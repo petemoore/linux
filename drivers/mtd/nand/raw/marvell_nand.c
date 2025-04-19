@@ -573,7 +573,7 @@ static int marvell_nfc_wait_ndrun(struct nand_chip *chip)
 					 POLL_PERIOD, POLL_TIMEOUT);
 	if (ret) {
 		dev_err(nfc->dev, "Timeout on NAND controller run mode\n");
-		writel_relaxed(readl(nfc->regs + NDCR) & ~NDCR_ND_RUN,
+		writel_relaxed(pete_readl("drivers/mtd/nand/raw/marvell_nand.c:576", nfc->regs + NDCR) & ~NDCR_ND_RUN,
 			       nfc->regs + NDCR);
 		return ret;
 	}
@@ -610,7 +610,7 @@ static int marvell_nfc_prepare_cmd(struct nand_chip *chip)
 	}
 
 	ndcr = readl_relaxed(nfc->regs + NDCR);
-	writel_relaxed(readl(nfc->regs + NDSR), nfc->regs + NDSR);
+	writel_relaxed(pete_readl("drivers/mtd/nand/raw/marvell_nand.c:613", nfc->regs + NDSR), nfc->regs + NDSR);
 
 	/* Assert ND_RUN bit and wait the NFC to be ready */
 	writel_relaxed(ndcr | NDCR_ND_RUN, nfc->regs + NDCR);
@@ -642,7 +642,7 @@ static void marvell_nfc_send_cmd(struct nand_chip *chip,
 	writel_relaxed(to_nand_sel(marvell_nand)->ndcb0_csel | nfc_op->ndcb[0],
 		       nfc->regs + NDCB0);
 	writel_relaxed(nfc_op->ndcb[1], nfc->regs + NDCB0);
-	writel(nfc_op->ndcb[2], nfc->regs + NDCB0);
+	pete_writel("drivers/mtd/nand/raw/marvell_nand.c:645", nfc_op->ndcb[2], nfc->regs + NDCB0);
 
 	/*
 	 * Write NDCB0 four times only if LEN_OVRD is set or if ADDR6 or ADDR7
@@ -651,7 +651,7 @@ static void marvell_nfc_send_cmd(struct nand_chip *chip,
 	if (nfc_op->ndcb[0] & NDCB0_LEN_OVRD ||
 	    NDCB0_ADDR_GET_NUM_CYC(nfc_op->ndcb[0]) >= 6) {
 		if (!WARN_ON_ONCE(!nfc->caps->is_nfcv2))
-			writel(nfc_op->ndcb[3], nfc->regs + NDCB0);
+			pete_writel("drivers/mtd/nand/raw/marvell_nand.c:654", nfc_op->ndcb[3], nfc->regs + NDCB0);
 	}
 }
 
@@ -1849,7 +1849,7 @@ static int marvell_nfc_monolithic_access_exec(struct nand_chip *chip,
 	if (!reading) {
 		struct marvell_nfc *nfc = to_marvell_nfc(chip->controller);
 
-		writel_relaxed(readl(nfc->regs + NDCR) & ~NDCR_ND_RUN,
+		writel_relaxed(pete_readl("drivers/mtd/nand/raw/marvell_nand.c:1852", nfc->regs + NDCR) & ~NDCR_ND_RUN,
 			       nfc->regs + NDCR);
 	}
 
@@ -1921,7 +1921,7 @@ static int marvell_nfc_naked_access_exec(struct nand_chip *chip,
 	if (subop->instrs[0].type == NAND_OP_DATA_OUT_INSTR) {
 		struct marvell_nfc *nfc = to_marvell_nfc(chip->controller);
 
-		writel_relaxed(readl(nfc->regs + NDCR) & ~NDCR_ND_RUN,
+		writel_relaxed(pete_readl("drivers/mtd/nand/raw/marvell_nand.c:1924", nfc->regs + NDCR) & ~NDCR_ND_RUN,
 			       nfc->regs + NDCR);
 	}
 

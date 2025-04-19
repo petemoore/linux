@@ -669,7 +669,7 @@ static inline void sdhci_writel(struct sdhci_host *host, u32 val, int reg)
 	if (unlikely(host->ops->write_l))
 		host->ops->write_l(host, val, reg);
 	else
-		writel(val, host->ioaddr + reg);
+		pete_writel("drivers/mmc/host/sdhci.h:672", val, host->ioaddr + reg);
 }
 
 static inline void sdhci_writew(struct sdhci_host *host, u16 val, int reg)
@@ -677,7 +677,7 @@ static inline void sdhci_writew(struct sdhci_host *host, u16 val, int reg)
 	if (unlikely(host->ops->write_w))
 		host->ops->write_w(host, val, reg);
 	else
-		writew(val, host->ioaddr + reg);
+		pete_writew("drivers/mmc/host/sdhci.h:680", val, host->ioaddr + reg);
 }
 
 static inline void sdhci_writeb(struct sdhci_host *host, u8 val, int reg)
@@ -685,7 +685,7 @@ static inline void sdhci_writeb(struct sdhci_host *host, u8 val, int reg)
 	if (unlikely(host->ops->write_b))
 		host->ops->write_b(host, val, reg);
 	else
-		writeb(val, host->ioaddr + reg);
+		pete_writeb("drivers/mmc/host/sdhci.h:688", val, host->ioaddr + reg);
 }
 
 static inline u32 sdhci_readl(struct sdhci_host *host, int reg)
@@ -693,7 +693,7 @@ static inline u32 sdhci_readl(struct sdhci_host *host, int reg)
 	if (unlikely(host->ops->read_l))
 		return host->ops->read_l(host, reg);
 	else
-		return readl(host->ioaddr + reg);
+		return pete_readl("drivers/mmc/host/sdhci.h:696", host->ioaddr + reg);
 }
 
 static inline u16 sdhci_readw(struct sdhci_host *host, int reg)
@@ -701,7 +701,7 @@ static inline u16 sdhci_readw(struct sdhci_host *host, int reg)
 	if (unlikely(host->ops->read_w))
 		return host->ops->read_w(host, reg);
 	else
-		return readw(host->ioaddr + reg);
+		return pete_readw("drivers/mmc/host/sdhci.h:704", host->ioaddr + reg);
 }
 
 static inline u8 sdhci_readb(struct sdhci_host *host, int reg)
@@ -709,39 +709,39 @@ static inline u8 sdhci_readb(struct sdhci_host *host, int reg)
 	if (unlikely(host->ops->read_b))
 		return host->ops->read_b(host, reg);
 	else
-		return readb(host->ioaddr + reg);
+		return pete_readb("drivers/mmc/host/sdhci.h:712", host->ioaddr + reg);
 }
 
 #else
 
 static inline void sdhci_writel(struct sdhci_host *host, u32 val, int reg)
 {
-	writel(val, host->ioaddr + reg);
+	pete_writel("drivers/mmc/host/sdhci.h:719", val, host->ioaddr + reg);
 }
 
 static inline void sdhci_writew(struct sdhci_host *host, u16 val, int reg)
 {
-	writew(val, host->ioaddr + reg);
+	pete_writew("drivers/mmc/host/sdhci.h:724", val, host->ioaddr + reg);
 }
 
 static inline void sdhci_writeb(struct sdhci_host *host, u8 val, int reg)
 {
-	writeb(val, host->ioaddr + reg);
+	pete_writeb("drivers/mmc/host/sdhci.h:729", val, host->ioaddr + reg);
 }
 
 static inline u32 sdhci_readl(struct sdhci_host *host, int reg)
 {
-	return readl(host->ioaddr + reg);
+	return pete_readl("drivers/mmc/host/sdhci.h:734", host->ioaddr + reg);
 }
 
 static inline u16 sdhci_readw(struct sdhci_host *host, int reg)
 {
-	return readw(host->ioaddr + reg);
+	return pete_readw("drivers/mmc/host/sdhci.h:739", host->ioaddr + reg);
 }
 
 static inline u8 sdhci_readb(struct sdhci_host *host, int reg)
 {
-	return readb(host->ioaddr + reg);
+	return pete_readb("drivers/mmc/host/sdhci.h:744", host->ioaddr + reg);
 }
 
 #endif /* CONFIG_MMC_SDHCI_IO_ACCESSORS */

@@ -42,8 +42,8 @@
 	}												\
 } while(0)
 
-#define mwrite(dat, addr)	writel((dat), addr)
-#define mread(addr)		readl(addr)
+#define mwrite(dat, addr)	pete_writel("drivers/media/pci/mantis/mantis_common.h:45", (dat), addr)
+#define mread(addr)		pete_readl("drivers/media/pci/mantis/mantis_common.h:46", addr)
 
 #define mmwrite(dat, addr)	mwrite((dat), (mantis->mmio + (addr)))
 #define mmread(addr)		mread(mantis->mmio + (addr))

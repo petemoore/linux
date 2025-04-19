@@ -22,8 +22,8 @@ static void exynos5_subcmu_clk_save(void __iomem *base,
 				    unsigned int num_regs)
 {
 	for (; num_regs > 0; --num_regs, ++rd) {
-		rd->save = readl(base + rd->offset);
-		writel((rd->save & ~rd->mask) | rd->value, base + rd->offset);
+		rd->save = pete_readl("drivers/clk/samsung/clk-exynos5-subcmu.c:25", base + rd->offset);
+		pete_writel("drivers/clk/samsung/clk-exynos5-subcmu.c:26", (rd->save & ~rd->mask) | rd->value, base + rd->offset);
 		rd->save &= rd->mask;
 	}
 };
@@ -33,7 +33,7 @@ static void exynos5_subcmu_clk_restore(void __iomem *base,
 				       unsigned int num_regs)
 {
 	for (; num_regs > 0; --num_regs, ++rd)
-		writel((readl(base + rd->offset) & ~rd->mask) | rd->save,
+		pete_writel("drivers/clk/samsung/clk-exynos5-subcmu.c:36", (pete_readl("drivers/clk/samsung/clk-exynos5-subcmu.c:36", base + rd->offset) & ~rd->mask) | rd->save,
 		       base + rd->offset);
 }
 

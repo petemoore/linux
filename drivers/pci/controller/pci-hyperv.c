@@ -724,19 +724,19 @@ static void _hv_pcifront_read_config(struct hv_pci_dev *hpdev, int where,
 	} else if (where + size <= CFG_PAGE_SIZE) {
 		spin_lock_irqsave(&hpdev->hbus->config_lock, flags);
 		/* Choose the function to be read. (See comment above) */
-		writel(hpdev->desc.win_slot.slot, hpdev->hbus->cfg_addr);
+		pete_writel("drivers/pci/controller/pci-hyperv.c:727", hpdev->desc.win_slot.slot, hpdev->hbus->cfg_addr);
 		/* Make sure the function was chosen before we start reading. */
 		mb();
 		/* Read from that function's config space. */
 		switch (size) {
 		case 1:
-			*val = readb(addr);
+			*val = pete_readb("drivers/pci/controller/pci-hyperv.c:733", addr);
 			break;
 		case 2:
-			*val = readw(addr);
+			*val = pete_readw("drivers/pci/controller/pci-hyperv.c:736", addr);
 			break;
 		default:
-			*val = readl(addr);
+			*val = pete_readl("drivers/pci/controller/pci-hyperv.c:739", addr);
 			break;
 		}
 		/*
@@ -761,11 +761,11 @@ static u16 hv_pcifront_get_vendor_id(struct hv_pci_dev *hpdev)
 	spin_lock_irqsave(&hpdev->hbus->config_lock, flags);
 
 	/* Choose the function to be read. (See comment above) */
-	writel(hpdev->desc.win_slot.slot, hpdev->hbus->cfg_addr);
+	pete_writel("drivers/pci/controller/pci-hyperv.c:764", hpdev->desc.win_slot.slot, hpdev->hbus->cfg_addr);
 	/* Make sure the function was chosen before we start reading. */
 	mb();
 	/* Read from that function's config space. */
-	ret = readw(addr);
+	ret = pete_readw("drivers/pci/controller/pci-hyperv.c:768", addr);
 	/*
 	 * mb() is not required here, because the spin_unlock_irqrestore()
 	 * is a barrier.
@@ -795,19 +795,19 @@ static void _hv_pcifront_write_config(struct hv_pci_dev *hpdev, int where,
 	} else if (where >= PCI_COMMAND && where + size <= CFG_PAGE_SIZE) {
 		spin_lock_irqsave(&hpdev->hbus->config_lock, flags);
 		/* Choose the function to be written. (See comment above) */
-		writel(hpdev->desc.win_slot.slot, hpdev->hbus->cfg_addr);
+		pete_writel("drivers/pci/controller/pci-hyperv.c:798", hpdev->desc.win_slot.slot, hpdev->hbus->cfg_addr);
 		/* Make sure the function was chosen before we start writing. */
 		wmb();
 		/* Write to that function's config space. */
 		switch (size) {
 		case 1:
-			writeb(val, addr);
+			pete_writeb("drivers/pci/controller/pci-hyperv.c:804", val, addr);
 			break;
 		case 2:
-			writew(val, addr);
+			pete_writew("drivers/pci/controller/pci-hyperv.c:807", val, addr);
 			break;
 		default:
-			writel(val, addr);
+			pete_writel("drivers/pci/controller/pci-hyperv.c:810", val, addr);
 			break;
 		}
 		/*

@@ -582,8 +582,8 @@ lpfc_config_port_post(struct lpfc_hba *phba)
 	    (phba->cfg_poll & DISABLE_FCP_RING_INT))
 		status &= ~(HC_R0INT_ENA);
 
-	writel(status, phba->HCregaddr);
-	readl(phba->HCregaddr); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_init.c:585", status, phba->HCregaddr);
+	pete_readl("drivers/scsi/lpfc/lpfc_init.c:586", phba->HCregaddr); /* flush */
 	spin_unlock_irq(&phba->hbalock);
 
 	/* Set up ring-0 (ELS) timer */
@@ -749,11 +749,11 @@ lpfc_hba_init_link_fc_topology(struct lpfc_hba *phba, uint32_t fc_topology,
 				mb->mbxCommand, mb->mbxStatus);
 		if (phba->sli_rev <= LPFC_SLI_REV3) {
 			/* Clear all interrupt enable conditions */
-			writel(0, phba->HCregaddr);
-			readl(phba->HCregaddr); /* flush */
+			pete_writel("drivers/scsi/lpfc/lpfc_init.c:752", 0, phba->HCregaddr);
+			pete_readl("drivers/scsi/lpfc/lpfc_init.c:753", phba->HCregaddr); /* flush */
 			/* Clear all pending interrupts */
-			writel(0xffffffff, phba->HAregaddr);
-			readl(phba->HAregaddr); /* flush */
+			pete_writel("drivers/scsi/lpfc/lpfc_init.c:755", 0xffffffff, phba->HAregaddr);
+			pete_readl("drivers/scsi/lpfc/lpfc_init.c:756", phba->HAregaddr); /* flush */
 		}
 		phba->link_state = LPFC_HBA_ERROR;
 		if (rc != MBX_BUSY || flag == MBX_POLL)
@@ -830,8 +830,8 @@ lpfc_hba_down_prep(struct lpfc_hba *phba)
 
 	if (phba->sli_rev <= LPFC_SLI_REV3) {
 		/* Disable interrupts */
-		writel(0, phba->HCregaddr);
-		readl(phba->HCregaddr); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_init.c:833", 0, phba->HCregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_init.c:834", phba->HCregaddr); /* flush */
 	}
 
 	if (phba->pport->load_flag & FC_UNLOADING)
@@ -1696,8 +1696,8 @@ lpfc_handle_deferred_eratt(struct lpfc_hba *phba)
 	spin_lock_irq(&phba->hbalock);
 	phba->hba_flag &= ~DEFER_ERATT;
 	spin_unlock_irq(&phba->hbalock);
-	phba->work_status[0] = readl(phba->MBslimaddr + 0xa8);
-	phba->work_status[1] = readl(phba->MBslimaddr + 0xac);
+	phba->work_status[0] = pete_readl("drivers/scsi/lpfc/lpfc_init.c:1699", phba->MBslimaddr + 0xa8);
+	phba->work_status[1] = pete_readl("drivers/scsi/lpfc/lpfc_init.c:1700", phba->MBslimaddr + 0xac);
 }
 
 static void
@@ -1796,7 +1796,7 @@ lpfc_handle_eratt_s3(struct lpfc_hba *phba)
 		}
 		lpfc_unblock_mgmt_io(phba);
 	} else if (phba->work_hs & HS_CRIT_TEMP) {
-		temperature = readl(phba->MBslimaddr + TEMPERATURE_OFFSET);
+		temperature = pete_readl("drivers/scsi/lpfc/lpfc_init.c:1799", phba->MBslimaddr + TEMPERATURE_OFFSET);
 		temp_event_data.event_type = FC_REG_TEMPERATURE_EVENT;
 		temp_event_data.event_code = LPFC_CRIT_TEMP;
 		temp_event_data.data = (uint32_t)temperature;
@@ -2027,12 +2027,12 @@ lpfc_handle_eratt_s4(struct lpfc_hba *phba)
 		if (pci_rd_rc1 == -EIO) {
 			lpfc_printf_log(phba, KERN_ERR, LOG_TRACE_EVENT,
 				"3151 PCI bus read access failure: x%x\n",
-				readl(phba->sli4_hba.u.if_type2.STATUSregaddr));
+				pete_readl("drivers/scsi/lpfc/lpfc_init.c:2030", phba->sli4_hba.u.if_type2.STATUSregaddr));
 			lpfc_sli4_offline_eratt(phba);
 			return;
 		}
-		reg_err1 = readl(phba->sli4_hba.u.if_type2.ERR1regaddr);
-		reg_err2 = readl(phba->sli4_hba.u.if_type2.ERR2regaddr);
+		reg_err1 = pete_readl("drivers/scsi/lpfc/lpfc_init.c:2034", phba->sli4_hba.u.if_type2.ERR1regaddr);
+		reg_err2 = pete_readl("drivers/scsi/lpfc/lpfc_init.c:2035", phba->sli4_hba.u.if_type2.ERR2regaddr);
 		if (bf_get(lpfc_sliport_status_oti, &portstat_reg)) {
 			lpfc_printf_log(phba, KERN_ERR, LOG_TRACE_EVENT,
 					"2889 Port Overtemperature event, "
@@ -2177,8 +2177,8 @@ lpfc_handle_latt(struct lpfc_hba *phba)
 
 	/* Clear Link Attention in HA REG */
 	spin_lock_irq(&phba->hbalock);
-	writel(HA_LATT, phba->HAregaddr);
-	readl(phba->HAregaddr); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_init.c:2180", HA_LATT, phba->HAregaddr);
+	pete_readl("drivers/scsi/lpfc/lpfc_init.c:2181", phba->HAregaddr); /* flush */
 	spin_unlock_irq(&phba->hbalock);
 
 	return;
@@ -2194,14 +2194,14 @@ lpfc_handle_latt_err_exit:
 	/* Enable Link attention interrupts */
 	spin_lock_irq(&phba->hbalock);
 	psli->sli_flag |= LPFC_PROCESS_LA;
-	control = readl(phba->HCregaddr);
+	control = pete_readl("drivers/scsi/lpfc/lpfc_init.c:2197", phba->HCregaddr);
 	control |= HC_LAINT_ENA;
-	writel(control, phba->HCregaddr);
-	readl(phba->HCregaddr); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_init.c:2199", control, phba->HCregaddr);
+	pete_readl("drivers/scsi/lpfc/lpfc_init.c:2200", phba->HCregaddr); /* flush */
 
 	/* Clear Link Attention in HA REG */
-	writel(HA_LATT, phba->HAregaddr);
-	readl(phba->HAregaddr); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_init.c:2203", HA_LATT, phba->HAregaddr);
+	pete_readl("drivers/scsi/lpfc/lpfc_init.c:2204", phba->HAregaddr); /* flush */
 	spin_unlock_irq(&phba->hbalock);
 	lpfc_linkdown(phba);
 	phba->link_state = LPFC_HBA_ERROR;
@@ -4898,11 +4898,11 @@ static void
 lpfc_stop_port_s3(struct lpfc_hba *phba)
 {
 	/* Clear all interrupt enable conditions */
-	writel(0, phba->HCregaddr);
-	readl(phba->HCregaddr); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_init.c:4901", 0, phba->HCregaddr);
+	pete_readl("drivers/scsi/lpfc/lpfc_init.c:4902", phba->HCregaddr); /* flush */
 	/* Clear all pending interrupts */
-	writel(0xffffffff, phba->HAregaddr);
-	readl(phba->HAregaddr); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_init.c:4904", 0xffffffff, phba->HAregaddr);
+	pete_readl("drivers/scsi/lpfc/lpfc_init.c:4905", phba->HAregaddr); /* flush */
 
 	/* Reset some HBA SLI setup states */
 	lpfc_stop_hba_timers(phba);
@@ -9273,13 +9273,13 @@ lpfc_sli4_post_status_check(struct lpfc_hba *phba)
 		switch (if_type) {
 		case LPFC_SLI_INTF_IF_TYPE_0:
 			phba->sli4_hba.ue_mask_lo =
-			      readl(phba->sli4_hba.u.if_type0.UEMASKLOregaddr);
+			      pete_readl("drivers/scsi/lpfc/lpfc_init.c:9276", phba->sli4_hba.u.if_type0.UEMASKLOregaddr);
 			phba->sli4_hba.ue_mask_hi =
-			      readl(phba->sli4_hba.u.if_type0.UEMASKHIregaddr);
+			      pete_readl("drivers/scsi/lpfc/lpfc_init.c:9278", phba->sli4_hba.u.if_type0.UEMASKHIregaddr);
 			uerrlo_reg.word0 =
-			      readl(phba->sli4_hba.u.if_type0.UERRLOregaddr);
+			      pete_readl("drivers/scsi/lpfc/lpfc_init.c:9280", phba->sli4_hba.u.if_type0.UERRLOregaddr);
 			uerrhi_reg.word0 =
-				readl(phba->sli4_hba.u.if_type0.UERRHIregaddr);
+				pete_readl("drivers/scsi/lpfc/lpfc_init.c:9282", phba->sli4_hba.u.if_type0.UERRHIregaddr);
 			if ((~phba->sli4_hba.ue_mask_lo & uerrlo_reg.word0) ||
 			    (~phba->sli4_hba.ue_mask_hi & uerrhi_reg.word0)) {
 				lpfc_printf_log(phba, KERN_ERR,
@@ -9305,10 +9305,10 @@ lpfc_sli4_post_status_check(struct lpfc_hba *phba)
 				(bf_get(lpfc_sliport_status_err, &reg_data) &&
 				 !bf_get(lpfc_sliport_status_rn, &reg_data))) {
 				phba->work_status[0] =
-					readl(phba->sli4_hba.u.if_type2.
+					pete_readl("drivers/scsi/lpfc/lpfc_init.c:9308", phba->sli4_hba.u.if_type2.
 					      ERR1regaddr);
 				phba->work_status[1] =
-					readl(phba->sli4_hba.u.if_type2.
+					pete_readl("drivers/scsi/lpfc/lpfc_init.c:9311", phba->sli4_hba.u.if_type2.
 					      ERR2regaddr);
 				lpfc_printf_log(phba, KERN_ERR, LOG_TRACE_EVENT,
 					"2888 Unrecoverable port error "
@@ -11514,9 +11514,9 @@ wait:
 		}
 
 		if (!bf_get(lpfc_sliport_status_rdy, &reg_data)) {
-			phba->work_status[0] = readl(
+			phba->work_status[0] = pete_readl("drivers/scsi/lpfc/lpfc_init.c:11517", 
 				phba->sli4_hba.u.if_type2.ERR1regaddr);
-			phba->work_status[1] = readl(
+			phba->work_status[1] = pete_readl("drivers/scsi/lpfc/lpfc_init.c:11519", 
 				phba->sli4_hba.u.if_type2.ERR2regaddr);
 			lpfc_printf_log(phba, KERN_ERR, LOG_TRACE_EVENT,
 					"2890 Port not ready, port status reg "
@@ -11537,7 +11537,7 @@ wait:
 			       LPFC_SLIPORT_LITTLE_ENDIAN);
 			bf_set(lpfc_sliport_ctrl_ip, &reg_data,
 			       LPFC_SLIPORT_INIT_PORT);
-			writel(reg_data.word0, phba->sli4_hba.u.if_type2.
+			pete_writel("drivers/scsi/lpfc/lpfc_init.c:11540", reg_data.word0, phba->sli4_hba.u.if_type2.
 			       CTRLregaddr);
 			/* flush */
 			pci_read_config_word(phba->pcidev,

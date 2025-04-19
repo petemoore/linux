@@ -45,12 +45,12 @@ static void __init clps711x_init(void)
 {
 	u32 id[5];
 
-	id[0] = readl(CLPS711X_VIRT_BASE + UNIQID);
-	id[1] = readl(CLPS711X_VIRT_BASE + RANDID0);
-	id[2] = readl(CLPS711X_VIRT_BASE + RANDID1);
-	id[3] = readl(CLPS711X_VIRT_BASE + RANDID2);
-	id[4] = readl(CLPS711X_VIRT_BASE + RANDID3);
-	system_rev = SYSFLG1_VERID(readl(CLPS711X_VIRT_BASE + SYSFLG1));
+	id[0] = pete_readl("arch/arm/mach-clps711x/board-dt.c:48", CLPS711X_VIRT_BASE + UNIQID);
+	id[1] = pete_readl("arch/arm/mach-clps711x/board-dt.c:49", CLPS711X_VIRT_BASE + RANDID0);
+	id[2] = pete_readl("arch/arm/mach-clps711x/board-dt.c:50", CLPS711X_VIRT_BASE + RANDID1);
+	id[3] = pete_readl("arch/arm/mach-clps711x/board-dt.c:51", CLPS711X_VIRT_BASE + RANDID2);
+	id[4] = pete_readl("arch/arm/mach-clps711x/board-dt.c:52", CLPS711X_VIRT_BASE + RANDID3);
+	system_rev = SYSFLG1_VERID(pete_readl("arch/arm/mach-clps711x/board-dt.c:53", CLPS711X_VIRT_BASE + SYSFLG1));
 
 	add_device_randomness(id, sizeof(id));
 

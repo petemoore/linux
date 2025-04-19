@@ -150,7 +150,7 @@ static int i40e_program_fdir_filter(struct i40e_fdir_filter *fdir_data,
 	/* Mark the data descriptor to be watched */
 	first->next_to_watch = tx_desc;
 
-	writel(tx_ring->next_to_use, tx_ring->tail);
+	pete_writel("drivers/net/ethernet/intel/i40e/i40e_txrx.c:153", tx_ring->next_to_use, tx_ring->tail);
 	return 0;
 
 dma_fail:
@@ -852,7 +852,7 @@ u32 i40e_get_tx_pending(struct i40e_ring *ring, bool in_sw)
 
 	if (!in_sw) {
 		head = i40e_get_head(ring);
-		tail = readl(ring->tail);
+		tail = pete_readl("drivers/net/ethernet/intel/i40e/i40e_txrx.c:855", ring->tail);
 	} else {
 		head = ring->next_to_clean;
 		tail = ring->next_to_use;
@@ -1615,7 +1615,7 @@ void i40e_release_rx_desc(struct i40e_ring *rx_ring, u32 val)
 	 * such as IA-64).
 	 */
 	wmb();
-	writel(val, rx_ring->tail);
+	pete_writel("drivers/net/ethernet/intel/i40e/i40e_txrx.c:1618", val, rx_ring->tail);
 }
 
 static unsigned int i40e_rx_frame_truesize(struct i40e_ring *rx_ring,
@@ -3593,7 +3593,7 @@ static inline int i40e_tx_map(struct i40e_ring *tx_ring, struct sk_buff *skb,
 
 	/* notify HW of packet */
 	if (netif_xmit_stopped(txring_txq(tx_ring)) || !netdev_xmit_more()) {
-		writel(i, tx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/i40e/i40e_txrx.c:3596", i, tx_ring->tail);
 	}
 
 	return 0;

@@ -176,24 +176,24 @@ struct nwl_pcie {
 
 static inline u32 nwl_bridge_readl(struct nwl_pcie *pcie, u32 off)
 {
-	return readl(pcie->breg_base + off);
+	return pete_readl("drivers/pci/controller/pcie-xilinx-nwl.c:179", pcie->breg_base + off);
 }
 
 static inline void nwl_bridge_writel(struct nwl_pcie *pcie, u32 val, u32 off)
 {
-	writel(val, pcie->breg_base + off);
+	pete_writel("drivers/pci/controller/pcie-xilinx-nwl.c:184", val, pcie->breg_base + off);
 }
 
 static bool nwl_pcie_link_up(struct nwl_pcie *pcie)
 {
-	if (readl(pcie->pcireg_base + PS_LINKUP_OFFSET) & PCIE_PHY_LINKUP_BIT)
+	if (pete_readl("drivers/pci/controller/pcie-xilinx-nwl.c:189", pcie->pcireg_base + PS_LINKUP_OFFSET) & PCIE_PHY_LINKUP_BIT)
 		return true;
 	return false;
 }
 
 static bool nwl_phy_link_up(struct nwl_pcie *pcie)
 {
-	if (readl(pcie->pcireg_base + PS_LINKUP_OFFSET) & PHY_RDY_LINKUP_BIT)
+	if (pete_readl("drivers/pci/controller/pcie-xilinx-nwl.c:196", pcie->pcireg_base + PS_LINKUP_OFFSET) & PHY_RDY_LINKUP_BIT)
 		return true;
 	return false;
 }
@@ -707,7 +707,7 @@ static int nwl_pcie_bridge_init(struct nwl_pcie *pcie)
 	ecam_val = first_busno;
 	ecam_val |= (first_busno + 1) << 8;
 	ecam_val |= (pcie->last_busno << E_ECAM_SIZE_SHIFT);
-	writel(ecam_val, (pcie->ecam_base + PCI_PRIMARY_BUS));
+	pete_writel("drivers/pci/controller/pcie-xilinx-nwl.c:710", ecam_val, (pcie->ecam_base + PCI_PRIMARY_BUS));
 
 	if (nwl_pcie_link_up(pcie))
 		dev_info(dev, "Link is UP\n");

@@ -121,11 +121,11 @@ static int k3_bgp_read_temp(struct k3_thermal_data *devdata,
 	 *
 	 * Errata workaround.
 	 */
-	s0 = readl(bgp->base + devdata->stat_offset) &
+	s0 = pete_readl("drivers/thermal/k3_bandgap.c:124", bgp->base + devdata->stat_offset) &
 		K3_VTM_TS_STAT_DTEMP_MASK;
-	s1 = readl(bgp->base + devdata->stat_offset) &
+	s1 = pete_readl("drivers/thermal/k3_bandgap.c:126", bgp->base + devdata->stat_offset) &
 		K3_VTM_TS_STAT_DTEMP_MASK;
-	s2 = readl(bgp->base + devdata->stat_offset) &
+	s2 = pete_readl("drivers/thermal/k3_bandgap.c:128", bgp->base + devdata->stat_offset) &
 		K3_VTM_TS_STAT_DTEMP_MASK;
 	dtemp = vtm_get_best_value(s0, s1, s2);
 
@@ -185,7 +185,7 @@ static int k3_bandgap_probe(struct platform_device *pdev)
 	}
 
 	/* Get the sensor count in the VTM */
-	val = readl(bgp->base + K3_VTM_DEVINFO_PWR0_OFFSET);
+	val = pete_readl("drivers/thermal/k3_bandgap.c:188", bgp->base + K3_VTM_DEVINFO_PWR0_OFFSET);
 	cnt = val & K3_VTM_DEVINFO_PWR0_TEMPSENS_CT_MASK;
 	cnt >>= __ffs(K3_VTM_DEVINFO_PWR0_TEMPSENS_CT_MASK);
 
@@ -203,12 +203,12 @@ static int k3_bandgap_probe(struct platform_device *pdev)
 					id * K3_VTM_REGS_PER_TS;
 		data[id].stat_offset = data[id].ctrl_offset + 0x8;
 
-		val = readl(data[id].bgp->base + data[id].ctrl_offset);
+		val = pete_readl("drivers/thermal/k3_bandgap.c:206", data[id].bgp->base + data[id].ctrl_offset);
 		val |= (K3_VTM_TMPSENS_CTRL_SOC |
 			K3_VTM_TMPSENS_CTRL_CLRZ |
 			K3_VTM_TMPSENS_CTRL_CLKON_REQ);
 		val &= ~K3_VTM_TMPSENS_CTRL_CBIASSEL;
-		writel(val, data[id].bgp->base + data[id].ctrl_offset);
+		pete_writel("drivers/thermal/k3_bandgap.c:211", val, data[id].bgp->base + data[id].ctrl_offset);
 
 		data[id].tzd =
 		devm_thermal_zone_of_sensor_register(dev, id,

@@ -80,15 +80,15 @@ static void stmp3xxx_wdt_set_timeout(struct device *dev, u32 timeout)
 	struct stmp3xxx_rtc_data *rtc_data = dev_get_drvdata(dev);
 
 	if (timeout) {
-		writel(timeout, rtc_data->io + STMP3XXX_RTC_WATCHDOG);
-		writel(STMP3XXX_RTC_CTRL_WATCHDOGEN,
+		pete_writel("drivers/rtc/rtc-stmp3xxx.c:83", timeout, rtc_data->io + STMP3XXX_RTC_WATCHDOG);
+		pete_writel("drivers/rtc/rtc-stmp3xxx.c:84", STMP3XXX_RTC_CTRL_WATCHDOGEN,
 		       rtc_data->io + STMP3XXX_RTC_CTRL + STMP_OFFSET_REG_SET);
-		writel(STMP3XXX_RTC_PERSISTENT1_FORCE_UPDATER,
+		pete_writel("drivers/rtc/rtc-stmp3xxx.c:86", STMP3XXX_RTC_PERSISTENT1_FORCE_UPDATER,
 		       rtc_data->io + STMP3XXX_RTC_PERSISTENT1 + STMP_OFFSET_REG_SET);
 	} else {
-		writel(STMP3XXX_RTC_CTRL_WATCHDOGEN,
+		pete_writel("drivers/rtc/rtc-stmp3xxx.c:89", STMP3XXX_RTC_CTRL_WATCHDOGEN,
 		       rtc_data->io + STMP3XXX_RTC_CTRL + STMP_OFFSET_REG_CLR);
-		writel(STMP3XXX_RTC_PERSISTENT1_FORCE_UPDATER,
+		pete_writel("drivers/rtc/rtc-stmp3xxx.c:91", STMP3XXX_RTC_PERSISTENT1_FORCE_UPDATER,
 		       rtc_data->io + STMP3XXX_RTC_PERSISTENT1 + STMP_OFFSET_REG_CLR);
 	}
 }
@@ -133,12 +133,12 @@ static int stmp3xxx_wait_time(struct stmp3xxx_rtc_data *rtc_data)
 	 * | STALE_REGS or NEW_REGS containing 0x80.)
 	 */
 	do {
-		if (!(readl(rtc_data->io + STMP3XXX_RTC_STAT) &
+		if (!(pete_readl("drivers/rtc/rtc-stmp3xxx.c:136", rtc_data->io + STMP3XXX_RTC_STAT) &
 				(0x80 << STMP3XXX_RTC_STAT_STALE_SHIFT)))
 			return 0;
 		udelay(1);
 	} while (--timeout > 0);
-	return (readl(rtc_data->io + STMP3XXX_RTC_STAT) &
+	return (pete_readl("drivers/rtc/rtc-stmp3xxx.c:141", rtc_data->io + STMP3XXX_RTC_STAT) &
 		(0x80 << STMP3XXX_RTC_STAT_STALE_SHIFT)) ? -ETIME : 0;
 }
 
@@ -152,7 +152,7 @@ static int stmp3xxx_rtc_gettime(struct device *dev, struct rtc_time *rtc_tm)
 	if (ret)
 		return ret;
 
-	rtc_time64_to_tm(readl(rtc_data->io + STMP3XXX_RTC_SECONDS), rtc_tm);
+	rtc_time64_to_tm(pete_readl("drivers/rtc/rtc-stmp3xxx.c:155", rtc_data->io + STMP3XXX_RTC_SECONDS), rtc_tm);
 	return 0;
 }
 
@@ -160,7 +160,7 @@ static int stmp3xxx_rtc_settime(struct device *dev, struct rtc_time *rtc_tm)
 {
 	struct stmp3xxx_rtc_data *rtc_data = dev_get_drvdata(dev);
 
-	writel(rtc_tm_to_time64(rtc_tm), rtc_data->io + STMP3XXX_RTC_SECONDS);
+	pete_writel("drivers/rtc/rtc-stmp3xxx.c:163", rtc_tm_to_time64(rtc_tm), rtc_data->io + STMP3XXX_RTC_SECONDS);
 	return stmp3xxx_wait_time(rtc_data);
 }
 
@@ -168,10 +168,10 @@ static int stmp3xxx_rtc_settime(struct device *dev, struct rtc_time *rtc_tm)
 static irqreturn_t stmp3xxx_rtc_interrupt(int irq, void *dev_id)
 {
 	struct stmp3xxx_rtc_data *rtc_data = dev_get_drvdata(dev_id);
-	u32 status = readl(rtc_data->io + STMP3XXX_RTC_CTRL);
+	u32 status = pete_readl("drivers/rtc/rtc-stmp3xxx.c:171", rtc_data->io + STMP3XXX_RTC_CTRL);
 
 	if (status & STMP3XXX_RTC_CTRL_ALARM_IRQ) {
-		writel(STMP3XXX_RTC_CTRL_ALARM_IRQ,
+		pete_writel("drivers/rtc/rtc-stmp3xxx.c:174", STMP3XXX_RTC_CTRL_ALARM_IRQ,
 			rtc_data->io + STMP3XXX_RTC_CTRL + STMP_OFFSET_REG_CLR);
 		rtc_update_irq(rtc_data->rtc, 1, RTC_AF | RTC_IRQF);
 		return IRQ_HANDLED;
@@ -185,18 +185,18 @@ static int stmp3xxx_alarm_irq_enable(struct device *dev, unsigned int enabled)
 	struct stmp3xxx_rtc_data *rtc_data = dev_get_drvdata(dev);
 
 	if (enabled) {
-		writel(STMP3XXX_RTC_PERSISTENT0_ALARM_EN |
+		pete_writel("drivers/rtc/rtc-stmp3xxx.c:188", STMP3XXX_RTC_PERSISTENT0_ALARM_EN |
 				STMP3XXX_RTC_PERSISTENT0_ALARM_WAKE_EN,
 			rtc_data->io + STMP3XXX_RTC_PERSISTENT0 +
 				STMP_OFFSET_REG_SET);
-		writel(STMP3XXX_RTC_CTRL_ALARM_IRQ_EN,
+		pete_writel("drivers/rtc/rtc-stmp3xxx.c:192", STMP3XXX_RTC_CTRL_ALARM_IRQ_EN,
 			rtc_data->io + STMP3XXX_RTC_CTRL + STMP_OFFSET_REG_SET);
 	} else {
-		writel(STMP3XXX_RTC_PERSISTENT0_ALARM_EN |
+		pete_writel("drivers/rtc/rtc-stmp3xxx.c:195", STMP3XXX_RTC_PERSISTENT0_ALARM_EN |
 				STMP3XXX_RTC_PERSISTENT0_ALARM_WAKE_EN,
 			rtc_data->io + STMP3XXX_RTC_PERSISTENT0 +
 				STMP_OFFSET_REG_CLR);
-		writel(STMP3XXX_RTC_CTRL_ALARM_IRQ_EN,
+		pete_writel("drivers/rtc/rtc-stmp3xxx.c:199", STMP3XXX_RTC_CTRL_ALARM_IRQ_EN,
 			rtc_data->io + STMP3XXX_RTC_CTRL + STMP_OFFSET_REG_CLR);
 	}
 	return 0;
@@ -206,7 +206,7 @@ static int stmp3xxx_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alm)
 {
 	struct stmp3xxx_rtc_data *rtc_data = dev_get_drvdata(dev);
 
-	rtc_time64_to_tm(readl(rtc_data->io + STMP3XXX_RTC_ALARM), &alm->time);
+	rtc_time64_to_tm(pete_readl("drivers/rtc/rtc-stmp3xxx.c:209", rtc_data->io + STMP3XXX_RTC_ALARM), &alm->time);
 	return 0;
 }
 
@@ -214,7 +214,7 @@ static int stmp3xxx_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alm)
 {
 	struct stmp3xxx_rtc_data *rtc_data = dev_get_drvdata(dev);
 
-	writel(rtc_tm_to_time64(&alm->time), rtc_data->io + STMP3XXX_RTC_ALARM);
+	pete_writel("drivers/rtc/rtc-stmp3xxx.c:217", rtc_tm_to_time64(&alm->time), rtc_data->io + STMP3XXX_RTC_ALARM);
 
 	stmp3xxx_alarm_irq_enable(dev, alm->enabled);
 
@@ -237,7 +237,7 @@ static int stmp3xxx_rtc_remove(struct platform_device *pdev)
 	if (!rtc_data)
 		return 0;
 
-	writel(STMP3XXX_RTC_CTRL_ALARM_IRQ_EN,
+	pete_writel("drivers/rtc/rtc-stmp3xxx.c:240", STMP3XXX_RTC_CTRL_ALARM_IRQ_EN,
 		rtc_data->io + STMP3XXX_RTC_CTRL + STMP_OFFSET_REG_CLR);
 
 	return 0;
@@ -270,7 +270,7 @@ static int stmp3xxx_rtc_probe(struct platform_device *pdev)
 
 	rtc_data->irq_alarm = platform_get_irq(pdev, 0);
 
-	rtc_stat = readl(rtc_data->io + STMP3XXX_RTC_STAT);
+	rtc_stat = pete_readl("drivers/rtc/rtc-stmp3xxx.c:273", rtc_data->io + STMP3XXX_RTC_STAT);
 	if (!(rtc_stat & STMP3XXX_RTC_STAT_RTC_PRESENT)) {
 		dev_err(&pdev->dev, "no device onboard\n");
 		return -ENODEV;
@@ -283,7 +283,7 @@ static int stmp3xxx_rtc_probe(struct platform_device *pdev)
 	 * running. So (assuming it is running on purpose) don't reset if the
 	 * watchdog is enabled.
 	 */
-	if (readl(rtc_data->io + STMP3XXX_RTC_CTRL) &
+	if (pete_readl("drivers/rtc/rtc-stmp3xxx.c:286", rtc_data->io + STMP3XXX_RTC_CTRL) &
 	    STMP3XXX_RTC_CTRL_WATCHDOGEN) {
 		dev_info(&pdev->dev,
 			 "Watchdog is running, skip resetting rtc\n");
@@ -339,15 +339,15 @@ static int stmp3xxx_rtc_probe(struct platform_device *pdev)
 			STMP3XXX_RTC_PERSISTENT0_CLOCKSOURCE;
 	}
 
-	writel(pers0_set, rtc_data->io + STMP3XXX_RTC_PERSISTENT0 +
+	pete_writel("drivers/rtc/rtc-stmp3xxx.c:342", pers0_set, rtc_data->io + STMP3XXX_RTC_PERSISTENT0 +
 			STMP_OFFSET_REG_SET);
 
-	writel(STMP3XXX_RTC_PERSISTENT0_ALARM_EN |
+	pete_writel("drivers/rtc/rtc-stmp3xxx.c:345", STMP3XXX_RTC_PERSISTENT0_ALARM_EN |
 			STMP3XXX_RTC_PERSISTENT0_ALARM_WAKE_EN |
 			STMP3XXX_RTC_PERSISTENT0_ALARM_WAKE | pers0_clr,
 		rtc_data->io + STMP3XXX_RTC_PERSISTENT0 + STMP_OFFSET_REG_CLR);
 
-	writel(STMP3XXX_RTC_CTRL_ONEMSEC_IRQ_EN |
+	pete_writel("drivers/rtc/rtc-stmp3xxx.c:350", STMP3XXX_RTC_CTRL_ONEMSEC_IRQ_EN |
 			STMP3XXX_RTC_CTRL_ALARM_IRQ_EN,
 		rtc_data->io + STMP3XXX_RTC_CTRL + STMP_OFFSET_REG_CLR);
 
@@ -385,7 +385,7 @@ static int stmp3xxx_rtc_resume(struct device *dev)
 	struct stmp3xxx_rtc_data *rtc_data = dev_get_drvdata(dev);
 
 	stmp_reset_block(rtc_data->io);
-	writel(STMP3XXX_RTC_PERSISTENT0_ALARM_EN |
+	pete_writel("drivers/rtc/rtc-stmp3xxx.c:388", STMP3XXX_RTC_PERSISTENT0_ALARM_EN |
 			STMP3XXX_RTC_PERSISTENT0_ALARM_WAKE_EN |
 			STMP3XXX_RTC_PERSISTENT0_ALARM_WAKE,
 		rtc_data->io + STMP3XXX_RTC_PERSISTENT0 + STMP_OFFSET_REG_CLR);

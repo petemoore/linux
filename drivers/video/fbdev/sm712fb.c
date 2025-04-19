@@ -1235,26 +1235,26 @@ static void sm7xx_set_timing(struct smtcfb_info *sfb)
 	smtc_mmiowb(0x67, 0x3c2);
 
 	/* set VPR registers */
-	writel(0x0, sfb->vp_regs + 0x0C);
-	writel(0x0, sfb->vp_regs + 0x40);
+	pete_writel("drivers/video/fbdev/sm712fb.c:1238", 0x0, sfb->vp_regs + 0x0C);
+	pete_writel("drivers/video/fbdev/sm712fb.c:1239", 0x0, sfb->vp_regs + 0x40);
 
 	/* set data width */
 	m_nscreenstride = (sfb->width * sfb->fb->var.bits_per_pixel) / 64;
 	switch (sfb->fb->var.bits_per_pixel) {
 	case 8:
-		writel(0x0, sfb->vp_regs + 0x0);
+		pete_writel("drivers/video/fbdev/sm712fb.c:1245", 0x0, sfb->vp_regs + 0x0);
 		break;
 	case 16:
-		writel(0x00020000, sfb->vp_regs + 0x0);
+		pete_writel("drivers/video/fbdev/sm712fb.c:1248", 0x00020000, sfb->vp_regs + 0x0);
 		break;
 	case 24:
-		writel(0x00040000, sfb->vp_regs + 0x0);
+		pete_writel("drivers/video/fbdev/sm712fb.c:1251", 0x00040000, sfb->vp_regs + 0x0);
 		break;
 	case 32:
-		writel(0x00030000, sfb->vp_regs + 0x0);
+		pete_writel("drivers/video/fbdev/sm712fb.c:1254", 0x00030000, sfb->vp_regs + 0x0);
 		break;
 	}
-	writel((u32)(((m_nscreenstride + 2) << 16) | m_nscreenstride),
+	pete_writel("drivers/video/fbdev/sm712fb.c:1257", (u32)(((m_nscreenstride + 2) << 16) | m_nscreenstride),
 	       sfb->vp_regs + 0x10);
 }
 

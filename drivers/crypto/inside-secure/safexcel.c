@@ -42,20 +42,20 @@ static void eip197_trc_cache_setupvirt(struct safexcel_crypto_priv *priv)
 	 * AND serious coherence/invalidation issues.
 	 */
 	for (i = 0; i < 4; i++)
-		writel(0, priv->base + EIP197_FLUE_IFC_LUT(i));
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:45", 0, priv->base + EIP197_FLUE_IFC_LUT(i));
 
 	/*
 	 * Initialize other virtualization regs for cache
 	 * These may not be in their reset state ...
 	 */
 	for (i = 0; i < priv->config.rings; i++) {
-		writel(0, priv->base + EIP197_FLUE_CACHEBASE_LO(i));
-		writel(0, priv->base + EIP197_FLUE_CACHEBASE_HI(i));
-		writel(EIP197_FLUE_CONFIG_MAGIC,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:52", 0, priv->base + EIP197_FLUE_CACHEBASE_LO(i));
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:53", 0, priv->base + EIP197_FLUE_CACHEBASE_HI(i));
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:54", EIP197_FLUE_CONFIG_MAGIC,
 		       priv->base + EIP197_FLUE_CONFIG(i));
 	}
-	writel(0, priv->base + EIP197_FLUE_OFFSETS);
-	writel(0, priv->base + EIP197_FLUE_ARC4_OFFSET);
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:57", 0, priv->base + EIP197_FLUE_OFFSETS);
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:58", 0, priv->base + EIP197_FLUE_ARC4_OFFSET);
 }
 
 static void eip197_trc_cache_banksel(struct safexcel_crypto_priv *priv,
@@ -66,10 +66,10 @@ static void eip197_trc_cache_banksel(struct safexcel_crypto_priv *priv,
 
 	curbank = addrmid >> 16;
 	if (curbank != *actbank) {
-		val = readl(priv->base + EIP197_CS_RAM_CTRL);
+		val = pete_readl("drivers/crypto/inside-secure/safexcel.c:69", priv->base + EIP197_CS_RAM_CTRL);
 		val = (val & ~EIP197_CS_BANKSEL_MASK) |
 		      (curbank << EIP197_CS_BANKSEL_OFS);
-		writel(val, priv->base + EIP197_CS_RAM_CTRL);
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:72", val, priv->base + EIP197_CS_RAM_CTRL);
 		*actbank = curbank;
 	}
 }
@@ -92,7 +92,7 @@ static u32 eip197_trc_cache_probe(struct safexcel_crypto_priv *priv,
 		addrmid = (addrhi + addrlo) >> 1;
 		marker = (addrmid ^ 0xabadbabe) & probemask; /* Unique */
 		eip197_trc_cache_banksel(priv, addrmid, &actbank);
-		writel(marker,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:95", marker,
 			priv->base + EIP197_CLASSIFICATION_RAMS +
 			(addrmid & 0xffff));
 
@@ -101,7 +101,7 @@ static u32 eip197_trc_cache_probe(struct safexcel_crypto_priv *priv,
 		while (delta >= stride) {
 			addralias = addrmid - delta;
 			eip197_trc_cache_banksel(priv, addralias, &actbank);
-			writel(~marker,
+			pete_writel("drivers/crypto/inside-secure/safexcel.c:104", ~marker,
 			       priv->base + EIP197_CLASSIFICATION_RAMS +
 			       (addralias & 0xffff));
 			delta >>= 1;
@@ -109,7 +109,7 @@ static u32 eip197_trc_cache_probe(struct safexcel_crypto_priv *priv,
 
 		/* read back marker from top half */
 		eip197_trc_cache_banksel(priv, addrmid, &actbank);
-		val = readl(priv->base + EIP197_CLASSIFICATION_RAMS +
+		val = pete_readl("drivers/crypto/inside-secure/safexcel.c:112", priv->base + EIP197_CLASSIFICATION_RAMS +
 			    (addrmid & 0xffff));
 
 		if ((val & probemask) == marker)
@@ -132,7 +132,7 @@ static void eip197_trc_cache_clear(struct safexcel_crypto_priv *priv,
 	for (i = 0; i < cs_rc_max; i++) {
 		offset = EIP197_CLASSIFICATION_RAMS + i * EIP197_CS_RC_SIZE;
 
-		writel(EIP197_CS_RC_NEXT(EIP197_RC_NULL) |
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:135", EIP197_CS_RC_NEXT(EIP197_RC_NULL) |
 		       EIP197_CS_RC_PREV(EIP197_RC_NULL),
 		       priv->base + offset);
 
@@ -141,16 +141,16 @@ static void eip197_trc_cache_clear(struct safexcel_crypto_priv *priv,
 			val |= EIP197_CS_RC_PREV(EIP197_RC_NULL);
 		else if (i == cs_rc_max - 1)
 			val |= EIP197_CS_RC_NEXT(EIP197_RC_NULL);
-		writel(val, priv->base + offset + 4);
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:144", val, priv->base + offset + 4);
 		/* must also initialize the address key due to ECC! */
-		writel(0, priv->base + offset + 8);
-		writel(0, priv->base + offset + 12);
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:146", 0, priv->base + offset + 8);
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:147", 0, priv->base + offset + 12);
 	}
 
 	/* Clear the hash table entries */
 	htable_offset = cs_rc_max * EIP197_CS_RC_SIZE;
 	for (i = 0; i < cs_ht_wc; i++)
-		writel(GENMASK(29, 0),
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:153", GENMASK(29, 0),
 		       priv->base + EIP197_CLASSIFICATION_RAMS +
 		       htable_offset + i * sizeof(u32));
 }
@@ -169,23 +169,23 @@ static int eip197_trc_cache_init(struct safexcel_crypto_priv *priv)
 	 * Enable the record cache memory access and
 	 * probe the bank select width
 	 */
-	val = readl(priv->base + EIP197_CS_RAM_CTRL);
+	val = pete_readl("drivers/crypto/inside-secure/safexcel.c:172", priv->base + EIP197_CS_RAM_CTRL);
 	val &= ~EIP197_TRC_ENABLE_MASK;
 	val |= EIP197_TRC_ENABLE_0 | EIP197_CS_BANKSEL_MASK;
-	writel(val, priv->base + EIP197_CS_RAM_CTRL);
-	val = readl(priv->base + EIP197_CS_RAM_CTRL);
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:175", val, priv->base + EIP197_CS_RAM_CTRL);
+	val = pete_readl("drivers/crypto/inside-secure/safexcel.c:176", priv->base + EIP197_CS_RAM_CTRL);
 	maxbanks = ((val&EIP197_CS_BANKSEL_MASK)>>EIP197_CS_BANKSEL_OFS) + 1;
 
 	/* Clear all ECC errors */
-	writel(0, priv->base + EIP197_TRC_ECCCTRL);
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:180", 0, priv->base + EIP197_TRC_ECCCTRL);
 
 	/*
 	 * Make sure the cache memory is accessible by taking record cache into
 	 * reset. Need data memory access here, not admin access.
 	 */
-	val = readl(priv->base + EIP197_TRC_PARAMS);
+	val = pete_readl("drivers/crypto/inside-secure/safexcel.c:186", priv->base + EIP197_TRC_PARAMS);
 	val |= EIP197_TRC_PARAMS_SW_RESET | EIP197_TRC_PARAMS_DATA_ACCESS;
-	writel(val, priv->base + EIP197_TRC_PARAMS);
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:188", val, priv->base + EIP197_TRC_PARAMS);
 
 	/* Probed data RAM size in bytes */
 	dsize = eip197_trc_cache_probe(priv, maxbanks, 0xffffffff, 32);
@@ -195,16 +195,16 @@ static int eip197_trc_cache_init(struct safexcel_crypto_priv *priv)
 	 * Except that only the lower 30 bits are writable and we don't need
 	 * bank selects
 	 */
-	val = readl(priv->base + EIP197_TRC_PARAMS);
+	val = pete_readl("drivers/crypto/inside-secure/safexcel.c:198", priv->base + EIP197_TRC_PARAMS);
 	/* admin access now */
 	val &= ~(EIP197_TRC_PARAMS_DATA_ACCESS | EIP197_CS_BANKSEL_MASK);
-	writel(val, priv->base + EIP197_TRC_PARAMS);
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:201", val, priv->base + EIP197_TRC_PARAMS);
 
 	/* Probed admin RAM size in admin words */
 	asize = eip197_trc_cache_probe(priv, 0, 0x3fffffff, 16) >> 4;
 
 	/* Clear any ECC errors detected while probing! */
-	writel(0, priv->base + EIP197_TRC_ECCCTRL);
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:207", 0, priv->base + EIP197_TRC_ECCCTRL);
 
 	/* Sanity check probing results */
 	if (dsize < EIP197_MIN_DSIZE || asize < EIP197_MIN_ASIZE) {
@@ -241,25 +241,25 @@ static int eip197_trc_cache_init(struct safexcel_crypto_priv *priv)
 	eip197_trc_cache_clear(priv, cs_rc_max, cs_ht_wc);
 
 	/* Disable the record cache memory access */
-	val = readl(priv->base + EIP197_CS_RAM_CTRL);
+	val = pete_readl("drivers/crypto/inside-secure/safexcel.c:244", priv->base + EIP197_CS_RAM_CTRL);
 	val &= ~EIP197_TRC_ENABLE_MASK;
-	writel(val, priv->base + EIP197_CS_RAM_CTRL);
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:246", val, priv->base + EIP197_CS_RAM_CTRL);
 
 	/* Write head and tail pointers of the record free chain */
 	val = EIP197_TRC_FREECHAIN_HEAD_PTR(0) |
 	      EIP197_TRC_FREECHAIN_TAIL_PTR(cs_rc_max - 1);
-	writel(val, priv->base + EIP197_TRC_FREECHAIN);
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:251", val, priv->base + EIP197_TRC_FREECHAIN);
 
 	/* Configure the record cache #1 */
 	val = EIP197_TRC_PARAMS2_RC_SZ_SMALL(cs_trc_rec_wc) |
 	      EIP197_TRC_PARAMS2_HTABLE_PTR(cs_rc_max);
-	writel(val, priv->base + EIP197_TRC_PARAMS2);
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:256", val, priv->base + EIP197_TRC_PARAMS2);
 
 	/* Configure the record cache #2 */
 	val = EIP197_TRC_PARAMS_RC_SZ_LARGE(cs_trc_lg_rec_wc) |
 	      EIP197_TRC_PARAMS_BLK_TIMER_SPEED(1) |
 	      EIP197_TRC_PARAMS_HTABLE_SZ(cs_ht_sz);
-	writel(val, priv->base + EIP197_TRC_PARAMS);
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:262", val, priv->base + EIP197_TRC_PARAMS);
 
 	dev_info(priv->dev, "TRC init: %dd,%da (%dr,%dh)\n",
 		 dsize, asize, cs_rc_max, cs_ht_wc + cs_ht_wc);
@@ -273,41 +273,41 @@ static void eip197_init_firmware(struct safexcel_crypto_priv *priv)
 
 	for (pe = 0; pe < priv->config.pes; pe++) {
 		/* Configure the token FIFO's */
-		writel(3, EIP197_PE(priv) + EIP197_PE_ICE_PUTF_CTRL(pe));
-		writel(0, EIP197_PE(priv) + EIP197_PE_ICE_PPTF_CTRL(pe));
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:276", 3, EIP197_PE(priv) + EIP197_PE_ICE_PUTF_CTRL(pe));
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:277", 0, EIP197_PE(priv) + EIP197_PE_ICE_PPTF_CTRL(pe));
 
 		/* Clear the ICE scratchpad memory */
-		val = readl(EIP197_PE(priv) + EIP197_PE_ICE_SCRATCH_CTRL(pe));
+		val = pete_readl("drivers/crypto/inside-secure/safexcel.c:280", EIP197_PE(priv) + EIP197_PE_ICE_SCRATCH_CTRL(pe));
 		val |= EIP197_PE_ICE_SCRATCH_CTRL_CHANGE_TIMER |
 		       EIP197_PE_ICE_SCRATCH_CTRL_TIMER_EN |
 		       EIP197_PE_ICE_SCRATCH_CTRL_SCRATCH_ACCESS |
 		       EIP197_PE_ICE_SCRATCH_CTRL_CHANGE_ACCESS;
-		writel(val, EIP197_PE(priv) + EIP197_PE_ICE_SCRATCH_CTRL(pe));
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:285", val, EIP197_PE(priv) + EIP197_PE_ICE_SCRATCH_CTRL(pe));
 
 		/* clear the scratchpad RAM using 32 bit writes only */
 		for (i = 0; i < EIP197_NUM_OF_SCRATCH_BLOCKS; i++)
-			writel(0, EIP197_PE(priv) +
+			pete_writel("drivers/crypto/inside-secure/safexcel.c:289", 0, EIP197_PE(priv) +
 				  EIP197_PE_ICE_SCRATCH_RAM(pe) + (i << 2));
 
 		/* Reset the IFPP engine to make its program mem accessible */
-		writel(EIP197_PE_ICE_x_CTRL_SW_RESET |
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:293", EIP197_PE_ICE_x_CTRL_SW_RESET |
 		       EIP197_PE_ICE_x_CTRL_CLR_ECC_CORR |
 		       EIP197_PE_ICE_x_CTRL_CLR_ECC_NON_CORR,
 		       EIP197_PE(priv) + EIP197_PE_ICE_FPP_CTRL(pe));
 
 		/* Reset the IPUE engine to make its program mem accessible */
-		writel(EIP197_PE_ICE_x_CTRL_SW_RESET |
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:299", EIP197_PE_ICE_x_CTRL_SW_RESET |
 		       EIP197_PE_ICE_x_CTRL_CLR_ECC_CORR |
 		       EIP197_PE_ICE_x_CTRL_CLR_ECC_NON_CORR,
 		       EIP197_PE(priv) + EIP197_PE_ICE_PUE_CTRL(pe));
 
 		/* Enable access to all IFPP program memories */
-		writel(EIP197_PE_ICE_RAM_CTRL_FPP_PROG_EN,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:305", EIP197_PE_ICE_RAM_CTRL_FPP_PROG_EN,
 		       EIP197_PE(priv) + EIP197_PE_ICE_RAM_CTRL(pe));
 
 		/* bypass the OCE, if present */
 		if (priv->flags & EIP197_OCE)
-			writel(EIP197_DEBUG_OCE_BYPASS, EIP197_PE(priv) +
+			pete_writel("drivers/crypto/inside-secure/safexcel.c:310", EIP197_DEBUG_OCE_BYPASS, EIP197_PE(priv) +
 							EIP197_PE_DEBUG(pe));
 	}
 
@@ -321,7 +321,7 @@ static int eip197_write_firmware(struct safexcel_crypto_priv *priv,
 
 	/* Write the firmware */
 	for (i = 0; i < fw->size / sizeof(u32); i++)
-		writel(be32_to_cpu(data[i]),
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:324", be32_to_cpu(data[i]),
 		       priv->base + EIP197_CLASSIFICATION_RAMS +
 		       i * sizeof(__be32));
 
@@ -368,7 +368,7 @@ static bool eip197_start_firmware(struct safexcel_crypto_priv *priv,
 
 	for (pe = 0; pe < priv->config.pes; pe++) {
 		/* Disable access to all program memory */
-		writel(0, EIP197_PE(priv) + EIP197_PE_ICE_RAM_CTRL(pe));
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:371", 0, EIP197_PE(priv) + EIP197_PE_ICE_RAM_CTRL(pe));
 
 		/* Start IFPP microengines */
 		if (minifw)
@@ -377,7 +377,7 @@ static bool eip197_start_firmware(struct safexcel_crypto_priv *priv,
 			val = EIP197_PE_ICE_UENG_START_OFFSET((ifppsz - 1) &
 					EIP197_PE_ICE_UENG_INIT_ALIGN_MASK) |
 				EIP197_PE_ICE_UENG_DEBUG_RESET;
-		writel(val, EIP197_PE(priv) + EIP197_PE_ICE_FPP_CTRL(pe));
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:380", val, EIP197_PE(priv) + EIP197_PE_ICE_FPP_CTRL(pe));
 
 		/* Start IPUE microengines */
 		if (minifw)
@@ -386,7 +386,7 @@ static bool eip197_start_firmware(struct safexcel_crypto_priv *priv,
 			val = EIP197_PE_ICE_UENG_START_OFFSET((ipuesz - 1) &
 					EIP197_PE_ICE_UENG_INIT_ALIGN_MASK) |
 				EIP197_PE_ICE_UENG_DEBUG_RESET;
-		writel(val, EIP197_PE(priv) + EIP197_PE_ICE_PUE_CTRL(pe));
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:389", val, EIP197_PE(priv) + EIP197_PE_ICE_PUE_CTRL(pe));
 	}
 
 	/* For miniFW startup, there is no initialization, so always succeed */
@@ -442,7 +442,7 @@ retry_fw:
 
 	/* Enable access to IPUE program memories */
 	for (pe = 0; pe < priv->config.pes; pe++)
-		writel(EIP197_PE_ICE_RAM_CTRL_PUE_PROG_EN,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:445", EIP197_PE_ICE_RAM_CTRL_PUE_PROG_EN,
 		       EIP197_PE(priv) + EIP197_PE_ICE_RAM_CTRL(pe));
 
 	ipuesz = eip197_write_firmware(priv, fw[FW_IPUE]);
@@ -501,15 +501,15 @@ static int safexcel_hw_setup_cdesc_rings(struct safexcel_crypto_priv *priv)
 
 	for (i = 0; i < priv->config.rings; i++) {
 		/* ring base address */
-		writel(lower_32_bits(priv->ring[i].cdr.base_dma),
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:504", lower_32_bits(priv->ring[i].cdr.base_dma),
 		       EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_RING_BASE_ADDR_LO);
-		writel(upper_32_bits(priv->ring[i].cdr.base_dma),
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:506", upper_32_bits(priv->ring[i].cdr.base_dma),
 		       EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_RING_BASE_ADDR_HI);
 
-		writel(EIP197_xDR_DESC_MODE_64BIT | EIP197_CDR_DESC_MODE_ADCP |
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:509", EIP197_xDR_DESC_MODE_64BIT | EIP197_CDR_DESC_MODE_ADCP |
 		       (priv->config.cd_offset << 14) | priv->config.cd_size,
 		       EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_DESC_SIZE);
-		writel(((cd_fetch_cnt *
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:512", ((cd_fetch_cnt *
 			 (cd_size_rnd << priv->hwconfig.hwdataw)) << 16) |
 		       (cd_fetch_cnt * (priv->config.cd_offset / sizeof(u32))),
 		       EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_CFG);
@@ -517,10 +517,10 @@ static int safexcel_hw_setup_cdesc_rings(struct safexcel_crypto_priv *priv)
 		/* Configure DMA tx control */
 		val = EIP197_HIA_xDR_CFG_WR_CACHE(WR_CACHE_3BITS);
 		val |= EIP197_HIA_xDR_CFG_RD_CACHE(RD_CACHE_3BITS);
-		writel(val, EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_DMA_CFG);
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:520", val, EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_DMA_CFG);
 
 		/* clear any pending interrupt */
-		writel(GENMASK(5, 0),
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:523", GENMASK(5, 0),
 		       EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_STAT);
 	}
 
@@ -549,16 +549,16 @@ static int safexcel_hw_setup_rdesc_rings(struct safexcel_crypto_priv *priv)
 
 	for (i = 0; i < priv->config.rings; i++) {
 		/* ring base address */
-		writel(lower_32_bits(priv->ring[i].rdr.base_dma),
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:552", lower_32_bits(priv->ring[i].rdr.base_dma),
 		       EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_RING_BASE_ADDR_LO);
-		writel(upper_32_bits(priv->ring[i].rdr.base_dma),
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:554", upper_32_bits(priv->ring[i].rdr.base_dma),
 		       EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_RING_BASE_ADDR_HI);
 
-		writel(EIP197_xDR_DESC_MODE_64BIT | (priv->config.rd_offset << 14) |
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:557", EIP197_xDR_DESC_MODE_64BIT | (priv->config.rd_offset << 14) |
 		       priv->config.rd_size,
 		       EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_DESC_SIZE);
 
-		writel(((rd_fetch_cnt *
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:561", ((rd_fetch_cnt *
 			 (rd_size_rnd << priv->hwconfig.hwdataw)) << 16) |
 		       (rd_fetch_cnt * (priv->config.rd_offset / sizeof(u32))),
 		       EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_CFG);
@@ -567,17 +567,17 @@ static int safexcel_hw_setup_rdesc_rings(struct safexcel_crypto_priv *priv)
 		val = EIP197_HIA_xDR_CFG_WR_CACHE(WR_CACHE_3BITS);
 		val |= EIP197_HIA_xDR_CFG_RD_CACHE(RD_CACHE_3BITS);
 		val |= EIP197_HIA_xDR_WR_RES_BUF | EIP197_HIA_xDR_WR_CTRL_BUF;
-		writel(val,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:570", val,
 		       EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_DMA_CFG);
 
 		/* clear any pending interrupt */
-		writel(GENMASK(7, 0),
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:574", GENMASK(7, 0),
 		       EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_STAT);
 
 		/* enable ring interrupt */
-		val = readl(EIP197_HIA_AIC_R(priv) + EIP197_HIA_AIC_R_ENABLE_CTRL(i));
+		val = pete_readl("drivers/crypto/inside-secure/safexcel.c:578", EIP197_HIA_AIC_R(priv) + EIP197_HIA_AIC_R_ENABLE_CTRL(i));
 		val |= EIP197_RDR_IRQ(i);
-		writel(val, EIP197_HIA_AIC_R(priv) + EIP197_HIA_AIC_R_ENABLE_CTRL(i));
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:580", val, EIP197_HIA_AIC_R(priv) + EIP197_HIA_AIC_R_ENABLE_CTRL(i));
 	}
 
 	return 0;
@@ -596,35 +596,35 @@ static int safexcel_hw_init(struct safexcel_crypto_priv *priv)
 	 * Skip for the EIP97 as it does not have this field.
 	 */
 	if (priv->flags & SAFEXCEL_HW_EIP197) {
-		val = readl(EIP197_HIA_AIC(priv) + EIP197_HIA_MST_CTRL);
+		val = pete_readl("drivers/crypto/inside-secure/safexcel.c:599", EIP197_HIA_AIC(priv) + EIP197_HIA_MST_CTRL);
 		val |= EIP197_MST_CTRL_TX_MAX_CMD(5);
-		writel(val, EIP197_HIA_AIC(priv) + EIP197_HIA_MST_CTRL);
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:601", val, EIP197_HIA_AIC(priv) + EIP197_HIA_MST_CTRL);
 	}
 
 	/* Configure wr/rd cache values */
-	writel(EIP197_MST_CTRL_RD_CACHE(RD_CACHE_4BITS) |
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:605", EIP197_MST_CTRL_RD_CACHE(RD_CACHE_4BITS) |
 	       EIP197_MST_CTRL_WD_CACHE(WR_CACHE_4BITS),
 	       EIP197_HIA_GEN_CFG(priv) + EIP197_MST_CTRL);
 
 	/* Interrupts reset */
 
 	/* Disable all global interrupts */
-	writel(0, EIP197_HIA_AIC_G(priv) + EIP197_HIA_AIC_G_ENABLE_CTRL);
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:612", 0, EIP197_HIA_AIC_G(priv) + EIP197_HIA_AIC_G_ENABLE_CTRL);
 
 	/* Clear any pending interrupt */
-	writel(GENMASK(31, 0), EIP197_HIA_AIC_G(priv) + EIP197_HIA_AIC_G_ACK);
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:615", GENMASK(31, 0), EIP197_HIA_AIC_G(priv) + EIP197_HIA_AIC_G_ACK);
 
 	/* Processing Engine configuration */
 	for (pe = 0; pe < priv->config.pes; pe++) {
 		/* Data Fetch Engine configuration */
 
 		/* Reset all DFE threads */
-		writel(EIP197_DxE_THR_CTRL_RESET_PE,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:622", EIP197_DxE_THR_CTRL_RESET_PE,
 		       EIP197_HIA_DFE_THR(priv) + EIP197_HIA_DFE_THR_CTRL(pe));
 
 		if (priv->flags & EIP197_PE_ARB)
 			/* Reset HIA input interface arbiter (if present) */
-			writel(EIP197_HIA_RA_PE_CTRL_RESET,
+			pete_writel("drivers/crypto/inside-secure/safexcel.c:627", EIP197_HIA_RA_PE_CTRL_RESET,
 			       EIP197_HIA_AIC(priv) + EIP197_HIA_RA_PE_CTRL(pe));
 
 		/* DMA transfer size to use */
@@ -635,33 +635,33 @@ static int safexcel_hw_init(struct safexcel_crypto_priv *priv)
 		       EIP197_HIA_DxE_CFG_MAX_CTRL_SIZE(7);
 		val |= EIP197_HIA_DxE_CFG_DATA_CACHE_CTRL(RD_CACHE_3BITS);
 		val |= EIP197_HIA_DxE_CFG_CTRL_CACHE_CTRL(RD_CACHE_3BITS);
-		writel(val, EIP197_HIA_DFE(priv) + EIP197_HIA_DFE_CFG(pe));
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:638", val, EIP197_HIA_DFE(priv) + EIP197_HIA_DFE_CFG(pe));
 
 		/* Leave the DFE threads reset state */
-		writel(0, EIP197_HIA_DFE_THR(priv) + EIP197_HIA_DFE_THR_CTRL(pe));
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:641", 0, EIP197_HIA_DFE_THR(priv) + EIP197_HIA_DFE_THR_CTRL(pe));
 
 		/* Configure the processing engine thresholds */
-		writel(EIP197_PE_IN_xBUF_THRES_MIN(6) |
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:644", EIP197_PE_IN_xBUF_THRES_MIN(6) |
 		       EIP197_PE_IN_xBUF_THRES_MAX(9),
 		       EIP197_PE(priv) + EIP197_PE_IN_DBUF_THRES(pe));
-		writel(EIP197_PE_IN_xBUF_THRES_MIN(6) |
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:647", EIP197_PE_IN_xBUF_THRES_MIN(6) |
 		       EIP197_PE_IN_xBUF_THRES_MAX(7),
 		       EIP197_PE(priv) + EIP197_PE_IN_TBUF_THRES(pe));
 
 		if (priv->flags & SAFEXCEL_HW_EIP197)
 			/* enable HIA input interface arbiter and rings */
-			writel(EIP197_HIA_RA_PE_CTRL_EN |
+			pete_writel("drivers/crypto/inside-secure/safexcel.c:653", EIP197_HIA_RA_PE_CTRL_EN |
 			       GENMASK(priv->config.rings - 1, 0),
 			       EIP197_HIA_AIC(priv) + EIP197_HIA_RA_PE_CTRL(pe));
 
 		/* Data Store Engine configuration */
 
 		/* Reset all DSE threads */
-		writel(EIP197_DxE_THR_CTRL_RESET_PE,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:660", EIP197_DxE_THR_CTRL_RESET_PE,
 		       EIP197_HIA_DSE_THR(priv) + EIP197_HIA_DSE_THR_CTRL(pe));
 
 		/* Wait for all DSE threads to complete */
-		while ((readl(EIP197_HIA_DSE_THR(priv) + EIP197_HIA_DSE_THR_STAT(pe)) &
+		while ((pete_readl("drivers/crypto/inside-secure/safexcel.c:664", EIP197_HIA_DSE_THR(priv) + EIP197_HIA_DSE_THR_STAT(pe)) &
 			GENMASK(15, 12)) != GENMASK(15, 12))
 			;
 
@@ -683,13 +683,13 @@ static int safexcel_hw_init(struct safexcel_crypto_priv *priv)
 		 */
 		if (priv->flags & SAFEXCEL_HW_EIP197)
 			val |= EIP197_HIA_DSE_CFG_EN_SINGLE_WR;
-		writel(val, EIP197_HIA_DSE(priv) + EIP197_HIA_DSE_CFG(pe));
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:686", val, EIP197_HIA_DSE(priv) + EIP197_HIA_DSE_CFG(pe));
 
 		/* Leave the DSE threads reset state */
-		writel(0, EIP197_HIA_DSE_THR(priv) + EIP197_HIA_DSE_THR_CTRL(pe));
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:689", 0, EIP197_HIA_DSE_THR(priv) + EIP197_HIA_DSE_THR_CTRL(pe));
 
 		/* Configure the processing engine thresholds */
-		writel(EIP197_PE_OUT_DBUF_THRES_MIN(opbuflo) |
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:692", EIP197_PE_OUT_DBUF_THRES_MIN(opbuflo) |
 		       EIP197_PE_OUT_DBUF_THRES_MAX(opbufhi),
 		       EIP197_PE(priv) + EIP197_PE_OUT_DBUF_THRES(pe));
 
@@ -699,83 +699,83 @@ static int safexcel_hw_init(struct safexcel_crypto_priv *priv)
 		val = EIP197_PE_EIP96_TOKEN_CTRL_CTX_UPDATES |
 		      EIP197_PE_EIP96_TOKEN_CTRL_NO_TOKEN_WAIT |
 		      EIP197_PE_EIP96_TOKEN_CTRL_ENABLE_TIMEOUT;
-		writel(val, EIP197_PE(priv) + EIP197_PE_EIP96_TOKEN_CTRL(pe));
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:702", val, EIP197_PE(priv) + EIP197_PE_EIP96_TOKEN_CTRL(pe));
 
 		/* H/W capabilities selection: just enable everything */
-		writel(EIP197_FUNCTION_ALL,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:705", EIP197_FUNCTION_ALL,
 		       EIP197_PE(priv) + EIP197_PE_EIP96_FUNCTION_EN(pe));
-		writel(EIP197_FUNCTION_ALL,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:707", EIP197_FUNCTION_ALL,
 		       EIP197_PE(priv) + EIP197_PE_EIP96_FUNCTION2_EN(pe));
 	}
 
 	/* Command Descriptor Rings prepare */
 	for (i = 0; i < priv->config.rings; i++) {
 		/* Clear interrupts for this ring */
-		writel(GENMASK(31, 0),
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:714", GENMASK(31, 0),
 		       EIP197_HIA_AIC_R(priv) + EIP197_HIA_AIC_R_ENABLE_CLR(i));
 
 		/* Disable external triggering */
-		writel(0, EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_CFG);
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:718", 0, EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_CFG);
 
 		/* Clear the pending prepared counter */
-		writel(EIP197_xDR_PREP_CLR_COUNT,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:721", EIP197_xDR_PREP_CLR_COUNT,
 		       EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_PREP_COUNT);
 
 		/* Clear the pending processed counter */
-		writel(EIP197_xDR_PROC_CLR_COUNT,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:725", EIP197_xDR_PROC_CLR_COUNT,
 		       EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_PROC_COUNT);
 
-		writel(0,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:728", 0,
 		       EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_PREP_PNTR);
-		writel(0,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:730", 0,
 		       EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_PROC_PNTR);
 
-		writel((EIP197_DEFAULT_RING_SIZE * priv->config.cd_offset),
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:733", (EIP197_DEFAULT_RING_SIZE * priv->config.cd_offset),
 		       EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_RING_SIZE);
 	}
 
 	/* Result Descriptor Ring prepare */
 	for (i = 0; i < priv->config.rings; i++) {
 		/* Disable external triggering*/
-		writel(0, EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_CFG);
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:740", 0, EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_CFG);
 
 		/* Clear the pending prepared counter */
-		writel(EIP197_xDR_PREP_CLR_COUNT,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:743", EIP197_xDR_PREP_CLR_COUNT,
 		       EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_PREP_COUNT);
 
 		/* Clear the pending processed counter */
-		writel(EIP197_xDR_PROC_CLR_COUNT,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:747", EIP197_xDR_PROC_CLR_COUNT,
 		       EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_PROC_COUNT);
 
-		writel(0,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:750", 0,
 		       EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_PREP_PNTR);
-		writel(0,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:752", 0,
 		       EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_PROC_PNTR);
 
 		/* Ring size */
-		writel((EIP197_DEFAULT_RING_SIZE * priv->config.rd_offset),
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:756", (EIP197_DEFAULT_RING_SIZE * priv->config.rd_offset),
 		       EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_RING_SIZE);
 	}
 
 	for (pe = 0; pe < priv->config.pes; pe++) {
 		/* Enable command descriptor rings */
-		writel(EIP197_DxE_THR_CTRL_EN | GENMASK(priv->config.rings - 1, 0),
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:762", EIP197_DxE_THR_CTRL_EN | GENMASK(priv->config.rings - 1, 0),
 		       EIP197_HIA_DFE_THR(priv) + EIP197_HIA_DFE_THR_CTRL(pe));
 
 		/* Enable result descriptor rings */
-		writel(EIP197_DxE_THR_CTRL_EN | GENMASK(priv->config.rings - 1, 0),
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:766", EIP197_DxE_THR_CTRL_EN | GENMASK(priv->config.rings - 1, 0),
 		       EIP197_HIA_DSE_THR(priv) + EIP197_HIA_DSE_THR_CTRL(pe));
 	}
 
 	/* Clear any HIA interrupt */
-	writel(GENMASK(30, 20), EIP197_HIA_AIC_G(priv) + EIP197_HIA_AIC_G_ACK);
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:771", GENMASK(30, 20), EIP197_HIA_AIC_G(priv) + EIP197_HIA_AIC_G_ACK);
 
 	if (priv->flags & EIP197_SIMPLE_TRC) {
-		writel(EIP197_STRC_CONFIG_INIT |
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:774", EIP197_STRC_CONFIG_INIT |
 		       EIP197_STRC_CONFIG_LARGE_REC(EIP197_CS_TRC_REC_WC) |
 		       EIP197_STRC_CONFIG_SMALL_REC(EIP197_CS_TRC_REC_WC),
 		       priv->base + EIP197_STRC_CONFIG);
-		writel(EIP197_PE_EIP96_TOKEN_CTRL2_CTX_DONE,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:778", EIP197_PE_EIP96_TOKEN_CTRL2_CTX_DONE,
 		       EIP197_PE(priv) + EIP197_PE_EIP96_TOKEN_CTRL2(0));
 	} else if (priv->flags & SAFEXCEL_HW_EIP197) {
 		ret = eip197_trc_cache_init(priv);
@@ -804,7 +804,7 @@ static void safexcel_try_push_requests(struct safexcel_crypto_priv *priv,
 		return;
 
 	/* Configure when we want an interrupt */
-	writel(EIP197_HIA_RDR_THRESH_PKT_MODE |
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:807", EIP197_HIA_RDR_THRESH_PKT_MODE |
 	       EIP197_HIA_RDR_THRESH_PROC_PKT(coal),
 	       EIP197_HIA_RDR(priv, ring) + EIP197_HIA_xDR_THRESH);
 }
@@ -879,11 +879,11 @@ finalize:
 	spin_unlock_bh(&priv->ring[ring].lock);
 
 	/* let the RDR know we have pending descriptors */
-	writel((rdesc * priv->config.rd_offset),
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:882", (rdesc * priv->config.rd_offset),
 	       EIP197_HIA_RDR(priv, ring) + EIP197_HIA_xDR_PREP_COUNT);
 
 	/* let the CDR know we have pending descriptors */
-	writel((cdesc * priv->config.cd_offset),
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:886", (cdesc * priv->config.cd_offset),
 	       EIP197_HIA_CDR(priv, ring) + EIP197_HIA_xDR_PREP_COUNT);
 }
 
@@ -1022,7 +1022,7 @@ static inline void safexcel_handle_result_descriptor(struct safexcel_crypto_priv
 handle_results:
 	tot_descs = 0;
 
-	nreq = readl(EIP197_HIA_RDR(priv, ring) + EIP197_HIA_xDR_PROC_COUNT);
+	nreq = pete_readl("drivers/crypto/inside-secure/safexcel.c:1025", EIP197_HIA_RDR(priv, ring) + EIP197_HIA_xDR_PROC_COUNT);
 	nreq >>= EIP197_xDR_PROC_xD_PKT_OFFSET;
 	nreq &= EIP197_xDR_PROC_xD_PKT_MASK;
 	if (!nreq)
@@ -1052,7 +1052,7 @@ handle_results:
 
 acknowledge:
 	if (i)
-		writel(EIP197_xDR_PROC_xD_PKT(i) |
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:1055", EIP197_xDR_PROC_xD_PKT(i) |
 		       (tot_descs * priv->config.rd_offset),
 		       EIP197_HIA_RDR(priv, ring) + EIP197_HIA_xDR_PROC_COUNT);
 
@@ -1094,13 +1094,13 @@ static irqreturn_t safexcel_irq_ring(int irq, void *data)
 	int ring = irq_data->ring, rc = IRQ_NONE;
 	u32 status, stat;
 
-	status = readl(EIP197_HIA_AIC_R(priv) + EIP197_HIA_AIC_R_ENABLED_STAT(ring));
+	status = pete_readl("drivers/crypto/inside-secure/safexcel.c:1097", EIP197_HIA_AIC_R(priv) + EIP197_HIA_AIC_R_ENABLED_STAT(ring));
 	if (!status)
 		return rc;
 
 	/* RDR interrupts */
 	if (status & EIP197_RDR_IRQ(ring)) {
-		stat = readl(EIP197_HIA_RDR(priv, ring) + EIP197_HIA_xDR_STAT);
+		stat = pete_readl("drivers/crypto/inside-secure/safexcel.c:1103", EIP197_HIA_RDR(priv, ring) + EIP197_HIA_xDR_STAT);
 
 		if (unlikely(stat & EIP197_xDR_ERR)) {
 			/*
@@ -1114,12 +1114,12 @@ static irqreturn_t safexcel_irq_ring(int irq, void *data)
 		}
 
 		/* ACK the interrupts */
-		writel(stat & 0xff,
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:1117", stat & 0xff,
 		       EIP197_HIA_RDR(priv, ring) + EIP197_HIA_xDR_STAT);
 	}
 
 	/* ACK the interrupts */
-	writel(status, EIP197_HIA_AIC_R(priv) + EIP197_HIA_AIC_R_ACK(ring));
+	pete_writel("drivers/crypto/inside-secure/safexcel.c:1122", status, EIP197_HIA_AIC_R(priv) + EIP197_HIA_AIC_R_ACK(ring));
 
 	return rc;
 }
@@ -1413,7 +1413,7 @@ static int safexcel_probe_generic(void *pdev,
 	 * For the EIP197, this is guaranteed to NOT return any of the test
 	 * values
 	 */
-	version = readl(priv->base + EIP97_HIA_AIC_BASE + EIP197_HIA_VERSION);
+	version = pete_readl("drivers/crypto/inside-secure/safexcel.c:1416", priv->base + EIP97_HIA_AIC_BASE + EIP197_HIA_VERSION);
 
 	mask = 0;  /* do not swap */
 	if (EIP197_REG_LO16(version) == EIP197_HIA_VERSION_LE) {
@@ -1424,7 +1424,7 @@ static int safexcel_probe_generic(void *pdev,
 		priv->hwconfig.hiaver = EIP197_VERSION_SWAP(version);
 	} else {
 		/* So it wasn't an EIP97 ... maybe it's an EIP197? */
-		version = readl(priv->base + EIP197_HIA_AIC_BASE +
+		version = pete_readl("drivers/crypto/inside-secure/safexcel.c:1427", priv->base + EIP197_HIA_AIC_BASE +
 				EIP197_HIA_VERSION);
 		if (EIP197_REG_LO16(version) == EIP197_HIA_VERSION_LE) {
 			priv->hwconfig.hiaver = EIP197_VERSION_MASK(version);
@@ -1449,9 +1449,9 @@ static int safexcel_probe_generic(void *pdev,
 	 * byte-swapped ...
 	 */
 	if (mask) {
-		val = readl(EIP197_HIA_AIC(priv) + EIP197_HIA_MST_CTRL);
+		val = pete_readl("drivers/crypto/inside-secure/safexcel.c:1452", EIP197_HIA_AIC(priv) + EIP197_HIA_MST_CTRL);
 		val = val ^ (mask >> 24); /* toggle byte swap bits */
-		writel(val, EIP197_HIA_AIC(priv) + EIP197_HIA_MST_CTRL);
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:1454", val, EIP197_HIA_AIC(priv) + EIP197_HIA_MST_CTRL);
 	}
 
 	/*
@@ -1459,7 +1459,7 @@ static int safexcel_probe_generic(void *pdev,
 	 * was found at all. So, with the endianness presumably correct now and
 	 * the offsets setup, *really* probe for the EIP97/EIP197.
 	 */
-	version = readl(EIP197_GLOBAL(priv) + EIP197_VERSION);
+	version = pete_readl("drivers/crypto/inside-secure/safexcel.c:1462", EIP197_GLOBAL(priv) + EIP197_VERSION);
 	if (((priv->flags & SAFEXCEL_HW_EIP197) &&
 	     (EIP197_REG_LO16(version) != EIP197_VERSION_LE) &&
 	     (EIP197_REG_LO16(version) != EIP196_VERSION_LE)) ||
@@ -1479,7 +1479,7 @@ static int safexcel_probe_generic(void *pdev,
 	peid = version & 255;
 
 	/* Detect EIP206 processing pipe */
-	version = readl(EIP197_PE(priv) + + EIP197_PE_VERSION(0));
+	version = pete_readl("drivers/crypto/inside-secure/safexcel.c:1482", EIP197_PE(priv) + + EIP197_PE_VERSION(0));
 	if (EIP197_REG_LO16(version) != EIP206_VERSION_LE) {
 		dev_err(priv->dev, "EIP%d: EIP206 not detected\n", peid);
 		return -ENODEV;
@@ -1487,22 +1487,22 @@ static int safexcel_probe_generic(void *pdev,
 	priv->hwconfig.ppver = EIP197_VERSION_MASK(version);
 
 	/* Detect EIP96 packet engine and version */
-	version = readl(EIP197_PE(priv) + EIP197_PE_EIP96_VERSION(0));
+	version = pete_readl("drivers/crypto/inside-secure/safexcel.c:1490", EIP197_PE(priv) + EIP197_PE_EIP96_VERSION(0));
 	if (EIP197_REG_LO16(version) != EIP96_VERSION_LE) {
 		dev_err(dev, "EIP%d: EIP96 not detected.\n", peid);
 		return -ENODEV;
 	}
 	priv->hwconfig.pever = EIP197_VERSION_MASK(version);
 
-	hwopt = readl(EIP197_GLOBAL(priv) + EIP197_OPTIONS);
-	hiaopt = readl(EIP197_HIA_AIC(priv) + EIP197_HIA_OPTIONS);
+	hwopt = pete_readl("drivers/crypto/inside-secure/safexcel.c:1497", EIP197_GLOBAL(priv) + EIP197_OPTIONS);
+	hiaopt = pete_readl("drivers/crypto/inside-secure/safexcel.c:1498", EIP197_HIA_AIC(priv) + EIP197_HIA_OPTIONS);
 
 	priv->hwconfig.icever = 0;
 	priv->hwconfig.ocever = 0;
 	priv->hwconfig.psever = 0;
 	if (priv->flags & SAFEXCEL_HW_EIP197) {
 		/* EIP197 */
-		peopt = readl(EIP197_PE(priv) + EIP197_PE_OPTIONS(0));
+		peopt = pete_readl("drivers/crypto/inside-secure/safexcel.c:1505", EIP197_PE(priv) + EIP197_PE_OPTIONS(0));
 
 		priv->hwconfig.hwdataw  = (hiaopt >> EIP197_HWDATAW_OFFSET) &
 					  EIP197_HWDATAW_MASK;
@@ -1521,7 +1521,7 @@ static int safexcel_probe_generic(void *pdev,
 		if (EIP206_OPT_ICE_TYPE(peopt) == 1) {
 			priv->flags |= EIP197_ICE;
 			/* Detect ICE EIP207 class. engine and version */
-			version = readl(EIP197_PE(priv) +
+			version = pete_readl("drivers/crypto/inside-secure/safexcel.c:1524", EIP197_PE(priv) +
 				  EIP197_PE_ICE_VERSION(0));
 			if (EIP197_REG_LO16(version) != EIP207_VERSION_LE) {
 				dev_err(dev, "EIP%d: ICE EIP207 not detected.\n",
@@ -1533,14 +1533,14 @@ static int safexcel_probe_generic(void *pdev,
 		if (EIP206_OPT_OCE_TYPE(peopt) == 1) {
 			priv->flags |= EIP197_OCE;
 			/* Detect EIP96PP packet stream editor and version */
-			version = readl(EIP197_PE(priv) + EIP197_PE_PSE_VERSION(0));
+			version = pete_readl("drivers/crypto/inside-secure/safexcel.c:1536", EIP197_PE(priv) + EIP197_PE_PSE_VERSION(0));
 			if (EIP197_REG_LO16(version) != EIP96_VERSION_LE) {
 				dev_err(dev, "EIP%d: EIP96PP not detected.\n", peid);
 				return -ENODEV;
 			}
 			priv->hwconfig.psever = EIP197_VERSION_MASK(version);
 			/* Detect OCE EIP207 class. engine and version */
-			version = readl(EIP197_PE(priv) +
+			version = pete_readl("drivers/crypto/inside-secure/safexcel.c:1543", EIP197_PE(priv) +
 				  EIP197_PE_ICE_VERSION(0));
 			if (EIP197_REG_LO16(version) != EIP207_VERSION_LE) {
 				dev_err(dev, "EIP%d: OCE EIP207 not detected.\n",
@@ -1569,7 +1569,7 @@ static int safexcel_probe_generic(void *pdev,
 
 	/* Scan for ring AIC's */
 	for (i = 0; i < EIP197_MAX_RING_AIC; i++) {
-		version = readl(EIP197_HIA_AIC_R(priv) +
+		version = pete_readl("drivers/crypto/inside-secure/safexcel.c:1572", EIP197_HIA_AIC_R(priv) +
 				EIP197_HIA_AIC_R_VERSION(i));
 		if (EIP197_REG_LO16(version) != EIP201_VERSION_LE)
 			break;
@@ -1582,7 +1582,7 @@ static int safexcel_probe_generic(void *pdev,
 	}
 
 	/* Get supported algorithms from EIP96 transform engine */
-	priv->hwconfig.algo_flags = readl(EIP197_PE(priv) +
+	priv->hwconfig.algo_flags = pete_readl("drivers/crypto/inside-secure/safexcel.c:1585", EIP197_PE(priv) +
 				    EIP197_PE_EIP96_OPTIONS(0));
 
 	/* Print single info line describing what we just detected */
@@ -1705,16 +1705,16 @@ static void safexcel_hw_reset_rings(struct safexcel_crypto_priv *priv)
 
 	for (i = 0; i < priv->config.rings; i++) {
 		/* clear any pending interrupt */
-		writel(GENMASK(5, 0), EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_STAT);
-		writel(GENMASK(7, 0), EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_STAT);
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:1708", GENMASK(5, 0), EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_STAT);
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:1709", GENMASK(7, 0), EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_STAT);
 
 		/* Reset the CDR base address */
-		writel(0, EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_RING_BASE_ADDR_LO);
-		writel(0, EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_RING_BASE_ADDR_HI);
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:1712", 0, EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_RING_BASE_ADDR_LO);
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:1713", 0, EIP197_HIA_CDR(priv, i) + EIP197_HIA_xDR_RING_BASE_ADDR_HI);
 
 		/* Reset the RDR base address */
-		writel(0, EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_RING_BASE_ADDR_LO);
-		writel(0, EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_RING_BASE_ADDR_HI);
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:1716", 0, EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_RING_BASE_ADDR_LO);
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:1717", 0, EIP197_HIA_RDR(priv, i) + EIP197_HIA_xDR_RING_BASE_ADDR_HI);
 	}
 }
 
@@ -1891,23 +1891,23 @@ static int safexcel_pci_probe(struct pci_dev *pdev,
 		}
 
 		pciebase = pcim_iomap_table(pdev)[2];
-		val = readl(pciebase + EIP197_XLX_IRQ_BLOCK_ID_ADDR);
+		val = pete_readl("drivers/crypto/inside-secure/safexcel.c:1894", pciebase + EIP197_XLX_IRQ_BLOCK_ID_ADDR);
 		if ((val >> 16) == EIP197_XLX_IRQ_BLOCK_ID_VALUE) {
 			dev_dbg(dev, "Detected Xilinx PCIE IRQ block version %d, multiple MSI support enabled\n",
 				(val & 0xff));
 
 			/* Setup MSI identity map mapping */
-			writel(EIP197_XLX_USER_VECT_LUT0_IDENT,
+			pete_writel("drivers/crypto/inside-secure/safexcel.c:1900", EIP197_XLX_USER_VECT_LUT0_IDENT,
 			       pciebase + EIP197_XLX_USER_VECT_LUT0_ADDR);
-			writel(EIP197_XLX_USER_VECT_LUT1_IDENT,
+			pete_writel("drivers/crypto/inside-secure/safexcel.c:1902", EIP197_XLX_USER_VECT_LUT1_IDENT,
 			       pciebase + EIP197_XLX_USER_VECT_LUT1_ADDR);
-			writel(EIP197_XLX_USER_VECT_LUT2_IDENT,
+			pete_writel("drivers/crypto/inside-secure/safexcel.c:1904", EIP197_XLX_USER_VECT_LUT2_IDENT,
 			       pciebase + EIP197_XLX_USER_VECT_LUT2_ADDR);
-			writel(EIP197_XLX_USER_VECT_LUT3_IDENT,
+			pete_writel("drivers/crypto/inside-secure/safexcel.c:1906", EIP197_XLX_USER_VECT_LUT3_IDENT,
 			       pciebase + EIP197_XLX_USER_VECT_LUT3_ADDR);
 
 			/* Enable all device interrupts */
-			writel(GENMASK(31, 0),
+			pete_writel("drivers/crypto/inside-secure/safexcel.c:1910", GENMASK(31, 0),
 			       pciebase + EIP197_XLX_USER_INT_ENB_MSK);
 		} else {
 			dev_err(dev, "Unrecognised IRQ block identifier %x\n",
@@ -1917,10 +1917,10 @@ static int safexcel_pci_probe(struct pci_dev *pdev,
 
 		/* HW reset FPGA dev board */
 		/* assert reset */
-		writel(1, priv->base + EIP197_XLX_GPIO_BASE);
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:1920", 1, priv->base + EIP197_XLX_GPIO_BASE);
 		wmb(); /* maintain strict ordering for accesses here */
 		/* deassert reset */
-		writel(0, priv->base + EIP197_XLX_GPIO_BASE);
+		pete_writel("drivers/crypto/inside-secure/safexcel.c:1923", 0, priv->base + EIP197_XLX_GPIO_BASE);
 		wmb(); /* maintain strict ordering for accesses here */
 	}
 

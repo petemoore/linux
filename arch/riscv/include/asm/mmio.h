@@ -135,17 +135,17 @@ static inline u64 __raw_readq(const volatile void __iomem *addr)
 #define __io_bw()	__asm__ __volatile__ ("fence w,o" : : : "memory")
 #define __io_aw()	mmiowb_set_pending()
 
-#define readb(c)	({ u8  __v; __io_br(); __v = readb_cpu(c); __io_ar(__v); __v; })
-#define readw(c)	({ u16 __v; __io_br(); __v = readw_cpu(c); __io_ar(__v); __v; })
-#define readl(c)	({ u32 __v; __io_br(); __v = readl_cpu(c); __io_ar(__v); __v; })
+#define pete_readb("arch/riscv/include/asm/mmio.h:138", c)	({ u8  __v; __io_br(); __v = readb_cpu(c); __io_ar(__v); __v; })
+#define pete_readw("arch/riscv/include/asm/mmio.h:139", c)	({ u16 __v; __io_br(); __v = readw_cpu(c); __io_ar(__v); __v; })
+#define pete_readl("arch/riscv/include/asm/mmio.h:140", c)	({ u32 __v; __io_br(); __v = readl_cpu(c); __io_ar(__v); __v; })
 
-#define writeb(v, c)	({ __io_bw(); writeb_cpu((v), (c)); __io_aw(); })
-#define writew(v, c)	({ __io_bw(); writew_cpu((v), (c)); __io_aw(); })
-#define writel(v, c)	({ __io_bw(); writel_cpu((v), (c)); __io_aw(); })
+#define pete_writeb("arch/riscv/include/asm/mmio.h:142", v, c)	({ __io_bw(); writeb_cpu((v), (c)); __io_aw(); })
+#define pete_writew("arch/riscv/include/asm/mmio.h:143", v, c)	({ __io_bw(); writew_cpu((v), (c)); __io_aw(); })
+#define pete_writel("arch/riscv/include/asm/mmio.h:144", v, c)	({ __io_bw(); writel_cpu((v), (c)); __io_aw(); })
 
 #ifdef CONFIG_64BIT
-#define readq(c)	({ u64 __v; __io_br(); __v = readq_cpu(c); __io_ar(__v); __v; })
-#define writeq(v, c)	({ __io_bw(); writeq_cpu((v), (c)); __io_aw(); })
+#define pete_readq("arch/riscv/include/asm/mmio.h:147", c)	({ u64 __v; __io_br(); __v = readq_cpu(c); __io_ar(__v); __v; })
+#define pete_writeq("arch/riscv/include/asm/mmio.h:148", v, c)	({ __io_bw(); writeq_cpu((v), (c)); __io_aw(); })
 #endif
 
 #endif /* _ASM_RISCV_MMIO_H */

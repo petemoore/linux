@@ -201,7 +201,7 @@ static void sis_update_sso(struct voice *voice, u16 period)
 		voice->sso = 8;
 
 	/* The SSO is in the upper 16 bits of the register. */
-	writew(voice->sso & 0xffff, base + SIS_PLAY_DMA_SSO_ESO + 2);
+	pete_writew("sound/pci/sis7019.c:204", voice->sso & 0xffff, base + SIS_PLAY_DMA_SSO_ESO + 2);
 }
 
 static void sis_update_voice(struct voice *voice)
@@ -229,7 +229,7 @@ static void sis_update_voice(struct voice *voice)
 		 * consider ourselves wrapped.
 		 */
 		sync = voice->sync_cso;
-		sync -= readw(voice->sync_base + SIS_CAPTURE_DMA_FORMAT_CSO);
+		sync -= pete_readw("sound/pci/sis7019.c:232", voice->sync_base + SIS_CAPTURE_DMA_FORMAT_CSO);
 		if (sync > (voice->sync_buffer_size / 2))
 			sync -= voice->sync_buffer_size;
 
@@ -543,23 +543,23 @@ static int sis_pcm_playback_prepare(struct snd_pcm_substream *substream)
 
 	/* Ok, we're ready to go, set up the channel.
 	 */
-	writel(format, ctrl_base + SIS_PLAY_DMA_FORMAT_CSO);
-	writel(dma_addr, ctrl_base + SIS_PLAY_DMA_BASE);
-	writel(control, ctrl_base + SIS_PLAY_DMA_CONTROL);
-	writel(sso_eso, ctrl_base + SIS_PLAY_DMA_SSO_ESO);
+	pete_writel("sound/pci/sis7019.c:546", format, ctrl_base + SIS_PLAY_DMA_FORMAT_CSO);
+	pete_writel("sound/pci/sis7019.c:547", dma_addr, ctrl_base + SIS_PLAY_DMA_BASE);
+	pete_writel("sound/pci/sis7019.c:548", control, ctrl_base + SIS_PLAY_DMA_CONTROL);
+	pete_writel("sound/pci/sis7019.c:549", sso_eso, ctrl_base + SIS_PLAY_DMA_SSO_ESO);
 
 	for (reg = 0; reg < SIS_WAVE_SIZE; reg += 4)
-		writel(0, wave_base + reg);
+		pete_writel("sound/pci/sis7019.c:552", 0, wave_base + reg);
 
-	writel(SIS_WAVE_GENERAL_WAVE_VOLUME, wave_base + SIS_WAVE_GENERAL);
-	writel(delta << 16, wave_base + SIS_WAVE_GENERAL_ARTICULATION);
-	writel(SIS_WAVE_CHANNEL_CONTROL_FIRST_SAMPLE |
+	pete_writel("sound/pci/sis7019.c:554", SIS_WAVE_GENERAL_WAVE_VOLUME, wave_base + SIS_WAVE_GENERAL);
+	pete_writel("sound/pci/sis7019.c:555", delta << 16, wave_base + SIS_WAVE_GENERAL_ARTICULATION);
+	pete_writel("sound/pci/sis7019.c:556", SIS_WAVE_CHANNEL_CONTROL_FIRST_SAMPLE |
 			SIS_WAVE_CHANNEL_CONTROL_AMP_ENABLE |
 			SIS_WAVE_CHANNEL_CONTROL_INTERPOLATE_ENABLE,
 			wave_base + SIS_WAVE_CHANNEL_CONTROL);
 
 	/* Force PCI writes to post. */
-	readl(ctrl_base);
+	pete_readl("sound/pci/sis7019.c:562", ctrl_base);
 
 	return 0;
 }
@@ -639,7 +639,7 @@ static snd_pcm_uframes_t sis_pcm_pointer(struct snd_pcm_substream *substream)
 	struct voice *voice = runtime->private_data;
 	u32 cso;
 
-	cso = readl(voice->ctrl_base + SIS_PLAY_DMA_FORMAT_CSO);
+	cso = pete_readl("sound/pci/sis7019.c:642", voice->ctrl_base + SIS_PLAY_DMA_FORMAT_CSO);
 	cso &= 0xffff;
 	return cso;
 }
@@ -781,17 +781,17 @@ static void sis_prepare_timing_voice(struct voice *voice,
 
 	/* We've done the math, now configure the channel.
 	 */
-	writel(format, play_base + SIS_PLAY_DMA_FORMAT_CSO);
-	writel(sis->silence_dma_addr, play_base + SIS_PLAY_DMA_BASE);
-	writel(control, play_base + SIS_PLAY_DMA_CONTROL);
-	writel(sso_eso, play_base + SIS_PLAY_DMA_SSO_ESO);
+	pete_writel("sound/pci/sis7019.c:784", format, play_base + SIS_PLAY_DMA_FORMAT_CSO);
+	pete_writel("sound/pci/sis7019.c:785", sis->silence_dma_addr, play_base + SIS_PLAY_DMA_BASE);
+	pete_writel("sound/pci/sis7019.c:786", control, play_base + SIS_PLAY_DMA_CONTROL);
+	pete_writel("sound/pci/sis7019.c:787", sso_eso, play_base + SIS_PLAY_DMA_SSO_ESO);
 
 	for (reg = 0; reg < SIS_WAVE_SIZE; reg += 4)
-		writel(0, wave_base + reg);
+		pete_writel("sound/pci/sis7019.c:790", 0, wave_base + reg);
 
-	writel(SIS_WAVE_GENERAL_WAVE_VOLUME, wave_base + SIS_WAVE_GENERAL);
-	writel(delta << 16, wave_base + SIS_WAVE_GENERAL_ARTICULATION);
-	writel(SIS_WAVE_CHANNEL_CONTROL_FIRST_SAMPLE |
+	pete_writel("sound/pci/sis7019.c:792", SIS_WAVE_GENERAL_WAVE_VOLUME, wave_base + SIS_WAVE_GENERAL);
+	pete_writel("sound/pci/sis7019.c:793", delta << 16, wave_base + SIS_WAVE_GENERAL_ARTICULATION);
+	pete_writel("sound/pci/sis7019.c:794", SIS_WAVE_CHANNEL_CONTROL_FIRST_SAMPLE |
 			SIS_WAVE_CHANNEL_CONTROL_AMP_ENABLE |
 			SIS_WAVE_CHANNEL_CONTROL_INTERPOLATE_ENABLE,
 			wave_base + SIS_WAVE_CHANNEL_CONTROL);
@@ -832,12 +832,12 @@ static int sis_pcm_capture_prepare(struct snd_pcm_substream *substream)
 			control |= SIS_CAPTURE_DMA_INTR_AT_MLP;
 	}
 
-	writel(format, rec_base + SIS_CAPTURE_DMA_FORMAT_CSO);
-	writel(dma_addr, rec_base + SIS_CAPTURE_DMA_BASE);
-	writel(control, rec_base + SIS_CAPTURE_DMA_CONTROL);
+	pete_writel("sound/pci/sis7019.c:835", format, rec_base + SIS_CAPTURE_DMA_FORMAT_CSO);
+	pete_writel("sound/pci/sis7019.c:836", dma_addr, rec_base + SIS_CAPTURE_DMA_BASE);
+	pete_writel("sound/pci/sis7019.c:837", control, rec_base + SIS_CAPTURE_DMA_CONTROL);
 
 	/* Force the writes to post. */
-	readl(rec_base);
+	pete_readl("sound/pci/sis7019.c:840", rec_base);
 
 	return 0;
 }
@@ -1127,8 +1127,8 @@ static int sis_chip_init(struct sis7019 *sis)
 	outl(0, io + SIS_MIXER_SYNC_GROUP);
 
 	for (i = 0; i < 64; i++) {
-		writel(i, SIS_MIXER_START_ADDR(ioaddr, i));
-		writel(SIS_MIXER_RIGHT_NO_ATTEN | SIS_MIXER_LEFT_NO_ATTEN |
+		pete_writel("sound/pci/sis7019.c:1130", i, SIS_MIXER_START_ADDR(ioaddr, i));
+		pete_writel("sound/pci/sis7019.c:1131", SIS_MIXER_RIGHT_NO_ATTEN | SIS_MIXER_LEFT_NO_ATTEN |
 				SIS_MIXER_DEST_0, SIS_MIXER_ADDR(ioaddr, i));
 	}
 

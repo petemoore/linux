@@ -90,7 +90,7 @@ int xhci_ext_cap_init(struct xhci_hcd *xhci)
 	offset = xhci_find_next_ext_cap(base, 0, 0);
 
 	while (offset) {
-		val = readl(base + offset);
+		val = pete_readl("drivers/usb/host/xhci-ext-caps.c:93", base + offset);
 
 		switch (XHCI_EXT_CAPS_ID(val)) {
 		case XHCI_EXT_CAPS_VENDOR_INTEL:

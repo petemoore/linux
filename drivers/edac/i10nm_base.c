@@ -31,23 +31,23 @@
 #define I10NM_GET_CAPID3_CFG(d, reg)	\
 	pci_read_config_dword((d)->pcu_cr3, 0x90, &(reg))
 #define I10NM_GET_DIMMMTR(m, i, j)	\
-	readl((m)->mbase + ((m)->hbm_mc ? 0x80c : 0x2080c) + \
+	pete_readl("drivers/edac/i10nm_base.c:34", (m)->mbase + ((m)->hbm_mc ? 0x80c : 0x2080c) + \
 	(i) * (m)->chan_mmio_sz + (j) * 4)
 #define I10NM_GET_MCDDRTCFG(m, i)	\
-	readl((m)->mbase + ((m)->hbm_mc ? 0x970 : 0x20970) + \
+	pete_readl("drivers/edac/i10nm_base.c:37", (m)->mbase + ((m)->hbm_mc ? 0x970 : 0x20970) + \
 	(i) * (m)->chan_mmio_sz)
 #define I10NM_GET_MCMTR(m, i)		\
-	readl((m)->mbase + ((m)->hbm_mc ? 0xef8 : 0x20ef8) + \
+	pete_readl("drivers/edac/i10nm_base.c:40", (m)->mbase + ((m)->hbm_mc ? 0xef8 : 0x20ef8) + \
 	(i) * (m)->chan_mmio_sz)
 #define I10NM_GET_AMAP(m, i)		\
-	readl((m)->mbase + ((m)->hbm_mc ? 0x814 : 0x20814) + \
+	pete_readl("drivers/edac/i10nm_base.c:43", (m)->mbase + ((m)->hbm_mc ? 0x814 : 0x20814) + \
 	(i) * (m)->chan_mmio_sz)
 #define I10NM_GET_REG32(m, i, offset)	\
-	readl((m)->mbase + (i) * (m)->chan_mmio_sz + (offset))
+	pete_readl("drivers/edac/i10nm_base.c:46", (m)->mbase + (i) * (m)->chan_mmio_sz + (offset))
 #define I10NM_GET_REG64(m, i, offset)	\
-	readq((m)->mbase + (i) * (m)->chan_mmio_sz + (offset))
+	pete_readq("drivers/edac/i10nm_base.c:48", (m)->mbase + (i) * (m)->chan_mmio_sz + (offset))
 #define I10NM_SET_REG32(m, i, offset, v)	\
-	writel(v, (m)->mbase + (i) * (m)->chan_mmio_sz + (offset))
+	pete_writel("drivers/edac/i10nm_base.c:50", v, (m)->mbase + (i) * (m)->chan_mmio_sz + (offset))
 
 #define I10NM_GET_SCK_MMIO_BASE(reg)	(GET_BITFIELD(reg, 0, 28) << 23)
 #define I10NM_GET_IMC_MMIO_OFFSET(reg)	(GET_BITFIELD(reg, 0, 10) << 12)

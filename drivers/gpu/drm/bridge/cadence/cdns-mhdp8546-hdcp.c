@@ -27,7 +27,7 @@ static int cdns_mhdp_secure_mailbox_read(struct cdns_mhdp_device *mhdp)
 	if (ret < 0)
 		return ret;
 
-	return readl(mhdp->sapb_regs + CDNS_MAILBOX_RX_DATA) & 0xff;
+	return pete_readl("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-hdcp.c:30", mhdp->sapb_regs + CDNS_MAILBOX_RX_DATA) & 0xff;
 }
 
 static int cdns_mhdp_secure_mailbox_write(struct cdns_mhdp_device *mhdp,
@@ -43,7 +43,7 @@ static int cdns_mhdp_secure_mailbox_write(struct cdns_mhdp_device *mhdp,
 	if (ret < 0)
 		return ret;
 
-	writel(val, mhdp->sapb_regs + CDNS_MAILBOX_TX_DATA);
+	pete_writel("drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-hdcp.c:46", val, mhdp->sapb_regs + CDNS_MAILBOX_TX_DATA);
 
 	return 0;
 }

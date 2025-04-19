@@ -63,13 +63,13 @@ static const struct rockchip_gpio_regs gpio_regs_v2 = {
 
 static inline void gpio_writel_v2(u32 val, void __iomem *reg)
 {
-	writel((val & 0xffff) | 0xffff0000, reg);
-	writel((val >> 16) | 0xffff0000, reg + 0x4);
+	pete_writel("drivers/gpio/gpio-rockchip.c:66", (val & 0xffff) | 0xffff0000, reg);
+	pete_writel("drivers/gpio/gpio-rockchip.c:67", (val >> 16) | 0xffff0000, reg + 0x4);
 }
 
 static inline u32 gpio_readl_v2(void __iomem *reg)
 {
-	return readl(reg + 0x4) << 16 | readl(reg);
+	return pete_readl("drivers/gpio/gpio-rockchip.c:72", reg + 0x4) << 16 | pete_readl("drivers/gpio/gpio-rockchip.c:72", reg);
 }
 
 static inline void rockchip_gpio_writel(struct rockchip_pin_bank *bank,
@@ -80,7 +80,7 @@ static inline void rockchip_gpio_writel(struct rockchip_pin_bank *bank,
 	if (bank->gpio_type == GPIO_TYPE_V2)
 		gpio_writel_v2(value, reg);
 	else
-		writel(value, reg);
+		pete_writel("drivers/gpio/gpio-rockchip.c:83", value, reg);
 }
 
 static inline u32 rockchip_gpio_readl(struct rockchip_pin_bank *bank,
@@ -92,7 +92,7 @@ static inline u32 rockchip_gpio_readl(struct rockchip_pin_bank *bank,
 	if (bank->gpio_type == GPIO_TYPE_V2)
 		value = gpio_readl_v2(reg);
 	else
-		value = readl(reg);
+		value = pete_readl("drivers/gpio/gpio-rockchip.c:95", reg);
 
 	return value;
 }
@@ -109,13 +109,13 @@ static inline void rockchip_gpio_writel_bit(struct rockchip_pin_bank *bank,
 			data = BIT(bit % 16) | BIT(bit % 16 + 16);
 		else
 			data = BIT(bit % 16 + 16);
-		writel(data, bit >= 16 ? reg + 0x4 : reg);
+		pete_writel("drivers/gpio/gpio-rockchip.c:112", data, bit >= 16 ? reg + 0x4 : reg);
 	} else {
-		data = readl(reg);
+		data = pete_readl("drivers/gpio/gpio-rockchip.c:114", reg);
 		data &= ~BIT(bit);
 		if (value)
 			data |= BIT(bit);
-		writel(data, reg);
+		pete_writel("drivers/gpio/gpio-rockchip.c:118", data, reg);
 	}
 }
 
@@ -126,10 +126,10 @@ static inline u32 rockchip_gpio_readl_bit(struct rockchip_pin_bank *bank,
 	u32 data;
 
 	if (bank->gpio_type == GPIO_TYPE_V2) {
-		data = readl(bit >= 16 ? reg + 0x4 : reg);
+		data = pete_readl("drivers/gpio/gpio-rockchip.c:129", bit >= 16 ? reg + 0x4 : reg);
 		data >>= bit % 16;
 	} else {
-		data = readl(reg);
+		data = pete_readl("drivers/gpio/gpio-rockchip.c:132", reg);
 		data >>= bit;
 	}
 
@@ -185,7 +185,7 @@ static int rockchip_gpio_get(struct gpio_chip *gc, unsigned int offset)
 	struct rockchip_pin_bank *bank = gpiochip_get_data(gc);
 	u32 data;
 
-	data = readl(bank->reg_base + bank->gpio_regs->ext_port);
+	data = pete_readl("drivers/gpio/gpio-rockchip.c:188", bank->reg_base + bank->gpio_regs->ext_port);
 	data >>= offset;
 	data &= 1;
 
@@ -222,10 +222,10 @@ static int rockchip_gpio_set_debounce(struct gpio_chip *gc,
 	if (debounce) {
 		if (div_debounce_support) {
 			/* Configure the max debounce from consumers */
-			cur_div_reg = readl(bank->reg_base +
+			cur_div_reg = pete_readl("drivers/gpio/gpio-rockchip.c:225", bank->reg_base +
 					    reg->dbclk_div_con);
 			if (cur_div_reg < div_reg)
-				writel(div_reg, bank->reg_base +
+				pete_writel("drivers/gpio/gpio-rockchip.c:228", div_reg, bank->reg_base +
 				       reg->dbclk_div_con);
 			rockchip_gpio_writel_bit(bank, offset, 1,
 						 reg->dbclk_div_en);
@@ -372,7 +372,7 @@ static void rockchip_irq_demux(struct irq_desc *desc)
 					polarity &= ~BIT(irq);
 				else
 					polarity |= BIT(irq);
-				writel(polarity,
+				pete_writel("drivers/gpio/gpio-rockchip.c:375", polarity,
 				       bank->reg_base +
 				       bank->gpio_regs->int_polarity);
 
@@ -431,7 +431,7 @@ static int rockchip_irq_set_type(struct irq_data *d, unsigned int type)
 			 * Determine gpio state. If 1 next interrupt should be
 			 * low otherwise high.
 			 */
-			data = readl(bank->reg_base + bank->gpio_regs->ext_port);
+			data = pete_readl("drivers/gpio/gpio-rockchip.c:434", bank->reg_base + bank->gpio_regs->ext_port);
 			if (data & mask)
 				polarity &= ~mask;
 			else
@@ -654,7 +654,7 @@ static int rockchip_get_bank_data(struct rockchip_pin_bank *bank)
 		return PTR_ERR(bank->clk);
 
 	clk_prepare_enable(bank->clk);
-	id = readl(bank->reg_base + gpio_regs_v2.version_id);
+	id = pete_readl("drivers/gpio/gpio-rockchip.c:657", bank->reg_base + gpio_regs_v2.version_id);
 
 	/* If not gpio v2, that is default to v1. */
 	if (id == GPIO_TYPE_V2) {

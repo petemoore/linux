@@ -987,7 +987,7 @@ static void oxnas_gpio_irq_ack(struct irq_data *data)
 	struct oxnas_gpio_bank *bank = gpiochip_get_data(chip);
 	u32 mask = BIT(data->hwirq);
 
-	writel(mask, bank->reg_base + IRQ_PENDING);
+	pete_writel("drivers/pinctrl/pinctrl-oxnas.c:990", mask, bank->reg_base + IRQ_PENDING);
 }
 
 static void oxnas_gpio_irq_mask(struct irq_data *data)
@@ -998,11 +998,11 @@ static void oxnas_gpio_irq_mask(struct irq_data *data)
 	u32 mask = BIT(data->hwirq);
 
 	if (type & IRQ_TYPE_EDGE_RISING)
-		writel(readl(bank->reg_base + RE_IRQ_ENABLE) & ~mask,
+		pete_writel("drivers/pinctrl/pinctrl-oxnas.c:1001", pete_readl("drivers/pinctrl/pinctrl-oxnas.c:1001", bank->reg_base + RE_IRQ_ENABLE) & ~mask,
 		       bank->reg_base + RE_IRQ_ENABLE);
 
 	if (type & IRQ_TYPE_EDGE_FALLING)
-		writel(readl(bank->reg_base + FE_IRQ_ENABLE) & ~mask,
+		pete_writel("drivers/pinctrl/pinctrl-oxnas.c:1005", pete_readl("drivers/pinctrl/pinctrl-oxnas.c:1005", bank->reg_base + FE_IRQ_ENABLE) & ~mask,
 		       bank->reg_base + FE_IRQ_ENABLE);
 }
 
@@ -1014,11 +1014,11 @@ static void oxnas_gpio_irq_unmask(struct irq_data *data)
 	u32 mask = BIT(data->hwirq);
 
 	if (type & IRQ_TYPE_EDGE_RISING)
-		writel(readl(bank->reg_base + RE_IRQ_ENABLE) | mask,
+		pete_writel("drivers/pinctrl/pinctrl-oxnas.c:1017", pete_readl("drivers/pinctrl/pinctrl-oxnas.c:1017", bank->reg_base + RE_IRQ_ENABLE) | mask,
 		       bank->reg_base + RE_IRQ_ENABLE);
 
 	if (type & IRQ_TYPE_EDGE_FALLING)
-		writel(readl(bank->reg_base + FE_IRQ_ENABLE) | mask,
+		pete_writel("drivers/pinctrl/pinctrl-oxnas.c:1021", pete_readl("drivers/pinctrl/pinctrl-oxnas.c:1021", bank->reg_base + FE_IRQ_ENABLE) | mask,
 		       bank->reg_base + FE_IRQ_ENABLE);
 }
 
@@ -1052,7 +1052,7 @@ static void oxnas_gpio_irq_handler(struct irq_desc *desc)
 
 	chained_irq_enter(chip, desc);
 
-	stat = readl(bank->reg_base + IRQ_PENDING);
+	stat = pete_readl("drivers/pinctrl/pinctrl-oxnas.c:1055", bank->reg_base + IRQ_PENDING);
 
 	for_each_set_bit(pin, &stat, BITS_PER_LONG)
 		generic_handle_domain_irq(gc->irq.domain, pin);

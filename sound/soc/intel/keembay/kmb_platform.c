@@ -111,11 +111,11 @@ static unsigned int kmb_pcm_tx_fn(struct kmb_i2s_info *kmb_i2s,
 	/* KMB i2s uses two separate L/R FIFO */
 	for (i = 0; i < kmb_i2s->fifo_th; i++) {
 		if (kmb_i2s->config.data_width == 16) {
-			writel(((u16(*)[2])buf)[tx_ptr][0], i2s_base + LRBR_LTHR(0));
-			writel(((u16(*)[2])buf)[tx_ptr][1], i2s_base + RRBR_RTHR(0));
+			pete_writel("sound/soc/intel/keembay/kmb_platform.c:114", ((u16(*)[2])buf)[tx_ptr][0], i2s_base + LRBR_LTHR(0));
+			pete_writel("sound/soc/intel/keembay/kmb_platform.c:115", ((u16(*)[2])buf)[tx_ptr][1], i2s_base + RRBR_RTHR(0));
 		} else {
-			writel(((u32(*)[2])buf)[tx_ptr][0], i2s_base + LRBR_LTHR(0));
-			writel(((u32(*)[2])buf)[tx_ptr][1], i2s_base + RRBR_RTHR(0));
+			pete_writel("sound/soc/intel/keembay/kmb_platform.c:117", ((u32(*)[2])buf)[tx_ptr][0], i2s_base + LRBR_LTHR(0));
+			pete_writel("sound/soc/intel/keembay/kmb_platform.c:118", ((u32(*)[2])buf)[tx_ptr][1], i2s_base + RRBR_RTHR(0));
 		}
 
 		period_pos++;
@@ -144,14 +144,14 @@ static unsigned int kmb_pcm_rx_fn(struct kmb_i2s_info *kmb_i2s,
 		for (j = 0; j < chan / 2; j++) {
 			if (kmb_i2s->config.data_width == 16) {
 				((u16 *)buf)[rx_ptr * chan + (j * 2)] =
-						readl(i2s_base + LRBR_LTHR(j));
+						pete_readl("sound/soc/intel/keembay/kmb_platform.c:147", i2s_base + LRBR_LTHR(j));
 				((u16 *)buf)[rx_ptr * chan + ((j * 2) + 1)] =
-						readl(i2s_base + RRBR_RTHR(j));
+						pete_readl("sound/soc/intel/keembay/kmb_platform.c:149", i2s_base + RRBR_RTHR(j));
 			} else {
 				((u32 *)buf)[rx_ptr * chan + (j * 2)] =
-						readl(i2s_base + LRBR_LTHR(j));
+						pete_readl("sound/soc/intel/keembay/kmb_platform.c:152", i2s_base + LRBR_LTHR(j));
 				((u32 *)buf)[rx_ptr * chan + ((j * 2) + 1)] =
-						readl(i2s_base + RRBR_RTHR(j));
+						pete_readl("sound/soc/intel/keembay/kmb_platform.c:154", i2s_base + RRBR_RTHR(j));
 			}
 		}
 		period_pos++;
@@ -173,10 +173,10 @@ static inline void kmb_i2s_disable_channels(struct kmb_i2s_info *kmb_i2s,
 	/* Disable all channels regardless of configuration*/
 	if (stream == SNDRV_PCM_STREAM_PLAYBACK) {
 		for (i = 0; i < MAX_ISR; i++)
-			writel(0, kmb_i2s->i2s_base + TER(i));
+			pete_writel("sound/soc/intel/keembay/kmb_platform.c:176", 0, kmb_i2s->i2s_base + TER(i));
 	} else {
 		for (i = 0; i < MAX_ISR; i++)
-			writel(0, kmb_i2s->i2s_base + RER(i));
+			pete_writel("sound/soc/intel/keembay/kmb_platform.c:179", 0, kmb_i2s->i2s_base + RER(i));
 	}
 }
 
@@ -187,10 +187,10 @@ static inline void kmb_i2s_clear_irqs(struct kmb_i2s_info *kmb_i2s, u32 stream)
 
 	if (stream == SNDRV_PCM_STREAM_PLAYBACK) {
 		for (i = 0; i < config->chan_nr / 2; i++)
-			readl(kmb_i2s->i2s_base + TOR(i));
+			pete_readl("sound/soc/intel/keembay/kmb_platform.c:190", kmb_i2s->i2s_base + TOR(i));
 	} else {
 		for (i = 0; i < config->chan_nr / 2; i++)
-			readl(kmb_i2s->i2s_base + ROR(i));
+			pete_readl("sound/soc/intel/keembay/kmb_platform.c:193", kmb_i2s->i2s_base + ROR(i));
 	}
 }
 
@@ -206,14 +206,14 @@ static inline void kmb_i2s_irq_trigger(struct kmb_i2s_info *kmb_i2s,
 		flag = RX_INT_FLAG;
 
 	for (i = 0; i < chan_nr / 2; i++) {
-		irq = readl(kmb_i2s->i2s_base + IMR(i));
+		irq = pete_readl("sound/soc/intel/keembay/kmb_platform.c:209", kmb_i2s->i2s_base + IMR(i));
 
 		if (trigger)
 			irq = irq & ~flag;
 		else
 			irq = irq | flag;
 
-		writel(irq, kmb_i2s->i2s_base + IMR(i));
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:216", irq, kmb_i2s->i2s_base + IMR(i));
 	}
 }
 
@@ -303,12 +303,12 @@ static irqreturn_t kmb_i2s_irq_handler(int irq, void *dev_id)
 	int i;
 
 	for (i = 0; i < config->chan_nr / 2; i++)
-		isr[i] = readl(kmb_i2s->i2s_base + ISR(i));
+		isr[i] = pete_readl("sound/soc/intel/keembay/kmb_platform.c:306", kmb_i2s->i2s_base + ISR(i));
 
 	kmb_i2s_clear_irqs(kmb_i2s, SNDRV_PCM_STREAM_PLAYBACK);
 	kmb_i2s_clear_irqs(kmb_i2s, SNDRV_PCM_STREAM_CAPTURE);
 	/* Only check TX interrupt if TX is active */
-	tx_enabled = readl(kmb_i2s->i2s_base + ITER);
+	tx_enabled = pete_readl("sound/soc/intel/keembay/kmb_platform.c:311", kmb_i2s->i2s_base + ITER);
 
 	/*
 	 * Data available. Retrieve samples from FIFO
@@ -416,30 +416,30 @@ static inline void kmb_i2s_enable_dma(struct kmb_i2s_info *kmb_i2s, u32 stream)
 {
 	u32 dma_reg;
 
-	dma_reg = readl(kmb_i2s->i2s_base + I2S_DMACR);
+	dma_reg = pete_readl("sound/soc/intel/keembay/kmb_platform.c:419", kmb_i2s->i2s_base + I2S_DMACR);
 	/* Enable DMA handshake for stream */
 	if (stream == SNDRV_PCM_STREAM_PLAYBACK)
 		dma_reg |= I2S_DMAEN_TXBLOCK;
 	else
 		dma_reg |= I2S_DMAEN_RXBLOCK;
 
-	writel(dma_reg, kmb_i2s->i2s_base + I2S_DMACR);
+	pete_writel("sound/soc/intel/keembay/kmb_platform.c:426", dma_reg, kmb_i2s->i2s_base + I2S_DMACR);
 }
 
 static inline void kmb_i2s_disable_dma(struct kmb_i2s_info *kmb_i2s, u32 stream)
 {
 	u32 dma_reg;
 
-	dma_reg = readl(kmb_i2s->i2s_base + I2S_DMACR);
+	dma_reg = pete_readl("sound/soc/intel/keembay/kmb_platform.c:433", kmb_i2s->i2s_base + I2S_DMACR);
 	/* Disable DMA handshake for stream */
 	if (stream == SNDRV_PCM_STREAM_PLAYBACK) {
 		dma_reg &= ~I2S_DMAEN_TXBLOCK;
-		writel(1, kmb_i2s->i2s_base + I2S_RTXDMA);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:437", 1, kmb_i2s->i2s_base + I2S_RTXDMA);
 	} else {
 		dma_reg &= ~I2S_DMAEN_RXBLOCK;
-		writel(1, kmb_i2s->i2s_base + I2S_RRXDMA);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:440", 1, kmb_i2s->i2s_base + I2S_RRXDMA);
 	}
-	writel(dma_reg, kmb_i2s->i2s_base + I2S_DMACR);
+	pete_writel("sound/soc/intel/keembay/kmb_platform.c:442", dma_reg, kmb_i2s->i2s_base + I2S_DMACR);
 }
 
 static void kmb_i2s_start(struct kmb_i2s_info *kmb_i2s,
@@ -448,12 +448,12 @@ static void kmb_i2s_start(struct kmb_i2s_info *kmb_i2s,
 	struct i2s_clk_config_data *config = &kmb_i2s->config;
 
 	/* I2S Programming sequence in Keem_Bay_VPU_DB_v1.1 */
-	writel(1, kmb_i2s->i2s_base + IER);
+	pete_writel("sound/soc/intel/keembay/kmb_platform.c:451", 1, kmb_i2s->i2s_base + IER);
 
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
-		writel(1, kmb_i2s->i2s_base + ITER);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:454", 1, kmb_i2s->i2s_base + ITER);
 	else
-		writel(1, kmb_i2s->i2s_base + IRER);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:456", 1, kmb_i2s->i2s_base + IRER);
 
 	if (kmb_i2s->use_pio)
 		kmb_i2s_irq_trigger(kmb_i2s, substream->stream,
@@ -462,9 +462,9 @@ static void kmb_i2s_start(struct kmb_i2s_info *kmb_i2s,
 		kmb_i2s_enable_dma(kmb_i2s, substream->stream);
 
 	if (kmb_i2s->clock_provider)
-		writel(1, kmb_i2s->i2s_base + CER);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:465", 1, kmb_i2s->i2s_base + CER);
 	else
-		writel(0, kmb_i2s->i2s_base + CER);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:467", 0, kmb_i2s->i2s_base + CER);
 }
 
 static void kmb_i2s_stop(struct kmb_i2s_info *kmb_i2s,
@@ -474,15 +474,15 @@ static void kmb_i2s_stop(struct kmb_i2s_info *kmb_i2s,
 	kmb_i2s_clear_irqs(kmb_i2s, substream->stream);
 
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
-		writel(0, kmb_i2s->i2s_base + ITER);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:477", 0, kmb_i2s->i2s_base + ITER);
 	else
-		writel(0, kmb_i2s->i2s_base + IRER);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:479", 0, kmb_i2s->i2s_base + IRER);
 
 	kmb_i2s_irq_trigger(kmb_i2s, substream->stream, 8, false);
 
 	if (!kmb_i2s->active) {
-		writel(0, kmb_i2s->i2s_base + CER);
-		writel(0, kmb_i2s->i2s_base + IER);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:484", 0, kmb_i2s->i2s_base + CER);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:485", 0, kmb_i2s->i2s_base + IER);
 	}
 }
 
@@ -502,7 +502,7 @@ static int kmb_set_dai_fmt(struct snd_soc_dai *cpu_dai, unsigned int fmt)
 		ret = 0;
 		break;
 	case SND_SOC_DAIFMT_CBC_CFC:
-		writel(CLOCK_PROVIDER_MODE, kmb_i2s->pss_base + I2S_GEN_CFG_0);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:505", CLOCK_PROVIDER_MODE, kmb_i2s->pss_base + I2S_GEN_CFG_0);
 
 		ret = clk_prepare_enable(kmb_i2s->clk_i2s);
 		if (ret < 0)
@@ -556,21 +556,21 @@ static void kmb_i2s_config(struct kmb_i2s_info *kmb_i2s, int stream)
 
 	for (ch_reg = 0; ch_reg < config->chan_nr / 2; ch_reg++) {
 		if (stream == SNDRV_PCM_STREAM_PLAYBACK) {
-			writel(kmb_i2s->xfer_resolution,
+			pete_writel("sound/soc/intel/keembay/kmb_platform.c:559", kmb_i2s->xfer_resolution,
 			       kmb_i2s->i2s_base + TCR(ch_reg));
 
-			writel(kmb_i2s->fifo_th - 1,
+			pete_writel("sound/soc/intel/keembay/kmb_platform.c:562", kmb_i2s->fifo_th - 1,
 			       kmb_i2s->i2s_base + TFCR(ch_reg));
 
-			writel(1, kmb_i2s->i2s_base + TER(ch_reg));
+			pete_writel("sound/soc/intel/keembay/kmb_platform.c:565", 1, kmb_i2s->i2s_base + TER(ch_reg));
 		} else {
-			writel(kmb_i2s->xfer_resolution,
+			pete_writel("sound/soc/intel/keembay/kmb_platform.c:567", kmb_i2s->xfer_resolution,
 			       kmb_i2s->i2s_base + RCR(ch_reg));
 
-			writel(kmb_i2s->fifo_th - 1,
+			pete_writel("sound/soc/intel/keembay/kmb_platform.c:570", kmb_i2s->fifo_th - 1,
 			       kmb_i2s->i2s_base + RFCR(ch_reg));
 
-			writel(1, kmb_i2s->i2s_base + RER(ch_reg));
+			pete_writel("sound/soc/intel/keembay/kmb_platform.c:573", 1, kmb_i2s->i2s_base + RER(ch_reg));
 		}
 	}
 }
@@ -630,7 +630,7 @@ static int kmb_dai_hw_params(struct snd_pcm_substream *substream,
 				(config->data_width << DATA_WIDTH_CONFIG_BIT) |
 				TDM_OPERATION;
 
-		writel(write_val, kmb_i2s->pss_base + I2S_GEN_CFG_0);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:633", write_val, kmb_i2s->pss_base + I2S_GEN_CFG_0);
 		break;
 	case 2:
 		/*
@@ -644,7 +644,7 @@ static int kmb_dai_hw_params(struct snd_pcm_substream *substream,
 				(config->data_width << DATA_WIDTH_CONFIG_BIT) |
 				CLOCK_PROVIDER_MODE | I2S_OPERATION;
 
-		writel(write_val, kmb_i2s->pss_base + I2S_GEN_CFG_0);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:647", write_val, kmb_i2s->pss_base + I2S_GEN_CFG_0);
 		break;
 	default:
 		dev_dbg(kmb_i2s->dev, "channel not supported\n");
@@ -653,7 +653,7 @@ static int kmb_dai_hw_params(struct snd_pcm_substream *substream,
 
 	kmb_i2s_config(kmb_i2s, substream->stream);
 
-	writel(kmb_i2s->ccr, kmb_i2s->i2s_base + CCR);
+	pete_writel("sound/soc/intel/keembay/kmb_platform.c:656", kmb_i2s->ccr, kmb_i2s->i2s_base + CCR);
 
 	config->sample_rate = params_rate(hw_params);
 
@@ -678,9 +678,9 @@ static int kmb_dai_prepare(struct snd_pcm_substream *substream,
 	struct kmb_i2s_info *kmb_i2s = snd_soc_dai_get_drvdata(cpu_dai);
 
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
-		writel(1, kmb_i2s->i2s_base + TXFFR);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:681", 1, kmb_i2s->i2s_base + TXFFR);
 	else
-		writel(1, kmb_i2s->i2s_base + RXFFR);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:683", 1, kmb_i2s->i2s_base + RXFFR);
 
 	return 0;
 }
@@ -713,9 +713,9 @@ static int kmb_dai_hw_free(struct snd_pcm_substream *substream,
 		kmb_i2s_clear_irqs(kmb_i2s, substream->stream);
 
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
-		writel(0, kmb_i2s->i2s_base + ITER);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:716", 0, kmb_i2s->i2s_base + ITER);
 	else
-		writel(0, kmb_i2s->i2s_base + IRER);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:718", 0, kmb_i2s->i2s_base + IRER);
 
 	if (kmb_i2s->use_pio)
 		kmb_i2s_irq_trigger(kmb_i2s, substream->stream, 8, false);
@@ -723,8 +723,8 @@ static int kmb_dai_hw_free(struct snd_pcm_substream *substream,
 		kmb_i2s_disable_dma(kmb_i2s, substream->stream);
 
 	if (!kmb_i2s->active) {
-		writel(0, kmb_i2s->i2s_base + CER);
-		writel(0, kmb_i2s->i2s_base + IER);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:726", 0, kmb_i2s->i2s_base + CER);
+		pete_writel("sound/soc/intel/keembay/kmb_platform.c:727", 0, kmb_i2s->i2s_base + IER);
 	}
 
 	return 0;
@@ -875,7 +875,7 @@ static int kmb_plat_dai_probe(struct platform_device *pdev)
 
 	kmb_i2s->dev = &pdev->dev;
 
-	comp1_reg = readl(kmb_i2s->i2s_base + I2S_COMP_PARAM_1);
+	comp1_reg = pete_readl("sound/soc/intel/keembay/kmb_platform.c:878", kmb_i2s->i2s_base + I2S_COMP_PARAM_1);
 
 	kmb_i2s->fifo_th = (1 << COMP1_FIFO_DEPTH(comp1_reg)) / 2;
 

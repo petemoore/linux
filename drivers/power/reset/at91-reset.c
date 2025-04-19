@@ -106,7 +106,7 @@ static void __init at91_reset_status(struct platform_device *pdev,
 				     void __iomem *base)
 {
 	const char *reason;
-	u32 reg = readl(base + AT91_RSTC_SR);
+	u32 reg = pete_readl("drivers/power/reset/at91-reset.c:109", base + AT91_RSTC_SR);
 
 	switch ((reg & AT91_RSTC_RSTTYP) >> 8) {
 	case RESET_TYPE_GENERAL:
@@ -230,9 +230,9 @@ static int __init at91_reset_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, reset);
 
 	if (of_device_is_compatible(pdev->dev.of_node, "microchip,sam9x60-rstc")) {
-		u32 val = readl(reset->rstc_base + AT91_RSTC_MR);
+		u32 val = pete_readl("drivers/power/reset/at91-reset.c:233", reset->rstc_base + AT91_RSTC_MR);
 
-		writel(AT91_RSTC_KEY | AT91_RSTC_URSTASYNC | val,
+		pete_writel("drivers/power/reset/at91-reset.c:235", AT91_RSTC_KEY | AT91_RSTC_URSTASYNC | val,
 		       reset->rstc_base + AT91_RSTC_MR);
 	}
 

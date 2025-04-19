@@ -58,13 +58,13 @@ static struct pistachio_clocksource pcs_gpt;
 
 static inline u32 gpt_readl(void __iomem *base, u32 offset, u32 gpt_id)
 {
-	return readl(base + 0x20 * gpt_id + offset);
+	return pete_readl("drivers/clocksource/timer-pistachio.c:61", base + 0x20 * gpt_id + offset);
 }
 
 static inline void gpt_writel(void __iomem *base, u32 value, u32 offset,
 		u32 gpt_id)
 {
-	writel(value, base + 0x20 * gpt_id + offset);
+	pete_writel("drivers/clocksource/timer-pistachio.c:67", value, base + 0x20 * gpt_id + offset);
 }
 
 static u64 notrace
@@ -208,7 +208,7 @@ static int __init pistachio_clksrc_of_init(struct device_node *node)
 	gpt_writel(pcs_gpt.base, 0, TIMER_IRQ_MASK, 3);
 
 	/* Enable timer block */
-	writel(TIMER_ME_GLOBAL, pcs_gpt.base);
+	pete_writel("drivers/clocksource/timer-pistachio.c:211", TIMER_ME_GLOBAL, pcs_gpt.base);
 
 	raw_spin_lock_init(&pcs_gpt.lock);
 	sched_clock_register(pistachio_read_sched_clock, 32, rate);

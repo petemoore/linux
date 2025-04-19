@@ -18,7 +18,7 @@
 
 static void dwmac1000_dma_axi(void __iomem *ioaddr, struct stmmac_axi *axi)
 {
-	u32 value = readl(ioaddr + DMA_AXI_BUS_MODE);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac1000_dma.c:21", ioaddr + DMA_AXI_BUS_MODE);
 	int i;
 
 	pr_info("dwmac1000: Master AXI performs %s burst length\n",
@@ -67,13 +67,13 @@ static void dwmac1000_dma_axi(void __iomem *ioaddr, struct stmmac_axi *axi)
 		}
 	}
 
-	writel(value, ioaddr + DMA_AXI_BUS_MODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac1000_dma.c:70", value, ioaddr + DMA_AXI_BUS_MODE);
 }
 
 static void dwmac1000_dma_init(void __iomem *ioaddr,
 			       struct stmmac_dma_cfg *dma_cfg, int atds)
 {
-	u32 value = readl(ioaddr + DMA_BUS_MODE);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac1000_dma.c:76", ioaddr + DMA_BUS_MODE);
 	int txpbl = dma_cfg->txpbl ?: dma_cfg->pbl;
 	int rxpbl = dma_cfg->rxpbl ?: dma_cfg->pbl;
 
@@ -104,10 +104,10 @@ static void dwmac1000_dma_init(void __iomem *ioaddr,
 	if (dma_cfg->aal)
 		value |= DMA_BUS_MODE_AAL;
 
-	writel(value, ioaddr + DMA_BUS_MODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac1000_dma.c:107", value, ioaddr + DMA_BUS_MODE);
 
 	/* Mask interrupts by writing to CSR7 */
-	writel(DMA_INTR_DEFAULT_MASK, ioaddr + DMA_INTR_ENA);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac1000_dma.c:110", DMA_INTR_DEFAULT_MASK, ioaddr + DMA_INTR_ENA);
 }
 
 static void dwmac1000_dma_init_rx(void __iomem *ioaddr,
@@ -115,7 +115,7 @@ static void dwmac1000_dma_init_rx(void __iomem *ioaddr,
 				  dma_addr_t dma_rx_phy, u32 chan)
 {
 	/* RX descriptor base address list must be written into DMA CSR3 */
-	writel(lower_32_bits(dma_rx_phy), ioaddr + DMA_RCV_BASE_ADDR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac1000_dma.c:118", lower_32_bits(dma_rx_phy), ioaddr + DMA_RCV_BASE_ADDR);
 }
 
 static void dwmac1000_dma_init_tx(void __iomem *ioaddr,
@@ -123,7 +123,7 @@ static void dwmac1000_dma_init_tx(void __iomem *ioaddr,
 				  dma_addr_t dma_tx_phy, u32 chan)
 {
 	/* TX descriptor base address list must be written into DMA CSR4 */
-	writel(lower_32_bits(dma_tx_phy), ioaddr + DMA_TX_BASE_ADDR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac1000_dma.c:126", lower_32_bits(dma_tx_phy), ioaddr + DMA_TX_BASE_ADDR);
 }
 
 static u32 dwmac1000_configure_fc(u32 csr6, int rxfifosz)
@@ -150,7 +150,7 @@ static u32 dwmac1000_configure_fc(u32 csr6, int rxfifosz)
 static void dwmac1000_dma_operation_mode_rx(void __iomem *ioaddr, int mode,
 					    u32 channel, int fifosz, u8 qmode)
 {
-	u32 csr6 = readl(ioaddr + DMA_CONTROL);
+	u32 csr6 = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac1000_dma.c:153", ioaddr + DMA_CONTROL);
 
 	if (mode == SF_DMA_MODE) {
 		pr_debug("GMAC: enable RX store and forward mode\n");
@@ -172,13 +172,13 @@ static void dwmac1000_dma_operation_mode_rx(void __iomem *ioaddr, int mode,
 	/* Configure flow control based on rx fifo size */
 	csr6 = dwmac1000_configure_fc(csr6, fifosz);
 
-	writel(csr6, ioaddr + DMA_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac1000_dma.c:175", csr6, ioaddr + DMA_CONTROL);
 }
 
 static void dwmac1000_dma_operation_mode_tx(void __iomem *ioaddr, int mode,
 					    u32 channel, int fifosz, u8 qmode)
 {
-	u32 csr6 = readl(ioaddr + DMA_CONTROL);
+	u32 csr6 = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac1000_dma.c:181", ioaddr + DMA_CONTROL);
 
 	if (mode == SF_DMA_MODE) {
 		pr_debug("GMAC: enable TX store and forward mode\n");
@@ -205,7 +205,7 @@ static void dwmac1000_dma_operation_mode_tx(void __iomem *ioaddr, int mode,
 			csr6 |= DMA_CONTROL_TTC_256;
 	}
 
-	writel(csr6, ioaddr + DMA_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac1000_dma.c:208", csr6, ioaddr + DMA_CONTROL);
 }
 
 static void dwmac1000_dump_dma_regs(void __iomem *ioaddr, u32 *reg_space)
@@ -215,13 +215,13 @@ static void dwmac1000_dump_dma_regs(void __iomem *ioaddr, u32 *reg_space)
 	for (i = 0; i < NUM_DWMAC1000_DMA_REGS; i++)
 		if ((i < 12) || (i > 17))
 			reg_space[DMA_BUS_MODE / 4 + i] =
-				readl(ioaddr + DMA_BUS_MODE + i * 4);
+				pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac1000_dma.c:218", ioaddr + DMA_BUS_MODE + i * 4);
 }
 
 static int dwmac1000_get_hw_feature(void __iomem *ioaddr,
 				    struct dma_features *dma_cap)
 {
-	u32 hw_cap = readl(ioaddr + DMA_HW_FEATURE);
+	u32 hw_cap = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac1000_dma.c:224", ioaddr + DMA_HW_FEATURE);
 
 	if (!hw_cap) {
 		/* 0x00000000 is the value read on old hardware that does not
@@ -266,7 +266,7 @@ static int dwmac1000_get_hw_feature(void __iomem *ioaddr,
 static void dwmac1000_rx_watchdog(void __iomem *ioaddr, u32 riwt,
 				  u32 queue)
 {
-	writel(riwt, ioaddr + DMA_RX_WATCHDOG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac1000_dma.c:269", riwt, ioaddr + DMA_RX_WATCHDOG);
 }
 
 const struct stmmac_dma_ops dwmac1000_dma_ops = {

@@ -61,13 +61,13 @@ struct tiadc_device {
 
 static unsigned int tiadc_readl(struct tiadc_device *adc, unsigned int reg)
 {
-	return readl(adc->mfd_tscadc->tscadc_base + reg);
+	return pete_readl("drivers/iio/adc/ti_am335x_adc.c:64", adc->mfd_tscadc->tscadc_base + reg);
 }
 
 static void tiadc_writel(struct tiadc_device *adc, unsigned int reg,
 					unsigned int val)
 {
-	writel(val, adc->mfd_tscadc->tscadc_base + reg);
+	pete_writel("drivers/iio/adc/ti_am335x_adc.c:70", val, adc->mfd_tscadc->tscadc_base + reg);
 }
 
 static u32 get_adc_step_mask(struct tiadc_device *adc_dev)

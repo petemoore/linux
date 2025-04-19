@@ -64,8 +64,8 @@ static int zevio_timer_set_event(unsigned long delta,
 	struct zevio_timer *timer = container_of(dev, struct zevio_timer,
 						 clkevt);
 
-	writel(delta, timer->timer1 + IO_CURRENT_VAL);
-	writel(CNTL_RUN_TIMER | CNTL_DEC | CNTL_MATCH(TIMER_MATCH),
+	pete_writel("drivers/clocksource/timer-zevio.c:67", delta, timer->timer1 + IO_CURRENT_VAL);
+	pete_writel("drivers/clocksource/timer-zevio.c:68", CNTL_RUN_TIMER | CNTL_DEC | CNTL_MATCH(TIMER_MATCH),
 			timer->timer1 + IO_CONTROL);
 
 	return 0;
@@ -77,10 +77,10 @@ static int zevio_timer_shutdown(struct clock_event_device *dev)
 						 clkevt);
 
 	/* Disable timer interrupts */
-	writel(0, timer->interrupt_regs + IO_INTR_MSK);
-	writel(TIMER_INTR_ALL, timer->interrupt_regs + IO_INTR_ACK);
+	pete_writel("drivers/clocksource/timer-zevio.c:80", 0, timer->interrupt_regs + IO_INTR_MSK);
+	pete_writel("drivers/clocksource/timer-zevio.c:81", TIMER_INTR_ALL, timer->interrupt_regs + IO_INTR_ACK);
 	/* Stop timer */
-	writel(CNTL_STOP_TIMER, timer->timer1 + IO_CONTROL);
+	pete_writel("drivers/clocksource/timer-zevio.c:83", CNTL_STOP_TIMER, timer->timer1 + IO_CONTROL);
 	return 0;
 }
 
@@ -90,8 +90,8 @@ static int zevio_timer_set_oneshot(struct clock_event_device *dev)
 						 clkevt);
 
 	/* Enable timer interrupts */
-	writel(TIMER_INTR_MSK, timer->interrupt_regs + IO_INTR_MSK);
-	writel(TIMER_INTR_ALL, timer->interrupt_regs + IO_INTR_ACK);
+	pete_writel("drivers/clocksource/timer-zevio.c:93", TIMER_INTR_MSK, timer->interrupt_regs + IO_INTR_MSK);
+	pete_writel("drivers/clocksource/timer-zevio.c:94", TIMER_INTR_ALL, timer->interrupt_regs + IO_INTR_ACK);
 	return 0;
 }
 
@@ -100,12 +100,12 @@ static irqreturn_t zevio_timer_interrupt(int irq, void *dev_id)
 	struct zevio_timer *timer = dev_id;
 	u32 intr;
 
-	intr = readl(timer->interrupt_regs + IO_INTR_ACK);
+	intr = pete_readl("drivers/clocksource/timer-zevio.c:103", timer->interrupt_regs + IO_INTR_ACK);
 	if (!(intr & TIMER_INTR_MSK))
 		return IRQ_NONE;
 
-	writel(TIMER_INTR_MSK, timer->interrupt_regs + IO_INTR_ACK);
-	writel(CNTL_STOP_TIMER, timer->timer1 + IO_CONTROL);
+	pete_writel("drivers/clocksource/timer-zevio.c:107", TIMER_INTR_MSK, timer->interrupt_regs + IO_INTR_ACK);
+	pete_writel("drivers/clocksource/timer-zevio.c:108", CNTL_STOP_TIMER, timer->timer1 + IO_CONTROL);
 
 	if (timer->clkevt.event_handler)
 		timer->clkevt.event_handler(&timer->clkevt);
@@ -161,15 +161,15 @@ static int __init zevio_timer_add(struct device_node *node)
 		timer->clkevt.features		= CLOCK_EVT_FEAT_ONESHOT;
 		timer->clkevt.irq		= irqnr;
 
-		writel(CNTL_STOP_TIMER, timer->timer1 + IO_CONTROL);
-		writel(0, timer->timer1 + IO_DIVIDER);
+		pete_writel("drivers/clocksource/timer-zevio.c:164", CNTL_STOP_TIMER, timer->timer1 + IO_CONTROL);
+		pete_writel("drivers/clocksource/timer-zevio.c:165", 0, timer->timer1 + IO_DIVIDER);
 
 		/* Start with timer interrupts disabled */
-		writel(0, timer->interrupt_regs + IO_INTR_MSK);
-		writel(TIMER_INTR_ALL, timer->interrupt_regs + IO_INTR_ACK);
+		pete_writel("drivers/clocksource/timer-zevio.c:168", 0, timer->interrupt_regs + IO_INTR_MSK);
+		pete_writel("drivers/clocksource/timer-zevio.c:169", TIMER_INTR_ALL, timer->interrupt_regs + IO_INTR_ACK);
 
 		/* Interrupt to occur when timer value matches 0 */
-		writel(0, timer->base + IO_MATCH(TIMER_MATCH));
+		pete_writel("drivers/clocksource/timer-zevio.c:172", 0, timer->base + IO_MATCH(TIMER_MATCH));
 
 		if (request_irq(irqnr, zevio_timer_interrupt,
 				IRQF_TIMER | IRQF_IRQPOLL,
@@ -183,10 +183,10 @@ static int __init zevio_timer_add(struct device_node *node)
 		pr_info("Added %s as clockevent\n", timer->clockevent_name);
 	}
 
-	writel(CNTL_STOP_TIMER, timer->timer2 + IO_CONTROL);
-	writel(0, timer->timer2 + IO_CURRENT_VAL);
-	writel(0, timer->timer2 + IO_DIVIDER);
-	writel(CNTL_RUN_TIMER | CNTL_FOREVER | CNTL_INC,
+	pete_writel("drivers/clocksource/timer-zevio.c:186", CNTL_STOP_TIMER, timer->timer2 + IO_CONTROL);
+	pete_writel("drivers/clocksource/timer-zevio.c:187", 0, timer->timer2 + IO_CURRENT_VAL);
+	pete_writel("drivers/clocksource/timer-zevio.c:188", 0, timer->timer2 + IO_DIVIDER);
+	pete_writel("drivers/clocksource/timer-zevio.c:189", CNTL_RUN_TIMER | CNTL_FOREVER | CNTL_INC,
 			timer->timer2 + IO_CONTROL);
 
 	clocksource_mmio_init(timer->timer2 + IO_CURRENT_VAL,

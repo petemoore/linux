@@ -117,22 +117,22 @@ int hidma_mgmt_setup(struct hidma_mgmt_dev *mgmtdev)
 	}
 
 	pm_runtime_get_sync(&mgmtdev->pdev->dev);
-	val = readl(mgmtdev->virtaddr + HIDMA_MAX_BUS_REQ_LEN_OFFSET);
+	val = pete_readl("drivers/dma/qcom/hidma_mgmt.c:120", mgmtdev->virtaddr + HIDMA_MAX_BUS_REQ_LEN_OFFSET);
 	val &= ~(HIDMA_MAX_BUS_REQ_LEN_MASK << HIDMA_MAX_BUS_WR_REQ_BIT_POS);
 	val |= mgmtdev->max_write_request << HIDMA_MAX_BUS_WR_REQ_BIT_POS;
 	val &= ~HIDMA_MAX_BUS_REQ_LEN_MASK;
 	val |= mgmtdev->max_read_request;
-	writel(val, mgmtdev->virtaddr + HIDMA_MAX_BUS_REQ_LEN_OFFSET);
+	pete_writel("drivers/dma/qcom/hidma_mgmt.c:125", val, mgmtdev->virtaddr + HIDMA_MAX_BUS_REQ_LEN_OFFSET);
 
-	val = readl(mgmtdev->virtaddr + HIDMA_MAX_XACTIONS_OFFSET);
+	val = pete_readl("drivers/dma/qcom/hidma_mgmt.c:127", mgmtdev->virtaddr + HIDMA_MAX_XACTIONS_OFFSET);
 	val &= ~(HIDMA_MAX_WR_XACTIONS_MASK << HIDMA_MAX_WR_XACTIONS_BIT_POS);
 	val |= mgmtdev->max_wr_xactions << HIDMA_MAX_WR_XACTIONS_BIT_POS;
 	val &= ~HIDMA_MAX_RD_XACTIONS_MASK;
 	val |= mgmtdev->max_rd_xactions;
-	writel(val, mgmtdev->virtaddr + HIDMA_MAX_XACTIONS_OFFSET);
+	pete_writel("drivers/dma/qcom/hidma_mgmt.c:132", val, mgmtdev->virtaddr + HIDMA_MAX_XACTIONS_OFFSET);
 
 	mgmtdev->hw_version =
-	    readl(mgmtdev->virtaddr + HIDMA_HW_VERSION_OFFSET);
+	    pete_readl("drivers/dma/qcom/hidma_mgmt.c:135", mgmtdev->virtaddr + HIDMA_HW_VERSION_OFFSET);
 	mgmtdev->hw_version_major = (mgmtdev->hw_version >> 28) & 0xF;
 	mgmtdev->hw_version_minor = (mgmtdev->hw_version >> 16) & 0xF;
 
@@ -140,18 +140,18 @@ int hidma_mgmt_setup(struct hidma_mgmt_dev *mgmtdev)
 		u32 weight = mgmtdev->weight[i];
 		u32 priority = mgmtdev->priority[i];
 
-		val = readl(mgmtdev->virtaddr + HIDMA_QOS_N_OFFSET + (4 * i));
+		val = pete_readl("drivers/dma/qcom/hidma_mgmt.c:143", mgmtdev->virtaddr + HIDMA_QOS_N_OFFSET + (4 * i));
 		val &= ~(1 << HIDMA_PRIORITY_BIT_POS);
 		val |= (priority & 0x1) << HIDMA_PRIORITY_BIT_POS;
 		val &= ~(HIDMA_WEIGHT_MASK << HIDMA_WRR_BIT_POS);
 		val |= (weight & HIDMA_WEIGHT_MASK) << HIDMA_WRR_BIT_POS;
-		writel(val, mgmtdev->virtaddr + HIDMA_QOS_N_OFFSET + (4 * i));
+		pete_writel("drivers/dma/qcom/hidma_mgmt.c:148", val, mgmtdev->virtaddr + HIDMA_QOS_N_OFFSET + (4 * i));
 	}
 
-	val = readl(mgmtdev->virtaddr + HIDMA_CHRESET_TIMEOUT_OFFSET);
+	val = pete_readl("drivers/dma/qcom/hidma_mgmt.c:151", mgmtdev->virtaddr + HIDMA_CHRESET_TIMEOUT_OFFSET);
 	val &= ~HIDMA_CHRESET_TIMEOUT_MASK;
 	val |= mgmtdev->chreset_timeout_cycles & HIDMA_CHRESET_TIMEOUT_MASK;
-	writel(val, mgmtdev->virtaddr + HIDMA_CHRESET_TIMEOUT_OFFSET);
+	pete_writel("drivers/dma/qcom/hidma_mgmt.c:154", val, mgmtdev->virtaddr + HIDMA_CHRESET_TIMEOUT_OFFSET);
 
 	pm_runtime_mark_last_busy(&mgmtdev->pdev->dev);
 	pm_runtime_put_autosuspend(&mgmtdev->pdev->dev);
@@ -293,9 +293,9 @@ static int hidma_mgmt_probe(struct platform_device *pdev)
 	}
 
 	/* start the HW */
-	val = readl(mgmtdev->virtaddr + HIDMA_CFG_OFFSET);
+	val = pete_readl("drivers/dma/qcom/hidma_mgmt.c:296", mgmtdev->virtaddr + HIDMA_CFG_OFFSET);
 	val |= 1;
-	writel(val, mgmtdev->virtaddr + HIDMA_CFG_OFFSET);
+	pete_writel("drivers/dma/qcom/hidma_mgmt.c:298", val, mgmtdev->virtaddr + HIDMA_CFG_OFFSET);
 
 	rc = hidma_mgmt_init_sys(mgmtdev);
 	if (rc) {

@@ -979,9 +979,9 @@ static inline bool ufshcd_is_user_access_allowed(struct ufs_hba *hba)
 }
 
 #define ufshcd_writel(hba, val, reg)	\
-	writel((val), (hba)->mmio_base + (reg))
+	pete_writel("drivers/scsi/ufs/ufshcd.h:982", (val), (hba)->mmio_base + (reg))
 #define ufshcd_readl(hba, reg)	\
-	readl((hba)->mmio_base + (reg))
+	pete_readl("drivers/scsi/ufs/ufshcd.h:984", (hba)->mmio_base + (reg))
 
 /**
  * ufshcd_rmwl - read modify write into a register

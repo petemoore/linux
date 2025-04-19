@@ -55,11 +55,11 @@ static int pic32_rng_read(struct hwrng *rng, void *buf, size_t max,
 	unsigned int timeout = RNG_TIMEOUT;
 
 	do {
-		t = readl(priv->base + RNGRCNT) & RCNT_MASK;
+		t = pete_readl("drivers/char/hw_random/pic32-rng.c:58", priv->base + RNGRCNT) & RCNT_MASK;
 		if (t == 64) {
 			/* TRNG value comes through the seed registers */
-			*data = ((u64)readl(priv->base + RNGSEED2) << 32) +
-				readl(priv->base + RNGSEED1);
+			*data = ((u64)pete_readl("drivers/char/hw_random/pic32-rng.c:61", priv->base + RNGSEED2) << 32) +
+				pete_readl("drivers/char/hw_random/pic32-rng.c:62", priv->base + RNGSEED1);
 			return 8;
 		}
 	} while (wait && --timeout);
@@ -91,7 +91,7 @@ static int pic32_rng_probe(struct platform_device *pdev)
 
 	/* enable TRNG in enhanced mode */
 	v = TRNGEN | TRNGMOD;
-	writel(v, priv->base + RNGCON);
+	pete_writel("drivers/char/hw_random/pic32-rng.c:94", v, priv->base + RNGCON);
 
 	priv->rng.name = pdev->name;
 	priv->rng.read = pic32_rng_read;
@@ -113,7 +113,7 @@ static int pic32_rng_remove(struct platform_device *pdev)
 {
 	struct pic32_rng *rng = platform_get_drvdata(pdev);
 
-	writel(0, rng->base + RNGCON);
+	pete_writel("drivers/char/hw_random/pic32-rng.c:116", 0, rng->base + RNGCON);
 	clk_disable_unprepare(rng->clk);
 	return 0;
 }

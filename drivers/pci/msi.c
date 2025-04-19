@@ -185,7 +185,7 @@ static void pci_msix_write_vector_ctrl(struct msi_desc *desc, u32 ctrl)
 	void __iomem *desc_addr = pci_msix_desc_addr(desc);
 
 	if (desc->msi_attrib.can_mask)
-		writel(ctrl, desc_addr + PCI_MSIX_ENTRY_VECTOR_CTRL);
+		pete_writel("drivers/pci/msi.c:188", ctrl, desc_addr + PCI_MSIX_ENTRY_VECTOR_CTRL);
 }
 
 static inline void pci_msix_mask(struct msi_desc *desc)
@@ -193,7 +193,7 @@ static inline void pci_msix_mask(struct msi_desc *desc)
 	desc->msix_ctrl |= PCI_MSIX_ENTRY_CTRL_MASKBIT;
 	pci_msix_write_vector_ctrl(desc, desc->msix_ctrl);
 	/* Flush write to device */
-	readl(desc->mask_base);
+	pete_readl("drivers/pci/msi.c:196", desc->mask_base);
 }
 
 static inline void pci_msix_unmask(struct msi_desc *desc)
@@ -262,9 +262,9 @@ void __pci_read_msi_msg(struct msi_desc *entry, struct msi_msg *msg)
 		if (WARN_ON_ONCE(entry->msi_attrib.is_virtual))
 			return;
 
-		msg->address_lo = readl(base + PCI_MSIX_ENTRY_LOWER_ADDR);
-		msg->address_hi = readl(base + PCI_MSIX_ENTRY_UPPER_ADDR);
-		msg->data = readl(base + PCI_MSIX_ENTRY_DATA);
+		msg->address_lo = pete_readl("drivers/pci/msi.c:265", base + PCI_MSIX_ENTRY_LOWER_ADDR);
+		msg->address_hi = pete_readl("drivers/pci/msi.c:266", base + PCI_MSIX_ENTRY_UPPER_ADDR);
+		msg->data = pete_readl("drivers/pci/msi.c:267", base + PCI_MSIX_ENTRY_DATA);
 	} else {
 		int pos = dev->msi_cap;
 		u16 data;
@@ -308,15 +308,15 @@ void __pci_write_msi_msg(struct msi_desc *entry, struct msi_msg *msg)
 		if (unmasked)
 			pci_msix_write_vector_ctrl(entry, ctrl | PCI_MSIX_ENTRY_CTRL_MASKBIT);
 
-		writel(msg->address_lo, base + PCI_MSIX_ENTRY_LOWER_ADDR);
-		writel(msg->address_hi, base + PCI_MSIX_ENTRY_UPPER_ADDR);
-		writel(msg->data, base + PCI_MSIX_ENTRY_DATA);
+		pete_writel("drivers/pci/msi.c:311", msg->address_lo, base + PCI_MSIX_ENTRY_LOWER_ADDR);
+		pete_writel("drivers/pci/msi.c:312", msg->address_hi, base + PCI_MSIX_ENTRY_UPPER_ADDR);
+		pete_writel("drivers/pci/msi.c:313", msg->data, base + PCI_MSIX_ENTRY_DATA);
 
 		if (unmasked)
 			pci_msix_write_vector_ctrl(entry, ctrl);
 
 		/* Ensure that the writes are visible in the device */
-		readl(base + PCI_MSIX_ENTRY_DATA);
+		pete_readl("drivers/pci/msi.c:319", base + PCI_MSIX_ENTRY_DATA);
 	} else {
 		int pos = dev->msi_cap;
 		u16 msgctl;
@@ -648,7 +648,7 @@ static int msix_setup_entries(struct pci_dev *dev, void __iomem *base,
 
 		if (entry->msi_attrib.can_mask) {
 			addr = pci_msix_desc_addr(entry);
-			entry->msix_ctrl = readl(addr + PCI_MSIX_ENTRY_VECTOR_CTRL);
+			entry->msix_ctrl = pete_readl("drivers/pci/msi.c:651", addr + PCI_MSIX_ENTRY_VECTOR_CTRL);
 		}
 
 		list_add_tail(&entry->list, dev_to_msi_list(&dev->dev));
@@ -682,7 +682,7 @@ static void msix_mask_all(void __iomem *base, int tsize)
 		return;
 
 	for (i = 0; i < tsize; i++, base += PCI_MSIX_ENTRY_SIZE)
-		writel(ctrl, base + PCI_MSIX_ENTRY_VECTOR_CTRL);
+		pete_writel("drivers/pci/msi.c:685", ctrl, base + PCI_MSIX_ENTRY_VECTOR_CTRL);
 }
 
 /**

@@ -182,25 +182,25 @@ static inline struct jz4780_dma_dev *jz4780_dma_chan_parent(
 static inline uint32_t jz4780_dma_chn_readl(struct jz4780_dma_dev *jzdma,
 	unsigned int chn, unsigned int reg)
 {
-	return readl(jzdma->chn_base + reg + JZ_DMA_REG_CHAN(chn));
+	return pete_readl("drivers/dma/dma-jz4780.c:185", jzdma->chn_base + reg + JZ_DMA_REG_CHAN(chn));
 }
 
 static inline void jz4780_dma_chn_writel(struct jz4780_dma_dev *jzdma,
 	unsigned int chn, unsigned int reg, uint32_t val)
 {
-	writel(val, jzdma->chn_base + reg + JZ_DMA_REG_CHAN(chn));
+	pete_writel("drivers/dma/dma-jz4780.c:191", val, jzdma->chn_base + reg + JZ_DMA_REG_CHAN(chn));
 }
 
 static inline uint32_t jz4780_dma_ctrl_readl(struct jz4780_dma_dev *jzdma,
 	unsigned int reg)
 {
-	return readl(jzdma->ctrl_base + reg);
+	return pete_readl("drivers/dma/dma-jz4780.c:197", jzdma->ctrl_base + reg);
 }
 
 static inline void jz4780_dma_ctrl_writel(struct jz4780_dma_dev *jzdma,
 	unsigned int reg, uint32_t val)
 {
-	writel(val, jzdma->ctrl_base + reg);
+	pete_writel("drivers/dma/dma-jz4780.c:203", val, jzdma->ctrl_base + reg);
 }
 
 static inline void jz4780_dma_chan_enable(struct jz4780_dma_dev *jzdma,

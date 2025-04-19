@@ -117,11 +117,11 @@ static int qcom_rng_enable(struct qcom_rng *rng)
 	val = readl_relaxed(rng->base + PRNG_LFSR_CFG);
 	val &= ~PRNG_LFSR_CFG_MASK;
 	val |= PRNG_LFSR_CFG_CLOCKS;
-	writel(val, rng->base + PRNG_LFSR_CFG);
+	pete_writel("drivers/crypto/qcom-rng.c:120", val, rng->base + PRNG_LFSR_CFG);
 
 	val = readl_relaxed(rng->base + PRNG_CONFIG);
 	val |= PRNG_CONFIG_HW_ENABLE;
-	writel(val, rng->base + PRNG_CONFIG);
+	pete_writel("drivers/crypto/qcom-rng.c:124", val, rng->base + PRNG_CONFIG);
 
 already_enabled:
 	clk_disable_unprepare(rng->clk);

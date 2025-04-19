@@ -57,8 +57,8 @@ struct bt8xxgpio {
 #endif
 };
 
-#define bgwrite(dat, adr)	writel((dat), bg->mmio+(adr))
-#define bgread(adr)		readl(bg->mmio+(adr))
+#define bgwrite(dat, adr)	pete_writel("drivers/gpio/gpio-bt8xx.c:60", (dat), bg->mmio+(adr))
+#define bgread(adr)		pete_readl("drivers/gpio/gpio-bt8xx.c:61", bg->mmio+(adr))
 
 
 static int modparam_gpiobase = -1/* dynamic */;

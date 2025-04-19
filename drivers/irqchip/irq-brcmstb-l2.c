@@ -180,12 +180,12 @@ static int __init brcmstb_l2_intc_of_init(struct device_node *np,
 	}
 
 	/* Disable all interrupts by default */
-	writel(0xffffffff, base + init_params->cpu_mask_set);
+	pete_writel("drivers/irqchip/irq-brcmstb-l2.c:183", 0xffffffff, base + init_params->cpu_mask_set);
 
 	/* Wakeup interrupts may be retained from S5 (cold boot) */
 	data->can_wake = of_property_read_bool(np, "brcm,irq-can-wake");
 	if (!data->can_wake && (init_params->cpu_clear >= 0))
-		writel(0xffffffff, base + init_params->cpu_clear);
+		pete_writel("drivers/irqchip/irq-brcmstb-l2.c:188", 0xffffffff, base + init_params->cpu_clear);
 
 	parent_irq = irq_of_parse_and_map(np, 0);
 	if (!parent_irq) {

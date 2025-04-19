@@ -80,8 +80,8 @@ static void dwmac5_handle_mac_err(struct net_device *ndev,
 {
 	u32 value;
 
-	value = readl(ioaddr + MAC_DPP_FSM_INT_STATUS);
-	writel(value, ioaddr + MAC_DPP_FSM_INT_STATUS);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:83", ioaddr + MAC_DPP_FSM_INT_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:84", value, ioaddr + MAC_DPP_FSM_INT_STATUS);
 
 	dwmac5_log_error(ndev, value, correctable, "MAC", dwmac5_mac_errors,
 			STAT_OFF(mac_errors), stats);
@@ -128,8 +128,8 @@ static void dwmac5_handle_mtl_err(struct net_device *ndev,
 {
 	u32 value;
 
-	value = readl(ioaddr + MTL_ECC_INT_STATUS);
-	writel(value, ioaddr + MTL_ECC_INT_STATUS);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:131", ioaddr + MTL_ECC_INT_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:132", value, ioaddr + MTL_ECC_INT_STATUS);
 
 	dwmac5_log_error(ndev, value, correctable, "MTL", dwmac5_mtl_errors,
 			STAT_OFF(mtl_errors), stats);
@@ -176,8 +176,8 @@ static void dwmac5_handle_dma_err(struct net_device *ndev,
 {
 	u32 value;
 
-	value = readl(ioaddr + DMA_ECC_INT_STATUS);
-	writel(value, ioaddr + DMA_ECC_INT_STATUS);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:179", ioaddr + DMA_ECC_INT_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:180", value, ioaddr + DMA_ECC_INT_STATUS);
 
 	dwmac5_log_error(ndev, value, correctable, "DMA", dwmac5_dma_errors,
 			STAT_OFF(dma_errors), stats);
@@ -206,7 +206,7 @@ int dwmac5_safety_feat_config(void __iomem *ioaddr, unsigned int asp,
 		safety_feat_cfg = &all_safety_feats;
 
 	/* 1. Enable Safety Features */
-	value = readl(ioaddr + MTL_ECC_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:209", ioaddr + MTL_ECC_CONTROL);
 	value |= MEEAO; /* MTL ECC Error Addr Status Override */
 	if (safety_feat_cfg->tsoee)
 		value |= TSOEE; /* TSO ECC */
@@ -218,38 +218,38 @@ int dwmac5_safety_feat_config(void __iomem *ioaddr, unsigned int asp,
 		value |= MRXEE; /* MTL RX FIFO ECC */
 	if (safety_feat_cfg->mtxee)
 		value |= MTXEE; /* MTL TX FIFO ECC */
-	writel(value, ioaddr + MTL_ECC_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:221", value, ioaddr + MTL_ECC_CONTROL);
 
 	/* 2. Enable MTL Safety Interrupts */
-	value = readl(ioaddr + MTL_ECC_INT_ENABLE);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:224", ioaddr + MTL_ECC_INT_ENABLE);
 	value |= RPCEIE; /* RX Parser Memory Correctable Error */
 	value |= ECEIE; /* EST Memory Correctable Error */
 	value |= RXCEIE; /* RX Memory Correctable Error */
 	value |= TXCEIE; /* TX Memory Correctable Error */
-	writel(value, ioaddr + MTL_ECC_INT_ENABLE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:229", value, ioaddr + MTL_ECC_INT_ENABLE);
 
 	/* 3. Enable DMA Safety Interrupts */
-	value = readl(ioaddr + DMA_ECC_INT_ENABLE);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:232", ioaddr + DMA_ECC_INT_ENABLE);
 	value |= TCEIE; /* TSO Memory Correctable Error */
-	writel(value, ioaddr + DMA_ECC_INT_ENABLE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:234", value, ioaddr + DMA_ECC_INT_ENABLE);
 
 	/* Only ECC Protection for External Memory feature is selected */
 	if (asp <= 0x1)
 		return 0;
 
 	/* 5. Enable Parity and Timeout for FSM */
-	value = readl(ioaddr + MAC_FSM_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:241", ioaddr + MAC_FSM_CONTROL);
 	if (safety_feat_cfg->prtyen)
 		value |= PRTYEN; /* FSM Parity Feature */
 	if (safety_feat_cfg->tmouten)
 		value |= TMOUTEN; /* FSM Timeout Feature */
-	writel(value, ioaddr + MAC_FSM_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:246", value, ioaddr + MAC_FSM_CONTROL);
 
 	/* 4. Enable Data Parity Protection */
-	value = readl(ioaddr + MTL_DPP_CONTROL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:249", ioaddr + MTL_DPP_CONTROL);
 	if (safety_feat_cfg->edpp)
 		value |= EDPP;
-	writel(value, ioaddr + MTL_DPP_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:252", value, ioaddr + MTL_DPP_CONTROL);
 
 	/*
 	 * All the Automotive Safety features are selected without the "Parity
@@ -260,7 +260,7 @@ int dwmac5_safety_feat_config(void __iomem *ioaddr, unsigned int asp,
 
 	if (safety_feat_cfg->epsi)
 		value |= EPSI;
-	writel(value, ioaddr + MTL_DPP_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:263", value, ioaddr + MTL_DPP_CONTROL);
 	return 0;
 }
 
@@ -275,8 +275,8 @@ int dwmac5_safety_feat_irq_status(struct net_device *ndev,
 	if (!asp)
 		return -EINVAL;
 
-	mtl = readl(ioaddr + MTL_SAFETY_INT_STATUS);
-	dma = readl(ioaddr + DMA_SAFETY_INT_STATUS);
+	mtl = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:278", ioaddr + MTL_SAFETY_INT_STATUS);
+	dma = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:279", ioaddr + DMA_SAFETY_INT_STATUS);
 
 	err = (mtl & MCSIS) || (dma & MCSIS);
 	corr = false;
@@ -331,9 +331,9 @@ static int dwmac5_rxp_disable(void __iomem *ioaddr)
 {
 	u32 val;
 
-	val = readl(ioaddr + MTL_OPERATION_MODE);
+	val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:334", ioaddr + MTL_OPERATION_MODE);
 	val &= ~MTL_FRPE;
-	writel(val, ioaddr + MTL_OPERATION_MODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:336", val, ioaddr + MTL_OPERATION_MODE);
 
 	return readl_poll_timeout(ioaddr + MTL_RXP_CONTROL_STATUS, val,
 			val & RXPI, 1, 10000);
@@ -343,9 +343,9 @@ static void dwmac5_rxp_enable(void __iomem *ioaddr)
 {
 	u32 val;
 
-	val = readl(ioaddr + MTL_OPERATION_MODE);
+	val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:346", ioaddr + MTL_OPERATION_MODE);
 	val |= MTL_FRPE;
-	writel(val, ioaddr + MTL_OPERATION_MODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:348", val, ioaddr + MTL_OPERATION_MODE);
 }
 
 static int dwmac5_rxp_update_single_entry(void __iomem *ioaddr,
@@ -366,19 +366,19 @@ static int dwmac5_rxp_update_single_entry(void __iomem *ioaddr,
 
 		/* Write data */
 		val = *((u32 *)&entry->val + i);
-		writel(val, ioaddr + MTL_RXP_IACC_DATA);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:369", val, ioaddr + MTL_RXP_IACC_DATA);
 
 		/* Write pos */
 		val = real_pos & ADDR;
-		writel(val, ioaddr + MTL_RXP_IACC_CTRL_STATUS);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:373", val, ioaddr + MTL_RXP_IACC_CTRL_STATUS);
 
 		/* Write OP */
 		val |= WRRDN;
-		writel(val, ioaddr + MTL_RXP_IACC_CTRL_STATUS);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:377", val, ioaddr + MTL_RXP_IACC_CTRL_STATUS);
 
 		/* Start Write */
 		val |= STARTBUSY;
-		writel(val, ioaddr + MTL_RXP_IACC_CTRL_STATUS);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:381", val, ioaddr + MTL_RXP_IACC_CTRL_STATUS);
 
 		/* Wait for done */
 		ret = readl_poll_timeout(ioaddr + MTL_RXP_IACC_CTRL_STATUS,
@@ -439,9 +439,9 @@ int dwmac5_rxp_config(void __iomem *ioaddr, struct stmmac_tc_entry *entries,
 	u32 old_val, val;
 
 	/* Force disable RX */
-	old_val = readl(ioaddr + GMAC_CONFIG);
+	old_val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:442", ioaddr + GMAC_CONFIG);
 	val = old_val & ~GMAC_CONFIG_RE;
-	writel(val, ioaddr + GMAC_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:444", val, ioaddr + GMAC_CONFIG);
 
 	/* Disable RX Parser */
 	ret = dwmac5_rxp_disable(ioaddr);
@@ -506,14 +506,14 @@ int dwmac5_rxp_config(void __iomem *ioaddr, struct stmmac_tc_entry *entries,
 	/* Assume n. of parsable entries == n. of valid entries */
 	val = (nve << 16) & NPE;
 	val |= nve & NVE;
-	writel(val, ioaddr + MTL_RXP_CONTROL_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:509", val, ioaddr + MTL_RXP_CONTROL_STATUS);
 
 	/* Enable RX Parser */
 	dwmac5_rxp_enable(ioaddr);
 
 re_enable:
 	/* Re-enable RX */
-	writel(old_val, ioaddr + GMAC_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:516", old_val, ioaddr + GMAC_CONFIG);
 	return ret;
 }
 
@@ -521,8 +521,8 @@ int dwmac5_flex_pps_config(void __iomem *ioaddr, int index,
 			   struct stmmac_pps_cfg *cfg, bool enable,
 			   u32 sub_second_inc, u32 systime_flags)
 {
-	u32 tnsec = readl(ioaddr + MAC_PPSx_TARGET_TIME_NSEC(index));
-	u32 val = readl(ioaddr + MAC_PPS_CONTROL);
+	u32 tnsec = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:524", ioaddr + MAC_PPSx_TARGET_TIME_NSEC(index));
+	u32 val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:525", ioaddr + MAC_PPS_CONTROL);
 	u64 period;
 
 	if (!cfg->available)
@@ -537,7 +537,7 @@ int dwmac5_flex_pps_config(void __iomem *ioaddr, int index,
 	if (!enable) {
 		val |= PPSCMDx(index, 0x5);
 		val |= PPSEN0;
-		writel(val, ioaddr + MAC_PPS_CONTROL);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:540", val, ioaddr + MAC_PPS_CONTROL);
 		return 0;
 	}
 
@@ -545,11 +545,11 @@ int dwmac5_flex_pps_config(void __iomem *ioaddr, int index,
 	val |= TRGTMODSELx(index, 0x2);
 	val |= PPSEN0;
 
-	writel(cfg->start.tv_sec, ioaddr + MAC_PPSx_TARGET_TIME_SEC(index));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:548", cfg->start.tv_sec, ioaddr + MAC_PPSx_TARGET_TIME_SEC(index));
 
 	if (!(systime_flags & PTP_TCR_TSCTRLSSR))
 		cfg->start.tv_nsec = (cfg->start.tv_nsec * 1000) / 465;
-	writel(cfg->start.tv_nsec, ioaddr + MAC_PPSx_TARGET_TIME_NSEC(index));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:552", cfg->start.tv_nsec, ioaddr + MAC_PPSx_TARGET_TIME_NSEC(index));
 
 	period = cfg->period.tv_sec * 1000000000;
 	period += cfg->period.tv_nsec;
@@ -559,16 +559,16 @@ int dwmac5_flex_pps_config(void __iomem *ioaddr, int index,
 	if (period <= 1)
 		return -EINVAL;
 
-	writel(period - 1, ioaddr + MAC_PPSx_INTERVAL(index));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:562", period - 1, ioaddr + MAC_PPSx_INTERVAL(index));
 
 	period >>= 1;
 	if (period <= 1)
 		return -EINVAL;
 
-	writel(period - 1, ioaddr + MAC_PPSx_WIDTH(index));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:568", period - 1, ioaddr + MAC_PPSx_WIDTH(index));
 
 	/* Finally, activate it */
-	writel(val, ioaddr + MAC_PPS_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:571", val, ioaddr + MAC_PPS_CONTROL);
 	return 0;
 }
 
@@ -576,15 +576,15 @@ static int dwmac5_est_write(void __iomem *ioaddr, u32 reg, u32 val, bool gcl)
 {
 	u32 ctrl;
 
-	writel(val, ioaddr + MTL_EST_GCL_DATA);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:579", val, ioaddr + MTL_EST_GCL_DATA);
 
 	ctrl = (reg << ADDR_SHIFT);
 	ctrl |= gcl ? 0 : GCRR;
 
-	writel(ctrl, ioaddr + MTL_EST_GCL_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:584", ctrl, ioaddr + MTL_EST_GCL_CONTROL);
 
 	ctrl |= SRWO;
-	writel(ctrl, ioaddr + MTL_EST_GCL_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:587", ctrl, ioaddr + MTL_EST_GCL_CONTROL);
 
 	return readl_poll_timeout(ioaddr + MTL_EST_GCL_CONTROL,
 				  ctrl, !(ctrl & SRWO), 100, 5000);
@@ -611,7 +611,7 @@ int dwmac5_est_configure(void __iomem *ioaddr, struct stmmac_est *cfg,
 			return ret;
 	}
 
-	ctrl = readl(ioaddr + MTL_EST_CONTROL);
+	ctrl = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:614", ioaddr + MTL_EST_CONTROL);
 	ctrl &= ~PTOV;
 	ctrl |= ((1000000000 / ptp_rate) * 6) << PTOV_SHIFT;
 	if (cfg->enable)
@@ -619,7 +619,7 @@ int dwmac5_est_configure(void __iomem *ioaddr, struct stmmac_est *cfg,
 	else
 		ctrl &= ~EEST;
 
-	writel(ctrl, ioaddr + MTL_EST_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:622", ctrl, ioaddr + MTL_EST_CONTROL);
 
 	/* Configure EST interrupt */
 	if (cfg->enable)
@@ -627,7 +627,7 @@ int dwmac5_est_configure(void __iomem *ioaddr, struct stmmac_est *cfg,
 	else
 		ctrl = 0;
 
-	writel(ctrl, ioaddr + MTL_EST_INT_EN);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:630", ctrl, ioaddr + MTL_EST_INT_EN);
 
 	return 0;
 }
@@ -638,7 +638,7 @@ void dwmac5_est_irq_status(void __iomem *ioaddr, struct net_device *dev,
 	u32 status, value, feqn, hbfq, hbfs, btrl;
 	u32 txqcnt_mask = (1 << txqcnt) - 1;
 
-	status = readl(ioaddr + MTL_EST_STATUS);
+	status = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:641", ioaddr + MTL_EST_STATUS);
 
 	value = (CGCE | HLBS | HLBF | BTRE | SWLC);
 
@@ -648,19 +648,19 @@ void dwmac5_est_irq_status(void __iomem *ioaddr, struct net_device *dev,
 
 	if (status & CGCE) {
 		/* Clear Interrupt */
-		writel(CGCE, ioaddr + MTL_EST_STATUS);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:651", CGCE, ioaddr + MTL_EST_STATUS);
 
 		x->mtl_est_cgce++;
 	}
 
 	if (status & HLBS) {
-		value = readl(ioaddr + MTL_EST_SCH_ERR);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:657", ioaddr + MTL_EST_SCH_ERR);
 		value &= txqcnt_mask;
 
 		x->mtl_est_hlbs++;
 
 		/* Clear Interrupt */
-		writel(value, ioaddr + MTL_EST_SCH_ERR);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:663", value, ioaddr + MTL_EST_SCH_ERR);
 
 		/* Collecting info to shows all the queues that has HLBS
 		 * issue. The only way to clear this is to clear the
@@ -671,17 +671,17 @@ void dwmac5_est_irq_status(void __iomem *ioaddr, struct net_device *dev,
 	}
 
 	if (status & HLBF) {
-		value = readl(ioaddr + MTL_EST_FRM_SZ_ERR);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:674", ioaddr + MTL_EST_FRM_SZ_ERR);
 		feqn = value & txqcnt_mask;
 
-		value = readl(ioaddr + MTL_EST_FRM_SZ_CAP);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:677", ioaddr + MTL_EST_FRM_SZ_CAP);
 		hbfq = (value & SZ_CAP_HBFQ_MASK(txqcnt)) >> SZ_CAP_HBFQ_SHIFT;
 		hbfs = value & SZ_CAP_HBFS_MASK;
 
 		x->mtl_est_hlbf++;
 
 		/* Clear Interrupt */
-		writel(feqn, ioaddr + MTL_EST_FRM_SZ_ERR);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:684", feqn, ioaddr + MTL_EST_FRM_SZ_ERR);
 
 		if (net_ratelimit())
 			netdev_err(dev, "EST: HLB(size) Queue %u Size %u\n",
@@ -700,11 +700,11 @@ void dwmac5_est_irq_status(void __iomem *ioaddr, struct net_device *dev,
 			netdev_info(dev, "EST: BTR Error Loop Count %u\n",
 				    btrl);
 
-		writel(BTRE, ioaddr + MTL_EST_STATUS);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:703", BTRE, ioaddr + MTL_EST_STATUS);
 	}
 
 	if (status & SWLC) {
-		writel(SWLC, ioaddr + MTL_EST_STATUS);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:707", SWLC, ioaddr + MTL_EST_STATUS);
 		netdev_info(dev, "EST: SWOL has been switched\n");
 	}
 }
@@ -715,22 +715,22 @@ void dwmac5_fpe_configure(void __iomem *ioaddr, u32 num_txq, u32 num_rxq,
 	u32 value;
 
 	if (!enable) {
-		value = readl(ioaddr + MAC_FPE_CTRL_STS);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:718", ioaddr + MAC_FPE_CTRL_STS);
 
 		value &= ~EFPE;
 
-		writel(value, ioaddr + MAC_FPE_CTRL_STS);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:722", value, ioaddr + MAC_FPE_CTRL_STS);
 		return;
 	}
 
-	value = readl(ioaddr + GMAC_RXQ_CTRL1);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:726", ioaddr + GMAC_RXQ_CTRL1);
 	value &= ~GMAC_RXQCTRL_FPRQ;
 	value |= (num_rxq - 1) << GMAC_RXQCTRL_FPRQ_SHIFT;
-	writel(value, ioaddr + GMAC_RXQ_CTRL1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:729", value, ioaddr + GMAC_RXQ_CTRL1);
 
-	value = readl(ioaddr + MAC_FPE_CTRL_STS);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:731", ioaddr + MAC_FPE_CTRL_STS);
 	value |= EFPE;
-	writel(value, ioaddr + MAC_FPE_CTRL_STS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:733", value, ioaddr + MAC_FPE_CTRL_STS);
 }
 
 int dwmac5_fpe_irq_status(void __iomem *ioaddr, struct net_device *dev)
@@ -740,7 +740,7 @@ int dwmac5_fpe_irq_status(void __iomem *ioaddr, struct net_device *dev)
 
 	status = FPE_EVENT_UNKNOWN;
 
-	value = readl(ioaddr + MAC_FPE_CTRL_STS);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:743", ioaddr + MAC_FPE_CTRL_STS);
 
 	if (value & TRSP) {
 		status |= FPE_EVENT_TRSP;
@@ -769,7 +769,7 @@ void dwmac5_fpe_send_mpacket(void __iomem *ioaddr, enum stmmac_mpacket_type type
 {
 	u32 value;
 
-	value = readl(ioaddr + MAC_FPE_CTRL_STS);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:772", ioaddr + MAC_FPE_CTRL_STS);
 
 	if (type == MPACKET_VERIFY) {
 		value &= ~SRSP;
@@ -779,5 +779,5 @@ void dwmac5_fpe_send_mpacket(void __iomem *ioaddr, enum stmmac_mpacket_type type
 		value |= SRSP;
 	}
 
-	writel(value, ioaddr + MAC_FPE_CTRL_STS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac5.c:782", value, ioaddr + MAC_FPE_CTRL_STS);
 }

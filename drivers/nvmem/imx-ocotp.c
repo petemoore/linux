@@ -112,7 +112,7 @@ static int imx_ocotp_wait_for_busy(struct ocotp_priv *priv, u32 flags)
 	mask = bm_ctrl_busy | bm_ctrl_error | flags;
 
 	for (count = 10000; count >= 0; count--) {
-		c = readl(base + IMX_OCOTP_ADDR_CTRL);
+		c = pete_readl("drivers/nvmem/imx-ocotp.c:115", base + IMX_OCOTP_ADDR_CTRL);
 		if (!(c & mask))
 			break;
 		cpu_relax();
@@ -148,11 +148,11 @@ static void imx_ocotp_clr_err_if_set(struct ocotp_priv *priv)
 
 	bm_ctrl_error = priv->params->ctrl.bm_error;
 
-	c = readl(base + IMX_OCOTP_ADDR_CTRL);
+	c = pete_readl("drivers/nvmem/imx-ocotp.c:151", base + IMX_OCOTP_ADDR_CTRL);
 	if (!(c & bm_ctrl_error))
 		return;
 
-	writel(bm_ctrl_error, base + IMX_OCOTP_ADDR_CTRL_CLR);
+	pete_writel("drivers/nvmem/imx-ocotp.c:155", bm_ctrl_error, base + IMX_OCOTP_ADDR_CTRL_CLR);
 }
 
 static int imx_ocotp_read(void *context, unsigned int offset,
@@ -194,7 +194,7 @@ static int imx_ocotp_read(void *context, unsigned int offset,
 	}
 
 	for (i = index; i < (index + count); i++) {
-		*(u32 *)buf = readl(priv->base + IMX_OCOTP_OFFSET_B0W0 +
+		*(u32 *)buf = pete_readl("drivers/nvmem/imx-ocotp.c:197", priv->base + IMX_OCOTP_OFFSET_B0W0 +
 			       i * IMX_OCOTP_OFFSET_PER_WORD);
 
 		/* 47.3.1.2
@@ -265,12 +265,12 @@ static void imx_ocotp_set_imx6_timing(struct ocotp_priv *priv)
 					1000000);
 	strobe_prog += 2 * (relax + 1) - 1;
 
-	timing = readl(priv->base + IMX_OCOTP_ADDR_TIMING) & 0x0FC00000;
+	timing = pete_readl("drivers/nvmem/imx-ocotp.c:268", priv->base + IMX_OCOTP_ADDR_TIMING) & 0x0FC00000;
 	timing |= strobe_prog & 0x00000FFF;
 	timing |= (relax       << 12) & 0x0000F000;
 	timing |= (strobe_read << 16) & 0x003F0000;
 
-	writel(timing, priv->base + IMX_OCOTP_ADDR_TIMING);
+	pete_writel("drivers/nvmem/imx-ocotp.c:273", timing, priv->base + IMX_OCOTP_ADDR_TIMING);
 }
 
 static void imx_ocotp_set_imx7_timing(struct ocotp_priv *priv)
@@ -291,7 +291,7 @@ static void imx_ocotp_set_imx7_timing(struct ocotp_priv *priv)
 	timing = strobe_prog & 0x00000FFF;
 	timing |= (fsource << 12) & 0x000FF000;
 
-	writel(timing, priv->base + IMX_OCOTP_ADDR_TIMING);
+	pete_writel("drivers/nvmem/imx-ocotp.c:294", timing, priv->base + IMX_OCOTP_ADDR_TIMING);
 }
 
 static int imx_ocotp_write(void *context, unsigned int offset, void *val,
@@ -359,12 +359,12 @@ static int imx_ocotp_write(void *context, unsigned int offset, void *val,
 		waddr = offset / 4;
 	}
 
-	ctrl = readl(priv->base + IMX_OCOTP_ADDR_CTRL);
+	ctrl = pete_readl("drivers/nvmem/imx-ocotp.c:362", priv->base + IMX_OCOTP_ADDR_CTRL);
 	ctrl &= ~priv->params->ctrl.bm_addr;
 	ctrl |= waddr & priv->params->ctrl.bm_addr;
 	ctrl |= IMX_OCOTP_WR_UNLOCK;
 
-	writel(ctrl, priv->base + IMX_OCOTP_ADDR_CTRL);
+	pete_writel("drivers/nvmem/imx-ocotp.c:367", ctrl, priv->base + IMX_OCOTP_ADDR_CTRL);
 
 	/* 47.3.1.3.4
 	 * Write the data to the HW_OCOTP_DATA register. This will automatically
@@ -392,33 +392,33 @@ static int imx_ocotp_write(void *context, unsigned int offset, void *val,
 		/* Banked/i.MX7 mode */
 		switch (word) {
 		case 0:
-			writel(0, priv->base + IMX_OCOTP_ADDR_DATA1);
-			writel(0, priv->base + IMX_OCOTP_ADDR_DATA2);
-			writel(0, priv->base + IMX_OCOTP_ADDR_DATA3);
-			writel(*buf, priv->base + IMX_OCOTP_ADDR_DATA0);
+			pete_writel("drivers/nvmem/imx-ocotp.c:395", 0, priv->base + IMX_OCOTP_ADDR_DATA1);
+			pete_writel("drivers/nvmem/imx-ocotp.c:396", 0, priv->base + IMX_OCOTP_ADDR_DATA2);
+			pete_writel("drivers/nvmem/imx-ocotp.c:397", 0, priv->base + IMX_OCOTP_ADDR_DATA3);
+			pete_writel("drivers/nvmem/imx-ocotp.c:398", *buf, priv->base + IMX_OCOTP_ADDR_DATA0);
 			break;
 		case 1:
-			writel(*buf, priv->base + IMX_OCOTP_ADDR_DATA1);
-			writel(0, priv->base + IMX_OCOTP_ADDR_DATA2);
-			writel(0, priv->base + IMX_OCOTP_ADDR_DATA3);
-			writel(0, priv->base + IMX_OCOTP_ADDR_DATA0);
+			pete_writel("drivers/nvmem/imx-ocotp.c:401", *buf, priv->base + IMX_OCOTP_ADDR_DATA1);
+			pete_writel("drivers/nvmem/imx-ocotp.c:402", 0, priv->base + IMX_OCOTP_ADDR_DATA2);
+			pete_writel("drivers/nvmem/imx-ocotp.c:403", 0, priv->base + IMX_OCOTP_ADDR_DATA3);
+			pete_writel("drivers/nvmem/imx-ocotp.c:404", 0, priv->base + IMX_OCOTP_ADDR_DATA0);
 			break;
 		case 2:
-			writel(0, priv->base + IMX_OCOTP_ADDR_DATA1);
-			writel(*buf, priv->base + IMX_OCOTP_ADDR_DATA2);
-			writel(0, priv->base + IMX_OCOTP_ADDR_DATA3);
-			writel(0, priv->base + IMX_OCOTP_ADDR_DATA0);
+			pete_writel("drivers/nvmem/imx-ocotp.c:407", 0, priv->base + IMX_OCOTP_ADDR_DATA1);
+			pete_writel("drivers/nvmem/imx-ocotp.c:408", *buf, priv->base + IMX_OCOTP_ADDR_DATA2);
+			pete_writel("drivers/nvmem/imx-ocotp.c:409", 0, priv->base + IMX_OCOTP_ADDR_DATA3);
+			pete_writel("drivers/nvmem/imx-ocotp.c:410", 0, priv->base + IMX_OCOTP_ADDR_DATA0);
 			break;
 		case 3:
-			writel(0, priv->base + IMX_OCOTP_ADDR_DATA1);
-			writel(0, priv->base + IMX_OCOTP_ADDR_DATA2);
-			writel(*buf, priv->base + IMX_OCOTP_ADDR_DATA3);
-			writel(0, priv->base + IMX_OCOTP_ADDR_DATA0);
+			pete_writel("drivers/nvmem/imx-ocotp.c:413", 0, priv->base + IMX_OCOTP_ADDR_DATA1);
+			pete_writel("drivers/nvmem/imx-ocotp.c:414", 0, priv->base + IMX_OCOTP_ADDR_DATA2);
+			pete_writel("drivers/nvmem/imx-ocotp.c:415", *buf, priv->base + IMX_OCOTP_ADDR_DATA3);
+			pete_writel("drivers/nvmem/imx-ocotp.c:416", 0, priv->base + IMX_OCOTP_ADDR_DATA0);
 			break;
 		}
 	} else {
 		/* Non-banked i.MX6 mode */
-		writel(*buf, priv->base + IMX_OCOTP_ADDR_DATA0);
+		pete_writel("drivers/nvmem/imx-ocotp.c:421", *buf, priv->base + IMX_OCOTP_ADDR_DATA0);
 	}
 
 	/* 47.4.1.4.5
@@ -448,7 +448,7 @@ static int imx_ocotp_write(void *context, unsigned int offset, void *val,
 	udelay(2);
 
 	/* reload all shadow registers */
-	writel(priv->params->ctrl.bm_rel_shadows,
+	pete_writel("drivers/nvmem/imx-ocotp.c:451", priv->params->ctrl.bm_rel_shadows,
 	       priv->base + IMX_OCOTP_ADDR_CTRL_SET);
 	ret = imx_ocotp_wait_for_busy(priv,
 				      priv->params->ctrl.bm_rel_shadows);

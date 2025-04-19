@@ -49,8 +49,8 @@ static void spdif_in_configure(struct spdif_in_dev *host)
 		SPDIF_IN_VALEN | SPDIF_IN_BLKEN;
 	ctrl |= SPDIF_MODE_16BIT | SPDIF_FIFO_THRES_16;
 
-	writel(ctrl, host->io_base + SPDIF_IN_CTRL);
-	writel(0xF, host->io_base + SPDIF_IN_IRQ_MASK);
+	pete_writel("sound/soc/spear/spdif_in.c:52", ctrl, host->io_base + SPDIF_IN_CTRL);
+	pete_writel("sound/soc/spear/spdif_in.c:53", 0xF, host->io_base + SPDIF_IN_IRQ_MASK);
 }
 
 static int spdif_in_dai_probe(struct snd_soc_dai *dai)
@@ -71,12 +71,12 @@ static void spdif_in_shutdown(struct snd_pcm_substream *substream,
 	if (substream->stream != SNDRV_PCM_STREAM_CAPTURE)
 		return;
 
-	writel(0x0, host->io_base + SPDIF_IN_IRQ_MASK);
+	pete_writel("sound/soc/spear/spdif_in.c:74", 0x0, host->io_base + SPDIF_IN_IRQ_MASK);
 }
 
 static void spdif_in_format(struct spdif_in_dev *host, u32 format)
 {
-	u32 ctrl = readl(host->io_base + SPDIF_IN_CTRL);
+	u32 ctrl = pete_readl("sound/soc/spear/spdif_in.c:79", host->io_base + SPDIF_IN_CTRL);
 
 	switch (format) {
 	case SNDRV_PCM_FORMAT_S16_LE:
@@ -88,7 +88,7 @@ static void spdif_in_format(struct spdif_in_dev *host, u32 format)
 		break;
 	}
 
-	writel(ctrl, host->io_base + SPDIF_IN_CTRL);
+	pete_writel("sound/soc/spear/spdif_in.c:91", ctrl, host->io_base + SPDIF_IN_CTRL);
 }
 
 static int spdif_in_hw_params(struct snd_pcm_substream *substream,
@@ -125,19 +125,19 @@ static int spdif_in_trigger(struct snd_pcm_substream *substream, int cmd,
 		spdif_in_configure(host);
 		spdif_in_format(host, host->saved_params.format);
 
-		ctrl = readl(host->io_base + SPDIF_IN_CTRL);
+		ctrl = pete_readl("sound/soc/spear/spdif_in.c:128", host->io_base + SPDIF_IN_CTRL);
 		ctrl |= SPDIF_IN_SAMPLE | SPDIF_IN_ENB;
-		writel(ctrl, host->io_base + SPDIF_IN_CTRL);
-		writel(0xF, host->io_base + SPDIF_IN_IRQ_MASK);
+		pete_writel("sound/soc/spear/spdif_in.c:130", ctrl, host->io_base + SPDIF_IN_CTRL);
+		pete_writel("sound/soc/spear/spdif_in.c:131", 0xF, host->io_base + SPDIF_IN_IRQ_MASK);
 		break;
 
 	case SNDRV_PCM_TRIGGER_STOP:
 	case SNDRV_PCM_TRIGGER_SUSPEND:
 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
-		ctrl = readl(host->io_base + SPDIF_IN_CTRL);
+		ctrl = pete_readl("sound/soc/spear/spdif_in.c:137", host->io_base + SPDIF_IN_CTRL);
 		ctrl &= ~(SPDIF_IN_SAMPLE | SPDIF_IN_ENB);
-		writel(ctrl, host->io_base + SPDIF_IN_CTRL);
-		writel(0x0, host->io_base + SPDIF_IN_IRQ_MASK);
+		pete_writel("sound/soc/spear/spdif_in.c:139", ctrl, host->io_base + SPDIF_IN_CTRL);
+		pete_writel("sound/soc/spear/spdif_in.c:140", 0x0, host->io_base + SPDIF_IN_IRQ_MASK);
 
 		if (host->reset_perip)
 			host->reset_perip();
@@ -179,7 +179,7 @@ static irqreturn_t spdif_in_irq(int irq, void *arg)
 {
 	struct spdif_in_dev *host = (struct spdif_in_dev *)arg;
 
-	u32 irq_status = readl(host->io_base + SPDIF_IN_IRQ);
+	u32 irq_status = pete_readl("sound/soc/spear/spdif_in.c:182", host->io_base + SPDIF_IN_IRQ);
 
 	if (!irq_status)
 		return IRQ_NONE;
@@ -193,7 +193,7 @@ static irqreturn_t spdif_in_irq(int irq, void *arg)
 	if (irq_status & SPDIF_IRQ_OUTOFRANGE)
 		dev_err(host->dev, "spdif in: out of range error");
 
-	writel(0, host->io_base + SPDIF_IN_IRQ);
+	pete_writel("sound/soc/spear/spdif_in.c:196", 0, host->io_base + SPDIF_IN_IRQ);
 
 	return IRQ_HANDLED;
 }

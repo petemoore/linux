@@ -23,7 +23,7 @@ static int mtk_reg_read(void *context,
 	int i = 0, words = bytes / 4;
 
 	while (words--)
-		*val++ = readl(priv->base + reg + (i++ * 4));
+		*val++ = pete_readl("drivers/nvmem/mtk-efuse.c:26", priv->base + reg + (i++ * 4));
 
 	return 0;
 }

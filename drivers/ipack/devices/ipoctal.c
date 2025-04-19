@@ -256,8 +256,8 @@ static irqreturn_t ipoctal_irq_handler(void *arg)
 	struct ipoctal *ipoctal = (struct ipoctal *) arg;
 
 	/* Clear the IPack device interrupt */
-	readw(ipoctal->int_space + ACK_INT_REQ0);
-	readw(ipoctal->int_space + ACK_INT_REQ1);
+	pete_readw("drivers/ipack/devices/ipoctal.c:259", ipoctal->int_space + ACK_INT_REQ0);
+	pete_readw("drivers/ipack/devices/ipoctal.c:260", ipoctal->int_space + ACK_INT_REQ1);
 
 	/* Check all channels */
 	for (i = 0; i < NR_CHANNELS; i++)

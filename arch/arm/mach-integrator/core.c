@@ -38,7 +38,7 @@ static void __iomem *cm_base;
  */
 u32 cm_get(void)
 {
-	return readl(cm_base + INTEGRATOR_HDR_CTRL_OFFSET);
+	return pete_readl("arch/arm/mach-integrator/core.c:41", cm_base + INTEGRATOR_HDR_CTRL_OFFSET);
 }
 
 /**
@@ -52,15 +52,15 @@ void cm_control(u32 mask, u32 set)
 	u32 val;
 
 	raw_spin_lock_irqsave(&cm_lock, flags);
-	val = readl(cm_base + INTEGRATOR_HDR_CTRL_OFFSET) & ~mask;
-	writel(val | set, cm_base + INTEGRATOR_HDR_CTRL_OFFSET);
+	val = pete_readl("arch/arm/mach-integrator/core.c:55", cm_base + INTEGRATOR_HDR_CTRL_OFFSET) & ~mask;
+	pete_writel("arch/arm/mach-integrator/core.c:56", val | set, cm_base + INTEGRATOR_HDR_CTRL_OFFSET);
 	raw_spin_unlock_irqrestore(&cm_lock, flags);
 }
 
 void cm_clear_irqs(void)
 {
 	/* disable core module IRQs */
-	writel(0xffffffffU, cm_base + INTEGRATOR_HDR_IC_OFFSET +
+	pete_writel("arch/arm/mach-integrator/core.c:63", 0xffffffffU, cm_base + INTEGRATOR_HDR_IC_OFFSET +
 		IRQ_ENABLE_CLEAR);
 }
 

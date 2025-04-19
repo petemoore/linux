@@ -64,12 +64,12 @@ static int tse_pcs_reset(void __iomem *base, struct tse_pcs *pcs)
 	int counter = 0;
 	u16 val;
 
-	val = readw(base + TSE_PCS_CONTROL_REG);
+	val = pete_readw("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:67", base + TSE_PCS_CONTROL_REG);
 	val |= TSE_PCS_SW_RST_MASK;
-	writew(val, base + TSE_PCS_CONTROL_REG);
+	pete_writew("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:69", val, base + TSE_PCS_CONTROL_REG);
 
 	while (counter < TSE_PCS_SW_RESET_TIMEOUT) {
-		val = readw(base + TSE_PCS_CONTROL_REG);
+		val = pete_readw("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:72", base + TSE_PCS_CONTROL_REG);
 		val &= TSE_PCS_SW_RST_MASK;
 		if (val == 0)
 			break;
@@ -88,16 +88,16 @@ int tse_pcs_init(void __iomem *base, struct tse_pcs *pcs)
 {
 	int ret = 0;
 
-	writew(TSE_PCS_IF_USE_SGMII, base + TSE_PCS_IF_MODE_REG);
+	pete_writew("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:91", TSE_PCS_IF_USE_SGMII, base + TSE_PCS_IF_MODE_REG);
 
-	writew(TSE_PCS_CTRL_AUTONEG_SGMII, base + TSE_PCS_CONTROL_REG);
+	pete_writew("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:93", TSE_PCS_CTRL_AUTONEG_SGMII, base + TSE_PCS_CONTROL_REG);
 
-	writew(TSE_PCS_SGMII_LINK_TIMER_0, base + TSE_PCS_LINK_TIMER_0_REG);
-	writew(TSE_PCS_SGMII_LINK_TIMER_1, base + TSE_PCS_LINK_TIMER_1_REG);
+	pete_writew("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:95", TSE_PCS_SGMII_LINK_TIMER_0, base + TSE_PCS_LINK_TIMER_0_REG);
+	pete_writew("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:96", TSE_PCS_SGMII_LINK_TIMER_1, base + TSE_PCS_LINK_TIMER_1_REG);
 
 	ret = tse_pcs_reset(base, pcs);
 	if (ret == 0)
-		writew(SGMII_ADAPTER_ENABLE,
+		pete_writew("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:100", SGMII_ADAPTER_ENABLE,
 		       pcs->sgmii_adapter_base + SGMII_ADAPTER_CTRL_REG);
 
 	return ret;
@@ -109,12 +109,12 @@ static void pcs_link_timer_callback(struct tse_pcs *pcs)
 	void __iomem *tse_pcs_base = pcs->tse_pcs_base;
 	void __iomem *sgmii_adapter_base = pcs->sgmii_adapter_base;
 
-	val = readw(tse_pcs_base + TSE_PCS_STATUS_REG);
+	val = pete_readw("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:112", tse_pcs_base + TSE_PCS_STATUS_REG);
 	val &= TSE_PCS_STATUS_LINK_MASK;
 
 	if (val != 0) {
 		dev_dbg(pcs->dev, "Adapter: Link is established\n");
-		writew(SGMII_ADAPTER_ENABLE,
+		pete_writew("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:117", SGMII_ADAPTER_ENABLE,
 		       sgmii_adapter_base + SGMII_ADAPTER_CTRL_REG);
 	} else {
 		mod_timer(&pcs->aneg_link_timer, jiffies +
@@ -130,12 +130,12 @@ static void auto_nego_timer_callback(struct tse_pcs *pcs)
 	void __iomem *tse_pcs_base = pcs->tse_pcs_base;
 	void __iomem *sgmii_adapter_base = pcs->sgmii_adapter_base;
 
-	val = readw(tse_pcs_base + TSE_PCS_STATUS_REG);
+	val = pete_readw("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:133", tse_pcs_base + TSE_PCS_STATUS_REG);
 	val &= TSE_PCS_STATUS_AN_COMPLETED_MASK;
 
 	if (val != 0) {
 		dev_dbg(pcs->dev, "Adapter: Auto Negotiation is completed\n");
-		val = readw(tse_pcs_base + TSE_PCS_PARTNER_ABILITY_REG);
+		val = pete_readw("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:138", tse_pcs_base + TSE_PCS_PARTNER_ABILITY_REG);
 		speed = val & TSE_PCS_PARTNER_SPEED_MASK;
 		duplex = val & TSE_PCS_PARTNER_DUPLEX_MASK;
 
@@ -171,12 +171,12 @@ static void auto_nego_timer_callback(struct tse_pcs *pcs)
 		    (speed == TSE_PCS_PARTNER_SPEED_10 ||
 		     speed == TSE_PCS_PARTNER_SPEED_100 ||
 		     speed == TSE_PCS_PARTNER_SPEED_1000))
-			writew(SGMII_ADAPTER_ENABLE,
+			pete_writew("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:174", SGMII_ADAPTER_ENABLE,
 			       sgmii_adapter_base + SGMII_ADAPTER_CTRL_REG);
 	} else {
-		val = readw(tse_pcs_base + TSE_PCS_CONTROL_REG);
+		val = pete_readw("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:177", tse_pcs_base + TSE_PCS_CONTROL_REG);
 		val |= TSE_PCS_CONTROL_RESTART_AN_MASK;
-		writew(val, tse_pcs_base + TSE_PCS_CONTROL_REG);
+		pete_writew("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:179", val, tse_pcs_base + TSE_PCS_CONTROL_REG);
 
 		tse_pcs_reset(tse_pcs_base, pcs);
 		mod_timer(&pcs->aneg_link_timer, jiffies +
@@ -203,15 +203,15 @@ void tse_pcs_fix_mac_speed(struct tse_pcs *pcs, struct phy_device *phy_dev,
 	pcs->autoneg = phy_dev->autoneg;
 
 	if (phy_dev->autoneg == AUTONEG_ENABLE) {
-		val = readw(tse_pcs_base + TSE_PCS_CONTROL_REG);
+		val = pete_readw("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:206", tse_pcs_base + TSE_PCS_CONTROL_REG);
 		val |= TSE_PCS_CONTROL_AN_EN_MASK;
-		writew(val, tse_pcs_base + TSE_PCS_CONTROL_REG);
+		pete_writew("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:208", val, tse_pcs_base + TSE_PCS_CONTROL_REG);
 
-		val = readw(tse_pcs_base + TSE_PCS_IF_MODE_REG);
+		val = pete_readw("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:210", tse_pcs_base + TSE_PCS_IF_MODE_REG);
 		val |= TSE_PCS_USE_SGMII_AN_MASK;
-		writew(val, tse_pcs_base + TSE_PCS_IF_MODE_REG);
+		pete_writew("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:212", val, tse_pcs_base + TSE_PCS_IF_MODE_REG);
 
-		val = readw(tse_pcs_base + TSE_PCS_CONTROL_REG);
+		val = pete_readw("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:214", tse_pcs_base + TSE_PCS_CONTROL_REG);
 		val |= TSE_PCS_CONTROL_RESTART_AN_MASK;
 
 		tse_pcs_reset(tse_pcs_base, pcs);
@@ -221,15 +221,15 @@ void tse_pcs_fix_mac_speed(struct tse_pcs *pcs, struct phy_device *phy_dev,
 		mod_timer(&pcs->aneg_link_timer, jiffies +
 			  msecs_to_jiffies(AUTONEGO_LINK_TIMER));
 	} else if (phy_dev->autoneg == AUTONEG_DISABLE) {
-		val = readw(tse_pcs_base + TSE_PCS_CONTROL_REG);
+		val = pete_readw("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:224", tse_pcs_base + TSE_PCS_CONTROL_REG);
 		val &= ~TSE_PCS_CONTROL_AN_EN_MASK;
-		writew(val, tse_pcs_base + TSE_PCS_CONTROL_REG);
+		pete_writew("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:226", val, tse_pcs_base + TSE_PCS_CONTROL_REG);
 
-		val = readw(tse_pcs_base + TSE_PCS_IF_MODE_REG);
+		val = pete_readw("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:228", tse_pcs_base + TSE_PCS_IF_MODE_REG);
 		val &= ~TSE_PCS_USE_SGMII_AN_MASK;
-		writew(val, tse_pcs_base + TSE_PCS_IF_MODE_REG);
+		pete_writew("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:230", val, tse_pcs_base + TSE_PCS_IF_MODE_REG);
 
-		val = readw(tse_pcs_base + TSE_PCS_IF_MODE_REG);
+		val = pete_readw("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:232", tse_pcs_base + TSE_PCS_IF_MODE_REG);
 		val &= ~TSE_PCS_SGMII_SPEED_MASK;
 
 		switch (speed) {
@@ -245,7 +245,7 @@ void tse_pcs_fix_mac_speed(struct tse_pcs *pcs, struct phy_device *phy_dev,
 		default:
 			return;
 		}
-		writew(val, tse_pcs_base + TSE_PCS_IF_MODE_REG);
+		pete_writew("drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.c:248", val, tse_pcs_base + TSE_PCS_IF_MODE_REG);
 
 		tse_pcs_reset(tse_pcs_base, pcs);
 

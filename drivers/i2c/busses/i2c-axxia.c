@@ -153,16 +153,16 @@ static void i2c_int_disable(struct axxia_i2c_dev *idev, u32 mask)
 {
 	u32 int_en;
 
-	int_en = readl(idev->base + MST_INT_ENABLE);
-	writel(int_en & ~mask, idev->base + MST_INT_ENABLE);
+	int_en = pete_readl("drivers/i2c/busses/i2c-axxia.c:156", idev->base + MST_INT_ENABLE);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:157", int_en & ~mask, idev->base + MST_INT_ENABLE);
 }
 
 static void i2c_int_enable(struct axxia_i2c_dev *idev, u32 mask)
 {
 	u32 int_en;
 
-	int_en = readl(idev->base + MST_INT_ENABLE);
-	writel(int_en | mask, idev->base + MST_INT_ENABLE);
+	int_en = pete_readl("drivers/i2c/busses/i2c-axxia.c:164", idev->base + MST_INT_ENABLE);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:165", int_en | mask, idev->base + MST_INT_ENABLE);
 }
 
 /**
@@ -187,9 +187,9 @@ static int axxia_i2c_init(struct axxia_i2c_dev *idev)
 		idev->bus_clk_rate, clk_mhz, divisor);
 
 	/* Reset controller */
-	writel(0x01, idev->base + SOFT_RESET);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:190", 0x01, idev->base + SOFT_RESET);
 	timeout = jiffies + msecs_to_jiffies(100);
-	while (readl(idev->base + SOFT_RESET) & 1) {
+	while (pete_readl("drivers/i2c/busses/i2c-axxia.c:192", idev->base + SOFT_RESET) & 1) {
 		if (time_after(jiffies, timeout)) {
 			dev_warn(idev->dev, "Soft reset failed\n");
 			break;
@@ -197,7 +197,7 @@ static int axxia_i2c_init(struct axxia_i2c_dev *idev)
 	}
 
 	/* Enable Master Mode */
-	writel(0x1, idev->base + GLOBAL_CONTROL);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:200", 0x1, idev->base + GLOBAL_CONTROL);
 
 	if (idev->bus_clk_rate <= I2C_MAX_STANDARD_MODE_FREQ) {
 		/* Standard mode SCL 50/50, tSU:DAT = 250 ns */
@@ -212,15 +212,15 @@ static int axxia_i2c_init(struct axxia_i2c_dev *idev)
 	}
 
 	/* SCL High Time */
-	writel(t_high, idev->base + SCL_HIGH_PERIOD);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:215", t_high, idev->base + SCL_HIGH_PERIOD);
 	/* SCL Low Time */
-	writel(t_low, idev->base + SCL_LOW_PERIOD);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:217", t_low, idev->base + SCL_LOW_PERIOD);
 	/* SDA Setup Time */
-	writel(t_setup, idev->base + SDA_SETUP_TIME);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:219", t_setup, idev->base + SDA_SETUP_TIME);
 	/* SDA Hold Time, 300ns */
-	writel(ns_to_clk(300, clk_mhz), idev->base + SDA_HOLD_TIME);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:221", ns_to_clk(300, clk_mhz), idev->base + SDA_HOLD_TIME);
 	/* Filter <50ns spikes */
-	writel(ns_to_clk(50, clk_mhz), idev->base + SPIKE_FLTR_LEN);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:223", ns_to_clk(50, clk_mhz), idev->base + SPIKE_FLTR_LEN);
 
 	/* Configure Time-Out Registers */
 	tmo_clk = ns_to_clk(SCL_WAIT_TIMEOUT_NS, clk_mhz);
@@ -235,15 +235,15 @@ static int axxia_i2c_init(struct axxia_i2c_dev *idev)
 		tmo_clk = 0x7fff;
 
 	/* Prescale divider (log2) */
-	writel(prescale, idev->base + TIMER_CLOCK_DIV);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:238", prescale, idev->base + TIMER_CLOCK_DIV);
 	/* Timeout in divided clocks */
-	writel(WT_EN | WT_VALUE(tmo_clk), idev->base + WAIT_TIMER_CONTROL);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:240", WT_EN | WT_VALUE(tmo_clk), idev->base + WAIT_TIMER_CONTROL);
 
 	/* Mask all master interrupt bits */
 	i2c_int_disable(idev, ~0);
 
 	/* Interrupt enable */
-	writel(0x01, idev->base + INTERRUPT_ENABLE);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:246", 0x01, idev->base + INTERRUPT_ENABLE);
 
 	return 0;
 }
@@ -270,11 +270,11 @@ static int i2c_m_recv_len(const struct i2c_msg *msg)
 static int axxia_i2c_empty_rx_fifo(struct axxia_i2c_dev *idev)
 {
 	struct i2c_msg *msg = idev->msg_r;
-	size_t rx_fifo_avail = readl(idev->base + MST_RX_FIFO);
+	size_t rx_fifo_avail = pete_readl("drivers/i2c/busses/i2c-axxia.c:273", idev->base + MST_RX_FIFO);
 	int bytes_to_transfer = min(rx_fifo_avail, msg->len - idev->msg_xfrd_r);
 
 	while (bytes_to_transfer-- > 0) {
-		int c = readl(idev->base + MST_DATA);
+		int c = pete_readl("drivers/i2c/busses/i2c-axxia.c:277", idev->base + MST_DATA);
 
 		if (idev->msg_xfrd_r == 0 && i2c_m_recv_len(msg)) {
 			/*
@@ -287,7 +287,7 @@ static int axxia_i2c_empty_rx_fifo(struct axxia_i2c_dev *idev)
 				break;
 			}
 			msg->len = 1 + c;
-			writel(msg->len, idev->base + MST_RX_XFER);
+			pete_writel("drivers/i2c/busses/i2c-axxia.c:290", msg->len, idev->base + MST_RX_XFER);
 		}
 		msg->buf[idev->msg_xfrd_r++] = c;
 	}
@@ -302,19 +302,19 @@ static int axxia_i2c_empty_rx_fifo(struct axxia_i2c_dev *idev)
 static int axxia_i2c_fill_tx_fifo(struct axxia_i2c_dev *idev)
 {
 	struct i2c_msg *msg = idev->msg;
-	size_t tx_fifo_avail = FIFO_SIZE - readl(idev->base + MST_TX_FIFO);
+	size_t tx_fifo_avail = FIFO_SIZE - pete_readl("drivers/i2c/busses/i2c-axxia.c:305", idev->base + MST_TX_FIFO);
 	int bytes_to_transfer = min(tx_fifo_avail, msg->len - idev->msg_xfrd);
 	int ret = msg->len - idev->msg_xfrd - bytes_to_transfer;
 
 	while (bytes_to_transfer-- > 0)
-		writel(msg->buf[idev->msg_xfrd++], idev->base + MST_DATA);
+		pete_writel("drivers/i2c/busses/i2c-axxia.c:310", msg->buf[idev->msg_xfrd++], idev->base + MST_DATA);
 
 	return ret;
 }
 
 static void axxia_i2c_slv_fifo_event(struct axxia_i2c_dev *idev)
 {
-	u32 fifo_status = readl(idev->base + SLV_RX_FIFO);
+	u32 fifo_status = pete_readl("drivers/i2c/busses/i2c-axxia.c:317", idev->base + SLV_RX_FIFO);
 	u8 val;
 
 	dev_dbg(idev->dev, "slave irq fifo_status=0x%x\n", fifo_status);
@@ -324,20 +324,20 @@ static void axxia_i2c_slv_fifo_event(struct axxia_i2c_dev *idev)
 			i2c_slave_event(idev->slave,
 					I2C_SLAVE_WRITE_REQUESTED, &val);
 
-		val = readl(idev->base + SLV_DATA);
+		val = pete_readl("drivers/i2c/busses/i2c-axxia.c:327", idev->base + SLV_DATA);
 		i2c_slave_event(idev->slave, I2C_SLAVE_WRITE_RECEIVED, &val);
 	}
 	if (fifo_status & SLV_FIFO_STPC) {
-		readl(idev->base + SLV_DATA); /* dummy read */
+		pete_readl("drivers/i2c/busses/i2c-axxia.c:331", idev->base + SLV_DATA); /* dummy read */
 		i2c_slave_event(idev->slave, I2C_SLAVE_STOP, &val);
 	}
 	if (fifo_status & SLV_FIFO_RSC)
-		readl(idev->base + SLV_DATA); /* dummy read */
+		pete_readl("drivers/i2c/busses/i2c-axxia.c:335", idev->base + SLV_DATA); /* dummy read */
 }
 
 static irqreturn_t axxia_i2c_slv_isr(struct axxia_i2c_dev *idev)
 {
-	u32 status = readl(idev->base + SLV_INT_STATUS);
+	u32 status = pete_readl("drivers/i2c/busses/i2c-axxia.c:340", idev->base + SLV_INT_STATUS);
 	u8 val;
 
 	dev_dbg(idev->dev, "slave irq status=0x%x\n", status);
@@ -346,16 +346,16 @@ static irqreturn_t axxia_i2c_slv_isr(struct axxia_i2c_dev *idev)
 		axxia_i2c_slv_fifo_event(idev);
 	if (status & SLV_STATUS_SRS1) {
 		i2c_slave_event(idev->slave, I2C_SLAVE_READ_REQUESTED, &val);
-		writel(val, idev->base + SLV_DATA);
+		pete_writel("drivers/i2c/busses/i2c-axxia.c:349", val, idev->base + SLV_DATA);
 	}
 	if (status & SLV_STATUS_SRND1) {
 		i2c_slave_event(idev->slave, I2C_SLAVE_READ_PROCESSED, &val);
-		writel(val, idev->base + SLV_DATA);
+		pete_writel("drivers/i2c/busses/i2c-axxia.c:353", val, idev->base + SLV_DATA);
 	}
 	if (status & SLV_STATUS_SRC1)
 		i2c_slave_event(idev->slave, I2C_SLAVE_STOP, &val);
 
-	writel(INT_SLV, idev->base + INTERRUPT_STATUS);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:358", INT_SLV, idev->base + INTERRUPT_STATUS);
 	return IRQ_HANDLED;
 }
 
@@ -365,7 +365,7 @@ static irqreturn_t axxia_i2c_isr(int irq, void *_dev)
 	irqreturn_t ret = IRQ_NONE;
 	u32 status;
 
-	status = readl(idev->base + INTERRUPT_STATUS);
+	status = pete_readl("drivers/i2c/busses/i2c-axxia.c:368", idev->base + INTERRUPT_STATUS);
 
 	if (status & INT_SLV)
 		ret = axxia_i2c_slv_isr(idev);
@@ -373,7 +373,7 @@ static irqreturn_t axxia_i2c_isr(int irq, void *_dev)
 		return ret;
 
 	/* Read interrupt status bits */
-	status = readl(idev->base + MST_INT_STATUS);
+	status = pete_readl("drivers/i2c/busses/i2c-axxia.c:376", idev->base + MST_INT_STATUS);
 
 	if (!idev->msg) {
 		dev_warn(idev->dev, "unexpected interrupt\n");
@@ -402,10 +402,10 @@ static irqreturn_t axxia_i2c_isr(int irq, void *_dev)
 		dev_dbg(idev->dev, "error %#x, addr=%#x rx=%u/%u tx=%u/%u\n",
 			status,
 			idev->msg->addr,
-			readl(idev->base + MST_RX_BYTES_XFRD),
-			readl(idev->base + MST_RX_XFER),
-			readl(idev->base + MST_TX_BYTES_XFRD),
-			readl(idev->base + MST_TX_XFER));
+			pete_readl("drivers/i2c/busses/i2c-axxia.c:405", idev->base + MST_RX_BYTES_XFRD),
+			pete_readl("drivers/i2c/busses/i2c-axxia.c:406", idev->base + MST_RX_XFER),
+			pete_readl("drivers/i2c/busses/i2c-axxia.c:407", idev->base + MST_TX_BYTES_XFRD),
+			pete_readl("drivers/i2c/busses/i2c-axxia.c:408", idev->base + MST_TX_XFER));
 		complete(&idev->msg_complete);
 	} else if (status & MST_STATUS_SCC) {
 		/* Stop completed */
@@ -428,7 +428,7 @@ static irqreturn_t axxia_i2c_isr(int irq, void *_dev)
 
 out:
 	/* Clear interrupt */
-	writel(INT_MST, idev->base + INTERRUPT_STATUS);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:431", INT_MST, idev->base + INTERRUPT_STATUS);
 
 	return IRQ_HANDLED;
 }
@@ -455,8 +455,8 @@ static void axxia_i2c_set_addr(struct axxia_i2c_dev *idev, struct i2c_msg *msg)
 		addr_2 = 0;
 	}
 
-	writel(addr_1, idev->base + MST_ADDR_1);
-	writel(addr_2, idev->base + MST_ADDR_2);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:458", addr_1, idev->base + MST_ADDR_1);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:459", addr_2, idev->base + MST_ADDR_2);
 }
 
 /* The NAK interrupt will be sent _before_ issuing STOP command
@@ -468,7 +468,7 @@ static int axxia_i2c_handle_seq_nak(struct axxia_i2c_dev *idev)
 	unsigned long timeout = jiffies + I2C_XFER_TIMEOUT;
 
 	do {
-		if ((readl(idev->base + MST_COMMAND) & CMD_BUSY) == 0)
+		if ((pete_readl("drivers/i2c/busses/i2c-axxia.c:471", idev->base + MST_COMMAND) & CMD_BUSY) == 0)
 			return 0;
 		usleep_range(1, 100);
 	} while (time_before(jiffies, timeout));
@@ -484,8 +484,8 @@ static int axxia_i2c_xfer_seq(struct axxia_i2c_dev *idev, struct i2c_msg msgs[])
 
 	axxia_i2c_set_addr(idev, &msgs[0]);
 
-	writel(msgs[0].len, idev->base + MST_TX_XFER);
-	writel(rlen, idev->base + MST_RX_XFER);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:487", msgs[0].len, idev->base + MST_TX_XFER);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:488", rlen, idev->base + MST_RX_XFER);
 
 	idev->msg = &msgs[0];
 	idev->msg_r = &msgs[1];
@@ -494,7 +494,7 @@ static int axxia_i2c_xfer_seq(struct axxia_i2c_dev *idev, struct i2c_msg msgs[])
 	idev->last = true;
 	axxia_i2c_fill_tx_fifo(idev);
 
-	writel(CMD_SEQUENCE, idev->base + MST_COMMAND);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:497", CMD_SEQUENCE, idev->base + MST_COMMAND);
 
 	reinit_completion(&idev->msg_complete);
 	i2c_int_enable(idev, int_mask);
@@ -505,7 +505,7 @@ static int axxia_i2c_xfer_seq(struct axxia_i2c_dev *idev, struct i2c_msg msgs[])
 	if (idev->msg_err == -ENXIO) {
 		if (axxia_i2c_handle_seq_nak(idev))
 			axxia_i2c_init(idev);
-	} else if (readl(idev->base + MST_COMMAND) & CMD_BUSY) {
+	} else if (pete_readl("drivers/i2c/busses/i2c-axxia.c:508", idev->base + MST_COMMAND) & CMD_BUSY) {
 		dev_warn(idev->dev, "busy after xfer\n");
 	}
 
@@ -548,30 +548,30 @@ static int axxia_i2c_xfer_msg(struct axxia_i2c_dev *idev, struct i2c_msg *msg,
 		tx_xfer = msg->len;
 	}
 
-	writel(rx_xfer, idev->base + MST_RX_XFER);
-	writel(tx_xfer, idev->base + MST_TX_XFER);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:551", rx_xfer, idev->base + MST_RX_XFER);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:552", tx_xfer, idev->base + MST_TX_XFER);
 
 	if (i2c_m_rd(msg))
 		int_mask |= MST_STATUS_RFL;
 	else if (axxia_i2c_fill_tx_fifo(idev) != 0)
 		int_mask |= MST_STATUS_TFL;
 
-	wt_value = WT_VALUE(readl(idev->base + WAIT_TIMER_CONTROL));
+	wt_value = WT_VALUE(pete_readl("drivers/i2c/busses/i2c-axxia.c:559", idev->base + WAIT_TIMER_CONTROL));
 	/* Disable wait timer temporarly */
-	writel(wt_value, idev->base + WAIT_TIMER_CONTROL);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:561", wt_value, idev->base + WAIT_TIMER_CONTROL);
 	/* Check if timeout error happened */
 	if (idev->msg_err)
 		goto out;
 
 	if (!last) {
-		writel(CMD_MANUAL, idev->base + MST_COMMAND);
+		pete_writel("drivers/i2c/busses/i2c-axxia.c:567", CMD_MANUAL, idev->base + MST_COMMAND);
 		int_mask |= MST_STATUS_SNS;
 	} else {
-		writel(CMD_AUTO, idev->base + MST_COMMAND);
+		pete_writel("drivers/i2c/busses/i2c-axxia.c:570", CMD_AUTO, idev->base + MST_COMMAND);
 		int_mask |= MST_STATUS_SS;
 	}
 
-	writel(WT_EN | wt_value, idev->base + WAIT_TIMER_CONTROL);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:574", WT_EN | wt_value, idev->base + WAIT_TIMER_CONTROL);
 
 	i2c_int_enable(idev, int_mask);
 
@@ -580,7 +580,7 @@ static int axxia_i2c_xfer_msg(struct axxia_i2c_dev *idev, struct i2c_msg *msg,
 
 	i2c_int_disable(idev, int_mask);
 
-	if (readl(idev->base + MST_COMMAND) & CMD_BUSY)
+	if (pete_readl("drivers/i2c/busses/i2c-axxia.c:583", idev->base + MST_COMMAND) & CMD_BUSY)
 		dev_warn(idev->dev, "busy after xfer\n");
 
 	if (time_left == 0) {
@@ -635,7 +635,7 @@ static int axxia_i2c_get_scl(struct i2c_adapter *adap)
 {
 	struct axxia_i2c_dev *idev = i2c_get_adapdata(adap);
 
-	return !!(readl(idev->base + I2C_BUS_MONITOR) & BM_SCLS);
+	return !!(pete_readl("drivers/i2c/busses/i2c-axxia.c:638", idev->base + I2C_BUS_MONITOR) & BM_SCLS);
 }
 
 static void axxia_i2c_set_scl(struct i2c_adapter *adap, int val)
@@ -644,17 +644,17 @@ static void axxia_i2c_set_scl(struct i2c_adapter *adap, int val)
 	u32 tmp;
 
 	/* Preserve SDA Control */
-	tmp = readl(idev->base + I2C_BUS_MONITOR) & BM_SDAC;
+	tmp = pete_readl("drivers/i2c/busses/i2c-axxia.c:647", idev->base + I2C_BUS_MONITOR) & BM_SDAC;
 	if (!val)
 		tmp |= BM_SCLC;
-	writel(tmp, idev->base + I2C_BUS_MONITOR);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:650", tmp, idev->base + I2C_BUS_MONITOR);
 }
 
 static int axxia_i2c_get_sda(struct i2c_adapter *adap)
 {
 	struct axxia_i2c_dev *idev = i2c_get_adapdata(adap);
 
-	return !!(readl(idev->base + I2C_BUS_MONITOR) & BM_SDAS);
+	return !!(pete_readl("drivers/i2c/busses/i2c-axxia.c:657", idev->base + I2C_BUS_MONITOR) & BM_SDAS);
 }
 
 static struct i2c_bus_recovery_info axxia_i2c_recovery_info = {
@@ -683,22 +683,22 @@ static int axxia_i2c_reg_slave(struct i2c_client *slave)
 	idev->slave = slave;
 
 	/* Enable slave mode as well */
-	writel(GLOBAL_MST_EN | GLOBAL_SLV_EN, idev->base + GLOBAL_CONTROL);
-	writel(INT_MST | INT_SLV, idev->base + INTERRUPT_ENABLE);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:686", GLOBAL_MST_EN | GLOBAL_SLV_EN, idev->base + GLOBAL_CONTROL);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:687", INT_MST | INT_SLV, idev->base + INTERRUPT_ENABLE);
 
 	/* Set slave address */
 	dec_ctl = SLV_ADDR_DEC_SA1E;
 	if (slave->flags & I2C_CLIENT_TEN)
 		dec_ctl |= SLV_ADDR_DEC_SA1M;
 
-	writel(SLV_RX_ACSA1, idev->base + SLV_RX_CTL);
-	writel(dec_ctl, idev->base + SLV_ADDR_DEC_CTL);
-	writel(slave->addr, idev->base + SLV_ADDR_1);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:694", SLV_RX_ACSA1, idev->base + SLV_RX_CTL);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:695", dec_ctl, idev->base + SLV_ADDR_DEC_CTL);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:696", slave->addr, idev->base + SLV_ADDR_1);
 
 	/* Enable interrupts */
 	slv_int_mask |= SLV_STATUS_SRS1 | SLV_STATUS_SRRS1 | SLV_STATUS_SRND1;
 	slv_int_mask |= SLV_STATUS_SRC1;
-	writel(slv_int_mask, idev->base + SLV_INT_ENABLE);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:701", slv_int_mask, idev->base + SLV_INT_ENABLE);
 
 	return 0;
 }
@@ -708,8 +708,8 @@ static int axxia_i2c_unreg_slave(struct i2c_client *slave)
 	struct axxia_i2c_dev *idev = i2c_get_adapdata(slave->adapter);
 
 	/* Disable slave mode */
-	writel(GLOBAL_MST_EN, idev->base + GLOBAL_CONTROL);
-	writel(INT_MST, idev->base + INTERRUPT_ENABLE);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:711", GLOBAL_MST_EN, idev->base + GLOBAL_CONTROL);
+	pete_writel("drivers/i2c/busses/i2c-axxia.c:712", INT_MST, idev->base + INTERRUPT_ENABLE);
 
 	synchronize_irq(idev->irq);
 

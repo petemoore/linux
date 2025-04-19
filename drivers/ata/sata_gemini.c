@@ -160,13 +160,13 @@ static int gemini_sata_setup_bridge(struct sata_gemini *sg,
 		/* SATA0 slave mode is only used in muxmode 2 */
 		if (sg->muxmode == GEMINI_MUXMODE_2)
 			val |= GEMINI_SATA_CTRL_SLAVE_EN;
-		writel(val, sg->base + GEMINI_SATA0_CTRL);
+		pete_writel("drivers/ata/sata_gemini.c:163", val, sg->base + GEMINI_SATA0_CTRL);
 	} else {
 		val = GEMINI_SATA_CTRL_HOTPLUG_DETECT_EN | GEMINI_SATA_CTRL_EN;
 		/* SATA1 slave mode is only used in muxmode 3 */
 		if (sg->muxmode == GEMINI_MUXMODE_3)
 			val |= GEMINI_SATA_CTRL_SLAVE_EN;
-		writel(val, sg->base + GEMINI_SATA1_CTRL);
+		pete_writel("drivers/ata/sata_gemini.c:169", val, sg->base + GEMINI_SATA1_CTRL);
 	}
 
 	/* Vendor code waits 10 ms here */
@@ -177,9 +177,9 @@ static int gemini_sata_setup_bridge(struct sata_gemini *sg,
 		msleep(100);
 
 		if (bridge == 0)
-			val = readl(sg->base + GEMINI_SATA0_STATUS);
+			val = pete_readl("drivers/ata/sata_gemini.c:180", sg->base + GEMINI_SATA0_STATUS);
 		else
-			val = readl(sg->base + GEMINI_SATA1_STATUS);
+			val = pete_readl("drivers/ata/sata_gemini.c:182", sg->base + GEMINI_SATA1_STATUS);
 		if (val & GEMINI_SATA_STATUS_PHY_READY)
 			break;
 	} while (time_before(jiffies, timeout));
@@ -278,8 +278,8 @@ static int gemini_sata_bridge_init(struct sata_gemini *sg)
 		return PTR_ERR(sg->sata1_reset);
 	}
 
-	sata_id = readl(sg->base + GEMINI_SATA_ID);
-	sata_phy_id = readl(sg->base + GEMINI_SATA_PHY_ID);
+	sata_id = pete_readl("drivers/ata/sata_gemini.c:281", sg->base + GEMINI_SATA_ID);
+	sata_phy_id = pete_readl("drivers/ata/sata_gemini.c:282", sg->base + GEMINI_SATA_PHY_ID);
 	sg->sata_bridge = true;
 	clk_disable(sg->sata0_pclk);
 	clk_disable(sg->sata1_pclk);

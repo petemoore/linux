@@ -185,7 +185,7 @@ static int rr_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	 * Don't access any register before this point!
 	 */
 #ifdef __BIG_ENDIAN
-	writel(readl(&rrpriv->regs->HostCtrl) | NO_SWAP,
+	pete_writel("drivers/net/hippi/rrunner.c:188", pete_readl("drivers/net/hippi/rrunner.c:188", &rrpriv->regs->HostCtrl) | NO_SWAP,
 		&rrpriv->regs->HostCtrl);
 #endif
 	/*
@@ -224,10 +224,10 @@ static void rr_remove_one(struct pci_dev *pdev)
 	struct net_device *dev = pci_get_drvdata(pdev);
 	struct rr_private *rr = netdev_priv(dev);
 
-	if (!(readl(&rr->regs->HostCtrl) & NIC_HALTED)) {
+	if (!(pete_readl("drivers/net/hippi/rrunner.c:227", &rr->regs->HostCtrl) & NIC_HALTED)) {
 		printk(KERN_ERR "%s: trying to unload running NIC\n",
 		       dev->name);
-		writel(HALT_NIC, &rr->regs->HostCtrl);
+		pete_writel("drivers/net/hippi/rrunner.c:230", HALT_NIC, &rr->regs->HostCtrl);
 	}
 
 	unregister_netdev(dev);
@@ -258,25 +258,25 @@ static void rr_issue_cmd(struct rr_private *rrpriv, struct cmd *cmd)
 	 * This is temporary - it will go away in the final version.
 	 * We probably also want to make this function inline.
 	 */
-	if (readl(&regs->HostCtrl) & NIC_HALTED){
+	if (pete_readl("drivers/net/hippi/rrunner.c:261", &regs->HostCtrl) & NIC_HALTED){
 		printk("issuing command for halted NIC, code 0x%x, "
-		       "HostCtrl %08x\n", cmd->code, readl(&regs->HostCtrl));
-		if (readl(&regs->Mode) & FATAL_ERR)
+		       "HostCtrl %08x\n", cmd->code, pete_readl("drivers/net/hippi/rrunner.c:263", &regs->HostCtrl));
+		if (pete_readl("drivers/net/hippi/rrunner.c:264", &regs->Mode) & FATAL_ERR)
 			printk("error codes Fail1 %02x, Fail2 %02x\n",
-			       readl(&regs->Fail1), readl(&regs->Fail2));
+			       pete_readl("drivers/net/hippi/rrunner.c:266", &regs->Fail1), pete_readl("drivers/net/hippi/rrunner.c:266", &regs->Fail2));
 	}
 
 	idx = rrpriv->info->cmd_ctrl.pi;
 
-	writel(*(u32*)(cmd), &regs->CmdRing[idx]);
+	pete_writel("drivers/net/hippi/rrunner.c:271", *(u32*)(cmd), &regs->CmdRing[idx]);
 	wmb();
 
 	idx = (idx - 1) % CMD_RING_ENTRIES;
 	rrpriv->info->cmd_ctrl.pi = idx;
 	wmb();
 
-	if (readl(&regs->Mode) & FATAL_ERR)
-		printk("error code %02x\n", readl(&regs->Fail1));
+	if (pete_readl("drivers/net/hippi/rrunner.c:278", &regs->Mode) & FATAL_ERR)
+		printk("error code %02x\n", pete_readl("drivers/net/hippi/rrunner.c:279", &regs->Fail1));
 }
 
 
@@ -296,82 +296,82 @@ static int rr_reset(struct net_device *dev)
 
 	rr_load_firmware(dev);
 
-	writel(0x01000000, &regs->TX_state);
-	writel(0xff800000, &regs->RX_state);
-	writel(0, &regs->AssistState);
-	writel(CLEAR_INTA, &regs->LocalCtrl);
-	writel(0x01, &regs->BrkPt);
-	writel(0, &regs->Timer);
-	writel(0, &regs->TimerRef);
-	writel(RESET_DMA, &regs->DmaReadState);
-	writel(RESET_DMA, &regs->DmaWriteState);
-	writel(0, &regs->DmaWriteHostHi);
-	writel(0, &regs->DmaWriteHostLo);
-	writel(0, &regs->DmaReadHostHi);
-	writel(0, &regs->DmaReadHostLo);
-	writel(0, &regs->DmaReadLen);
-	writel(0, &regs->DmaWriteLen);
-	writel(0, &regs->DmaWriteLcl);
-	writel(0, &regs->DmaWriteIPchecksum);
-	writel(0, &regs->DmaReadLcl);
-	writel(0, &regs->DmaReadIPchecksum);
-	writel(0, &regs->PciState);
+	pete_writel("drivers/net/hippi/rrunner.c:299", 0x01000000, &regs->TX_state);
+	pete_writel("drivers/net/hippi/rrunner.c:300", 0xff800000, &regs->RX_state);
+	pete_writel("drivers/net/hippi/rrunner.c:301", 0, &regs->AssistState);
+	pete_writel("drivers/net/hippi/rrunner.c:302", CLEAR_INTA, &regs->LocalCtrl);
+	pete_writel("drivers/net/hippi/rrunner.c:303", 0x01, &regs->BrkPt);
+	pete_writel("drivers/net/hippi/rrunner.c:304", 0, &regs->Timer);
+	pete_writel("drivers/net/hippi/rrunner.c:305", 0, &regs->TimerRef);
+	pete_writel("drivers/net/hippi/rrunner.c:306", RESET_DMA, &regs->DmaReadState);
+	pete_writel("drivers/net/hippi/rrunner.c:307", RESET_DMA, &regs->DmaWriteState);
+	pete_writel("drivers/net/hippi/rrunner.c:308", 0, &regs->DmaWriteHostHi);
+	pete_writel("drivers/net/hippi/rrunner.c:309", 0, &regs->DmaWriteHostLo);
+	pete_writel("drivers/net/hippi/rrunner.c:310", 0, &regs->DmaReadHostHi);
+	pete_writel("drivers/net/hippi/rrunner.c:311", 0, &regs->DmaReadHostLo);
+	pete_writel("drivers/net/hippi/rrunner.c:312", 0, &regs->DmaReadLen);
+	pete_writel("drivers/net/hippi/rrunner.c:313", 0, &regs->DmaWriteLen);
+	pete_writel("drivers/net/hippi/rrunner.c:314", 0, &regs->DmaWriteLcl);
+	pete_writel("drivers/net/hippi/rrunner.c:315", 0, &regs->DmaWriteIPchecksum);
+	pete_writel("drivers/net/hippi/rrunner.c:316", 0, &regs->DmaReadLcl);
+	pete_writel("drivers/net/hippi/rrunner.c:317", 0, &regs->DmaReadIPchecksum);
+	pete_writel("drivers/net/hippi/rrunner.c:318", 0, &regs->PciState);
 #if (BITS_PER_LONG == 64) && defined __LITTLE_ENDIAN
-	writel(SWAP_DATA | PTR64BIT | PTR_WD_SWAP, &regs->Mode);
+	pete_writel("drivers/net/hippi/rrunner.c:320", SWAP_DATA | PTR64BIT | PTR_WD_SWAP, &regs->Mode);
 #elif (BITS_PER_LONG == 64)
-	writel(SWAP_DATA | PTR64BIT | PTR_WD_NOSWAP, &regs->Mode);
+	pete_writel("drivers/net/hippi/rrunner.c:322", SWAP_DATA | PTR64BIT | PTR_WD_NOSWAP, &regs->Mode);
 #else
-	writel(SWAP_DATA | PTR32BIT | PTR_WD_NOSWAP, &regs->Mode);
+	pete_writel("drivers/net/hippi/rrunner.c:324", SWAP_DATA | PTR32BIT | PTR_WD_NOSWAP, &regs->Mode);
 #endif
 
 #if 0
 	/*
 	 * Don't worry, this is just black magic.
 	 */
-	writel(0xdf000, &regs->RxBase);
-	writel(0xdf000, &regs->RxPrd);
-	writel(0xdf000, &regs->RxCon);
-	writel(0xce000, &regs->TxBase);
-	writel(0xce000, &regs->TxPrd);
-	writel(0xce000, &regs->TxCon);
-	writel(0, &regs->RxIndPro);
-	writel(0, &regs->RxIndCon);
-	writel(0, &regs->RxIndRef);
-	writel(0, &regs->TxIndPro);
-	writel(0, &regs->TxIndCon);
-	writel(0, &regs->TxIndRef);
-	writel(0xcc000, &regs->pad10[0]);
-	writel(0, &regs->DrCmndPro);
-	writel(0, &regs->DrCmndCon);
-	writel(0, &regs->DwCmndPro);
-	writel(0, &regs->DwCmndCon);
-	writel(0, &regs->DwCmndRef);
-	writel(0, &regs->DrDataPro);
-	writel(0, &regs->DrDataCon);
-	writel(0, &regs->DrDataRef);
-	writel(0, &regs->DwDataPro);
-	writel(0, &regs->DwDataCon);
-	writel(0, &regs->DwDataRef);
+	pete_writel("drivers/net/hippi/rrunner.c:331", 0xdf000, &regs->RxBase);
+	pete_writel("drivers/net/hippi/rrunner.c:332", 0xdf000, &regs->RxPrd);
+	pete_writel("drivers/net/hippi/rrunner.c:333", 0xdf000, &regs->RxCon);
+	pete_writel("drivers/net/hippi/rrunner.c:334", 0xce000, &regs->TxBase);
+	pete_writel("drivers/net/hippi/rrunner.c:335", 0xce000, &regs->TxPrd);
+	pete_writel("drivers/net/hippi/rrunner.c:336", 0xce000, &regs->TxCon);
+	pete_writel("drivers/net/hippi/rrunner.c:337", 0, &regs->RxIndPro);
+	pete_writel("drivers/net/hippi/rrunner.c:338", 0, &regs->RxIndCon);
+	pete_writel("drivers/net/hippi/rrunner.c:339", 0, &regs->RxIndRef);
+	pete_writel("drivers/net/hippi/rrunner.c:340", 0, &regs->TxIndPro);
+	pete_writel("drivers/net/hippi/rrunner.c:341", 0, &regs->TxIndCon);
+	pete_writel("drivers/net/hippi/rrunner.c:342", 0, &regs->TxIndRef);
+	pete_writel("drivers/net/hippi/rrunner.c:343", 0xcc000, &regs->pad10[0]);
+	pete_writel("drivers/net/hippi/rrunner.c:344", 0, &regs->DrCmndPro);
+	pete_writel("drivers/net/hippi/rrunner.c:345", 0, &regs->DrCmndCon);
+	pete_writel("drivers/net/hippi/rrunner.c:346", 0, &regs->DwCmndPro);
+	pete_writel("drivers/net/hippi/rrunner.c:347", 0, &regs->DwCmndCon);
+	pete_writel("drivers/net/hippi/rrunner.c:348", 0, &regs->DwCmndRef);
+	pete_writel("drivers/net/hippi/rrunner.c:349", 0, &regs->DrDataPro);
+	pete_writel("drivers/net/hippi/rrunner.c:350", 0, &regs->DrDataCon);
+	pete_writel("drivers/net/hippi/rrunner.c:351", 0, &regs->DrDataRef);
+	pete_writel("drivers/net/hippi/rrunner.c:352", 0, &regs->DwDataPro);
+	pete_writel("drivers/net/hippi/rrunner.c:353", 0, &regs->DwDataCon);
+	pete_writel("drivers/net/hippi/rrunner.c:354", 0, &regs->DwDataRef);
 #endif
 
-	writel(0xffffffff, &regs->MbEvent);
-	writel(0, &regs->Event);
+	pete_writel("drivers/net/hippi/rrunner.c:357", 0xffffffff, &regs->MbEvent);
+	pete_writel("drivers/net/hippi/rrunner.c:358", 0, &regs->Event);
 
-	writel(0, &regs->TxPi);
-	writel(0, &regs->IpRxPi);
+	pete_writel("drivers/net/hippi/rrunner.c:360", 0, &regs->TxPi);
+	pete_writel("drivers/net/hippi/rrunner.c:361", 0, &regs->IpRxPi);
 
-	writel(0, &regs->EvtCon);
-	writel(0, &regs->EvtPrd);
+	pete_writel("drivers/net/hippi/rrunner.c:363", 0, &regs->EvtCon);
+	pete_writel("drivers/net/hippi/rrunner.c:364", 0, &regs->EvtPrd);
 
 	rrpriv->info->evt_ctrl.pi = 0;
 
 	for (i = 0; i < CMD_RING_ENTRIES; i++)
-		writel(0, &regs->CmdRing[i]);
+		pete_writel("drivers/net/hippi/rrunner.c:369", 0, &regs->CmdRing[i]);
 
 /*
  * Why 32 ? is this not cache line size dependent?
  */
-	writel(RBURST_64|WBURST_64, &regs->PciState);
+	pete_writel("drivers/net/hippi/rrunner.c:374", RBURST_64|WBURST_64, &regs->PciState);
 	wmb();
 
 	start_pc = rr_read_eeprom_word(rrpriv,
@@ -382,11 +382,11 @@ static int rr_reset(struct net_device *dev)
 	       dev->name, start_pc);
 #endif
 
-	writel(start_pc + 0x800, &regs->Pc);
+	pete_writel("drivers/net/hippi/rrunner.c:385", start_pc + 0x800, &regs->Pc);
 	wmb();
 	udelay(5);
 
-	writel(start_pc, &regs->Pc);
+	pete_writel("drivers/net/hippi/rrunner.c:389", start_pc, &regs->Pc);
 	wmb();
 
 	return 0;
@@ -404,24 +404,24 @@ static unsigned int rr_read_eeprom(struct rr_private *rrpriv,
 	struct rr_regs __iomem *regs = rrpriv->regs;
 	u32 misc, io, host, i;
 
-	io = readl(&regs->ExtIo);
-	writel(0, &regs->ExtIo);
-	misc = readl(&regs->LocalCtrl);
-	writel(0, &regs->LocalCtrl);
-	host = readl(&regs->HostCtrl);
-	writel(host | HALT_NIC, &regs->HostCtrl);
+	io = pete_readl("drivers/net/hippi/rrunner.c:407", &regs->ExtIo);
+	pete_writel("drivers/net/hippi/rrunner.c:408", 0, &regs->ExtIo);
+	misc = pete_readl("drivers/net/hippi/rrunner.c:409", &regs->LocalCtrl);
+	pete_writel("drivers/net/hippi/rrunner.c:410", 0, &regs->LocalCtrl);
+	host = pete_readl("drivers/net/hippi/rrunner.c:411", &regs->HostCtrl);
+	pete_writel("drivers/net/hippi/rrunner.c:412", host | HALT_NIC, &regs->HostCtrl);
 	mb();
 
 	for (i = 0; i < length; i++){
-		writel((EEPROM_BASE + ((offset+i) << 3)), &regs->WinBase);
+		pete_writel("drivers/net/hippi/rrunner.c:416", (EEPROM_BASE + ((offset+i) << 3)), &regs->WinBase);
 		mb();
-		buf[i] = (readl(&regs->WinData) >> 24) & 0xff;
+		buf[i] = (pete_readl("drivers/net/hippi/rrunner.c:418", &regs->WinData) >> 24) & 0xff;
 		mb();
 	}
 
-	writel(host, &regs->HostCtrl);
-	writel(misc, &regs->LocalCtrl);
-	writel(io, &regs->ExtIo);
+	pete_writel("drivers/net/hippi/rrunner.c:422", host, &regs->HostCtrl);
+	pete_writel("drivers/net/hippi/rrunner.c:423", misc, &regs->LocalCtrl);
+	pete_writel("drivers/net/hippi/rrunner.c:424", io, &regs->ExtIo);
 	mb();
 	return i;
 }
@@ -456,35 +456,35 @@ static unsigned int write_eeprom(struct rr_private *rrpriv,
 	struct rr_regs __iomem *regs = rrpriv->regs;
 	u32 misc, io, data, i, j, ready, error = 0;
 
-	io = readl(&regs->ExtIo);
-	writel(0, &regs->ExtIo);
-	misc = readl(&regs->LocalCtrl);
-	writel(ENABLE_EEPROM_WRITE, &regs->LocalCtrl);
+	io = pete_readl("drivers/net/hippi/rrunner.c:459", &regs->ExtIo);
+	pete_writel("drivers/net/hippi/rrunner.c:460", 0, &regs->ExtIo);
+	misc = pete_readl("drivers/net/hippi/rrunner.c:461", &regs->LocalCtrl);
+	pete_writel("drivers/net/hippi/rrunner.c:462", ENABLE_EEPROM_WRITE, &regs->LocalCtrl);
 	mb();
 
 	for (i = 0; i < length; i++){
-		writel((EEPROM_BASE + ((offset+i) << 3)), &regs->WinBase);
+		pete_writel("drivers/net/hippi/rrunner.c:466", (EEPROM_BASE + ((offset+i) << 3)), &regs->WinBase);
 		mb();
 		data = buf[i] << 24;
 		/*
 		 * Only try to write the data if it is not the same
 		 * value already.
 		 */
-		if ((readl(&regs->WinData) & 0xff000000) != data){
-			writel(data, &regs->WinData);
+		if ((pete_readl("drivers/net/hippi/rrunner.c:473", &regs->WinData) & 0xff000000) != data){
+			pete_writel("drivers/net/hippi/rrunner.c:474", data, &regs->WinData);
 			ready = 0;
 			j = 0;
 			mb();
 			while(!ready){
 				udelay(20);
-				if ((readl(&regs->WinData) & 0xff000000) ==
+				if ((pete_readl("drivers/net/hippi/rrunner.c:480", &regs->WinData) & 0xff000000) ==
 				    data)
 					ready = 1;
 				mb();
 				if (j++ > 5000){
 					printk("data mismatch: %08x, "
 					       "WinData %08x\n", data,
-					       readl(&regs->WinData));
+					       pete_readl("drivers/net/hippi/rrunner.c:487", &regs->WinData));
 					ready = 1;
 					error = 1;
 				}
@@ -492,8 +492,8 @@ static unsigned int write_eeprom(struct rr_private *rrpriv,
 		}
 	}
 
-	writel(misc, &regs->LocalCtrl);
-	writel(io, &regs->ExtIo);
+	pete_writel("drivers/net/hippi/rrunner.c:495", misc, &regs->LocalCtrl);
+	pete_writel("drivers/net/hippi/rrunner.c:496", io, &regs->ExtIo);
 	mb();
 
 	return error;
@@ -509,7 +509,7 @@ static int rr_init(struct net_device *dev)
 	rrpriv = netdev_priv(dev);
 	regs = rrpriv->regs;
 
-	rev = readl(&regs->FwRev);
+	rev = pete_readl("drivers/net/hippi/rrunner.c:512", &regs->FwRev);
 	rrpriv->fw_rev = rev;
 	if (rev > 0x00020024)
 		printk("  Firmware revision: %i.%i.%i\n", (rev >> 16),
@@ -525,7 +525,7 @@ static int rr_init(struct net_device *dev)
 	}
 
 #if (DEBUG > 2)
-	printk("  Maximum receive rings %i\n", readl(&regs->MaxRxRng));
+	printk("  Maximum receive rings %i\n", pete_readl("drivers/net/hippi/rrunner.c:528", &regs->MaxRxRng));
 #endif
 
 	/*
@@ -566,8 +566,8 @@ static int rr_init1(struct net_device *dev)
 
 	spin_lock_irqsave(&rrpriv->lock, flags);
 
-	hostctrl = readl(&regs->HostCtrl);
-	writel(hostctrl | HALT_NIC | RR_CLEAR_INT, &regs->HostCtrl);
+	hostctrl = pete_readl("drivers/net/hippi/rrunner.c:569", &regs->HostCtrl);
+	pete_writel("drivers/net/hippi/rrunner.c:570", hostctrl | HALT_NIC | RR_CLEAR_INT, &regs->HostCtrl);
 	wmb();
 
 	if (hostctrl & PARITY_ERR){
@@ -593,7 +593,7 @@ static int rr_init1(struct net_device *dev)
 	rrpriv->info->cmd_ctrl.pi = 15;
 
 	for (i = 0; i < CMD_RING_ENTRIES; i++) {
-		writel(0, &regs->CmdRing[i]);
+		pete_writel("drivers/net/hippi/rrunner.c:596", 0, &regs->CmdRing[i]);
 	}
 
 	for (i = 0; i < TX_RING_ENTRIES; i++) {
@@ -620,20 +620,20 @@ static int rr_init1(struct net_device *dev)
 	rr_reset(dev);
 
 	/* Tuning values */
-	writel(0x5000, &regs->ConRetry);
-	writel(0x100, &regs->ConRetryTmr);
-	writel(0x500000, &regs->ConTmout);
- 	writel(0x60, &regs->IntrTmr);
-	writel(0x500000, &regs->TxDataMvTimeout);
-	writel(0x200000, &regs->RxDataMvTimeout);
- 	writel(0x80, &regs->WriteDmaThresh);
- 	writel(0x80, &regs->ReadDmaThresh);
+	pete_writel("drivers/net/hippi/rrunner.c:623", 0x5000, &regs->ConRetry);
+	pete_writel("drivers/net/hippi/rrunner.c:624", 0x100, &regs->ConRetryTmr);
+	pete_writel("drivers/net/hippi/rrunner.c:625", 0x500000, &regs->ConTmout);
+ 	pete_writel("drivers/net/hippi/rrunner.c:626", 0x60, &regs->IntrTmr);
+	pete_writel("drivers/net/hippi/rrunner.c:627", 0x500000, &regs->TxDataMvTimeout);
+	pete_writel("drivers/net/hippi/rrunner.c:628", 0x200000, &regs->RxDataMvTimeout);
+ 	pete_writel("drivers/net/hippi/rrunner.c:629", 0x80, &regs->WriteDmaThresh);
+ 	pete_writel("drivers/net/hippi/rrunner.c:630", 0x80, &regs->ReadDmaThresh);
 
 	rrpriv->fw_running = 0;
 	wmb();
 
 	hostctrl &= ~(HALT_NIC | INVALID_INST_B | PARITY_ERR);
-	writel(hostctrl, &regs->HostCtrl);
+	pete_writel("drivers/net/hippi/rrunner.c:636", hostctrl, &regs->HostCtrl);
 	wmb();
 
 	spin_unlock_irqrestore(&rrpriv->lock, flags);
@@ -733,12 +733,12 @@ static u32 rr_handle_event(struct net_device *dev, u32 prodidx, u32 eidx)
 	while (prodidx != eidx){
 		switch (rrpriv->evt_ring[eidx].code){
 		case E_NIC_UP:
-			tmp = readl(&regs->FwRev);
+			tmp = pete_readl("drivers/net/hippi/rrunner.c:736", &regs->FwRev);
 			printk(KERN_INFO "%s: Firmware revision %i.%i.%i "
 			       "up and running\n", dev->name,
 			       (tmp >> 16), ((tmp >> 8) & 0xff), (tmp & 0xff));
 			rrpriv->fw_running = 1;
-			writel(RX_RING_ENTRIES - 1, &regs->IpRxPi);
+			pete_writel("drivers/net/hippi/rrunner.c:741", RX_RING_ENTRIES - 1, &regs->IpRxPi);
 			wmb();
 			break;
 		case E_LINK_ON:
@@ -758,14 +758,14 @@ static u32 rr_handle_event(struct net_device *dev, u32 prodidx, u32 eidx)
 		case E_INTERN_ERR:
 			printk(KERN_ERR "%s: HIPPI Internal NIC error\n",
 			       dev->name);
-			writel(readl(&regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
+			pete_writel("drivers/net/hippi/rrunner.c:761", pete_readl("drivers/net/hippi/rrunner.c:761", &regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
 			       &regs->HostCtrl);
 			wmb();
 			break;
 		case E_HOST_ERR:
 			printk(KERN_ERR "%s: Host software error\n",
 			       dev->name);
-			writel(readl(&regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
+			pete_writel("drivers/net/hippi/rrunner.c:768", pete_readl("drivers/net/hippi/rrunner.c:768", &regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
 			       &regs->HostCtrl);
 			wmb();
 			break;
@@ -789,7 +789,7 @@ static u32 rr_handle_event(struct net_device *dev, u32 prodidx, u32 eidx)
 		case E_INT_PRTY:
 			printk(KERN_ERR "%s: HIPPI Internal Parity error\n",
 			       dev->name);
-			writel(readl(&regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
+			pete_writel("drivers/net/hippi/rrunner.c:792", pete_readl("drivers/net/hippi/rrunner.c:792", &regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
 			       &regs->HostCtrl);
 			wmb();
 			break;
@@ -801,28 +801,28 @@ static u32 rr_handle_event(struct net_device *dev, u32 prodidx, u32 eidx)
 			printk(KERN_WARNING "%s: Link lost during transmit\n",
 			       dev->name);
 			dev->stats.tx_aborted_errors++;
-			writel(readl(&regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
+			pete_writel("drivers/net/hippi/rrunner.c:804", pete_readl("drivers/net/hippi/rrunner.c:804", &regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
 			       &regs->HostCtrl);
 			wmb();
 			break;
 		case E_TX_INV_RNG:
 			printk(KERN_ERR "%s: Invalid send ring block\n",
 			       dev->name);
-			writel(readl(&regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
+			pete_writel("drivers/net/hippi/rrunner.c:811", pete_readl("drivers/net/hippi/rrunner.c:811", &regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
 			       &regs->HostCtrl);
 			wmb();
 			break;
 		case E_TX_INV_BUF:
 			printk(KERN_ERR "%s: Invalid send buffer address\n",
 			       dev->name);
-			writel(readl(&regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
+			pete_writel("drivers/net/hippi/rrunner.c:818", pete_readl("drivers/net/hippi/rrunner.c:818", &regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
 			       &regs->HostCtrl);
 			wmb();
 			break;
 		case E_TX_INV_DSC:
 			printk(KERN_ERR "%s: Invalid descriptor address\n",
 			       dev->name);
-			writel(readl(&regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
+			pete_writel("drivers/net/hippi/rrunner.c:825", pete_readl("drivers/net/hippi/rrunner.c:825", &regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
 			       &regs->HostCtrl);
 			wmb();
 			break;
@@ -876,21 +876,21 @@ static u32 rr_handle_event(struct net_device *dev, u32 prodidx, u32 eidx)
 		case E_RX_INV_BUF:
 			printk(KERN_ERR "%s: Invalid receive buffer "
 			       "address\n", dev->name);
-			writel(readl(&regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
+			pete_writel("drivers/net/hippi/rrunner.c:879", pete_readl("drivers/net/hippi/rrunner.c:879", &regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
 			       &regs->HostCtrl);
 			wmb();
 			break;
 		case E_RX_INV_DSC:
 			printk(KERN_ERR "%s: Invalid receive descriptor "
 			       "address\n", dev->name);
-			writel(readl(&regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
+			pete_writel("drivers/net/hippi/rrunner.c:886", pete_readl("drivers/net/hippi/rrunner.c:886", &regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
 			       &regs->HostCtrl);
 			wmb();
 			break;
 		case E_RNG_BLK:
 			printk(KERN_ERR "%s: Invalid ring block\n",
 			       dev->name);
-			writel(readl(&regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
+			pete_writel("drivers/net/hippi/rrunner.c:893", pete_readl("drivers/net/hippi/rrunner.c:893", &regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
 			       &regs->HostCtrl);
 			wmb();
 			break;
@@ -1008,7 +1008,7 @@ static void rx_int(struct net_device *dev, u32 rxlimit, u32 index)
 		desc->size = dev->mtu + HIPPI_HLEN;
 
 		if ((index & 7) == 7)
-			writel(index, &regs->IpRxPi);
+			pete_writel("drivers/net/hippi/rrunner.c:1011", index, &regs->IpRxPi);
 
 		index = (index + 1) % RX_RING_ENTRIES;
 	} while(index != rxlimit);
@@ -1028,12 +1028,12 @@ static irqreturn_t rr_interrupt(int irq, void *dev_id)
 	rrpriv = netdev_priv(dev);
 	regs = rrpriv->regs;
 
-	if (!(readl(&regs->HostCtrl) & RR_INT))
+	if (!(pete_readl("drivers/net/hippi/rrunner.c:1031", &regs->HostCtrl) & RR_INT))
 		return IRQ_NONE;
 
 	spin_lock(&rrpriv->lock);
 
-	prodidx = readl(&regs->EvtPrd);
+	prodidx = pete_readl("drivers/net/hippi/rrunner.c:1036", &regs->EvtPrd);
 	txcsmr = (prodidx >> 8) & 0xff;
 	rxlimit = (prodidx >> 16) & 0xff;
 	prodidx &= 0xff;
@@ -1096,7 +1096,7 @@ static irqreturn_t rr_interrupt(int irq, void *dev_id)
 	}
 
 	eidx |= ((txcsmr << 8) | (rxlimit << 16));
-	writel(eidx, &regs->EvtCon);
+	pete_writel("drivers/net/hippi/rrunner.c:1099", eidx, &regs->EvtCon);
 	wmb();
 
 	spin_unlock(&rrpriv->lock);
@@ -1156,7 +1156,7 @@ static void rr_timer(struct timer_list *t)
 	struct rr_regs __iomem *regs = rrpriv->regs;
 	unsigned long flags;
 
-	if (readl(&regs->HostCtrl) & NIC_HALTED){
+	if (pete_readl("drivers/net/hippi/rrunner.c:1159", &regs->HostCtrl) & NIC_HALTED){
 		printk("%s: Restarting nic\n", dev->name);
 		memset(rrpriv->rx_ctrl, 0, 256 * sizeof(struct ring_ctrl));
 		memset(rrpriv->info, 0, sizeof(struct rr_info));
@@ -1167,7 +1167,7 @@ static void rr_timer(struct timer_list *t)
 
 		if (rr_init1(dev)) {
 			spin_lock_irqsave(&rrpriv->lock, flags);
-			writel(readl(&regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
+			pete_writel("drivers/net/hippi/rrunner.c:1170", pete_readl("drivers/net/hippi/rrunner.c:1170", &regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT,
 			       &regs->HostCtrl);
 			spin_unlock_irqrestore(&rrpriv->lock, flags);
 		}
@@ -1214,8 +1214,8 @@ static int rr_open(struct net_device *dev)
 	wmb();
 
 	spin_lock_irqsave(&rrpriv->lock, flags);
-	writel(readl(&regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT, &regs->HostCtrl);
-	readl(&regs->HostCtrl);
+	pete_writel("drivers/net/hippi/rrunner.c:1217", pete_readl("drivers/net/hippi/rrunner.c:1217", &regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT, &regs->HostCtrl);
+	pete_readl("drivers/net/hippi/rrunner.c:1218", &regs->HostCtrl);
 	spin_unlock_irqrestore(&rrpriv->lock, flags);
 
 	if (request_irq(pdev->irq, rr_interrupt, IRQF_SHARED, dev->name, dev)) {
@@ -1240,7 +1240,7 @@ static int rr_open(struct net_device *dev)
 
  error:
 	spin_lock_irqsave(&rrpriv->lock, flags);
-	writel(readl(&regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT, &regs->HostCtrl);
+	pete_writel("drivers/net/hippi/rrunner.c:1243", pete_readl("drivers/net/hippi/rrunner.c:1243", &regs->HostCtrl)|HALT_NIC|RR_CLEAR_INT, &regs->HostCtrl);
 	spin_unlock_irqrestore(&rrpriv->lock, flags);
 
 	if (rrpriv->info) {
@@ -1274,13 +1274,13 @@ static void rr_dump(struct net_device *dev)
 	printk("%s: dumping NIC TX rings\n", dev->name);
 
 	printk("RxPrd %08x, TxPrd %02x, EvtPrd %08x, TxPi %02x, TxCtrlPi %02x\n",
-	       readl(&regs->RxPrd), readl(&regs->TxPrd),
-	       readl(&regs->EvtPrd), readl(&regs->TxPi),
+	       pete_readl("drivers/net/hippi/rrunner.c:1277", &regs->RxPrd), pete_readl("drivers/net/hippi/rrunner.c:1277", &regs->TxPrd),
+	       pete_readl("drivers/net/hippi/rrunner.c:1278", &regs->EvtPrd), pete_readl("drivers/net/hippi/rrunner.c:1278", &regs->TxPi),
 	       rrpriv->info->tx_ctrl.pi);
 
-	printk("Error code 0x%x\n", readl(&regs->Fail1));
+	printk("Error code 0x%x\n", pete_readl("drivers/net/hippi/rrunner.c:1281", &regs->Fail1));
 
-	index = (((readl(&regs->EvtPrd) >> 8) & 0xff) - 1) % TX_RING_ENTRIES;
+	index = (((pete_readl("drivers/net/hippi/rrunner.c:1283", &regs->EvtPrd) >> 8) & 0xff) - 1) % TX_RING_ENTRIES;
 	cons = rrpriv->dirty_tx;
 	printk("TX ring index %i, TX consumer %i\n",
 	       index, cons);
@@ -1341,14 +1341,14 @@ static int rr_close(struct net_device *dev)
 	 */
 	spin_lock_irqsave(&rrpriv->lock, flags);
 
-	tmp = readl(&regs->HostCtrl);
+	tmp = pete_readl("drivers/net/hippi/rrunner.c:1344", &regs->HostCtrl);
 	if (tmp & NIC_HALTED){
 		printk("%s: NIC already halted\n", dev->name);
 		rr_dump(dev);
 	}else{
 		tmp |= HALT_NIC | RR_CLEAR_INT;
-		writel(tmp, &regs->HostCtrl);
-		readl(&regs->HostCtrl);
+		pete_writel("drivers/net/hippi/rrunner.c:1350", tmp, &regs->HostCtrl);
+		pete_readl("drivers/net/hippi/rrunner.c:1351", &regs->HostCtrl);
 	}
 
 	rrpriv->fw_running = 0;
@@ -1357,14 +1357,14 @@ static int rr_close(struct net_device *dev)
 	del_timer_sync(&rrpriv->timer);
 	spin_lock_irqsave(&rrpriv->lock, flags);
 
-	writel(0, &regs->TxPi);
-	writel(0, &regs->IpRxPi);
+	pete_writel("drivers/net/hippi/rrunner.c:1360", 0, &regs->TxPi);
+	pete_writel("drivers/net/hippi/rrunner.c:1361", 0, &regs->IpRxPi);
 
-	writel(0, &regs->EvtCon);
-	writel(0, &regs->EvtPrd);
+	pete_writel("drivers/net/hippi/rrunner.c:1363", 0, &regs->EvtCon);
+	pete_writel("drivers/net/hippi/rrunner.c:1364", 0, &regs->EvtPrd);
 
 	for (i = 0; i < CMD_RING_ENTRIES; i++)
-		writel(0, &regs->CmdRing[i]);
+		pete_writel("drivers/net/hippi/rrunner.c:1367", 0, &regs->CmdRing[i]);
 
 	rrpriv->info->tx_ctrl.entries = 0;
 	rrpriv->info->cmd_ctrl.pi = 0;
@@ -1401,9 +1401,9 @@ static netdev_tx_t rr_start_xmit(struct sk_buff *skb,
 	u32 *ifield;
 	struct sk_buff *new_skb;
 
-	if (readl(&regs->Mode) & FATAL_ERR)
+	if (pete_readl("drivers/net/hippi/rrunner.c:1404", &regs->Mode) & FATAL_ERR)
 		printk("error codes Fail1 %02x, Fail2 %02x\n",
-		       readl(&regs->Fail1), readl(&regs->Fail2));
+		       pete_readl("drivers/net/hippi/rrunner.c:1406", &regs->Fail1), pete_readl("drivers/net/hippi/rrunner.c:1406", &regs->Fail2));
 
 	/*
 	 * We probably need to deal with tbusy here to prevent overruns.
@@ -1445,7 +1445,7 @@ static netdev_tx_t rr_start_xmit(struct sk_buff *skb,
 	rrpriv->tx_ring[index].mode = PACKET_START | PACKET_END;
 	txctrl->pi = (index + 1) % TX_RING_ENTRIES;
 	wmb();
-	writel(txctrl->pi, &regs->TxPi);
+	pete_writel("drivers/net/hippi/rrunner.c:1448", txctrl->pi, &regs->TxPi);
 
 	if (txctrl->pi == rrpriv->dirty_tx){
 		rrpriv->tx_full = 1;
@@ -1480,35 +1480,35 @@ static int rr_load_firmware(struct net_device *dev)
 	if (dev->flags & IFF_UP)
 		return -EBUSY;
 
-	if (!(readl(&regs->HostCtrl) & NIC_HALTED)){
+	if (!(pete_readl("drivers/net/hippi/rrunner.c:1483", &regs->HostCtrl) & NIC_HALTED)){
 		printk("%s: Trying to load firmware to a running NIC.\n",
 		       dev->name);
 		return -EBUSY;
 	}
 
-	localctrl = readl(&regs->LocalCtrl);
-	writel(0, &regs->LocalCtrl);
+	localctrl = pete_readl("drivers/net/hippi/rrunner.c:1489", &regs->LocalCtrl);
+	pete_writel("drivers/net/hippi/rrunner.c:1490", 0, &regs->LocalCtrl);
 
-	writel(0, &regs->EvtPrd);
-	writel(0, &regs->RxPrd);
-	writel(0, &regs->TxPrd);
+	pete_writel("drivers/net/hippi/rrunner.c:1492", 0, &regs->EvtPrd);
+	pete_writel("drivers/net/hippi/rrunner.c:1493", 0, &regs->RxPrd);
+	pete_writel("drivers/net/hippi/rrunner.c:1494", 0, &regs->TxPrd);
 
 	/*
 	 * First wipe the entire SRAM, otherwise we might run into all
 	 * kinds of trouble ... sigh, this took almost all afternoon
 	 * to track down ;-(
 	 */
-	io = readl(&regs->ExtIo);
-	writel(0, &regs->ExtIo);
+	io = pete_readl("drivers/net/hippi/rrunner.c:1501", &regs->ExtIo);
+	pete_writel("drivers/net/hippi/rrunner.c:1502", 0, &regs->ExtIo);
 	sram_size = rr_read_eeprom_word(rrpriv, 8);
 
 	for (i = 200; i < sram_size / 4; i++){
-		writel(i * 4, &regs->WinBase);
+		pete_writel("drivers/net/hippi/rrunner.c:1506", i * 4, &regs->WinBase);
 		mb();
-		writel(0, &regs->WinData);
+		pete_writel("drivers/net/hippi/rrunner.c:1508", 0, &regs->WinData);
 		mb();
 	}
-	writel(io, &regs->ExtIo);
+	pete_writel("drivers/net/hippi/rrunner.c:1511", io, &regs->ExtIo);
 	mb();
 
 	eptr = rr_read_eeprom_word(rrpriv,
@@ -1554,9 +1554,9 @@ static int rr_load_firmware(struct net_device *dev)
 #endif
 		for (j = 0; j < len; j++){
 			tmp = rr_read_eeprom_word(rrpriv, segptr);
-			writel(sptr, &regs->WinBase);
+			pete_writel("drivers/net/hippi/rrunner.c:1557", sptr, &regs->WinBase);
 			mb();
-			writel(tmp, &regs->WinData);
+			pete_writel("drivers/net/hippi/rrunner.c:1559", tmp, &regs->WinData);
 			mb();
 			segptr += 4;
 			sptr += 4;
@@ -1564,7 +1564,7 @@ static int rr_load_firmware(struct net_device *dev)
 	}
 
 out:
-	writel(localctrl, &regs->LocalCtrl);
+	pete_writel("drivers/net/hippi/rrunner.c:1567", localctrl, &regs->LocalCtrl);
 	mb();
 	return 0;
 }

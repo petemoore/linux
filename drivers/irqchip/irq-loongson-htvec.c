@@ -43,7 +43,7 @@ static void htvec_irq_dispatch(struct irq_desc *desc)
 	chained_irq_enter(chip, desc);
 
 	for (i = 0; i < priv->num_parents; i++) {
-		pending = readl(priv->base + 4 * i);
+		pending = pete_readl("drivers/irqchip/irq-loongson-htvec.c:46", priv->base + 4 * i);
 		while (pending) {
 			int bit = __ffs(pending);
 
@@ -64,7 +64,7 @@ static void htvec_ack_irq(struct irq_data *d)
 {
 	struct htvec *priv = irq_data_get_irq_chip_data(d);
 
-	writel(BIT(VEC_REG_BIT(d->hwirq)),
+	pete_writel("drivers/irqchip/irq-loongson-htvec.c:67", BIT(VEC_REG_BIT(d->hwirq)),
 	       priv->base + VEC_REG_IDX(d->hwirq) * 4);
 }
 
@@ -77,9 +77,9 @@ static void htvec_mask_irq(struct irq_data *d)
 	raw_spin_lock(&priv->htvec_lock);
 	addr = priv->base + HTVEC_EN_OFF;
 	addr += VEC_REG_IDX(d->hwirq) * 4;
-	reg = readl(addr);
+	reg = pete_readl("drivers/irqchip/irq-loongson-htvec.c:80", addr);
 	reg &= ~BIT(VEC_REG_BIT(d->hwirq));
-	writel(reg, addr);
+	pete_writel("drivers/irqchip/irq-loongson-htvec.c:82", reg, addr);
 	raw_spin_unlock(&priv->htvec_lock);
 }
 
@@ -92,9 +92,9 @@ static void htvec_unmask_irq(struct irq_data *d)
 	raw_spin_lock(&priv->htvec_lock);
 	addr = priv->base + HTVEC_EN_OFF;
 	addr += VEC_REG_IDX(d->hwirq) * 4;
-	reg = readl(addr);
+	reg = pete_readl("drivers/irqchip/irq-loongson-htvec.c:95", addr);
 	reg |= BIT(VEC_REG_BIT(d->hwirq));
-	writel(reg, addr);
+	pete_writel("drivers/irqchip/irq-loongson-htvec.c:97", reg, addr);
 	raw_spin_unlock(&priv->htvec_lock);
 }
 

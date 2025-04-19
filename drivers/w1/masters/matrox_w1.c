@@ -68,8 +68,8 @@ static __inline__ u8 matrox_w1_read_reg(struct matrox_device *dev, u8 reg)
 {
 	u8 ret;
 
-	writeb(reg, dev->port_index);
-	ret = readb(dev->port_data);
+	pete_writeb("drivers/w1/masters/matrox_w1.c:71", reg, dev->port_index);
+	ret = pete_readb("drivers/w1/masters/matrox_w1.c:72", dev->port_data);
 	barrier();
 
 	return ret;
@@ -77,8 +77,8 @@ static __inline__ u8 matrox_w1_read_reg(struct matrox_device *dev, u8 reg)
 
 static __inline__ void matrox_w1_write_reg(struct matrox_device *dev, u8 reg, u8 val)
 {
-	writeb(reg, dev->port_index);
-	writeb(val, dev->port_data);
+	pete_writeb("drivers/w1/masters/matrox_w1.c:80", reg, dev->port_index);
+	pete_writeb("drivers/w1/masters/matrox_w1.c:81", val, dev->port_data);
 	wmb();
 }
 

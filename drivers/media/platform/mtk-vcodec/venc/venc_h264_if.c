@@ -157,7 +157,7 @@ struct venc_h264_inst {
 
 static inline u32 h264_read_reg(struct venc_h264_inst *inst, u32 addr)
 {
-	return readl(inst->hw_base + addr);
+	return pete_readl("drivers/media/platform/mtk-vcodec/venc/venc_h264_if.c:160", inst->hw_base + addr);
 }
 
 static unsigned int h264_get_profile(struct venc_h264_inst *inst,

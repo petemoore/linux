@@ -1970,12 +1970,12 @@ void intelfbhw_cursor_load(struct intelfb_info *dinfo, int width, int height,
 	d_mask = ~(0xff >> mod);
 	for (i = height; i--; ) {
 		for (j = 0; j < w; j++) {
-			writeb(0x00, addr + j);
-			writeb(*(data++), addr + j+8);
+			pete_writeb("drivers/video/fbdev/intelfb/intelfbhw.c:1973", 0x00, addr + j);
+			pete_writeb("drivers/video/fbdev/intelfb/intelfbhw.c:1974", *(data++), addr + j+8);
 		}
 		if (mod) {
-			writeb(t_mask, addr + j);
-			writeb(*(data++) & d_mask, addr + j+8);
+			pete_writeb("drivers/video/fbdev/intelfb/intelfbhw.c:1977", t_mask, addr + j);
+			pete_writeb("drivers/video/fbdev/intelfb/intelfbhw.c:1978", *(data++) & d_mask, addr + j+8);
 		}
 		addr += 16;
 	}
@@ -1995,8 +1995,8 @@ void intelfbhw_cursor_reset(struct intelfb_info *dinfo)
 
 	for (i = 64; i--; ) {
 		for (j = 0; j < 8; j++) {
-			writeb(0xff, addr + j+0);
-			writeb(0x00, addr + j+8);
+			pete_writeb("drivers/video/fbdev/intelfb/intelfbhw.c:1998", 0xff, addr + j+0);
+			pete_writeb("drivers/video/fbdev/intelfb/intelfbhw.c:1999", 0x00, addr + j+8);
 		}
 		addr += 16;
 	}

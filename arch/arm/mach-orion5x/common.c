@@ -263,7 +263,7 @@ static int __init orion5x_find_tclk(void)
 
 	orion5x_pcie_id(&dev, &rev);
 	if (dev == MV88F6183_DEV_ID &&
-	    (readl(MPP_RESET_SAMPLE) & 0x00000200) == 0)
+	    (pete_readl("arch/arm/mach-orion5x/common.c:266", MPP_RESET_SAMPLE) & 0x00000200) == 0)
 		return 133333333;
 
 	return 166666667;

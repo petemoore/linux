@@ -11,8 +11,8 @@
 #include "g2d.h"
 #include "g2d-regs.h"
 
-#define w(x, a)	writel((x), d->regs + (a))
-#define r(a)	readl(d->regs + (a))
+#define w(x, a)	pete_writel("drivers/media/platform/s5p-g2d/g2d-hw.c:14", (x), d->regs + (a))
+#define r(a)	pete_readl("drivers/media/platform/s5p-g2d/g2d-hw.c:15", d->regs + (a))
 
 /* g2d_reset clears all g2d registers */
 void g2d_reset(struct g2d_dev *d)

@@ -43,23 +43,23 @@ static int imx8mq_usb_phy_init(struct phy *phy)
 	struct imx8mq_usb_phy *imx_phy = phy_get_drvdata(phy);
 	u32 value;
 
-	value = readl(imx_phy->base + PHY_CTRL1);
+	value = pete_readl("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:46", imx_phy->base + PHY_CTRL1);
 	value &= ~(PHY_CTRL1_VDATSRCENB0 | PHY_CTRL1_VDATDETENB0 |
 		   PHY_CTRL1_COMMONONN);
 	value |= PHY_CTRL1_RESET | PHY_CTRL1_ATERESET;
-	writel(value, imx_phy->base + PHY_CTRL1);
+	pete_writel("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:50", value, imx_phy->base + PHY_CTRL1);
 
-	value = readl(imx_phy->base + PHY_CTRL0);
+	value = pete_readl("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:52", imx_phy->base + PHY_CTRL0);
 	value |= PHY_CTRL0_REF_SSP_EN;
-	writel(value, imx_phy->base + PHY_CTRL0);
+	pete_writel("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:54", value, imx_phy->base + PHY_CTRL0);
 
-	value = readl(imx_phy->base + PHY_CTRL2);
+	value = pete_readl("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:56", imx_phy->base + PHY_CTRL2);
 	value |= PHY_CTRL2_TXENABLEN0;
-	writel(value, imx_phy->base + PHY_CTRL2);
+	pete_writel("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:58", value, imx_phy->base + PHY_CTRL2);
 
-	value = readl(imx_phy->base + PHY_CTRL1);
+	value = pete_readl("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:60", imx_phy->base + PHY_CTRL1);
 	value &= ~(PHY_CTRL1_RESET | PHY_CTRL1_ATERESET);
-	writel(value, imx_phy->base + PHY_CTRL1);
+	pete_writel("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:62", value, imx_phy->base + PHY_CTRL1);
 
 	return 0;
 }
@@ -70,34 +70,34 @@ static int imx8mp_usb_phy_init(struct phy *phy)
 	u32 value;
 
 	/* USB3.0 PHY signal fsel for 24M ref */
-	value = readl(imx_phy->base + PHY_CTRL0);
+	value = pete_readl("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:73", imx_phy->base + PHY_CTRL0);
 	value &= ~PHY_CTRL0_FSEL_MASK;
 	value |= FIELD_PREP(PHY_CTRL0_FSEL_MASK, PHY_CTRL0_FSEL_24M);
-	writel(value, imx_phy->base + PHY_CTRL0);
+	pete_writel("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:76", value, imx_phy->base + PHY_CTRL0);
 
 	/* Disable alt_clk_en and use internal MPLL clocks */
-	value = readl(imx_phy->base + PHY_CTRL6);
+	value = pete_readl("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:79", imx_phy->base + PHY_CTRL6);
 	value &= ~(PHY_CTRL6_ALT_CLK_SEL | PHY_CTRL6_ALT_CLK_EN);
-	writel(value, imx_phy->base + PHY_CTRL6);
+	pete_writel("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:81", value, imx_phy->base + PHY_CTRL6);
 
-	value = readl(imx_phy->base + PHY_CTRL1);
+	value = pete_readl("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:83", imx_phy->base + PHY_CTRL1);
 	value &= ~(PHY_CTRL1_VDATSRCENB0 | PHY_CTRL1_VDATDETENB0);
 	value |= PHY_CTRL1_RESET | PHY_CTRL1_ATERESET;
-	writel(value, imx_phy->base + PHY_CTRL1);
+	pete_writel("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:86", value, imx_phy->base + PHY_CTRL1);
 
-	value = readl(imx_phy->base + PHY_CTRL0);
+	value = pete_readl("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:88", imx_phy->base + PHY_CTRL0);
 	value |= PHY_CTRL0_REF_SSP_EN;
-	writel(value, imx_phy->base + PHY_CTRL0);
+	pete_writel("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:90", value, imx_phy->base + PHY_CTRL0);
 
-	value = readl(imx_phy->base + PHY_CTRL2);
+	value = pete_readl("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:92", imx_phy->base + PHY_CTRL2);
 	value |= PHY_CTRL2_TXENABLEN0 | PHY_CTRL2_OTG_DISABLE;
-	writel(value, imx_phy->base + PHY_CTRL2);
+	pete_writel("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:94", value, imx_phy->base + PHY_CTRL2);
 
 	udelay(10);
 
-	value = readl(imx_phy->base + PHY_CTRL1);
+	value = pete_readl("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:98", imx_phy->base + PHY_CTRL1);
 	value &= ~(PHY_CTRL1_RESET | PHY_CTRL1_ATERESET);
-	writel(value, imx_phy->base + PHY_CTRL1);
+	pete_writel("drivers/phy/freescale/phy-fsl-imx8mq-usb.c:100", value, imx_phy->base + PHY_CTRL1);
 
 	return 0;
 }

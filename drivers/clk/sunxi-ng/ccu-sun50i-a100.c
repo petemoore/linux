@@ -1197,9 +1197,9 @@ static int sun50i_a100_ccu_probe(struct platform_device *pdev)
 	 * we only turn off the output of PLL.
 	 */
 	for (i = 0; i < ARRAY_SIZE(sun50i_a100_pll_regs); i++) {
-		val = readl(reg + sun50i_a100_pll_regs[i]);
+		val = pete_readl("drivers/clk/sunxi-ng/ccu-sun50i-a100.c:1200", reg + sun50i_a100_pll_regs[i]);
 		val |= SUN50I_A100_PLL_LOCK_ENABLE | SUN50I_A100_PLL_ENABLE;
-		writel(val, reg + sun50i_a100_pll_regs[i]);
+		pete_writel("drivers/clk/sunxi-ng/ccu-sun50i-a100.c:1202", val, reg + sun50i_a100_pll_regs[i]);
 	}
 
 	/*
@@ -1207,12 +1207,12 @@ static int sun50i_a100_ccu_probe(struct platform_device *pdev)
 	 * the peripheral 1 bus is enabled, and the frequency is still
 	 * calculated using the previous division factor.
 	 */
-	writel(SUN50I_A100_PLL_PERIPH1_PATTERN0,
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun50i-a100.c:1210", SUN50I_A100_PLL_PERIPH1_PATTERN0,
 	       reg + SUN50I_A100_PLL_PERIPH1_PATTERN0_REG);
 
-	val = readl(reg + SUN50I_A100_PLL_PERIPH1_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun50i-a100.c:1213", reg + SUN50I_A100_PLL_PERIPH1_REG);
 	val |= SUN50I_A100_PLL_SDM_ENABLE;
-	writel(val, reg + SUN50I_A100_PLL_PERIPH1_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun50i-a100.c:1215", val, reg + SUN50I_A100_PLL_PERIPH1_REG);
 
 	/*
 	 * Force the output divider of video PLLs to 0.
@@ -1220,9 +1220,9 @@ static int sun50i_a100_ccu_probe(struct platform_device *pdev)
 	 * See the comment before pll-video0 definition for the reason.
 	 */
 	for (i = 0; i < ARRAY_SIZE(sun50i_a100_pll_video_regs); i++) {
-		val = readl(reg + sun50i_a100_pll_video_regs[i]);
+		val = pete_readl("drivers/clk/sunxi-ng/ccu-sun50i-a100.c:1223", reg + sun50i_a100_pll_video_regs[i]);
 		val &= ~BIT(0);
-		writel(val, reg + sun50i_a100_pll_video_regs[i]);
+		pete_writel("drivers/clk/sunxi-ng/ccu-sun50i-a100.c:1225", val, reg + sun50i_a100_pll_video_regs[i]);
 	}
 
 	/*
@@ -1230,10 +1230,10 @@ static int sun50i_a100_ccu_probe(struct platform_device *pdev)
 	 *
 	 * See the comment before pll-audio definition for the reason.
 	 */
-	val = readl(reg + SUN50I_A100_PLL_AUDIO_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun50i-a100.c:1233", reg + SUN50I_A100_PLL_AUDIO_REG);
 	val &= ~BIT(1);
 	val |= BIT(0);
-	writel(val, reg + SUN50I_A100_PLL_AUDIO_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun50i-a100.c:1236", val, reg + SUN50I_A100_PLL_AUDIO_REG);
 
 	/*
 	 * Force OHCI 12M clock sources to 00 (12MHz divided from 48MHz)
@@ -1242,9 +1242,9 @@ static int sun50i_a100_ccu_probe(struct platform_device *pdev)
 	 * it to have a valid clock parent.
 	 */
 	for (i = 0; i < ARRAY_SIZE(sun50i_a100_usb2_clk_regs); i++) {
-		val = readl(reg + sun50i_a100_usb2_clk_regs[i]);
+		val = pete_readl("drivers/clk/sunxi-ng/ccu-sun50i-a100.c:1245", reg + sun50i_a100_usb2_clk_regs[i]);
 		val &= ~GENMASK(25, 24);
-		writel(val, reg + sun50i_a100_usb2_clk_regs[i]);
+		pete_writel("drivers/clk/sunxi-ng/ccu-sun50i-a100.c:1247", val, reg + sun50i_a100_usb2_clk_regs[i]);
 	}
 
 	ret = devm_sunxi_ccu_probe(&pdev->dev, reg, &sun50i_a100_ccu_desc);

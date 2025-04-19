@@ -546,7 +546,7 @@ static int armada_xp_pinctrl_suspend(struct platform_device *pdev,
 	nregs = DIV_ROUND_UP(soc->nmodes, MVEBU_MPPS_PER_REG);
 
 	for (i = 0; i < nregs; i++)
-		mpp_saved_regs[i] = readl(soc->control_data[0].base + i * 4);
+		mpp_saved_regs[i] = pete_readl("drivers/pinctrl/mvebu/pinctrl-armada-xp.c:549", soc->control_data[0].base + i * 4);
 
 	return 0;
 }
@@ -560,7 +560,7 @@ static int armada_xp_pinctrl_resume(struct platform_device *pdev)
 	nregs = DIV_ROUND_UP(soc->nmodes, MVEBU_MPPS_PER_REG);
 
 	for (i = 0; i < nregs; i++)
-		writel(mpp_saved_regs[i], soc->control_data[0].base + i * 4);
+		pete_writel("drivers/pinctrl/mvebu/pinctrl-armada-xp.c:563", mpp_saved_regs[i], soc->control_data[0].base + i * 4);
 
 	return 0;
 }

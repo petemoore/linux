@@ -175,7 +175,7 @@ static struct timer_list db88f5281_timer;
 static void db88f5281_7seg_event(struct timer_list *unused)
 {
 	static int count = 0;
-	writel(0, db88f5281_7seg + (count << 4));
+	pete_writel("arch/arm/mach-orion5x/db88f5281-setup.c:178", 0, db88f5281_7seg + (count << 4));
 	count = (count + 1) & 7;
 	mod_timer(&db88f5281_timer, jiffies + 2 * HZ);
 }
@@ -329,7 +329,7 @@ static void __init db88f5281_init(void)
 	orion5x_init();
 
 	orion5x_mpp_conf(db88f5281_mpp_modes);
-	writel(0, MPP_DEV_CTRL);		/* DEV_D[31:16] */
+	pete_writel("arch/arm/mach-orion5x/db88f5281-setup.c:332", 0, MPP_DEV_CTRL);		/* DEV_D[31:16] */
 
 	/*
 	 * Configure peripherals.

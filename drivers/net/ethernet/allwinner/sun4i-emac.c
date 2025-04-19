@@ -95,11 +95,11 @@ static void emac_update_speed(struct net_device *dev)
 	unsigned int reg_val;
 
 	/* set EMAC SPEED, depend on PHY  */
-	reg_val = readl(db->membase + EMAC_MAC_SUPP_REG);
+	reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:98", db->membase + EMAC_MAC_SUPP_REG);
 	reg_val &= ~(0x1 << 8);
 	if (db->speed == SPEED_100)
 		reg_val |= 1 << 8;
-	writel(reg_val, db->membase + EMAC_MAC_SUPP_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:102", reg_val, db->membase + EMAC_MAC_SUPP_REG);
 }
 
 static void emac_update_duplex(struct net_device *dev)
@@ -108,11 +108,11 @@ static void emac_update_duplex(struct net_device *dev)
 	unsigned int reg_val;
 
 	/* set duplex depend on phy */
-	reg_val = readl(db->membase + EMAC_MAC_CTL1_REG);
+	reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:111", db->membase + EMAC_MAC_CTL1_REG);
 	reg_val &= ~EMAC_MAC_CTL1_DUPLEX_EN;
 	if (db->duplex)
 		reg_val |= EMAC_MAC_CTL1_DUPLEX_EN;
-	writel(reg_val, db->membase + EMAC_MAC_CTL1_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:115", reg_val, db->membase + EMAC_MAC_CTL1_REG);
 }
 
 static void emac_handle_link_change(struct net_device *dev)
@@ -190,9 +190,9 @@ static void emac_reset(struct emac_board_info *db)
 	dev_dbg(db->dev, "resetting device\n");
 
 	/* RESET device */
-	writel(0, db->membase + EMAC_CTL_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:193", 0, db->membase + EMAC_CTL_REG);
 	udelay(200);
-	writel(EMAC_CTL_RESET, db->membase + EMAC_CTL_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:195", EMAC_CTL_RESET, db->membase + EMAC_CTL_REG);
 	udelay(200);
 }
 
@@ -243,38 +243,38 @@ static unsigned int emac_setup(struct net_device *ndev)
 	unsigned int reg_val;
 
 	/* set up TX */
-	reg_val = readl(db->membase + EMAC_TX_MODE_REG);
+	reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:246", db->membase + EMAC_TX_MODE_REG);
 
-	writel(reg_val | EMAC_TX_MODE_ABORTED_FRAME_EN,
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:248", reg_val | EMAC_TX_MODE_ABORTED_FRAME_EN,
 		db->membase + EMAC_TX_MODE_REG);
 
 	/* set MAC */
 	/* set MAC CTL0 */
-	reg_val = readl(db->membase + EMAC_MAC_CTL0_REG);
-	writel(reg_val | EMAC_MAC_CTL0_RX_FLOW_CTL_EN |
+	reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:253", db->membase + EMAC_MAC_CTL0_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:254", reg_val | EMAC_MAC_CTL0_RX_FLOW_CTL_EN |
 		EMAC_MAC_CTL0_TX_FLOW_CTL_EN,
 		db->membase + EMAC_MAC_CTL0_REG);
 
 	/* set MAC CTL1 */
-	reg_val = readl(db->membase + EMAC_MAC_CTL1_REG);
+	reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:259", db->membase + EMAC_MAC_CTL1_REG);
 	reg_val |= EMAC_MAC_CTL1_LEN_CHECK_EN;
 	reg_val |= EMAC_MAC_CTL1_CRC_EN;
 	reg_val |= EMAC_MAC_CTL1_PAD_EN;
-	writel(reg_val, db->membase + EMAC_MAC_CTL1_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:263", reg_val, db->membase + EMAC_MAC_CTL1_REG);
 
 	/* set up IPGT */
-	writel(EMAC_MAC_IPGT_FULL_DUPLEX, db->membase + EMAC_MAC_IPGT_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:266", EMAC_MAC_IPGT_FULL_DUPLEX, db->membase + EMAC_MAC_IPGT_REG);
 
 	/* set up IPGR */
-	writel((EMAC_MAC_IPGR_IPG1 << 8) | EMAC_MAC_IPGR_IPG2,
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:269", (EMAC_MAC_IPGR_IPG1 << 8) | EMAC_MAC_IPGR_IPG2,
 		db->membase + EMAC_MAC_IPGR_REG);
 
 	/* set up Collison window */
-	writel((EMAC_MAC_CLRT_COLLISION_WINDOW << 8) | EMAC_MAC_CLRT_RM,
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:273", (EMAC_MAC_CLRT_COLLISION_WINDOW << 8) | EMAC_MAC_CLRT_RM,
 		db->membase + EMAC_MAC_CLRT_REG);
 
 	/* set up Max Frame Length */
-	writel(EMAC_MAX_FRAME_LEN,
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:277", EMAC_MAX_FRAME_LEN,
 		db->membase + EMAC_MAC_MAXF_REG);
 
 	return 0;
@@ -286,14 +286,14 @@ static void emac_set_rx_mode(struct net_device *ndev)
 	unsigned int reg_val;
 
 	/* set up RX */
-	reg_val = readl(db->membase + EMAC_RX_CTL_REG);
+	reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:289", db->membase + EMAC_RX_CTL_REG);
 
 	if (ndev->flags & IFF_PROMISC)
 		reg_val |= EMAC_RX_CTL_PASS_ALL_EN;
 	else
 		reg_val &= ~EMAC_RX_CTL_PASS_ALL_EN;
 
-	writel(reg_val | EMAC_RX_CTL_PASS_LEN_OOR_EN |
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:296", reg_val | EMAC_RX_CTL_PASS_LEN_OOR_EN |
 		EMAC_RX_CTL_ACCEPT_UNICAST_EN | EMAC_RX_CTL_DA_FILTER_EN |
 		EMAC_RX_CTL_ACCEPT_MULTICAST_EN |
 		EMAC_RX_CTL_ACCEPT_BROADCAST_EN,
@@ -307,30 +307,30 @@ static unsigned int emac_powerup(struct net_device *ndev)
 
 	/* initial EMAC */
 	/* flush RX FIFO */
-	reg_val = readl(db->membase + EMAC_RX_CTL_REG);
+	reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:310", db->membase + EMAC_RX_CTL_REG);
 	reg_val |= 0x8;
-	writel(reg_val, db->membase + EMAC_RX_CTL_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:312", reg_val, db->membase + EMAC_RX_CTL_REG);
 	udelay(1);
 
 	/* initial MAC */
 	/* soft reset MAC */
-	reg_val = readl(db->membase + EMAC_MAC_CTL0_REG);
+	reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:317", db->membase + EMAC_MAC_CTL0_REG);
 	reg_val &= ~EMAC_MAC_CTL0_SOFT_RESET;
-	writel(reg_val, db->membase + EMAC_MAC_CTL0_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:319", reg_val, db->membase + EMAC_MAC_CTL0_REG);
 
 	/* set MII clock */
-	reg_val = readl(db->membase + EMAC_MAC_MCFG_REG);
+	reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:322", db->membase + EMAC_MAC_MCFG_REG);
 	reg_val &= (~(0xf << 2));
 	reg_val |= (0xD << 2);
-	writel(reg_val, db->membase + EMAC_MAC_MCFG_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:325", reg_val, db->membase + EMAC_MAC_MCFG_REG);
 
 	/* clear RX counter */
-	writel(0x0, db->membase + EMAC_RX_FBC_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:328", 0x0, db->membase + EMAC_RX_FBC_REG);
 
 	/* disable all interrupt and clear interrupt status */
-	writel(0, db->membase + EMAC_INT_CTL_REG);
-	reg_val = readl(db->membase + EMAC_INT_STA_REG);
-	writel(reg_val, db->membase + EMAC_INT_STA_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:331", 0, db->membase + EMAC_INT_CTL_REG);
+	reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:332", db->membase + EMAC_INT_STA_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:333", reg_val, db->membase + EMAC_INT_STA_REG);
 
 	udelay(1);
 
@@ -338,9 +338,9 @@ static unsigned int emac_powerup(struct net_device *ndev)
 	emac_setup(ndev);
 
 	/* set mac_address to chip */
-	writel(ndev->dev_addr[0] << 16 | ndev->dev_addr[1] << 8 | ndev->
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:341", ndev->dev_addr[0] << 16 | ndev->dev_addr[1] << 8 | ndev->
 	       dev_addr[2], db->membase + EMAC_MAC_A1_REG);
-	writel(ndev->dev_addr[3] << 16 | ndev->dev_addr[4] << 8 | ndev->
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:343", ndev->dev_addr[3] << 16 | ndev->dev_addr[4] << 8 | ndev->
 	       dev_addr[5], db->membase + EMAC_MAC_A0_REG);
 
 	mdelay(1);
@@ -358,9 +358,9 @@ static int emac_set_mac_address(struct net_device *dev, void *p)
 
 	memcpy(dev->dev_addr, addr->sa_data, ETH_ALEN);
 
-	writel(dev->dev_addr[0] << 16 | dev->dev_addr[1] << 8 | dev->
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:361", dev->dev_addr[0] << 16 | dev->dev_addr[1] << 8 | dev->
 	       dev_addr[2], db->membase + EMAC_MAC_A1_REG);
-	writel(dev->dev_addr[3] << 16 | dev->dev_addr[4] << 8 | dev->
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:363", dev->dev_addr[3] << 16 | dev->dev_addr[4] << 8 | dev->
 	       dev_addr[5], db->membase + EMAC_MAC_A0_REG);
 
 	return 0;
@@ -379,14 +379,14 @@ static void emac_init_device(struct net_device *dev)
 	emac_update_duplex(dev);
 
 	/* enable RX/TX */
-	reg_val = readl(db->membase + EMAC_CTL_REG);
-	writel(reg_val | EMAC_CTL_RESET | EMAC_CTL_TX_EN | EMAC_CTL_RX_EN,
+	reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:382", db->membase + EMAC_CTL_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:383", reg_val | EMAC_CTL_RESET | EMAC_CTL_TX_EN | EMAC_CTL_RX_EN,
 		db->membase + EMAC_CTL_REG);
 
 	/* enable RX/TX0/RX Hlevel interrup */
-	reg_val = readl(db->membase + EMAC_INT_CTL_REG);
+	reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:387", db->membase + EMAC_INT_CTL_REG);
 	reg_val |= (0xf << 0) | (0x01 << 8);
-	writel(reg_val, db->membase + EMAC_INT_CTL_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:389", reg_val, db->membase + EMAC_INT_CTL_REG);
 
 	spin_unlock_irqrestore(&db->lock, flags);
 }
@@ -431,7 +431,7 @@ static netdev_tx_t emac_start_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	spin_lock_irqsave(&db->lock, flags);
 
-	writel(channel, db->membase + EMAC_TX_INS_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:434", channel, db->membase + EMAC_TX_INS_REG);
 
 	emac_outblk_32bit(db->membase + EMAC_TX_IO_DATA_REG,
 			skb->data, skb->len);
@@ -441,18 +441,18 @@ static netdev_tx_t emac_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	/* TX control: First packet immediately send, second packet queue */
 	if (channel == 0) {
 		/* set TX len */
-		writel(skb->len, db->membase + EMAC_TX_PL0_REG);
+		pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:444", skb->len, db->membase + EMAC_TX_PL0_REG);
 		/* start translate from fifo to phy */
-		writel(readl(db->membase + EMAC_TX_CTL0_REG) | 1,
+		pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:446", pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:446", db->membase + EMAC_TX_CTL0_REG) | 1,
 		       db->membase + EMAC_TX_CTL0_REG);
 
 		/* save the time stamp */
 		netif_trans_update(dev);
 	} else if (channel == 1) {
 		/* set TX len */
-		writel(skb->len, db->membase + EMAC_TX_PL1_REG);
+		pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:453", skb->len, db->membase + EMAC_TX_PL1_REG);
 		/* start translate from fifo to phy */
-		writel(readl(db->membase + EMAC_TX_CTL1_REG) | 1,
+		pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:455", pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:455", db->membase + EMAC_TX_CTL1_REG) | 1,
 		       db->membase + EMAC_TX_CTL1_REG);
 
 		/* save the time stamp */
@@ -509,7 +509,7 @@ static void emac_rx(struct net_device *dev)
 		 * the interrupts disabled, but the second will fix
 		 * it
 		 */
-		rxcount = readl(db->membase + EMAC_RX_FBC_REG);
+		rxcount = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:512", db->membase + EMAC_RX_FBC_REG);
 
 		if (netif_msg_rx_status(db))
 			dev_dbg(db->dev, "RXCount: %x\n", rxcount);
@@ -525,48 +525,48 @@ static void emac_rx(struct net_device *dev)
 			db->skb_last = NULL;
 			rxlen_last = 0;
 
-			reg_val = readl(db->membase + EMAC_RX_CTL_REG);
+			reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:528", db->membase + EMAC_RX_CTL_REG);
 			reg_val &= ~EMAC_RX_CTL_DMA_EN;
-			writel(reg_val, db->membase + EMAC_RX_CTL_REG);
+			pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:530", reg_val, db->membase + EMAC_RX_CTL_REG);
 		}
 
 		if (!rxcount) {
 			db->emacrx_completed_flag = 1;
-			reg_val = readl(db->membase + EMAC_INT_CTL_REG);
+			reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:535", db->membase + EMAC_INT_CTL_REG);
 			reg_val |= (0xf << 0) | (0x01 << 8);
-			writel(reg_val, db->membase + EMAC_INT_CTL_REG);
+			pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:537", reg_val, db->membase + EMAC_INT_CTL_REG);
 
 			/* had one stuck? */
-			rxcount = readl(db->membase + EMAC_RX_FBC_REG);
+			rxcount = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:540", db->membase + EMAC_RX_FBC_REG);
 			if (!rxcount)
 				return;
 		}
 
-		reg_val = readl(db->membase + EMAC_RX_IO_DATA_REG);
+		reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:545", db->membase + EMAC_RX_IO_DATA_REG);
 		if (netif_msg_rx_status(db))
 			dev_dbg(db->dev, "receive header: %x\n", reg_val);
 		if (reg_val != EMAC_UNDOCUMENTED_MAGIC) {
 			/* disable RX */
-			reg_val = readl(db->membase + EMAC_CTL_REG);
-			writel(reg_val & ~EMAC_CTL_RX_EN,
+			reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:550", db->membase + EMAC_CTL_REG);
+			pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:551", reg_val & ~EMAC_CTL_RX_EN,
 			       db->membase + EMAC_CTL_REG);
 
 			/* Flush RX FIFO */
-			reg_val = readl(db->membase + EMAC_RX_CTL_REG);
-			writel(reg_val | (1 << 3),
+			reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:555", db->membase + EMAC_RX_CTL_REG);
+			pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:556", reg_val | (1 << 3),
 			       db->membase + EMAC_RX_CTL_REG);
 
 			do {
-				reg_val = readl(db->membase + EMAC_RX_CTL_REG);
+				reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:560", db->membase + EMAC_RX_CTL_REG);
 			} while (reg_val & (1 << 3));
 
 			/* enable RX */
-			reg_val = readl(db->membase + EMAC_CTL_REG);
-			writel(reg_val | EMAC_CTL_RX_EN,
+			reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:564", db->membase + EMAC_CTL_REG);
+			pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:565", reg_val | EMAC_CTL_RX_EN,
 			       db->membase + EMAC_CTL_REG);
-			reg_val = readl(db->membase + EMAC_INT_CTL_REG);
+			reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:567", db->membase + EMAC_INT_CTL_REG);
 			reg_val |= (0xf << 0) | (0x01 << 8);
-			writel(reg_val, db->membase + EMAC_INT_CTL_REG);
+			pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:569", reg_val, db->membase + EMAC_INT_CTL_REG);
 
 			db->emacrx_completed_flag = 1;
 
@@ -576,7 +576,7 @@ static void emac_rx(struct net_device *dev)
 		/* A packet ready now  & Get status/length */
 		good_packet = true;
 
-		rxhdr = readl(db->membase + EMAC_RX_IO_DATA_REG);
+		rxhdr = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:579", db->membase + EMAC_RX_IO_DATA_REG);
 
 		if (netif_msg_rx_status(db))
 			dev_dbg(db->dev, "rxhdr: %x\n", *((int *)(&rxhdr)));
@@ -647,13 +647,13 @@ static irqreturn_t emac_interrupt(int irq, void *dev_id)
 	spin_lock(&db->lock);
 
 	/* Disable all interrupts */
-	writel(0, db->membase + EMAC_INT_CTL_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:650", 0, db->membase + EMAC_INT_CTL_REG);
 
 	/* Got EMAC interrupt status */
 	/* Got ISR */
-	int_status = readl(db->membase + EMAC_INT_STA_REG);
+	int_status = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:654", db->membase + EMAC_INT_STA_REG);
 	/* Clear ISR status */
-	writel(int_status, db->membase + EMAC_INT_STA_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:656", int_status, db->membase + EMAC_INT_STA_REG);
 
 	if (netif_msg_intr(db))
 		dev_dbg(db->dev, "emac interrupt %02x\n", int_status);
@@ -674,9 +674,9 @@ static irqreturn_t emac_interrupt(int irq, void *dev_id)
 
 	/* Re-enable interrupt mask */
 	if (db->emacrx_completed_flag == 1) {
-		reg_val = readl(db->membase + EMAC_INT_CTL_REG);
+		reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:677", db->membase + EMAC_INT_CTL_REG);
 		reg_val |= (0xf << 0) | (0x01 << 8);
-		writel(reg_val, db->membase + EMAC_INT_CTL_REG);
+		pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:679", reg_val, db->membase + EMAC_INT_CTL_REG);
 	}
 	spin_unlock(&db->lock);
 
@@ -732,16 +732,16 @@ static void emac_shutdown(struct net_device *dev)
 	struct emac_board_info *db = netdev_priv(dev);
 
 	/* Disable all interrupt */
-	writel(0, db->membase + EMAC_INT_CTL_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:735", 0, db->membase + EMAC_INT_CTL_REG);
 
 	/* clear interrupt status */
-	reg_val = readl(db->membase + EMAC_INT_STA_REG);
-	writel(reg_val, db->membase + EMAC_INT_STA_REG);
+	reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:738", db->membase + EMAC_INT_STA_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:739", reg_val, db->membase + EMAC_INT_STA_REG);
 
 	/* Disable RX/TX */
-	reg_val = readl(db->membase + EMAC_CTL_REG);
+	reg_val = pete_readl("drivers/net/ethernet/allwinner/sun4i-emac.c:742", db->membase + EMAC_CTL_REG);
 	reg_val &= ~(EMAC_CTL_TX_EN | EMAC_CTL_RX_EN | EMAC_CTL_RESET);
-	writel(reg_val, db->membase + EMAC_CTL_REG);
+	pete_writel("drivers/net/ethernet/allwinner/sun4i-emac.c:744", reg_val, db->membase + EMAC_CTL_REG);
 }
 
 /* Stop the interface.

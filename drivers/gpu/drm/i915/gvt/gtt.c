@@ -283,7 +283,7 @@ static u64 read_pte64(struct i915_ggtt *ggtt, unsigned long index)
 {
 	void __iomem *addr = (gen8_pte_t __iomem *)ggtt->gsm + index;
 
-	return readq(addr);
+	return pete_readq("drivers/gpu/drm/i915/gvt/gtt.c:286", addr);
 }
 
 static void ggtt_invalidate(struct intel_gt *gt)
@@ -297,7 +297,7 @@ static void write_pte64(struct i915_ggtt *ggtt, unsigned long index, u64 pte)
 {
 	void __iomem *addr = (gen8_pte_t __iomem *)ggtt->gsm + index;
 
-	writeq(pte, addr);
+	pete_writeq("drivers/gpu/drm/i915/gvt/gtt.c:300", pte, addr);
 }
 
 static inline int gtt_get_entry64(void *pt,

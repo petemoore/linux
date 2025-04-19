@@ -187,11 +187,11 @@
 
 static void dwmac_mmc_ctrl(void __iomem *mmcaddr, unsigned int mode)
 {
-	u32 value = readl(mmcaddr + MMC_CNTRL);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:190", mmcaddr + MMC_CNTRL);
 
 	value |= (mode & 0x3F);
 
-	writel(value, mmcaddr + MMC_CNTRL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:194", value, mmcaddr + MMC_CNTRL);
 
 	pr_debug("stmmac: MMC ctrl register (offset 0x%x): 0x%08x\n",
 		 MMC_CNTRL, value);
@@ -200,9 +200,9 @@ static void dwmac_mmc_ctrl(void __iomem *mmcaddr, unsigned int mode)
 /* To mask all all interrupts.*/
 static void dwmac_mmc_intr_all_mask(void __iomem *mmcaddr)
 {
-	writel(MMC_DEFAULT_MASK, mmcaddr + MMC_RX_INTR_MASK);
-	writel(MMC_DEFAULT_MASK, mmcaddr + MMC_TX_INTR_MASK);
-	writel(MMC_DEFAULT_MASK, mmcaddr + MMC_RX_IPC_INTR_MASK);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:203", MMC_DEFAULT_MASK, mmcaddr + MMC_RX_INTR_MASK);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:204", MMC_DEFAULT_MASK, mmcaddr + MMC_TX_INTR_MASK);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:205", MMC_DEFAULT_MASK, mmcaddr + MMC_RX_IPC_INTR_MASK);
 }
 
 /* This reads the MAC core counters (if actaully supported).
@@ -212,125 +212,125 @@ static void dwmac_mmc_intr_all_mask(void __iomem *mmcaddr)
  */
 static void dwmac_mmc_read(void __iomem *mmcaddr, struct stmmac_counters *mmc)
 {
-	mmc->mmc_tx_octetcount_gb += readl(mmcaddr + MMC_TX_OCTETCOUNT_GB);
-	mmc->mmc_tx_framecount_gb += readl(mmcaddr + MMC_TX_FRAMECOUNT_GB);
-	mmc->mmc_tx_broadcastframe_g += readl(mmcaddr +
+	mmc->mmc_tx_octetcount_gb += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:215", mmcaddr + MMC_TX_OCTETCOUNT_GB);
+	mmc->mmc_tx_framecount_gb += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:216", mmcaddr + MMC_TX_FRAMECOUNT_GB);
+	mmc->mmc_tx_broadcastframe_g += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:217", mmcaddr +
 					      MMC_TX_BROADCASTFRAME_G);
-	mmc->mmc_tx_multicastframe_g += readl(mmcaddr +
+	mmc->mmc_tx_multicastframe_g += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:219", mmcaddr +
 					      MMC_TX_MULTICASTFRAME_G);
-	mmc->mmc_tx_64_octets_gb += readl(mmcaddr + MMC_TX_64_OCTETS_GB);
+	mmc->mmc_tx_64_octets_gb += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:221", mmcaddr + MMC_TX_64_OCTETS_GB);
 	mmc->mmc_tx_65_to_127_octets_gb +=
-	    readl(mmcaddr + MMC_TX_65_TO_127_OCTETS_GB);
+	    pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:223", mmcaddr + MMC_TX_65_TO_127_OCTETS_GB);
 	mmc->mmc_tx_128_to_255_octets_gb +=
-	    readl(mmcaddr + MMC_TX_128_TO_255_OCTETS_GB);
+	    pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:225", mmcaddr + MMC_TX_128_TO_255_OCTETS_GB);
 	mmc->mmc_tx_256_to_511_octets_gb +=
-	    readl(mmcaddr + MMC_TX_256_TO_511_OCTETS_GB);
+	    pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:227", mmcaddr + MMC_TX_256_TO_511_OCTETS_GB);
 	mmc->mmc_tx_512_to_1023_octets_gb +=
-	    readl(mmcaddr + MMC_TX_512_TO_1023_OCTETS_GB);
+	    pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:229", mmcaddr + MMC_TX_512_TO_1023_OCTETS_GB);
 	mmc->mmc_tx_1024_to_max_octets_gb +=
-	    readl(mmcaddr + MMC_TX_1024_TO_MAX_OCTETS_GB);
-	mmc->mmc_tx_unicast_gb += readl(mmcaddr + MMC_TX_UNICAST_GB);
-	mmc->mmc_tx_multicast_gb += readl(mmcaddr + MMC_TX_MULTICAST_GB);
-	mmc->mmc_tx_broadcast_gb += readl(mmcaddr + MMC_TX_BROADCAST_GB);
-	mmc->mmc_tx_underflow_error += readl(mmcaddr + MMC_TX_UNDERFLOW_ERROR);
-	mmc->mmc_tx_singlecol_g += readl(mmcaddr + MMC_TX_SINGLECOL_G);
-	mmc->mmc_tx_multicol_g += readl(mmcaddr + MMC_TX_MULTICOL_G);
-	mmc->mmc_tx_deferred += readl(mmcaddr + MMC_TX_DEFERRED);
-	mmc->mmc_tx_latecol += readl(mmcaddr + MMC_TX_LATECOL);
-	mmc->mmc_tx_exesscol += readl(mmcaddr + MMC_TX_EXESSCOL);
-	mmc->mmc_tx_carrier_error += readl(mmcaddr + MMC_TX_CARRIER_ERROR);
-	mmc->mmc_tx_octetcount_g += readl(mmcaddr + MMC_TX_OCTETCOUNT_G);
-	mmc->mmc_tx_framecount_g += readl(mmcaddr + MMC_TX_FRAMECOUNT_G);
-	mmc->mmc_tx_excessdef += readl(mmcaddr + MMC_TX_EXCESSDEF);
-	mmc->mmc_tx_pause_frame += readl(mmcaddr + MMC_TX_PAUSE_FRAME);
-	mmc->mmc_tx_vlan_frame_g += readl(mmcaddr + MMC_TX_VLAN_FRAME_G);
+	    pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:231", mmcaddr + MMC_TX_1024_TO_MAX_OCTETS_GB);
+	mmc->mmc_tx_unicast_gb += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:232", mmcaddr + MMC_TX_UNICAST_GB);
+	mmc->mmc_tx_multicast_gb += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:233", mmcaddr + MMC_TX_MULTICAST_GB);
+	mmc->mmc_tx_broadcast_gb += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:234", mmcaddr + MMC_TX_BROADCAST_GB);
+	mmc->mmc_tx_underflow_error += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:235", mmcaddr + MMC_TX_UNDERFLOW_ERROR);
+	mmc->mmc_tx_singlecol_g += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:236", mmcaddr + MMC_TX_SINGLECOL_G);
+	mmc->mmc_tx_multicol_g += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:237", mmcaddr + MMC_TX_MULTICOL_G);
+	mmc->mmc_tx_deferred += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:238", mmcaddr + MMC_TX_DEFERRED);
+	mmc->mmc_tx_latecol += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:239", mmcaddr + MMC_TX_LATECOL);
+	mmc->mmc_tx_exesscol += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:240", mmcaddr + MMC_TX_EXESSCOL);
+	mmc->mmc_tx_carrier_error += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:241", mmcaddr + MMC_TX_CARRIER_ERROR);
+	mmc->mmc_tx_octetcount_g += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:242", mmcaddr + MMC_TX_OCTETCOUNT_G);
+	mmc->mmc_tx_framecount_g += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:243", mmcaddr + MMC_TX_FRAMECOUNT_G);
+	mmc->mmc_tx_excessdef += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:244", mmcaddr + MMC_TX_EXCESSDEF);
+	mmc->mmc_tx_pause_frame += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:245", mmcaddr + MMC_TX_PAUSE_FRAME);
+	mmc->mmc_tx_vlan_frame_g += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:246", mmcaddr + MMC_TX_VLAN_FRAME_G);
 
 	/* MMC RX counter registers */
-	mmc->mmc_rx_framecount_gb += readl(mmcaddr + MMC_RX_FRAMECOUNT_GB);
-	mmc->mmc_rx_octetcount_gb += readl(mmcaddr + MMC_RX_OCTETCOUNT_GB);
-	mmc->mmc_rx_octetcount_g += readl(mmcaddr + MMC_RX_OCTETCOUNT_G);
-	mmc->mmc_rx_broadcastframe_g += readl(mmcaddr +
+	mmc->mmc_rx_framecount_gb += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:249", mmcaddr + MMC_RX_FRAMECOUNT_GB);
+	mmc->mmc_rx_octetcount_gb += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:250", mmcaddr + MMC_RX_OCTETCOUNT_GB);
+	mmc->mmc_rx_octetcount_g += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:251", mmcaddr + MMC_RX_OCTETCOUNT_G);
+	mmc->mmc_rx_broadcastframe_g += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:252", mmcaddr +
 					      MMC_RX_BROADCASTFRAME_G);
-	mmc->mmc_rx_multicastframe_g += readl(mmcaddr +
+	mmc->mmc_rx_multicastframe_g += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:254", mmcaddr +
 					      MMC_RX_MULTICASTFRAME_G);
-	mmc->mmc_rx_crc_error += readl(mmcaddr + MMC_RX_CRC_ERROR);
-	mmc->mmc_rx_align_error += readl(mmcaddr + MMC_RX_ALIGN_ERROR);
-	mmc->mmc_rx_run_error += readl(mmcaddr + MMC_RX_RUN_ERROR);
-	mmc->mmc_rx_jabber_error += readl(mmcaddr + MMC_RX_JABBER_ERROR);
-	mmc->mmc_rx_undersize_g += readl(mmcaddr + MMC_RX_UNDERSIZE_G);
-	mmc->mmc_rx_oversize_g += readl(mmcaddr + MMC_RX_OVERSIZE_G);
-	mmc->mmc_rx_64_octets_gb += readl(mmcaddr + MMC_RX_64_OCTETS_GB);
+	mmc->mmc_rx_crc_error += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:256", mmcaddr + MMC_RX_CRC_ERROR);
+	mmc->mmc_rx_align_error += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:257", mmcaddr + MMC_RX_ALIGN_ERROR);
+	mmc->mmc_rx_run_error += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:258", mmcaddr + MMC_RX_RUN_ERROR);
+	mmc->mmc_rx_jabber_error += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:259", mmcaddr + MMC_RX_JABBER_ERROR);
+	mmc->mmc_rx_undersize_g += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:260", mmcaddr + MMC_RX_UNDERSIZE_G);
+	mmc->mmc_rx_oversize_g += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:261", mmcaddr + MMC_RX_OVERSIZE_G);
+	mmc->mmc_rx_64_octets_gb += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:262", mmcaddr + MMC_RX_64_OCTETS_GB);
 	mmc->mmc_rx_65_to_127_octets_gb +=
-	    readl(mmcaddr + MMC_RX_65_TO_127_OCTETS_GB);
+	    pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:264", mmcaddr + MMC_RX_65_TO_127_OCTETS_GB);
 	mmc->mmc_rx_128_to_255_octets_gb +=
-	    readl(mmcaddr + MMC_RX_128_TO_255_OCTETS_GB);
+	    pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:266", mmcaddr + MMC_RX_128_TO_255_OCTETS_GB);
 	mmc->mmc_rx_256_to_511_octets_gb +=
-	    readl(mmcaddr + MMC_RX_256_TO_511_OCTETS_GB);
+	    pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:268", mmcaddr + MMC_RX_256_TO_511_OCTETS_GB);
 	mmc->mmc_rx_512_to_1023_octets_gb +=
-	    readl(mmcaddr + MMC_RX_512_TO_1023_OCTETS_GB);
+	    pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:270", mmcaddr + MMC_RX_512_TO_1023_OCTETS_GB);
 	mmc->mmc_rx_1024_to_max_octets_gb +=
-	    readl(mmcaddr + MMC_RX_1024_TO_MAX_OCTETS_GB);
-	mmc->mmc_rx_unicast_g += readl(mmcaddr + MMC_RX_UNICAST_G);
-	mmc->mmc_rx_length_error += readl(mmcaddr + MMC_RX_LENGTH_ERROR);
-	mmc->mmc_rx_autofrangetype += readl(mmcaddr + MMC_RX_AUTOFRANGETYPE);
-	mmc->mmc_rx_pause_frames += readl(mmcaddr + MMC_RX_PAUSE_FRAMES);
-	mmc->mmc_rx_fifo_overflow += readl(mmcaddr + MMC_RX_FIFO_OVERFLOW);
-	mmc->mmc_rx_vlan_frames_gb += readl(mmcaddr + MMC_RX_VLAN_FRAMES_GB);
-	mmc->mmc_rx_watchdog_error += readl(mmcaddr + MMC_RX_WATCHDOG_ERROR);
+	    pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:272", mmcaddr + MMC_RX_1024_TO_MAX_OCTETS_GB);
+	mmc->mmc_rx_unicast_g += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:273", mmcaddr + MMC_RX_UNICAST_G);
+	mmc->mmc_rx_length_error += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:274", mmcaddr + MMC_RX_LENGTH_ERROR);
+	mmc->mmc_rx_autofrangetype += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:275", mmcaddr + MMC_RX_AUTOFRANGETYPE);
+	mmc->mmc_rx_pause_frames += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:276", mmcaddr + MMC_RX_PAUSE_FRAMES);
+	mmc->mmc_rx_fifo_overflow += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:277", mmcaddr + MMC_RX_FIFO_OVERFLOW);
+	mmc->mmc_rx_vlan_frames_gb += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:278", mmcaddr + MMC_RX_VLAN_FRAMES_GB);
+	mmc->mmc_rx_watchdog_error += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:279", mmcaddr + MMC_RX_WATCHDOG_ERROR);
 	/* IPC */
-	mmc->mmc_rx_ipc_intr_mask += readl(mmcaddr + MMC_RX_IPC_INTR_MASK);
-	mmc->mmc_rx_ipc_intr += readl(mmcaddr + MMC_RX_IPC_INTR);
+	mmc->mmc_rx_ipc_intr_mask += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:281", mmcaddr + MMC_RX_IPC_INTR_MASK);
+	mmc->mmc_rx_ipc_intr += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:282", mmcaddr + MMC_RX_IPC_INTR);
 	/* IPv4 */
-	mmc->mmc_rx_ipv4_gd += readl(mmcaddr + MMC_RX_IPV4_GD);
-	mmc->mmc_rx_ipv4_hderr += readl(mmcaddr + MMC_RX_IPV4_HDERR);
-	mmc->mmc_rx_ipv4_nopay += readl(mmcaddr + MMC_RX_IPV4_NOPAY);
-	mmc->mmc_rx_ipv4_frag += readl(mmcaddr + MMC_RX_IPV4_FRAG);
-	mmc->mmc_rx_ipv4_udsbl += readl(mmcaddr + MMC_RX_IPV4_UDSBL);
+	mmc->mmc_rx_ipv4_gd += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:284", mmcaddr + MMC_RX_IPV4_GD);
+	mmc->mmc_rx_ipv4_hderr += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:285", mmcaddr + MMC_RX_IPV4_HDERR);
+	mmc->mmc_rx_ipv4_nopay += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:286", mmcaddr + MMC_RX_IPV4_NOPAY);
+	mmc->mmc_rx_ipv4_frag += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:287", mmcaddr + MMC_RX_IPV4_FRAG);
+	mmc->mmc_rx_ipv4_udsbl += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:288", mmcaddr + MMC_RX_IPV4_UDSBL);
 
-	mmc->mmc_rx_ipv4_gd_octets += readl(mmcaddr + MMC_RX_IPV4_GD_OCTETS);
+	mmc->mmc_rx_ipv4_gd_octets += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:290", mmcaddr + MMC_RX_IPV4_GD_OCTETS);
 	mmc->mmc_rx_ipv4_hderr_octets +=
-	    readl(mmcaddr + MMC_RX_IPV4_HDERR_OCTETS);
+	    pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:292", mmcaddr + MMC_RX_IPV4_HDERR_OCTETS);
 	mmc->mmc_rx_ipv4_nopay_octets +=
-	    readl(mmcaddr + MMC_RX_IPV4_NOPAY_OCTETS);
-	mmc->mmc_rx_ipv4_frag_octets += readl(mmcaddr +
+	    pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:294", mmcaddr + MMC_RX_IPV4_NOPAY_OCTETS);
+	mmc->mmc_rx_ipv4_frag_octets += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:295", mmcaddr +
 					      MMC_RX_IPV4_FRAG_OCTETS);
 	mmc->mmc_rx_ipv4_udsbl_octets +=
-	    readl(mmcaddr + MMC_RX_IPV4_UDSBL_OCTETS);
+	    pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:298", mmcaddr + MMC_RX_IPV4_UDSBL_OCTETS);
 
 	/* IPV6 */
-	mmc->mmc_rx_ipv6_gd_octets += readl(mmcaddr + MMC_RX_IPV6_GD_OCTETS);
+	mmc->mmc_rx_ipv6_gd_octets += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:301", mmcaddr + MMC_RX_IPV6_GD_OCTETS);
 	mmc->mmc_rx_ipv6_hderr_octets +=
-	    readl(mmcaddr + MMC_RX_IPV6_HDERR_OCTETS);
+	    pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:303", mmcaddr + MMC_RX_IPV6_HDERR_OCTETS);
 	mmc->mmc_rx_ipv6_nopay_octets +=
-	    readl(mmcaddr + MMC_RX_IPV6_NOPAY_OCTETS);
+	    pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:305", mmcaddr + MMC_RX_IPV6_NOPAY_OCTETS);
 
-	mmc->mmc_rx_ipv6_gd += readl(mmcaddr + MMC_RX_IPV6_GD);
-	mmc->mmc_rx_ipv6_hderr += readl(mmcaddr + MMC_RX_IPV6_HDERR);
-	mmc->mmc_rx_ipv6_nopay += readl(mmcaddr + MMC_RX_IPV6_NOPAY);
+	mmc->mmc_rx_ipv6_gd += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:307", mmcaddr + MMC_RX_IPV6_GD);
+	mmc->mmc_rx_ipv6_hderr += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:308", mmcaddr + MMC_RX_IPV6_HDERR);
+	mmc->mmc_rx_ipv6_nopay += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:309", mmcaddr + MMC_RX_IPV6_NOPAY);
 
 	/* Protocols */
-	mmc->mmc_rx_udp_gd += readl(mmcaddr + MMC_RX_UDP_GD);
-	mmc->mmc_rx_udp_err += readl(mmcaddr + MMC_RX_UDP_ERR);
-	mmc->mmc_rx_tcp_gd += readl(mmcaddr + MMC_RX_TCP_GD);
-	mmc->mmc_rx_tcp_err += readl(mmcaddr + MMC_RX_TCP_ERR);
-	mmc->mmc_rx_icmp_gd += readl(mmcaddr + MMC_RX_ICMP_GD);
-	mmc->mmc_rx_icmp_err += readl(mmcaddr + MMC_RX_ICMP_ERR);
+	mmc->mmc_rx_udp_gd += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:312", mmcaddr + MMC_RX_UDP_GD);
+	mmc->mmc_rx_udp_err += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:313", mmcaddr + MMC_RX_UDP_ERR);
+	mmc->mmc_rx_tcp_gd += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:314", mmcaddr + MMC_RX_TCP_GD);
+	mmc->mmc_rx_tcp_err += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:315", mmcaddr + MMC_RX_TCP_ERR);
+	mmc->mmc_rx_icmp_gd += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:316", mmcaddr + MMC_RX_ICMP_GD);
+	mmc->mmc_rx_icmp_err += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:317", mmcaddr + MMC_RX_ICMP_ERR);
 
-	mmc->mmc_rx_udp_gd_octets += readl(mmcaddr + MMC_RX_UDP_GD_OCTETS);
-	mmc->mmc_rx_udp_err_octets += readl(mmcaddr + MMC_RX_UDP_ERR_OCTETS);
-	mmc->mmc_rx_tcp_gd_octets += readl(mmcaddr + MMC_RX_TCP_GD_OCTETS);
-	mmc->mmc_rx_tcp_err_octets += readl(mmcaddr + MMC_RX_TCP_ERR_OCTETS);
-	mmc->mmc_rx_icmp_gd_octets += readl(mmcaddr + MMC_RX_ICMP_GD_OCTETS);
-	mmc->mmc_rx_icmp_err_octets += readl(mmcaddr + MMC_RX_ICMP_ERR_OCTETS);
+	mmc->mmc_rx_udp_gd_octets += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:319", mmcaddr + MMC_RX_UDP_GD_OCTETS);
+	mmc->mmc_rx_udp_err_octets += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:320", mmcaddr + MMC_RX_UDP_ERR_OCTETS);
+	mmc->mmc_rx_tcp_gd_octets += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:321", mmcaddr + MMC_RX_TCP_GD_OCTETS);
+	mmc->mmc_rx_tcp_err_octets += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:322", mmcaddr + MMC_RX_TCP_ERR_OCTETS);
+	mmc->mmc_rx_icmp_gd_octets += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:323", mmcaddr + MMC_RX_ICMP_GD_OCTETS);
+	mmc->mmc_rx_icmp_err_octets += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:324", mmcaddr + MMC_RX_ICMP_ERR_OCTETS);
 
-	mmc->mmc_tx_fpe_fragment_cntr += readl(mmcaddr + MMC_TX_FPE_FRAG);
-	mmc->mmc_tx_hold_req_cntr += readl(mmcaddr + MMC_TX_HOLD_REQ);
+	mmc->mmc_tx_fpe_fragment_cntr += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:326", mmcaddr + MMC_TX_FPE_FRAG);
+	mmc->mmc_tx_hold_req_cntr += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:327", mmcaddr + MMC_TX_HOLD_REQ);
 	mmc->mmc_rx_packet_assembly_err_cntr +=
-		readl(mmcaddr + MMC_RX_PKT_ASSEMBLY_ERR);
-	mmc->mmc_rx_packet_smd_err_cntr += readl(mmcaddr + MMC_RX_PKT_SMD_ERR);
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:329", mmcaddr + MMC_RX_PKT_ASSEMBLY_ERR);
+	mmc->mmc_rx_packet_smd_err_cntr += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:330", mmcaddr + MMC_RX_PKT_SMD_ERR);
 	mmc->mmc_rx_packet_assembly_ok_cntr +=
-		readl(mmcaddr + MMC_RX_PKT_ASSEMBLY_OK);
-	mmc->mmc_rx_fpe_fragment_cntr += readl(mmcaddr + MMC_RX_FPE_FRAG);
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:332", mmcaddr + MMC_RX_PKT_ASSEMBLY_OK);
+	mmc->mmc_rx_fpe_fragment_cntr += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:333", mmcaddr + MMC_RX_FPE_FRAG);
 }
 
 const struct stmmac_mmc_ops dwmac_mmc_ops = {
@@ -341,26 +341,26 @@ const struct stmmac_mmc_ops dwmac_mmc_ops = {
 
 static void dwxgmac_mmc_ctrl(void __iomem *mmcaddr, unsigned int mode)
 {
-	u32 value = readl(mmcaddr + MMC_CNTRL);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:344", mmcaddr + MMC_CNTRL);
 
 	value |= (mode & 0x3F);
 
-	writel(value, mmcaddr + MMC_CNTRL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:348", value, mmcaddr + MMC_CNTRL);
 }
 
 static void dwxgmac_mmc_intr_all_mask(void __iomem *mmcaddr)
 {
-	writel(0x0, mmcaddr + MMC_RX_INTR_MASK);
-	writel(0x0, mmcaddr + MMC_TX_INTR_MASK);
-	writel(MMC_DEFAULT_MASK, mmcaddr + MMC_XGMAC_RX_IPC_INTR_MASK);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:353", 0x0, mmcaddr + MMC_RX_INTR_MASK);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:354", 0x0, mmcaddr + MMC_TX_INTR_MASK);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:355", MMC_DEFAULT_MASK, mmcaddr + MMC_XGMAC_RX_IPC_INTR_MASK);
 }
 
 static void dwxgmac_read_mmc_reg(void __iomem *addr, u32 reg, u32 *dest)
 {
 	u64 tmp = 0;
 
-	tmp += readl(addr + reg);
-	tmp += ((u64 )readl(addr + reg + 0x4)) << 32;
+	tmp += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:362", addr + reg);
+	tmp += ((u64 )pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:363", addr + reg + 0x4)) << 32;
 	if (tmp > GENMASK(31, 0))
 		*dest = ~0x0;
 	else
@@ -426,10 +426,10 @@ static void dwxgmac_mmc_read(void __iomem *mmcaddr, struct stmmac_counters *mmc)
 			     &mmc->mmc_rx_crc_error);
 	dwxgmac_read_mmc_reg(mmcaddr, MMC_XGMAC_RX_CRC_ERR,
 			     &mmc->mmc_rx_crc_error);
-	mmc->mmc_rx_run_error += readl(mmcaddr + MMC_XGMAC_RX_RUNT_ERR);
-	mmc->mmc_rx_jabber_error += readl(mmcaddr + MMC_XGMAC_RX_JABBER_ERR);
-	mmc->mmc_rx_undersize_g += readl(mmcaddr + MMC_XGMAC_RX_UNDER);
-	mmc->mmc_rx_oversize_g += readl(mmcaddr + MMC_XGMAC_RX_OVER);
+	mmc->mmc_rx_run_error += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:429", mmcaddr + MMC_XGMAC_RX_RUNT_ERR);
+	mmc->mmc_rx_jabber_error += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:430", mmcaddr + MMC_XGMAC_RX_JABBER_ERR);
+	mmc->mmc_rx_undersize_g += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:431", mmcaddr + MMC_XGMAC_RX_UNDER);
+	mmc->mmc_rx_oversize_g += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:432", mmcaddr + MMC_XGMAC_RX_OVER);
 	dwxgmac_read_mmc_reg(mmcaddr, MMC_XGMAC_RX_64OCT_GB,
 			     &mmc->mmc_rx_64_octets_gb);
 	dwxgmac_read_mmc_reg(mmcaddr, MMC_XGMAC_RX_65OCT_GB,
@@ -454,18 +454,18 @@ static void dwxgmac_mmc_read(void __iomem *mmcaddr, struct stmmac_counters *mmc)
 			     &mmc->mmc_rx_fifo_overflow);
 	dwxgmac_read_mmc_reg(mmcaddr, MMC_XGMAC_RX_VLAN_PKT_GB,
 			     &mmc->mmc_rx_vlan_frames_gb);
-	mmc->mmc_rx_watchdog_error += readl(mmcaddr + MMC_XGMAC_RX_WATCHDOG_ERR);
+	mmc->mmc_rx_watchdog_error += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:457", mmcaddr + MMC_XGMAC_RX_WATCHDOG_ERR);
 
-	mmc->mmc_tx_fpe_fragment_cntr += readl(mmcaddr + MMC_XGMAC_TX_FPE_FRAG);
-	mmc->mmc_tx_hold_req_cntr += readl(mmcaddr + MMC_XGMAC_TX_HOLD_REQ);
+	mmc->mmc_tx_fpe_fragment_cntr += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:459", mmcaddr + MMC_XGMAC_TX_FPE_FRAG);
+	mmc->mmc_tx_hold_req_cntr += pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:460", mmcaddr + MMC_XGMAC_TX_HOLD_REQ);
 	mmc->mmc_rx_packet_assembly_err_cntr +=
-		readl(mmcaddr + MMC_XGMAC_RX_PKT_ASSEMBLY_ERR);
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:462", mmcaddr + MMC_XGMAC_RX_PKT_ASSEMBLY_ERR);
 	mmc->mmc_rx_packet_smd_err_cntr +=
-		readl(mmcaddr + MMC_XGMAC_RX_PKT_SMD_ERR);
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:464", mmcaddr + MMC_XGMAC_RX_PKT_SMD_ERR);
 	mmc->mmc_rx_packet_assembly_ok_cntr +=
-		readl(mmcaddr + MMC_XGMAC_RX_PKT_ASSEMBLY_OK);
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:466", mmcaddr + MMC_XGMAC_RX_PKT_ASSEMBLY_OK);
 	mmc->mmc_rx_fpe_fragment_cntr +=
-		readl(mmcaddr + MMC_XGMAC_RX_FPE_FRAG);
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/mmc_core.c:468", mmcaddr + MMC_XGMAC_RX_FPE_FRAG);
 }
 
 const struct stmmac_mmc_ops dwxgmac_mmc_ops = {

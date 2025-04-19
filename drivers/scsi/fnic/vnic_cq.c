@@ -58,7 +58,7 @@ void vnic_cq_init(struct vnic_cq *cq, unsigned int flow_control_enable,
 	u64 paddr;
 
 	paddr = (u64)cq->ring.base_addr | VNIC_PADDR_TARGET;
-	writeq(paddr, &cq->ctrl->ring_base);
+	pete_writeq("drivers/scsi/fnic/vnic_cq.c:61", paddr, &cq->ctrl->ring_base);
 	iowrite32(cq->ring.desc_count, &cq->ctrl->ring_size);
 	iowrite32(flow_control_enable, &cq->ctrl->flow_control_enable);
 	iowrite32(color_enable, &cq->ctrl->color_enable);
@@ -69,7 +69,7 @@ void vnic_cq_init(struct vnic_cq *cq, unsigned int flow_control_enable,
 	iowrite32(cq_entry_enable, &cq->ctrl->cq_entry_enable);
 	iowrite32(cq_message_enable, &cq->ctrl->cq_message_enable);
 	iowrite32(interrupt_offset, &cq->ctrl->interrupt_offset);
-	writeq(cq_message_addr, &cq->ctrl->cq_message_addr);
+	pete_writeq("drivers/scsi/fnic/vnic_cq.c:72", cq_message_addr, &cq->ctrl->cq_message_addr);
 }
 
 void vnic_cq_clean(struct vnic_cq *cq)

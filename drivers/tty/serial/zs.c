@@ -141,11 +141,11 @@ static u8 read_zsreg(struct zs_port *zport, int reg)
 	u8 retval;
 
 	if (reg != 0) {
-		writeb(reg & 0xf, control);
+		pete_writeb("drivers/tty/serial/zs.c:144", reg & 0xf, control);
 		fast_iob();
 		recovery_delay();
 	}
-	retval = readb(control);
+	retval = pete_readb("drivers/tty/serial/zs.c:148", control);
 	recovery_delay();
 	return retval;
 }
@@ -155,10 +155,10 @@ static void write_zsreg(struct zs_port *zport, int reg, u8 value)
 	void __iomem *control = zport->port.membase + ZS_CHAN_IO_OFFSET;
 
 	if (reg != 0) {
-		writeb(reg & 0xf, control);
+		pete_writeb("drivers/tty/serial/zs.c:158", reg & 0xf, control);
 		fast_iob(); recovery_delay();
 	}
-	writeb(value, control);
+	pete_writeb("drivers/tty/serial/zs.c:161", value, control);
 	fast_iob();
 	recovery_delay();
 	return;
@@ -170,7 +170,7 @@ static u8 read_zsdata(struct zs_port *zport)
 			     ZS_CHAN_IO_STRIDE + ZS_CHAN_IO_OFFSET;
 	u8 retval;
 
-	retval = readb(data);
+	retval = pete_readb("drivers/tty/serial/zs.c:173", data);
 	recovery_delay();
 	return retval;
 }
@@ -180,7 +180,7 @@ static void write_zsdata(struct zs_port *zport, u8 value)
 	void __iomem *data = zport->port.membase +
 			     ZS_CHAN_IO_STRIDE + ZS_CHAN_IO_OFFSET;
 
-	writeb(value, data);
+	pete_writeb("drivers/tty/serial/zs.c:183", value, data);
 	fast_iob();
 	recovery_delay();
 	return;

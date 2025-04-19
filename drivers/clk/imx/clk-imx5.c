@@ -456,13 +456,13 @@ static void __init mx51_clocks_init(struct device_node *np)
 	 * The effect of not setting these bits is that MIPI clocks can't be
 	 * enabled without the IPU clock being enabled aswell.
 	 */
-	val = readl(MXC_CCM_CCDR);
+	val = pete_readl("drivers/clk/imx/clk-imx5.c:459", MXC_CCM_CCDR);
 	val |= 1 << 18;
-	writel(val, MXC_CCM_CCDR);
+	pete_writel("drivers/clk/imx/clk-imx5.c:461", val, MXC_CCM_CCDR);
 
-	val = readl(MXC_CCM_CLPCR);
+	val = pete_readl("drivers/clk/imx/clk-imx5.c:463", MXC_CCM_CLPCR);
 	val |= 1 << 23;
-	writel(val, MXC_CCM_CLPCR);
+	pete_writel("drivers/clk/imx/clk-imx5.c:465", val, MXC_CCM_CLPCR);
 
 	imx_register_uart_clocks(3);
 }

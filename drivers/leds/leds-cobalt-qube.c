@@ -24,7 +24,7 @@ static void qube_front_led_set(struct led_classdev *led_cdev,
 		led_value = LED_FRONT_LEFT | LED_FRONT_RIGHT;
 	else
 		led_value = ~(LED_FRONT_LEFT | LED_FRONT_RIGHT);
-	writeb(led_value, led_port);
+	pete_writeb("drivers/leds/leds-cobalt-qube.c:27", led_value, led_port);
 }
 
 static struct led_classdev qube_front_led = {
@@ -47,7 +47,7 @@ static int cobalt_qube_led_probe(struct platform_device *pdev)
 		return -ENOMEM;
 
 	led_value = LED_FRONT_LEFT | LED_FRONT_RIGHT;
-	writeb(led_value, led_port);
+	pete_writeb("drivers/leds/leds-cobalt-qube.c:50", led_value, led_port);
 
 	return devm_led_classdev_register(&pdev->dev, &qube_front_led);
 }

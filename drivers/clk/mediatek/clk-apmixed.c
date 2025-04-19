@@ -30,7 +30,7 @@ static int mtk_ref2usb_tx_is_prepared(struct clk_hw *hw)
 {
 	struct mtk_ref2usb_tx *tx = to_mtk_ref2usb_tx(hw);
 
-	return (readl(tx->base_addr) & REF2USB_EN_MASK) == REF2USB_EN_MASK;
+	return (pete_readl("drivers/clk/mediatek/clk-apmixed.c:33", tx->base_addr) & REF2USB_EN_MASK) == REF2USB_EN_MASK;
 }
 
 static int mtk_ref2usb_tx_prepare(struct clk_hw *hw)
@@ -38,17 +38,17 @@ static int mtk_ref2usb_tx_prepare(struct clk_hw *hw)
 	struct mtk_ref2usb_tx *tx = to_mtk_ref2usb_tx(hw);
 	u32 val;
 
-	val = readl(tx->base_addr);
+	val = pete_readl("drivers/clk/mediatek/clk-apmixed.c:41", tx->base_addr);
 
 	val |= REF2USB_TX_EN;
-	writel(val, tx->base_addr);
+	pete_writel("drivers/clk/mediatek/clk-apmixed.c:44", val, tx->base_addr);
 	udelay(100);
 
 	val |= REF2USB_TX_LPF_EN;
-	writel(val, tx->base_addr);
+	pete_writel("drivers/clk/mediatek/clk-apmixed.c:48", val, tx->base_addr);
 
 	val |= REF2USB_TX_OUT_EN;
-	writel(val, tx->base_addr);
+	pete_writel("drivers/clk/mediatek/clk-apmixed.c:51", val, tx->base_addr);
 
 	return 0;
 }
@@ -58,9 +58,9 @@ static void mtk_ref2usb_tx_unprepare(struct clk_hw *hw)
 	struct mtk_ref2usb_tx *tx = to_mtk_ref2usb_tx(hw);
 	u32 val;
 
-	val = readl(tx->base_addr);
+	val = pete_readl("drivers/clk/mediatek/clk-apmixed.c:61", tx->base_addr);
 	val &= ~REF2USB_EN_MASK;
-	writel(val, tx->base_addr);
+	pete_writel("drivers/clk/mediatek/clk-apmixed.c:63", val, tx->base_addr);
 }
 
 static const struct clk_ops mtk_ref2usb_tx_ops = {

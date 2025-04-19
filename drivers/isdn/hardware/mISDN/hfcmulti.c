@@ -278,7 +278,7 @@ HFC_outb_pcimem(struct hfc_multi *hc, u_char reg, u_char val,
 	HFC_outb_pcimem(struct hfc_multi *hc, u_char reg, u_char val)
 #endif
 {
-	writeb(val, hc->pci_membase + reg);
+	pete_writeb("drivers/isdn/hardware/mISDN/hfcmulti.c:281", val, hc->pci_membase + reg);
 }
 static u_char
 #ifdef HFC_REGISTER_DEBUG
@@ -287,7 +287,7 @@ HFC_inb_pcimem(struct hfc_multi *hc, u_char reg, const char *function, int line)
 	HFC_inb_pcimem(struct hfc_multi *hc, u_char reg)
 #endif
 {
-	return readb(hc->pci_membase + reg);
+	return pete_readb("drivers/isdn/hardware/mISDN/hfcmulti.c:290", hc->pci_membase + reg);
 }
 static u_short
 #ifdef HFC_REGISTER_DEBUG
@@ -296,7 +296,7 @@ HFC_inw_pcimem(struct hfc_multi *hc, u_char reg, const char *function, int line)
 	HFC_inw_pcimem(struct hfc_multi *hc, u_char reg)
 #endif
 {
-	return readw(hc->pci_membase + reg);
+	return pete_readw("drivers/isdn/hardware/mISDN/hfcmulti.c:299", hc->pci_membase + reg);
 }
 static void
 #ifdef HFC_REGISTER_DEBUG
@@ -305,7 +305,7 @@ HFC_wait_pcimem(struct hfc_multi *hc, const char *function, int line)
 	HFC_wait_pcimem(struct hfc_multi *hc)
 #endif
 {
-	while (readb(hc->pci_membase + R_STATUS) & V_BUSY)
+	while (pete_readb("drivers/isdn/hardware/mISDN/hfcmulti.c:308", hc->pci_membase + R_STATUS) & V_BUSY)
 		cpu_relax();
 }
 
@@ -469,19 +469,19 @@ static void
 write_fifo_pcimem(struct hfc_multi *hc, u_char *data, int len)
 {
 	while (len >> 2) {
-		writel(cpu_to_le32(*(u32 *)data),
+		pete_writel("drivers/isdn/hardware/mISDN/hfcmulti.c:472", cpu_to_le32(*(u32 *)data),
 		       hc->pci_membase + A_FIFO_DATA0);
 		data += 4;
 		len -= 4;
 	}
 	while (len >> 1) {
-		writew(cpu_to_le16(*(u16 *)data),
+		pete_writew("drivers/isdn/hardware/mISDN/hfcmulti.c:478", cpu_to_le16(*(u16 *)data),
 		       hc->pci_membase + A_FIFO_DATA0);
 		data += 2;
 		len -= 2;
 	}
 	while (len) {
-		writeb(*data, hc->pci_membase + A_FIFO_DATA0);
+		pete_writeb("drivers/isdn/hardware/mISDN/hfcmulti.c:484", *data, hc->pci_membase + A_FIFO_DATA0);
 		data++;
 		len--;
 	}
@@ -515,18 +515,18 @@ read_fifo_pcimem(struct hfc_multi *hc, u_char *data, int len)
 {
 	while (len >> 2) {
 		*(u32 *)data =
-			le32_to_cpu(readl(hc->pci_membase + A_FIFO_DATA0));
+			le32_to_cpu(pete_readl("drivers/isdn/hardware/mISDN/hfcmulti.c:518", hc->pci_membase + A_FIFO_DATA0));
 		data += 4;
 		len -= 4;
 	}
 	while (len >> 1) {
 		*(u16 *)data =
-			le16_to_cpu(readw(hc->pci_membase + A_FIFO_DATA0));
+			le16_to_cpu(pete_readw("drivers/isdn/hardware/mISDN/hfcmulti.c:524", hc->pci_membase + A_FIFO_DATA0));
 		data += 2;
 		len -= 2;
 	}
 	while (len) {
-		*data = readb(hc->pci_membase + A_FIFO_DATA0);
+		*data = pete_readb("drivers/isdn/hardware/mISDN/hfcmulti.c:529", hc->pci_membase + A_FIFO_DATA0);
 		data++;
 		len--;
 	}
@@ -942,9 +942,9 @@ hfcmulti_resync(struct hfc_multi *locked, struct hfc_multi *newmaster, int rm)
 	list_for_each_entry_safe(hc, next, &HFClist, list) {
 		if (test_bit(HFC_CHIP_PLXSD, &hc->chip)) {
 			plx_acc_32 = hc->plx_membase + PLX_GPIOC;
-			pv = readl(plx_acc_32);
+			pv = pete_readl("drivers/isdn/hardware/mISDN/hfcmulti.c:945", plx_acc_32);
 			pv &= ~PLX_SYNC_O_EN;
-			writel(pv, plx_acc_32);
+			pete_writel("drivers/isdn/hardware/mISDN/hfcmulti.c:947", pv, plx_acc_32);
 			if (test_bit(HFC_CHIP_PCM_MASTER, &hc->chip)) {
 				pcmmaster = hc;
 				if (hc->ctype == HFC_TYPE_E1) {
@@ -964,9 +964,9 @@ hfcmulti_resync(struct hfc_multi *locked, struct hfc_multi *newmaster, int rm)
 			       "interface.\n", hc->id, hc);
 		/* Enable new sync master */
 		plx_acc_32 = hc->plx_membase + PLX_GPIOC;
-		pv = readl(plx_acc_32);
+		pv = pete_readl("drivers/isdn/hardware/mISDN/hfcmulti.c:967", plx_acc_32);
 		pv |= PLX_SYNC_O_EN;
-		writel(pv, plx_acc_32);
+		pete_writel("drivers/isdn/hardware/mISDN/hfcmulti.c:969", pv, plx_acc_32);
 		/* switch to jatt PLL, if not disabled by RX_SYNC */
 		if (hc->ctype == HFC_TYPE_E1
 		    && !test_bit(HFC_CHIP_RX_SYNC, &hc->chip)) {
@@ -995,9 +995,9 @@ hfcmulti_resync(struct hfc_multi *locked, struct hfc_multi *newmaster, int rm)
 					       "enabled by HFC-%dS\n", hc->ctype);
 			}
 			plx_acc_32 = hc->plx_membase + PLX_GPIOC;
-			pv = readl(plx_acc_32);
+			pv = pete_readl("drivers/isdn/hardware/mISDN/hfcmulti.c:998", plx_acc_32);
 			pv |= PLX_SYNC_O_EN;
-			writel(pv, plx_acc_32);
+			pete_writel("drivers/isdn/hardware/mISDN/hfcmulti.c:1000", pv, plx_acc_32);
 		} else
 			if (!rm)
 				printk(KERN_ERR "%s no pcm master, this MUST "
@@ -1061,8 +1061,8 @@ release_io_hfcmulti(struct hfc_multi *hc)
 			       __func__, hc->id + 1);
 		spin_lock_irqsave(&plx_lock, plx_flags);
 		plx_acc_32 = hc->plx_membase + PLX_GPIOC;
-		writel(PLX_GPIOC_INIT, plx_acc_32);
-		pv = readl(plx_acc_32);
+		pete_writel("drivers/isdn/hardware/mISDN/hfcmulti.c:1064", PLX_GPIOC_INIT, plx_acc_32);
+		pv = pete_readl("drivers/isdn/hardware/mISDN/hfcmulti.c:1065", plx_acc_32);
 		/* Termination off */
 		pv &= ~PLX_TERM_ON;
 		/* Disconnect the PCM */
@@ -1071,7 +1071,7 @@ release_io_hfcmulti(struct hfc_multi *hc)
 		pv &= ~PLX_SYNC_O_EN;
 		/* Put the DSP in Reset */
 		pv &= ~PLX_DSP_RES_N;
-		writel(pv, plx_acc_32);
+		pete_writel("drivers/isdn/hardware/mISDN/hfcmulti.c:1074", pv, plx_acc_32);
 		if (debug & DEBUG_HFCMULTI_INIT)
 			printk(KERN_DEBUG "%s: PCM off: PLX_GPIO=%x\n",
 			       __func__, pv);
@@ -1194,8 +1194,8 @@ init_chip(struct hfc_multi *hc)
 			       __func__, hc->id + 1);
 		spin_lock_irqsave(&plx_lock, plx_flags);
 		plx_acc_32 = hc->plx_membase + PLX_GPIOC;
-		writel(PLX_GPIOC_INIT, plx_acc_32);
-		pv = readl(plx_acc_32);
+		pete_writel("drivers/isdn/hardware/mISDN/hfcmulti.c:1197", PLX_GPIOC_INIT, plx_acc_32);
+		pv = pete_readl("drivers/isdn/hardware/mISDN/hfcmulti.c:1198", plx_acc_32);
 		/* The first and the last cards are terminating the PCM bus */
 		pv |= PLX_TERM_ON; /* hc is currently the last */
 		/* Disconnect the PCM */
@@ -1204,7 +1204,7 @@ init_chip(struct hfc_multi *hc)
 		pv &= ~PLX_SYNC_O_EN;
 		/* Put the DSP in Reset */
 		pv &= ~PLX_DSP_RES_N;
-		writel(pv, plx_acc_32);
+		pete_writel("drivers/isdn/hardware/mISDN/hfcmulti.c:1207", pv, plx_acc_32);
 		spin_unlock_irqrestore(&plx_lock, plx_flags);
 		if (debug & DEBUG_HFCMULTI_INIT)
 			printk(KERN_DEBUG "%s: slave/term: PLX_GPIO=%x\n",
@@ -1230,9 +1230,9 @@ init_chip(struct hfc_multi *hc)
 				       __func__, plx_last_hc->id + 1);
 			spin_lock_irqsave(&plx_lock, plx_flags);
 			plx_acc_32 = plx_last_hc->plx_membase + PLX_GPIOC;
-			pv = readl(plx_acc_32);
+			pv = pete_readl("drivers/isdn/hardware/mISDN/hfcmulti.c:1233", plx_acc_32);
 			pv &= ~PLX_TERM_ON;
-			writel(pv, plx_acc_32);
+			pete_writel("drivers/isdn/hardware/mISDN/hfcmulti.c:1235", pv, plx_acc_32);
 			spin_unlock_irqrestore(&plx_lock, plx_flags);
 			if (debug & DEBUG_HFCMULTI_INIT)
 				printk(KERN_DEBUG
@@ -1292,7 +1292,7 @@ init_chip(struct hfc_multi *hc)
 	if (test_bit(HFC_CHIP_PLXSD, &hc->chip)) {
 		spin_lock_irqsave(&plx_lock, plx_flags);
 		plx_acc_32 = hc->plx_membase + PLX_GPIOC;
-		pv = readl(plx_acc_32);
+		pv = pete_readl("drivers/isdn/hardware/mISDN/hfcmulti.c:1295", plx_acc_32);
 		/* Connect PCM */
 		if (hc->hw.r_pcm_md0 & V_PCM_MD) {
 			pv |= PLX_MASTER_EN | PLX_SLAVE_EN_N;
@@ -1307,7 +1307,7 @@ init_chip(struct hfc_multi *hc)
 				printk(KERN_DEBUG "%s: slave: PLX_GPIO=%x\n",
 				       __func__, pv);
 		}
-		writel(pv, plx_acc_32);
+		pete_writel("drivers/isdn/hardware/mISDN/hfcmulti.c:1310", pv, plx_acc_32);
 		spin_unlock_irqrestore(&plx_lock, plx_flags);
 	}
 
@@ -1410,10 +1410,10 @@ init_chip(struct hfc_multi *hc)
 			if (test_bit(HFC_CHIP_PLXSD, &hc->chip)) {
 				spin_lock_irqsave(&plx_lock, plx_flags);
 				plx_acc_32 = hc->plx_membase + PLX_GPIOC;
-				pv = readl(plx_acc_32);
+				pv = pete_readl("drivers/isdn/hardware/mISDN/hfcmulti.c:1413", plx_acc_32);
 				pv |= PLX_MASTER_EN | PLX_SLAVE_EN_N;
 				pv |= PLX_SYNC_O_EN;
-				writel(pv, plx_acc_32);
+				pete_writel("drivers/isdn/hardware/mISDN/hfcmulti.c:1416", pv, plx_acc_32);
 				spin_unlock_irqrestore(&plx_lock, plx_flags);
 				if (debug & DEBUG_HFCMULTI_INIT)
 					printk(KERN_DEBUG "%s: master: "
@@ -1446,9 +1446,9 @@ init_chip(struct hfc_multi *hc)
 			plxsd_master = 1;
 		spin_lock_irqsave(&plx_lock, plx_flags);
 		plx_acc_32 = hc->plx_membase + PLX_GPIOC;
-		pv = readl(plx_acc_32);
+		pv = pete_readl("drivers/isdn/hardware/mISDN/hfcmulti.c:1449", plx_acc_32);
 		pv |=  PLX_DSP_RES_N;
-		writel(pv, plx_acc_32);
+		pete_writel("drivers/isdn/hardware/mISDN/hfcmulti.c:1451", pv, plx_acc_32);
 		spin_unlock_irqrestore(&plx_lock, plx_flags);
 		if (debug & DEBUG_HFCMULTI_INIT)
 			printk(KERN_DEBUG "%s: reset off: PLX_GPIO=%x\n",
@@ -2709,7 +2709,7 @@ hfcmulti_interrupt(int intno, void *dev_id)
 	if (test_bit(HFC_CHIP_PLXSD, &hc->chip)) {
 		spin_lock_irqsave(&plx_lock, flags);
 		plx_acc = hc->plx_membase + PLX_INTCSR;
-		wval = readw(plx_acc);
+		wval = pete_readw("drivers/isdn/hardware/mISDN/hfcmulti.c:2712", plx_acc);
 		spin_unlock_irqrestore(&plx_lock, flags);
 		if (!(wval & PLX_INTCSR_LINTI1_STATUS))
 			goto irq_notforus;
@@ -4273,7 +4273,7 @@ init_card(struct hfc_multi *hc)
 	if (test_bit(HFC_CHIP_PLXSD, &hc->chip)) {
 		spin_lock_irqsave(&plx_lock, plx_flags);
 		plx_acc = hc->plx_membase + PLX_INTCSR;
-		writew((PLX_INTCSR_PCIINT_ENABLE | PLX_INTCSR_LINTI1_ENABLE),
+		pete_writew("drivers/isdn/hardware/mISDN/hfcmulti.c:4276", (PLX_INTCSR_PCIINT_ENABLE | PLX_INTCSR_LINTI1_ENABLE),
 		       plx_acc); /* enable PCI & LINT1 irq */
 		spin_unlock_irqrestore(&plx_lock, plx_flags);
 	}
@@ -4322,7 +4322,7 @@ error:
 	if (test_bit(HFC_CHIP_PLXSD, &hc->chip)) {
 		spin_lock_irqsave(&plx_lock, plx_flags);
 		plx_acc = hc->plx_membase + PLX_INTCSR;
-		writew(0x00, plx_acc); /*disable IRQs*/
+		pete_writew("drivers/isdn/hardware/mISDN/hfcmulti.c:4325", 0x00, plx_acc); /*disable IRQs*/
 		spin_unlock_irqrestore(&plx_lock, plx_flags);
 	}
 

@@ -421,19 +421,19 @@ static int dm644x_venc_setup_clock(enum vpbe_enc_timings_type type,
 	switch (type) {
 	case VPBE_ENC_STD:
 		v |= DM644X_VPSS_DACCLKEN;
-		writel(v, DAVINCI_SYSMOD_VIRT(SYSMOD_VPSS_CLKCTL));
+		pete_writel("arch/arm/mach-davinci/dm644x.c:424", v, DAVINCI_SYSMOD_VIRT(SYSMOD_VPSS_CLKCTL));
 		break;
 	case VPBE_ENC_DV_TIMINGS:
 		if (pclock <= 27000000) {
 			v |= DM644X_VPSS_DACCLKEN;
-			writel(v, DAVINCI_SYSMOD_VIRT(SYSMOD_VPSS_CLKCTL));
+			pete_writel("arch/arm/mach-davinci/dm644x.c:429", v, DAVINCI_SYSMOD_VIRT(SYSMOD_VPSS_CLKCTL));
 		} else {
 			/*
 			 * For HD, use external clock source since
 			 * HD requires higher clock rate
 			 */
 			v |= DM644X_VPSS_MUXSEL_VPBECLK_MODE;
-			writel(v, DAVINCI_SYSMOD_VIRT(SYSMOD_VPSS_CLKCTL));
+			pete_writel("arch/arm/mach-davinci/dm644x.c:436", v, DAVINCI_SYSMOD_VIRT(SYSMOD_VPSS_CLKCTL));
 		}
 		break;
 	default:

@@ -72,7 +72,7 @@ static int spear13xx_pcie_start_link(struct dw_pcie *pci)
 	struct pcie_app_reg *app_reg = spear13xx_pcie->app_base;
 
 	/* enable ltssm */
-	writel(DEVICE_TYPE_RC | (1 << MISCTRL_EN_ID)
+	pete_writel("drivers/pci/controller/dwc/pcie-spear13xx.c:75", DEVICE_TYPE_RC | (1 << MISCTRL_EN_ID)
 			| (1 << APP_LTSSM_ENABLE_ID)
 			| ((u32)1 << REG_TRANSLATION_ENABLE),
 			&app_reg->app_ctrl_0);
@@ -88,14 +88,14 @@ static irqreturn_t spear13xx_pcie_irq_handler(int irq, void *arg)
 	struct pcie_port *pp = &pci->pp;
 	unsigned int status;
 
-	status = readl(&app_reg->int_sts);
+	status = pete_readl("drivers/pci/controller/dwc/pcie-spear13xx.c:91", &app_reg->int_sts);
 
 	if (status & MSI_CTRL_INT) {
 		BUG_ON(!IS_ENABLED(CONFIG_PCI_MSI));
 		dw_handle_msi_irq(pp);
 	}
 
-	writel(status, &app_reg->int_clr);
+	pete_writel("drivers/pci/controller/dwc/pcie-spear13xx.c:98", status, &app_reg->int_clr);
 
 	return IRQ_HANDLED;
 }
@@ -106,7 +106,7 @@ static void spear13xx_pcie_enable_interrupts(struct spear13xx_pcie *spear13xx_pc
 
 	/* Enable MSI interrupt */
 	if (IS_ENABLED(CONFIG_PCI_MSI))
-		writel(readl(&app_reg->int_mask) |
+		pete_writel("drivers/pci/controller/dwc/pcie-spear13xx.c:109", pete_readl("drivers/pci/controller/dwc/pcie-spear13xx.c:109", &app_reg->int_mask) |
 				MSI_CTRL_INT, &app_reg->int_mask);
 }
 
@@ -115,7 +115,7 @@ static int spear13xx_pcie_link_up(struct dw_pcie *pci)
 	struct spear13xx_pcie *spear13xx_pcie = to_spear13xx_pcie(pci);
 	struct pcie_app_reg *app_reg = spear13xx_pcie->app_base;
 
-	if (readl(&app_reg->app_status_1) & XMLH_LINK_UP)
+	if (pete_readl("drivers/pci/controller/dwc/pcie-spear13xx.c:118", &app_reg->app_status_1) & XMLH_LINK_UP)
 		return 1;
 
 	return 0;

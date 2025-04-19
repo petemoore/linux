@@ -624,10 +624,10 @@ static int ns2_pinmux_set(struct ns2_pinctrl *pinctrl,
 	}
 
 	spin_lock_irqsave(&pinctrl->lock, flags);
-	val = readl(base_address + grp->mux.offset);
+	val = pete_readl("drivers/pinctrl/bcm/pinctrl-ns2-mux.c:627", base_address + grp->mux.offset);
 	val &= ~(mask << grp->mux.shift);
 	val |= grp->mux.alt << grp->mux.shift;
-	writel(val, (base_address + grp->mux.offset));
+	pete_writel("drivers/pinctrl/bcm/pinctrl-ns2-mux.c:630", val, (base_address + grp->mux.offset));
 	spin_unlock_irqrestore(&pinctrl->lock, flags);
 
 	return 0;
@@ -667,13 +667,13 @@ static int ns2_pin_set_enable(struct pinctrl_dev *pctrldev, unsigned int pin,
 
 	base_address = pinctrl->pinconf_base;
 	spin_lock_irqsave(&pinctrl->lock, flags);
-	val = readl(base_address + pin_data->pin_conf.offset);
+	val = pete_readl("drivers/pinctrl/bcm/pinctrl-ns2-mux.c:670", base_address + pin_data->pin_conf.offset);
 	val &= ~(NS2_PIN_SRC_MASK << pin_data->pin_conf.input_en);
 
 	if (!enable)
 		val |= NS2_PIN_INPUT_EN_MASK << pin_data->pin_conf.input_en;
 
-	writel(val, (base_address + pin_data->pin_conf.offset));
+	pete_writel("drivers/pinctrl/bcm/pinctrl-ns2-mux.c:676", val, (base_address + pin_data->pin_conf.offset));
 	spin_unlock_irqrestore(&pinctrl->lock, flags);
 
 	dev_dbg(pctrldev->dev, "pin:%u set enable:%d\n", pin, enable);
@@ -688,7 +688,7 @@ static int ns2_pin_get_enable(struct pinctrl_dev *pctrldev, unsigned int pin)
 	int enable;
 
 	spin_lock_irqsave(&pinctrl->lock, flags);
-	enable = readl(pinctrl->pinconf_base + pin_data->pin_conf.offset);
+	enable = pete_readl("drivers/pinctrl/bcm/pinctrl-ns2-mux.c:691", pinctrl->pinconf_base + pin_data->pin_conf.offset);
 	enable = (enable >> pin_data->pin_conf.input_en) &
 			NS2_PIN_INPUT_EN_MASK;
 	spin_unlock_irqrestore(&pinctrl->lock, flags);
@@ -713,13 +713,13 @@ static int ns2_pin_set_slew(struct pinctrl_dev *pctrldev, unsigned int pin,
 
 	base_address = pinctrl->pinconf_base;
 	spin_lock_irqsave(&pinctrl->lock, flags);
-	val = readl(base_address + pin_data->pin_conf.offset);
+	val = pete_readl("drivers/pinctrl/bcm/pinctrl-ns2-mux.c:716", base_address + pin_data->pin_conf.offset);
 	val &= ~(NS2_PIN_SRC_MASK << pin_data->pin_conf.src_shift);
 
 	if (slew)
 		val |= NS2_PIN_SRC_MASK << pin_data->pin_conf.src_shift;
 
-	writel(val, (base_address + pin_data->pin_conf.offset));
+	pete_writel("drivers/pinctrl/bcm/pinctrl-ns2-mux.c:722", val, (base_address + pin_data->pin_conf.offset));
 	spin_unlock_irqrestore(&pinctrl->lock, flags);
 
 	dev_dbg(pctrldev->dev, "pin:%u set slew:%d\n", pin, slew);
@@ -735,7 +735,7 @@ static int ns2_pin_get_slew(struct pinctrl_dev *pctrldev, unsigned int pin,
 	u32 val;
 
 	spin_lock_irqsave(&pinctrl->lock, flags);
-	val = readl(pinctrl->pinconf_base + pin_data->pin_conf.offset);
+	val = pete_readl("drivers/pinctrl/bcm/pinctrl-ns2-mux.c:738", pinctrl->pinconf_base + pin_data->pin_conf.offset);
 	*slew = (val >> pin_data->pin_conf.src_shift) & NS2_PIN_SRC_MASK;
 	spin_unlock_irqrestore(&pinctrl->lock, flags);
 
@@ -754,14 +754,14 @@ static int ns2_pin_set_pull(struct pinctrl_dev *pctrldev, unsigned int pin,
 
 	base_address = pinctrl->pinconf_base;
 	spin_lock_irqsave(&pinctrl->lock, flags);
-	val = readl(base_address + pin_data->pin_conf.offset);
+	val = pete_readl("drivers/pinctrl/bcm/pinctrl-ns2-mux.c:757", base_address + pin_data->pin_conf.offset);
 	val &= ~(NS2_PIN_PULL_MASK << pin_data->pin_conf.pull_shift);
 
 	if (pull_up == true)
 		val |= NS2_PIN_PULL_UP << pin_data->pin_conf.pull_shift;
 	if (pull_down == true)
 		val |= NS2_PIN_PULL_DOWN << pin_data->pin_conf.pull_shift;
-	writel(val, (base_address + pin_data->pin_conf.offset));
+	pete_writel("drivers/pinctrl/bcm/pinctrl-ns2-mux.c:764", val, (base_address + pin_data->pin_conf.offset));
 	spin_unlock_irqrestore(&pinctrl->lock, flags);
 
 	dev_dbg(pctrldev->dev, "pin:%u set pullup:%d pulldown: %d\n",
@@ -779,7 +779,7 @@ static void ns2_pin_get_pull(struct pinctrl_dev *pctrldev,
 	u32 val;
 
 	spin_lock_irqsave(&pinctrl->lock, flags);
-	val = readl(pinctrl->pinconf_base + pin_data->pin_conf.offset);
+	val = pete_readl("drivers/pinctrl/bcm/pinctrl-ns2-mux.c:782", pinctrl->pinconf_base + pin_data->pin_conf.offset);
 	val = (val >> pin_data->pin_conf.pull_shift) & NS2_PIN_PULL_MASK;
 	*pull_up = false;
 	*pull_down = false;
@@ -807,10 +807,10 @@ static int ns2_pin_set_strength(struct pinctrl_dev *pctrldev, unsigned int pin,
 
 	base_address = pinctrl->pinconf_base;
 	spin_lock_irqsave(&pinctrl->lock, flags);
-	val = readl(base_address + pin_data->pin_conf.offset);
+	val = pete_readl("drivers/pinctrl/bcm/pinctrl-ns2-mux.c:810", base_address + pin_data->pin_conf.offset);
 	val &= ~(NS2_PIN_DRIVE_STRENGTH_MASK << pin_data->pin_conf.drive_shift);
 	val |= ((strength / 2) - 1) << pin_data->pin_conf.drive_shift;
-	writel(val, (base_address + pin_data->pin_conf.offset));
+	pete_writel("drivers/pinctrl/bcm/pinctrl-ns2-mux.c:813", val, (base_address + pin_data->pin_conf.offset));
 	spin_unlock_irqrestore(&pinctrl->lock, flags);
 
 	dev_dbg(pctrldev->dev, "pin:%u set drive strength:%d mA\n",
@@ -827,7 +827,7 @@ static int ns2_pin_get_strength(struct pinctrl_dev *pctrldev, unsigned int pin,
 	unsigned long flags;
 
 	spin_lock_irqsave(&pinctrl->lock, flags);
-	val = readl(pinctrl->pinconf_base + pin_data->pin_conf.offset);
+	val = pete_readl("drivers/pinctrl/bcm/pinctrl-ns2-mux.c:830", pinctrl->pinconf_base + pin_data->pin_conf.offset);
 	*strength = (val >> pin_data->pin_conf.drive_shift) &
 					NS2_PIN_DRIVE_STRENGTH_MASK;
 	*strength = (*strength + 1) * 2;

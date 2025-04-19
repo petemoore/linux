@@ -590,7 +590,7 @@ static void balloon3_nand_cmd_ctl(struct nand_chip *this, int cmd,
 	}
 
 	if (cmd != NAND_CMD_NONE)
-		writeb(cmd, this->legacy.IO_ADDR_W);
+		pete_writeb("arch/arm/mach-pxa/balloon3.c:593", cmd, this->legacy.IO_ADDR_W);
 }
 
 static void balloon3_nand_select_chip(struct nand_chip *this, int chip)

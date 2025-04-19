@@ -27,8 +27,8 @@ extern struct pci_ops vr41xx_pci_ops;
 
 static void __iomem *pciu_base;
 
-#define pciu_read(offset)		readl(pciu_base + (offset))
-#define pciu_write(offset, value)	writel((value), pciu_base + (offset))
+#define pciu_read(offset)		pete_readl("arch/mips/pci/pci-vr41xx.c:30", pciu_base + (offset))
+#define pciu_write(offset, value)	pete_writel("arch/mips/pci/pci-vr41xx.c:31", (value), pciu_base + (offset))
 
 static struct pci_master_address_conversion pci_master_memory1 = {
 	.bus_base_address	= PCI_MASTER_MEM1_BUS_BASE_ADDRESS,

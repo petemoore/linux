@@ -154,43 +154,43 @@
 #define bna_halt_clear(_bna)						\
 do {									\
 	u32 init_halt;						\
-	init_halt = readl((_bna)->ioceth.ioc.ioc_regs.ll_halt);	\
+	init_halt = pete_readl("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:157", (_bna)->ioceth.ioc.ioc_regs.ll_halt);	\
 	init_halt &= ~__FW_INIT_HALT_P;					\
-	writel(init_halt, (_bna)->ioceth.ioc.ioc_regs.ll_halt);	\
-	init_halt = readl((_bna)->ioceth.ioc.ioc_regs.ll_halt);	\
+	pete_writel("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:159", init_halt, (_bna)->ioceth.ioc.ioc_regs.ll_halt);	\
+	init_halt = pete_readl("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:160", (_bna)->ioceth.ioc.ioc_regs.ll_halt);	\
 } while (0)
 
 #define bna_intx_disable(_bna, _cur_mask)				\
 {									\
-	(_cur_mask) = readl((_bna)->regs.fn_int_mask);		\
-	writel(0xffffffff, (_bna)->regs.fn_int_mask);		\
+	(_cur_mask) = pete_readl("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:165", (_bna)->regs.fn_int_mask);		\
+	pete_writel("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:166", 0xffffffff, (_bna)->regs.fn_int_mask);		\
 }
 
 #define bna_intx_enable(bna, new_mask)					\
-	writel((new_mask), (bna)->regs.fn_int_mask)
+	pete_writel("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:170", (new_mask), (bna)->regs.fn_int_mask)
 #define bna_mbox_intr_disable(bna)					\
 do {									\
 	u32 mask;							\
-	mask = readl((bna)->regs.fn_int_mask);				\
-	writel((mask | (bna)->bits.mbox_mask_bits |			\
+	mask = pete_readl("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:174", (bna)->regs.fn_int_mask);				\
+	pete_writel("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:175", (mask | (bna)->bits.mbox_mask_bits |			\
 		(bna)->bits.error_mask_bits), (bna)->regs.fn_int_mask); \
-	mask = readl((bna)->regs.fn_int_mask);				\
+	mask = pete_readl("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:177", (bna)->regs.fn_int_mask);				\
 } while (0)
 
 #define bna_mbox_intr_enable(bna)					\
 do {									\
 	u32 mask;							\
-	mask = readl((bna)->regs.fn_int_mask);				\
-	writel((mask & ~((bna)->bits.mbox_mask_bits |			\
+	mask = pete_readl("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:183", (bna)->regs.fn_int_mask);				\
+	pete_writel("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:184", (mask & ~((bna)->bits.mbox_mask_bits |			\
 		(bna)->bits.error_mask_bits)), (bna)->regs.fn_int_mask);\
-	mask = readl((bna)->regs.fn_int_mask);				\
+	mask = pete_readl("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:186", (bna)->regs.fn_int_mask);				\
 } while (0)
 
 #define bna_intr_status_get(_bna, _status)				\
 {									\
-	(_status) = readl((_bna)->regs.fn_int_status);			\
+	(_status) = pete_readl("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:191", (_bna)->regs.fn_int_status);			\
 	if (_status) {							\
-		writel(((_status) & ~(_bna)->bits.mbox_status_bits),	\
+		pete_writel("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:193", ((_status) & ~(_bna)->bits.mbox_status_bits),	\
 			(_bna)->regs.fn_int_status);			\
 	}								\
 }
@@ -222,12 +222,12 @@ do {									\
 
 /* Acks 'events' # of events for a given ib while disabling interrupts */
 #define bna_ib_ack_disable_irq(_i_dbell, _events)			\
-	(writel(BNA_DOORBELL_IB_INT_ACK(0, (_events)),			\
+	(pete_writel("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:225", BNA_DOORBELL_IB_INT_ACK(0, (_events)),			\
 		(_i_dbell)->doorbell_addr))
 
 /* Acks 'events' # of events for a given ib */
 #define bna_ib_ack(_i_dbell, _events)					\
-	(writel(((_i_dbell)->doorbell_ack | (_events)),		\
+	(pete_writel("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:230", ((_i_dbell)->doorbell_ack | (_events)),		\
 		(_i_dbell)->doorbell_addr))
 
 #define bna_ib_start(_bna, _ib, _is_regular)				\
@@ -249,7 +249,7 @@ do {									\
 {									\
 	u32 intx_mask;						\
 	struct bna_ib *ib = _ib;					\
-	writel(BNA_DOORBELL_IB_INT_DISABLE,				\
+	pete_writel("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:252", BNA_DOORBELL_IB_INT_DISABLE,				\
 		ib->door_bell.doorbell_addr);				\
 	if (ib->intr_type == BNA_INTR_T_INTX) {				\
 		bna_intx_disable((_bna), intx_mask);			\
@@ -259,11 +259,11 @@ do {									\
 }
 
 #define bna_txq_prod_indx_doorbell(_tcb)				\
-	(writel(BNA_DOORBELL_Q_PRD_IDX((_tcb)->producer_index),		\
+	(pete_writel("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:262", BNA_DOORBELL_Q_PRD_IDX((_tcb)->producer_index),		\
 		(_tcb)->q_dbell))
 
 #define bna_rxq_prod_indx_doorbell(_rcb)				\
-	(writel(BNA_DOORBELL_Q_PRD_IDX((_rcb)->producer_index),		\
+	(pete_writel("drivers/net/ethernet/brocade/bna/bna_hw_defs.h:266", BNA_DOORBELL_Q_PRD_IDX((_rcb)->producer_index),		\
 		(_rcb)->q_dbell))
 
 /* TxQ, RxQ, CQ related bits, offsets, macros */

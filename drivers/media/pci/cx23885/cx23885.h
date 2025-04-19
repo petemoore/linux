@@ -493,11 +493,11 @@ struct sram_channel {
 
 /* ----------------------------------------------------------- */
 
-#define cx_read(reg)             readl(dev->lmmio + ((reg)>>2))
-#define cx_write(reg, value)     writel((value), dev->lmmio + ((reg)>>2))
+#define cx_read(reg)             pete_readl("drivers/media/pci/cx23885/cx23885.h:496", dev->lmmio + ((reg)>>2))
+#define cx_write(reg, value)     pete_writel("drivers/media/pci/cx23885/cx23885.h:497", (value), dev->lmmio + ((reg)>>2))
 
 #define cx_andor(reg, mask, value) \
-  writel((readl(dev->lmmio+((reg)>>2)) & ~(mask)) |\
+  pete_writel("drivers/media/pci/cx23885/cx23885.h:500", (pete_readl("drivers/media/pci/cx23885/cx23885.h:500", dev->lmmio+((reg)>>2)) & ~(mask)) |\
   ((value) & (mask)), dev->lmmio+((reg)>>2))
 
 #define cx_set(reg, bit)          cx_andor((reg), (bit), (bit))

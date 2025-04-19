@@ -130,8 +130,8 @@ static struct dentry *intel_lpss_debugfs;
 
 static void intel_lpss_cache_ltr(struct intel_lpss *lpss)
 {
-	lpss->active_ltr = readl(lpss->priv + LPSS_PRIV_ACTIVELTR);
-	lpss->idle_ltr = readl(lpss->priv + LPSS_PRIV_IDLELTR);
+	lpss->active_ltr = pete_readl("drivers/mfd/intel-lpss.c:133", lpss->priv + LPSS_PRIV_ACTIVELTR);
+	lpss->idle_ltr = pete_readl("drivers/mfd/intel-lpss.c:134", lpss->priv + LPSS_PRIV_IDLELTR);
 }
 
 static int intel_lpss_debugfs_add(struct intel_lpss *lpss)
@@ -168,7 +168,7 @@ static void intel_lpss_ltr_set(struct device *dev, s32 val)
 	 * by the PM QoS layer or disable it in case we were passed
 	 * negative value or PM_QOS_LATENCY_ANY.
 	 */
-	ltr = readl(lpss->priv + LPSS_PRIV_ACTIVELTR);
+	ltr = pete_readl("drivers/mfd/intel-lpss.c:171", lpss->priv + LPSS_PRIV_ACTIVELTR);
 
 	if (val == PM_QOS_LATENCY_ANY || val < 0) {
 		ltr &= ~LPSS_PRIV_LTR_REQ;
@@ -186,8 +186,8 @@ static void intel_lpss_ltr_set(struct device *dev, s32 val)
 	if (ltr == lpss->active_ltr)
 		return;
 
-	writel(ltr, lpss->priv + LPSS_PRIV_ACTIVELTR);
-	writel(ltr, lpss->priv + LPSS_PRIV_IDLELTR);
+	pete_writel("drivers/mfd/intel-lpss.c:189", ltr, lpss->priv + LPSS_PRIV_ACTIVELTR);
+	pete_writel("drivers/mfd/intel-lpss.c:190", ltr, lpss->priv + LPSS_PRIV_IDLELTR);
 
 	/* Cache the values into lpss structure */
 	intel_lpss_cache_ltr(lpss);
@@ -253,7 +253,7 @@ static void intel_lpss_deassert_reset(const struct intel_lpss *lpss)
 	u32 value = LPSS_PRIV_RESETS_FUNC | LPSS_PRIV_RESETS_IDMA;
 
 	/* Bring out the device from reset */
-	writel(value, lpss->priv + LPSS_PRIV_RESETS);
+	pete_writel("drivers/mfd/intel-lpss.c:256", value, lpss->priv + LPSS_PRIV_RESETS);
 }
 
 static void intel_lpss_init_dev(const struct intel_lpss *lpss)
@@ -261,7 +261,7 @@ static void intel_lpss_init_dev(const struct intel_lpss *lpss)
 	u32 value = LPSS_PRIV_SSP_REG_DIS_DMA_FIN;
 
 	/* Set the device in reset state */
-	writel(0, lpss->priv + LPSS_PRIV_RESETS);
+	pete_writel("drivers/mfd/intel-lpss.c:264", 0, lpss->priv + LPSS_PRIV_RESETS);
 
 	intel_lpss_deassert_reset(lpss);
 
@@ -272,7 +272,7 @@ static void intel_lpss_init_dev(const struct intel_lpss *lpss)
 
 	/* Make sure that SPI multiblock DMA transfers are re-enabled */
 	if (lpss->type == LPSS_DEV_SPI)
-		writel(value, lpss->priv + LPSS_PRIV_SSP_REG);
+		pete_writel("drivers/mfd/intel-lpss.c:275", value, lpss->priv + LPSS_PRIV_SSP_REG);
 }
 
 static void intel_lpss_unregister_clock_tree(struct clk *clk)
@@ -392,7 +392,7 @@ int intel_lpss_probe(struct device *dev,
 
 	lpss->info = info;
 	lpss->dev = dev;
-	lpss->caps = readl(lpss->priv + LPSS_PRIV_CAPS);
+	lpss->caps = pete_readl("drivers/mfd/intel-lpss.c:395", lpss->priv + LPSS_PRIV_CAPS);
 
 	dev_set_drvdata(dev, lpss);
 
@@ -485,7 +485,7 @@ int intel_lpss_suspend(struct device *dev)
 
 	/* Save device context */
 	for (i = 0; i < LPSS_PRIV_REG_COUNT; i++)
-		lpss->priv_ctx[i] = readl(lpss->priv + i * 4);
+		lpss->priv_ctx[i] = pete_readl("drivers/mfd/intel-lpss.c:488", lpss->priv + i * 4);
 
 	/*
 	 * If the device type is not UART, then put the controller into
@@ -493,7 +493,7 @@ int intel_lpss_suspend(struct device *dev)
 	 * no_console_suspend flag is enabled.
 	 */
 	if (lpss->type != LPSS_DEV_UART)
-		writel(0, lpss->priv + LPSS_PRIV_RESETS);
+		pete_writel("drivers/mfd/intel-lpss.c:496", 0, lpss->priv + LPSS_PRIV_RESETS);
 
 	return 0;
 }
@@ -508,7 +508,7 @@ int intel_lpss_resume(struct device *dev)
 
 	/* Restore device context */
 	for (i = 0; i < LPSS_PRIV_REG_COUNT; i++)
-		writel(lpss->priv_ctx[i], lpss->priv + i * 4);
+		pete_writel("drivers/mfd/intel-lpss.c:511", lpss->priv_ctx[i], lpss->priv + i * 4);
 
 	return 0;
 }

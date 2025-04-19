@@ -95,7 +95,7 @@ static unsigned int tifm_ms_read_data(struct tifm_ms *host,
 	if (!length)
 		return off;
 
-	while (!(TIFM_MS_STAT_EMP & readl(sock->addr + SOCK_MS_STATUS))) {
+	while (!(TIFM_MS_STAT_EMP & pete_readl("drivers/memstick/host/tifm_ms.c:98", sock->addr + SOCK_MS_STATUS))) {
 		if (length < 4)
 			break;
 		*(unsigned int *)(buf + off) = __raw_readl(sock->addr
@@ -105,8 +105,8 @@ static unsigned int tifm_ms_read_data(struct tifm_ms *host,
 	}
 
 	if (length
-	    && !(TIFM_MS_STAT_EMP & readl(sock->addr + SOCK_MS_STATUS))) {
-		host->io_word = readl(sock->addr + SOCK_MS_DATA);
+	    && !(TIFM_MS_STAT_EMP & pete_readl("drivers/memstick/host/tifm_ms.c:108", sock->addr + SOCK_MS_STATUS))) {
+		host->io_word = pete_readl("drivers/memstick/host/tifm_ms.c:109", sock->addr + SOCK_MS_DATA);
 		for (host->io_pos = 4; host->io_pos; --host->io_pos) {
 			buf[off++] = host->io_word & 0xff;
 			host->io_word >>= 8;
@@ -134,10 +134,10 @@ static unsigned int tifm_ms_write_data(struct tifm_ms *host,
 	}
 
 	if (host->io_pos == 4
-	    && !(TIFM_MS_STAT_FUL & readl(sock->addr + SOCK_MS_STATUS))) {
-		writel(TIFM_MS_SYS_FDIR | readl(sock->addr + SOCK_MS_SYSTEM),
+	    && !(TIFM_MS_STAT_FUL & pete_readl("drivers/memstick/host/tifm_ms.c:137", sock->addr + SOCK_MS_STATUS))) {
+		pete_writel("drivers/memstick/host/tifm_ms.c:138", TIFM_MS_SYS_FDIR | pete_readl("drivers/memstick/host/tifm_ms.c:138", sock->addr + SOCK_MS_SYSTEM),
 		       sock->addr + SOCK_MS_SYSTEM);
-		writel(host->io_word, sock->addr + SOCK_MS_DATA);
+		pete_writel("drivers/memstick/host/tifm_ms.c:140", host->io_word, sock->addr + SOCK_MS_DATA);
 		host->io_pos = 0;
 		host->io_word = 0;
 	} else if (host->io_pos) {
@@ -147,10 +147,10 @@ static unsigned int tifm_ms_write_data(struct tifm_ms *host,
 	if (!length)
 		return off;
 
-	while (!(TIFM_MS_STAT_FUL & readl(sock->addr + SOCK_MS_STATUS))) {
+	while (!(TIFM_MS_STAT_FUL & pete_readl("drivers/memstick/host/tifm_ms.c:150", sock->addr + SOCK_MS_STATUS))) {
 		if (length < 4)
 			break;
-		writel(TIFM_MS_SYS_FDIR | readl(sock->addr + SOCK_MS_SYSTEM),
+		pete_writel("drivers/memstick/host/tifm_ms.c:153", TIFM_MS_SYS_FDIR | pete_readl("drivers/memstick/host/tifm_ms.c:153", sock->addr + SOCK_MS_SYSTEM),
 		       sock->addr + SOCK_MS_SYSTEM);
 		__raw_writel(*(unsigned int *)(buf + off),
 			     sock->addr + SOCK_MS_DATA);
@@ -233,17 +233,17 @@ static unsigned int tifm_ms_transfer_data(struct tifm_ms *host)
 	dev_dbg(&sock->dev, "fifo data transfer, %d remaining\n", length);
 	if (!length && (host->req->data_dir == WRITE)) {
 		if (host->io_pos) {
-			writel(TIFM_MS_SYS_FDIR
-			       | readl(sock->addr + SOCK_MS_SYSTEM),
+			pete_writel("drivers/memstick/host/tifm_ms.c:236", TIFM_MS_SYS_FDIR
+			       | pete_readl("drivers/memstick/host/tifm_ms.c:237", sock->addr + SOCK_MS_SYSTEM),
 			       sock->addr + SOCK_MS_SYSTEM);
-			writel(host->io_word, sock->addr + SOCK_MS_DATA);
+			pete_writel("drivers/memstick/host/tifm_ms.c:239", host->io_word, sock->addr + SOCK_MS_DATA);
 		}
-		writel(TIFM_MS_SYS_FDIR
-		       | readl(sock->addr + SOCK_MS_SYSTEM),
+		pete_writel("drivers/memstick/host/tifm_ms.c:241", TIFM_MS_SYS_FDIR
+		       | pete_readl("drivers/memstick/host/tifm_ms.c:242", sock->addr + SOCK_MS_SYSTEM),
 		       sock->addr + SOCK_MS_SYSTEM);
-		writel(0, sock->addr + SOCK_MS_DATA);
+		pete_writel("drivers/memstick/host/tifm_ms.c:244", 0, sock->addr + SOCK_MS_DATA);
 	} else {
-		readl(sock->addr + SOCK_MS_DATA);
+		pete_readl("drivers/memstick/host/tifm_ms.c:246", sock->addr + SOCK_MS_DATA);
 	}
 
 	return length;
@@ -271,9 +271,9 @@ static int tifm_ms_issue_cmd(struct tifm_ms *host)
 		host->use_dma = 0;
 	}
 
-	writel(TIFM_FIFO_INT_SETALL,
+	pete_writel("drivers/memstick/host/tifm_ms.c:274", TIFM_FIFO_INT_SETALL,
 	       sock->addr + SOCK_DMA_FIFO_INT_ENABLE_CLEAR);
-	writel(TIFM_FIFO_ENABLE,
+	pete_writel("drivers/memstick/host/tifm_ms.c:276", TIFM_FIFO_ENABLE,
 	       sock->addr + SOCK_FIFO_CONTROL);
 
 	if (host->use_dma) {
@@ -286,34 +286,34 @@ static int tifm_ms_issue_cmd(struct tifm_ms *host)
 		}
 		data_len = sg_dma_len(&host->req->sg);
 
-		writel(ilog2(data_len) - 2,
+		pete_writel("drivers/memstick/host/tifm_ms.c:289", ilog2(data_len) - 2,
 		       sock->addr + SOCK_FIFO_PAGE_SIZE);
-		writel(TIFM_FIFO_INTMASK,
+		pete_writel("drivers/memstick/host/tifm_ms.c:291", TIFM_FIFO_INTMASK,
 		       sock->addr + SOCK_DMA_FIFO_INT_ENABLE_SET);
 		sys_param = TIFM_DMA_EN | (1 << 8);
 		if (host->req->data_dir == WRITE)
 			sys_param |= TIFM_DMA_TX;
 
-		writel(TIFM_FIFO_INTMASK,
+		pete_writel("drivers/memstick/host/tifm_ms.c:297", TIFM_FIFO_INTMASK,
 		       sock->addr + SOCK_DMA_FIFO_INT_ENABLE_SET);
 
-		writel(sg_dma_address(&host->req->sg),
+		pete_writel("drivers/memstick/host/tifm_ms.c:300", sg_dma_address(&host->req->sg),
 		       sock->addr + SOCK_DMA_ADDRESS);
-		writel(sys_param, sock->addr + SOCK_DMA_CONTROL);
+		pete_writel("drivers/memstick/host/tifm_ms.c:302", sys_param, sock->addr + SOCK_DMA_CONTROL);
 	} else {
-		writel(host->mode_mask | TIFM_MS_SYS_FIFO,
+		pete_writel("drivers/memstick/host/tifm_ms.c:304", host->mode_mask | TIFM_MS_SYS_FIFO,
 		       sock->addr + SOCK_MS_SYSTEM);
 
-		writel(TIFM_FIFO_MORE,
+		pete_writel("drivers/memstick/host/tifm_ms.c:307", TIFM_FIFO_MORE,
 		       sock->addr + SOCK_DMA_FIFO_INT_ENABLE_SET);
 	}
 
 	mod_timer(&host->timer, jiffies + host->timeout_jiffies);
-	writel(TIFM_CTRL_LED | readl(sock->addr + SOCK_CONTROL),
+	pete_writel("drivers/memstick/host/tifm_ms.c:312", TIFM_CTRL_LED | pete_readl("drivers/memstick/host/tifm_ms.c:312", sock->addr + SOCK_CONTROL),
 	       sock->addr + SOCK_CONTROL);
 	host->req->error = 0;
 
-	sys_param = readl(sock->addr + SOCK_MS_SYSTEM);
+	sys_param = pete_readl("drivers/memstick/host/tifm_ms.c:316", sock->addr + SOCK_MS_SYSTEM);
 	sys_param |= TIFM_MS_SYS_INTCLR;
 
 	if (host->use_dma)
@@ -321,11 +321,11 @@ static int tifm_ms_issue_cmd(struct tifm_ms *host)
 	else
 		sys_param &= ~TIFM_MS_SYS_DMA;
 
-	writel(sys_param, sock->addr + SOCK_MS_SYSTEM);
+	pete_writel("drivers/memstick/host/tifm_ms.c:324", sys_param, sock->addr + SOCK_MS_SYSTEM);
 
 	cmd = (host->req->tpc & 0xf) << 12;
 	cmd |= data_len;
-	writel(cmd, sock->addr + SOCK_MS_COMMAND);
+	pete_writel("drivers/memstick/host/tifm_ms.c:328", cmd, sock->addr + SOCK_MS_COMMAND);
 
 	dev_dbg(&sock->dev, "executing TPC %x, %x\n", cmd, sys_param);
 	return 0;
@@ -339,13 +339,13 @@ static void tifm_ms_complete_cmd(struct tifm_ms *host)
 
 	del_timer(&host->timer);
 
-	host->req->int_reg = readl(sock->addr + SOCK_MS_STATUS) & 0xff;
+	host->req->int_reg = pete_readl("drivers/memstick/host/tifm_ms.c:342", sock->addr + SOCK_MS_STATUS) & 0xff;
 	host->req->int_reg = (host->req->int_reg & 1)
 			     | ((host->req->int_reg << 4) & 0xe0);
 
-	writel(TIFM_FIFO_INT_SETALL,
+	pete_writel("drivers/memstick/host/tifm_ms.c:346", TIFM_FIFO_INT_SETALL,
 	       sock->addr + SOCK_DMA_FIFO_INT_ENABLE_CLEAR);
-	writel(TIFM_DMA_RESET, sock->addr + SOCK_DMA_CONTROL);
+	pete_writel("drivers/memstick/host/tifm_ms.c:348", TIFM_DMA_RESET, sock->addr + SOCK_DMA_CONTROL);
 
 	if (host->use_dma) {
 		tifm_unmap_sg(sock, &host->req->sg, 1,
@@ -354,7 +354,7 @@ static void tifm_ms_complete_cmd(struct tifm_ms *host)
 			      : DMA_TO_DEVICE);
 	}
 
-	writel((~TIFM_CTRL_LED) & readl(sock->addr + SOCK_CONTROL),
+	pete_writel("drivers/memstick/host/tifm_ms.c:357", (~TIFM_CTRL_LED) & pete_readl("drivers/memstick/host/tifm_ms.c:357", sock->addr + SOCK_CONTROL),
 	       sock->addr + SOCK_CONTROL);
 
 	dev_dbg(&sock->dev, "TPC complete\n");
@@ -386,8 +386,8 @@ static void tifm_ms_data_event(struct tifm_dev *sock)
 
 	spin_lock(&sock->lock);
 	host = memstick_priv((struct memstick_host *)tifm_get_drvdata(sock));
-	fifo_status = readl(sock->addr + SOCK_DMA_FIFO_STATUS);
-	host_status = readl(sock->addr + SOCK_MS_STATUS);
+	fifo_status = pete_readl("drivers/memstick/host/tifm_ms.c:389", sock->addr + SOCK_DMA_FIFO_STATUS);
+	host_status = pete_readl("drivers/memstick/host/tifm_ms.c:390", sock->addr + SOCK_MS_STATUS);
 	dev_dbg(&sock->dev,
 		"data event: fifo_status %x, host_status %x, flags %x\n",
 		fifo_status, host_status, host->cmd_flags);
@@ -405,7 +405,7 @@ static void tifm_ms_data_event(struct tifm_dev *sock)
 		}
 	}
 
-	writel(fifo_status, sock->addr + SOCK_DMA_FIFO_STATUS);
+	pete_writel("drivers/memstick/host/tifm_ms.c:408", fifo_status, sock->addr + SOCK_DMA_FIFO_STATUS);
 	if (!rc)
 		tifm_ms_complete_cmd(host);
 
@@ -422,7 +422,7 @@ static void tifm_ms_card_event(struct tifm_dev *sock)
 
 	spin_lock(&sock->lock);
 	host = memstick_priv((struct memstick_host *)tifm_get_drvdata(sock));
-	host_status = readl(sock->addr + SOCK_MS_STATUS);
+	host_status = pete_readl("drivers/memstick/host/tifm_ms.c:425", sock->addr + SOCK_MS_STATUS);
 	dev_dbg(&sock->dev, "host event: host_status %x, flags %x\n",
 		host_status, host->cmd_flags);
 
@@ -442,7 +442,7 @@ static void tifm_ms_card_event(struct tifm_dev *sock)
 
 	}
 
-	writel(TIFM_MS_SYS_INTCLR | readl(sock->addr + SOCK_MS_SYSTEM),
+	pete_writel("drivers/memstick/host/tifm_ms.c:445", TIFM_MS_SYS_INTCLR | pete_readl("drivers/memstick/host/tifm_ms.c:445", sock->addr + SOCK_MS_SYSTEM),
 	       sock->addr + SOCK_MS_SYSTEM);
 
 	if (!rc)
@@ -503,27 +503,27 @@ static int tifm_ms_set_param(struct memstick_host *msh,
 		/* also affected by media detection mechanism */
 		if (value == MEMSTICK_POWER_ON) {
 			host->mode_mask = TIFM_MS_SYS_SRAC | TIFM_MS_SYS_REI;
-			writel(TIFM_MS_SYS_RESET, sock->addr + SOCK_MS_SYSTEM);
-			writel(TIFM_MS_SYS_FCLR | TIFM_MS_SYS_INTCLR,
+			pete_writel("drivers/memstick/host/tifm_ms.c:506", TIFM_MS_SYS_RESET, sock->addr + SOCK_MS_SYSTEM);
+			pete_writel("drivers/memstick/host/tifm_ms.c:507", TIFM_MS_SYS_FCLR | TIFM_MS_SYS_INTCLR,
 			       sock->addr + SOCK_MS_SYSTEM);
-			writel(0xffffffff, sock->addr + SOCK_MS_STATUS);
+			pete_writel("drivers/memstick/host/tifm_ms.c:509", 0xffffffff, sock->addr + SOCK_MS_STATUS);
 		} else if (value == MEMSTICK_POWER_OFF) {
-			writel(TIFM_MS_SYS_FCLR | TIFM_MS_SYS_INTCLR,
+			pete_writel("drivers/memstick/host/tifm_ms.c:511", TIFM_MS_SYS_FCLR | TIFM_MS_SYS_INTCLR,
 			       sock->addr + SOCK_MS_SYSTEM);
-			writel(0xffffffff, sock->addr + SOCK_MS_STATUS);
+			pete_writel("drivers/memstick/host/tifm_ms.c:513", 0xffffffff, sock->addr + SOCK_MS_STATUS);
 		} else
 			return -EINVAL;
 		break;
 	case MEMSTICK_INTERFACE:
 		if (value == MEMSTICK_SERIAL) {
 			host->mode_mask = TIFM_MS_SYS_SRAC | TIFM_MS_SYS_REI;
-			writel((~TIFM_CTRL_FAST_CLK)
-			       & readl(sock->addr + SOCK_CONTROL),
+			pete_writel("drivers/memstick/host/tifm_ms.c:520", (~TIFM_CTRL_FAST_CLK)
+			       & pete_readl("drivers/memstick/host/tifm_ms.c:521", sock->addr + SOCK_CONTROL),
 			       sock->addr + SOCK_CONTROL);
 		} else if (value == MEMSTICK_PAR4) {
 			host->mode_mask = 0;
-			writel(TIFM_CTRL_FAST_CLK
-			       | readl(sock->addr + SOCK_CONTROL),
+			pete_writel("drivers/memstick/host/tifm_ms.c:525", TIFM_CTRL_FAST_CLK
+			       | pete_readl("drivers/memstick/host/tifm_ms.c:526", sock->addr + SOCK_CONTROL),
 			       sock->addr + SOCK_CONTROL);
 		} else
 			return -EINVAL;
@@ -538,7 +538,7 @@ static void tifm_ms_abort(struct timer_list *t)
 	struct tifm_ms *host = from_timer(host, t, timer);
 
 	dev_dbg(&host->dev->dev, "status %x\n",
-		readl(host->dev->addr + SOCK_MS_STATUS));
+		pete_readl("drivers/memstick/host/tifm_ms.c:541", host->dev->addr + SOCK_MS_STATUS));
 	printk(KERN_ERR
 	       "%s : card failed to respond for a long period of time "
 	       "(%x, %x)\n",
@@ -555,7 +555,7 @@ static int tifm_ms_probe(struct tifm_dev *sock)
 	int rc = -EIO;
 
 	if (!(TIFM_SOCK_STATE_OCCUPIED
-	      & readl(sock->addr + SOCK_PRESENT_STATE))) {
+	      & pete_readl("drivers/memstick/host/tifm_ms.c:558", sock->addr + SOCK_PRESENT_STATE))) {
 		printk(KERN_WARNING "%s : card gone, unexpectedly\n",
 		       dev_name(&sock->dev));
 		return rc;
@@ -601,9 +601,9 @@ static void tifm_ms_remove(struct tifm_dev *sock)
 	host->eject = 1;
 	if (host->req) {
 		del_timer(&host->timer);
-		writel(TIFM_FIFO_INT_SETALL,
+		pete_writel("drivers/memstick/host/tifm_ms.c:604", TIFM_FIFO_INT_SETALL,
 		       sock->addr + SOCK_DMA_FIFO_INT_ENABLE_CLEAR);
-		writel(TIFM_DMA_RESET, sock->addr + SOCK_DMA_CONTROL);
+		pete_writel("drivers/memstick/host/tifm_ms.c:606", TIFM_DMA_RESET, sock->addr + SOCK_DMA_CONTROL);
 		if (host->use_dma)
 			tifm_unmap_sg(sock, &host->req->sg, 1,
 				      host->req->data_dir == READ

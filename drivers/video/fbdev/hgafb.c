@@ -247,7 +247,7 @@ static void hga_show_logo(struct fb_info *info)
 	
 	for (y = 134; y < 134 + 80 ; y++) * this needs some cleanup *
 		for (x = 0; x < 10 ; x++)
-			writeb(~*(logo++),(dest + HGA_ROWADDR(y) + x + 40));
+			pete_writeb("drivers/video/fbdev/hgafb.c:250", ~*(logo++),(dest + HGA_ROWADDR(y) + x + 40));
 */
 }
 
@@ -298,11 +298,11 @@ static int hga_card_detect(void)
 	p = hga_vram;
 	q = hga_vram + 0x01000;
 
-	p_save = readw(p); q_save = readw(q);
+	p_save = pete_readw("drivers/video/fbdev/hgafb.c:301", p); q_save = pete_readw("drivers/video/fbdev/hgafb.c:301", q);
 
-	writew(0xaa55, p); if (readw(p) == 0xaa55) count++;
-	writew(0x55aa, p); if (readw(p) == 0x55aa) count++;
-	writew(p_save, p);
+	pete_writew("drivers/video/fbdev/hgafb.c:303", 0xaa55, p); if (pete_readw("drivers/video/fbdev/hgafb.c:303", p) == 0xaa55) count++;
+	pete_writew("drivers/video/fbdev/hgafb.c:304", 0x55aa, p); if (pete_readw("drivers/video/fbdev/hgafb.c:304", p) == 0x55aa) count++;
+	pete_writew("drivers/video/fbdev/hgafb.c:305", p_save, p);
 
 	if (count != 2)
 		goto error;

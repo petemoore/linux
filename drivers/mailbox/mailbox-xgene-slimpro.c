@@ -67,24 +67,24 @@ struct slimpro_mbox {
 
 static void mb_chan_send_msg(struct slimpro_mbox_chan *mb_chan, u32 *msg)
 {
-	writel(msg[1], mb_chan->reg + REG_DB_DOUT0);
-	writel(msg[2], mb_chan->reg + REG_DB_DOUT1);
-	writel(msg[0], mb_chan->reg + REG_DB_OUT);
+	pete_writel("drivers/mailbox/mailbox-xgene-slimpro.c:70", msg[1], mb_chan->reg + REG_DB_DOUT0);
+	pete_writel("drivers/mailbox/mailbox-xgene-slimpro.c:71", msg[2], mb_chan->reg + REG_DB_DOUT1);
+	pete_writel("drivers/mailbox/mailbox-xgene-slimpro.c:72", msg[0], mb_chan->reg + REG_DB_OUT);
 }
 
 static void mb_chan_recv_msg(struct slimpro_mbox_chan *mb_chan)
 {
-	mb_chan->rx_msg[1] = readl(mb_chan->reg + REG_DB_DIN0);
-	mb_chan->rx_msg[2] = readl(mb_chan->reg + REG_DB_DIN1);
-	mb_chan->rx_msg[0] = readl(mb_chan->reg + REG_DB_IN);
+	mb_chan->rx_msg[1] = pete_readl("drivers/mailbox/mailbox-xgene-slimpro.c:77", mb_chan->reg + REG_DB_DIN0);
+	mb_chan->rx_msg[2] = pete_readl("drivers/mailbox/mailbox-xgene-slimpro.c:78", mb_chan->reg + REG_DB_DIN1);
+	mb_chan->rx_msg[0] = pete_readl("drivers/mailbox/mailbox-xgene-slimpro.c:79", mb_chan->reg + REG_DB_IN);
 }
 
 static int mb_chan_status_ack(struct slimpro_mbox_chan *mb_chan)
 {
-	u32 val = readl(mb_chan->reg + REG_DB_STAT);
+	u32 val = pete_readl("drivers/mailbox/mailbox-xgene-slimpro.c:84", mb_chan->reg + REG_DB_STAT);
 
 	if (val & MBOX_STATUS_ACK_MASK) {
-		writel(MBOX_STATUS_ACK_MASK, mb_chan->reg + REG_DB_STAT);
+		pete_writel("drivers/mailbox/mailbox-xgene-slimpro.c:87", MBOX_STATUS_ACK_MASK, mb_chan->reg + REG_DB_STAT);
 		return 1;
 	}
 	return 0;
@@ -92,11 +92,11 @@ static int mb_chan_status_ack(struct slimpro_mbox_chan *mb_chan)
 
 static int mb_chan_status_avail(struct slimpro_mbox_chan *mb_chan)
 {
-	u32 val = readl(mb_chan->reg + REG_DB_STAT);
+	u32 val = pete_readl("drivers/mailbox/mailbox-xgene-slimpro.c:95", mb_chan->reg + REG_DB_STAT);
 
 	if (val & MBOX_STATUS_AVAIL_MASK) {
 		mb_chan_recv_msg(mb_chan);
-		writel(MBOX_STATUS_AVAIL_MASK, mb_chan->reg + REG_DB_STAT);
+		pete_writel("drivers/mailbox/mailbox-xgene-slimpro.c:99", MBOX_STATUS_AVAIL_MASK, mb_chan->reg + REG_DB_STAT);
 		return 1;
 	}
 	return 0;
@@ -138,12 +138,12 @@ static int slimpro_mbox_startup(struct mbox_chan *chan)
 	}
 
 	/* Enable HW interrupt */
-	writel(MBOX_STATUS_ACK_MASK | MBOX_STATUS_AVAIL_MASK,
+	pete_writel("drivers/mailbox/mailbox-xgene-slimpro.c:141", MBOX_STATUS_ACK_MASK | MBOX_STATUS_AVAIL_MASK,
 	       mb_chan->reg + REG_DB_STAT);
 	/* Unmask doorbell status interrupt */
-	val = readl(mb_chan->reg + REG_DB_STATMASK);
+	val = pete_readl("drivers/mailbox/mailbox-xgene-slimpro.c:144", mb_chan->reg + REG_DB_STATMASK);
 	val &= ~(MBOX_STATUS_ACK_MASK | MBOX_STATUS_AVAIL_MASK);
-	writel(val, mb_chan->reg + REG_DB_STATMASK);
+	pete_writel("drivers/mailbox/mailbox-xgene-slimpro.c:146", val, mb_chan->reg + REG_DB_STATMASK);
 
 	return 0;
 }
@@ -154,9 +154,9 @@ static void slimpro_mbox_shutdown(struct mbox_chan *chan)
 	u32 val;
 
 	/* Mask doorbell status interrupt */
-	val = readl(mb_chan->reg + REG_DB_STATMASK);
+	val = pete_readl("drivers/mailbox/mailbox-xgene-slimpro.c:157", mb_chan->reg + REG_DB_STATMASK);
 	val |= (MBOX_STATUS_ACK_MASK | MBOX_STATUS_AVAIL_MASK);
-	writel(val, mb_chan->reg + REG_DB_STATMASK);
+	pete_writel("drivers/mailbox/mailbox-xgene-slimpro.c:159", val, mb_chan->reg + REG_DB_STATMASK);
 
 	devm_free_irq(mb_chan->dev, mb_chan->irq, mb_chan);
 }

@@ -63,7 +63,7 @@ static struct device *dev_for_power_off;
 
 static inline uint32_t jz4740_rtc_reg_read(struct jz4740_rtc *rtc, size_t reg)
 {
-	return readl(rtc->base + reg);
+	return pete_readl("drivers/rtc/rtc-jz4740.c:66", rtc->base + reg);
 }
 
 static int jz4740_rtc_wait_write_ready(struct jz4740_rtc *rtc)
@@ -87,10 +87,10 @@ static inline int jz4780_rtc_enable_write(struct jz4740_rtc *rtc)
 	if (ret != 0)
 		return ret;
 
-	writel(JZ_RTC_WENR_MAGIC, rtc->base + JZ_REG_RTC_WENR);
+	pete_writel("drivers/rtc/rtc-jz4740.c:90", JZ_RTC_WENR_MAGIC, rtc->base + JZ_REG_RTC_WENR);
 
 	do {
-		ctrl = readl(rtc->base + JZ_REG_RTC_WENR);
+		ctrl = pete_readl("drivers/rtc/rtc-jz4740.c:93", rtc->base + JZ_REG_RTC_WENR);
 	} while (!(ctrl & JZ_RTC_WENR_WEN) && --timeout);
 
 	return timeout ? 0 : -EIO;
@@ -106,7 +106,7 @@ static inline int jz4740_rtc_reg_write(struct jz4740_rtc *rtc, size_t reg,
 	if (ret == 0)
 		ret = jz4740_rtc_wait_write_ready(rtc);
 	if (ret == 0)
-		writel(val, rtc->base + reg);
+		pete_writel("drivers/rtc/rtc-jz4740.c:109", val, rtc->base + reg);
 
 	return ret;
 }

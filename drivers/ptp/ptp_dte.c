@@ -72,9 +72,9 @@ static void dte_write_nco(void __iomem *regs, s64 ns)
 	sum3 = (u32)(((ns >> DTE_NCO_SUM3_SHIFT) & DTE_NCO_SUM3_MASK) <<
 		     DTE_NCO_SUM3_WR_SHIFT);
 
-	writel(0, (regs + DTE_NCO_LOW_TIME_REG));
-	writel(sum2, (regs + DTE_NCO_TIME_REG));
-	writel(sum3, (regs + DTE_NCO_OVERFLOW_REG));
+	pete_writel("drivers/ptp/ptp_dte.c:75", 0, (regs + DTE_NCO_LOW_TIME_REG));
+	pete_writel("drivers/ptp/ptp_dte.c:76", sum2, (regs + DTE_NCO_TIME_REG));
+	pete_writel("drivers/ptp/ptp_dte.c:77", sum3, (regs + DTE_NCO_OVERFLOW_REG));
 }
 
 static s64 dte_read_nco(void __iomem *regs)
@@ -86,8 +86,8 @@ static s64 dte_read_nco(void __iomem *regs)
 	 * ignoring sum1 (4 bits) gives a 16ns resolution, which
 	 * works due to the async register read.
 	 */
-	sum3 = readl(regs + DTE_NCO_OVERFLOW_REG) & DTE_NCO_SUM3_MASK;
-	sum2 = readl(regs + DTE_NCO_TIME_REG);
+	sum3 = pete_readl("drivers/ptp/ptp_dte.c:89", regs + DTE_NCO_OVERFLOW_REG) & DTE_NCO_SUM3_MASK;
+	sum2 = pete_readl("drivers/ptp/ptp_dte.c:90", regs + DTE_NCO_TIME_REG);
 	ns = ((s64)sum3 << DTE_NCO_SUM3_SHIFT) |
 		 ((s64)sum2 << DTE_NCO_SUM2_SHIFT);
 
@@ -161,7 +161,7 @@ static int ptp_dte_adjfreq(struct ptp_clock_info *ptp, s32 ppb)
 		nco_incr = DTE_NCO_INC_DEFAULT + DTE_PPB_ADJ(ppb);
 
 	spin_lock_irqsave(&ptp_dte->lock, flags);
-	writel(nco_incr, ptp_dte->regs + DTE_NCO_INC_REG);
+	pete_writel("drivers/ptp/ptp_dte.c:164", nco_incr, ptp_dte->regs + DTE_NCO_INC_REG);
 	spin_unlock_irqrestore(&ptp_dte->lock, flags);
 
 	return 0;
@@ -200,7 +200,7 @@ static int ptp_dte_settime(struct ptp_clock_info *ptp,
 	spin_lock_irqsave(&ptp_dte->lock, flags);
 
 	/* Disable nco increment */
-	writel(0, ptp_dte->regs + DTE_NCO_INC_REG);
+	pete_writel("drivers/ptp/ptp_dte.c:203", 0, ptp_dte->regs + DTE_NCO_INC_REG);
 
 	dte_write_nco(ptp_dte->regs, timespec64_to_ns(ts));
 
@@ -209,7 +209,7 @@ static int ptp_dte_settime(struct ptp_clock_info *ptp,
 	ptp_dte->ts_wrap_cnt = 0;
 
 	/* Enable nco increment */
-	writel(DTE_NCO_INC_DEFAULT, ptp_dte->regs + DTE_NCO_INC_REG);
+	pete_writel("drivers/ptp/ptp_dte.c:212", DTE_NCO_INC_DEFAULT, ptp_dte->regs + DTE_NCO_INC_REG);
 
 	spin_unlock_irqrestore(&ptp_dte->lock, flags);
 
@@ -275,7 +275,7 @@ static int ptp_dte_remove(struct platform_device *pdev)
 	ptp_clock_unregister(ptp_dte->ptp_clk);
 
 	for (i = 0; i < DTE_NUM_REGS_TO_RESTORE; i++)
-		writel(0, ptp_dte->regs + (i * sizeof(u32)));
+		pete_writel("drivers/ptp/ptp_dte.c:278", 0, ptp_dte->regs + (i * sizeof(u32)));
 
 	return 0;
 }
@@ -288,11 +288,11 @@ static int ptp_dte_suspend(struct device *dev)
 
 	for (i = 0; i < DTE_NUM_REGS_TO_RESTORE; i++) {
 		ptp_dte->reg_val[i] =
-			readl(ptp_dte->regs + (i * sizeof(u32)));
+			pete_readl("drivers/ptp/ptp_dte.c:291", ptp_dte->regs + (i * sizeof(u32)));
 	}
 
 	/* disable the nco */
-	writel(0, ptp_dte->regs + DTE_NCO_INC_REG);
+	pete_writel("drivers/ptp/ptp_dte.c:295", 0, ptp_dte->regs + DTE_NCO_INC_REG);
 
 	return 0;
 }
@@ -304,10 +304,10 @@ static int ptp_dte_resume(struct device *dev)
 
 	for (i = 0; i < DTE_NUM_REGS_TO_RESTORE; i++) {
 		if ((i * sizeof(u32)) != DTE_NCO_OVERFLOW_REG)
-			writel(ptp_dte->reg_val[i],
+			pete_writel("drivers/ptp/ptp_dte.c:307", ptp_dte->reg_val[i],
 				(ptp_dte->regs + (i * sizeof(u32))));
 		else
-			writel(((ptp_dte->reg_val[i] &
+			pete_writel("drivers/ptp/ptp_dte.c:310", ((ptp_dte->reg_val[i] &
 				DTE_NCO_SUM3_MASK) << DTE_NCO_SUM3_WR_SHIFT),
 				(ptp_dte->regs + (i * sizeof(u32))));
 	}

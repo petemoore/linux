@@ -998,7 +998,7 @@ static int dm365_venc_setup_clock(enum vpbe_enc_timings_type type,
 	default:
 		return -EINVAL;
 	}
-	writel(val, vpss_clkctl_reg);
+	pete_writel("arch/arm/mach-davinci/dm365.c:1001", val, vpss_clkctl_reg);
 
 	return 0;
 }

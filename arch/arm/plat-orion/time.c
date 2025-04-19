@@ -64,7 +64,7 @@ static u32 ticks_per_jiffy;
 
 static u64 notrace orion_read_sched_clock(void)
 {
-	return ~readl(timer_base + TIMER0_VAL_OFF);
+	return ~pete_readl("arch/arm/plat-orion/time.c:67", timer_base + TIMER0_VAL_OFF);
 }
 
 /*
@@ -84,23 +84,23 @@ orion_clkevt_next_event(unsigned long delta, struct clock_event_device *dev)
 	/*
 	 * Clear and enable clockevent timer interrupt.
 	 */
-	writel(bridge_timer1_clr_mask, bridge_base + BRIDGE_CAUSE_OFF);
+	pete_writel("arch/arm/plat-orion/time.c:87", bridge_timer1_clr_mask, bridge_base + BRIDGE_CAUSE_OFF);
 
-	u = readl(bridge_base + BRIDGE_MASK_OFF);
+	u = pete_readl("arch/arm/plat-orion/time.c:89", bridge_base + BRIDGE_MASK_OFF);
 	u |= BRIDGE_INT_TIMER1;
-	writel(u, bridge_base + BRIDGE_MASK_OFF);
+	pete_writel("arch/arm/plat-orion/time.c:91", u, bridge_base + BRIDGE_MASK_OFF);
 
 	/*
 	 * Setup new clockevent timer value.
 	 */
-	writel(delta, timer_base + TIMER1_VAL_OFF);
+	pete_writel("arch/arm/plat-orion/time.c:96", delta, timer_base + TIMER1_VAL_OFF);
 
 	/*
 	 * Enable the timer.
 	 */
-	u = readl(timer_base + TIMER_CTRL_OFF);
+	u = pete_readl("arch/arm/plat-orion/time.c:101", timer_base + TIMER_CTRL_OFF);
 	u = (u & ~TIMER1_RELOAD_EN) | TIMER1_EN;
-	writel(u, timer_base + TIMER_CTRL_OFF);
+	pete_writel("arch/arm/plat-orion/time.c:103", u, timer_base + TIMER_CTRL_OFF);
 
 	local_irq_restore(flags);
 
@@ -115,15 +115,15 @@ static int orion_clkevt_shutdown(struct clock_event_device *evt)
 	local_irq_save(flags);
 
 	/* Disable timer */
-	u = readl(timer_base + TIMER_CTRL_OFF);
-	writel(u & ~TIMER1_EN, timer_base + TIMER_CTRL_OFF);
+	u = pete_readl("arch/arm/plat-orion/time.c:118", timer_base + TIMER_CTRL_OFF);
+	pete_writel("arch/arm/plat-orion/time.c:119", u & ~TIMER1_EN, timer_base + TIMER_CTRL_OFF);
 
 	/* Disable timer interrupt */
-	u = readl(bridge_base + BRIDGE_MASK_OFF);
-	writel(u & ~BRIDGE_INT_TIMER1, bridge_base + BRIDGE_MASK_OFF);
+	u = pete_readl("arch/arm/plat-orion/time.c:122", bridge_base + BRIDGE_MASK_OFF);
+	pete_writel("arch/arm/plat-orion/time.c:123", u & ~BRIDGE_INT_TIMER1, bridge_base + BRIDGE_MASK_OFF);
 
 	/* ACK pending timer interrupt */
-	writel(bridge_timer1_clr_mask, bridge_base + BRIDGE_CAUSE_OFF);
+	pete_writel("arch/arm/plat-orion/time.c:126", bridge_timer1_clr_mask, bridge_base + BRIDGE_CAUSE_OFF);
 
 	local_irq_restore(flags);
 
@@ -138,16 +138,16 @@ static int orion_clkevt_set_periodic(struct clock_event_device *evt)
 	local_irq_save(flags);
 
 	/* Setup timer to fire at 1/HZ intervals */
-	writel(ticks_per_jiffy - 1, timer_base + TIMER1_RELOAD_OFF);
-	writel(ticks_per_jiffy - 1, timer_base + TIMER1_VAL_OFF);
+	pete_writel("arch/arm/plat-orion/time.c:141", ticks_per_jiffy - 1, timer_base + TIMER1_RELOAD_OFF);
+	pete_writel("arch/arm/plat-orion/time.c:142", ticks_per_jiffy - 1, timer_base + TIMER1_VAL_OFF);
 
 	/* Enable timer interrupt */
-	u = readl(bridge_base + BRIDGE_MASK_OFF);
-	writel(u | BRIDGE_INT_TIMER1, bridge_base + BRIDGE_MASK_OFF);
+	u = pete_readl("arch/arm/plat-orion/time.c:145", bridge_base + BRIDGE_MASK_OFF);
+	pete_writel("arch/arm/plat-orion/time.c:146", u | BRIDGE_INT_TIMER1, bridge_base + BRIDGE_MASK_OFF);
 
 	/* Enable timer */
-	u = readl(timer_base + TIMER_CTRL_OFF);
-	writel(u | TIMER1_EN | TIMER1_RELOAD_EN, timer_base + TIMER_CTRL_OFF);
+	u = pete_readl("arch/arm/plat-orion/time.c:149", timer_base + TIMER_CTRL_OFF);
+	pete_writel("arch/arm/plat-orion/time.c:150", u | TIMER1_EN | TIMER1_RELOAD_EN, timer_base + TIMER_CTRL_OFF);
 
 	local_irq_restore(flags);
 
@@ -171,7 +171,7 @@ static irqreturn_t orion_timer_interrupt(int irq, void *dev_id)
 	/*
 	 * ACK timer interrupt and call event handler.
 	 */
-	writel(bridge_timer1_clr_mask, bridge_base + BRIDGE_CAUSE_OFF);
+	pete_writel("arch/arm/plat-orion/time.c:174", bridge_timer1_clr_mask, bridge_base + BRIDGE_CAUSE_OFF);
 	orion_clkevt.event_handler(&orion_clkevt);
 
 	return IRQ_HANDLED;
@@ -185,7 +185,7 @@ orion_time_set_base(void __iomem *_timer_base)
 
 static unsigned long orion_delay_timer_read(void)
 {
-	return ~readl(timer_base + TIMER0_VAL_OFF);
+	return ~pete_readl("arch/arm/plat-orion/time.c:188", timer_base + TIMER0_VAL_OFF);
 }
 
 static struct delay_timer orion_delay_timer = {
@@ -218,12 +218,12 @@ orion_time_init(void __iomem *_bridge_base, u32 _bridge_timer1_clr_mask,
 	 * Setup free-running clocksource timer (interrupts
 	 * disabled).
 	 */
-	writel(0xffffffff, timer_base + TIMER0_VAL_OFF);
-	writel(0xffffffff, timer_base + TIMER0_RELOAD_OFF);
-	u = readl(bridge_base + BRIDGE_MASK_OFF);
-	writel(u & ~BRIDGE_INT_TIMER0, bridge_base + BRIDGE_MASK_OFF);
-	u = readl(timer_base + TIMER_CTRL_OFF);
-	writel(u | TIMER0_EN | TIMER0_RELOAD_EN, timer_base + TIMER_CTRL_OFF);
+	pete_writel("arch/arm/plat-orion/time.c:221", 0xffffffff, timer_base + TIMER0_VAL_OFF);
+	pete_writel("arch/arm/plat-orion/time.c:222", 0xffffffff, timer_base + TIMER0_RELOAD_OFF);
+	u = pete_readl("arch/arm/plat-orion/time.c:223", bridge_base + BRIDGE_MASK_OFF);
+	pete_writel("arch/arm/plat-orion/time.c:224", u & ~BRIDGE_INT_TIMER0, bridge_base + BRIDGE_MASK_OFF);
+	u = pete_readl("arch/arm/plat-orion/time.c:225", timer_base + TIMER_CTRL_OFF);
+	pete_writel("arch/arm/plat-orion/time.c:226", u | TIMER0_EN | TIMER0_RELOAD_EN, timer_base + TIMER_CTRL_OFF);
 	clocksource_mmio_init(timer_base + TIMER0_VAL_OFF, "orion_clocksource",
 		tclk, 300, 32, clocksource_mmio_readl_down);
 

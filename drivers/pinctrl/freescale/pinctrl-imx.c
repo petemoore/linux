@@ -180,14 +180,14 @@ static int imx_pmx_set_one_pin_mmio(struct imx_pinctrl *ipctl,
 	if (info->flags & SHARE_MUX_CONF_REG) {
 		u32 reg;
 
-		reg = readl(ipctl->base + pin_reg->mux_reg);
+		reg = pete_readl("drivers/pinctrl/freescale/pinctrl-imx.c:183", ipctl->base + pin_reg->mux_reg);
 		reg &= ~info->mux_mask;
 		reg |= (pin_mmio->mux_mode << info->mux_shift);
-		writel(reg, ipctl->base + pin_reg->mux_reg);
+		pete_writel("drivers/pinctrl/freescale/pinctrl-imx.c:186", reg, ipctl->base + pin_reg->mux_reg);
 		dev_dbg(ipctl->dev, "write: offset 0x%x val 0x%x\n",
 			pin_reg->mux_reg, reg);
 	} else {
-		writel(pin_mmio->mux_mode, ipctl->base + pin_reg->mux_reg);
+		pete_writel("drivers/pinctrl/freescale/pinctrl-imx.c:190", pin_mmio->mux_mode, ipctl->base + pin_reg->mux_reg);
 		dev_dbg(ipctl->dev, "write: offset 0x%x val 0x%x\n",
 			pin_reg->mux_reg, pin_mmio->mux_mode);
 	}
@@ -215,20 +215,20 @@ static int imx_pmx_set_one_pin_mmio(struct imx_pinctrl *ipctl,
 		 * The input_reg[i] here is actually some IOMUXC general
 		 * purpose register, not regular select input register.
 		 */
-		val = readl(ipctl->base + pin_mmio->input_reg);
+		val = pete_readl("drivers/pinctrl/freescale/pinctrl-imx.c:218", ipctl->base + pin_mmio->input_reg);
 		val &= ~mask;
 		val |= select << shift;
-		writel(val, ipctl->base + pin_mmio->input_reg);
+		pete_writel("drivers/pinctrl/freescale/pinctrl-imx.c:221", val, ipctl->base + pin_mmio->input_reg);
 	} else if (pin_mmio->input_reg) {
 		/*
 		 * Regular select input register can never be at offset
 		 * 0, and we only print register value for regular case.
 		 */
 		if (ipctl->input_sel_base)
-			writel(pin_mmio->input_val, ipctl->input_sel_base +
+			pete_writel("drivers/pinctrl/freescale/pinctrl-imx.c:228", pin_mmio->input_val, ipctl->input_sel_base +
 					pin_mmio->input_reg);
 		else
-			writel(pin_mmio->input_val, ipctl->base +
+			pete_writel("drivers/pinctrl/freescale/pinctrl-imx.c:231", pin_mmio->input_val, ipctl->base +
 					pin_mmio->input_reg);
 		dev_dbg(ipctl->dev,
 			"==>select_input: offset 0x%x val 0x%x\n",
@@ -359,7 +359,7 @@ static int imx_pinconf_get_mmio(struct pinctrl_dev *pctldev, unsigned pin_id,
 		return -EINVAL;
 	}
 
-	*config = readl(ipctl->base + pin_reg->conf_reg);
+	*config = pete_readl("drivers/pinctrl/freescale/pinctrl-imx.c:362", ipctl->base + pin_reg->conf_reg);
 
 	if (info->flags & SHARE_MUX_CONF_REG)
 		*config &= ~info->mux_mask;
@@ -400,14 +400,14 @@ static int imx_pinconf_set_mmio(struct pinctrl_dev *pctldev,
 	for (i = 0; i < num_configs; i++) {
 		if (info->flags & SHARE_MUX_CONF_REG) {
 			u32 reg;
-			reg = readl(ipctl->base + pin_reg->conf_reg);
+			reg = pete_readl("drivers/pinctrl/freescale/pinctrl-imx.c:403", ipctl->base + pin_reg->conf_reg);
 			reg &= info->mux_mask;
 			reg |= configs[i];
-			writel(reg, ipctl->base + pin_reg->conf_reg);
+			pete_writel("drivers/pinctrl/freescale/pinctrl-imx.c:406", reg, ipctl->base + pin_reg->conf_reg);
 			dev_dbg(ipctl->dev, "write: offset 0x%x val 0x%x\n",
 				pin_reg->conf_reg, reg);
 		} else {
-			writel(configs[i], ipctl->base + pin_reg->conf_reg);
+			pete_writel("drivers/pinctrl/freescale/pinctrl-imx.c:410", configs[i], ipctl->base + pin_reg->conf_reg);
 			dev_dbg(ipctl->dev, "write: offset 0x%x val 0x%lx\n",
 				pin_reg->conf_reg, configs[i]);
 		}
@@ -455,7 +455,7 @@ static void imx_pinconf_dbg_show(struct pinctrl_dev *pctldev,
 			return;
 		}
 
-		config = readl(ipctl->base + pin_reg->conf_reg);
+		config = pete_readl("drivers/pinctrl/freescale/pinctrl-imx.c:458", ipctl->base + pin_reg->conf_reg);
 	}
 
 	seq_printf(s, "0x%lx", config);

@@ -70,9 +70,9 @@ static void uniphier_u3ssphy_testio_write(struct uniphier_u3ssphy_priv *priv,
 					  u32 data)
 {
 	/* need to read TESTO twice after accessing TESTI */
-	writel(data, priv->base + SSPHY_TESTI);
-	readl(priv->base + SSPHY_TESTO);
-	readl(priv->base + SSPHY_TESTO);
+	pete_writel("drivers/phy/socionext/phy-uniphier-usb3ss.c:73", data, priv->base + SSPHY_TESTI);
+	pete_readl("drivers/phy/socionext/phy-uniphier-usb3ss.c:74", priv->base + SSPHY_TESTO);
+	pete_readl("drivers/phy/socionext/phy-uniphier-usb3ss.c:75", priv->base + SSPHY_TESTO);
 }
 
 static void uniphier_u3ssphy_set_param(struct uniphier_u3ssphy_priv *priv,
@@ -86,7 +86,7 @@ static void uniphier_u3ssphy_set_param(struct uniphier_u3ssphy_priv *priv,
 	val  = FIELD_PREP(TESTI_DAT_MASK, 1);
 	val |= FIELD_PREP(TESTI_ADR_MASK, p->field.reg_no);
 	uniphier_u3ssphy_testio_write(priv, val);
-	val = readl(priv->base + SSPHY_TESTO) & TESTO_DAT_MASK;
+	val = pete_readl("drivers/phy/socionext/phy-uniphier-usb3ss.c:89", priv->base + SSPHY_TESTO) & TESTO_DAT_MASK;
 
 	/* update value */
 	val &= ~field_mask;
@@ -101,7 +101,7 @@ static void uniphier_u3ssphy_set_param(struct uniphier_u3ssphy_priv *priv,
 	val  = FIELD_PREP(TESTI_DAT_MASK, 1);
 	val |= FIELD_PREP(TESTI_ADR_MASK, p->field.reg_no);
 	uniphier_u3ssphy_testio_write(priv, val);
-	readl(priv->base + SSPHY_TESTO);
+	pete_readl("drivers/phy/socionext/phy-uniphier-usb3ss.c:104", priv->base + SSPHY_TESTO);
 }
 
 static int uniphier_u3ssphy_power_on(struct phy *phy)

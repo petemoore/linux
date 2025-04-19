@@ -59,11 +59,11 @@ static int __init clksrc_dbx500_prcmu_init(struct device_node *node)
 	 * The PRCMU should configure it but if it for some reason
 	 * don't we do it here.
 	 */
-	if (readl(clksrc_dbx500_timer_base + PRCMU_TIMER_MODE) !=
+	if (pete_readl("drivers/clocksource/clksrc-dbx500-prcmu.c:62", clksrc_dbx500_timer_base + PRCMU_TIMER_MODE) !=
 	    TIMER_MODE_CONTINUOUS) {
-		writel(TIMER_MODE_CONTINUOUS,
+		pete_writel("drivers/clocksource/clksrc-dbx500-prcmu.c:64", TIMER_MODE_CONTINUOUS,
 		       clksrc_dbx500_timer_base + PRCMU_TIMER_MODE);
-		writel(TIMER_DOWNCOUNT_VAL,
+		pete_writel("drivers/clocksource/clksrc-dbx500-prcmu.c:66", TIMER_DOWNCOUNT_VAL,
 		       clksrc_dbx500_timer_base + PRCMU_TIMER_REF);
 	}
 	return clocksource_register_hz(&clocksource_dbx500_prcmu, RATE_32K);

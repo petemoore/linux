@@ -96,7 +96,7 @@ static inline void rcv_array_wc_fill(struct hfi1_devdata *dd, u32 index)
 	 * present and the RcvArray has been mapped as WC memory.
 	 */
 	if ((dd->flags & HFI1_PRESENT) && dd->rcvarray_wc) {
-		writeq(0, dd->rcvarray_wc + (index * 8));
+		pete_writeq("drivers/infiniband/hw/hfi1/exp_rcv.h:99", 0, dd->rcvarray_wc + (index * 8));
 		if ((index & 3) == 3)
 			flush_wc();
 	}

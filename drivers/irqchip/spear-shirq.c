@@ -62,8 +62,8 @@ static void shirq_irq_mask(struct irq_data *d)
 	u32 __iomem *reg = shirq->base + shirq->mask_reg;
 
 	raw_spin_lock(&shirq_lock);
-	val = readl(reg) & ~(0x1 << shift);
-	writel(val, reg);
+	val = pete_readl("drivers/irqchip/spear-shirq.c:65", reg) & ~(0x1 << shift);
+	pete_writel("drivers/irqchip/spear-shirq.c:66", val, reg);
 	raw_spin_unlock(&shirq_lock);
 }
 
@@ -74,8 +74,8 @@ static void shirq_irq_unmask(struct irq_data *d)
 	u32 __iomem *reg = shirq->base + shirq->mask_reg;
 
 	raw_spin_lock(&shirq_lock);
-	val = readl(reg) | (0x1 << shift);
-	writel(val, reg);
+	val = pete_readl("drivers/irqchip/spear-shirq.c:77", reg) | (0x1 << shift);
+	pete_writel("drivers/irqchip/spear-shirq.c:78", val, reg);
 	raw_spin_unlock(&shirq_lock);
 }
 
@@ -187,7 +187,7 @@ static void shirq_handler(struct irq_desc *desc)
 	struct spear_shirq *shirq = irq_desc_get_handler_data(desc);
 	u32 pend;
 
-	pend = readl(shirq->base + shirq->status_reg) & shirq->mask;
+	pend = pete_readl("drivers/irqchip/spear-shirq.c:190", shirq->base + shirq->status_reg) & shirq->mask;
 	pend >>= shirq->offset;
 
 	while (pend) {

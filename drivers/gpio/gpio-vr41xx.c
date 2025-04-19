@@ -70,8 +70,8 @@ static unsigned long giu_flags;
 static void __iomem *giu_base;
 static struct gpio_chip vr41xx_gpio_chip;
 
-#define giu_read(offset)		readw(giu_base + (offset))
-#define giu_write(offset, value)	writew((value), giu_base + (offset))
+#define giu_read(offset)		pete_readw("drivers/gpio/gpio-vr41xx.c:73", giu_base + (offset))
+#define giu_write(offset, value)	pete_writew("drivers/gpio/gpio-vr41xx.c:74", (value), giu_base + (offset))
 
 #define GPIO_PIN_OF_IRQ(irq)	((irq) - GIU_IRQ_BASE)
 #define GIUINT_HIGH_OFFSET	16

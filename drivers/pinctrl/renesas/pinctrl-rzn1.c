@@ -182,13 +182,13 @@ static void rzn1_hw_set_lock(struct rzn1_pinctrl *ipctl, u8 lock, u8 value)
 	if (lock & LOCK_LEVEL1) {
 		u32 val = ipctl->lev1_protect_phys | !(value & LOCK_LEVEL1);
 
-		writel(val, &ipctl->lev1->status_protect);
+		pete_writel("drivers/pinctrl/renesas/pinctrl-rzn1.c:185", val, &ipctl->lev1->status_protect);
 	}
 
 	if (lock & LOCK_LEVEL2) {
 		u32 val = ipctl->lev2_protect_phys | !(value & LOCK_LEVEL2);
 
-		writel(val, &ipctl->lev2->status_protect);
+		pete_writel("drivers/pinctrl/renesas/pinctrl-rzn1.c:191", val, &ipctl->lev2->status_protect);
 	}
 }
 
@@ -201,7 +201,7 @@ static void rzn1_pinctrl_mdio_select(struct rzn1_pinctrl *ipctl, int mdio,
 
 	dev_dbg(ipctl->dev, "setting mdio%d to %u\n", mdio, func);
 
-	writel(func, &ipctl->lev2->l2_mdio[mdio]);
+	pete_writel("drivers/pinctrl/renesas/pinctrl-rzn1.c:204", func, &ipctl->lev2->l2_mdio[mdio]);
 }
 
 /*
@@ -253,9 +253,9 @@ static int rzn1_set_hw_pin_func(struct rzn1_pinctrl *ipctl, unsigned int pin,
 	    pin_config >= RZN1_FUNC_MDIO0_HIGHZ)
 		return -EINVAL;
 
-	l1 = readl(&ipctl->lev1->conf[pin]);
+	l1 = pete_readl("drivers/pinctrl/renesas/pinctrl-rzn1.c:256", &ipctl->lev1->conf[pin]);
 	l1_cache = l1;
-	l2 = readl(&ipctl->lev2->conf[pin]);
+	l2 = pete_readl("drivers/pinctrl/renesas/pinctrl-rzn1.c:258", &ipctl->lev2->conf[pin]);
 	l2_cache = l2;
 
 	dev_dbg(ipctl->dev, "setting func for pin %u to %u\n", pin, pin_config);
@@ -272,8 +272,8 @@ static int rzn1_set_hw_pin_func(struct rzn1_pinctrl *ipctl, unsigned int pin,
 
 	/* If either configuration changes, we update both anyway */
 	if (l1 != l1_cache || l2 != l2_cache) {
-		writel(l1, &ipctl->lev1->conf[pin]);
-		writel(l2, &ipctl->lev2->conf[pin]);
+		pete_writel("drivers/pinctrl/renesas/pinctrl-rzn1.c:275", l1, &ipctl->lev1->conf[pin]);
+		pete_writel("drivers/pinctrl/renesas/pinctrl-rzn1.c:276", l2, &ipctl->lev2->conf[pin]);
 	}
 
 	return 0;
@@ -494,7 +494,7 @@ static int rzn1_pinconf_get(struct pinctrl_dev *pctldev, unsigned int pin,
 	if (pin >= ARRAY_SIZE(ipctl->lev1->conf))
 		return -EINVAL;
 
-	l1 = readl(&ipctl->lev1->conf[pin]);
+	l1 = pete_readl("drivers/pinctrl/renesas/pinctrl-rzn1.c:497", &ipctl->lev1->conf[pin]);
 
 	l1mux = l1 & RZN1_L1_FUNC_MASK;
 	pull = (l1 >> RZN1_L1_PIN_PULL) & 0x3;
@@ -517,7 +517,7 @@ static int rzn1_pinconf_get(struct pinctrl_dev *pctldev, unsigned int pin,
 		arg = reg_drive[drive];
 		break;
 	case PIN_CONFIG_BIAS_HIGH_IMPEDANCE:
-		l2 = readl(&ipctl->lev2->conf[pin]);
+		l2 = pete_readl("drivers/pinctrl/renesas/pinctrl-rzn1.c:520", &ipctl->lev2->conf[pin]);
 		if (l1mux == RZN1_L1_FUNCTION_L2) {
 			if (l2 != 0)
 				return -EINVAL;
@@ -547,7 +547,7 @@ static int rzn1_pinconf_set(struct pinctrl_dev *pctldev, unsigned int pin,
 	if (pin >= ARRAY_SIZE(ipctl->lev1->conf))
 		return -EINVAL;
 
-	l1 = readl(&ipctl->lev1->conf[pin]);
+	l1 = pete_readl("drivers/pinctrl/renesas/pinctrl-rzn1.c:550", &ipctl->lev1->conf[pin]);
 	l1_cache = l1;
 
 	for (i = 0; i < num_configs; i++) {
@@ -609,7 +609,7 @@ static int rzn1_pinconf_set(struct pinctrl_dev *pctldev, unsigned int pin,
 
 	if (l1 != l1_cache) {
 		rzn1_hw_set_lock(ipctl, LOCK_LEVEL1, LOCK_LEVEL1);
-		writel(l1, &ipctl->lev1->conf[pin]);
+		pete_writel("drivers/pinctrl/renesas/pinctrl-rzn1.c:612", l1, &ipctl->lev1->conf[pin]);
 		rzn1_hw_set_lock(ipctl, LOCK_LEVEL1, 0);
 	}
 

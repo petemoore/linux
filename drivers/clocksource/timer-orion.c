@@ -39,7 +39,7 @@ static void __iomem *timer_base;
 
 static unsigned long notrace orion_read_timer(void)
 {
-	return ~readl(timer_base + TIMER0_VAL);
+	return ~pete_readl("drivers/clocksource/timer-orion.c:42", timer_base + TIMER0_VAL);
 }
 
 static struct delay_timer orion_delay_timer = {
@@ -57,7 +57,7 @@ static void orion_delay_timer_init(unsigned long rate)
  */
 static u64 notrace orion_read_sched_clock(void)
 {
-	return ~readl(timer_base + TIMER0_VAL);
+	return ~pete_readl("drivers/clocksource/timer-orion.c:60", timer_base + TIMER0_VAL);
 }
 
 /*
@@ -69,7 +69,7 @@ static int orion_clkevt_next_event(unsigned long delta,
 				   struct clock_event_device *dev)
 {
 	/* setup and enable one-shot timer */
-	writel(delta, timer_base + TIMER1_VAL);
+	pete_writel("drivers/clocksource/timer-orion.c:72", delta, timer_base + TIMER1_VAL);
 	atomic_io_modify(timer_base + TIMER_CTRL,
 		TIMER1_RELOAD_EN | TIMER1_EN, TIMER1_EN);
 
@@ -87,8 +87,8 @@ static int orion_clkevt_shutdown(struct clock_event_device *dev)
 static int orion_clkevt_set_periodic(struct clock_event_device *dev)
 {
 	/* setup and enable periodic timer at 1/HZ intervals */
-	writel(ticks_per_jiffy - 1, timer_base + TIMER1_RELOAD);
-	writel(ticks_per_jiffy - 1, timer_base + TIMER1_VAL);
+	pete_writel("drivers/clocksource/timer-orion.c:90", ticks_per_jiffy - 1, timer_base + TIMER1_RELOAD);
+	pete_writel("drivers/clocksource/timer-orion.c:91", ticks_per_jiffy - 1, timer_base + TIMER1_VAL);
 	atomic_io_modify(timer_base + TIMER_CTRL,
 			 TIMER1_RELOAD_EN | TIMER1_EN,
 			 TIMER1_RELOAD_EN | TIMER1_EN);
@@ -150,8 +150,8 @@ static int __init orion_timer_init(struct device_node *np)
 	rate = clk_get_rate(clk);
 
 	/* setup timer0 as free-running clocksource */
-	writel(~0, timer_base + TIMER0_VAL);
-	writel(~0, timer_base + TIMER0_RELOAD);
+	pete_writel("drivers/clocksource/timer-orion.c:153", ~0, timer_base + TIMER0_VAL);
+	pete_writel("drivers/clocksource/timer-orion.c:154", ~0, timer_base + TIMER0_RELOAD);
 	atomic_io_modify(timer_base + TIMER_CTRL,
 		TIMER0_RELOAD_EN | TIMER0_EN,
 		TIMER0_RELOAD_EN | TIMER0_EN);

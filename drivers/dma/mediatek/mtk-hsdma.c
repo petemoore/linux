@@ -268,12 +268,12 @@ static struct device *hsdma2dev(struct mtk_hsdma_device *hsdma)
 
 static u32 mtk_dma_read(struct mtk_hsdma_device *hsdma, u32 reg)
 {
-	return readl(hsdma->base + reg);
+	return pete_readl("drivers/dma/mediatek/mtk-hsdma.c:271", hsdma->base + reg);
 }
 
 static void mtk_dma_write(struct mtk_hsdma_device *hsdma, u32 reg, u32 val)
 {
-	writel(val, hsdma->base + reg);
+	pete_writel("drivers/dma/mediatek/mtk-hsdma.c:276", val, hsdma->base + reg);
 }
 
 static void mtk_dma_rmw(struct mtk_hsdma_device *hsdma, u32 reg,

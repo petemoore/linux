@@ -140,16 +140,16 @@ static void ts78xx_ts_nand_cmd_ctrl(struct nand_chip *this, int cmd,
 		bits |= ctrl & NAND_CLE;
 		bits |= (ctrl & NAND_ALE) >> 2;
 
-		writeb((readb(TS_NAND_CTRL) & ~0x7) | bits, TS_NAND_CTRL);
+		pete_writeb("arch/arm/mach-orion5x/ts78xx-setup.c:143", (pete_readb("arch/arm/mach-orion5x/ts78xx-setup.c:143", TS_NAND_CTRL) & ~0x7) | bits, TS_NAND_CTRL);
 	}
 
 	if (cmd != NAND_CMD_NONE)
-		writeb(cmd, this->legacy.IO_ADDR_W);
+		pete_writeb("arch/arm/mach-orion5x/ts78xx-setup.c:147", cmd, this->legacy.IO_ADDR_W);
 }
 
 static int ts78xx_ts_nand_dev_ready(struct nand_chip *chip)
 {
-	return readb(TS_NAND_CTRL) & 0x20;
+	return pete_readb("arch/arm/mach-orion5x/ts78xx-setup.c:152", TS_NAND_CTRL) & 0x20;
 }
 
 static void ts78xx_ts_nand_write_buf(struct nand_chip *chip,
@@ -411,7 +411,7 @@ static int ts78xx_fpga_unload_devices(void)
 
 static int ts78xx_fpga_load(void)
 {
-	ts78xx_fpga.id = readl(TS78XX_FPGA_REGS_VIRT_BASE);
+	ts78xx_fpga.id = pete_readl("arch/arm/mach-orion5x/ts78xx-setup.c:414", TS78XX_FPGA_REGS_VIRT_BASE);
 
 	pr_info("FPGA magic=0x%.6x, rev=0x%.2x\n",
 			(ts78xx_fpga.id >> 8) & 0xffffff,
@@ -431,7 +431,7 @@ static int ts78xx_fpga_unload(void)
 {
 	unsigned int fpga_id;
 
-	fpga_id = readl(TS78XX_FPGA_REGS_VIRT_BASE);
+	fpga_id = pete_readl("arch/arm/mach-orion5x/ts78xx-setup.c:434", TS78XX_FPGA_REGS_VIRT_BASE);
 
 	/*
 	 * There does not seem to be a feasible way to block access to the GPIO

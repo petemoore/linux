@@ -451,12 +451,12 @@ static void hash_hw_write_key(struct hash_device_data *device_data,
 		HASH_SET_DIN(&word, nwords);
 	}
 
-	while (readl(&device_data->base->str) & HASH_STR_DCAL_MASK)
+	while (pete_readl("drivers/crypto/ux500/hash/hash_core.c:454", &device_data->base->str) & HASH_STR_DCAL_MASK)
 		cpu_relax();
 
 	HASH_SET_DCAL;
 
-	while (readl(&device_data->base->str) & HASH_STR_DCAL_MASK)
+	while (pete_readl("drivers/crypto/ux500/hash/hash_core.c:459", &device_data->base->str) & HASH_STR_DCAL_MASK)
 		cpu_relax();
 }
 
@@ -634,7 +634,7 @@ static void hash_messagepad(struct hash_device_data *device_data,
 	if (index_bytes)
 		HASH_SET_DIN(message, nwords);
 
-	while (readl(&device_data->base->str) & HASH_STR_DCAL_MASK)
+	while (pete_readl("drivers/crypto/ux500/hash/hash_core.c:637", &device_data->base->str) & HASH_STR_DCAL_MASK)
 		cpu_relax();
 
 	/* num_of_bytes == 0 => NBLW <- 0 (32 bits valid in DATAIN) */
@@ -647,7 +647,7 @@ static void hash_messagepad(struct hash_device_data *device_data,
 		__func__, readl_relaxed(&device_data->base->din),
 		readl_relaxed(&device_data->base->str) & HASH_STR_NBLW_MASK);
 
-	while (readl(&device_data->base->str) & HASH_STR_DCAL_MASK)
+	while (pete_readl("drivers/crypto/ux500/hash/hash_core.c:650", &device_data->base->str) & HASH_STR_DCAL_MASK)
 		cpu_relax();
 }
 
@@ -746,7 +746,7 @@ void hash_begin(struct hash_device_data *device_data, struct hash_ctx *ctx)
 	/* HW and SW initializations */
 	/* Note: there is no need to initialize buffer and digest members */
 
-	while (readl(&device_data->base->str) & HASH_STR_DCAL_MASK)
+	while (pete_readl("drivers/crypto/ux500/hash/hash_core.c:749", &device_data->base->str) & HASH_STR_DCAL_MASK)
 		cpu_relax();
 
 	/*
@@ -929,7 +929,7 @@ static int hash_dma_final(struct ahash_request *req)
 	wait_for_completion(&ctx->device->dma.complete);
 	hash_dma_done(ctx);
 
-	while (readl(&device_data->base->str) & HASH_STR_DCAL_MASK)
+	while (pete_readl("drivers/crypto/ux500/hash/hash_core.c:932", &device_data->base->str) & HASH_STR_DCAL_MASK)
 		cpu_relax();
 
 	if (ctx->config.oper_mode == HASH_OPER_MODE_HMAC && ctx->key) {
@@ -1031,7 +1031,7 @@ static int hash_hw_final(struct ahash_request *req)
 				req_ctx->state.index);
 	} else {
 		HASH_SET_DCAL;
-		while (readl(&device_data->base->str) & HASH_STR_DCAL_MASK)
+		while (pete_readl("drivers/crypto/ux500/hash/hash_core.c:1034", &device_data->base->str) & HASH_STR_DCAL_MASK)
 			cpu_relax();
 	}
 
@@ -1163,7 +1163,7 @@ int hash_resume_state(struct hash_device_data *device_data,
 	temp_cr = device_state->temp_cr;
 	writel_relaxed(temp_cr & HASH_CR_RESUME_MASK, &device_data->base->cr);
 
-	if (readl(&device_data->base->cr) & HASH_CR_MODE_MASK)
+	if (pete_readl("drivers/crypto/ux500/hash/hash_core.c:1166", &device_data->base->cr) & HASH_CR_MODE_MASK)
 		hash_mode = HASH_OPER_MODE_HMAC;
 	else
 		hash_mode = HASH_OPER_MODE_HASH;
@@ -1207,7 +1207,7 @@ int hash_save_state(struct hash_device_data *device_data,
 	 * actually makes sure that there isn't any ongoing calculation in the
 	 * hardware.
 	 */
-	while (readl(&device_data->base->str) & HASH_STR_DCAL_MASK)
+	while (pete_readl("drivers/crypto/ux500/hash/hash_core.c:1210", &device_data->base->str) & HASH_STR_DCAL_MASK)
 		cpu_relax();
 
 	temp_cr = readl_relaxed(&device_data->base->cr);
@@ -1216,7 +1216,7 @@ int hash_save_state(struct hash_device_data *device_data,
 
 	device_state->din_reg = readl_relaxed(&device_data->base->din);
 
-	if (readl(&device_data->base->cr) & HASH_CR_MODE_MASK)
+	if (pete_readl("drivers/crypto/ux500/hash/hash_core.c:1219", &device_data->base->cr) & HASH_CR_MODE_MASK)
 		hash_mode = HASH_OPER_MODE_HMAC;
 	else
 		hash_mode = HASH_OPER_MODE_HASH;

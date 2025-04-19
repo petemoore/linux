@@ -154,7 +154,7 @@ static inline void omap_8250_rx_dma_flush(struct uart_8250_port *p) { }
 
 static u32 uart_read(struct uart_8250_port *up, u32 reg)
 {
-	return readl(up->port.membase + (reg << up->port.regshift));
+	return pete_readl("drivers/tty/serial/8250/8250_omap.c:157", up->port.membase + (reg << up->port.regshift));
 }
 
 /*

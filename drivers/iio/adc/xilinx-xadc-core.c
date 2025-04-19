@@ -121,13 +121,13 @@ static const unsigned int XADC_ZYNQ_UNMASK_TIMEOUT = 500;
 static void xadc_write_reg(struct xadc *xadc, unsigned int reg,
 	uint32_t val)
 {
-	writel(val, xadc->base + reg);
+	pete_writel("drivers/iio/adc/xilinx-xadc-core.c:124", val, xadc->base + reg);
 }
 
 static void xadc_read_reg(struct xadc *xadc, unsigned int reg,
 	uint32_t *val)
 {
-	*val = readl(xadc->base + reg);
+	*val = pete_readl("drivers/iio/adc/xilinx-xadc-core.c:130", xadc->base + reg);
 }
 
 /*

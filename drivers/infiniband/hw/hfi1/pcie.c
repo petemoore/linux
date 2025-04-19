@@ -120,13 +120,13 @@ int hfi1_pcie_ddinit(struct hfi1_devdata *dd, struct pci_dev *pdev)
 	dd_dev_info(dd, "UC base1: %p for %x\n", dd->kregbase1, RCV_ARRAY);
 
 	/* verify that reads actually work, save revision for reset check */
-	dd->revision = readq(dd->kregbase1 + CCE_REVISION);
+	dd->revision = pete_readq("drivers/infiniband/hw/hfi1/pcie.c:123", dd->kregbase1 + CCE_REVISION);
 	if (dd->revision == ~(u64)0) {
 		dd_dev_err(dd, "Cannot read chip CSRs\n");
 		goto nomem;
 	}
 
-	rcv_array_count = readq(dd->kregbase1 + RCV_ARRAY_CNT);
+	rcv_array_count = pete_readq("drivers/infiniband/hw/hfi1/pcie.c:129", dd->kregbase1 + RCV_ARRAY_CNT);
 	dd_dev_info(dd, "RcvArray count: %u\n", rcv_array_count);
 	dd->base2_start  = RCV_ARRAY + rcv_array_count * 8;
 

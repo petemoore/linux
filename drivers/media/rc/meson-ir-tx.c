@@ -86,7 +86,7 @@ static void meson_irtx_set_mod(struct meson_irtx *ir)
 		ir->carrier, NSEC_PER_SEC / ir->clk_rate * cnt,
 		100 * pulse_cnt / cnt);
 
-	writel(IRB_MOD_COUNT(pulse_cnt, space_cnt),
+	pete_writel("drivers/media/rc/meson-ir-tx.c:89", IRB_MOD_COUNT(pulse_cnt, space_cnt),
 	       ir->reg_base + IRB_ADDR1);
 }
 
@@ -98,14 +98,14 @@ static void meson_irtx_setup(struct meson_irtx *ir, unsigned int clk_nr)
 	 * unset initialize output. Enable FIFO interrupt, set FIFO interrupt
 	 * threshold. Finally, enable the transmitter back.
 	 */
-	writel(~IRB_ENABLE & (IRB_MOD_CLK(clk_nr) | IRB_INIT_HIGH),
+	pete_writel("drivers/media/rc/meson-ir-tx.c:101", ~IRB_ENABLE & (IRB_MOD_CLK(clk_nr) | IRB_INIT_HIGH),
 	       ir->reg_base + IRB_ADDR0);
 	meson_irtx_set_mod(ir);
-	writel(readl(ir->reg_base + IRB_ADDR0) & ~IRB_INIT_HIGH,
+	pete_writel("drivers/media/rc/meson-ir-tx.c:104", pete_readl("drivers/media/rc/meson-ir-tx.c:104", ir->reg_base + IRB_ADDR0) & ~IRB_INIT_HIGH,
 	       ir->reg_base + IRB_ADDR0);
-	writel(IRB_FIFO_IRQ_ENABLE | MIRTX_FIFO_THD,
+	pete_writel("drivers/media/rc/meson-ir-tx.c:106", IRB_FIFO_IRQ_ENABLE | MIRTX_FIFO_THD,
 	       ir->reg_base + IRB_ADDR3);
-	writel(readl(ir->reg_base + IRB_ADDR0) | IRB_ENABLE,
+	pete_writel("drivers/media/rc/meson-ir-tx.c:108", pete_readl("drivers/media/rc/meson-ir-tx.c:108", ir->reg_base + IRB_ADDR0) | IRB_ENABLE,
 	       ir->reg_base + IRB_ADDR0);
 }
 
@@ -148,7 +148,7 @@ static void meson_irtx_send_buffer(struct meson_irtx *ir)
 	unsigned int max_fifo_level = IRB_FIFO_LEN - MIRTX_FIFO_THD;
 
 	while (ir->buf_head < ir->buf_len && nr < max_fifo_level) {
-		writel(ir->buf[ir->buf_head], ir->reg_base + IRB_ADDR2);
+		pete_writel("drivers/media/rc/meson-ir-tx.c:151", ir->buf[ir->buf_head], ir->reg_base + IRB_ADDR2);
 
 		ir->buf_head++;
 		nr++;
@@ -196,7 +196,7 @@ static irqreturn_t meson_irtx_irqhandler(int irq, void *data)
 	unsigned long flags;
 	struct meson_irtx *ir = data;
 
-	writel(readl(ir->reg_base + IRB_ADDR3) & ~IRB_FIFO_THD_PENDING,
+	pete_writel("drivers/media/rc/meson-ir-tx.c:199", pete_readl("drivers/media/rc/meson-ir-tx.c:199", ir->reg_base + IRB_ADDR3) & ~IRB_FIFO_THD_PENDING,
 	       ir->reg_base + IRB_ADDR3);
 
 	if (completion_done(&ir->completion))

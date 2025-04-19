@@ -40,7 +40,7 @@ static int clear_poll_bit(void __iomem *addr, u32 mask)
 	int timeout = 0x400;
 
 	/* clear the bit */
-	writel(mask, addr + MXS_CLR_ADDR);
+	pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:43", mask, addr + MXS_CLR_ADDR);
 
 	/*
 	 * SFTRST needs 3 GPMI clocks to settle, the reference manual
@@ -49,7 +49,7 @@ static int clear_poll_bit(void __iomem *addr, u32 mask)
 	udelay(1);
 
 	/* poll the bit becoming clear */
-	while ((readl(addr) & mask) && --timeout)
+	while ((pete_readl("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:52", addr) & mask) && --timeout)
 		/* nothing */;
 
 	return !timeout;
@@ -85,15 +85,15 @@ static int gpmi_reset_block(void __iomem *reset_addr, bool just_enable)
 		goto error;
 
 	/* clear CLKGATE */
-	writel(MODULE_CLKGATE, reset_addr + MXS_CLR_ADDR);
+	pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:88", MODULE_CLKGATE, reset_addr + MXS_CLR_ADDR);
 
 	if (!just_enable) {
 		/* set SFTRST to reset the block */
-		writel(MODULE_SFTRST, reset_addr + MXS_SET_ADDR);
+		pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:92", MODULE_SFTRST, reset_addr + MXS_SET_ADDR);
 		udelay(1);
 
 		/* poll CLKGATE becoming set */
-		while ((!(readl(reset_addr) & MODULE_CLKGATE)) && --timeout)
+		while ((!(pete_readl("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:96", reset_addr) & MODULE_CLKGATE)) && --timeout)
 			/* nothing */;
 		if (unlikely(!timeout))
 			goto error;
@@ -167,24 +167,24 @@ static int gpmi_init(struct gpmi_nand_data *this)
 		goto err_out;
 
 	/* Choose NAND mode. */
-	writel(BM_GPMI_CTRL1_GPMI_MODE, r->gpmi_regs + HW_GPMI_CTRL1_CLR);
+	pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:170", BM_GPMI_CTRL1_GPMI_MODE, r->gpmi_regs + HW_GPMI_CTRL1_CLR);
 
 	/* Set the IRQ polarity. */
-	writel(BM_GPMI_CTRL1_ATA_IRQRDY_POLARITY,
+	pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:173", BM_GPMI_CTRL1_ATA_IRQRDY_POLARITY,
 				r->gpmi_regs + HW_GPMI_CTRL1_SET);
 
 	/* Disable Write-Protection. */
-	writel(BM_GPMI_CTRL1_DEV_RESET, r->gpmi_regs + HW_GPMI_CTRL1_SET);
+	pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:177", BM_GPMI_CTRL1_DEV_RESET, r->gpmi_regs + HW_GPMI_CTRL1_SET);
 
 	/* Select BCH ECC. */
-	writel(BM_GPMI_CTRL1_BCH_MODE, r->gpmi_regs + HW_GPMI_CTRL1_SET);
+	pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:180", BM_GPMI_CTRL1_BCH_MODE, r->gpmi_regs + HW_GPMI_CTRL1_SET);
 
 	/*
 	 * Decouple the chip select from dma channel. We use dma0 for all
 	 * the chips, force all NAND RDY_BUSY inputs to be sourced from
 	 * RDY_BUSY0.
 	 */
-	writel(BM_GPMI_CTRL1_DECOUPLE_CS | BM_GPMI_CTRL1_GANGED_RDYBUSY,
+	pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:187", BM_GPMI_CTRL1_DECOUPLE_CS | BM_GPMI_CTRL1_GANGED_RDYBUSY,
 	       r->gpmi_regs + HW_GPMI_CTRL1_SET);
 
 err_out:
@@ -203,14 +203,14 @@ static void gpmi_dump_info(struct gpmi_nand_data *this)
 
 	dev_err(this->dev, "Show GPMI registers :\n");
 	for (i = 0; i <= HW_GPMI_DEBUG / 0x10 + 1; i++) {
-		reg = readl(r->gpmi_regs + i * 0x10);
+		reg = pete_readl("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:206", r->gpmi_regs + i * 0x10);
 		dev_err(this->dev, "offset 0x%.3x : 0x%.8x\n", i * 0x10, reg);
 	}
 
 	/* start to print out the BCH info */
 	dev_err(this->dev, "Show BCH registers :\n");
 	for (i = 0; i <= HW_BCH_VERSION / 0x10 + 1; i++) {
-		reg = readl(r->bch_regs + i * 0x10);
+		reg = pete_readl("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:213", r->bch_regs + i * 0x10);
 		dev_err(this->dev, "offset 0x%.3x : 0x%.8x\n", i * 0x10, reg);
 	}
 	dev_err(this->dev, "BCH Geometry :\n"
@@ -560,7 +560,7 @@ static int bch_set_geometry(struct gpmi_nand_data *this)
 		goto err_out;
 
 	/* Set *all* chip selects to use layout 0. */
-	writel(0, r->bch_regs + HW_BCH_LAYOUTSELECT);
+	pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:563", 0, r->bch_regs + HW_BCH_LAYOUTSELECT);
 
 	ret = 0;
 err_out:
@@ -756,15 +756,15 @@ static int gpmi_nfc_apply_timings(struct gpmi_nand_data *this)
 			return ret;
 	}
 
-	writel(hw->timing0, gpmi_regs + HW_GPMI_TIMING0);
-	writel(hw->timing1, gpmi_regs + HW_GPMI_TIMING1);
+	pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:759", hw->timing0, gpmi_regs + HW_GPMI_TIMING0);
+	pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:760", hw->timing1, gpmi_regs + HW_GPMI_TIMING1);
 
 	/*
 	 * Clear several CTRL1 fields, DLL must be disabled when setting
 	 * RDN_DELAY or HALF_PERIOD.
 	 */
-	writel(BM_GPMI_CTRL1_CLEAR_MASK, gpmi_regs + HW_GPMI_CTRL1_CLR);
-	writel(hw->ctrl1n, gpmi_regs + HW_GPMI_CTRL1_SET);
+	pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:766", BM_GPMI_CTRL1_CLEAR_MASK, gpmi_regs + HW_GPMI_CTRL1_CLR);
+	pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:767", hw->ctrl1n, gpmi_regs + HW_GPMI_CTRL1_SET);
 
 	/* Wait 64 clock cycles before using the GPMI after enabling the DLL */
 	dll_wait_time_us = USEC_PER_SEC / hw->clk_rate * 64;
@@ -811,7 +811,7 @@ static int gpmi_setup_interface(struct nand_chip *chip, int chipnr,
 static void gpmi_clear_bch(struct gpmi_nand_data *this)
 {
 	struct resources *r = &this->resources;
-	writel(BM_BCH_CTRL_COMPLETE_IRQ, r->bch_regs + HW_BCH_CTRL_CLR);
+	pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:814", BM_BCH_CTRL_COMPLETE_IRQ, r->bch_regs + HW_BCH_CTRL_CLR);
 }
 
 static struct dma_chan *get_dma_chan(struct gpmi_nand_data *this)
@@ -2379,9 +2379,9 @@ static int gpmi_nfc_exec_op(struct nand_chip *chip,
 	}
 
 	if (this->bch) {
-		writel(this->bch_flashlayout0,
+		pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:2382", this->bch_flashlayout0,
 		       this->resources.bch_regs + HW_BCH_FLASH0LAYOUT0);
-		writel(this->bch_flashlayout1,
+		pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:2384", this->bch_flashlayout1,
 		       this->resources.bch_regs + HW_BCH_FLASH0LAYOUT1);
 	}
 
@@ -2393,7 +2393,7 @@ static int gpmi_nfc_exec_op(struct nand_chip *chip,
 	init_completion(dma_completion);
 
 	if (this->bch && buf_read) {
-		writel(BM_BCH_CTRL_COMPLETE_IRQ_EN,
+		pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:2396", BM_BCH_CTRL_COMPLETE_IRQ_EN,
 		       this->resources.bch_regs + HW_BCH_CTRL_SET);
 		bch_completion = &this->bch_done;
 		init_completion(bch_completion);
@@ -2420,7 +2420,7 @@ static int gpmi_nfc_exec_op(struct nand_chip *chip,
 		}
 	}
 
-	writel(BM_BCH_CTRL_COMPLETE_IRQ_EN,
+	pete_writel("drivers/mtd/nand/raw/gpmi-nand/gpmi-nand.c:2423", BM_BCH_CTRL_COMPLETE_IRQ_EN,
 	       this->resources.bch_regs + HW_BCH_CTRL_CLR);
 	gpmi_clear_bch(this);
 

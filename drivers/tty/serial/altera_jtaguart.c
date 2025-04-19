@@ -61,7 +61,7 @@ struct altera_jtaguart {
 
 static unsigned int altera_jtaguart_tx_empty(struct uart_port *port)
 {
-	return (readl(port->membase + ALTERA_JTAGUART_CONTROL_REG) &
+	return (pete_readl("drivers/tty/serial/altera_jtaguart.c:64", port->membase + ALTERA_JTAGUART_CONTROL_REG) &
 		ALTERA_JTAGUART_CONTROL_WSPACE_MSK) ? TIOCSER_TEMT : 0;
 }
 
@@ -80,7 +80,7 @@ static void altera_jtaguart_start_tx(struct uart_port *port)
 	    container_of(port, struct altera_jtaguart, port);
 
 	pp->imr |= ALTERA_JTAGUART_CONTROL_WE_MSK;
-	writel(pp->imr, port->membase + ALTERA_JTAGUART_CONTROL_REG);
+	pete_writel("drivers/tty/serial/altera_jtaguart.c:83", pp->imr, port->membase + ALTERA_JTAGUART_CONTROL_REG);
 }
 
 static void altera_jtaguart_stop_tx(struct uart_port *port)
@@ -89,7 +89,7 @@ static void altera_jtaguart_stop_tx(struct uart_port *port)
 	    container_of(port, struct altera_jtaguart, port);
 
 	pp->imr &= ~ALTERA_JTAGUART_CONTROL_WE_MSK;
-	writel(pp->imr, port->membase + ALTERA_JTAGUART_CONTROL_REG);
+	pete_writel("drivers/tty/serial/altera_jtaguart.c:92", pp->imr, port->membase + ALTERA_JTAGUART_CONTROL_REG);
 }
 
 static void altera_jtaguart_stop_rx(struct uart_port *port)
@@ -98,7 +98,7 @@ static void altera_jtaguart_stop_rx(struct uart_port *port)
 	    container_of(port, struct altera_jtaguart, port);
 
 	pp->imr &= ~ALTERA_JTAGUART_CONTROL_RE_MSK;
-	writel(pp->imr, port->membase + ALTERA_JTAGUART_CONTROL_REG);
+	pete_writel("drivers/tty/serial/altera_jtaguart.c:101", pp->imr, port->membase + ALTERA_JTAGUART_CONTROL_REG);
 }
 
 static void altera_jtaguart_break_ctl(struct uart_port *port, int break_state)
@@ -120,7 +120,7 @@ static void altera_jtaguart_rx_chars(struct altera_jtaguart *pp)
 	unsigned char ch, flag;
 	unsigned long status;
 
-	while ((status = readl(port->membase + ALTERA_JTAGUART_DATA_REG)) &
+	while ((status = pete_readl("drivers/tty/serial/altera_jtaguart.c:123", port->membase + ALTERA_JTAGUART_DATA_REG)) &
 	       ALTERA_JTAGUART_DATA_RVALID_MSK) {
 		ch = status & ALTERA_JTAGUART_DATA_DATA_MSK;
 		flag = TTY_NORMAL;
@@ -142,7 +142,7 @@ static void altera_jtaguart_tx_chars(struct altera_jtaguart *pp)
 
 	if (port->x_char) {
 		/* Send special char - probably flow control */
-		writel(port->x_char, port->membase + ALTERA_JTAGUART_DATA_REG);
+		pete_writel("drivers/tty/serial/altera_jtaguart.c:145", port->x_char, port->membase + ALTERA_JTAGUART_DATA_REG);
 		port->x_char = 0;
 		port->icount.tx++;
 		return;
@@ -150,7 +150,7 @@ static void altera_jtaguart_tx_chars(struct altera_jtaguart *pp)
 
 	pending = uart_circ_chars_pending(xmit);
 	if (pending > 0) {
-		count = (readl(port->membase + ALTERA_JTAGUART_CONTROL_REG) &
+		count = (pete_readl("drivers/tty/serial/altera_jtaguart.c:153", port->membase + ALTERA_JTAGUART_CONTROL_REG) &
 				ALTERA_JTAGUART_CONTROL_WSPACE_MSK) >>
 			ALTERA_JTAGUART_CONTROL_WSPACE_OFF;
 		if (count > pending)
@@ -158,7 +158,7 @@ static void altera_jtaguart_tx_chars(struct altera_jtaguart *pp)
 		if (count > 0) {
 			pending -= count;
 			while (count--) {
-				writel(xmit->buf[xmit->tail],
+				pete_writel("drivers/tty/serial/altera_jtaguart.c:161", xmit->buf[xmit->tail],
 				       port->membase + ALTERA_JTAGUART_DATA_REG);
 				xmit->tail = (xmit->tail + 1) & (UART_XMIT_SIZE - 1);
 				port->icount.tx++;
@@ -170,7 +170,7 @@ static void altera_jtaguart_tx_chars(struct altera_jtaguart *pp)
 
 	if (pending == 0) {
 		pp->imr &= ~ALTERA_JTAGUART_CONTROL_WE_MSK;
-		writel(pp->imr, port->membase + ALTERA_JTAGUART_CONTROL_REG);
+		pete_writel("drivers/tty/serial/altera_jtaguart.c:173", pp->imr, port->membase + ALTERA_JTAGUART_CONTROL_REG);
 	}
 }
 
@@ -181,7 +181,7 @@ static irqreturn_t altera_jtaguart_interrupt(int irq, void *data)
 	    container_of(port, struct altera_jtaguart, port);
 	unsigned int isr;
 
-	isr = (readl(port->membase + ALTERA_JTAGUART_CONTROL_REG) >>
+	isr = (pete_readl("drivers/tty/serial/altera_jtaguart.c:184", port->membase + ALTERA_JTAGUART_CONTROL_REG) >>
 	       ALTERA_JTAGUART_CONTROL_RI_OFF) & pp->imr;
 
 	spin_lock(&port->lock);
@@ -201,7 +201,7 @@ static void altera_jtaguart_config_port(struct uart_port *port, int flags)
 	port->type = PORT_ALTERA_JTAGUART;
 
 	/* Clear mask, so no surprise interrupts. */
-	writel(0, port->membase + ALTERA_JTAGUART_CONTROL_REG);
+	pete_writel("drivers/tty/serial/altera_jtaguart.c:204", 0, port->membase + ALTERA_JTAGUART_CONTROL_REG);
 }
 
 static int altera_jtaguart_startup(struct uart_port *port)
@@ -223,7 +223,7 @@ static int altera_jtaguart_startup(struct uart_port *port)
 
 	/* Enable RX interrupts now */
 	pp->imr = ALTERA_JTAGUART_CONTROL_RE_MSK;
-	writel(pp->imr, port->membase + ALTERA_JTAGUART_CONTROL_REG);
+	pete_writel("drivers/tty/serial/altera_jtaguart.c:226", pp->imr, port->membase + ALTERA_JTAGUART_CONTROL_REG);
 
 	spin_unlock_irqrestore(&port->lock, flags);
 
@@ -240,7 +240,7 @@ static void altera_jtaguart_shutdown(struct uart_port *port)
 
 	/* Disable all interrupts now */
 	pp->imr = 0;
-	writel(pp->imr, port->membase + ALTERA_JTAGUART_CONTROL_REG);
+	pete_writel("drivers/tty/serial/altera_jtaguart.c:243", pp->imr, port->membase + ALTERA_JTAGUART_CONTROL_REG);
 
 	spin_unlock_irqrestore(&port->lock, flags);
 
@@ -304,7 +304,7 @@ static void altera_jtaguart_console_putc(struct uart_port *port, int c)
 	unsigned long flags;
 
 	spin_lock_irqsave(&port->lock, flags);
-	while (((status = readl(port->membase + ALTERA_JTAGUART_CONTROL_REG)) &
+	while (((status = pete_readl("drivers/tty/serial/altera_jtaguart.c:307", port->membase + ALTERA_JTAGUART_CONTROL_REG)) &
 		ALTERA_JTAGUART_CONTROL_WSPACE_MSK) == 0) {
 		if ((status & ALTERA_JTAGUART_CONTROL_AC_MSK) == 0) {
 			spin_unlock_irqrestore(&port->lock, flags);
@@ -314,7 +314,7 @@ static void altera_jtaguart_console_putc(struct uart_port *port, int c)
 		cpu_relax();
 		spin_lock_irqsave(&port->lock, flags);
 	}
-	writel(c, port->membase + ALTERA_JTAGUART_DATA_REG);
+	pete_writel("drivers/tty/serial/altera_jtaguart.c:317", c, port->membase + ALTERA_JTAGUART_DATA_REG);
 	spin_unlock_irqrestore(&port->lock, flags);
 }
 #else
@@ -323,13 +323,13 @@ static void altera_jtaguart_console_putc(struct uart_port *port, int c)
 	unsigned long flags;
 
 	spin_lock_irqsave(&port->lock, flags);
-	while ((readl(port->membase + ALTERA_JTAGUART_CONTROL_REG) &
+	while ((pete_readl("drivers/tty/serial/altera_jtaguart.c:326", port->membase + ALTERA_JTAGUART_CONTROL_REG) &
 		ALTERA_JTAGUART_CONTROL_WSPACE_MSK) == 0) {
 		spin_unlock_irqrestore(&port->lock, flags);
 		cpu_relax();
 		spin_lock_irqsave(&port->lock, flags);
 	}
-	writel(c, port->membase + ALTERA_JTAGUART_DATA_REG);
+	pete_writel("drivers/tty/serial/altera_jtaguart.c:332", c, port->membase + ALTERA_JTAGUART_DATA_REG);
 	spin_unlock_irqrestore(&port->lock, flags);
 }
 #endif

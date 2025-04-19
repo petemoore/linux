@@ -1238,24 +1238,24 @@ static void __init sun6i_a31_ccu_setup(struct device_node *node)
 	}
 
 	/* Force the PLL-Audio-1x divider to 1 */
-	val = readl(reg + SUN6I_A31_PLL_AUDIO_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun6i-a31.c:1241", reg + SUN6I_A31_PLL_AUDIO_REG);
 	val &= ~GENMASK(19, 16);
-	writel(val | (0 << 16), reg + SUN6I_A31_PLL_AUDIO_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun6i-a31.c:1243", val | (0 << 16), reg + SUN6I_A31_PLL_AUDIO_REG);
 
 	/* Force PLL-MIPI to MIPI mode */
-	val = readl(reg + SUN6I_A31_PLL_MIPI_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun6i-a31.c:1246", reg + SUN6I_A31_PLL_MIPI_REG);
 	val &= BIT(16);
-	writel(val, reg + SUN6I_A31_PLL_MIPI_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun6i-a31.c:1248", val, reg + SUN6I_A31_PLL_MIPI_REG);
 
 	/* Force AHB1 to PLL6 / 3 */
-	val = readl(reg + SUN6I_A31_AHB1_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun6i-a31.c:1251", reg + SUN6I_A31_AHB1_REG);
 	/* set PLL6 pre-div = 3 */
 	val &= ~GENMASK(7, 6);
 	val |= 0x2 << 6;
 	/* select PLL6 / pre-div */
 	val &= ~GENMASK(13, 12);
 	val |= 0x3 << 12;
-	writel(val, reg + SUN6I_A31_AHB1_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun6i-a31.c:1258", val, reg + SUN6I_A31_AHB1_REG);
 
 	of_sunxi_ccu_probe(node, reg, &sun6i_a31_ccu_desc);
 

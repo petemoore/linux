@@ -56,7 +56,7 @@ static void fpga_irq_mask(struct irq_data *d)
 	struct fpga_irq_data *f = irq_data_get_irq_chip_data(d);
 	u32 mask = 1 << d->hwirq;
 
-	writel(mask, f->base + IRQ_ENABLE_CLEAR);
+	pete_writel("drivers/irqchip/irq-versatile-fpga.c:59", mask, f->base + IRQ_ENABLE_CLEAR);
 }
 
 static void fpga_irq_unmask(struct irq_data *d)
@@ -64,7 +64,7 @@ static void fpga_irq_unmask(struct irq_data *d)
 	struct fpga_irq_data *f = irq_data_get_irq_chip_data(d);
 	u32 mask = 1 << d->hwirq;
 
-	writel(mask, f->base + IRQ_ENABLE_SET);
+	pete_writel("drivers/irqchip/irq-versatile-fpga.c:67", mask, f->base + IRQ_ENABLE_SET);
 }
 
 static void fpga_irq_handle(struct irq_desc *desc)
@@ -75,7 +75,7 @@ static void fpga_irq_handle(struct irq_desc *desc)
 
 	chained_irq_enter(chip, desc);
 
-	status = readl(f->base + IRQ_STATUS);
+	status = pete_readl("drivers/irqchip/irq-versatile-fpga.c:78", f->base + IRQ_STATUS);
 	if (status == 0) {
 		do_bad_IRQ(desc);
 		goto out;
@@ -103,7 +103,7 @@ static int handle_one_fpga(struct fpga_irq_data *f, struct pt_regs *regs)
 	int irq;
 	u32 status;
 
-	while ((status  = readl(f->base + IRQ_STATUS))) {
+	while ((status  = pete_readl("drivers/irqchip/irq-versatile-fpga.c:106", f->base + IRQ_STATUS))) {
 		irq = ffs(status) - 1;
 		handle_domain_irq(f->domain, irq, regs);
 		handled = 1;
@@ -212,8 +212,8 @@ int __init fpga_irq_of_init(struct device_node *node,
 	if (of_property_read_u32(node, "valid-mask", &valid_mask))
 		valid_mask = 0;
 
-	writel(clear_mask, base + IRQ_ENABLE_CLEAR);
-	writel(clear_mask, base + FIQ_ENABLE_CLEAR);
+	pete_writel("drivers/irqchip/irq-versatile-fpga.c:215", clear_mask, base + IRQ_ENABLE_CLEAR);
+	pete_writel("drivers/irqchip/irq-versatile-fpga.c:216", clear_mask, base + FIQ_ENABLE_CLEAR);
 
 	/* Some chips are cascaded from a parent IRQ */
 	parent_irq = irq_of_parse_and_map(node, 0);
@@ -230,7 +230,7 @@ int __init fpga_irq_of_init(struct device_node *node,
 	 * to be enabled. See section 3.10 of the Versatile AB user guide.
 	 */
 	if (of_device_is_compatible(node, "arm,versatile-sic"))
-		writel(0xffd00000, base + PIC_ENABLES);
+		pete_writel("drivers/irqchip/irq-versatile-fpga.c:233", 0xffd00000, base + PIC_ENABLES);
 
 	return 0;
 }

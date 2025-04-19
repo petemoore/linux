@@ -55,7 +55,7 @@ static inline int lcd_spi_write(struct spi_device *spi, u32 data)
 	tmp = readl_relaxed(reg_base + LCD_SPU_SPI_CTRL);
 	tmp &= ~CFG_SPI_START_MASK;
 	tmp |= CFG_SPI_START(1);
-	writel(tmp, reg_base + LCD_SPU_SPI_CTRL);
+	pete_writel("drivers/video/fbdev/mmp/hw/mmp_spi.c:58", tmp, reg_base + LCD_SPU_SPI_CTRL);
 
 	isr = readl_relaxed(reg_base + SPU_IRQ_ISR);
 	while (!(isr & SPI_IRQ_ENA_MASK)) {
@@ -88,7 +88,7 @@ static int lcd_spi_setup(struct spi_device *spi)
 		CFG_TXBITS(spi->bits_per_word) |
 		CFG_SPI_SEL(1) | CFG_SPI_ENA(1) |
 		CFG_SPI_3W4WB(1);
-	writel(tmp, reg_base + LCD_SPU_SPI_CTRL);
+	pete_writel("drivers/video/fbdev/mmp/hw/mmp_spi.c:91", tmp, reg_base + LCD_SPU_SPI_CTRL);
 
 	/*
 	 * After set mode it need a time to pull up the spi singals,

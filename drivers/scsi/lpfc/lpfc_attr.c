@@ -1731,7 +1731,7 @@ lpfc_sli4_pdev_reg_request(struct lpfc_hba *phba, uint32_t opcode)
 		msleep(100);
 	}
 
-	reg_val = readl(phba->sli4_hba.conf_regs_memmap_p +
+	reg_val = pete_readl("drivers/scsi/lpfc/lpfc_attr.c:1734", phba->sli4_hba.conf_regs_memmap_p +
 			LPFC_CTL_PDEV_CTL_OFFSET);
 
 	if (opcode == LPFC_FW_DUMP)
@@ -1741,10 +1741,10 @@ lpfc_sli4_pdev_reg_request(struct lpfc_hba *phba, uint32_t opcode)
 	else if (opcode == LPFC_DV_RESET)
 		reg_val |= LPFC_CTL_PDEV_CTL_DRST;
 
-	writel(reg_val, phba->sli4_hba.conf_regs_memmap_p +
+	pete_writel("drivers/scsi/lpfc/lpfc_attr.c:1744", reg_val, phba->sli4_hba.conf_regs_memmap_p +
 	       LPFC_CTL_PDEV_CTL_OFFSET);
 	/* flush */
-	readl(phba->sli4_hba.conf_regs_memmap_p + LPFC_CTL_PDEV_CTL_OFFSET);
+	pete_readl("drivers/scsi/lpfc/lpfc_attr.c:1747", phba->sli4_hba.conf_regs_memmap_p + LPFC_CTL_PDEV_CTL_OFFSET);
 
 	/* delay driver action following IF_TYPE_2 reset */
 	rc = lpfc_sli4_pdev_status_reg_wait(phba);
@@ -2390,8 +2390,8 @@ lpfc_poll_store(struct device *dev, struct device_attribute *attr,
 				return -EINVAL;
 			}
 			creg_val &= ~(HC_R0INT_ENA << LPFC_FCP_RING);
-			writel(creg_val, phba->HCregaddr);
-			readl(phba->HCregaddr); /* flush */
+			pete_writel("drivers/scsi/lpfc/lpfc_attr.c:2393", creg_val, phba->HCregaddr);
+			pete_readl("drivers/scsi/lpfc/lpfc_attr.c:2394", phba->HCregaddr); /* flush */
 
 			lpfc_poll_start_timer(phba);
 		}
@@ -2411,8 +2411,8 @@ lpfc_poll_store(struct device *dev, struct device_attribute *attr,
 			return -EINVAL;
 		}
 		creg_val |= (HC_R0INT_ENA << LPFC_FCP_RING);
-		writel(creg_val, phba->HCregaddr);
-		readl(phba->HCregaddr); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_attr.c:2414", creg_val, phba->HCregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_attr.c:2415", phba->HCregaddr); /* flush */
 	}
 
 	phba->cfg_poll = val;
@@ -6621,7 +6621,7 @@ sysfs_ctlreg_write(struct file *filp, struct kobject *kobj,
 	spin_lock_irq(&phba->hbalock);
 	for (buf_off = 0; buf_off < count - LPFC_REG_WRITE_KEY_SIZE;
 			buf_off += sizeof(uint32_t))
-		writel(*((uint32_t *)(buf + buf_off + LPFC_REG_WRITE_KEY_SIZE)),
+		pete_writel("drivers/scsi/lpfc/lpfc_attr.c:6624", *((uint32_t *)(buf + buf_off + LPFC_REG_WRITE_KEY_SIZE)),
 		       phba->ctrl_regs_memmap_p + off + buf_off);
 
 	spin_unlock_irq(&phba->hbalock);
@@ -6677,7 +6677,7 @@ sysfs_ctlreg_read(struct file *filp, struct kobject *kobj,
 
 	for (buf_off = 0; buf_off < count; buf_off += sizeof(uint32_t)) {
 		tmp_ptr = (uint32_t *)(buf + buf_off);
-		*tmp_ptr = readl(phba->ctrl_regs_memmap_p + off + buf_off);
+		*tmp_ptr = pete_readl("drivers/scsi/lpfc/lpfc_attr.c:6680", phba->ctrl_regs_memmap_p + off + buf_off);
 	}
 
 	spin_unlock_irq(&phba->hbalock);

@@ -62,19 +62,19 @@ struct mtk_hdmi_ddc {
 static inline void sif_set_bit(struct mtk_hdmi_ddc *ddc, unsigned int offset,
 			       unsigned int val)
 {
-	writel(readl(ddc->regs + offset) | val, ddc->regs + offset);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_hdmi_ddc.c:65", pete_readl("drivers/gpu/drm/mediatek/mtk_hdmi_ddc.c:65", ddc->regs + offset) | val, ddc->regs + offset);
 }
 
 static inline void sif_clr_bit(struct mtk_hdmi_ddc *ddc, unsigned int offset,
 			       unsigned int val)
 {
-	writel(readl(ddc->regs + offset) & ~val, ddc->regs + offset);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_hdmi_ddc.c:71", pete_readl("drivers/gpu/drm/mediatek/mtk_hdmi_ddc.c:71", ddc->regs + offset) & ~val, ddc->regs + offset);
 }
 
 static inline bool sif_bit_is_set(struct mtk_hdmi_ddc *ddc, unsigned int offset,
 				  unsigned int val)
 {
-	return (readl(ddc->regs + offset) & val) == val;
+	return (pete_readl("drivers/gpu/drm/mediatek/mtk_hdmi_ddc.c:77", ddc->regs + offset) & val) == val;
 }
 
 static inline void sif_write_mask(struct mtk_hdmi_ddc *ddc, unsigned int offset,
@@ -83,17 +83,17 @@ static inline void sif_write_mask(struct mtk_hdmi_ddc *ddc, unsigned int offset,
 {
 	unsigned int tmp;
 
-	tmp = readl(ddc->regs + offset);
+	tmp = pete_readl("drivers/gpu/drm/mediatek/mtk_hdmi_ddc.c:86", ddc->regs + offset);
 	tmp &= ~mask;
 	tmp |= (val << shift) & mask;
-	writel(tmp, ddc->regs + offset);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_hdmi_ddc.c:89", tmp, ddc->regs + offset);
 }
 
 static inline unsigned int sif_read_mask(struct mtk_hdmi_ddc *ddc,
 					 unsigned int offset, unsigned int mask,
 					 unsigned int shift)
 {
-	return (readl(ddc->regs + offset) & mask) >> shift;
+	return (pete_readl("drivers/gpu/drm/mediatek/mtk_hdmi_ddc.c:96", ddc->regs + offset) & mask) >> shift;
 }
 
 static void ddcm_trigger_mode(struct mtk_hdmi_ddc *ddc, int mode)

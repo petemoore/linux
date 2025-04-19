@@ -45,7 +45,7 @@ static int imx_iim_read(void *context, unsigned int offset,
 		int bank = i >> 5;
 		int reg = i & 0x1f;
 
-		*buf8++ = readl(iim->base + IIM_BANK_BASE(bank) + reg * 4);
+		*buf8++ = pete_readl("drivers/nvmem/imx-iim.c:48", iim->base + IIM_BANK_BASE(bank) + reg * 4);
 	}
 
 	clk_disable_unprepare(iim->clk);

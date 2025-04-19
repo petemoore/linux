@@ -265,12 +265,12 @@ static int ingenic_nand_exec_instr(struct nand_chip *chip,
 
 	switch (instr->type) {
 	case NAND_OP_CMD_INSTR:
-		writeb(instr->ctx.cmd.opcode,
+		pete_writeb("drivers/mtd/nand/raw/ingenic/ingenic_nand_drv.c:268", instr->ctx.cmd.opcode,
 		       cs->base + nfc->soc_info->cmd_offset);
 		return 0;
 	case NAND_OP_ADDR_INSTR:
 		for (i = 0; i < instr->ctx.addr.naddrs; i++)
-			writeb(instr->ctx.addr.addrs[i],
+			pete_writeb("drivers/mtd/nand/raw/ingenic/ingenic_nand_drv.c:273", instr->ctx.addr.addrs[i],
 			       cs->base + nfc->soc_info->addr_offset);
 		return 0;
 	case NAND_OP_DATA_IN_INSTR:

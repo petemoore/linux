@@ -33,10 +33,10 @@ static irqreturn_t hibmc_interrupt(int irq, void *arg)
 	struct hibmc_drm_private *priv = to_hibmc_drm_private(dev);
 	u32 status;
 
-	status = readl(priv->mmio + HIBMC_RAW_INTERRUPT);
+	status = pete_readl("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_drv.c:36", priv->mmio + HIBMC_RAW_INTERRUPT);
 
 	if (status & HIBMC_RAW_INTERRUPT_VBLANK(1)) {
-		writel(HIBMC_RAW_INTERRUPT_VBLANK(1),
+		pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_drv.c:39", HIBMC_RAW_INTERRUPT_VBLANK(1),
 		       priv->mmio + HIBMC_RAW_INTERRUPT);
 		drm_handle_vblank(dev, 0);
 	}
@@ -140,12 +140,12 @@ void hibmc_set_power_mode(struct hibmc_drm_private *priv, u32 power_mode)
 	if (power_mode == HIBMC_PW_MODE_CTL_MODE_SLEEP)
 		input = 0;
 
-	control_value = readl(mmio + HIBMC_POWER_MODE_CTRL);
+	control_value = pete_readl("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_drv.c:143", mmio + HIBMC_POWER_MODE_CTRL);
 	control_value &= ~(HIBMC_PW_MODE_CTL_MODE_MASK |
 			   HIBMC_PW_MODE_CTL_OSC_INPUT_MASK);
 	control_value |= HIBMC_FIELD(HIBMC_PW_MODE_CTL_MODE, power_mode);
 	control_value |= HIBMC_FIELD(HIBMC_PW_MODE_CTL_OSC_INPUT, input);
-	writel(control_value, mmio + HIBMC_POWER_MODE_CTRL);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_drv.c:148", control_value, mmio + HIBMC_POWER_MODE_CTRL);
 }
 
 void hibmc_set_current_gate(struct hibmc_drm_private *priv, unsigned int gate)
@@ -155,7 +155,7 @@ void hibmc_set_current_gate(struct hibmc_drm_private *priv, unsigned int gate)
 	void __iomem   *mmio = priv->mmio;
 
 	/* Get current power mode. */
-	mode = (readl(mmio + HIBMC_POWER_MODE_CTRL) &
+	mode = (pete_readl("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_drv.c:158", mmio + HIBMC_POWER_MODE_CTRL) &
 		HIBMC_PW_MODE_CTL_MODE_MASK) >> HIBMC_PW_MODE_CTL_MODE_SHIFT;
 
 	switch (mode) {
@@ -171,7 +171,7 @@ void hibmc_set_current_gate(struct hibmc_drm_private *priv, unsigned int gate)
 		gate_reg = HIBMC_MODE0_GATE;
 		break;
 	}
-	writel(gate, mmio + gate_reg);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_drv.c:174", gate, mmio + gate_reg);
 }
 
 static void hibmc_hw_config(struct hibmc_drm_private *priv)
@@ -182,7 +182,7 @@ static void hibmc_hw_config(struct hibmc_drm_private *priv)
 	hibmc_set_power_mode(priv, HIBMC_PW_MODE_CTL_MODE_MODE0);
 
 	/* Enable display power gate & LOCALMEM power gate*/
-	reg = readl(priv->mmio + HIBMC_CURRENT_GATE);
+	reg = pete_readl("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_drv.c:185", priv->mmio + HIBMC_CURRENT_GATE);
 	reg &= ~HIBMC_CURR_GATE_DISPLAY_MASK;
 	reg &= ~HIBMC_CURR_GATE_LOCALMEM_MASK;
 	reg |= HIBMC_CURR_GATE_DISPLAY(1);
@@ -196,15 +196,15 @@ static void hibmc_hw_config(struct hibmc_drm_private *priv)
 	 * the memory.The memory should be resetted after
 	 * changing the MXCLK.
 	 */
-	reg = readl(priv->mmio + HIBMC_MISC_CTRL);
+	reg = pete_readl("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_drv.c:199", priv->mmio + HIBMC_MISC_CTRL);
 	reg &= ~HIBMC_MSCCTL_LOCALMEM_RESET_MASK;
 	reg |= HIBMC_MSCCTL_LOCALMEM_RESET(0);
-	writel(reg, priv->mmio + HIBMC_MISC_CTRL);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_drv.c:202", reg, priv->mmio + HIBMC_MISC_CTRL);
 
 	reg &= ~HIBMC_MSCCTL_LOCALMEM_RESET_MASK;
 	reg |= HIBMC_MSCCTL_LOCALMEM_RESET(1);
 
-	writel(reg, priv->mmio + HIBMC_MISC_CTRL);
+	pete_writel("drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_drv.c:207", reg, priv->mmio + HIBMC_MISC_CTRL);
 }
 
 static int hibmc_hw_map(struct hibmc_drm_private *priv)

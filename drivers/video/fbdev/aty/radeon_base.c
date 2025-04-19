@@ -520,7 +520,7 @@ static int  radeon_find_mem_vbios(struct radeonfb_info *rinfo)
                 rom_base = ioremap(segstart, 0x10000);
 		if (rom_base == NULL)
 			return -ENOMEM;
-                if (readb(rom_base) == 0x55 && readb(rom_base + 1) == 0xaa)
+                if (pete_readb("drivers/video/fbdev/aty/radeon_base.c:523", rom_base) == 0x55 && pete_readb("drivers/video/fbdev/aty/radeon_base.c:523", rom_base + 1) == 0xaa)
 	                break;
                 iounmap(rom_base);
 		rom_base = NULL;

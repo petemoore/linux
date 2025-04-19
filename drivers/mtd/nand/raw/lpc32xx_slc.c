@@ -240,13 +240,13 @@ static void lpc32xx_nand_setup(struct lpc32xx_nand_host *host)
 	uint32_t clkrate, tmp;
 
 	/* Reset SLC controller */
-	writel(SLCCTRL_SW_RESET, SLC_CTRL(host->io_base));
+	pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:243", SLCCTRL_SW_RESET, SLC_CTRL(host->io_base));
 	udelay(1000);
 
 	/* Basic setup */
-	writel(0, SLC_CFG(host->io_base));
-	writel(0, SLC_IEN(host->io_base));
-	writel((SLCSTAT_INT_TC | SLCSTAT_INT_RDY_EN),
+	pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:247", 0, SLC_CFG(host->io_base));
+	pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:248", 0, SLC_IEN(host->io_base));
+	pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:249", (SLCSTAT_INT_TC | SLCSTAT_INT_RDY_EN),
 		SLC_ICR(host->io_base));
 
 	/* Get base clock for SLC block */
@@ -263,7 +263,7 @@ static void lpc32xx_nand_setup(struct lpc32xx_nand_host *host)
 		SLCTAC_RWIDTH(clkrate, host->ncfg->rwidth) |
 		SLCTAC_RHOLD(clkrate, host->ncfg->rhold) |
 		SLCTAC_RSETUP(clkrate, host->ncfg->rsetup);
-	writel(tmp, SLC_TAC(host->io_base));
+	pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:266", tmp, SLC_TAC(host->io_base));
 }
 
 /*
@@ -276,18 +276,18 @@ static void lpc32xx_nand_cmd_ctrl(struct nand_chip *chip, int cmd,
 	struct lpc32xx_nand_host *host = nand_get_controller_data(chip);
 
 	/* Does CE state need to be changed? */
-	tmp = readl(SLC_CFG(host->io_base));
+	tmp = pete_readl("drivers/mtd/nand/raw/lpc32xx_slc.c:279", SLC_CFG(host->io_base));
 	if (ctrl & NAND_NCE)
 		tmp |= SLCCFG_CE_LOW;
 	else
 		tmp &= ~SLCCFG_CE_LOW;
-	writel(tmp, SLC_CFG(host->io_base));
+	pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:284", tmp, SLC_CFG(host->io_base));
 
 	if (cmd != NAND_CMD_NONE) {
 		if (ctrl & NAND_CLE)
-			writel(cmd, SLC_CMD(host->io_base));
+			pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:288", cmd, SLC_CMD(host->io_base));
 		else
-			writel(cmd, SLC_ADDR(host->io_base));
+			pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:290", cmd, SLC_ADDR(host->io_base));
 	}
 }
 
@@ -299,7 +299,7 @@ static int lpc32xx_nand_device_ready(struct nand_chip *chip)
 	struct lpc32xx_nand_host *host = nand_get_controller_data(chip);
 	int rdy = 0;
 
-	if ((readl(SLC_STAT(host->io_base)) & SLCSTAT_NAND_READY) != 0)
+	if ((pete_readl("drivers/mtd/nand/raw/lpc32xx_slc.c:302", SLC_STAT(host->io_base)) & SLCSTAT_NAND_READY) != 0)
 		rdy = 1;
 
 	return rdy;
@@ -364,7 +364,7 @@ static uint8_t lpc32xx_nand_read_byte(struct nand_chip *chip)
 {
 	struct lpc32xx_nand_host *host = nand_get_controller_data(chip);
 
-	return (uint8_t)readl(SLC_DATA(host->io_base));
+	return (uint8_t)pete_readl("drivers/mtd/nand/raw/lpc32xx_slc.c:367", SLC_DATA(host->io_base));
 }
 
 /*
@@ -376,7 +376,7 @@ static void lpc32xx_nand_read_buf(struct nand_chip *chip, u_char *buf, int len)
 
 	/* Direct device read with no ECC */
 	while (len-- > 0)
-		*buf++ = (uint8_t)readl(SLC_DATA(host->io_base));
+		*buf++ = (uint8_t)pete_readl("drivers/mtd/nand/raw/lpc32xx_slc.c:379", SLC_DATA(host->io_base));
 }
 
 /*
@@ -389,7 +389,7 @@ static void lpc32xx_nand_write_buf(struct nand_chip *chip, const uint8_t *buf,
 
 	/* Direct device write with no ECC */
 	while (len-- > 0)
-		writel((uint32_t)*buf++, SLC_DATA(host->io_base));
+		pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:392", (uint32_t)*buf++, SLC_DATA(host->io_base));
 }
 
 /*
@@ -520,24 +520,24 @@ static int lpc32xx_xfer(struct mtd_info *mtd, uint8_t *buf, int eccsubpages,
 	}
 
 	if (read) {
-		writel(readl(SLC_CFG(host->io_base)) |
+		pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:523", pete_readl("drivers/mtd/nand/raw/lpc32xx_slc.c:523", SLC_CFG(host->io_base)) |
 		       SLCCFG_DMA_DIR | SLCCFG_ECC_EN | SLCCFG_DMA_ECC |
 		       SLCCFG_DMA_BURST, SLC_CFG(host->io_base));
 	} else {
-		writel((readl(SLC_CFG(host->io_base)) |
+		pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:527", (pete_readl("drivers/mtd/nand/raw/lpc32xx_slc.c:527", SLC_CFG(host->io_base)) |
 			SLCCFG_ECC_EN | SLCCFG_DMA_ECC | SLCCFG_DMA_BURST) &
 		       ~SLCCFG_DMA_DIR,
 			SLC_CFG(host->io_base));
 	}
 
 	/* Clear initial ECC */
-	writel(SLCCTRL_ECC_CLEAR, SLC_CTRL(host->io_base));
+	pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:534", SLCCTRL_ECC_CLEAR, SLC_CTRL(host->io_base));
 
 	/* Transfer size is data area only */
-	writel(mtd->writesize, SLC_TC(host->io_base));
+	pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:537", mtd->writesize, SLC_TC(host->io_base));
 
 	/* Start transfer in the NAND controller */
-	writel(readl(SLC_CTRL(host->io_base)) | SLCCTRL_DMA_START,
+	pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:540", pete_readl("drivers/mtd/nand/raw/lpc32xx_slc.c:540", SLC_CTRL(host->io_base)) | SLCCTRL_DMA_START,
 	       SLC_CTRL(host->io_base));
 
 	for (i = 0; i < chip->ecc.steps; i++) {
@@ -566,10 +566,10 @@ static int lpc32xx_xfer(struct mtd_info *mtd, uint8_t *buf, int eccsubpages,
 	 * appears to be always true, according to tests. Keeping the check for
 	 * safety reasons for now.
 	 */
-	if (readl(SLC_STAT(host->io_base)) & SLCSTAT_DMA_FIFO) {
+	if (pete_readl("drivers/mtd/nand/raw/lpc32xx_slc.c:569", SLC_STAT(host->io_base)) & SLCSTAT_DMA_FIFO) {
 		dev_warn(mtd->dev.parent, "FIFO not empty!\n");
 		timeout = jiffies + msecs_to_jiffies(LPC32XX_DMA_TIMEOUT);
-		while ((readl(SLC_STAT(host->io_base)) & SLCSTAT_DMA_FIFO) &&
+		while ((pete_readl("drivers/mtd/nand/raw/lpc32xx_slc.c:572", SLC_STAT(host->io_base)) & SLCSTAT_DMA_FIFO) &&
 		       time_before(jiffies, timeout))
 			cpu_relax();
 		if (!time_before(jiffies, timeout)) {
@@ -582,22 +582,22 @@ static int lpc32xx_xfer(struct mtd_info *mtd, uint8_t *buf, int eccsubpages,
 	if (!read)
 		udelay(10);
 	host->ecc_buf[chip->ecc.steps - 1] =
-		readl(SLC_ECC(host->io_base));
+		pete_readl("drivers/mtd/nand/raw/lpc32xx_slc.c:585", SLC_ECC(host->io_base));
 
 	/* Flush DMA */
 	dmaengine_terminate_all(host->dma_chan);
 
-	if (readl(SLC_STAT(host->io_base)) & SLCSTAT_DMA_FIFO ||
-	    readl(SLC_TC(host->io_base))) {
+	if (pete_readl("drivers/mtd/nand/raw/lpc32xx_slc.c:590", SLC_STAT(host->io_base)) & SLCSTAT_DMA_FIFO ||
+	    pete_readl("drivers/mtd/nand/raw/lpc32xx_slc.c:591", SLC_TC(host->io_base))) {
 		/* Something is left in the FIFO, something is wrong */
 		dev_err(mtd->dev.parent, "DMA FIFO failure\n");
 		status = -EIO;
 	}
 
 	/* Stop DMA & HW ECC */
-	writel(readl(SLC_CTRL(host->io_base)) & ~SLCCTRL_DMA_START,
+	pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:598", pete_readl("drivers/mtd/nand/raw/lpc32xx_slc.c:598", SLC_CTRL(host->io_base)) & ~SLCCTRL_DMA_START,
 	       SLC_CTRL(host->io_base));
-	writel(readl(SLC_CFG(host->io_base)) &
+	pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:600", pete_readl("drivers/mtd/nand/raw/lpc32xx_slc.c:600", SLC_CFG(host->io_base)) &
 	       ~(SLCCFG_DMA_DIR | SLCCFG_ECC_EN | SLCCFG_DMA_ECC |
 		 SLCCFG_DMA_BURST), SLC_CFG(host->io_base));
 
@@ -971,9 +971,9 @@ static int lpc32xx_nand_remove(struct platform_device *pdev)
 	dma_release_channel(host->dma_chan);
 
 	/* Force CE high */
-	tmp = readl(SLC_CTRL(host->io_base));
+	tmp = pete_readl("drivers/mtd/nand/raw/lpc32xx_slc.c:974", SLC_CTRL(host->io_base));
 	tmp &= ~SLCCFG_CE_LOW;
-	writel(tmp, SLC_CTRL(host->io_base));
+	pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:976", tmp, SLC_CTRL(host->io_base));
 
 	clk_disable_unprepare(host->clk);
 	lpc32xx_wp_enable(host);
@@ -1007,9 +1007,9 @@ static int lpc32xx_nand_suspend(struct platform_device *pdev, pm_message_t pm)
 	struct lpc32xx_nand_host *host = platform_get_drvdata(pdev);
 
 	/* Force CE high */
-	tmp = readl(SLC_CTRL(host->io_base));
+	tmp = pete_readl("drivers/mtd/nand/raw/lpc32xx_slc.c:1010", SLC_CTRL(host->io_base));
 	tmp &= ~SLCCFG_CE_LOW;
-	writel(tmp, SLC_CTRL(host->io_base));
+	pete_writel("drivers/mtd/nand/raw/lpc32xx_slc.c:1012", tmp, SLC_CTRL(host->io_base));
 
 	/* Enable write protect for safety */
 	lpc32xx_wp_enable(host);

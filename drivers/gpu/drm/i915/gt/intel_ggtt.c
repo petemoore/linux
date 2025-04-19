@@ -202,7 +202,7 @@ u64 gen8_ggtt_pte_encode(dma_addr_t addr,
 
 static void gen8_set_pte(void __iomem *addr, gen8_pte_t pte)
 {
-	writeq(pte, addr);
+	pete_writeq("drivers/gpu/drm/i915/gt/intel_ggtt.c:205", pte, addr);
 }
 
 static void gen8_ggtt_insert_page(struct i915_address_space *vm,

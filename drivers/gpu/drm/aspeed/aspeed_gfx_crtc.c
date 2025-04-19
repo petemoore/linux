@@ -30,7 +30,7 @@ static int aspeed_gfx_set_pixel_fmt(struct aspeed_gfx *priv, u32 *bpp)
 	const u32 format = crtc->primary->state->fb->format->format;
 	u32 ctrl1;
 
-	ctrl1 = readl(priv->base + CRT_CTRL1);
+	ctrl1 = pete_readl("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:33", priv->base + CRT_CTRL1);
 	ctrl1 &= ~CRT_CTRL_COLOR_MASK;
 
 	switch (format) {
@@ -49,30 +49,30 @@ static int aspeed_gfx_set_pixel_fmt(struct aspeed_gfx *priv, u32 *bpp)
 		return -EINVAL;
 	}
 
-	writel(ctrl1, priv->base + CRT_CTRL1);
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:52", ctrl1, priv->base + CRT_CTRL1);
 
 	return 0;
 }
 
 static void aspeed_gfx_enable_controller(struct aspeed_gfx *priv)
 {
-	u32 ctrl1 = readl(priv->base + CRT_CTRL1);
-	u32 ctrl2 = readl(priv->base + CRT_CTRL2);
+	u32 ctrl1 = pete_readl("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:59", priv->base + CRT_CTRL1);
+	u32 ctrl2 = pete_readl("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:60", priv->base + CRT_CTRL2);
 
 	/* Set DAC source for display output to Graphics CRT (GFX) */
 	regmap_update_bits(priv->scu, priv->dac_reg, BIT(16), BIT(16));
 
-	writel(ctrl1 | CRT_CTRL_EN, priv->base + CRT_CTRL1);
-	writel(ctrl2 | CRT_CTRL_DAC_EN, priv->base + CRT_CTRL2);
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:65", ctrl1 | CRT_CTRL_EN, priv->base + CRT_CTRL1);
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:66", ctrl2 | CRT_CTRL_DAC_EN, priv->base + CRT_CTRL2);
 }
 
 static void aspeed_gfx_disable_controller(struct aspeed_gfx *priv)
 {
-	u32 ctrl1 = readl(priv->base + CRT_CTRL1);
-	u32 ctrl2 = readl(priv->base + CRT_CTRL2);
+	u32 ctrl1 = pete_readl("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:71", priv->base + CRT_CTRL1);
+	u32 ctrl2 = pete_readl("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:72", priv->base + CRT_CTRL2);
 
-	writel(ctrl1 & ~CRT_CTRL_EN, priv->base + CRT_CTRL1);
-	writel(ctrl2 & ~CRT_CTRL_DAC_EN, priv->base + CRT_CTRL2);
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:74", ctrl1 & ~CRT_CTRL_EN, priv->base + CRT_CTRL1);
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:75", ctrl2 & ~CRT_CTRL_DAC_EN, priv->base + CRT_CTRL2);
 
 	regmap_update_bits(priv->scu, priv->dac_reg, BIT(16), 0);
 }
@@ -93,7 +93,7 @@ static void aspeed_gfx_crtc_mode_set_nofb(struct aspeed_gfx *priv)
 	clk_set_rate(priv->pixel_clk, m->crtc_clock * 1000);
 #endif
 
-	ctrl1 = readl(priv->base + CRT_CTRL1);
+	ctrl1 = pete_readl("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:96", priv->base + CRT_CTRL1);
 	ctrl1 &= ~(CRT_CTRL_INTERLACED |
 			CRT_CTRL_HSYNC_NEGATIVE |
 			CRT_CTRL_VSYNC_NEGATIVE);
@@ -107,19 +107,19 @@ static void aspeed_gfx_crtc_mode_set_nofb(struct aspeed_gfx *priv)
 	if (!(m->flags & DRM_MODE_FLAG_PVSYNC))
 		ctrl1 |= CRT_CTRL_VSYNC_NEGATIVE;
 
-	writel(ctrl1, priv->base + CRT_CTRL1);
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:110", ctrl1, priv->base + CRT_CTRL1);
 
 	/* Horizontal timing */
-	writel(CRT_H_TOTAL(m->htotal - 1) | CRT_H_DE(m->hdisplay - 1),
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:113", CRT_H_TOTAL(m->htotal - 1) | CRT_H_DE(m->hdisplay - 1),
 			priv->base + CRT_HORIZ0);
-	writel(CRT_H_RS_START(m->hsync_start - 1) | CRT_H_RS_END(m->hsync_end),
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:115", CRT_H_RS_START(m->hsync_start - 1) | CRT_H_RS_END(m->hsync_end),
 			priv->base + CRT_HORIZ1);
 
 
 	/* Vertical timing */
-	writel(CRT_V_TOTAL(m->vtotal - 1) | CRT_V_DE(m->vdisplay - 1),
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:120", CRT_V_TOTAL(m->vtotal - 1) | CRT_V_DE(m->vdisplay - 1),
 			priv->base + CRT_VERT0);
-	writel(CRT_V_RS_START(m->vsync_start) | CRT_V_RS_END(m->vsync_end),
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:122", CRT_V_RS_START(m->vsync_start) | CRT_V_RS_END(m->vsync_end),
 			priv->base + CRT_VERT1);
 
 	/*
@@ -129,14 +129,14 @@ static void aspeed_gfx_crtc_mode_set_nofb(struct aspeed_gfx *priv)
 	d_offset = m->hdisplay * bpp / 8;
 	t_count = DIV_ROUND_UP(m->hdisplay * bpp, priv->scan_line_max);
 
-	writel(CRT_DISP_OFFSET(d_offset) | CRT_TERM_COUNT(t_count),
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:132", CRT_DISP_OFFSET(d_offset) | CRT_TERM_COUNT(t_count),
 			priv->base + CRT_OFFSET);
 
 	/*
 	 * Threshold: FIFO thresholds of refill and stop (16 byte chunks
 	 * per line, rounded up)
 	 */
-	writel(priv->throd_val, priv->base + CRT_THROD);
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:139", priv->throd_val, priv->base + CRT_THROD);
 }
 
 static void aspeed_gfx_pipe_enable(struct drm_simple_display_pipe *pipe,
@@ -187,19 +187,19 @@ static void aspeed_gfx_pipe_update(struct drm_simple_display_pipe *pipe,
 	gem = drm_fb_cma_get_gem_obj(fb, 0);
 	if (!gem)
 		return;
-	writel(gem->paddr, priv->base + CRT_ADDR);
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:190", gem->paddr, priv->base + CRT_ADDR);
 }
 
 static int aspeed_gfx_enable_vblank(struct drm_simple_display_pipe *pipe)
 {
 	struct aspeed_gfx *priv = drm_pipe_to_aspeed_gfx(pipe);
-	u32 reg = readl(priv->base + CRT_CTRL1);
+	u32 reg = pete_readl("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:196", priv->base + CRT_CTRL1);
 
 	/* Clear pending VBLANK IRQ */
-	writel(reg | CRT_CTRL_VERTICAL_INTR_STS, priv->base + CRT_CTRL1);
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:199", reg | CRT_CTRL_VERTICAL_INTR_STS, priv->base + CRT_CTRL1);
 
 	reg |= CRT_CTRL_VERTICAL_INTR_EN;
-	writel(reg, priv->base + CRT_CTRL1);
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:202", reg, priv->base + CRT_CTRL1);
 
 	return 0;
 }
@@ -207,13 +207,13 @@ static int aspeed_gfx_enable_vblank(struct drm_simple_display_pipe *pipe)
 static void aspeed_gfx_disable_vblank(struct drm_simple_display_pipe *pipe)
 {
 	struct aspeed_gfx *priv = drm_pipe_to_aspeed_gfx(pipe);
-	u32 reg = readl(priv->base + CRT_CTRL1);
+	u32 reg = pete_readl("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:210", priv->base + CRT_CTRL1);
 
 	reg &= ~CRT_CTRL_VERTICAL_INTR_EN;
-	writel(reg, priv->base + CRT_CTRL1);
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:213", reg, priv->base + CRT_CTRL1);
 
 	/* Clear pending VBLANK IRQ */
-	writel(reg | CRT_CTRL_VERTICAL_INTR_STS, priv->base + CRT_CTRL1);
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_crtc.c:216", reg | CRT_CTRL_VERTICAL_INTR_STS, priv->base + CRT_CTRL1);
 }
 
 static const struct drm_simple_display_pipe_funcs aspeed_gfx_funcs = {

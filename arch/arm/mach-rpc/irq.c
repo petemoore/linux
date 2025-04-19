@@ -34,9 +34,9 @@ static void iomd_irq_mask_ack(struct irq_data *d)
 	void __iomem *base = iomd_get_base(d);
 	unsigned int val, mask = d->mask;
 
-	val = readb(base + MASK);
-	writeb(val & ~mask, base + MASK);
-	writeb(mask, base + CLR);
+	val = pete_readb("arch/arm/mach-rpc/irq.c:37", base + MASK);
+	pete_writeb("arch/arm/mach-rpc/irq.c:38", val & ~mask, base + MASK);
+	pete_writeb("arch/arm/mach-rpc/irq.c:39", mask, base + CLR);
 }
 
 static void iomd_irq_mask(struct irq_data *d)
@@ -44,8 +44,8 @@ static void iomd_irq_mask(struct irq_data *d)
 	void __iomem *base = iomd_get_base(d);
 	unsigned int val, mask = d->mask;
 
-	val = readb(base + MASK);
-	writeb(val & ~mask, base + MASK);
+	val = pete_readb("arch/arm/mach-rpc/irq.c:47", base + MASK);
+	pete_writeb("arch/arm/mach-rpc/irq.c:48", val & ~mask, base + MASK);
 }
 
 static void iomd_irq_unmask(struct irq_data *d)
@@ -53,8 +53,8 @@ static void iomd_irq_unmask(struct irq_data *d)
 	void __iomem *base = iomd_get_base(d);
 	unsigned int val, mask = d->mask;
 
-	val = readb(base + MASK);
-	writeb(val | mask, base + MASK);
+	val = pete_readb("arch/arm/mach-rpc/irq.c:56", base + MASK);
+	pete_writeb("arch/arm/mach-rpc/irq.c:57", val | mask, base + MASK);
 }
 
 static struct irq_chip iomd_chip_clr = {

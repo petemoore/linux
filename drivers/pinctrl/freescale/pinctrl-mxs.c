@@ -191,10 +191,10 @@ static void mxs_pinctrl_rmwl(u32 value, u32 mask, u8 shift, void __iomem *reg)
 {
 	u32 tmp;
 
-	tmp = readl(reg);
+	tmp = pete_readl("drivers/pinctrl/freescale/pinctrl-mxs.c:194", reg);
 	tmp &= ~(mask << shift);
 	tmp |= value << shift;
-	writel(tmp, reg);
+	pete_writel("drivers/pinctrl/freescale/pinctrl-mxs.c:197", tmp, reg);
 }
 
 static int mxs_pinctrl_set_mux(struct pinctrl_dev *pctldev, unsigned selector,
@@ -288,9 +288,9 @@ static int mxs_pinconf_group_set(struct pinctrl_dev *pctldev,
 			if (config & VOL_PRESENT) {
 				shift = pin % 8 * 4 + 2;
 				if (vol)
-					writel(1 << shift, reg + SET);
+					pete_writel("drivers/pinctrl/freescale/pinctrl-mxs.c:291", 1 << shift, reg + SET);
 				else
-					writel(1 << shift, reg + CLR);
+					pete_writel("drivers/pinctrl/freescale/pinctrl-mxs.c:293", 1 << shift, reg + CLR);
 			}
 
 			/* pull */
@@ -299,9 +299,9 @@ static int mxs_pinconf_group_set(struct pinctrl_dev *pctldev,
 				reg += bank * 0x10;
 				shift = pin;
 				if (pull)
-					writel(1 << shift, reg + SET);
+					pete_writel("drivers/pinctrl/freescale/pinctrl-mxs.c:302", 1 << shift, reg + SET);
 				else
-					writel(1 << shift, reg + CLR);
+					pete_writel("drivers/pinctrl/freescale/pinctrl-mxs.c:304", 1 << shift, reg + CLR);
 			}
 		}
 

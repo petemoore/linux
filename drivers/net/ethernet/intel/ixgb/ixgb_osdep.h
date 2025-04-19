@@ -21,16 +21,16 @@
 #define ENTER() pr_debug("%s\n", __func__);
 
 #define IXGB_WRITE_REG(a, reg, value) ( \
-	writel((value), ((a)->hw_addr + IXGB_##reg)))
+	pete_writel("drivers/net/ethernet/intel/ixgb/ixgb_osdep.h:24", (value), ((a)->hw_addr + IXGB_##reg)))
 
 #define IXGB_READ_REG(a, reg) ( \
-	readl((a)->hw_addr + IXGB_##reg))
+	pete_readl("drivers/net/ethernet/intel/ixgb/ixgb_osdep.h:27", (a)->hw_addr + IXGB_##reg))
 
 #define IXGB_WRITE_REG_ARRAY(a, reg, offset, value) ( \
-	writel((value), ((a)->hw_addr + IXGB_##reg + ((offset) << 2))))
+	pete_writel("drivers/net/ethernet/intel/ixgb/ixgb_osdep.h:30", (value), ((a)->hw_addr + IXGB_##reg + ((offset) << 2))))
 
 #define IXGB_READ_REG_ARRAY(a, reg, offset) ( \
-	readl((a)->hw_addr + IXGB_##reg + ((offset) << 2)))
+	pete_readl("drivers/net/ethernet/intel/ixgb/ixgb_osdep.h:33", (a)->hw_addr + IXGB_##reg + ((offset) << 2)))
 
 #define IXGB_WRITE_FLUSH(a) IXGB_READ_REG(a, STATUS)
 

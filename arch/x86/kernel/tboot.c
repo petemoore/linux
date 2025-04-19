@@ -374,7 +374,7 @@ static ssize_t tboot_log_read(struct file *file, char __user *user_buf, size_t c
 	if (memcmp(&tboot_log_uuid, log_uuid, sizeof(log_uuid)))
 		goto err_iounmap;
 
-	max_size = readl(log_base + LOG_MAX_SIZE_OFF);
+	max_size = pete_readl("arch/x86/kernel/tboot.c:377", log_base + LOG_MAX_SIZE_OFF);
 	if (*ppos >= max_size) {
 		ret = 0;
 		goto err_iounmap;

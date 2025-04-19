@@ -44,19 +44,19 @@ struct usb2_clock_sel_priv {
 
 static void usb2_clock_sel_enable_extal_only(struct usb2_clock_sel_priv *priv)
 {
-	u16 val = readw(priv->base + USB20_CLKSET0);
+	u16 val = pete_readw("drivers/clk/renesas/rcar-usb2-clock-sel.c:47", priv->base + USB20_CLKSET0);
 
 	pr_debug("%s: enter %d %d %x\n", __func__,
 		 priv->extal, priv->xtal, val);
 
 	if (priv->extal && !priv->xtal && val != CLKSET0_EXTAL_ONLY)
-		writew(CLKSET0_EXTAL_ONLY, priv->base + USB20_CLKSET0);
+		pete_writew("drivers/clk/renesas/rcar-usb2-clock-sel.c:53", CLKSET0_EXTAL_ONLY, priv->base + USB20_CLKSET0);
 }
 
 static void usb2_clock_sel_disable_extal_only(struct usb2_clock_sel_priv *priv)
 {
 	if (priv->extal && !priv->xtal)
-		writew(CLKSET0_PRIVATE, priv->base + USB20_CLKSET0);
+		pete_writew("drivers/clk/renesas/rcar-usb2-clock-sel.c:59", CLKSET0_PRIVATE, priv->base + USB20_CLKSET0);
 }
 
 static int usb2_clock_sel_enable(struct clk_hw *hw)

@@ -23,11 +23,11 @@ do {										\
 	dev_dbg(&((struct i40e_pf *)hw->back)->pdev->dev, S, ##A);		\
 } while (0)
 
-#define wr32(a, reg, value)	writel((value), ((a)->hw_addr + (reg)))
-#define rd32(a, reg)		readl((a)->hw_addr + (reg))
+#define wr32(a, reg, value)	pete_writel("drivers/net/ethernet/intel/i40e/i40e_osdep.h:26", (value), ((a)->hw_addr + (reg)))
+#define rd32(a, reg)		pete_readl("drivers/net/ethernet/intel/i40e/i40e_osdep.h:27", (a)->hw_addr + (reg))
 
-#define rd64(a, reg)		readq((a)->hw_addr + (reg))
-#define i40e_flush(a)		readl((a)->hw_addr + I40E_GLGEN_STAT)
+#define rd64(a, reg)		pete_readq("drivers/net/ethernet/intel/i40e/i40e_osdep.h:29", (a)->hw_addr + (reg))
+#define i40e_flush(a)		pete_readl("drivers/net/ethernet/intel/i40e/i40e_osdep.h:30", (a)->hw_addr + I40E_GLGEN_STAT)
 
 /* memory allocation tracking */
 struct i40e_dma_mem {

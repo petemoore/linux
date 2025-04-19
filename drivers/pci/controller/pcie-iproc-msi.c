@@ -308,7 +308,7 @@ static inline u32 decode_msi_hwirq(struct iproc_msi *msi, u32 eq, u32 head)
 
 	offs = iproc_msi_eq_offset(msi, eq) + head * sizeof(u32);
 	msg = (u32 __iomem *)(msi->eq_cpu + offs);
-	hwirq = readl(msg);
+	hwirq = pete_readl("drivers/pci/controller/pcie-iproc-msi.c:311", msg);
 	hwirq = (hwirq >> 5) + (hwirq & 0x1f);
 
 	/*

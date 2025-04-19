@@ -91,9 +91,9 @@ static void mbox_set_state(struct hi6220_mbox *mbox,
 {
 	u32 status;
 
-	status = readl(mbox->base + MBOX_MODE_REG(slot));
+	status = pete_readl("drivers/mailbox/hi6220-mailbox.c:94", mbox->base + MBOX_MODE_REG(slot));
 	status = (status & ~MBOX_STATE_MASK) | val;
-	writel(status, mbox->base + MBOX_MODE_REG(slot));
+	pete_writel("drivers/mailbox/hi6220-mailbox.c:96", status, mbox->base + MBOX_MODE_REG(slot));
 }
 
 static void mbox_set_mode(struct hi6220_mbox *mbox,
@@ -101,9 +101,9 @@ static void mbox_set_mode(struct hi6220_mbox *mbox,
 {
 	u32 mode;
 
-	mode = readl(mbox->base + MBOX_MODE_REG(slot));
+	mode = pete_readl("drivers/mailbox/hi6220-mailbox.c:104", mbox->base + MBOX_MODE_REG(slot));
 	mode = (mode & ~MBOX_ACK_CONFIG_MASK) | val;
-	writel(mode, mbox->base + MBOX_MODE_REG(slot));
+	pete_writel("drivers/mailbox/hi6220-mailbox.c:106", mode, mbox->base + MBOX_MODE_REG(slot));
 }
 
 static bool hi6220_mbox_last_tx_done(struct mbox_chan *chan)
@@ -115,7 +115,7 @@ static bool hi6220_mbox_last_tx_done(struct mbox_chan *chan)
 	/* Only set idle state for polling mode */
 	BUG_ON(mbox->tx_irq_mode);
 
-	state = readl(mbox->base + MBOX_MODE_REG(mchan->slot));
+	state = pete_readl("drivers/mailbox/hi6220-mailbox.c:118", mbox->base + MBOX_MODE_REG(mchan->slot));
 	return ((state & MBOX_STATE_MASK) == MBOX_STATE_IDLE);
 }
 
@@ -138,10 +138,10 @@ static int hi6220_mbox_send_data(struct mbox_chan *chan, void *msg)
 		mbox_set_mode(mbox, slot, MBOX_ACK_AUTOMATIC);
 
 	for (i = 0; i < MBOX_MSG_LEN; i++)
-		writel(buf[i], mbox->base + MBOX_DATA_REG(slot) + i * 4);
+		pete_writel("drivers/mailbox/hi6220-mailbox.c:141", buf[i], mbox->base + MBOX_DATA_REG(slot) + i * 4);
 
 	/* trigger remote request */
-	writel(BIT(mchan->dst_irq), DST_INT_RAW_REG(mbox->ipc));
+	pete_writel("drivers/mailbox/hi6220-mailbox.c:144", BIT(mchan->dst_irq), DST_INT_RAW_REG(mbox->ipc));
 	return 0;
 }
 
@@ -153,7 +153,7 @@ static irqreturn_t hi6220_mbox_interrupt(int irq, void *p)
 	unsigned int state, intr_bit, i;
 	u32 msg[MBOX_MSG_LEN];
 
-	state = readl(ACK_INT_STAT_REG(mbox->ipc));
+	state = pete_readl("drivers/mailbox/hi6220-mailbox.c:156", ACK_INT_STAT_REG(mbox->ipc));
 	if (!state) {
 		dev_warn(mbox->dev, "%s: spurious interrupt\n",
 			 __func__);
@@ -176,14 +176,14 @@ static irqreturn_t hi6220_mbox_interrupt(int irq, void *p)
 			mbox_chan_txdone(chan, 0);
 		else {
 			for (i = 0; i < MBOX_MSG_LEN; i++)
-				msg[i] = readl(mbox->base +
+				msg[i] = pete_readl("drivers/mailbox/hi6220-mailbox.c:179", mbox->base +
 					MBOX_DATA_REG(mchan->slot) + i * 4);
 
 			mbox_chan_received_data(chan, (void *)msg);
 		}
 
 		/* clear IRQ source */
-		writel(BIT(mchan->ack_irq), ACK_INT_CLR_REG(mbox->ipc));
+		pete_writel("drivers/mailbox/hi6220-mailbox.c:186", BIT(mchan->ack_irq), ACK_INT_CLR_REG(mbox->ipc));
 		mbox_set_state(mbox, mchan->slot, MBOX_STATE_IDLE);
 	}
 
@@ -198,7 +198,7 @@ static int hi6220_mbox_startup(struct mbox_chan *chan)
 	mchan->dir = 0;
 
 	/* enable interrupt */
-	writel(BIT(mchan->ack_irq), ACK_INT_ENA_REG(mbox->ipc));
+	pete_writel("drivers/mailbox/hi6220-mailbox.c:201", BIT(mchan->ack_irq), ACK_INT_ENA_REG(mbox->ipc));
 	return 0;
 }
 
@@ -208,7 +208,7 @@ static void hi6220_mbox_shutdown(struct mbox_chan *chan)
 	struct hi6220_mbox *mbox = mchan->parent;
 
 	/* disable interrupt */
-	writel(BIT(mchan->ack_irq), ACK_INT_DIS_REG(mbox->ipc));
+	pete_writel("drivers/mailbox/hi6220-mailbox.c:211", BIT(mchan->ack_irq), ACK_INT_DIS_REG(mbox->ipc));
 	mbox->irq_map_chan[mchan->ack_irq] = NULL;
 }
 
@@ -324,8 +324,8 @@ static int hi6220_mbox_probe(struct platform_device *pdev)
 	}
 
 	/* mask and clear all interrupt vectors */
-	writel(0x0,  ACK_INT_MSK_REG(mbox->ipc));
-	writel(~0x0, ACK_INT_CLR_REG(mbox->ipc));
+	pete_writel("drivers/mailbox/hi6220-mailbox.c:327", 0x0,  ACK_INT_MSK_REG(mbox->ipc));
+	pete_writel("drivers/mailbox/hi6220-mailbox.c:328", ~0x0, ACK_INT_CLR_REG(mbox->ipc));
 
 	/* use interrupt for tx's ack */
 	if (of_find_property(node, "hi6220,mbox-tx-noirq", NULL))

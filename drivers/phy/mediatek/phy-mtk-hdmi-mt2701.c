@@ -165,7 +165,7 @@ static unsigned long mtk_hdmi_pll_recalc_rate(struct clk_hw *hw,
 	struct mtk_hdmi_phy *hdmi_phy = to_mtk_hdmi_phy(hw);
 	unsigned long out_rate, val;
 
-	val = (readl(hdmi_phy->regs + HDMI_CON6)
+	val = (pete_readl("drivers/phy/mediatek/phy-mtk-hdmi-mt2701.c:168", hdmi_phy->regs + HDMI_CON6)
 	       & RG_HTPLL_PREDIV_MASK) >> RG_HTPLL_PREDIV;
 	switch (val) {
 	case 0x00:
@@ -179,14 +179,14 @@ static unsigned long mtk_hdmi_pll_recalc_rate(struct clk_hw *hw,
 		break;
 	}
 
-	val = (readl(hdmi_phy->regs + HDMI_CON6)
+	val = (pete_readl("drivers/phy/mediatek/phy-mtk-hdmi-mt2701.c:182", hdmi_phy->regs + HDMI_CON6)
 	       & RG_HTPLL_FBKDIV_MASK) >> RG_HTPLL_FBKDIV;
 	out_rate *= (val + 1) * 2;
-	val = (readl(hdmi_phy->regs + HDMI_CON2)
+	val = (pete_readl("drivers/phy/mediatek/phy-mtk-hdmi-mt2701.c:185", hdmi_phy->regs + HDMI_CON2)
 	       & RG_HDMITX_TX_POSDIV_MASK);
 	out_rate >>= (val >> RG_HDMITX_TX_POSDIV);
 
-	if (readl(hdmi_phy->regs + HDMI_CON2) & RG_HDMITX_EN_TX_POSDIV)
+	if (pete_readl("drivers/phy/mediatek/phy-mtk-hdmi-mt2701.c:189", hdmi_phy->regs + HDMI_CON2) & RG_HDMITX_EN_TX_POSDIV)
 		out_rate /= 5;
 
 	return out_rate;

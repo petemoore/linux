@@ -930,7 +930,7 @@ static int qib_verbs_send_pio(struct rvt_qp *qp, struct ib_header *ibhdr,
 	 * We have to flush after the PBC for correctness on some cpus
 	 * or WC buffer can be written out of order.
 	 */
-	writeq(pbc, piobuf);
+	pete_writeq("drivers/infiniband/hw/qib/qib_verbs.c:933", pbc, piobuf);
 	piobuf_orig = piobuf;
 	piobuf += 2;
 

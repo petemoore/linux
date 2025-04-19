@@ -137,7 +137,7 @@ static int handshake(void __iomem *ptr, u32 mask, u32 done, int wait, int delay)
 
 	/* Can not use readl_poll_timeout_atomic() for early boot things */
 	do {
-		result = readl(ptr);
+		result = pete_readl("drivers/usb/early/xhci-dbc.c:140", ptr);
 		result &= mask;
 		if (result == done)
 			return 0;
@@ -154,23 +154,23 @@ static void __init xdbc_bios_handoff(void)
 	u32 val;
 
 	offset = xhci_find_next_ext_cap(xdbc.xhci_base, 0, XHCI_EXT_CAPS_LEGACY);
-	val = readl(xdbc.xhci_base + offset);
+	val = pete_readl("drivers/usb/early/xhci-dbc.c:157", xdbc.xhci_base + offset);
 
 	if (val & XHCI_HC_BIOS_OWNED) {
-		writel(val | XHCI_HC_OS_OWNED, xdbc.xhci_base + offset);
+		pete_writel("drivers/usb/early/xhci-dbc.c:160", val | XHCI_HC_OS_OWNED, xdbc.xhci_base + offset);
 		timeout = handshake(xdbc.xhci_base + offset, XHCI_HC_BIOS_OWNED, 0, 5000, 10);
 
 		if (timeout) {
 			pr_notice("failed to hand over xHCI control from BIOS\n");
-			writel(val & ~XHCI_HC_BIOS_OWNED, xdbc.xhci_base + offset);
+			pete_writel("drivers/usb/early/xhci-dbc.c:165", val & ~XHCI_HC_BIOS_OWNED, xdbc.xhci_base + offset);
 		}
 	}
 
 	/* Disable BIOS SMIs and clear all SMI events: */
-	val = readl(xdbc.xhci_base + offset + XHCI_LEGACY_CONTROL_OFFSET);
+	val = pete_readl("drivers/usb/early/xhci-dbc.c:170", xdbc.xhci_base + offset + XHCI_LEGACY_CONTROL_OFFSET);
 	val &= XHCI_LEGACY_DISABLE_SMI;
 	val |= XHCI_LEGACY_SMI_EVENTS;
-	writel(val, xdbc.xhci_base + offset + XHCI_LEGACY_CONTROL_OFFSET);
+	pete_writel("drivers/usb/early/xhci-dbc.c:173", val, xdbc.xhci_base + offset + XHCI_LEGACY_CONTROL_OFFSET);
 }
 
 static int __init
@@ -254,7 +254,7 @@ static void xdbc_mem_init(void)
 	entry->__reserved_0	= 0;
 
 	/* Initialize ERST registers: */
-	writel(1, &xdbc.xdbc_reg->ersts);
+	pete_writel("drivers/usb/early/xhci-dbc.c:257", 1, &xdbc.xdbc_reg->ersts);
 	xdbc_write64(xdbc.erst_dma, &xdbc.xdbc_reg->erstba);
 	xdbc_write64(xdbc.evt_seg.dma, &xdbc.xdbc_reg->erdp);
 
@@ -318,7 +318,7 @@ static void xdbc_mem_init(void)
 	ctx->info.length	= cpu_to_le32(string_length);
 
 	/* Populate bulk out endpoint context: */
-	max_burst = DEBUG_MAX_BURST(readl(&xdbc.xdbc_reg->control));
+	max_burst = DEBUG_MAX_BURST(pete_readl("drivers/usb/early/xhci-dbc.c:321", &xdbc.xdbc_reg->control));
 	ep_out = (struct xdbc_ep_context *)&ctx->out;
 
 	ep_out->ep_info1	= 0;
@@ -336,10 +336,10 @@ static void xdbc_mem_init(void)
 	xdbc_write64(xdbc.dbcc_dma, &xdbc.xdbc_reg->dccp);
 
 	dev_info = cpu_to_le32((XDBC_VENDOR_ID << 16) | XDBC_PROTOCOL);
-	writel(dev_info, &xdbc.xdbc_reg->devinfo1);
+	pete_writel("drivers/usb/early/xhci-dbc.c:339", dev_info, &xdbc.xdbc_reg->devinfo1);
 
 	dev_info = cpu_to_le32((XDBC_DEVICE_REV << 16) | XDBC_PRODUCT_ID);
-	writel(dev_info, &xdbc.xdbc_reg->devinfo2);
+	pete_writel("drivers/usb/early/xhci-dbc.c:342", dev_info, &xdbc.xdbc_reg->devinfo2);
 
 	xdbc.in_buf = xdbc.out_buf + XDBC_MAX_PACKET;
 	xdbc.in_dma = xdbc.out_dma + XDBC_MAX_PACKET;
@@ -352,15 +352,15 @@ static void xdbc_do_reset_debug_port(u32 id, u32 count)
 	u32 val, cap_length;
 	int i;
 
-	cap_length = readl(xdbc.xhci_base) & 0xff;
+	cap_length = pete_readl("drivers/usb/early/xhci-dbc.c:355", xdbc.xhci_base) & 0xff;
 	ops_reg = xdbc.xhci_base + cap_length;
 
 	id--;
 	for (i = id; i < (id + count); i++) {
 		portsc = ops_reg + 0x400 + i * 0x10;
-		val = readl(portsc);
+		val = pete_readl("drivers/usb/early/xhci-dbc.c:361", portsc);
 		if (!(val & PORT_CONNECT))
-			writel(val | PORT_RESET, portsc);
+			pete_writel("drivers/usb/early/xhci-dbc.c:363", val | PORT_RESET, portsc);
 	}
 }
 
@@ -374,11 +374,11 @@ static void xdbc_reset_debug_port(void)
 		if (!offset)
 			break;
 
-		val = readl(xdbc.xhci_base + offset);
+		val = pete_readl("drivers/usb/early/xhci-dbc.c:377", xdbc.xhci_base + offset);
 		if (XHCI_EXT_PORT_MAJOR(val) != 0x3)
 			continue;
 
-		val = readl(xdbc.xhci_base + offset + 8);
+		val = pete_readl("drivers/usb/early/xhci-dbc.c:381", xdbc.xhci_base + offset + 8);
 		port_offset = XHCI_EXT_PORT_OFF(val);
 		port_count = XHCI_EXT_PORT_COUNT(val);
 
@@ -412,7 +412,7 @@ xdbc_queue_trb(struct xdbc_ring *ring, u32 field1, u32 field2, u32 field3, u32 f
 
 static void xdbc_ring_doorbell(int target)
 {
-	writel(DOOR_BELL_TARGET(target), &xdbc.xdbc_reg->doorbell);
+	pete_writel("drivers/usb/early/xhci-dbc.c:415", DOOR_BELL_TARGET(target), &xdbc.xdbc_reg->doorbell);
 }
 
 static int xdbc_start(void)
@@ -420,8 +420,8 @@ static int xdbc_start(void)
 	u32 ctrl, status;
 	int ret;
 
-	ctrl = readl(&xdbc.xdbc_reg->control);
-	writel(ctrl | CTRL_DBC_ENABLE | CTRL_PORT_ENABLE, &xdbc.xdbc_reg->control);
+	ctrl = pete_readl("drivers/usb/early/xhci-dbc.c:423", &xdbc.xdbc_reg->control);
+	pete_writel("drivers/usb/early/xhci-dbc.c:424", ctrl | CTRL_DBC_ENABLE | CTRL_PORT_ENABLE, &xdbc.xdbc_reg->control);
 	ret = handshake(&xdbc.xdbc_reg->control, CTRL_DBC_ENABLE, CTRL_DBC_ENABLE, 100000, 100);
 	if (ret) {
 		xdbc_trace("failed to initialize hardware\n");
@@ -447,7 +447,7 @@ static int xdbc_start(void)
 	}
 
 	/* Check port number: */
-	status = readl(&xdbc.xdbc_reg->status);
+	status = pete_readl("drivers/usb/early/xhci-dbc.c:450", &xdbc.xdbc_reg->status);
 	if (!DCST_DEBUG_PORT(status)) {
 		xdbc_trace("invalid root hub port number\n");
 		return -ENODEV;
@@ -456,7 +456,7 @@ static int xdbc_start(void)
 	xdbc.port_number = DCST_DEBUG_PORT(status);
 
 	xdbc_trace("DbC is running now, control 0x%08x port ID %d\n",
-		   readl(&xdbc.xdbc_reg->control), xdbc.port_number);
+		   pete_readl("drivers/usb/early/xhci-dbc.c:459", &xdbc.xdbc_reg->control), xdbc.port_number);
 
 	return 0;
 }
@@ -527,7 +527,7 @@ static int xdbc_handle_external_reset(void)
 	int ret = 0;
 
 	xdbc.flags = 0;
-	writel(0, &xdbc.xdbc_reg->control);
+	pete_writel("drivers/usb/early/xhci-dbc.c:530", 0, &xdbc.xdbc_reg->control);
 	ret = handshake(&xdbc.xdbc_reg->control, CTRL_DBC_ENABLE, 0, 100000, 10);
 	if (ret)
 		goto reset_out;
@@ -555,7 +555,7 @@ static int __init xdbc_early_setup(void)
 {
 	int ret;
 
-	writel(0, &xdbc.xdbc_reg->control);
+	pete_writel("drivers/usb/early/xhci-dbc.c:558", 0, &xdbc.xdbc_reg->control);
 	ret = handshake(&xdbc.xdbc_reg->control, CTRL_DBC_ENABLE, 0, 100000, 100);
 	if (ret)
 		return ret;
@@ -588,7 +588,7 @@ static int __init xdbc_early_setup(void)
 
 	ret = xdbc_start();
 	if (ret < 0) {
-		writel(0, &xdbc.xdbc_reg->control);
+		pete_writel("drivers/usb/early/xhci-dbc.c:591", 0, &xdbc.xdbc_reg->control);
 		return ret;
 	}
 
@@ -688,7 +688,7 @@ static void xdbc_handle_port_status(struct xdbc_trb *evt_trb)
 {
 	u32 port_reg;
 
-	port_reg = readl(&xdbc.xdbc_reg->portsc);
+	port_reg = pete_readl("drivers/usb/early/xhci-dbc.c:691", &xdbc.xdbc_reg->portsc);
 	if (port_reg & PORTSC_CONN_CHANGE) {
 		xdbc_trace("connect status change event\n");
 
@@ -709,7 +709,7 @@ static void xdbc_handle_port_status(struct xdbc_trb *evt_trb)
 		xdbc_trace("config error change\n");
 
 	/* Write back the value to clear RW1C bits: */
-	writel(port_reg, &xdbc.xdbc_reg->portsc);
+	pete_writel("drivers/usb/early/xhci-dbc.c:712", port_reg, &xdbc.xdbc_reg->portsc);
 }
 
 static void xdbc_handle_tx_event(struct xdbc_trb *evt_trb)
@@ -765,7 +765,7 @@ static void xdbc_handle_events(void)
 		return;
 
 	/* Handle external reset events: */
-	reg = readl(&xdbc.xdbc_reg->control);
+	reg = pete_readl("drivers/usb/early/xhci-dbc.c:768", &xdbc.xdbc_reg->control);
 	if (!(reg & CTRL_DBC_ENABLE)) {
 		if (xdbc_handle_external_reset()) {
 			xdbc_trace("failed to recover connection\n");
@@ -774,9 +774,9 @@ static void xdbc_handle_events(void)
 	}
 
 	/* Handle configure-exit event: */
-	reg = readl(&xdbc.xdbc_reg->control);
+	reg = pete_readl("drivers/usb/early/xhci-dbc.c:777", &xdbc.xdbc_reg->control);
 	if (reg & CTRL_DBC_RUN_CHANGE) {
-		writel(reg, &xdbc.xdbc_reg->control);
+		pete_writel("drivers/usb/early/xhci-dbc.c:779", reg, &xdbc.xdbc_reg->control);
 		if (reg & CTRL_DBC_RUN)
 			xdbc.flags |= XDBC_FLAGS_CONFIGURED;
 		else
@@ -784,7 +784,7 @@ static void xdbc_handle_events(void)
 	}
 
 	/* Handle endpoint stall event: */
-	reg = readl(&xdbc.xdbc_reg->control);
+	reg = pete_readl("drivers/usb/early/xhci-dbc.c:787", &xdbc.xdbc_reg->control);
 	if (reg & CTRL_HALT_IN_TR) {
 		xdbc.flags |= XDBC_FLAGS_IN_STALL;
 	} else {
@@ -946,7 +946,7 @@ static int xdbc_scrub_function(void *ptr)
 	}
 
 	xdbc_unregister_console();
-	writel(0, &xdbc.xdbc_reg->control);
+	pete_writel("drivers/usb/early/xhci-dbc.c:949", 0, &xdbc.xdbc_reg->control);
 	xdbc_trace("dbc scrub function exits\n");
 
 	return 0;
@@ -996,7 +996,7 @@ free_and_quit:
 	xdbc_free_ring(&xdbc.in_ring);
 	memblock_free(xdbc.table_dma, PAGE_SIZE);
 	memblock_free(xdbc.out_dma, PAGE_SIZE);
-	writel(0, &xdbc.xdbc_reg->control);
+	pete_writel("drivers/usb/early/xhci-dbc.c:999", 0, &xdbc.xdbc_reg->control);
 	early_iounmap(xdbc.xhci_base, xdbc.xhci_length);
 
 	return ret;

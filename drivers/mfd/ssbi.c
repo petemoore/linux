@@ -74,12 +74,12 @@ struct ssbi {
 
 static inline u32 ssbi_readl(struct ssbi *ssbi, u32 reg)
 {
-	return readl(ssbi->base + reg);
+	return pete_readl("drivers/mfd/ssbi.c:77", ssbi->base + reg);
 }
 
 static inline void ssbi_writel(struct ssbi *ssbi, u32 val, u32 reg)
 {
-	writel(val, ssbi->base + reg);
+	pete_writel("drivers/mfd/ssbi.c:82", val, ssbi->base + reg);
 }
 
 /*

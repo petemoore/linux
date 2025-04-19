@@ -43,12 +43,12 @@ static int regmap_reg_write(void *context, unsigned int reg, unsigned int val)
 	void __iomem *regs = (void __iomem *)context;
 
 	/* enable write to MCR register set */
-	writel(ASPEED_MCR_PROT_PASSWD, regs + ASPEED_MCR_PROT);
+	pete_writel("drivers/edac/aspeed_edac.c:46", ASPEED_MCR_PROT_PASSWD, regs + ASPEED_MCR_PROT);
 
-	writel(val, regs + reg);
+	pete_writel("drivers/edac/aspeed_edac.c:48", val, regs + reg);
 
 	/* disable write to MCR register set */
-	writel(~ASPEED_MCR_PROT_PASSWD, regs + ASPEED_MCR_PROT);
+	pete_writel("drivers/edac/aspeed_edac.c:51", ~ASPEED_MCR_PROT_PASSWD, regs + ASPEED_MCR_PROT);
 
 	return 0;
 }
@@ -58,7 +58,7 @@ static int regmap_reg_read(void *context, unsigned int reg, unsigned int *val)
 {
 	void __iomem *regs = (void __iomem *)context;
 
-	*val = readl(regs + reg);
+	*val = pete_readl("drivers/edac/aspeed_edac.c:61", regs + reg);
 
 	return 0;
 }

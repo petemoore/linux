@@ -818,9 +818,9 @@ static void __init sun8i_v3_v3s_ccu_init(struct device_node *node,
 	}
 
 	/* Force the PLL-Audio-1x divider to 1 */
-	val = readl(reg + SUN8I_V3S_PLL_AUDIO_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun8i-v3s.c:821", reg + SUN8I_V3S_PLL_AUDIO_REG);
 	val &= ~GENMASK(19, 16);
-	writel(val, reg + SUN8I_V3S_PLL_AUDIO_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun8i-v3s.c:823", val, reg + SUN8I_V3S_PLL_AUDIO_REG);
 
 	of_sunxi_ccu_probe(node, reg, ccu_desc);
 }

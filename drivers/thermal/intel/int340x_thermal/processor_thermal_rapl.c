@@ -60,7 +60,7 @@ static int rapl_mmio_read_raw(int cpu, struct reg_action *ra)
 	if (!ra->reg)
 		return -EINVAL;
 
-	ra->value = readq((void __iomem *)ra->reg);
+	ra->value = pete_readq("drivers/thermal/intel/int340x_thermal/processor_thermal_rapl.c:63", (void __iomem *)ra->reg);
 	ra->value &= ra->mask;
 	return 0;
 }
@@ -72,10 +72,10 @@ static int rapl_mmio_write_raw(int cpu, struct reg_action *ra)
 	if (!ra->reg)
 		return -EINVAL;
 
-	val = readq((void __iomem *)ra->reg);
+	val = pete_readq("drivers/thermal/intel/int340x_thermal/processor_thermal_rapl.c:75", (void __iomem *)ra->reg);
 	val &= ~ra->mask;
 	val |= ra->value;
-	writeq(val, (void __iomem *)ra->reg);
+	pete_writeq("drivers/thermal/intel/int340x_thermal/processor_thermal_rapl.c:78", val, (void __iomem *)ra->reg);
 	return 0;
 }
 

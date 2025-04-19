@@ -71,14 +71,14 @@ static inline u32 venc_read(struct v4l2_subdev *sd, u32 offset)
 {
 	struct venc_state *venc = to_state(sd);
 
-	return readl(venc->venc_base + offset);
+	return pete_readl("drivers/media/platform/davinci/vpbe_venc.c:74", venc->venc_base + offset);
 }
 
 static inline u32 venc_write(struct v4l2_subdev *sd, u32 offset, u32 val)
 {
 	struct venc_state *venc = to_state(sd);
 
-	writel(val, (venc->venc_base + offset));
+	pete_writel("drivers/media/platform/davinci/vpbe_venc.c:81", val, (venc->venc_base + offset));
 
 	return val;
 }
@@ -97,9 +97,9 @@ static inline u32 vdaccfg_write(struct v4l2_subdev *sd, u32 val)
 {
 	struct venc_state *venc = to_state(sd);
 
-	writel(val, venc->vdaccfg_reg);
+	pete_writel("drivers/media/platform/davinci/vpbe_venc.c:100", val, venc->vdaccfg_reg);
 
-	val = readl(venc->vdaccfg_reg);
+	val = pete_readl("drivers/media/platform/davinci/vpbe_venc.c:102", venc->vdaccfg_reg);
 
 	return val;
 }

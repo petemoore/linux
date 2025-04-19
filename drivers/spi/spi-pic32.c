@@ -122,12 +122,12 @@ struct pic32_spi {
 
 static inline void pic32_spi_enable(struct pic32_spi *pic32s)
 {
-	writel(CTRL_ON | CTRL_SIDL, &pic32s->regs->ctrl_set);
+	pete_writel("drivers/spi/spi-pic32.c:125", CTRL_ON | CTRL_SIDL, &pic32s->regs->ctrl_set);
 }
 
 static inline void pic32_spi_disable(struct pic32_spi *pic32s)
 {
-	writel(CTRL_ON | CTRL_SIDL, &pic32s->regs->ctrl_clr);
+	pete_writel("drivers/spi/spi-pic32.c:130", CTRL_ON | CTRL_SIDL, &pic32s->regs->ctrl_clr);
 
 	/* avoid SPI registers read/write at immediate next CPU clock */
 	ndelay(20);
@@ -140,19 +140,19 @@ static void pic32_spi_set_clk_rate(struct pic32_spi *pic32s, u32 spi_ck)
 	/* div = (clk_in / 2 * spi_ck) - 1 */
 	div = DIV_ROUND_CLOSEST(clk_get_rate(pic32s->clk), 2 * spi_ck) - 1;
 
-	writel(div & BAUD_MASK, &pic32s->regs->baud);
+	pete_writel("drivers/spi/spi-pic32.c:143", div & BAUD_MASK, &pic32s->regs->baud);
 }
 
 static inline u32 pic32_rx_fifo_level(struct pic32_spi *pic32s)
 {
-	u32 sr = readl(&pic32s->regs->status);
+	u32 sr = pete_readl("drivers/spi/spi-pic32.c:148", &pic32s->regs->status);
 
 	return (sr >> STAT_RF_LVL_SHIFT) & STAT_RF_LVL_MASK;
 }
 
 static inline u32 pic32_tx_fifo_level(struct pic32_spi *pic32s)
 {
-	u32 sr = readl(&pic32s->regs->status);
+	u32 sr = pete_readl("drivers/spi/spi-pic32.c:155", &pic32s->regs->status);
 
 	return (sr >> STAT_TF_LVL_SHIFT) & STAT_TF_LVL_MASK;
 }
@@ -235,12 +235,12 @@ static irqreturn_t pic32_spi_fault_irq(int irq, void *dev_id)
 	struct pic32_spi *pic32s = dev_id;
 	u32 status;
 
-	status = readl(&pic32s->regs->status);
+	status = pete_readl("drivers/spi/spi-pic32.c:238", &pic32s->regs->status);
 
 	/* Error handling */
 	if (status & (STAT_RX_OV | STAT_TX_UR)) {
-		writel(STAT_RX_OV, &pic32s->regs->status_clr);
-		writel(STAT_TX_UR, &pic32s->regs->status_clr);
+		pete_writel("drivers/spi/spi-pic32.c:242", STAT_RX_OV, &pic32s->regs->status_clr);
+		pete_writel("drivers/spi/spi-pic32.c:243", STAT_TX_UR, &pic32s->regs->status_clr);
 		pic32_err_stop(pic32s, "err_irq: fifo ov/ur-run\n");
 		return IRQ_HANDLED;
 	}
@@ -420,10 +420,10 @@ static int pic32_spi_set_word_size(struct pic32_spi *pic32s, u8 bits_per_word)
 	pic32s->fifo_n_elm = DIV_ROUND_UP(pic32s->fifo_n_byte,
 					  bits_per_word / 8);
 	/* set word size */
-	v = readl(&pic32s->regs->ctrl);
+	v = pete_readl("drivers/spi/spi-pic32.c:423", &pic32s->regs->ctrl);
 	v &= ~(CTRL_BPW_MASK << CTRL_BPW_SHIFT);
 	v |= buswidth << CTRL_BPW_SHIFT;
-	writel(v, &pic32s->regs->ctrl);
+	pete_writel("drivers/spi/spi-pic32.c:426", v, &pic32s->regs->ctrl);
 
 	/* re-configure dma width, if required */
 	if (test_bit(PIC32F_DMA_PREP, &pic32s->flags))
@@ -462,7 +462,7 @@ static int pic32_spi_prepare_message(struct spi_master *master,
 
 	/* device specific mode change */
 	if (pic32s->mode != spi->mode) {
-		val = readl(&pic32s->regs->ctrl);
+		val = pete_readl("drivers/spi/spi-pic32.c:465", &pic32s->regs->ctrl);
 		/* active low */
 		if (spi->mode & SPI_CPOL)
 			val |= CTRL_CKP;
@@ -476,7 +476,7 @@ static int pic32_spi_prepare_message(struct spi_master *master,
 
 		/* rx at end of tx */
 		val |= CTRL_SMP;
-		writel(val, &pic32s->regs->ctrl);
+		pete_writel("drivers/spi/spi-pic32.c:479", val, &pic32s->regs->ctrl);
 		pic32s->mode = spi->mode;
 	}
 
@@ -676,7 +676,7 @@ static void pic32_spi_hw_init(struct pic32_spi *pic32s)
 	/* disable hardware */
 	pic32_spi_disable(pic32s);
 
-	ctrl = readl(&pic32s->regs->ctrl);
+	ctrl = pete_readl("drivers/spi/spi-pic32.c:679", &pic32s->regs->ctrl);
 	/* enable enhanced fifo of 128bit deep */
 	ctrl |= CTRL_ENHBUF;
 	pic32s->fifo_n_byte = 16;
@@ -701,11 +701,11 @@ static void pic32_spi_hw_init(struct pic32_spi *pic32s)
 	/* set manual /CS mode */
 	ctrl &= ~CTRL_MSSEN;
 
-	writel(ctrl, &pic32s->regs->ctrl);
+	pete_writel("drivers/spi/spi-pic32.c:704", ctrl, &pic32s->regs->ctrl);
 
 	/* enable error reporting */
 	ctrl = CTRL2_TX_UR_EN | CTRL2_RX_OV_EN | CTRL2_FRM_ERR_EN;
-	writel(ctrl, &pic32s->regs->ctrl2_set);
+	pete_writel("drivers/spi/spi-pic32.c:708", ctrl, &pic32s->regs->ctrl2_set);
 }
 
 static int pic32_spi_hw_probe(struct platform_device *pdev,

@@ -856,7 +856,7 @@ static int coralp_init(struct mb862xxfb_par *par)
 
 	if (par->mapped_vram >= 0x2000000) {
 		/* relocate gdc registers space */
-		writel(1, par->fb_base + MB862XX_MMIO_BASE + GC_RSW);
+		pete_writel("drivers/video/fbdev/mb862xx/mb862xxfbdrv.c:859", 1, par->fb_base + MB862XX_MMIO_BASE + GC_RSW);
 		udelay(1); /* wait at least 20 bus cycles */
 	}
 

@@ -65,18 +65,18 @@ static void ast_vhub_epn_kick(struct ast_vhub_ep *ep, struct ast_vhub_req *req)
 			memcpy(ep->buf, req->req.buf + act, chunk);
 			vhub_dma_workaround(ep->buf);
 		}
-		writel(ep->buf_dma, ep->epn.regs + AST_VHUB_EP_DESC_BASE);
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:68", ep->buf_dma, ep->epn.regs + AST_VHUB_EP_DESC_BASE);
 	} else {
 		if (ep->epn.is_in)
 			vhub_dma_workaround(req->req.buf);
-		writel(req->req.dma + act, ep->epn.regs + AST_VHUB_EP_DESC_BASE);
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:72", req->req.dma + act, ep->epn.regs + AST_VHUB_EP_DESC_BASE);
 	}
 
 	/* Start DMA */
 	req->active = true;
-	writel(VHUB_EP_DMA_SET_TX_SIZE(chunk),
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:77", VHUB_EP_DMA_SET_TX_SIZE(chunk),
 	       ep->epn.regs + AST_VHUB_EP_DESC_STATUS);
-	writel(VHUB_EP_DMA_SET_TX_SIZE(chunk) | VHUB_EP_DMA_SINGLE_KICK,
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:79", VHUB_EP_DMA_SET_TX_SIZE(chunk) | VHUB_EP_DMA_SINGLE_KICK,
 	       ep->epn.regs + AST_VHUB_EP_DESC_STATUS);
 }
 
@@ -87,7 +87,7 @@ static void ast_vhub_epn_handle_ack(struct ast_vhub_ep *ep)
 	u32 stat;
 
 	/* Read EP status */
-	stat = readl(ep->epn.regs + AST_VHUB_EP_DESC_STATUS);
+	stat = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/epn.c:90", ep->epn.regs + AST_VHUB_EP_DESC_STATUS);
 
 	/* Grab current request if any */
 	req = list_first_entry_or_null(&ep->queue, struct ast_vhub_req, queue);
@@ -231,11 +231,11 @@ static void ast_vhub_epn_kick_desc(struct ast_vhub_ep *ep,
 		vhub_dma_workaround(desc);
 
 	/* Tell HW about new descriptors */
-	writel(VHUB_EP_DMA_SET_CPU_WPTR(ep->epn.d_next),
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:234", VHUB_EP_DMA_SET_CPU_WPTR(ep->epn.d_next),
 	       ep->epn.regs + AST_VHUB_EP_DESC_STATUS);
 
 	EPVDBG(ep, "HW kicked, d_next=%d dstat=%08x\n",
-	       ep->epn.d_next, readl(ep->epn.regs + AST_VHUB_EP_DESC_STATUS));
+	       ep->epn.d_next, pete_readl("drivers/usb/gadget/udc/aspeed-vhub/epn.c:238", ep->epn.regs + AST_VHUB_EP_DESC_STATUS));
 }
 
 static void ast_vhub_epn_handle_ack_desc(struct ast_vhub_ep *ep)
@@ -246,8 +246,8 @@ static void ast_vhub_epn_handle_ack_desc(struct ast_vhub_ep *ep)
 
 	/* Read EP status, workaround HW race */
 	do {
-		stat = readl(ep->epn.regs + AST_VHUB_EP_DESC_STATUS);
-		stat1 = readl(ep->epn.regs + AST_VHUB_EP_DESC_STATUS);
+		stat = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/epn.c:249", ep->epn.regs + AST_VHUB_EP_DESC_STATUS);
+		stat1 = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/epn.c:250", ep->epn.regs + AST_VHUB_EP_DESC_STATUS);
 	} while(stat != stat1);
 
 	/* Extract RPTR */
@@ -416,13 +416,13 @@ static void ast_vhub_stop_active_req(struct ast_vhub_ep *ep,
 
 	/* Stop DMA activity */
 	if (ep->epn.desc_mode)
-		writel(VHUB_EP_DMA_CTRL_RESET, ep->epn.regs + AST_VHUB_EP_DMA_CTLSTAT);
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:419", VHUB_EP_DMA_CTRL_RESET, ep->epn.regs + AST_VHUB_EP_DMA_CTLSTAT);
 	else
-		writel(0, ep->epn.regs + AST_VHUB_EP_DMA_CTLSTAT);
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:421", 0, ep->epn.regs + AST_VHUB_EP_DMA_CTLSTAT);
 
 	/* Wait for it to complete */
 	for (loops = 0; loops < 1000; loops++) {
-		state = readl(ep->epn.regs + AST_VHUB_EP_DMA_CTLSTAT);
+		state = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/epn.c:425", ep->epn.regs + AST_VHUB_EP_DMA_CTLSTAT);
 		state = VHUB_EP_DMA_PROC_STATUS(state);
 		if (state == EP_DMA_PROC_RX_IDLE ||
 		    state == EP_DMA_PROC_TX_IDLE)
@@ -450,14 +450,14 @@ static void ast_vhub_stop_active_req(struct ast_vhub_ep *ep,
 		 */
 		reg = VHUB_EP_DMA_SET_RPTR(ep->epn.d_next) |
 			VHUB_EP_DMA_SET_CPU_WPTR(ep->epn.d_next);
-		writel(reg, ep->epn.regs + AST_VHUB_EP_DESC_STATUS);
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:453", reg, ep->epn.regs + AST_VHUB_EP_DESC_STATUS);
 
 		/* Then turn it back on */
-		writel(ep->epn.dma_conf,
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:456", ep->epn.dma_conf,
 		       ep->epn.regs + AST_VHUB_EP_DMA_CTLSTAT);
 	} else {
 		/* Single mode: just turn it back on */
-		writel(ep->epn.dma_conf,
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:460", ep->epn.dma_conf,
 		       ep->epn.regs + AST_VHUB_EP_DMA_CTLSTAT);
 	}
 }
@@ -497,15 +497,15 @@ void ast_vhub_update_epn_stall(struct ast_vhub_ep *ep)
 
 	if (WARN_ON(ep->d_idx == 0))
 		return;
-	reg = readl(ep->epn.regs + AST_VHUB_EP_CONFIG);
+	reg = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/epn.c:500", ep->epn.regs + AST_VHUB_EP_CONFIG);
 	if (ep->epn.stalled || ep->epn.wedged)
 		reg |= VHUB_EP_CFG_STALL_CTRL;
 	else
 		reg &= ~VHUB_EP_CFG_STALL_CTRL;
-	writel(reg, ep->epn.regs + AST_VHUB_EP_CONFIG);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:505", reg, ep->epn.regs + AST_VHUB_EP_CONFIG);
 
 	if (!ep->epn.stalled && !ep->epn.wedged)
-		writel(VHUB_EP_TOGGLE_SET_EPNUM(ep->epn.g_idx),
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:508", VHUB_EP_TOGGLE_SET_EPNUM(ep->epn.g_idx),
 		       ep->vhub->regs + AST_VHUB_EP_TOGGLE);
 }
 
@@ -568,14 +568,14 @@ static int ast_vhub_epn_disable(struct usb_ep* u_ep)
 	ast_vhub_stop_active_req(ep, false);
 
 	/* Disable endpoint */
-	writel(0, ep->epn.regs + AST_VHUB_EP_CONFIG);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:571", 0, ep->epn.regs + AST_VHUB_EP_CONFIG);
 
 	/* Disable ACK interrupt */
 	imask = VHUB_EP_IRQ(ep->epn.g_idx);
-	ep_ier = readl(vhub->regs + AST_VHUB_EP_ACK_IER);
+	ep_ier = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/epn.c:575", vhub->regs + AST_VHUB_EP_ACK_IER);
 	ep_ier &= ~imask;
-	writel(ep_ier, vhub->regs + AST_VHUB_EP_ACK_IER);
-	writel(imask, vhub->regs + AST_VHUB_EP_ACK_ISR);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:577", ep_ier, vhub->regs + AST_VHUB_EP_ACK_IER);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:578", imask, vhub->regs + AST_VHUB_EP_ACK_ISR);
 
 	/* Nuke all pending requests */
 	ast_vhub_nuke(ep, -ESHUTDOWN);
@@ -690,19 +690,19 @@ static int ast_vhub_epn_enable(struct usb_ep* u_ep,
 	spin_lock_irqsave(&vhub->lock, flags);
 
 	/* Disable HW and reset DMA */
-	writel(0, ep->epn.regs + AST_VHUB_EP_CONFIG);
-	writel(VHUB_EP_DMA_CTRL_RESET,
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:693", 0, ep->epn.regs + AST_VHUB_EP_CONFIG);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:694", VHUB_EP_DMA_CTRL_RESET,
 	       ep->epn.regs + AST_VHUB_EP_DMA_CTLSTAT);
 
 	/* Configure and enable */
-	writel(ep_conf, ep->epn.regs + AST_VHUB_EP_CONFIG);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:698", ep_conf, ep->epn.regs + AST_VHUB_EP_CONFIG);
 
 	if (ep->epn.desc_mode) {
 		/* Clear DMA status, including the DMA read ptr */
-		writel(0, ep->epn.regs + AST_VHUB_EP_DESC_STATUS);
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:702", 0, ep->epn.regs + AST_VHUB_EP_DESC_STATUS);
 
 		/* Set descriptor base */
-		writel(ep->epn.descs_dma,
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:705", ep->epn.descs_dma,
 		       ep->epn.regs + AST_VHUB_EP_DESC_BASE);
 
 		/* Set base DMA config value */
@@ -711,34 +711,34 @@ static int ast_vhub_epn_enable(struct usb_ep* u_ep,
 			ep->epn.dma_conf |= VHUB_EP_DMA_IN_LONG_MODE;
 
 		/* First reset and disable all operations */
-		writel(ep->epn.dma_conf | VHUB_EP_DMA_CTRL_RESET,
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:714", ep->epn.dma_conf | VHUB_EP_DMA_CTRL_RESET,
 		       ep->epn.regs + AST_VHUB_EP_DMA_CTLSTAT);
 
 		/* Enable descriptor mode */
-		writel(ep->epn.dma_conf,
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:718", ep->epn.dma_conf,
 		       ep->epn.regs + AST_VHUB_EP_DMA_CTLSTAT);
 	} else {
 		/* Set base DMA config value */
 		ep->epn.dma_conf = VHUB_EP_DMA_SINGLE_STAGE;
 
 		/* Reset and switch to single stage mode */
-		writel(ep->epn.dma_conf | VHUB_EP_DMA_CTRL_RESET,
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:725", ep->epn.dma_conf | VHUB_EP_DMA_CTRL_RESET,
 		       ep->epn.regs + AST_VHUB_EP_DMA_CTLSTAT);
-		writel(ep->epn.dma_conf,
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:727", ep->epn.dma_conf,
 		       ep->epn.regs + AST_VHUB_EP_DMA_CTLSTAT);
-		writel(0, ep->epn.regs + AST_VHUB_EP_DESC_STATUS);
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:729", 0, ep->epn.regs + AST_VHUB_EP_DESC_STATUS);
 	}
 
 	/* Cleanup data toggle just in case */
-	writel(VHUB_EP_TOGGLE_SET_EPNUM(ep->epn.g_idx),
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:733", VHUB_EP_TOGGLE_SET_EPNUM(ep->epn.g_idx),
 	       vhub->regs + AST_VHUB_EP_TOGGLE);
 
 	/* Cleanup and enable ACK interrupt */
 	imask = VHUB_EP_IRQ(ep->epn.g_idx);
-	writel(imask, vhub->regs + AST_VHUB_EP_ACK_ISR);
-	ep_ier = readl(vhub->regs + AST_VHUB_EP_ACK_IER);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:738", imask, vhub->regs + AST_VHUB_EP_ACK_ISR);
+	ep_ier = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/epn.c:739", vhub->regs + AST_VHUB_EP_ACK_IER);
 	ep_ier |= imask;
-	writel(ep_ier, vhub->regs + AST_VHUB_EP_ACK_IER);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/epn.c:741", ep_ier, vhub->regs + AST_VHUB_EP_ACK_IER);
 
 	/* Woot, we are online ! */
 	ep->epn.enabled = true;

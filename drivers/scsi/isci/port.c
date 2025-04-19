@@ -150,9 +150,9 @@ static void sci_port_bcn_enable(struct isci_port *iport)
 		iphy = iport->phy_table[i];
 		if (!iphy)
 			continue;
-		val = readl(&iphy->link_layer_registers->link_layer_control);
+		val = pete_readl("drivers/scsi/isci/port.c:153", &iphy->link_layer_registers->link_layer_control);
 		/* clear the bit by writing 1. */
-		writel(val, &iphy->link_layer_registers->link_layer_control);
+		pete_writel("drivers/scsi/isci/port.c:155", val, &iphy->link_layer_registers->link_layer_control);
 	}
 }
 
@@ -654,7 +654,7 @@ void sci_port_deactivate_phy(struct isci_port *iport, struct isci_phy *iphy,
 	 */
 	if (iport->owning_controller->oem_parameters.controller.mode_type ==
 		SCIC_PORT_AUTOMATIC_CONFIGURATION_MODE)
-		writel(iphy->phy_index,
+		pete_writel("drivers/scsi/isci/port.c:657", iphy->phy_index,
 			&iport->port_pe_configuration_register[iphy->phy_index]);
 
 	if (do_notify_user == true)
@@ -765,7 +765,7 @@ bool sci_port_link_detected(struct isci_port *iport, struct isci_phy *iphy)
 		} else {
 			struct isci_host *ihost = iport->owning_controller;
 			struct isci_port *dst_port = &(ihost->ports[iphy->phy_index]);
-			writel(iphy->phy_index,
+			pete_writel("drivers/scsi/isci/port.c:768", iphy->phy_index,
 			       &dst_port->port_pe_configuration_register[iphy->phy_index]);
 		}
 	}
@@ -829,16 +829,16 @@ static void sci_port_update_viit_entry(struct isci_port *iport)
 
 	sci_port_get_sas_address(iport, &sas_address);
 
-	writel(sas_address.high,
+	pete_writel("drivers/scsi/isci/port.c:832", sas_address.high,
 		&iport->viit_registers->initiator_sas_address_hi);
-	writel(sas_address.low,
+	pete_writel("drivers/scsi/isci/port.c:834", sas_address.low,
 		&iport->viit_registers->initiator_sas_address_lo);
 
 	/* This value get cleared just in case its not already cleared */
-	writel(0, &iport->viit_registers->reserved);
+	pete_writel("drivers/scsi/isci/port.c:838", 0, &iport->viit_registers->reserved);
 
 	/* We are required to update the status register last */
-	writel(SCU_VIIT_ENTRY_ID_VIIT |
+	pete_writel("drivers/scsi/isci/port.c:841", SCU_VIIT_ENTRY_ID_VIIT |
 	       SCU_VIIT_IPPT_INITIATOR |
 	       ((1 << iport->physical_port_index) << SCU_VIIT_ENTRY_LPVIE_SHIFT) |
 	       SCU_VIIT_STATUS_ALL_VALID,
@@ -868,9 +868,9 @@ static void sci_port_suspend_port_task_scheduler(struct isci_port *iport)
 {
 	u32 pts_control_value;
 
-	pts_control_value = readl(&iport->port_task_scheduler_registers->control);
+	pts_control_value = pete_readl("drivers/scsi/isci/port.c:871", &iport->port_task_scheduler_registers->control);
 	pts_control_value |= SCU_PTSxCR_GEN_BIT(SUSPEND);
-	writel(pts_control_value, &iport->port_task_scheduler_registers->control);
+	pete_writel("drivers/scsi/isci/port.c:873", pts_control_value, &iport->port_task_scheduler_registers->control);
 }
 
 /**
@@ -935,9 +935,9 @@ sci_port_resume_port_task_scheduler(struct isci_port *iport)
 {
 	u32 pts_control_value;
 
-	pts_control_value = readl(&iport->port_task_scheduler_registers->control);
+	pts_control_value = pete_readl("drivers/scsi/isci/port.c:938", &iport->port_task_scheduler_registers->control);
 	pts_control_value &= ~SCU_PTSxCR_GEN_BIT(SUSPEND);
-	writel(pts_control_value, &iport->port_task_scheduler_registers->control);
+	pete_writel("drivers/scsi/isci/port.c:940", pts_control_value, &iport->port_task_scheduler_registers->control);
 }
 
 static void sci_port_ready_substate_waiting_enter(struct sci_base_state_machine *sm)
@@ -973,7 +973,7 @@ static void sci_port_ready_substate_operational_enter(struct sci_base_state_mach
 
 	for (index = 0; index < SCI_MAX_PHYS; index++) {
 		if (iport->phy_table[index]) {
-			writel(iport->physical_port_index,
+			pete_writel("drivers/scsi/isci/port.c:976", iport->physical_port_index,
 				&iport->port_pe_configuration_register[
 					iport->phy_table[index]->phy_index]);
 			if (((iport->active_phy_mask^iport->enabled_phy_mask) & (1 << index)) != 0)
@@ -1006,7 +1006,7 @@ static void sci_port_invalidate_dummy_remote_node(struct isci_port *iport)
 	 * controller and give it ample time to act before posting the rnc
 	 * invalidate
 	 */
-	readl(&ihost->smu_registers->interrupt_status); /* flush */
+	pete_readl("drivers/scsi/isci/port.c:1009", &ihost->smu_registers->interrupt_status); /* flush */
 	udelay(10);
 
 	command = SCU_CONTEXT_COMMAND_POST_RNC_INVALIDATE |
@@ -1443,19 +1443,19 @@ static void sci_port_enable_port_task_scheduler(struct isci_port *iport)
 	u32 pts_control_value;
 
 	 /* enable the port task scheduler in a suspended state */
-	pts_control_value = readl(&iport->port_task_scheduler_registers->control);
+	pts_control_value = pete_readl("drivers/scsi/isci/port.c:1446", &iport->port_task_scheduler_registers->control);
 	pts_control_value |= SCU_PTSxCR_GEN_BIT(ENABLE) | SCU_PTSxCR_GEN_BIT(SUSPEND);
-	writel(pts_control_value, &iport->port_task_scheduler_registers->control);
+	pete_writel("drivers/scsi/isci/port.c:1448", pts_control_value, &iport->port_task_scheduler_registers->control);
 }
 
 static void sci_port_disable_port_task_scheduler(struct isci_port *iport)
 {
 	u32 pts_control_value;
 
-	pts_control_value = readl(&iport->port_task_scheduler_registers->control);
+	pts_control_value = pete_readl("drivers/scsi/isci/port.c:1455", &iport->port_task_scheduler_registers->control);
 	pts_control_value &=
 		~(SCU_PTSxCR_GEN_BIT(ENABLE) | SCU_PTSxCR_GEN_BIT(SUSPEND));
-	writel(pts_control_value, &iport->port_task_scheduler_registers->control);
+	pete_writel("drivers/scsi/isci/port.c:1458", pts_control_value, &iport->port_task_scheduler_registers->control);
 }
 
 static void sci_port_post_dummy_remote_node(struct isci_port *iport)
@@ -1477,7 +1477,7 @@ static void sci_port_post_dummy_remote_node(struct isci_port *iport)
 	/* ensure hardware has seen the post rnc command and give it
 	 * ample time to act before sending the suspend
 	 */
-	readl(&ihost->smu_registers->interrupt_status); /* flush */
+	pete_readl("drivers/scsi/isci/port.c:1480", &ihost->smu_registers->interrupt_status); /* flush */
 	udelay(10);
 
 	command = SCU_CONTEXT_COMMAND_POST_RNC_SUSPEND_TX_RX |
@@ -1566,7 +1566,7 @@ void sci_port_set_hang_detection_timeout(struct isci_port *iport, u32 timeout)
 	if (timeout || (iport->hang_detect_users == 0)) {
 		for (phy_index = 0; phy_index < SCI_MAX_PHYS; phy_index++) {
 			if ((phy_mask >> phy_index) & 1) {
-				writel(timeout,
+				pete_writel("drivers/scsi/isci/port.c:1569", timeout,
 				       &iport->phy_table[phy_index]
 					  ->link_layer_registers
 					  ->link_layer_hang_detection_timeout);

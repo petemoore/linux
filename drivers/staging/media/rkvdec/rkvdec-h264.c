@@ -1124,13 +1124,13 @@ static int rkvdec_h264_run(struct rkvdec_ctx *ctx)
 
 	schedule_delayed_work(&rkvdec->watchdog_work, msecs_to_jiffies(2000));
 
-	writel(0, rkvdec->regs + RKVDEC_REG_STRMD_ERR_EN);
-	writel(0, rkvdec->regs + RKVDEC_REG_H264_ERR_E);
-	writel(1, rkvdec->regs + RKVDEC_REG_PREF_LUMA_CACHE_COMMAND);
-	writel(1, rkvdec->regs + RKVDEC_REG_PREF_CHR_CACHE_COMMAND);
+	pete_writel("drivers/staging/media/rkvdec/rkvdec-h264.c:1127", 0, rkvdec->regs + RKVDEC_REG_STRMD_ERR_EN);
+	pete_writel("drivers/staging/media/rkvdec/rkvdec-h264.c:1128", 0, rkvdec->regs + RKVDEC_REG_H264_ERR_E);
+	pete_writel("drivers/staging/media/rkvdec/rkvdec-h264.c:1129", 1, rkvdec->regs + RKVDEC_REG_PREF_LUMA_CACHE_COMMAND);
+	pete_writel("drivers/staging/media/rkvdec/rkvdec-h264.c:1130", 1, rkvdec->regs + RKVDEC_REG_PREF_CHR_CACHE_COMMAND);
 
 	/* Start decoding! */
-	writel(RKVDEC_INTERRUPT_DEC_E | RKVDEC_CONFIG_DEC_CLK_GATE_E |
+	pete_writel("drivers/staging/media/rkvdec/rkvdec-h264.c:1133", RKVDEC_INTERRUPT_DEC_E | RKVDEC_CONFIG_DEC_CLK_GATE_E |
 	       RKVDEC_TIMEOUT_E | RKVDEC_BUF_EMPTY_E,
 	       rkvdec->regs + RKVDEC_REG_INTERRUPT);
 

@@ -93,7 +93,7 @@ static int hi3660_mbox_check_state(struct mbox_chan *chan)
 	unsigned int ret;
 
 	/* Mailbox is ready to use */
-	if (readl(base + MBOX_MODE_REG) & MBOX_STATE_READY)
+	if (pete_readl("drivers/mailbox/hi3660-mailbox.c:96", base + MBOX_MODE_REG) & MBOX_STATE_READY)
 		return 0;
 
 	/* Wait for acknowledge from remote */
@@ -105,7 +105,7 @@ static int hi3660_mbox_check_state(struct mbox_chan *chan)
 	}
 
 	/* clear ack state, mailbox will get back to ready state */
-	writel(BIT(mchan->ack_irq), base + MBOX_ICLR_REG);
+	pete_writel("drivers/mailbox/hi3660-mailbox.c:108", BIT(mchan->ack_irq), base + MBOX_ICLR_REG);
 
 	return 0;
 }
@@ -116,9 +116,9 @@ static int hi3660_mbox_unlock(struct mbox_chan *chan)
 	unsigned int val, retry = 3;
 
 	do {
-		writel(MBOX_IPC_UNLOCK, mbox->base + MBOX_IPC_LOCK_REG);
+		pete_writel("drivers/mailbox/hi3660-mailbox.c:119", MBOX_IPC_UNLOCK, mbox->base + MBOX_IPC_LOCK_REG);
 
-		val = readl(mbox->base + MBOX_IPC_LOCK_REG);
+		val = pete_readl("drivers/mailbox/hi3660-mailbox.c:121", mbox->base + MBOX_IPC_LOCK_REG);
 		if (!val)
 			break;
 
@@ -141,11 +141,11 @@ static int hi3660_mbox_acquire_channel(struct mbox_chan *chan)
 
 	for (retry = 10; retry; retry--) {
 		/* Check if channel is in idle state */
-		if (readl(base + MBOX_MODE_REG) & MBOX_STATE_IDLE) {
-			writel(BIT(mchan->ack_irq), base + MBOX_SRC_REG);
+		if (pete_readl("drivers/mailbox/hi3660-mailbox.c:144", base + MBOX_MODE_REG) & MBOX_STATE_IDLE) {
+			pete_writel("drivers/mailbox/hi3660-mailbox.c:145", BIT(mchan->ack_irq), base + MBOX_SRC_REG);
 
 			/* Check ack bit has been set successfully */
-			val = readl(base + MBOX_SRC_REG);
+			val = pete_readl("drivers/mailbox/hi3660-mailbox.c:148", base + MBOX_SRC_REG);
 			if (val & BIT(mchan->ack_irq))
 				break;
 		}
@@ -200,7 +200,7 @@ static int hi3660_mbox_send_data(struct mbox_chan *chan, void *msg)
 		writel_relaxed(buf[i], base + MBOX_DATA_REG + i * 4);
 
 	/* Trigger data transferring */
-	writel(BIT(mchan->ack_irq), base + MBOX_SEND_REG);
+	pete_writel("drivers/mailbox/hi3660-mailbox.c:203", BIT(mchan->ack_irq), base + MBOX_SEND_REG);
 	return 0;
 }
 

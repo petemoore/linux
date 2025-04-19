@@ -358,9 +358,9 @@ static int cptpf_vfpf_mbox_init(struct otx2_cptpf_dev *cptpf, int num_vfs)
 
 	/* Map VF-PF mailbox memory */
 	if (test_bit(CN10K_MBOX, &cptpf->cap_flag))
-		vfpf_mbox_base = readq(cptpf->reg_base + RVU_PF_VF_MBOX_ADDR);
+		vfpf_mbox_base = pete_readq("drivers/crypto/marvell/octeontx2/otx2_cptpf_main.c:361", cptpf->reg_base + RVU_PF_VF_MBOX_ADDR);
 	else
-		vfpf_mbox_base = readq(cptpf->reg_base + RVU_PF_VF_BAR4_ADDR);
+		vfpf_mbox_base = pete_readq("drivers/crypto/marvell/octeontx2/otx2_cptpf_main.c:363", cptpf->reg_base + RVU_PF_VF_BAR4_ADDR);
 
 	if (!vfpf_mbox_base) {
 		dev_err(dev, "VF-PF mailbox address not configured\n");

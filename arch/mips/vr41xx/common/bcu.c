@@ -60,10 +60,10 @@ static inline uint16_t read_clkspeed(void)
 {
 	switch (current_cpu_type()) {
 	case CPU_VR4111:
-	case CPU_VR4121: return readw(CLKSPEEDREG_TYPE1);
+	case CPU_VR4121: return pete_readw("arch/mips/vr41xx/common/bcu.c:63", CLKSPEEDREG_TYPE1);
 	case CPU_VR4122:
 	case CPU_VR4131:
-	case CPU_VR4133: return readw(CLKSPEEDREG_TYPE2);
+	case CPU_VR4133: return pete_readw("arch/mips/vr41xx/common/bcu.c:66", CLKSPEEDREG_TYPE2);
 	default:
 		printk(KERN_INFO "Unexpected CPU of NEC VR4100 series\n");
 		break;

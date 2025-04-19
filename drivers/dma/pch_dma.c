@@ -108,9 +108,9 @@ struct pch_dma_chan {
 #define PDC_NEXT	0x0C
 
 #define channel_readl(pdc, name) \
-	readl((pdc)->membase + PDC_##name)
+	pete_readl("drivers/dma/pch_dma.c:111", (pdc)->membase + PDC_##name)
 #define channel_writel(pdc, name, val) \
-	writel((val), (pdc)->membase + PDC_##name)
+	pete_writel("drivers/dma/pch_dma.c:113", (val), (pdc)->membase + PDC_##name)
 
 struct pch_dma {
 	struct dma_device	dma;
@@ -130,9 +130,9 @@ struct pch_dma {
 #define PCH_DMA_STS2	0x18
 
 #define dma_readl(pd, name) \
-	readl((pd)->membase + PCH_DMA_##name)
+	pete_readl("drivers/dma/pch_dma.c:133", (pd)->membase + PCH_DMA_##name)
 #define dma_writel(pd, name, val) \
-	writel((val), (pd)->membase + PCH_DMA_##name)
+	pete_writel("drivers/dma/pch_dma.c:135", (val), (pd)->membase + PCH_DMA_##name)
 
 static inline
 struct pch_dma_desc *to_pd_desc(struct dma_async_tx_descriptor *txd)

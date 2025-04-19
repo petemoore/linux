@@ -154,7 +154,7 @@ u64 uncore_mmio_read_counter(struct intel_uncore_box *box,
 	if (!uncore_mmio_is_valid_offset(box, event->hw.event_base))
 		return 0;
 
-	return readq(box->io_addr + event->hw.event_base);
+	return pete_readq("arch/x86/events/intel/uncore.c:157", box->io_addr + event->hw.event_base);
 }
 
 /*

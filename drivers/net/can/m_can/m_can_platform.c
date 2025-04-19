@@ -26,7 +26,7 @@ static u32 iomap_read_reg(struct m_can_classdev *cdev, int reg)
 {
 	struct m_can_plat_priv *priv = cdev_to_priv(cdev);
 
-	return readl(priv->base + reg);
+	return pete_readl("drivers/net/can/m_can/m_can_platform.c:29", priv->base + reg);
 }
 
 static int iomap_read_fifo(struct m_can_classdev *cdev, int offset, void *val, size_t val_count)
@@ -47,7 +47,7 @@ static int iomap_write_reg(struct m_can_classdev *cdev, int reg, int val)
 {
 	struct m_can_plat_priv *priv = cdev_to_priv(cdev);
 
-	writel(val, priv->base + reg);
+	pete_writel("drivers/net/can/m_can/m_can_platform.c:50", val, priv->base + reg);
 
 	return 0;
 }

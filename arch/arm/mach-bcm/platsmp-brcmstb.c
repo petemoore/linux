@@ -96,13 +96,13 @@ static u32 pwr_ctrl_rd(u32 cpu)
 static void pwr_ctrl_set(unsigned int cpu, u32 val, u32 mask)
 {
 	void __iomem *base = pwr_ctrl_get_base(cpu);
-	writel((readl(base) & mask) | val, base);
+	pete_writel("arch/arm/mach-bcm/platsmp-brcmstb.c:99", (pete_readl("arch/arm/mach-bcm/platsmp-brcmstb.c:99", base) & mask) | val, base);
 }
 
 static void pwr_ctrl_clr(unsigned int cpu, u32 val, u32 mask)
 {
 	void __iomem *base = pwr_ctrl_get_base(cpu);
-	writel((readl(base) & mask) & ~val, base);
+	pete_writel("arch/arm/mach-bcm/platsmp-brcmstb.c:105", (pete_readl("arch/arm/mach-bcm/platsmp-brcmstb.c:105", base) & mask) & ~val, base);
 }
 
 #define POLL_TMOUT_MS 500

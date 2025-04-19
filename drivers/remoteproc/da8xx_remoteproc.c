@@ -108,10 +108,10 @@ static irqreturn_t da8xx_rproc_callback(int irq, void *p)
 	struct da8xx_rproc *drproc = (struct da8xx_rproc *)rproc->priv;
 	u32 chipsig;
 
-	chipsig = readl(drproc->chipsig);
+	chipsig = pete_readl("drivers/remoteproc/da8xx_remoteproc.c:111", drproc->chipsig);
 	if (chipsig & SYSCFG_CHIPSIG0) {
 		/* Clear interrupt level source */
-		writel(SYSCFG_CHIPSIG0, drproc->chipsig + 4);
+		pete_writel("drivers/remoteproc/da8xx_remoteproc.c:114", SYSCFG_CHIPSIG0, drproc->chipsig + 4);
 
 		/*
 		 * ACK intr to AINTC.
@@ -145,7 +145,7 @@ static int da8xx_rproc_start(struct rproc *rproc)
 		return -EINVAL;
 	}
 
-	writel(rproc->bootaddr, drproc->bootreg);
+	pete_writel("drivers/remoteproc/da8xx_remoteproc.c:148", rproc->bootaddr, drproc->bootreg);
 
 	ret = clk_prepare_enable(dsp_clk);
 	if (ret) {
@@ -186,7 +186,7 @@ static void da8xx_rproc_kick(struct rproc *rproc, int vqid)
 	struct da8xx_rproc *drproc = (struct da8xx_rproc *)rproc->priv;
 
 	/* Interrupt remote proc */
-	writel(SYSCFG_CHIPSIG2, drproc->chipsig);
+	pete_writel("drivers/remoteproc/da8xx_remoteproc.c:189", SYSCFG_CHIPSIG2, drproc->chipsig);
 }
 
 static const struct rproc_ops da8xx_rproc_ops = {

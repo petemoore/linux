@@ -241,14 +241,14 @@ static int __init apanel_init(void)
 
 	/* just use the first address */
 	p += 8;
-	i2c_addr = readb(p + 3) >> 1;
+	i2c_addr = pete_readb("drivers/input/misc/apanel.c:244", p + 3) >> 1;
 
-	for ( ; (devno = readb(p)) & 0x7f; p += 4) {
+	for ( ; (devno = pete_readb("drivers/input/misc/apanel.c:246", p)) & 0x7f; p += 4) {
 		unsigned char method, slave, chip;
 
-		method = readb(p + 1);
-		chip = readb(p + 2);
-		slave = readb(p + 3) >> 1;
+		method = pete_readb("drivers/input/misc/apanel.c:249", p + 1);
+		chip = pete_readb("drivers/input/misc/apanel.c:250", p + 2);
+		slave = pete_readb("drivers/input/misc/apanel.c:251", p + 3) >> 1;
 
 		if (slave != i2c_addr) {
 			pr_notice(APANEL ": only one SMBus slave "

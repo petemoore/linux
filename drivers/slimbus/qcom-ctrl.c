@@ -252,7 +252,7 @@ static irqreturn_t qcom_slim_handle_rx_irq(struct qcom_slim_ctrl *ctrl,
 		break;
 	}
 rx_ret_irq:
-	writel(MGR_INT_RX_MSG_RCVD, ctrl->base +
+	pete_writel("drivers/slimbus/qcom-ctrl.c:255", MGR_INT_RX_MSG_RCVD, ctrl->base +
 		       MGR_INT_CLR);
 	if (q_rx)
 		queue_work(ctrl->rxwq, &ctrl->wd);
@@ -595,21 +595,21 @@ static int qcom_slim_probe(struct platform_device *pdev)
 	/* Version info in 16 MSbits */
 	ver >>= 16;
 	/* Component register initialization */
-	writel(1, ctrl->base + CFG_PORT(COMP_CFG, ver));
-	writel((EE_MGR_RSC_GRP | EE_NGD_2 | EE_NGD_1),
+	pete_writel("drivers/slimbus/qcom-ctrl.c:598", 1, ctrl->base + CFG_PORT(COMP_CFG, ver));
+	pete_writel("drivers/slimbus/qcom-ctrl.c:599", (EE_MGR_RSC_GRP | EE_NGD_2 | EE_NGD_1),
 				ctrl->base + CFG_PORT(COMP_TRUST_CFG, ver));
 
-	writel((MGR_INT_TX_NACKED_2 |
+	pete_writel("drivers/slimbus/qcom-ctrl.c:602", (MGR_INT_TX_NACKED_2 |
 			MGR_INT_MSG_BUF_CONTE | MGR_INT_RX_MSG_RCVD |
 			MGR_INT_TX_MSG_SENT), ctrl->base + MGR_INT_EN);
-	writel(1, ctrl->base + MGR_CFG);
+	pete_writel("drivers/slimbus/qcom-ctrl.c:605", 1, ctrl->base + MGR_CFG);
 	/* Framer register initialization */
-	writel((1 << INTR_WAKE) | (0xA << REF_CLK_GEAR) |
+	pete_writel("drivers/slimbus/qcom-ctrl.c:607", (1 << INTR_WAKE) | (0xA << REF_CLK_GEAR) |
 		(0xA << CLK_GEAR) | (1 << ROOT_FREQ) | (1 << FRM_ACTIVE) | 1,
 		ctrl->base + FRM_CFG);
-	writel(MGR_CFG_ENABLE, ctrl->base + MGR_CFG);
-	writel(1, ctrl->base + INTF_CFG);
-	writel(1, ctrl->base + CFG_PORT(COMP_CFG, ver));
+	pete_writel("drivers/slimbus/qcom-ctrl.c:610", MGR_CFG_ENABLE, ctrl->base + MGR_CFG);
+	pete_writel("drivers/slimbus/qcom-ctrl.c:611", 1, ctrl->base + INTF_CFG);
+	pete_writel("drivers/slimbus/qcom-ctrl.c:612", 1, ctrl->base + CFG_PORT(COMP_CFG, ver));
 
 	pm_runtime_use_autosuspend(&pdev->dev);
 	pm_runtime_set_autosuspend_delay(&pdev->dev, QCOM_SLIM_AUTOSUSPEND);

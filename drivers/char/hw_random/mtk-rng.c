@@ -48,9 +48,9 @@ static int mtk_rng_init(struct hwrng *rng)
 	if (err)
 		return err;
 
-	val = readl(priv->base + RNG_CTRL);
+	val = pete_readl("drivers/char/hw_random/mtk-rng.c:51", priv->base + RNG_CTRL);
 	val |= RNG_EN;
-	writel(val, priv->base + RNG_CTRL);
+	pete_writel("drivers/char/hw_random/mtk-rng.c:53", val, priv->base + RNG_CTRL);
 
 	return 0;
 }
@@ -60,9 +60,9 @@ static void mtk_rng_cleanup(struct hwrng *rng)
 	struct mtk_rng *priv = to_mtk_rng(rng);
 	u32 val;
 
-	val = readl(priv->base + RNG_CTRL);
+	val = pete_readl("drivers/char/hw_random/mtk-rng.c:63", priv->base + RNG_CTRL);
 	val &= ~RNG_EN;
-	writel(val, priv->base + RNG_CTRL);
+	pete_writel("drivers/char/hw_random/mtk-rng.c:65", val, priv->base + RNG_CTRL);
 
 	clk_disable_unprepare(priv->clk);
 }
@@ -72,7 +72,7 @@ static bool mtk_rng_wait_ready(struct hwrng *rng, bool wait)
 	struct mtk_rng *priv = to_mtk_rng(rng);
 	int ready;
 
-	ready = readl(priv->base + RNG_CTRL) & RNG_READY;
+	ready = pete_readl("drivers/char/hw_random/mtk-rng.c:75", priv->base + RNG_CTRL) & RNG_READY;
 	if (!ready && wait)
 		readl_poll_timeout_atomic(priv->base + RNG_CTRL, ready,
 					  ready & RNG_READY, USEC_POLL,
@@ -91,7 +91,7 @@ static int mtk_rng_read(struct hwrng *rng, void *buf, size_t max, bool wait)
 		if (!mtk_rng_wait_ready(rng, wait))
 			break;
 
-		*(u32 *)buf = readl(priv->base + RNG_DATA);
+		*(u32 *)buf = pete_readl("drivers/char/hw_random/mtk-rng.c:94", priv->base + RNG_DATA);
 		retval += sizeof(u32);
 		buf += sizeof(u32);
 		max -= sizeof(u32);

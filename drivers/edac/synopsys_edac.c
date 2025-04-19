@@ -368,42 +368,42 @@ static int zynq_get_error_info(struct synps_edac_priv *priv)
 	base = priv->baseaddr;
 	p = &priv->stat;
 
-	regval = readl(base + STAT_OFST);
+	regval = pete_readl("drivers/edac/synopsys_edac.c:371", base + STAT_OFST);
 	if (!regval)
 		return 1;
 
 	p->ce_cnt = (regval & STAT_CECNT_MASK) >> STAT_CECNT_SHIFT;
 	p->ue_cnt = regval & STAT_UECNT_MASK;
 
-	regval = readl(base + CE_LOG_OFST);
+	regval = pete_readl("drivers/edac/synopsys_edac.c:378", base + CE_LOG_OFST);
 	if (!(p->ce_cnt && (regval & LOG_VALID)))
 		goto ue_err;
 
 	p->ceinfo.bitpos = (regval & CE_LOG_BITPOS_MASK) >> CE_LOG_BITPOS_SHIFT;
-	regval = readl(base + CE_ADDR_OFST);
+	regval = pete_readl("drivers/edac/synopsys_edac.c:383", base + CE_ADDR_OFST);
 	p->ceinfo.row = (regval & ADDR_ROW_MASK) >> ADDR_ROW_SHIFT;
 	p->ceinfo.col = regval & ADDR_COL_MASK;
 	p->ceinfo.bank = (regval & ADDR_BANK_MASK) >> ADDR_BANK_SHIFT;
-	p->ceinfo.data = readl(base + CE_DATA_31_0_OFST);
+	p->ceinfo.data = pete_readl("drivers/edac/synopsys_edac.c:387", base + CE_DATA_31_0_OFST);
 	edac_dbg(3, "CE bit position: %d data: %d\n", p->ceinfo.bitpos,
 		 p->ceinfo.data);
 	clearval = ECC_CTRL_CLR_CE_ERR;
 
 ue_err:
-	regval = readl(base + UE_LOG_OFST);
+	regval = pete_readl("drivers/edac/synopsys_edac.c:393", base + UE_LOG_OFST);
 	if (!(p->ue_cnt && (regval & LOG_VALID)))
 		goto out;
 
-	regval = readl(base + UE_ADDR_OFST);
+	regval = pete_readl("drivers/edac/synopsys_edac.c:397", base + UE_ADDR_OFST);
 	p->ueinfo.row = (regval & ADDR_ROW_MASK) >> ADDR_ROW_SHIFT;
 	p->ueinfo.col = regval & ADDR_COL_MASK;
 	p->ueinfo.bank = (regval & ADDR_BANK_MASK) >> ADDR_BANK_SHIFT;
-	p->ueinfo.data = readl(base + UE_DATA_31_0_OFST);
+	p->ueinfo.data = pete_readl("drivers/edac/synopsys_edac.c:401", base + UE_DATA_31_0_OFST);
 	clearval |= ECC_CTRL_CLR_UE_ERR;
 
 out:
-	writel(clearval, base + ECC_CTRL_OFST);
-	writel(0x0, base + ECC_CTRL_OFST);
+	pete_writel("drivers/edac/synopsys_edac.c:405", clearval, base + ECC_CTRL_OFST);
+	pete_writel("drivers/edac/synopsys_edac.c:406", 0x0, base + ECC_CTRL_OFST);
 
 	return 0;
 }
@@ -423,48 +423,48 @@ static int zynqmp_get_error_info(struct synps_edac_priv *priv)
 	base = priv->baseaddr;
 	p = &priv->stat;
 
-	regval = readl(base + ECC_ERRCNT_OFST);
+	regval = pete_readl("drivers/edac/synopsys_edac.c:426", base + ECC_ERRCNT_OFST);
 	p->ce_cnt = regval & ECC_ERRCNT_CECNT_MASK;
 	p->ue_cnt = (regval & ECC_ERRCNT_UECNT_MASK) >> ECC_ERRCNT_UECNT_SHIFT;
 	if (!p->ce_cnt)
 		goto ue_err;
 
-	regval = readl(base + ECC_STAT_OFST);
+	regval = pete_readl("drivers/edac/synopsys_edac.c:432", base + ECC_STAT_OFST);
 	if (!regval)
 		return 1;
 
 	p->ceinfo.bitpos = (regval & ECC_STAT_BITNUM_MASK);
 
-	regval = readl(base + ECC_CEADDR0_OFST);
+	regval = pete_readl("drivers/edac/synopsys_edac.c:438", base + ECC_CEADDR0_OFST);
 	p->ceinfo.row = (regval & ECC_CEADDR0_RW_MASK);
-	regval = readl(base + ECC_CEADDR1_OFST);
+	regval = pete_readl("drivers/edac/synopsys_edac.c:440", base + ECC_CEADDR1_OFST);
 	p->ceinfo.bank = (regval & ECC_CEADDR1_BNKNR_MASK) >>
 					ECC_CEADDR1_BNKNR_SHIFT;
 	p->ceinfo.bankgrpnr = (regval &	ECC_CEADDR1_BNKGRP_MASK) >>
 					ECC_CEADDR1_BNKGRP_SHIFT;
 	p->ceinfo.blknr = (regval & ECC_CEADDR1_BLKNR_MASK);
-	p->ceinfo.data = readl(base + ECC_CSYND0_OFST);
+	p->ceinfo.data = pete_readl("drivers/edac/synopsys_edac.c:446", base + ECC_CSYND0_OFST);
 	edac_dbg(2, "ECCCSYN0: 0x%08X ECCCSYN1: 0x%08X ECCCSYN2: 0x%08X\n",
-		 readl(base + ECC_CSYND0_OFST), readl(base + ECC_CSYND1_OFST),
-		 readl(base + ECC_CSYND2_OFST));
+		 pete_readl("drivers/edac/synopsys_edac.c:448", base + ECC_CSYND0_OFST), pete_readl("drivers/edac/synopsys_edac.c:448", base + ECC_CSYND1_OFST),
+		 pete_readl("drivers/edac/synopsys_edac.c:449", base + ECC_CSYND2_OFST));
 ue_err:
 	if (!p->ue_cnt)
 		goto out;
 
-	regval = readl(base + ECC_UEADDR0_OFST);
+	regval = pete_readl("drivers/edac/synopsys_edac.c:454", base + ECC_UEADDR0_OFST);
 	p->ueinfo.row = (regval & ECC_CEADDR0_RW_MASK);
-	regval = readl(base + ECC_UEADDR1_OFST);
+	regval = pete_readl("drivers/edac/synopsys_edac.c:456", base + ECC_UEADDR1_OFST);
 	p->ueinfo.bankgrpnr = (regval & ECC_CEADDR1_BNKGRP_MASK) >>
 					ECC_CEADDR1_BNKGRP_SHIFT;
 	p->ueinfo.bank = (regval & ECC_CEADDR1_BNKNR_MASK) >>
 					ECC_CEADDR1_BNKNR_SHIFT;
 	p->ueinfo.blknr = (regval & ECC_CEADDR1_BLKNR_MASK);
-	p->ueinfo.data = readl(base + ECC_UESYND0_OFST);
+	p->ueinfo.data = pete_readl("drivers/edac/synopsys_edac.c:462", base + ECC_UESYND0_OFST);
 out:
 	clearval = ECC_CTRL_CLR_CE_ERR | ECC_CTRL_CLR_CE_ERRCNT;
 	clearval |= ECC_CTRL_CLR_UE_ERR | ECC_CTRL_CLR_UE_ERRCNT;
-	writel(clearval, base + ECC_CLR_OFST);
-	writel(0x0, base + ECC_CLR_OFST);
+	pete_writel("drivers/edac/synopsys_edac.c:466", clearval, base + ECC_CLR_OFST);
+	pete_writel("drivers/edac/synopsys_edac.c:467", 0x0, base + ECC_CLR_OFST);
 
 	return 0;
 }
@@ -539,7 +539,7 @@ static irqreturn_t intr_handler(int irq, void *dev_id)
 	priv = mci->pvt_info;
 	p_data = priv->p_data;
 
-	regval = readl(priv->baseaddr + DDR_QOS_IRQ_STAT_OFST);
+	regval = pete_readl("drivers/edac/synopsys_edac.c:542", priv->baseaddr + DDR_QOS_IRQ_STAT_OFST);
 	regval &= (DDR_QOSCE_MASK | DDR_QOSUE_MASK);
 	if (!(regval & ECC_CE_UE_INTR_MASK))
 		return IRQ_NONE;
@@ -554,7 +554,7 @@ static irqreturn_t intr_handler(int irq, void *dev_id)
 
 	edac_dbg(3, "Total error count CE %d UE %d\n",
 		 priv->ce_cnt, priv->ue_cnt);
-	writel(regval, priv->baseaddr + DDR_QOS_IRQ_STAT_OFST);
+	pete_writel("drivers/edac/synopsys_edac.c:557", regval, priv->baseaddr + DDR_QOS_IRQ_STAT_OFST);
 	return IRQ_HANDLED;
 }
 
@@ -599,7 +599,7 @@ static enum dev_type zynq_get_dtype(const void __iomem *base)
 	enum dev_type dt;
 	u32 width;
 
-	width = readl(base + CTRL_OFST);
+	width = pete_readl("drivers/edac/synopsys_edac.c:602", base + CTRL_OFST);
 	width = (width & CTRL_BW_MASK) >> CTRL_BW_SHIFT;
 
 	switch (width) {
@@ -630,7 +630,7 @@ static enum dev_type zynqmp_get_dtype(const void __iomem *base)
 	enum dev_type dt;
 	u32 width;
 
-	width = readl(base + CTRL_OFST);
+	width = pete_readl("drivers/edac/synopsys_edac.c:633", base + CTRL_OFST);
 	width = (width & ECC_CTRL_BUSWIDTH_MASK) >> ECC_CTRL_BUSWIDTH_SHIFT;
 	switch (width) {
 	case DDRCTL_EWDTH_16:
@@ -666,7 +666,7 @@ static bool zynq_get_ecc_state(void __iomem *base)
 	if (dt == DEV_UNKNOWN)
 		return false;
 
-	ecctype = readl(base + SCRUB_OFST) & SCRUB_MODE_MASK;
+	ecctype = pete_readl("drivers/edac/synopsys_edac.c:669", base + SCRUB_OFST) & SCRUB_MODE_MASK;
 	if ((ecctype == SCRUB_MODE_SECDED) && (dt == DEV_X2))
 		return true;
 
@@ -690,7 +690,7 @@ static bool zynqmp_get_ecc_state(void __iomem *base)
 	if (dt == DEV_UNKNOWN)
 		return false;
 
-	ecctype = readl(base + ECC_CFG0_OFST) & SCRUB_MODE_MASK;
+	ecctype = pete_readl("drivers/edac/synopsys_edac.c:693", base + ECC_CFG0_OFST) & SCRUB_MODE_MASK;
 	if ((ecctype == SCRUB_MODE_SECDED) &&
 	    ((dt == DEV_X2) || (dt == DEV_X4) || (dt == DEV_X8)))
 		return true;
@@ -726,7 +726,7 @@ static enum mem_type zynq_get_mtype(const void __iomem *base)
 	enum mem_type mt;
 	u32 memtype;
 
-	memtype = readl(base + T_ZQ_OFST);
+	memtype = pete_readl("drivers/edac/synopsys_edac.c:729", base + T_ZQ_OFST);
 
 	if (memtype & T_ZQ_DDRMODE_MASK)
 		mt = MEM_DDR3;
@@ -750,7 +750,7 @@ static enum mem_type zynqmp_get_mtype(const void __iomem *base)
 	enum mem_type mt;
 	u32 memtype;
 
-	memtype = readl(base + CTRL_OFST);
+	memtype = pete_readl("drivers/edac/synopsys_edac.c:753", base + CTRL_OFST);
 
 	if ((memtype & MEM_TYPE_DDR3) || (memtype & MEM_TYPE_LPDDR3))
 		mt = MEM_DDR3;
@@ -840,14 +840,14 @@ static void mc_init(struct mem_ctl_info *mci, struct platform_device *pdev)
 static void enable_intr(struct synps_edac_priv *priv)
 {
 	/* Enable UE/CE Interrupts */
-	writel(DDR_QOSUE_MASK | DDR_QOSCE_MASK,
+	pete_writel("drivers/edac/synopsys_edac.c:843", DDR_QOSUE_MASK | DDR_QOSCE_MASK,
 			priv->baseaddr + DDR_QOS_IRQ_EN_OFST);
 }
 
 static void disable_intr(struct synps_edac_priv *priv)
 {
 	/* Disable UE/CE Interrupts */
-	writel(DDR_QOSUE_MASK | DDR_QOSCE_MASK,
+	pete_writel("drivers/edac/synopsys_edac.c:850", DDR_QOSUE_MASK | DDR_QOSCE_MASK,
 			priv->baseaddr + DDR_QOS_IRQ_DB_OFST);
 }
 
@@ -967,12 +967,12 @@ static void ddr_poison_setup(struct synps_edac_priv *priv)
 
 	regval = (rank << ECC_POISON0_RANK_SHIFT) & ECC_POISON0_RANK_MASK;
 	regval |= (col << ECC_POISON0_COLUMN_SHIFT) & ECC_POISON0_COLUMN_MASK;
-	writel(regval, priv->baseaddr + ECC_POISON0_OFST);
+	pete_writel("drivers/edac/synopsys_edac.c:970", regval, priv->baseaddr + ECC_POISON0_OFST);
 
 	regval = (bankgrp << ECC_POISON1_BG_SHIFT) & ECC_POISON1_BG_MASK;
 	regval |= (bank << ECC_POISON1_BANKNR_SHIFT) & ECC_POISON1_BANKNR_MASK;
 	regval |= (row << ECC_POISON1_ROW_SHIFT) & ECC_POISON1_ROW_MASK;
-	writel(regval, priv->baseaddr + ECC_POISON1_OFST);
+	pete_writel("drivers/edac/synopsys_edac.c:975", regval, priv->baseaddr + ECC_POISON1_OFST);
 }
 
 static ssize_t inject_data_error_show(struct device *dev,
@@ -984,8 +984,8 @@ static ssize_t inject_data_error_show(struct device *dev,
 
 	return sprintf(data, "Poison0 Addr: 0x%08x\n\rPoison1 Addr: 0x%08x\n\r"
 			"Error injection Address: 0x%lx\n\r",
-			readl(priv->baseaddr + ECC_POISON0_OFST),
-			readl(priv->baseaddr + ECC_POISON1_OFST),
+			pete_readl("drivers/edac/synopsys_edac.c:987", priv->baseaddr + ECC_POISON0_OFST),
+			pete_readl("drivers/edac/synopsys_edac.c:988", priv->baseaddr + ECC_POISON1_OFST),
 			priv->poison_addr);
 }
 
@@ -1012,7 +1012,7 @@ static ssize_t inject_data_poison_show(struct device *dev,
 	struct synps_edac_priv *priv = mci->pvt_info;
 
 	return sprintf(data, "Data Poisoning: %s\n\r",
-			(((readl(priv->baseaddr + ECC_CFG1_OFST)) & 0x3) == 0x3)
+			(((pete_readl("drivers/edac/synopsys_edac.c:1015", priv->baseaddr + ECC_CFG1_OFST)) & 0x3) == 0x3)
 			? ("Correctable Error") : ("UnCorrectable Error"));
 }
 
@@ -1023,12 +1023,12 @@ static ssize_t inject_data_poison_store(struct device *dev,
 	struct mem_ctl_info *mci = to_mci(dev);
 	struct synps_edac_priv *priv = mci->pvt_info;
 
-	writel(0, priv->baseaddr + DDRC_SWCTL);
+	pete_writel("drivers/edac/synopsys_edac.c:1026", 0, priv->baseaddr + DDRC_SWCTL);
 	if (strncmp(data, "CE", 2) == 0)
-		writel(ECC_CEPOISON_MASK, priv->baseaddr + ECC_CFG1_OFST);
+		pete_writel("drivers/edac/synopsys_edac.c:1028", ECC_CEPOISON_MASK, priv->baseaddr + ECC_CFG1_OFST);
 	else
-		writel(ECC_UEPOISON_MASK, priv->baseaddr + ECC_CFG1_OFST);
-	writel(1, priv->baseaddr + DDRC_SWCTL);
+		pete_writel("drivers/edac/synopsys_edac.c:1030", ECC_UEPOISON_MASK, priv->baseaddr + ECC_CFG1_OFST);
+	pete_writel("drivers/edac/synopsys_edac.c:1031", 1, priv->baseaddr + DDRC_SWCTL);
 
 	return count;
 }
@@ -1119,7 +1119,7 @@ static void setup_column_address_map(struct synps_edac_priv *priv, u32 *addrmap)
 	u32 width, memtype;
 	int index;
 
-	memtype = readl(priv->baseaddr + CTRL_OFST);
+	memtype = pete_readl("drivers/edac/synopsys_edac.c:1122", priv->baseaddr + CTRL_OFST);
 	width = (memtype & ECC_CTRL_BUSWIDTH_MASK) >> ECC_CTRL_BUSWIDTH_SHIFT;
 
 	priv->col_shift[0] = 0;
@@ -1266,7 +1266,7 @@ static void setup_address_map(struct synps_edac_priv *priv)
 		u32 addrmap_offset;
 
 		addrmap_offset = ECC_ADDRMAP0_OFFSET + (index * 4);
-		addrmap[index] = readl(priv->baseaddr + addrmap_offset);
+		addrmap[index] = pete_readl("drivers/edac/synopsys_edac.c:1269", priv->baseaddr + addrmap_offset);
 	}
 
 	setup_row_address_map(priv, addrmap);
@@ -1367,7 +1367,7 @@ static int mc_probe(struct platform_device *pdev)
 	 * 0 starts the counters.
 	 */
 	if (!(priv->p_data->quirks & DDR_ECC_INTR_SUPPORT))
-		writel(0x0, baseaddr + ECC_CTRL_OFST);
+		pete_writel("drivers/edac/synopsys_edac.c:1370", 0x0, baseaddr + ECC_CTRL_OFST);
 
 	return rc;
 

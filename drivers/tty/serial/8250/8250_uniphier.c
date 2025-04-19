@@ -89,7 +89,7 @@ static unsigned int uniphier_serial_in(struct uart_port *p, int offset)
 	 * share the same offset that must be accessed by 32-bit write/read.
 	 * 8 or 16 bit access to this hardware result in unexpected behavior.
 	 */
-	return (readl(p->membase + offset) >> valshift) & 0xff;
+	return (pete_readl("drivers/tty/serial/8250/8250_uniphier.c:92", p->membase + offset) >> valshift) & 0xff;
 }
 
 static void uniphier_serial_out(struct uart_port *p, int offset, int value)
@@ -120,7 +120,7 @@ static void uniphier_serial_out(struct uart_port *p, int offset, int value)
 	}
 
 	if (normal) {
-		writel(value, p->membase + offset);
+		pete_writel("drivers/tty/serial/8250/8250_uniphier.c:123", value, p->membase + offset);
 	} else {
 		/*
 		 * Special case: two registers share the same address that
@@ -132,10 +132,10 @@ static void uniphier_serial_out(struct uart_port *p, int offset, int value)
 		u32 tmp;
 
 		spin_lock_irqsave(&priv->atomic_write_lock, flags);
-		tmp = readl(p->membase + offset);
+		tmp = pete_readl("drivers/tty/serial/8250/8250_uniphier.c:135", p->membase + offset);
 		tmp &= ~(0xff << valshift);
 		tmp |= value << valshift;
-		writel(tmp, p->membase + offset);
+		pete_writel("drivers/tty/serial/8250/8250_uniphier.c:138", tmp, p->membase + offset);
 		spin_unlock_irqrestore(&priv->atomic_write_lock, flags);
 	}
 }
@@ -147,12 +147,12 @@ static void uniphier_serial_out(struct uart_port *p, int offset, int value)
  */
 static int uniphier_serial_dl_read(struct uart_8250_port *up)
 {
-	return readl(up->port.membase + UNIPHIER_UART_DLR);
+	return pete_readl("drivers/tty/serial/8250/8250_uniphier.c:150", up->port.membase + UNIPHIER_UART_DLR);
 }
 
 static void uniphier_serial_dl_write(struct uart_8250_port *up, int value)
 {
-	writel(value, up->port.membase + UNIPHIER_UART_DLR);
+	pete_writel("drivers/tty/serial/8250/8250_uniphier.c:155", value, up->port.membase + UNIPHIER_UART_DLR);
 }
 
 static int uniphier_uart_probe(struct platform_device *pdev)

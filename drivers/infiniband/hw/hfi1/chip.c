@@ -1307,7 +1307,7 @@ static inline void __iomem *hfi1_addr_from_offset(
 u64 read_csr(const struct hfi1_devdata *dd, u32 offset)
 {
 	if (dd->flags & HFI1_PRESENT)
-		return readq(hfi1_addr_from_offset(dd, offset));
+		return pete_readq("drivers/infiniband/hw/hfi1/chip.c:1310", hfi1_addr_from_offset(dd, offset));
 	return -1;
 }
 
@@ -1325,7 +1325,7 @@ void write_csr(const struct hfi1_devdata *dd, u32 offset, u64 value)
 		/* avoid write to RcvArray */
 		if (WARN_ON(offset >= RCV_ARRAY && offset < dd->base2_start))
 			return;
-		writeq(value, base);
+		pete_writeq("drivers/infiniband/hw/hfi1/chip.c:1328", value, base);
 	}
 }
 
@@ -9952,7 +9952,7 @@ void hfi1_put_tid(struct hfi1_devdata *dd, u32 index,
 		| ((pa >> RT_ADDR_SHIFT) & RCV_ARRAY_RT_ADDR_MASK)
 					<< RCV_ARRAY_RT_ADDR_SHIFT;
 	trace_hfi1_write_rcvarray(dd->rcvarray_wc + (index * 8), reg);
-	writeq(reg, dd->rcvarray_wc + (index * 8));
+	pete_writeq("drivers/infiniband/hw/hfi1/chip.c:9955", reg, dd->rcvarray_wc + (index * 8));
 
 	if (type == PT_EAGER || type == PT_INVALID_FLUSH || (index & 3) == 3)
 		/*

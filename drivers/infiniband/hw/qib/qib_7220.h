@@ -122,7 +122,7 @@ static inline u32 qib_read_kreg32(const struct qib_devdata *dd,
 {
 	if (!dd->kregbase || !(dd->flags & QIB_PRESENT))
 		return -1;
-	return readl((u32 __iomem *)&dd->kregbase[regno]);
+	return pete_readl("drivers/infiniband/hw/qib/qib_7220.h:125", (u32 __iomem *)&dd->kregbase[regno]);
 }
 
 static inline u64 qib_read_kreg64(const struct qib_devdata *dd,
@@ -131,14 +131,14 @@ static inline u64 qib_read_kreg64(const struct qib_devdata *dd,
 	if (!dd->kregbase || !(dd->flags & QIB_PRESENT))
 		return -1;
 
-	return readq(&dd->kregbase[regno]);
+	return pete_readq("drivers/infiniband/hw/qib/qib_7220.h:134", &dd->kregbase[regno]);
 }
 
 static inline void qib_write_kreg(const struct qib_devdata *dd,
 				  const u16 regno, u64 value)
 {
 	if (dd->kregbase)
-		writeq(value, &dd->kregbase[regno]);
+		pete_writeq("drivers/infiniband/hw/qib/qib_7220.h:141", value, &dd->kregbase[regno]);
 }
 
 void set_7220_relock_poll(struct qib_devdata *, int);

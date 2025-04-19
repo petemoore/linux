@@ -29,14 +29,14 @@ static u32 jsm_offset_table[8] = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x8
  */
 static inline void neo_pci_posting_flush(struct jsm_board *bd)
 {
-      readb(bd->re_map_membase + 0x8D);
+      pete_readb("drivers/tty/serial/jsm/jsm_neo.c:32", bd->re_map_membase + 0x8D);
 }
 
 static void neo_set_cts_flow_control(struct jsm_channel *ch)
 {
 	u8 ier, efr;
-	ier = readb(&ch->ch_neo_uart->ier);
-	efr = readb(&ch->ch_neo_uart->efr);
+	ier = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:38", &ch->ch_neo_uart->ier);
+	efr = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:39", &ch->ch_neo_uart->efr);
 
 	jsm_dbg(PARAM, &ch->ch_bd->pci_dev, "Setting CTSFLOW\n");
 
@@ -48,26 +48,26 @@ static void neo_set_cts_flow_control(struct jsm_channel *ch)
 	efr &= ~(UART_17158_EFR_IXON);
 
 	/* Why? Becuz Exar's spec says we have to zero it out before setting it */
-	writeb(0, &ch->ch_neo_uart->efr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:51", 0, &ch->ch_neo_uart->efr);
 
 	/* Turn on UART enhanced bits */
-	writeb(efr, &ch->ch_neo_uart->efr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:54", efr, &ch->ch_neo_uart->efr);
 
 	/* Turn on table D, with 8 char hi/low watermarks */
-	writeb((UART_17158_FCTR_TRGD | UART_17158_FCTR_RTS_4DELAY), &ch->ch_neo_uart->fctr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:57", (UART_17158_FCTR_TRGD | UART_17158_FCTR_RTS_4DELAY), &ch->ch_neo_uart->fctr);
 
 	/* Feed the UART our trigger levels */
-	writeb(8, &ch->ch_neo_uart->tfifo);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:60", 8, &ch->ch_neo_uart->tfifo);
 	ch->ch_t_tlevel = 8;
 
-	writeb(ier, &ch->ch_neo_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:63", ier, &ch->ch_neo_uart->ier);
 }
 
 static void neo_set_rts_flow_control(struct jsm_channel *ch)
 {
 	u8 ier, efr;
-	ier = readb(&ch->ch_neo_uart->ier);
-	efr = readb(&ch->ch_neo_uart->efr);
+	ier = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:69", &ch->ch_neo_uart->ier);
+	efr = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:70", &ch->ch_neo_uart->efr);
 
 	jsm_dbg(PARAM, &ch->ch_bd->pci_dev, "Setting RTSFLOW\n");
 
@@ -80,18 +80,18 @@ static void neo_set_rts_flow_control(struct jsm_channel *ch)
 	efr &= ~(UART_17158_EFR_IXOFF);
 
 	/* Why? Becuz Exar's spec says we have to zero it out before setting it */
-	writeb(0, &ch->ch_neo_uart->efr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:83", 0, &ch->ch_neo_uart->efr);
 
 	/* Turn on UART enhanced bits */
-	writeb(efr, &ch->ch_neo_uart->efr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:86", efr, &ch->ch_neo_uart->efr);
 
-	writeb((UART_17158_FCTR_TRGD | UART_17158_FCTR_RTS_4DELAY), &ch->ch_neo_uart->fctr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:88", (UART_17158_FCTR_TRGD | UART_17158_FCTR_RTS_4DELAY), &ch->ch_neo_uart->fctr);
 	ch->ch_r_watermark = 4;
 
-	writeb(56, &ch->ch_neo_uart->rfifo);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:91", 56, &ch->ch_neo_uart->rfifo);
 	ch->ch_r_tlevel = 56;
 
-	writeb(ier, &ch->ch_neo_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:94", ier, &ch->ch_neo_uart->ier);
 
 	/*
 	 * From the Neo UART spec sheet:
@@ -106,8 +106,8 @@ static void neo_set_rts_flow_control(struct jsm_channel *ch)
 static void neo_set_ixon_flow_control(struct jsm_channel *ch)
 {
 	u8 ier, efr;
-	ier = readb(&ch->ch_neo_uart->ier);
-	efr = readb(&ch->ch_neo_uart->efr);
+	ier = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:109", &ch->ch_neo_uart->ier);
+	efr = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:110", &ch->ch_neo_uart->efr);
 
 	jsm_dbg(PARAM, &ch->ch_bd->pci_dev, "Setting IXON FLOW\n");
 
@@ -119,32 +119,32 @@ static void neo_set_ixon_flow_control(struct jsm_channel *ch)
 	efr |= (UART_17158_EFR_ECB | UART_17158_EFR_IXON);
 
 	/* Why? Becuz Exar's spec says we have to zero it out before setting it */
-	writeb(0, &ch->ch_neo_uart->efr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:122", 0, &ch->ch_neo_uart->efr);
 
 	/* Turn on UART enhanced bits */
-	writeb(efr, &ch->ch_neo_uart->efr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:125", efr, &ch->ch_neo_uart->efr);
 
-	writeb((UART_17158_FCTR_TRGD | UART_17158_FCTR_RTS_8DELAY), &ch->ch_neo_uart->fctr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:127", (UART_17158_FCTR_TRGD | UART_17158_FCTR_RTS_8DELAY), &ch->ch_neo_uart->fctr);
 	ch->ch_r_watermark = 4;
 
-	writeb(32, &ch->ch_neo_uart->rfifo);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:130", 32, &ch->ch_neo_uart->rfifo);
 	ch->ch_r_tlevel = 32;
 
 	/* Tell UART what start/stop chars it should be looking for */
-	writeb(ch->ch_startc, &ch->ch_neo_uart->xonchar1);
-	writeb(0, &ch->ch_neo_uart->xonchar2);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:134", ch->ch_startc, &ch->ch_neo_uart->xonchar1);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:135", 0, &ch->ch_neo_uart->xonchar2);
 
-	writeb(ch->ch_stopc, &ch->ch_neo_uart->xoffchar1);
-	writeb(0, &ch->ch_neo_uart->xoffchar2);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:137", ch->ch_stopc, &ch->ch_neo_uart->xoffchar1);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:138", 0, &ch->ch_neo_uart->xoffchar2);
 
-	writeb(ier, &ch->ch_neo_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:140", ier, &ch->ch_neo_uart->ier);
 }
 
 static void neo_set_ixoff_flow_control(struct jsm_channel *ch)
 {
 	u8 ier, efr;
-	ier = readb(&ch->ch_neo_uart->ier);
-	efr = readb(&ch->ch_neo_uart->efr);
+	ier = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:146", &ch->ch_neo_uart->ier);
+	efr = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:147", &ch->ch_neo_uart->efr);
 
 	jsm_dbg(PARAM, &ch->ch_bd->pci_dev, "Setting IXOFF FLOW\n");
 
@@ -157,32 +157,32 @@ static void neo_set_ixoff_flow_control(struct jsm_channel *ch)
 	efr |= (UART_17158_EFR_ECB | UART_17158_EFR_IXOFF);
 
 	/* Why? Becuz Exar's spec says we have to zero it out before setting it */
-	writeb(0, &ch->ch_neo_uart->efr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:160", 0, &ch->ch_neo_uart->efr);
 
 	/* Turn on UART enhanced bits */
-	writeb(efr, &ch->ch_neo_uart->efr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:163", efr, &ch->ch_neo_uart->efr);
 
 	/* Turn on table D, with 8 char hi/low watermarks */
-	writeb((UART_17158_FCTR_TRGD | UART_17158_FCTR_RTS_8DELAY), &ch->ch_neo_uart->fctr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:166", (UART_17158_FCTR_TRGD | UART_17158_FCTR_RTS_8DELAY), &ch->ch_neo_uart->fctr);
 
-	writeb(8, &ch->ch_neo_uart->tfifo);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:168", 8, &ch->ch_neo_uart->tfifo);
 	ch->ch_t_tlevel = 8;
 
 	/* Tell UART what start/stop chars it should be looking for */
-	writeb(ch->ch_startc, &ch->ch_neo_uart->xonchar1);
-	writeb(0, &ch->ch_neo_uart->xonchar2);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:172", ch->ch_startc, &ch->ch_neo_uart->xonchar1);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:173", 0, &ch->ch_neo_uart->xonchar2);
 
-	writeb(ch->ch_stopc, &ch->ch_neo_uart->xoffchar1);
-	writeb(0, &ch->ch_neo_uart->xoffchar2);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:175", ch->ch_stopc, &ch->ch_neo_uart->xoffchar1);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:176", 0, &ch->ch_neo_uart->xoffchar2);
 
-	writeb(ier, &ch->ch_neo_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:178", ier, &ch->ch_neo_uart->ier);
 }
 
 static void neo_set_no_input_flow_control(struct jsm_channel *ch)
 {
 	u8 ier, efr;
-	ier = readb(&ch->ch_neo_uart->ier);
-	efr = readb(&ch->ch_neo_uart->efr);
+	ier = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:184", &ch->ch_neo_uart->ier);
+	efr = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:185", &ch->ch_neo_uart->efr);
 
 	jsm_dbg(PARAM, &ch->ch_bd->pci_dev, "Unsetting Input FLOW\n");
 
@@ -198,30 +198,30 @@ static void neo_set_no_input_flow_control(struct jsm_channel *ch)
 		efr &= ~(UART_17158_EFR_ECB | UART_17158_EFR_IXOFF);
 
 	/* Why? Becuz Exar's spec says we have to zero it out before setting it */
-	writeb(0, &ch->ch_neo_uart->efr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:201", 0, &ch->ch_neo_uart->efr);
 
 	/* Turn on UART enhanced bits */
-	writeb(efr, &ch->ch_neo_uart->efr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:204", efr, &ch->ch_neo_uart->efr);
 
 	/* Turn on table D, with 8 char hi/low watermarks */
-	writeb((UART_17158_FCTR_TRGD | UART_17158_FCTR_RTS_8DELAY), &ch->ch_neo_uart->fctr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:207", (UART_17158_FCTR_TRGD | UART_17158_FCTR_RTS_8DELAY), &ch->ch_neo_uart->fctr);
 
 	ch->ch_r_watermark = 0;
 
-	writeb(16, &ch->ch_neo_uart->tfifo);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:211", 16, &ch->ch_neo_uart->tfifo);
 	ch->ch_t_tlevel = 16;
 
-	writeb(16, &ch->ch_neo_uart->rfifo);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:214", 16, &ch->ch_neo_uart->rfifo);
 	ch->ch_r_tlevel = 16;
 
-	writeb(ier, &ch->ch_neo_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:217", ier, &ch->ch_neo_uart->ier);
 }
 
 static void neo_set_no_output_flow_control(struct jsm_channel *ch)
 {
 	u8 ier, efr;
-	ier = readb(&ch->ch_neo_uart->ier);
-	efr = readb(&ch->ch_neo_uart->efr);
+	ier = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:223", &ch->ch_neo_uart->ier);
+	efr = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:224", &ch->ch_neo_uart->efr);
 
 	jsm_dbg(PARAM, &ch->ch_bd->pci_dev, "Unsetting Output FLOW\n");
 
@@ -236,23 +236,23 @@ static void neo_set_no_output_flow_control(struct jsm_channel *ch)
 		efr &= ~(UART_17158_EFR_ECB | UART_17158_EFR_IXON);
 
 	/* Why? Becuz Exar's spec says we have to zero it out before setting it */
-	writeb(0, &ch->ch_neo_uart->efr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:239", 0, &ch->ch_neo_uart->efr);
 
 	/* Turn on UART enhanced bits */
-	writeb(efr, &ch->ch_neo_uart->efr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:242", efr, &ch->ch_neo_uart->efr);
 
 	/* Turn on table D, with 8 char hi/low watermarks */
-	writeb((UART_17158_FCTR_TRGD | UART_17158_FCTR_RTS_8DELAY), &ch->ch_neo_uart->fctr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:245", (UART_17158_FCTR_TRGD | UART_17158_FCTR_RTS_8DELAY), &ch->ch_neo_uart->fctr);
 
 	ch->ch_r_watermark = 0;
 
-	writeb(16, &ch->ch_neo_uart->tfifo);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:249", 16, &ch->ch_neo_uart->tfifo);
 	ch->ch_t_tlevel = 16;
 
-	writeb(16, &ch->ch_neo_uart->rfifo);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:252", 16, &ch->ch_neo_uart->rfifo);
 	ch->ch_r_tlevel = 16;
 
-	writeb(ier, &ch->ch_neo_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:255", ier, &ch->ch_neo_uart->ier);
 }
 
 static inline void neo_set_new_start_stop_chars(struct jsm_channel *ch)
@@ -265,11 +265,11 @@ static inline void neo_set_new_start_stop_chars(struct jsm_channel *ch)
 	jsm_dbg(PARAM, &ch->ch_bd->pci_dev, "start\n");
 
 	/* Tell UART what start/stop chars it should be looking for */
-	writeb(ch->ch_startc, &ch->ch_neo_uart->xonchar1);
-	writeb(0, &ch->ch_neo_uart->xonchar2);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:268", ch->ch_startc, &ch->ch_neo_uart->xonchar1);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:269", 0, &ch->ch_neo_uart->xonchar2);
 
-	writeb(ch->ch_stopc, &ch->ch_neo_uart->xoffchar1);
-	writeb(0, &ch->ch_neo_uart->xoffchar2);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:271", ch->ch_stopc, &ch->ch_neo_uart->xoffchar1);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:272", 0, &ch->ch_neo_uart->xoffchar2);
 }
 
 static void neo_copy_data_from_uart_to_queue(struct jsm_channel *ch)
@@ -304,7 +304,7 @@ static void neo_copy_data_from_uart_to_queue(struct jsm_channel *ch)
 	if (!(ch->ch_flags & CH_FIFO_ENABLED))
 		total = 0;
 	else {
-		total = readb(&ch->ch_neo_uart->rfifo);
+		total = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:307", &ch->ch_neo_uart->rfifo);
 
 		/*
 		 * EXAR chip bug - RX FIFO COUNT - Fudge factor.
@@ -330,7 +330,7 @@ static void neo_copy_data_from_uart_to_queue(struct jsm_channel *ch)
 		 * Grab the linestatus register, we need to check
 		 * to see if there are any errors in the FIFO.
 		 */
-		linestatus = readb(&ch->ch_neo_uart->lsr);
+		linestatus = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:333", &ch->ch_neo_uart->lsr);
 
 		/*
 		 * Break out if there is a FIFO error somewhere.
@@ -394,7 +394,7 @@ static void neo_copy_data_from_uart_to_queue(struct jsm_channel *ch)
 		 * Its possible we have a linestatus from the loop above
 		 * this, so we "OR" on any extra bits.
 		 */
-		linestatus |= readb(&ch->ch_neo_uart->lsr);
+		linestatus |= pete_readb("drivers/tty/serial/jsm/jsm_neo.c:397", &ch->ch_neo_uart->lsr);
 
 		/*
 		 * If the chip tells us there is no more data pending to
@@ -497,13 +497,13 @@ static void neo_copy_data_from_queue_to_uart(struct jsm_channel *ch)
 	 * If FIFOs are disabled. Send data directly to txrx register
 	 */
 	if (!(ch->ch_flags & CH_FIFO_ENABLED)) {
-		u8 lsrbits = readb(&ch->ch_neo_uart->lsr);
+		u8 lsrbits = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:500", &ch->ch_neo_uart->lsr);
 
 		ch->ch_cached_lsr |= lsrbits;
 		if (ch->ch_cached_lsr & UART_LSR_THRE) {
 			ch->ch_cached_lsr &= ~(UART_LSR_THRE);
 
-			writeb(circ->buf[circ->tail], &ch->ch_neo_uart->txrx);
+			pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:506", circ->buf[circ->tail], &ch->ch_neo_uart->txrx);
 			jsm_dbg(WRITE, &ch->ch_bd->pci_dev,
 				"Tx data: %x\n", circ->buf[circ->tail]);
 			circ->tail = (circ->tail + 1) & (UART_XMIT_SIZE - 1);
@@ -607,7 +607,7 @@ static void neo_assert_modem_signals(struct jsm_channel *ch)
 	if (!ch)
 		return;
 
-	writeb(ch->ch_mostat, &ch->ch_neo_uart->mcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:610", ch->ch_mostat, &ch->ch_neo_uart->mcr);
 
 	/* flush write operation */
 	neo_pci_posting_flush(ch->ch_bd);
@@ -626,12 +626,12 @@ static void neo_flush_uart_write(struct jsm_channel *ch)
 	if (!ch)
 		return;
 
-	writeb((UART_FCR_ENABLE_FIFO | UART_FCR_CLEAR_XMIT), &ch->ch_neo_uart->isr_fcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:629", (UART_FCR_ENABLE_FIFO | UART_FCR_CLEAR_XMIT), &ch->ch_neo_uart->isr_fcr);
 
 	for (i = 0; i < 10; i++) {
 
 		/* Check to see if the UART feels it completely flushed the FIFO. */
-		tmp = readb(&ch->ch_neo_uart->isr_fcr);
+		tmp = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:634", &ch->ch_neo_uart->isr_fcr);
 		if (tmp & UART_FCR_CLEAR_XMIT) {
 			jsm_dbg(IOCTL, &ch->ch_bd->pci_dev,
 				"Still flushing TX UART... i: %d\n", i);
@@ -658,12 +658,12 @@ static void neo_flush_uart_read(struct jsm_channel *ch)
 	if (!ch)
 		return;
 
-	writeb((UART_FCR_ENABLE_FIFO | UART_FCR_CLEAR_RCVR), &ch->ch_neo_uart->isr_fcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:661", (UART_FCR_ENABLE_FIFO | UART_FCR_CLEAR_RCVR), &ch->ch_neo_uart->isr_fcr);
 
 	for (i = 0; i < 10; i++) {
 
 		/* Check to see if the UART feels it completely flushed the FIFO. */
-		tmp = readb(&ch->ch_neo_uart->isr_fcr);
+		tmp = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:666", &ch->ch_neo_uart->isr_fcr);
 		if (tmp & 2) {
 			jsm_dbg(IOCTL, &ch->ch_bd->pci_dev,
 				"Still flushing RX UART... i: %d\n", i);
@@ -685,8 +685,8 @@ static void neo_clear_break(struct jsm_channel *ch)
 
 	/* Turn break off, and unset some variables */
 	if (ch->ch_flags & CH_BREAK_SENDING) {
-		u8 temp = readb(&ch->ch_neo_uart->lcr);
-		writeb((temp & ~UART_LCR_SBC), &ch->ch_neo_uart->lcr);
+		u8 temp = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:688", &ch->ch_neo_uart->lcr);
+		pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:689", (temp & ~UART_LCR_SBC), &ch->ch_neo_uart->lcr);
 
 		ch->ch_flags &= ~(CH_BREAK_SENDING);
 		jsm_dbg(IOCTL, &ch->ch_bd->pci_dev,
@@ -722,7 +722,7 @@ static void neo_parse_isr(struct jsm_board *brd, u32 port)
 	/* Here we try to figure out what caused the interrupt to happen */
 	while (1) {
 
-		isr = readb(&ch->ch_neo_uart->isr_fcr);
+		isr = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:725", &ch->ch_neo_uart->isr_fcr);
 
 		/* Bail if no pending interrupt */
 		if (isr & UART_IIR_NO_INT)
@@ -755,7 +755,7 @@ static void neo_parse_isr(struct jsm_board *brd, u32 port)
 		}
 
 		if (isr & UART_17158_IIR_XONXOFF) {
-			cause = readb(&ch->ch_neo_uart->xoffchar1);
+			cause = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:758", &ch->ch_neo_uart->xoffchar1);
 
 			jsm_dbg(INTR, &ch->ch_bd->pci_dev,
 				"Port %d. Got ISR_XONXOFF: cause:%x\n",
@@ -794,7 +794,7 @@ static void neo_parse_isr(struct jsm_board *brd, u32 port)
 			 * If we get here, this means the hardware is doing auto flow control.
 			 * Check to see whether RTS/DTR or CTS/DSR caused this interrupt.
 			 */
-			cause = readb(&ch->ch_neo_uart->mcr);
+			cause = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:797", &ch->ch_neo_uart->mcr);
 
 			/* Which pin is doing auto flow? RTS or DTR? */
 			spin_lock_irqsave(&ch->ch_lock, lock_flags);
@@ -816,7 +816,7 @@ static void neo_parse_isr(struct jsm_board *brd, u32 port)
 		jsm_dbg(INTR, &ch->ch_bd->pci_dev,
 			"MOD_STAT: sending to parse_modem_sigs\n");
 		spin_lock_irqsave(&ch->uart_port.lock, lock_flags);
-		neo_parse_modem(ch, readb(&ch->ch_neo_uart->msr));
+		neo_parse_modem(ch, pete_readb("drivers/tty/serial/jsm/jsm_neo.c:819", &ch->ch_neo_uart->msr));
 		spin_unlock_irqrestore(&ch->uart_port.lock, lock_flags);
 	}
 }
@@ -837,7 +837,7 @@ static inline void neo_parse_lsr(struct jsm_board *brd, u32 port)
 	if (!ch)
 		return;
 
-	linestatus = readb(&ch->ch_neo_uart->lsr);
+	linestatus = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:840", &ch->ch_neo_uart->lsr);
 
 	jsm_dbg(INTR, &ch->ch_bd->pci_dev, "%s:%d port: %d linestatus: %x\n",
 		__FILE__, __LINE__, port, linestatus);
@@ -1024,27 +1024,27 @@ static void neo_param(struct jsm_channel *ch)
 	break;
 	}
 
-	ier = readb(&ch->ch_neo_uart->ier);
-	uart_lcr = readb(&ch->ch_neo_uart->lcr);
+	ier = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:1027", &ch->ch_neo_uart->ier);
+	uart_lcr = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:1028", &ch->ch_neo_uart->lcr);
 
 	quot = ch->ch_bd->bd_dividend / baud;
 
 	if (quot != 0) {
-		writeb(UART_LCR_DLAB, &ch->ch_neo_uart->lcr);
-		writeb((quot & 0xff), &ch->ch_neo_uart->txrx);
-		writeb((quot >> 8), &ch->ch_neo_uart->ier);
-		writeb(lcr, &ch->ch_neo_uart->lcr);
+		pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1033", UART_LCR_DLAB, &ch->ch_neo_uart->lcr);
+		pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1034", (quot & 0xff), &ch->ch_neo_uart->txrx);
+		pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1035", (quot >> 8), &ch->ch_neo_uart->ier);
+		pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1036", lcr, &ch->ch_neo_uart->lcr);
 	}
 
 	if (uart_lcr != lcr)
-		writeb(lcr, &ch->ch_neo_uart->lcr);
+		pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1040", lcr, &ch->ch_neo_uart->lcr);
 
 	if (ch->ch_c_cflag & CREAD)
 		ier |= (UART_IER_RDI | UART_IER_RLSI);
 
 	ier |= (UART_IER_THRI | UART_IER_MSI);
 
-	writeb(ier, &ch->ch_neo_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1047", ier, &ch->ch_neo_uart->ier);
 
 	/* Set new start/stop chars */
 	neo_set_new_start_stop_chars(ch);
@@ -1078,14 +1078,14 @@ static void neo_param(struct jsm_channel *ch)
 	 * delay on firing off the RX FIFO interrupt on slower baud rates.
 	 */
 	if (baud < 9600) {
-		writeb(1, &ch->ch_neo_uart->rfifo);
+		pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1081", 1, &ch->ch_neo_uart->rfifo);
 		ch->ch_r_tlevel = 1;
 	}
 
 	neo_assert_modem_signals(ch);
 
 	/* Get current status of the modem signals now */
-	neo_parse_modem(ch, readb(&ch->ch_neo_uart->msr));
+	neo_parse_modem(ch, pete_readb("drivers/tty/serial/jsm/jsm_neo.c:1088", &ch->ch_neo_uart->msr));
 	return;
 }
 
@@ -1115,7 +1115,7 @@ static irqreturn_t neo_intr(int irq, void *voidbrd)
 	 * Bits 0-7: What port triggered the interrupt.
 	 * Bits 8-31: Each 3bits indicate what type of interrupt occurred.
 	 */
-	uart_poll = readl(brd->re_map_membase + UART_17158_POLL_ADDR_OFFSET);
+	uart_poll = pete_readl("drivers/tty/serial/jsm/jsm_neo.c:1118", brd->re_map_membase + UART_17158_POLL_ADDR_OFFSET);
 
 	jsm_dbg(INTR, &brd->pci_dev, "%s:%d uart_poll: %x\n",
 		__FILE__, __LINE__, uart_poll);
@@ -1243,9 +1243,9 @@ static irqreturn_t neo_intr(int irq, void *voidbrd)
  */
 static void neo_disable_receiver(struct jsm_channel *ch)
 {
-	u8 tmp = readb(&ch->ch_neo_uart->ier);
+	u8 tmp = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:1246", &ch->ch_neo_uart->ier);
 	tmp &= ~(UART_IER_RDI);
-	writeb(tmp, &ch->ch_neo_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1248", tmp, &ch->ch_neo_uart->ier);
 
 	/* flush write operation */
 	neo_pci_posting_flush(ch->ch_bd);
@@ -1259,9 +1259,9 @@ static void neo_disable_receiver(struct jsm_channel *ch)
  */
 static void neo_enable_receiver(struct jsm_channel *ch)
 {
-	u8 tmp = readb(&ch->ch_neo_uart->ier);
+	u8 tmp = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:1262", &ch->ch_neo_uart->ier);
 	tmp |= (UART_IER_RDI);
-	writeb(tmp, &ch->ch_neo_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1264", tmp, &ch->ch_neo_uart->ier);
 
 	/* flush write operation */
 	neo_pci_posting_flush(ch->ch_bd);
@@ -1274,7 +1274,7 @@ static void neo_send_start_character(struct jsm_channel *ch)
 
 	if (ch->ch_startc != __DISABLED_CHAR) {
 		ch->ch_xon_sends++;
-		writeb(ch->ch_startc, &ch->ch_neo_uart->txrx);
+		pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1277", ch->ch_startc, &ch->ch_neo_uart->txrx);
 
 		/* flush write operation */
 		neo_pci_posting_flush(ch->ch_bd);
@@ -1288,7 +1288,7 @@ static void neo_send_stop_character(struct jsm_channel *ch)
 
 	if (ch->ch_stopc != __DISABLED_CHAR) {
 		ch->ch_xoff_sends++;
-		writeb(ch->ch_stopc, &ch->ch_neo_uart->txrx);
+		pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1291", ch->ch_stopc, &ch->ch_neo_uart->txrx);
 
 		/* flush write operation */
 		neo_pci_posting_flush(ch->ch_bd);
@@ -1300,20 +1300,20 @@ static void neo_send_stop_character(struct jsm_channel *ch)
  */
 static void neo_uart_init(struct jsm_channel *ch)
 {
-	writeb(0, &ch->ch_neo_uart->ier);
-	writeb(0, &ch->ch_neo_uart->efr);
-	writeb(UART_EFR_ECB, &ch->ch_neo_uart->efr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1303", 0, &ch->ch_neo_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1304", 0, &ch->ch_neo_uart->efr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1305", UART_EFR_ECB, &ch->ch_neo_uart->efr);
 
 	/* Clear out UART and FIFO */
-	readb(&ch->ch_neo_uart->txrx);
-	writeb((UART_FCR_ENABLE_FIFO|UART_FCR_CLEAR_RCVR|UART_FCR_CLEAR_XMIT), &ch->ch_neo_uart->isr_fcr);
-	readb(&ch->ch_neo_uart->lsr);
-	readb(&ch->ch_neo_uart->msr);
+	pete_readb("drivers/tty/serial/jsm/jsm_neo.c:1308", &ch->ch_neo_uart->txrx);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1309", (UART_FCR_ENABLE_FIFO|UART_FCR_CLEAR_RCVR|UART_FCR_CLEAR_XMIT), &ch->ch_neo_uart->isr_fcr);
+	pete_readb("drivers/tty/serial/jsm/jsm_neo.c:1310", &ch->ch_neo_uart->lsr);
+	pete_readb("drivers/tty/serial/jsm/jsm_neo.c:1311", &ch->ch_neo_uart->msr);
 
 	ch->ch_flags |= CH_FIFO_ENABLED;
 
 	/* Assert any signals we want up */
-	writeb(ch->ch_mostat, &ch->ch_neo_uart->mcr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1316", ch->ch_mostat, &ch->ch_neo_uart->mcr);
 }
 
 /*
@@ -1322,16 +1322,16 @@ static void neo_uart_init(struct jsm_channel *ch)
 static void neo_uart_off(struct jsm_channel *ch)
 {
 	/* Turn off UART enhanced bits */
-	writeb(0, &ch->ch_neo_uart->efr);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1325", 0, &ch->ch_neo_uart->efr);
 
 	/* Stop all interrupts from occurring. */
-	writeb(0, &ch->ch_neo_uart->ier);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1328", 0, &ch->ch_neo_uart->ier);
 }
 
 static u32 neo_get_uart_bytes_left(struct jsm_channel *ch)
 {
 	u8 left = 0;
-	u8 lsr = readb(&ch->ch_neo_uart->lsr);
+	u8 lsr = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:1334", &ch->ch_neo_uart->lsr);
 
 	/* We must cache the LSR as some of the bits get reset once read... */
 	ch->ch_cached_lsr |= lsr;
@@ -1358,8 +1358,8 @@ static void neo_send_break(struct jsm_channel *ch)
 
 	/* Tell the UART to start sending the break */
 	if (!(ch->ch_flags & CH_BREAK_SENDING)) {
-		u8 temp = readb(&ch->ch_neo_uart->lcr);
-		writeb((temp | UART_LCR_SBC), &ch->ch_neo_uart->lcr);
+		u8 temp = pete_readb("drivers/tty/serial/jsm/jsm_neo.c:1361", &ch->ch_neo_uart->lcr);
+		pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1362", (temp | UART_LCR_SBC), &ch->ch_neo_uart->lcr);
 		ch->ch_flags |= (CH_BREAK_SENDING);
 
 		/* flush write operation */
@@ -1380,7 +1380,7 @@ static void neo_send_immediate_char(struct jsm_channel *ch, unsigned char c)
 	if (!ch)
 		return;
 
-	writeb(c, &ch->ch_neo_uart->txrx);
+	pete_writeb("drivers/tty/serial/jsm/jsm_neo.c:1383", c, &ch->ch_neo_uart->txrx);
 
 	/* flush write operation */
 	neo_pci_posting_flush(ch->ch_bd);

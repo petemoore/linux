@@ -164,10 +164,10 @@ struct st_fdma_dev {
 #define FDMA_INT_MASK_OFST	0xFDC
 
 #define fdma_read(fdev, name) \
-	readl((fdev)->slim_rproc->peri + name)
+	pete_readl("drivers/dma/st_fdma.h:167", (fdev)->slim_rproc->peri + name)
 
 #define fdma_write(fdev, val, name) \
-	writel((val), (fdev)->slim_rproc->peri + name)
+	pete_writel("drivers/dma/st_fdma.h:170", (val), (fdev)->slim_rproc->peri + name)
 
 /* fchan interface (dmem) */
 #define FDMA_CH_CMD_OFST	0x200
@@ -182,19 +182,19 @@ struct st_fdma_dev {
 #define FDMA_CH_CMD_ERR_MCHI		(0x2 << 2)
 #define FDMA_CH_CMD_DATA_MASK		GENMASK(31, 5)
 #define fchan_read(fchan, name) \
-	readl((fchan)->fdev->slim_rproc->mem[ST_SLIM_DMEM].cpu_addr \
+	pete_readl("drivers/dma/st_fdma.h:185", (fchan)->fdev->slim_rproc->mem[ST_SLIM_DMEM].cpu_addr \
 			+ (fchan)->vchan.chan.chan_id * 0x4 \
 			+ name)
 
 #define fchan_write(fchan, val, name) \
-	writel((val), (fchan)->fdev->slim_rproc->mem[ST_SLIM_DMEM].cpu_addr \
+	pete_writel("drivers/dma/st_fdma.h:190", (val), (fchan)->fdev->slim_rproc->mem[ST_SLIM_DMEM].cpu_addr \
 			+ (fchan)->vchan.chan.chan_id * 0x4 \
 			+ name)
 
 /* req interface */
 #define FDMA_REQ_CTRL_OFST	0x240
 #define dreq_write(fchan, val, name) \
-	writel((val), (fchan)->fdev->slim_rproc->mem[ST_SLIM_DMEM].cpu_addr \
+	pete_writel("drivers/dma/st_fdma.h:197", (val), (fchan)->fdev->slim_rproc->mem[ST_SLIM_DMEM].cpu_addr \
 			+ fchan->dreq_line * 0x04 \
 			+ name)
 /* node interface */
@@ -204,12 +204,12 @@ struct st_fdma_dev {
 #define FDMA_SADDRN_OFST	0x80c
 #define FDMA_DADDRN_OFST	0x810
 #define fnode_read(fchan, name) \
-	readl((fchan)->fdev->slim_rproc->mem[ST_SLIM_DMEM].cpu_addr \
+	pete_readl("drivers/dma/st_fdma.h:207", (fchan)->fdev->slim_rproc->mem[ST_SLIM_DMEM].cpu_addr \
 			+ (fchan)->vchan.chan.chan_id * FDMA_NODE_SZ \
 			+ name)
 
 #define fnode_write(fchan, val, name) \
-	writel((val), (fchan)->fdev->slim_rproc->mem[ST_SLIM_DMEM].cpu_addr \
+	pete_writel("drivers/dma/st_fdma.h:212", (val), (fchan)->fdev->slim_rproc->mem[ST_SLIM_DMEM].cpu_addr \
 			+ (fchan)->vchan.chan.chan_id * FDMA_NODE_SZ \
 			+ name)
 

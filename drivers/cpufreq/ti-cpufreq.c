@@ -223,7 +223,7 @@ static int ti_cpufreq_get_efuse(struct ti_cpufreq_data *opp_data,
 
 		if (!regs)
 			return -ENOMEM;
-		efuse = readl(regs);
+		efuse = pete_readl("drivers/cpufreq/ti-cpufreq.c:226", regs);
 		iounmap(regs);
 		}
 	else if (ret) {
@@ -264,7 +264,7 @@ static int ti_cpufreq_get_rev(struct ti_cpufreq_data *opp_data,
 
 		if (!regs)
 			return -ENOMEM;
-		revision = readl(regs);
+		revision = pete_readl("drivers/cpufreq/ti-cpufreq.c:267", regs);
 		iounmap(regs);
 		}
 	else if (ret) {

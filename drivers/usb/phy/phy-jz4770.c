@@ -128,15 +128,15 @@ static int ingenic_usb_phy_set_peripheral(struct usb_otg *otg,
 	u32 reg;
 
 	if (priv->soc_info->version >= ID_X1000) {
-		reg = readl(priv->base + REG_USBPCR1_OFFSET);
+		reg = pete_readl("drivers/usb/phy/phy-jz4770.c:131", priv->base + REG_USBPCR1_OFFSET);
 		reg |= USBPCR1_BVLD_REG;
-		writel(reg, priv->base + REG_USBPCR1_OFFSET);
+		pete_writel("drivers/usb/phy/phy-jz4770.c:133", reg, priv->base + REG_USBPCR1_OFFSET);
 	}
 
-	reg = readl(priv->base + REG_USBPCR_OFFSET);
+	reg = pete_readl("drivers/usb/phy/phy-jz4770.c:136", priv->base + REG_USBPCR_OFFSET);
 	reg &= ~USBPCR_USB_MODE;
 	reg |= USBPCR_VBUSVLDEXT | USBPCR_VBUSVLDEXTSEL | USBPCR_OTG_DISABLE;
-	writel(reg, priv->base + REG_USBPCR_OFFSET);
+	pete_writel("drivers/usb/phy/phy-jz4770.c:139", reg, priv->base + REG_USBPCR_OFFSET);
 
 	return 0;
 }
@@ -146,10 +146,10 @@ static int ingenic_usb_phy_set_host(struct usb_otg *otg, struct usb_bus *host)
 	struct jz4770_phy *priv = otg_to_jz4770_phy(otg);
 	u32 reg;
 
-	reg = readl(priv->base + REG_USBPCR_OFFSET);
+	reg = pete_readl("drivers/usb/phy/phy-jz4770.c:149", priv->base + REG_USBPCR_OFFSET);
 	reg &= ~(USBPCR_VBUSVLDEXT | USBPCR_VBUSVLDEXTSEL | USBPCR_OTG_DISABLE);
 	reg |= USBPCR_USB_MODE;
-	writel(reg, priv->base + REG_USBPCR_OFFSET);
+	pete_writel("drivers/usb/phy/phy-jz4770.c:152", reg, priv->base + REG_USBPCR_OFFSET);
 
 	return 0;
 }
@@ -176,8 +176,8 @@ static int ingenic_usb_phy_init(struct usb_phy *phy)
 
 	/* Wait for PHY to reset */
 	usleep_range(30, 300);
-	reg = readl(priv->base + REG_USBPCR_OFFSET);
-	writel(reg & ~USBPCR_POR, priv->base + REG_USBPCR_OFFSET);
+	reg = pete_readl("drivers/usb/phy/phy-jz4770.c:179", priv->base + REG_USBPCR_OFFSET);
+	pete_writel("drivers/usb/phy/phy-jz4770.c:180", reg & ~USBPCR_POR, priv->base + REG_USBPCR_OFFSET);
 	usleep_range(300, 1000);
 
 	return 0;
@@ -205,7 +205,7 @@ static void jz4770_usb_phy_init(struct usb_phy *phy)
 		USBPCR_COMPDISTUNE_DFT | USBPCR_OTGTUNE_DFT | USBPCR_SQRXTUNE_DFT |
 		USBPCR_TXFSLSTUNE_DFT | USBPCR_TXRISETUNE_DFT | USBPCR_TXVREFTUNE_DFT |
 		USBPCR_POR;
-	writel(reg, priv->base + REG_USBPCR_OFFSET);
+	pete_writel("drivers/usb/phy/phy-jz4770.c:208", reg, priv->base + REG_USBPCR_OFFSET);
 }
 
 static void jz4780_usb_phy_init(struct usb_phy *phy)
@@ -213,12 +213,12 @@ static void jz4780_usb_phy_init(struct usb_phy *phy)
 	struct jz4770_phy *priv = phy_to_jz4770_phy(phy);
 	u32 reg;
 
-	reg = readl(priv->base + REG_USBPCR1_OFFSET) | USBPCR1_USB_SEL |
+	reg = pete_readl("drivers/usb/phy/phy-jz4770.c:216", priv->base + REG_USBPCR1_OFFSET) | USBPCR1_USB_SEL |
 		USBPCR1_WORD_IF_16BIT;
-	writel(reg, priv->base + REG_USBPCR1_OFFSET);
+	pete_writel("drivers/usb/phy/phy-jz4770.c:218", reg, priv->base + REG_USBPCR1_OFFSET);
 
 	reg = USBPCR_TXPREEMPHTUNE | USBPCR_COMMONONN | USBPCR_POR;
-	writel(reg, priv->base + REG_USBPCR_OFFSET);
+	pete_writel("drivers/usb/phy/phy-jz4770.c:221", reg, priv->base + REG_USBPCR_OFFSET);
 }
 
 static void x1000_usb_phy_init(struct usb_phy *phy)
@@ -226,13 +226,13 @@ static void x1000_usb_phy_init(struct usb_phy *phy)
 	struct jz4770_phy *priv = phy_to_jz4770_phy(phy);
 	u32 reg;
 
-	reg = readl(priv->base + REG_USBPCR1_OFFSET) | USBPCR1_WORD_IF_16BIT;
-	writel(reg, priv->base + REG_USBPCR1_OFFSET);
+	reg = pete_readl("drivers/usb/phy/phy-jz4770.c:229", priv->base + REG_USBPCR1_OFFSET) | USBPCR1_WORD_IF_16BIT;
+	pete_writel("drivers/usb/phy/phy-jz4770.c:230", reg, priv->base + REG_USBPCR1_OFFSET);
 
 	reg = USBPCR_SQRXTUNE_DCR_20PCT | USBPCR_TXPREEMPHTUNE |
 		USBPCR_TXHSXVTUNE_DCR_15MV | USBPCR_TXVREFTUNE_INC_25PPT |
 		USBPCR_COMMONONN | USBPCR_POR;
-	writel(reg, priv->base + REG_USBPCR_OFFSET);
+	pete_writel("drivers/usb/phy/phy-jz4770.c:235", reg, priv->base + REG_USBPCR_OFFSET);
 }
 
 static void x1830_usb_phy_init(struct usb_phy *phy)
@@ -241,15 +241,15 @@ static void x1830_usb_phy_init(struct usb_phy *phy)
 	u32 reg;
 
 	/* rdt */
-	writel(USBRDT_VBFIL_EN | USBRDT_UTMI_RST, priv->base + REG_USBRDT_OFFSET);
+	pete_writel("drivers/usb/phy/phy-jz4770.c:244", USBRDT_VBFIL_EN | USBRDT_UTMI_RST, priv->base + REG_USBRDT_OFFSET);
 
-	reg = readl(priv->base + REG_USBPCR1_OFFSET) | USBPCR1_WORD_IF_16BIT |
+	reg = pete_readl("drivers/usb/phy/phy-jz4770.c:246", priv->base + REG_USBPCR1_OFFSET) | USBPCR1_WORD_IF_16BIT |
 		USBPCR1_DMPD | USBPCR1_DPPD;
-	writel(reg, priv->base + REG_USBPCR1_OFFSET);
+	pete_writel("drivers/usb/phy/phy-jz4770.c:248", reg, priv->base + REG_USBPCR1_OFFSET);
 
 	reg = USBPCR_IDPULLUP_OTG | USBPCR_VBUSVLDEXT |	USBPCR_TXPREEMPHTUNE |
 		USBPCR_COMMONONN | USBPCR_POR;
-	writel(reg, priv->base + REG_USBPCR_OFFSET);
+	pete_writel("drivers/usb/phy/phy-jz4770.c:252", reg, priv->base + REG_USBPCR_OFFSET);
 }
 
 static const struct ingenic_soc_info jz4770_soc_info = {

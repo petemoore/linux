@@ -240,12 +240,12 @@ static inline void vga_enable_palette(struct tdfx_par *par)
 
 static inline u32 tdfx_inl(struct tdfx_par *par, unsigned int reg)
 {
-	return readl(par->regbase_virt + reg);
+	return pete_readl("drivers/video/fbdev/tdfxfb.c:243", par->regbase_virt + reg);
 }
 
 static inline void tdfx_outl(struct tdfx_par *par, unsigned int reg, u32 val)
 {
-	writel(val, par->regbase_virt + reg);
+	pete_writel("drivers/video/fbdev/tdfxfb.c:248", val, par->regbase_virt + reg);
 }
 
 static inline void banshee_make_room(struct tdfx_par *par, int size)

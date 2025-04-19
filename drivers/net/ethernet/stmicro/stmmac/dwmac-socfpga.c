@@ -66,11 +66,11 @@ static void socfpga_dwmac_fix_mac_speed(void *priv, unsigned int speed)
 	u32 val;
 
 	if (sgmii_adapter_base)
-		writew(SGMII_ADAPTER_DISABLE,
+		pete_writew("drivers/net/ethernet/stmicro/stmmac/dwmac-socfpga.c:69", SGMII_ADAPTER_DISABLE,
 		       sgmii_adapter_base + SGMII_ADAPTER_CTRL_REG);
 
 	if (splitter_base) {
-		val = readl(splitter_base + EMAC_SPLITTER_CTRL_REG);
+		val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-socfpga.c:73", splitter_base + EMAC_SPLITTER_CTRL_REG);
 		val &= ~EMAC_SPLITTER_CTRL_SPEED_MASK;
 
 		switch (speed) {
@@ -86,11 +86,11 @@ static void socfpga_dwmac_fix_mac_speed(void *priv, unsigned int speed)
 		default:
 			return;
 		}
-		writel(val, splitter_base + EMAC_SPLITTER_CTRL_REG);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-socfpga.c:89", val, splitter_base + EMAC_SPLITTER_CTRL_REG);
 	}
 
 	if (phy_dev && sgmii_adapter_base) {
-		writew(SGMII_ADAPTER_ENABLE,
+		pete_writew("drivers/net/ethernet/stmicro/stmmac/dwmac-socfpga.c:93", SGMII_ADAPTER_ENABLE,
 		       sgmii_adapter_base + SGMII_ADAPTER_CTRL_REG);
 		tse_pcs_fix_mac_speed(&dwmac->pcs, phy_dev, speed);
 	}

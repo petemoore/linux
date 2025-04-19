@@ -53,10 +53,10 @@ static int indirect_bus_reg_read(void *context, unsigned int reg,
 	int loops;
 	u64 v;
 
-	writeq((reg >> 2) | INDIRECT_RD, base + INDIRECT_ADDR);
+	pete_writeq("drivers/spi/spi-altera-dfl.c:56", (reg >> 2) | INDIRECT_RD, base + INDIRECT_ADDR);
 
 	loops = 0;
-	while ((readq(base + INDIRECT_ADDR) & INDIRECT_RD) &&
+	while ((pete_readq("drivers/spi/spi-altera-dfl.c:59", base + INDIRECT_ADDR) & INDIRECT_RD) &&
 	       (loops++ < INDIRECT_TIMEOUT))
 		cpu_relax();
 
@@ -65,7 +65,7 @@ static int indirect_bus_reg_read(void *context, unsigned int reg,
 		return -ETIME;
 	}
 
-	v = readq(base + INDIRECT_RD_DATA);
+	v = pete_readq("drivers/spi/spi-altera-dfl.c:68", base + INDIRECT_RD_DATA);
 
 	*val = v & INDIRECT_DATA_MASK;
 
@@ -78,11 +78,11 @@ static int indirect_bus_reg_write(void *context, unsigned int reg,
 	void __iomem *base = context;
 	int loops;
 
-	writeq(val, base + INDIRECT_WR_DATA);
-	writeq((reg >> 2) | INDIRECT_WR, base + INDIRECT_ADDR);
+	pete_writeq("drivers/spi/spi-altera-dfl.c:81", val, base + INDIRECT_WR_DATA);
+	pete_writeq("drivers/spi/spi-altera-dfl.c:82", (reg >> 2) | INDIRECT_WR, base + INDIRECT_ADDR);
 
 	loops = 0;
-	while ((readq(base + INDIRECT_ADDR) & INDIRECT_WR) &&
+	while ((pete_readq("drivers/spi/spi-altera-dfl.c:85", base + INDIRECT_ADDR) & INDIRECT_WR) &&
 	       (loops++ < INDIRECT_TIMEOUT))
 		cpu_relax();
 
@@ -108,7 +108,7 @@ static void config_spi_master(void __iomem *base, struct spi_master *master)
 {
 	u64 v;
 
-	v = readq(base + SPI_CORE_PARAMETER);
+	v = pete_readq("drivers/spi/spi-altera-dfl.c:111", base + SPI_CORE_PARAMETER);
 
 	master->mode_bits = SPI_CS_HIGH;
 	if (FIELD_GET(CLK_POLARITY, v))

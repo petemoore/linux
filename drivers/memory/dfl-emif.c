@@ -51,7 +51,7 @@ static ssize_t emif_state_show(struct device *dev,
 	struct dfl_emif *de = dev_get_drvdata(dev);
 	u64 val;
 
-	val = readq(de->base + EMIF_STAT);
+	val = pete_readq("drivers/memory/dfl-emif.c:54", de->base + EMIF_STAT);
 
 	return sysfs_emit(buf, "%u\n",
 			  !!(val & BIT_ULL(eattr->shift + eattr->index)));
@@ -74,10 +74,10 @@ static ssize_t emif_clear_store(struct device *dev,
 
 	spin_lock(&de->lock);
 	/* The CLEAR_EN field is WO, but other fields are RW */
-	val = readq(base + EMIF_CTRL);
+	val = pete_readq("drivers/memory/dfl-emif.c:77", base + EMIF_CTRL);
 	val &= ~EMIF_CTRL_CLEAR_EN_MSK;
 	val |= clear_en_msk;
-	writeq(val, base + EMIF_CTRL);
+	pete_writeq("drivers/memory/dfl-emif.c:80", val, base + EMIF_CTRL);
 	spin_unlock(&de->lock);
 
 	if (readq_poll_timeout(base + EMIF_STAT, val,
@@ -151,7 +151,7 @@ static umode_t dfl_emif_visible(struct kobject *kobj,
 	 * CLEAN_EN field (which is a bitmap) could tell how many interfaces
 	 * are available.
 	 */
-	val = FIELD_GET(EMIF_CTRL_CLEAR_EN_MSK, readq(de->base + EMIF_CTRL));
+	val = FIELD_GET(EMIF_CTRL_CLEAR_EN_MSK, pete_readq("drivers/memory/dfl-emif.c:154", de->base + EMIF_CTRL));
 
 	return (val & BIT_ULL(eattr->index)) ? attr->mode : 0;
 }

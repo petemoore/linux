@@ -188,7 +188,7 @@ static void envtrl_i2c_test_pin(void)
 	int limit = 1000000;
 
 	while (--limit > 0) {
-		if (!(readb(i2c + PCF8584_CSR) & STATUS_PIN)) 
+		if (!(pete_readb("drivers/sbus/char/envctrl.c:191", i2c + PCF8584_CSR) & STATUS_PIN)) 
 			break;
 		udelay(1);
 	} 
@@ -206,7 +206,7 @@ static void envctrl_i2c_test_bb(void)
 
 	while (--limit > 0) {
 		/* Busy bit 0 means busy. */
-		if (readb(i2c + PCF8584_CSR) & STATUS_BB)
+		if (pete_readb("drivers/sbus/char/envctrl.c:209", i2c + PCF8584_CSR) & STATUS_BB)
 			break;
 		udelay(1);
 	} 
@@ -223,20 +223,20 @@ static int envctrl_i2c_read_addr(unsigned char addr)
 	envctrl_i2c_test_bb();
 
 	/* Load address. */
-	writeb(addr + 1, i2c + PCF8584_DATA);
+	pete_writeb("drivers/sbus/char/envctrl.c:226", addr + 1, i2c + PCF8584_DATA);
 
 	envctrl_i2c_test_bb();
 
-	writeb(OBD_SEND_START, i2c + PCF8584_CSR);
+	pete_writeb("drivers/sbus/char/envctrl.c:230", OBD_SEND_START, i2c + PCF8584_CSR);
 
 	/* Wait for PIN. */
 	envtrl_i2c_test_pin();
 
 	/* CSR 0 means acknowledged. */
-	if (!(readb(i2c + PCF8584_CSR) & STATUS_LRB)) {
-		return readb(i2c + PCF8584_DATA);
+	if (!(pete_readb("drivers/sbus/char/envctrl.c:236", i2c + PCF8584_CSR) & STATUS_LRB)) {
+		return pete_readb("drivers/sbus/char/envctrl.c:237", i2c + PCF8584_DATA);
 	} else {
-		writeb(OBD_SEND_STOP, i2c + PCF8584_CSR);
+		pete_writeb("drivers/sbus/char/envctrl.c:239", OBD_SEND_STOP, i2c + PCF8584_CSR);
 		return 0;
 	}
 }
@@ -247,10 +247,10 @@ static int envctrl_i2c_read_addr(unsigned char addr)
 static void envctrl_i2c_write_addr(unsigned char addr)
 {
 	envctrl_i2c_test_bb();
-	writeb(addr, i2c + PCF8584_DATA);
+	pete_writeb("drivers/sbus/char/envctrl.c:250", addr, i2c + PCF8584_DATA);
 
 	/* Generate Start condition. */
-	writeb(OBD_SEND_START, i2c + PCF8584_CSR);
+	pete_writeb("drivers/sbus/char/envctrl.c:253", OBD_SEND_START, i2c + PCF8584_CSR);
 }
 
 /* Function Description: Read 1 byte of data from addr 
@@ -260,8 +260,8 @@ static void envctrl_i2c_write_addr(unsigned char addr)
 static unsigned char envctrl_i2c_read_data(void)
 {
 	envtrl_i2c_test_pin();
-	writeb(CONTROL_ES0, i2c + PCF8584_CSR);  /* Send neg ack. */
-	return readb(i2c + PCF8584_DATA);
+	pete_writeb("drivers/sbus/char/envctrl.c:263", CONTROL_ES0, i2c + PCF8584_CSR);  /* Send neg ack. */
+	return pete_readb("drivers/sbus/char/envctrl.c:264", i2c + PCF8584_DATA);
 }
 
 /* Function Description: Instruct the device which port to read data from.  
@@ -270,7 +270,7 @@ static unsigned char envctrl_i2c_read_data(void)
 static void envctrl_i2c_write_data(unsigned char port)
 {
 	envtrl_i2c_test_pin();
-	writeb(port, i2c + PCF8584_DATA);
+	pete_writeb("drivers/sbus/char/envctrl.c:273", port, i2c + PCF8584_DATA);
 }
 
 /* Function Description: Generate Stop condition after last byte is sent.
@@ -279,7 +279,7 @@ static void envctrl_i2c_write_data(unsigned char port)
 static void envctrl_i2c_stop(void)
 {
 	envtrl_i2c_test_pin();
-	writeb(OBD_SEND_STOP, i2c + PCF8584_CSR);
+	pete_writeb("drivers/sbus/char/envctrl.c:282", OBD_SEND_STOP, i2c + PCF8584_CSR);
 }
 
 /* Function Description: Read adc device.
@@ -301,7 +301,7 @@ static unsigned char envctrl_i2c_read_8591(unsigned char addr, unsigned char por
 	envctrl_i2c_read_data();
 	envctrl_i2c_stop();
 
-	return readb(i2c + PCF8584_DATA);
+	return pete_readb("drivers/sbus/char/envctrl.c:304", i2c + PCF8584_DATA);
 }
 
 /* Function Description: Read gpio device.
@@ -1048,15 +1048,15 @@ static int envctrl_probe(struct platform_device *op)
 	}
 
 	/* Set device address. */
-	writeb(CONTROL_PIN, i2c + PCF8584_CSR);
-	writeb(PCF8584_ADDRESS, i2c + PCF8584_DATA);
+	pete_writeb("drivers/sbus/char/envctrl.c:1051", CONTROL_PIN, i2c + PCF8584_CSR);
+	pete_writeb("drivers/sbus/char/envctrl.c:1052", PCF8584_ADDRESS, i2c + PCF8584_DATA);
 
 	/* Set system clock and SCL frequencies. */ 
-	writeb(CONTROL_PIN | CONTROL_ES1, i2c + PCF8584_CSR);
-	writeb(CLK_4_43 | BUS_CLK_90, i2c + PCF8584_DATA);
+	pete_writeb("drivers/sbus/char/envctrl.c:1055", CONTROL_PIN | CONTROL_ES1, i2c + PCF8584_CSR);
+	pete_writeb("drivers/sbus/char/envctrl.c:1056", CLK_4_43 | BUS_CLK_90, i2c + PCF8584_DATA);
 
 	/* Enable serial interface. */
-	writeb(CONTROL_PIN | CONTROL_ES0 | CONTROL_ACK, i2c + PCF8584_CSR);
+	pete_writeb("drivers/sbus/char/envctrl.c:1059", CONTROL_PIN | CONTROL_ES0 | CONTROL_ACK, i2c + PCF8584_CSR);
 	udelay(200);
 
 	/* Register the device as a minor miscellaneous device. */

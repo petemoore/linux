@@ -96,10 +96,10 @@ static inline void mt6577_auxadc_mod_reg(void __iomem *reg,
 {
 	u32 val;
 
-	val = readl(reg);
+	val = pete_readl("drivers/iio/adc/mt6577_auxadc.c:99", reg);
 	val |= or_mask;
 	val &= ~and_mask;
-	writel(val, reg);
+	pete_writel("drivers/iio/adc/mt6577_auxadc.c:102", val, reg);
 }
 
 static int mt6577_auxadc_read(struct iio_dev *indio_dev,
@@ -163,7 +163,7 @@ static int mt6577_auxadc_read(struct iio_dev *indio_dev,
 	}
 
 	/* read data */
-	val = readl(reg_channel) & MT6577_AUXADC_DAT_MASK;
+	val = pete_readl("drivers/iio/adc/mt6577_auxadc.c:166", reg_channel) & MT6577_AUXADC_DAT_MASK;
 
 	mutex_unlock(&adc_dev->lock);
 

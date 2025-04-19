@@ -380,7 +380,7 @@ static inline u32 csdev_access_relaxed_read32(struct csdev_access *csa,
 static inline u32 csdev_access_read32(struct csdev_access *csa, u32 offset)
 {
 	if (likely(csa->io_mem))
-		return readl(csa->base + offset);
+		return pete_readl("include/linux/coresight.h:383", csa->base + offset);
 
 	return csa->read(offset, false, false);
 }
@@ -397,7 +397,7 @@ static inline void csdev_access_relaxed_write32(struct csdev_access *csa,
 static inline void csdev_access_write32(struct csdev_access *csa, u32 val, u32 offset)
 {
 	if (likely(csa->io_mem))
-		writel(val, csa->base + offset);
+		pete_writel("include/linux/coresight.h:400", val, csa->base + offset);
 	else
 		csa->write(val, offset, false, false);
 }
@@ -416,7 +416,7 @@ static inline u64 csdev_access_relaxed_read64(struct csdev_access *csa,
 static inline u64 csdev_access_read64(struct csdev_access *csa, u32 offset)
 {
 	if (likely(csa->io_mem))
-		return readq(csa->base + offset);
+		return pete_readq("include/linux/coresight.h:419", csa->base + offset);
 
 	return csa->read(offset, false, true);
 }
@@ -433,7 +433,7 @@ static inline void csdev_access_relaxed_write64(struct csdev_access *csa,
 static inline void csdev_access_write64(struct csdev_access *csa, u64 val, u32 offset)
 {
 	if (likely(csa->io_mem))
-		writeq(val, csa->base + offset);
+		pete_writeq("include/linux/coresight.h:436", val, csa->base + offset);
 	else
 		csa->write(val, offset, false, true);
 }

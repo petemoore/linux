@@ -566,21 +566,21 @@ static const struct can_bittiming_const rcar_canfd_bittiming_const = {
 /* Helper functions */
 static inline void rcar_canfd_update(u32 mask, u32 val, u32 __iomem *reg)
 {
-	u32 data = readl(reg);
+	u32 data = pete_readl("drivers/net/can/rcar/rcar_canfd.c:569", reg);
 
 	data &= ~mask;
 	data |= (val & mask);
-	writel(data, reg);
+	pete_writel("drivers/net/can/rcar/rcar_canfd.c:573", data, reg);
 }
 
 static inline u32 rcar_canfd_read(void __iomem *base, u32 offset)
 {
-	return readl(base + (offset));
+	return pete_readl("drivers/net/can/rcar/rcar_canfd.c:578", base + (offset));
 }
 
 static inline void rcar_canfd_write(void __iomem *base, u32 offset, u32 val)
 {
-	writel(val, base + (offset));
+	pete_writel("drivers/net/can/rcar/rcar_canfd.c:583", val, base + (offset));
 }
 
 static void rcar_canfd_set_bit(void __iomem *base, u32 reg, u32 val)

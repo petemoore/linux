@@ -109,7 +109,7 @@ static inline void mc_write_command(struct fsl_mc_command __iomem *portal,
 		writeq_relaxed(le64_to_cpu(cmd->params[i]), &portal->params[i]);
 
 	/* submit the command by writing the header */
-	writeq(le64_to_cpu(cmd->header), &portal->header);
+	pete_writeq("drivers/bus/fsl-mc/mc-sys.c:112", le64_to_cpu(cmd->header), &portal->header);
 }
 
 /**

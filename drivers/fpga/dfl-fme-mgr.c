@@ -94,12 +94,12 @@ static u64 fme_mgr_pr_error_handle(void __iomem *fme_pr)
 {
 	u64 pr_status, pr_error;
 
-	pr_status = readq(fme_pr + FME_PR_STS);
+	pr_status = pete_readq("drivers/fpga/dfl-fme-mgr.c:97", fme_pr + FME_PR_STS);
 	if (!(pr_status & FME_PR_STS_PR_STS))
 		return 0;
 
-	pr_error = readq(fme_pr + FME_PR_ERR);
-	writeq(pr_error, fme_pr + FME_PR_ERR);
+	pr_error = pete_readq("drivers/fpga/dfl-fme-mgr.c:101", fme_pr + FME_PR_ERR);
+	pete_writeq("drivers/fpga/dfl-fme-mgr.c:102", pr_error, fme_pr + FME_PR_ERR);
 
 	return pr_error;
 }
@@ -120,9 +120,9 @@ static int fme_mgr_write_init(struct fpga_manager *mgr,
 
 	dev_dbg(dev, "resetting PR before initiated PR\n");
 
-	pr_ctrl = readq(fme_pr + FME_PR_CTRL);
+	pr_ctrl = pete_readq("drivers/fpga/dfl-fme-mgr.c:123", fme_pr + FME_PR_CTRL);
 	pr_ctrl |= FME_PR_CTRL_PR_RST;
-	writeq(pr_ctrl, fme_pr + FME_PR_CTRL);
+	pete_writeq("drivers/fpga/dfl-fme-mgr.c:125", pr_ctrl, fme_pr + FME_PR_CTRL);
 
 	if (readq_poll_timeout(fme_pr + FME_PR_CTRL, pr_ctrl,
 			       pr_ctrl & FME_PR_CTRL_PR_RSTACK, 1,
@@ -131,9 +131,9 @@ static int fme_mgr_write_init(struct fpga_manager *mgr,
 		return -ETIMEDOUT;
 	}
 
-	pr_ctrl = readq(fme_pr + FME_PR_CTRL);
+	pr_ctrl = pete_readq("drivers/fpga/dfl-fme-mgr.c:134", fme_pr + FME_PR_CTRL);
 	pr_ctrl &= ~FME_PR_CTRL_PR_RST;
-	writeq(pr_ctrl, fme_pr + FME_PR_CTRL);
+	pete_writeq("drivers/fpga/dfl-fme-mgr.c:136", pr_ctrl, fme_pr + FME_PR_CTRL);
 
 	dev_dbg(dev,
 		"waiting for PR resource in HW to be initialized and ready\n");
@@ -154,10 +154,10 @@ static int fme_mgr_write_init(struct fpga_manager *mgr,
 
 	dev_dbg(dev, "set PR port ID\n");
 
-	pr_ctrl = readq(fme_pr + FME_PR_CTRL);
+	pr_ctrl = pete_readq("drivers/fpga/dfl-fme-mgr.c:157", fme_pr + FME_PR_CTRL);
 	pr_ctrl &= ~FME_PR_CTRL_PR_RGN_ID;
 	pr_ctrl |= FIELD_PREP(FME_PR_CTRL_PR_RGN_ID, info->region_id);
-	writeq(pr_ctrl, fme_pr + FME_PR_CTRL);
+	pete_writeq("drivers/fpga/dfl-fme-mgr.c:160", pr_ctrl, fme_pr + FME_PR_CTRL);
 
 	return 0;
 }
@@ -173,9 +173,9 @@ static int fme_mgr_write(struct fpga_manager *mgr,
 
 	dev_dbg(dev, "start request\n");
 
-	pr_ctrl = readq(fme_pr + FME_PR_CTRL);
+	pr_ctrl = pete_readq("drivers/fpga/dfl-fme-mgr.c:176", fme_pr + FME_PR_CTRL);
 	pr_ctrl |= FME_PR_CTRL_PR_START;
-	writeq(pr_ctrl, fme_pr + FME_PR_CTRL);
+	pete_writeq("drivers/fpga/dfl-fme-mgr.c:178", pr_ctrl, fme_pr + FME_PR_CTRL);
 
 	dev_dbg(dev, "pushing data from bitstream to HW\n");
 
@@ -185,7 +185,7 @@ static int fme_mgr_write(struct fpga_manager *mgr,
 	 * pr data write to PR_DATA register. If pr_credit <= 1, driver needs
 	 * to wait for enough pr_credit from hardware by polling.
 	 */
-	pr_status = readq(fme_pr + FME_PR_STS);
+	pr_status = pete_readq("drivers/fpga/dfl-fme-mgr.c:188", fme_pr + FME_PR_STS);
 	pr_credit = FIELD_GET(FME_PR_STS_PR_CREDIT, pr_status);
 
 	while (count > 0) {
@@ -196,7 +196,7 @@ static int fme_mgr_write(struct fpga_manager *mgr,
 			}
 			udelay(1);
 
-			pr_status = readq(fme_pr + FME_PR_STS);
+			pr_status = pete_readq("drivers/fpga/dfl-fme-mgr.c:199", fme_pr + FME_PR_STS);
 			pr_credit = FIELD_GET(FME_PR_STS_PR_CREDIT, pr_status);
 		}
 
@@ -208,7 +208,7 @@ static int fme_mgr_write(struct fpga_manager *mgr,
 		pr_data = 0;
 		pr_data |= FIELD_PREP(FME_PR_DATA_PR_DATA_RAW,
 				      *(((u32 *)buf) + i));
-		writeq(pr_data, fme_pr + FME_PR_DATA);
+		pete_writeq("drivers/fpga/dfl-fme-mgr.c:211", pr_data, fme_pr + FME_PR_DATA);
 		count -= 4;
 		pr_credit--;
 		i++;
@@ -225,9 +225,9 @@ static int fme_mgr_write_complete(struct fpga_manager *mgr,
 	void __iomem *fme_pr = priv->ioaddr;
 	u64 pr_ctrl;
 
-	pr_ctrl = readq(fme_pr + FME_PR_CTRL);
+	pr_ctrl = pete_readq("drivers/fpga/dfl-fme-mgr.c:228", fme_pr + FME_PR_CTRL);
 	pr_ctrl |= FME_PR_CTRL_PR_COMPLETE;
-	writeq(pr_ctrl, fme_pr + FME_PR_CTRL);
+	pete_writeq("drivers/fpga/dfl-fme-mgr.c:230", pr_ctrl, fme_pr + FME_PR_CTRL);
 
 	dev_dbg(dev, "green bitstream push complete\n");
 	dev_dbg(dev, "waiting for HW to release PR resource\n");
@@ -269,8 +269,8 @@ static const struct fpga_manager_ops fme_mgr_ops = {
 static void fme_mgr_get_compat_id(void __iomem *fme_pr,
 				  struct fpga_compat_id *id)
 {
-	id->id_l = readq(fme_pr + FME_PR_INTFC_ID_L);
-	id->id_h = readq(fme_pr + FME_PR_INTFC_ID_H);
+	id->id_l = pete_readq("drivers/fpga/dfl-fme-mgr.c:272", fme_pr + FME_PR_INTFC_ID_L);
+	id->id_h = pete_readq("drivers/fpga/dfl-fme-mgr.c:273", fme_pr + FME_PR_INTFC_ID_H);
 }
 
 static int fme_mgr_probe(struct platform_device *pdev)

@@ -127,16 +127,16 @@ static void hisi_femac_irq_enable(struct hisi_femac_priv *priv, int irqs)
 {
 	u32 val;
 
-	val = readl(priv->glb_base + GLB_IRQ_ENA);
-	writel(val | irqs, priv->glb_base + GLB_IRQ_ENA);
+	val = pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:130", priv->glb_base + GLB_IRQ_ENA);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:131", val | irqs, priv->glb_base + GLB_IRQ_ENA);
 }
 
 static void hisi_femac_irq_disable(struct hisi_femac_priv *priv, int irqs)
 {
 	u32 val;
 
-	val = readl(priv->glb_base + GLB_IRQ_ENA);
-	writel(val & (~irqs), priv->glb_base + GLB_IRQ_ENA);
+	val = pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:138", priv->glb_base + GLB_IRQ_ENA);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:139", val & (~irqs), priv->glb_base + GLB_IRQ_ENA);
 }
 
 static void hisi_femac_tx_dma_unmap(struct hisi_femac_priv *priv,
@@ -158,7 +158,7 @@ static void hisi_femac_xmit_reclaim(struct net_device *dev)
 
 	netif_tx_lock(dev);
 
-	val = readl(priv->port_base + ADDRQ_STAT) & TX_CNT_INUSE_MASK;
+	val = pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:161", priv->port_base + ADDRQ_STAT) & TX_CNT_INUSE_MASK;
 	while (val < priv->tx_fifo_used_cnt) {
 		skb = txq->skb[txq->tail];
 		if (unlikely(!skb)) {
@@ -173,7 +173,7 @@ static void hisi_femac_xmit_reclaim(struct net_device *dev)
 
 		priv->tx_fifo_used_cnt--;
 
-		val = readl(priv->port_base + ADDRQ_STAT) & TX_CNT_INUSE_MASK;
+		val = pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:176", priv->port_base + ADDRQ_STAT) & TX_CNT_INUSE_MASK;
 		txq->skb[txq->tail] = NULL;
 		txq->tail = (txq->tail + 1) % txq->num;
 	}
@@ -201,7 +201,7 @@ static void hisi_femac_adjust_link(struct net_device *dev)
 
 	if ((status != priv->link_status) &&
 	    ((status | priv->link_status) & MAC_PORTSET_LINKED)) {
-		writel(status, priv->port_base + MAC_PORTSET);
+		pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:204", status, priv->port_base + MAC_PORTSET);
 		priv->link_status = status;
 		phy_print_status(phy);
 	}
@@ -216,7 +216,7 @@ static void hisi_femac_rx_refill(struct hisi_femac_priv *priv)
 	dma_addr_t addr;
 
 	pos = rxq->head;
-	while (readl(priv->port_base + ADDRQ_STAT) & BIT_RX_READY) {
+	while (pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:219", priv->port_base + ADDRQ_STAT) & BIT_RX_READY) {
 		if (!CIRC_SPACE(pos, rxq->tail, rxq->num))
 			break;
 		if (unlikely(rxq->skb[pos])) {
@@ -236,7 +236,7 @@ static void hisi_femac_rx_refill(struct hisi_femac_priv *priv)
 		}
 		rxq->dma_phys[pos] = addr;
 		rxq->skb[pos] = skb;
-		writel(addr, priv->port_base + IQ_ADDR);
+		pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:239", addr, priv->port_base + IQ_ADDR);
 		pos = (pos + 1) % rxq->num;
 	}
 	rxq->head = pos;
@@ -251,13 +251,13 @@ static int hisi_femac_rx(struct net_device *dev, int limit)
 	u32 rx_pkt_info, pos, len, rx_pkts_num = 0;
 
 	pos = rxq->tail;
-	while (readl(priv->glb_base + GLB_IRQ_RAW) & IRQ_INT_RX_RDY) {
-		rx_pkt_info = readl(priv->port_base + IQFRM_DES);
+	while (pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:254", priv->glb_base + GLB_IRQ_RAW) & IRQ_INT_RX_RDY) {
+		rx_pkt_info = pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:255", priv->port_base + IQFRM_DES);
 		len = rx_pkt_info & RX_FRAME_LEN_MASK;
 		len -= ETH_FCS_LEN;
 
 		/* tell hardware we will deal with this packet */
-		writel(IRQ_INT_RX_RDY, priv->glb_base + GLB_IRQ_RAW);
+		pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:260", IRQ_INT_RX_RDY, priv->glb_base + GLB_IRQ_RAW);
 
 		rx_pkts_num++;
 
@@ -312,8 +312,8 @@ static int hisi_femac_poll(struct napi_struct *napi, int budget)
 		if (work_done >= budget)
 			break;
 
-		ints = readl(priv->glb_base + GLB_IRQ_RAW);
-		writel(ints & DEF_INT_MASK,
+		ints = pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:315", priv->glb_base + GLB_IRQ_RAW);
+		pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:316", ints & DEF_INT_MASK,
 		       priv->glb_base + GLB_IRQ_RAW);
 	} while (ints & DEF_INT_MASK);
 
@@ -332,10 +332,10 @@ static irqreturn_t hisi_femac_interrupt(int irq, void *dev_id)
 	struct net_device *dev = (struct net_device *)dev_id;
 	struct hisi_femac_priv *priv = netdev_priv(dev);
 
-	ints = readl(priv->glb_base + GLB_IRQ_RAW);
+	ints = pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:335", priv->glb_base + GLB_IRQ_RAW);
 
 	if (likely(ints & DEF_INT_MASK)) {
-		writel(ints & DEF_INT_MASK,
+		pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:338", ints & DEF_INT_MASK,
 		       priv->glb_base + GLB_IRQ_RAW);
 		hisi_femac_irq_disable(priv, DEF_INT_MASK);
 		napi_schedule(&priv->napi);
@@ -432,10 +432,10 @@ static int hisi_femac_set_hw_mac_addr(struct hisi_femac_priv *priv,
 	u32 reg;
 
 	reg = mac[1] | (mac[0] << 8);
-	writel(reg, priv->glb_base + GLB_HOSTMAC_H16);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:435", reg, priv->glb_base + GLB_HOSTMAC_H16);
 
 	reg = mac[5] | (mac[4] << 8) | (mac[3] << 16) | (mac[2] << 24);
-	writel(reg, priv->glb_base + GLB_HOSTMAC_L32);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:438", reg, priv->glb_base + GLB_HOSTMAC_L32);
 
 	return 0;
 }
@@ -444,14 +444,14 @@ static int hisi_femac_port_reset(struct hisi_femac_priv *priv)
 {
 	u32 val;
 
-	val = readl(priv->glb_base + GLB_SOFT_RESET);
+	val = pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:447", priv->glb_base + GLB_SOFT_RESET);
 	val |= SOFT_RESET_ALL;
-	writel(val, priv->glb_base + GLB_SOFT_RESET);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:449", val, priv->glb_base + GLB_SOFT_RESET);
 
 	usleep_range(500, 800);
 
 	val &= ~SOFT_RESET_ALL;
-	writel(val, priv->glb_base + GLB_SOFT_RESET);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:454", val, priv->glb_base + GLB_SOFT_RESET);
 
 	return 0;
 }
@@ -473,7 +473,7 @@ static int hisi_femac_net_open(struct net_device *dev)
 	if (dev->phydev)
 		phy_start(dev->phydev);
 
-	writel(IRQ_ENA_PORT0_MASK, priv->glb_base + GLB_IRQ_RAW);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:476", IRQ_ENA_PORT0_MASK, priv->glb_base + GLB_IRQ_RAW);
 	hisi_femac_irq_enable(priv, IRQ_ENA_ALL | IRQ_ENA_PORT0 | DEF_INT_MASK);
 
 	return 0;
@@ -504,7 +504,7 @@ static netdev_tx_t hisi_femac_net_xmit(struct sk_buff *skb,
 	dma_addr_t addr;
 	u32 val;
 
-	val = readl(priv->port_base + ADDRQ_STAT);
+	val = pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:507", priv->port_base + ADDRQ_STAT);
 	val &= BIT_TX_READY;
 	if (!val) {
 		hisi_femac_irq_enable(priv, IRQ_INT_TX_PER_PACKET);
@@ -535,8 +535,8 @@ static netdev_tx_t hisi_femac_net_xmit(struct sk_buff *skb,
 	txq->skb[txq->head] = skb;
 	txq->head = (txq->head + 1) % txq->num;
 
-	writel(addr, priv->port_base + EQ_ADDR);
-	writel(skb->len + ETH_FCS_LEN, priv->port_base + EQFRM_LEN);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:538", addr, priv->port_base + EQ_ADDR);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:539", skb->len + ETH_FCS_LEN, priv->port_base + EQFRM_LEN);
 
 	priv->tx_fifo_used_cnt++;
 
@@ -568,12 +568,12 @@ static void hisi_femac_enable_hw_addr_filter(struct hisi_femac_priv *priv,
 {
 	u32 val;
 
-	val = readl(priv->glb_base + GLB_MAC_H16(reg_n));
+	val = pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:571", priv->glb_base + GLB_MAC_H16(reg_n));
 	if (enable)
 		val |= BIT_MACFLT_ENA;
 	else
 		val &= ~BIT_MACFLT_ENA;
-	writel(val, priv->glb_base + GLB_MAC_H16(reg_n));
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:576", val, priv->glb_base + GLB_MAC_H16(reg_n));
 }
 
 static void hisi_femac_set_hw_addr_filter(struct hisi_femac_priv *priv,
@@ -587,13 +587,13 @@ static void hisi_femac_set_hw_addr_filter(struct hisi_femac_priv *priv,
 	low = GLB_MAC_L32(reg_n);
 
 	val = (addr[2] << 24) | (addr[3] << 16) | (addr[4] << 8) | addr[5];
-	writel(val, priv->glb_base + low);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:590", val, priv->glb_base + low);
 
-	val = readl(priv->glb_base + high);
+	val = pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:592", priv->glb_base + high);
 	val &= ~MACFLT_HI16_MASK;
 	val |= ((addr[0] << 8) | addr[1]);
 	val |= (BIT_MACFLT_ENA | BIT_MACFLT_FW2CPU);
-	writel(val, priv->glb_base + high);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:596", val, priv->glb_base + high);
 }
 
 static void hisi_femac_set_promisc_mode(struct hisi_femac_priv *priv,
@@ -601,12 +601,12 @@ static void hisi_femac_set_promisc_mode(struct hisi_femac_priv *priv,
 {
 	u32 val;
 
-	val = readl(priv->glb_base + GLB_FWCTRL);
+	val = pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:604", priv->glb_base + GLB_FWCTRL);
 	if (promisc_mode)
 		val |= FWCTRL_FWALL2CPU;
 	else
 		val &= ~FWCTRL_FWALL2CPU;
-	writel(val, priv->glb_base + GLB_FWCTRL);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:609", val, priv->glb_base + GLB_FWCTRL);
 }
 
 /* Handle multiple multicast addresses (perfect filtering)*/
@@ -615,7 +615,7 @@ static void hisi_femac_set_mc_addr_filter(struct hisi_femac_priv *priv)
 	struct net_device *dev = priv->ndev;
 	u32 val;
 
-	val = readl(priv->glb_base + GLB_MACTCTRL);
+	val = pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:618", priv->glb_base + GLB_MACTCTRL);
 	if ((netdev_mc_count(dev) > MAX_MULTICAST_ADDRESSES) ||
 	    (dev->flags & IFF_ALLMULTI)) {
 		val |= MACTCTRL_MULTI2CPU;
@@ -633,7 +633,7 @@ static void hisi_femac_set_mc_addr_filter(struct hisi_femac_priv *priv)
 		}
 		val &= ~MACTCTRL_MULTI2CPU;
 	}
-	writel(val, priv->glb_base + GLB_MACTCTRL);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:636", val, priv->glb_base + GLB_MACTCTRL);
 }
 
 /* Handle multiple unicast addresses (perfect filtering)*/
@@ -642,7 +642,7 @@ static void hisi_femac_set_uc_addr_filter(struct hisi_femac_priv *priv)
 	struct net_device *dev = priv->ndev;
 	u32 val;
 
-	val = readl(priv->glb_base + GLB_MACTCTRL);
+	val = pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:645", priv->glb_base + GLB_MACTCTRL);
 	if (netdev_uc_count(dev) > MAX_UNICAST_ADDRESSES) {
 		val |= MACTCTRL_UNI2CPU;
 	} else {
@@ -659,7 +659,7 @@ static void hisi_femac_set_uc_addr_filter(struct hisi_femac_priv *priv)
 		}
 		val &= ~MACTCTRL_UNI2CPU;
 	}
-	writel(val, priv->glb_base + GLB_MACTCTRL);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:662", val, priv->glb_base + GLB_MACTCTRL);
 }
 
 static void hisi_femac_net_set_rx_mode(struct net_device *dev)
@@ -737,32 +737,32 @@ static void hisi_femac_port_init(struct hisi_femac_priv *priv)
 	val = MAC_PORTSEL_STAT_CPU;
 	if (priv->ndev->phydev->interface == PHY_INTERFACE_MODE_RMII)
 		val |= MAC_PORTSEL_RMII;
-	writel(val, priv->port_base + MAC_PORTSEL);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:740", val, priv->port_base + MAC_PORTSEL);
 
 	/*clear all interrupt status */
-	writel(IRQ_ENA_PORT0_MASK, priv->glb_base + GLB_IRQ_RAW);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:743", IRQ_ENA_PORT0_MASK, priv->glb_base + GLB_IRQ_RAW);
 	hisi_femac_irq_disable(priv, IRQ_ENA_PORT0_MASK | IRQ_ENA_PORT0);
 
-	val = readl(priv->glb_base + GLB_FWCTRL);
+	val = pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:746", priv->glb_base + GLB_FWCTRL);
 	val &= ~(FWCTRL_VLAN_ENABLE | FWCTRL_FWALL2CPU);
 	val |= FWCTRL_FW2CPU_ENA;
-	writel(val, priv->glb_base + GLB_FWCTRL);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:749", val, priv->glb_base + GLB_FWCTRL);
 
-	val = readl(priv->glb_base + GLB_MACTCTRL);
+	val = pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:751", priv->glb_base + GLB_MACTCTRL);
 	val |= (MACTCTRL_BROAD2CPU | MACTCTRL_MACT_ENA);
-	writel(val, priv->glb_base + GLB_MACTCTRL);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:753", val, priv->glb_base + GLB_MACTCTRL);
 
-	val = readl(priv->port_base + MAC_SET);
+	val = pete_readl("drivers/net/ethernet/hisilicon/hisi_femac.c:755", priv->port_base + MAC_SET);
 	val &= ~MAX_FRAME_SIZE_MASK;
 	val |= MAX_FRAME_SIZE;
-	writel(val, priv->port_base + MAC_SET);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:758", val, priv->port_base + MAC_SET);
 
 	val = RX_COALESCED_TIMER |
 		(RX_COALESCED_FRAMES << RX_COALESCED_FRAME_OFFSET);
-	writel(val, priv->port_base + RX_COALESCE_SET);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:762", val, priv->port_base + RX_COALESCE_SET);
 
 	val = (HW_RX_FIFO_DEPTH << RX_DEPTH_OFFSET) | HW_TX_FIFO_DEPTH;
-	writel(val, priv->port_base + QLEN_SET);
+	pete_writel("drivers/net/ethernet/hisilicon/hisi_femac.c:765", val, priv->port_base + QLEN_SET);
 }
 
 static int hisi_femac_drv_probe(struct platform_device *pdev)

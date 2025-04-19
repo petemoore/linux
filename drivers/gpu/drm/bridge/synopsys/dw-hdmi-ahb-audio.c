@@ -251,7 +251,7 @@ static void dw_hdmi_start_dma(struct snd_dw_hdmi *dw)
 	dw_hdmi_writel(stop, base + HDMI_AHB_DMA_STPADDR0);
 
 	writeb_relaxed((u8)~HDMI_AHB_DMA_MASK_DONE, base + HDMI_AHB_DMA_MASK);
-	writeb(HDMI_AHB_DMA_START_START, base + HDMI_AHB_DMA_START);
+	pete_writeb("drivers/gpu/drm/bridge/synopsys/dw-hdmi-ahb-audio.c:254", HDMI_AHB_DMA_START_START, base + HDMI_AHB_DMA_START);
 
 	offset += period;
 	if (offset >= dw->buf_size)

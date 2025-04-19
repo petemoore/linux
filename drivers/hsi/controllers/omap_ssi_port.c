@@ -57,62 +57,62 @@ static int ssi_port_regs_show(struct seq_file *m, void *p __maybe_unused)
 	if (omap_port->wake_irq > 0)
 		seq_printf(m, "CAWAKE\t\t: %d\n", ssi_wakein(port));
 	seq_printf(m, "WAKE\t\t: 0x%08x\n",
-				readl(base + SSI_WAKE_REG(port->num)));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:60", base + SSI_WAKE_REG(port->num)));
 	seq_printf(m, "MPU_ENABLE_IRQ%d\t: 0x%08x\n", 0,
-			readl(base + SSI_MPU_ENABLE_REG(port->num, 0)));
+			pete_readl("drivers/hsi/controllers/omap_ssi_port.c:62", base + SSI_MPU_ENABLE_REG(port->num, 0)));
 	seq_printf(m, "MPU_STATUS_IRQ%d\t: 0x%08x\n", 0,
-			readl(base + SSI_MPU_STATUS_REG(port->num, 0)));
+			pete_readl("drivers/hsi/controllers/omap_ssi_port.c:64", base + SSI_MPU_STATUS_REG(port->num, 0)));
 	/* SST */
 	base = omap_port->sst_base;
 	seq_puts(m, "\nSST\n===\n");
 	seq_printf(m, "ID SST\t\t: 0x%08x\n",
-				readl(base + SSI_SST_ID_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:69", base + SSI_SST_ID_REG));
 	seq_printf(m, "MODE\t\t: 0x%08x\n",
-				readl(base + SSI_SST_MODE_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:71", base + SSI_SST_MODE_REG));
 	seq_printf(m, "FRAMESIZE\t: 0x%08x\n",
-				readl(base + SSI_SST_FRAMESIZE_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:73", base + SSI_SST_FRAMESIZE_REG));
 	seq_printf(m, "DIVISOR\t\t: 0x%08x\n",
-				readl(base + SSI_SST_DIVISOR_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:75", base + SSI_SST_DIVISOR_REG));
 	seq_printf(m, "CHANNELS\t: 0x%08x\n",
-				readl(base + SSI_SST_CHANNELS_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:77", base + SSI_SST_CHANNELS_REG));
 	seq_printf(m, "ARBMODE\t\t: 0x%08x\n",
-				readl(base + SSI_SST_ARBMODE_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:79", base + SSI_SST_ARBMODE_REG));
 	seq_printf(m, "TXSTATE\t\t: 0x%08x\n",
-				readl(base + SSI_SST_TXSTATE_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:81", base + SSI_SST_TXSTATE_REG));
 	seq_printf(m, "BUFSTATE\t: 0x%08x\n",
-				readl(base + SSI_SST_BUFSTATE_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:83", base + SSI_SST_BUFSTATE_REG));
 	seq_printf(m, "BREAK\t\t: 0x%08x\n",
-				readl(base + SSI_SST_BREAK_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:85", base + SSI_SST_BREAK_REG));
 	for (ch = 0; ch < omap_port->channels; ch++) {
 		seq_printf(m, "BUFFER_CH%d\t: 0x%08x\n", ch,
-				readl(base + SSI_SST_BUFFER_CH_REG(ch)));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:88", base + SSI_SST_BUFFER_CH_REG(ch)));
 	}
 	/* SSR */
 	base = omap_port->ssr_base;
 	seq_puts(m, "\nSSR\n===\n");
 	seq_printf(m, "ID SSR\t\t: 0x%08x\n",
-				readl(base + SSI_SSR_ID_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:94", base + SSI_SSR_ID_REG));
 	seq_printf(m, "MODE\t\t: 0x%08x\n",
-				readl(base + SSI_SSR_MODE_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:96", base + SSI_SSR_MODE_REG));
 	seq_printf(m, "FRAMESIZE\t: 0x%08x\n",
-				readl(base + SSI_SSR_FRAMESIZE_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:98", base + SSI_SSR_FRAMESIZE_REG));
 	seq_printf(m, "CHANNELS\t: 0x%08x\n",
-				readl(base + SSI_SSR_CHANNELS_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:100", base + SSI_SSR_CHANNELS_REG));
 	seq_printf(m, "TIMEOUT\t\t: 0x%08x\n",
-				readl(base + SSI_SSR_TIMEOUT_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:102", base + SSI_SSR_TIMEOUT_REG));
 	seq_printf(m, "RXSTATE\t\t: 0x%08x\n",
-				readl(base + SSI_SSR_RXSTATE_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:104", base + SSI_SSR_RXSTATE_REG));
 	seq_printf(m, "BUFSTATE\t: 0x%08x\n",
-				readl(base + SSI_SSR_BUFSTATE_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:106", base + SSI_SSR_BUFSTATE_REG));
 	seq_printf(m, "BREAK\t\t: 0x%08x\n",
-				readl(base + SSI_SSR_BREAK_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:108", base + SSI_SSR_BREAK_REG));
 	seq_printf(m, "ERROR\t\t: 0x%08x\n",
-				readl(base + SSI_SSR_ERROR_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:110", base + SSI_SSR_ERROR_REG));
 	seq_printf(m, "ERRORACK\t: 0x%08x\n",
-				readl(base + SSI_SSR_ERRORACK_REG));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:112", base + SSI_SSR_ERRORACK_REG));
 	for (ch = 0; ch < omap_port->channels; ch++) {
 		seq_printf(m, "BUFFER_CH%d\t: 0x%08x\n", ch,
-				readl(base + SSI_SSR_BUFFER_CH_REG(ch)));
+				pete_readl("drivers/hsi/controllers/omap_ssi_port.c:115", base + SSI_SSR_BUFFER_CH_REG(ch)));
 	}
 	pm_runtime_put_autosuspend(omap_port->pdev);
 
@@ -127,7 +127,7 @@ static int ssi_div_get(void *data, u64 *val)
 	struct omap_ssi_port *omap_port = hsi_port_drvdata(port);
 
 	pm_runtime_get_sync(omap_port->pdev);
-	*val = readl(omap_port->sst_base + SSI_SST_DIVISOR_REG);
+	*val = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:130", omap_port->sst_base + SSI_SST_DIVISOR_REG);
 	pm_runtime_put_autosuspend(omap_port->pdev);
 
 	return 0;
@@ -142,7 +142,7 @@ static int ssi_div_set(void *data, u64 val)
 		return -EINVAL;
 
 	pm_runtime_get_sync(omap_port->pdev);
-	writel(val, omap_port->sst_base + SSI_SST_DIVISOR_REG);
+	pete_writel("drivers/hsi/controllers/omap_ssi_port.c:145", val, omap_port->sst_base + SSI_SST_DIVISOR_REG);
 	omap_port->sst.divisor = val;
 	pm_runtime_put_autosuspend(omap_port->pdev);
 
@@ -273,11 +273,11 @@ static int ssi_start_dma(struct hsi_msg *msg, int lch)
 						gdd + SSI_GDD_CEN_REG(lch));
 
 	spin_lock_bh(&omap_ssi->lock);
-	tmp = readl(omap_ssi->sys + SSI_GDD_MPU_IRQ_ENABLE_REG);
+	tmp = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:276", omap_ssi->sys + SSI_GDD_MPU_IRQ_ENABLE_REG);
 	tmp |= SSI_GDD_LCH(lch);
 	writel_relaxed(tmp, omap_ssi->sys + SSI_GDD_MPU_IRQ_ENABLE_REG);
 	spin_unlock_bh(&omap_ssi->lock);
-	writew(ccr, gdd + SSI_GDD_CCR_REG(lch));
+	pete_writew("drivers/hsi/controllers/omap_ssi_port.c:280", ccr, gdd + SSI_GDD_CCR_REG(lch));
 	msg->status = HSI_STATUS_PROCEEDING;
 
 	return 0;
@@ -308,8 +308,8 @@ static int ssi_start_pio(struct hsi_msg *msg)
 	}
 	dev_dbg(&port->device, "Single %s transfer\n",
 						msg->ttype ? "write" : "read");
-	val |= readl(omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
-	writel(val, omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
+	val |= pete_readl("drivers/hsi/controllers/omap_ssi_port.c:311", omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
+	pete_writel("drivers/hsi/controllers/omap_ssi_port.c:312", val, omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
 	pm_runtime_put_autosuspend(omap_port->pdev);
 	msg->actual_len = 0;
 	msg->status = HSI_STATUS_PROCEEDING;
@@ -350,7 +350,7 @@ static int ssi_async_break(struct hsi_msg *msg)
 			err = -EINVAL;
 			goto out;
 		}
-		writel(1, omap_port->sst_base + SSI_SST_BREAK_REG);
+		pete_writel("drivers/hsi/controllers/omap_ssi_port.c:353", 1, omap_port->sst_base + SSI_SST_BREAK_REG);
 		msg->status = HSI_STATUS_COMPLETED;
 		msg->complete(msg);
 	} else {
@@ -359,9 +359,9 @@ static int ssi_async_break(struct hsi_msg *msg)
 			goto out;
 		}
 		spin_lock_bh(&omap_port->lock);
-		tmp = readl(omap_ssi->sys +
+		tmp = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:362", omap_ssi->sys +
 					SSI_MPU_ENABLE_REG(port->num, 0));
-		writel(tmp | SSI_BREAKDETECTED,
+		pete_writel("drivers/hsi/controllers/omap_ssi_port.c:364", tmp | SSI_BREAKDETECTED,
 			omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
 		msg->status = HSI_STATUS_PROCEEDING;
 		list_add_tail(&msg->link, &omap_port->brkqueue);
@@ -478,7 +478,7 @@ static int ssi_setup(struct hsi_client *cl)
 	writel_relaxed(SSI_MODE_SLEEP, sst + SSI_SST_MODE_REG);
 	writel_relaxed(SSI_MODE_SLEEP, ssr + SSI_SSR_MODE_REG);
 	/* Flush posted write */
-	val = readl(ssr + SSI_SSR_MODE_REG);
+	val = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:481", ssr + SSI_SSR_MODE_REG);
 	/* TX */
 	writel_relaxed(31, sst + SSI_SST_FRAMESIZE_REG);
 	writel_relaxed(div, sst + SSI_SST_DIVISOR_REG);
@@ -552,7 +552,7 @@ static int ssi_flush(struct hsi_client *cl)
 	writel_relaxed(0, ssr + SSI_SSR_RXSTATE_REG);
 	writel_relaxed(0, ssr + SSI_SSR_BUFSTATE_REG);
 	/* Flush all errors */
-	err = readl(ssr + SSI_SSR_ERROR_REG);
+	err = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:555", ssr + SSI_SSR_ERROR_REG);
 	writel_relaxed(err, ssr + SSI_SSR_ERRORACK_REG);
 	/* Flush break */
 	writel_relaxed(0, ssr + SSI_SSR_BREAK_REG);
@@ -561,7 +561,7 @@ static int ssi_flush(struct hsi_client *cl)
 	writel_relaxed(0xffffff00,
 			omap_ssi->sys + SSI_MPU_STATUS_REG(port->num, 0));
 	writel_relaxed(0, omap_ssi->sys + SSI_GDD_MPU_IRQ_ENABLE_REG);
-	writel(0xff, omap_ssi->sys + SSI_GDD_MPU_IRQ_STATUS_REG);
+	pete_writel("drivers/hsi/controllers/omap_ssi_port.c:564", 0xff, omap_ssi->sys + SSI_GDD_MPU_IRQ_STATUS_REG);
 	/* Dequeue all pending requests */
 	for (i = 0; i < omap_port->channels; i++) {
 		/* Release write clocks */
@@ -591,7 +591,7 @@ static void start_tx_work(struct work_struct *work)
 	struct omap_ssi_controller *omap_ssi = hsi_controller_drvdata(ssi);
 
 	pm_runtime_get_sync(omap_port->pdev); /* Grab clocks */
-	writel(SSI_WAKE(0), omap_ssi->sys + SSI_SET_WAKE_REG(port->num));
+	pete_writel("drivers/hsi/controllers/omap_ssi_port.c:594", SSI_WAKE(0), omap_ssi->sys + SSI_SET_WAKE_REG(port->num));
 }
 
 static int ssi_start_tx(struct hsi_client *cl)
@@ -628,7 +628,7 @@ static int ssi_stop_tx(struct hsi_client *cl)
 		spin_unlock_bh(&omap_port->wk_lock);
 		return 0;
 	}
-	writel(SSI_WAKE(0), omap_ssi->sys + SSI_CLEAR_WAKE_REG(port->num));
+	pete_writel("drivers/hsi/controllers/omap_ssi_port.c:631", SSI_WAKE(0), omap_ssi->sys + SSI_CLEAR_WAKE_REG(port->num));
 	spin_unlock_bh(&omap_port->wk_lock);
 
 	pm_runtime_mark_last_busy(omap_port->pdev);
@@ -709,15 +709,15 @@ static void ssi_cleanup_queues(struct hsi_client *cl)
 			status &= ~SSI_ERROROCCURED;
 	}
 	/* Cleanup write buffers */
-	tmp = readl(omap_port->sst_base + SSI_SST_BUFSTATE_REG);
+	tmp = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:712", omap_port->sst_base + SSI_SST_BUFSTATE_REG);
 	tmp &= ~txbufstate;
 	writel_relaxed(tmp, omap_port->sst_base + SSI_SST_BUFSTATE_REG);
 	/* Cleanup read buffers */
-	tmp = readl(omap_port->ssr_base + SSI_SSR_BUFSTATE_REG);
+	tmp = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:716", omap_port->ssr_base + SSI_SSR_BUFSTATE_REG);
 	tmp &= ~rxbufstate;
 	writel_relaxed(tmp, omap_port->ssr_base + SSI_SSR_BUFSTATE_REG);
 	/* Disarm and ack pending interrupts */
-	tmp = readl(omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
+	tmp = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:720", omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
 	tmp &= ~status;
 	writel_relaxed(tmp, omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
 	writel_relaxed(status, omap_ssi->sys +
@@ -753,15 +753,15 @@ static void ssi_cleanup_gdd(struct hsi_controller *ssi, struct hsi_client *cl)
 	tmp = readl_relaxed(omap_ssi->sys + SSI_GDD_MPU_IRQ_ENABLE_REG);
 	tmp &= ~val;
 	writel_relaxed(tmp, omap_ssi->sys + SSI_GDD_MPU_IRQ_ENABLE_REG);
-	writel(val, omap_ssi->sys + SSI_GDD_MPU_IRQ_STATUS_REG);
+	pete_writel("drivers/hsi/controllers/omap_ssi_port.c:756", val, omap_ssi->sys + SSI_GDD_MPU_IRQ_STATUS_REG);
 }
 
 static int ssi_set_port_mode(struct omap_ssi_port *omap_port, u32 mode)
 {
-	writel(mode, omap_port->sst_base + SSI_SST_MODE_REG);
-	writel(mode, omap_port->ssr_base + SSI_SSR_MODE_REG);
+	pete_writel("drivers/hsi/controllers/omap_ssi_port.c:761", mode, omap_port->sst_base + SSI_SST_MODE_REG);
+	pete_writel("drivers/hsi/controllers/omap_ssi_port.c:762", mode, omap_port->ssr_base + SSI_SSR_MODE_REG);
 	/* OCP barrier */
-	mode = readl(omap_port->ssr_base + SSI_SSR_MODE_REG);
+	mode = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:764", omap_port->ssr_base + SSI_SSR_MODE_REG);
 
 	return 0;
 }
@@ -814,7 +814,7 @@ static void ssi_error(struct hsi_port *port)
 	u32 tmp;
 
 	/* ACK error */
-	err = readl(omap_port->ssr_base + SSI_SSR_ERROR_REG);
+	err = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:817", omap_port->ssr_base + SSI_SSR_ERROR_REG);
 	dev_err(&port->device, "SSI error: 0x%02x\n", err);
 	if (!err) {
 		dev_dbg(&port->device, "spurious SSI error ignored!\n");
@@ -830,13 +830,13 @@ static void ssi_error(struct hsi_port *port)
 			omap_ssi->gdd_trn[i].msg = NULL;
 		}
 	}
-	tmp = readl(omap_ssi->sys + SSI_GDD_MPU_IRQ_ENABLE_REG);
+	tmp = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:833", omap_ssi->sys + SSI_GDD_MPU_IRQ_ENABLE_REG);
 	tmp &= ~val;
 	writel_relaxed(tmp, omap_ssi->sys + SSI_GDD_MPU_IRQ_ENABLE_REG);
 	spin_unlock(&omap_ssi->lock);
 	/* Cancel all PIO read transfers */
 	spin_lock(&omap_port->lock);
-	tmp = readl(omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
+	tmp = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:839", omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
 	tmp &= 0xfeff00ff; /* Disable error & all dataavailable interrupts */
 	writel_relaxed(tmp, omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
 	/* ACK error */
@@ -872,11 +872,11 @@ static void ssi_break_complete(struct hsi_port *port)
 	dev_dbg(&port->device, "HWBREAK received\n");
 
 	spin_lock(&omap_port->lock);
-	val = readl(omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
+	val = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:875", omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
 	val &= ~SSI_BREAKDETECTED;
 	writel_relaxed(val, omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
 	writel_relaxed(0, omap_port->ssr_base + SSI_SSR_BREAK_REG);
-	writel(SSI_BREAKDETECTED,
+	pete_writel("drivers/hsi/controllers/omap_ssi_port.c:879", SSI_BREAKDETECTED,
 			omap_ssi->sys + SSI_MPU_STATUS_REG(port->num, 0));
 	spin_unlock(&omap_port->lock);
 
@@ -913,10 +913,10 @@ static void ssi_pio_complete(struct hsi_port *port, struct list_head *queue)
 	if (msg->status == HSI_STATUS_PROCEEDING) {
 		buf = sg_virt(msg->sgt.sgl) + msg->actual_len;
 		if (msg->ttype == HSI_MSG_WRITE)
-			writel(*buf, omap_port->sst_base +
+			pete_writel("drivers/hsi/controllers/omap_ssi_port.c:916", *buf, omap_port->sst_base +
 					SSI_SST_BUFFER_CH_REG(msg->channel));
 		 else
-			*buf = readl(omap_port->ssr_base +
+			*buf = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:919", omap_port->ssr_base +
 					SSI_SSR_BUFFER_CH_REG(msg->channel));
 		dev_dbg(&port->device, "ch %d ttype %d 0x%08x\n", msg->channel,
 							msg->ttype, *buf);
@@ -930,7 +930,7 @@ static void ssi_pio_complete(struct hsi_port *port, struct list_head *queue)
 		if ((msg->status == HSI_STATUS_PROCEEDING) ||
 				((msg->status == HSI_STATUS_COMPLETED) &&
 					(msg->ttype == HSI_MSG_WRITE))) {
-			writel(val, omap_ssi->sys +
+			pete_writel("drivers/hsi/controllers/omap_ssi_port.c:933", val, omap_ssi->sys +
 					SSI_MPU_STATUS_REG(port->num, 0));
 			spin_unlock_bh(&omap_port->lock);
 
@@ -939,7 +939,7 @@ static void ssi_pio_complete(struct hsi_port *port, struct list_head *queue)
 
 	}
 	/* Transfer completed at this point */
-	reg = readl(omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
+	reg = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:942", omap_ssi->sys + SSI_MPU_ENABLE_REG(port->num, 0));
 	if (msg->ttype == HSI_MSG_WRITE) {
 		/* Release clocks for write transfer */
 		pm_runtime_mark_last_busy(omap_port->pdev);
@@ -967,8 +967,8 @@ static irqreturn_t ssi_pio_thread(int irq, void *ssi_port)
 	pm_runtime_get_sync(omap_port->pdev);
 
 	do {
-		status_reg = readl(sys + SSI_MPU_STATUS_REG(port->num, 0));
-		status_reg &= readl(sys + SSI_MPU_ENABLE_REG(port->num, 0));
+		status_reg = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:970", sys + SSI_MPU_STATUS_REG(port->num, 0));
+		status_reg &= pete_readl("drivers/hsi/controllers/omap_ssi_port.c:971", sys + SSI_MPU_ENABLE_REG(port->num, 0));
 
 		for (ch = 0; ch < omap_port->channels; ch++) {
 			if (status_reg & SSI_DATAACCEPT(ch))
@@ -981,8 +981,8 @@ static irqreturn_t ssi_pio_thread(int irq, void *ssi_port)
 		if (status_reg & SSI_ERROROCCURED)
 			ssi_error(port);
 
-		status_reg = readl(sys + SSI_MPU_STATUS_REG(port->num, 0));
-		status_reg &= readl(sys + SSI_MPU_ENABLE_REG(port->num, 0));
+		status_reg = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:984", sys + SSI_MPU_STATUS_REG(port->num, 0));
+		status_reg &= pete_readl("drivers/hsi/controllers/omap_ssi_port.c:985", sys + SSI_MPU_ENABLE_REG(port->num, 0));
 
 		/* TODO: sleep if we retry? */
 	} while (status_reg);
@@ -1012,14 +1012,14 @@ static irqreturn_t ssi_wake_thread(int irq __maybe_unused, void *ssi_port)
 			pm_runtime_get_sync(omap_port->pdev);
 		dev_dbg(&ssi->device, "Wake in high\n");
 		if (omap_port->wktest) { /* FIXME: HACK ! To be removed */
-			writel(SSI_WAKE(0),
+			pete_writel("drivers/hsi/controllers/omap_ssi_port.c:1015", SSI_WAKE(0),
 				omap_ssi->sys + SSI_SET_WAKE_REG(port->num));
 		}
 		hsi_event(port, HSI_EVENT_START_RX);
 	} else {
 		dev_dbg(&ssi->device, "Wake in low\n");
 		if (omap_port->wktest) { /* FIXME: HACK ! To be removed */
-			writel(SSI_WAKE(0),
+			pete_writel("drivers/hsi/controllers/omap_ssi_port.c:1022", SSI_WAKE(0),
 				omap_ssi->sys + SSI_CLEAR_WAKE_REG(port->num));
 		}
 		hsi_event(port, HSI_EVENT_STOP_RX);
@@ -1289,7 +1289,7 @@ static int ssi_save_port_ctx(struct omap_ssi_port *omap_port)
 	struct hsi_controller *ssi = to_hsi_controller(port->device.parent);
 	struct omap_ssi_controller *omap_ssi = hsi_controller_drvdata(ssi);
 
-	omap_port->sys_mpu_enable = readl(omap_ssi->sys +
+	omap_port->sys_mpu_enable = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:1292", omap_ssi->sys +
 					SSI_MPU_ENABLE_REG(port->num, 0));
 
 	return 0;
@@ -1329,7 +1329,7 @@ static int ssi_restore_port_mode(struct omap_ssi_port *omap_port)
 	writel_relaxed(omap_port->ssr.mode,
 				omap_port->ssr_base + SSI_SSR_MODE_REG);
 	/* OCP barrier */
-	mode = readl(omap_port->ssr_base + SSI_SSR_MODE_REG);
+	mode = pete_readl("drivers/hsi/controllers/omap_ssi_port.c:1332", omap_port->ssr_base + SSI_SSR_MODE_REG);
 
 	return 0;
 }

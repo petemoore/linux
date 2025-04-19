@@ -45,14 +45,14 @@ static int cdns_set_mode(struct cdns *cdns, enum usb_dr_mode mode)
 		else
 			override_reg = &cdns->otg_v0_regs->ctrl1;
 
-		reg = readl(override_reg);
+		reg = pete_readl("drivers/usb/cdns3/drd.c:48", override_reg);
 
 		if (cdns->version != CDNS3_CONTROLLER_V0)
 			reg |= OVERRIDE_IDPULLUP;
 		else
 			reg |= OVERRIDE_IDPULLUP_V0;
 
-		writel(reg, override_reg);
+		pete_writel("drivers/usb/cdns3/drd.c:55", reg, override_reg);
 
 		if (cdns->version == CDNS3_CONTROLLER_V1) {
 			/*
@@ -62,9 +62,9 @@ static int cdns_set_mode(struct cdns *cdns, enum usb_dr_mode mode)
 			 * for 0x0002450D controller version.
 			 */
 			if (cdns->phyrst_a_enable) {
-				reg = readl(&cdns->otg_v1_regs->phyrst_cfg);
+				reg = pete_readl("drivers/usb/cdns3/drd.c:65", &cdns->otg_v1_regs->phyrst_cfg);
 				reg |= PHYRST_CFG_PHYRST_A_ENABLE;
-				writel(reg, &cdns->otg_v1_regs->phyrst_cfg);
+				pete_writel("drivers/usb/cdns3/drd.c:67", reg, &cdns->otg_v1_regs->phyrst_cfg);
 			}
 		}
 
@@ -87,7 +87,7 @@ int cdns_get_id(struct cdns *cdns)
 {
 	int id;
 
-	id = readl(&cdns->otg_regs->sts) & OTGSTS_ID_VALUE;
+	id = pete_readl("drivers/usb/cdns3/drd.c:90", &cdns->otg_regs->sts) & OTGSTS_ID_VALUE;
 	dev_dbg(cdns->dev, "OTG ID: %d", id);
 
 	return id;
@@ -97,7 +97,7 @@ int cdns_get_vbus(struct cdns *cdns)
 {
 	int vbus;
 
-	vbus = !!(readl(&cdns->otg_regs->sts) & OTGSTS_VBUS_VALID);
+	vbus = !!(pete_readl("drivers/usb/cdns3/drd.c:100", &cdns->otg_regs->sts) & OTGSTS_VBUS_VALID);
 	dev_dbg(cdns->dev, "OTG VBUS: %d", vbus);
 
 	return vbus;
@@ -110,9 +110,9 @@ void cdns_clear_vbus(struct cdns *cdns)
 	if (cdns->version != CDNSP_CONTROLLER_V2)
 		return;
 
-	reg = readl(&cdns->otg_cdnsp_regs->override);
+	reg = pete_readl("drivers/usb/cdns3/drd.c:113", &cdns->otg_cdnsp_regs->override);
 	reg |= OVERRIDE_SESS_VLD_SEL;
-	writel(reg, &cdns->otg_cdnsp_regs->override);
+	pete_writel("drivers/usb/cdns3/drd.c:115", reg, &cdns->otg_cdnsp_regs->override);
 }
 EXPORT_SYMBOL_GPL(cdns_clear_vbus);
 
@@ -123,9 +123,9 @@ void cdns_set_vbus(struct cdns *cdns)
 	if (cdns->version != CDNSP_CONTROLLER_V2)
 		return;
 
-	reg = readl(&cdns->otg_cdnsp_regs->override);
+	reg = pete_readl("drivers/usb/cdns3/drd.c:126", &cdns->otg_cdnsp_regs->override);
 	reg &= ~OVERRIDE_SESS_VLD_SEL;
-	writel(reg, &cdns->otg_cdnsp_regs->override);
+	pete_writel("drivers/usb/cdns3/drd.c:128", reg, &cdns->otg_cdnsp_regs->override);
 }
 EXPORT_SYMBOL_GPL(cdns_set_vbus);
 
@@ -156,7 +156,7 @@ bool cdns_is_device(struct cdns *cdns)
  */
 static void cdns_otg_disable_irq(struct cdns *cdns)
 {
-	writel(0, &cdns->otg_irq_regs->ien);
+	pete_writel("drivers/usb/cdns3/drd.c:159", 0, &cdns->otg_irq_regs->ien);
 }
 
 /**
@@ -165,7 +165,7 @@ static void cdns_otg_disable_irq(struct cdns *cdns)
  */
 static void cdns_otg_enable_irq(struct cdns *cdns)
 {
-	writel(OTGIEN_ID_CHANGE_INT | OTGIEN_VBUSVALID_RISE_INT |
+	pete_writel("drivers/usb/cdns3/drd.c:168", OTGIEN_ID_CHANGE_INT | OTGIEN_VBUSVALID_RISE_INT |
 	       OTGIEN_VBUSVALID_FALL_INT, &cdns->otg_irq_regs->ien);
 }
 
@@ -181,7 +181,7 @@ int cdns_drd_host_on(struct cdns *cdns)
 	int ret;
 
 	/* Enable host mode. */
-	writel(OTGCMD_HOST_BUS_REQ | OTGCMD_OTG_DIS,
+	pete_writel("drivers/usb/cdns3/drd.c:184", OTGCMD_HOST_BUS_REQ | OTGCMD_OTG_DIS,
 	       &cdns->otg_regs->cmd);
 
 	if (cdns->version == CDNSP_CONTROLLER_V2)
@@ -208,7 +208,7 @@ void cdns_drd_host_off(struct cdns *cdns)
 {
 	u32 val;
 
-	writel(OTGCMD_HOST_BUS_DROP | OTGCMD_DEV_BUS_DROP |
+	pete_writel("drivers/usb/cdns3/drd.c:211", OTGCMD_HOST_BUS_DROP | OTGCMD_DEV_BUS_DROP |
 	       OTGCMD_DEV_POWER_OFF | OTGCMD_HOST_POWER_OFF,
 	       &cdns->otg_regs->cmd);
 
@@ -232,7 +232,7 @@ int cdns_drd_gadget_on(struct cdns *cdns)
 	int ret, val;
 
 	/* switch OTG core */
-	writel(OTGCMD_DEV_BUS_REQ | reg, &cdns->otg_regs->cmd);
+	pete_writel("drivers/usb/cdns3/drd.c:235", OTGCMD_DEV_BUS_REQ | reg, &cdns->otg_regs->cmd);
 
 	dev_dbg(cdns->dev, "Waiting till Device mode is turned on\n");
 
@@ -266,7 +266,7 @@ void cdns_drd_gadget_off(struct cdns *cdns)
 	 * before turning-off Device (DEV_BUS_DROP).
 	 */
 	usleep_range(20, 30);
-	writel(OTGCMD_HOST_BUS_DROP | OTGCMD_DEV_BUS_DROP |
+	pete_writel("drivers/usb/cdns3/drd.c:269", OTGCMD_HOST_BUS_DROP | OTGCMD_DEV_BUS_DROP |
 	       OTGCMD_DEV_POWER_OFF | OTGCMD_HOST_POWER_OFF,
 	       &cdns->otg_regs->cmd);
 	/* Waiting till DEV_IDLE state.*/
@@ -289,7 +289,7 @@ static int cdns_init_otg_mode(struct cdns *cdns)
 
 	cdns_otg_disable_irq(cdns);
 	/* clear all interrupts */
-	writel(~0, &cdns->otg_irq_regs->ivect);
+	pete_writel("drivers/usb/cdns3/drd.c:292", ~0, &cdns->otg_irq_regs->ivect);
 
 	ret = cdns_set_mode(cdns, USB_DR_MODE_OTG);
 	if (ret)
@@ -358,7 +358,7 @@ static irqreturn_t cdns_drd_irq(int irq, void *data)
 	if (cdns->in_lpm)
 		return ret;
 
-	reg = readl(&cdns->otg_irq_regs->ivect);
+	reg = pete_readl("drivers/usb/cdns3/drd.c:361", &cdns->otg_irq_regs->ivect);
 
 	if (!reg)
 		return IRQ_NONE;
@@ -377,7 +377,7 @@ static irqreturn_t cdns_drd_irq(int irq, void *data)
 		ret = IRQ_WAKE_THREAD;
 	}
 
-	writel(~0, &cdns->otg_irq_regs->ivect);
+	pete_writel("drivers/usb/cdns3/drd.c:380", ~0, &cdns->otg_irq_regs->ivect);
 	return ret;
 }
 
@@ -401,16 +401,16 @@ int cdns_drd_init(struct cdns *cdns)
 	 * controller.
 	 */
 	cdns->otg_v0_regs = regs;
-	if (!readl(&cdns->otg_v0_regs->cmd)) {
+	if (!pete_readl("drivers/usb/cdns3/drd.c:404", &cdns->otg_v0_regs->cmd)) {
 		cdns->version  = CDNS3_CONTROLLER_V0;
 		cdns->otg_v1_regs = NULL;
 		cdns->otg_cdnsp_regs = NULL;
 		cdns->otg_regs = regs;
 		cdns->otg_irq_regs = (struct cdns_otg_irq_regs __iomem  *)
 				     &cdns->otg_v0_regs->ien;
-		writel(1, &cdns->otg_v0_regs->simulate);
+		pete_writel("drivers/usb/cdns3/drd.c:411", 1, &cdns->otg_v0_regs->simulate);
 		dev_dbg(cdns->dev, "DRD version v0 (%08x)\n",
-			 readl(&cdns->otg_v0_regs->version));
+			 pete_readl("drivers/usb/cdns3/drd.c:413", &cdns->otg_v0_regs->version));
 	} else {
 		cdns->otg_v0_regs = NULL;
 		cdns->otg_v1_regs = regs;
@@ -418,23 +418,23 @@ int cdns_drd_init(struct cdns *cdns)
 
 		cdns->otg_regs = (void __iomem *)&cdns->otg_v1_regs->cmd;
 
-		if (readl(&cdns->otg_cdnsp_regs->did) == OTG_CDNSP_DID) {
+		if (pete_readl("drivers/usb/cdns3/drd.c:421", &cdns->otg_cdnsp_regs->did) == OTG_CDNSP_DID) {
 			cdns->otg_irq_regs = (struct cdns_otg_irq_regs __iomem *)
 					      &cdns->otg_cdnsp_regs->ien;
 			cdns->version  = CDNSP_CONTROLLER_V2;
 		} else {
 			cdns->otg_irq_regs = (struct cdns_otg_irq_regs __iomem *)
 					      &cdns->otg_v1_regs->ien;
-			writel(1, &cdns->otg_v1_regs->simulate);
+			pete_writel("drivers/usb/cdns3/drd.c:428", 1, &cdns->otg_v1_regs->simulate);
 			cdns->version  = CDNS3_CONTROLLER_V1;
 		}
 
 		dev_dbg(cdns->dev, "DRD version v1 (ID: %08x, rev: %08x)\n",
-			 readl(&cdns->otg_v1_regs->did),
-			 readl(&cdns->otg_v1_regs->rid));
+			 pete_readl("drivers/usb/cdns3/drd.c:433", &cdns->otg_v1_regs->did),
+			 pete_readl("drivers/usb/cdns3/drd.c:434", &cdns->otg_v1_regs->rid));
 	}
 
-	state = OTGSTS_STRAP(readl(&cdns->otg_regs->sts));
+	state = OTGSTS_STRAP(pete_readl("drivers/usb/cdns3/drd.c:437", &cdns->otg_regs->sts));
 
 	/* Update dr_mode according to STRAP configuration. */
 	cdns->dr_mode = USB_DR_MODE_OTG;
@@ -463,7 +463,7 @@ int cdns_drd_init(struct cdns *cdns)
 		return ret;
 	}
 
-	state = readl(&cdns->otg_regs->sts);
+	state = pete_readl("drivers/usb/cdns3/drd.c:466", &cdns->otg_regs->sts);
 	if (OTGSTS_OTG_NRDY(state)) {
 		dev_err(cdns->dev, "Cadence USB3 OTG device not ready\n");
 		return -ENODEV;
@@ -484,10 +484,10 @@ int cdns_drd_exit(struct cdns *cdns)
 bool cdns_power_is_lost(struct cdns *cdns)
 {
 	if (cdns->version == CDNS3_CONTROLLER_V0) {
-		if (!(readl(&cdns->otg_v0_regs->simulate) & BIT(0)))
+		if (!(pete_readl("drivers/usb/cdns3/drd.c:487", &cdns->otg_v0_regs->simulate) & BIT(0)))
 			return true;
 	} else {
-		if (!(readl(&cdns->otg_v1_regs->simulate) & BIT(0)))
+		if (!(pete_readl("drivers/usb/cdns3/drd.c:490", &cdns->otg_v1_regs->simulate) & BIT(0)))
 			return true;
 	}
 	return false;

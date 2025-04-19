@@ -211,7 +211,7 @@ static unsigned long wait_for_avs_command(struct private_data *priv,
 	/* Polling for command completion */
 	do {
 		time_left = timeout;
-		val = readl(priv->base + AVS_MBOX_STATUS);
+		val = pete_readl("drivers/cpufreq/brcmstb-avs-cpufreq.c:214", priv->base + AVS_MBOX_STATUS);
 		if (val)
 			break;
 
@@ -241,7 +241,7 @@ static int __issue_avs_command(struct private_data *priv, unsigned int cmd,
 	 * have to wait here.
 	 */
 	for (i = 0, val = 1; val != 0 && i < AVS_LOOP_LIMIT; i++)
-		val = readl(base + AVS_MBOX_COMMAND);
+		val = pete_readl("drivers/cpufreq/brcmstb-avs-cpufreq.c:244", base + AVS_MBOX_COMMAND);
 
 	/* Give the caller a chance to retry if AVS is busy. */
 	if (i == AVS_LOOP_LIMIT) {
@@ -250,18 +250,18 @@ static int __issue_avs_command(struct private_data *priv, unsigned int cmd,
 	}
 
 	/* Clear status before we begin. */
-	writel(AVS_STATUS_CLEAR, base + AVS_MBOX_STATUS);
+	pete_writel("drivers/cpufreq/brcmstb-avs-cpufreq.c:253", AVS_STATUS_CLEAR, base + AVS_MBOX_STATUS);
 
 	/* Provide input parameters */
 	for (i = 0; i < num_in; i++)
-		writel(args[i], base + AVS_MBOX_PARAM(i));
+		pete_writel("drivers/cpufreq/brcmstb-avs-cpufreq.c:257", args[i], base + AVS_MBOX_PARAM(i));
 
 	/* Protect from spurious interrupts. */
 	reinit_completion(&priv->done);
 
 	/* Now issue the command & tell firmware to wake up to process it. */
-	writel(cmd, base + AVS_MBOX_COMMAND);
-	writel(AVS_CPU_L2_INT_MASK, priv->avs_intr_base + AVS_CPU_L2_SET0);
+	pete_writel("drivers/cpufreq/brcmstb-avs-cpufreq.c:263", cmd, base + AVS_MBOX_COMMAND);
+	pete_writel("drivers/cpufreq/brcmstb-avs-cpufreq.c:264", AVS_CPU_L2_INT_MASK, priv->avs_intr_base + AVS_CPU_L2_SET0);
 
 	/* Wait for AVS co-processor to finish processing the command. */
 	time_left = wait_for_avs_command(priv, AVS_TIMEOUT);
@@ -271,7 +271,7 @@ static int __issue_avs_command(struct private_data *priv, unsigned int cmd,
 	 * complete our command in time, and we return an error. Also, if there
 	 * is no "time left", we timed out waiting for the interrupt.
 	 */
-	val = readl(base + AVS_MBOX_STATUS);
+	val = pete_readl("drivers/cpufreq/brcmstb-avs-cpufreq.c:274", base + AVS_MBOX_STATUS);
 	if (time_left == 0 || val == 0 || val > AVS_STATUS_MAX) {
 		dev_err(priv->dev, "AVS command %#x didn't complete in time\n",
 			cmd);
@@ -283,10 +283,10 @@ static int __issue_avs_command(struct private_data *priv, unsigned int cmd,
 
 	/* Process returned values */
 	for (i = 0; i < num_out; i++)
-		args[i] = readl(base + AVS_MBOX_PARAM(i));
+		args[i] = pete_readl("drivers/cpufreq/brcmstb-avs-cpufreq.c:286", base + AVS_MBOX_PARAM(i));
 
 	/* Clear status to tell AVS co-processor we are done. */
-	writel(AVS_STATUS_CLEAR, base + AVS_MBOX_STATUS);
+	pete_writel("drivers/cpufreq/brcmstb-avs-cpufreq.c:289", AVS_STATUS_CLEAR, base + AVS_MBOX_STATUS);
 
 	/* Convert firmware errors to errno's as much as possible. */
 	switch (val) {
@@ -410,12 +410,12 @@ static int brcm_avs_set_pstate(struct private_data *priv, unsigned int pstate)
 
 static u32 brcm_avs_get_voltage(void __iomem *base)
 {
-	return readl(base + AVS_MBOX_VOLTAGE1);
+	return pete_readl("drivers/cpufreq/brcmstb-avs-cpufreq.c:413", base + AVS_MBOX_VOLTAGE1);
 }
 
 static u32 brcm_avs_get_frequency(void __iomem *base)
 {
-	return readl(base + AVS_MBOX_FREQUENCY) * 1000;	/* in kHz */
+	return pete_readl("drivers/cpufreq/brcmstb-avs-cpufreq.c:418", base + AVS_MBOX_FREQUENCY) * 1000;	/* in kHz */
 }
 
 /*
@@ -468,7 +468,7 @@ static bool brcm_avs_is_firmware_loaded(struct private_data *priv)
 	int rc;
 
 	rc = brcm_avs_get_pmap(priv, NULL);
-	magic = readl(priv->base + AVS_MBOX_MAGIC);
+	magic = pete_readl("drivers/cpufreq/brcmstb-avs-cpufreq.c:471", priv->base + AVS_MBOX_MAGIC);
 
 	return (magic == AVS_FIRMWARE_MAGIC) && ((rc != -ENOTSUPP) ||
 		(rc != -EINVAL));

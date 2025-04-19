@@ -127,7 +127,7 @@ static u32 pipemux_strap_read(struct sr_pcie_phy_core *core)
 	 * In the case when the value indicates using HW strap, fall back to
 	 * use HW strap
 	 */
-	pipemux = readl(core->base + PCIE_PIPEMUX_CFG_OFFSET);
+	pipemux = pete_readl("drivers/phy/broadcom/phy-bcm-sr-pcie.c:130", core->base + PCIE_PIPEMUX_CFG_OFFSET);
 	pipemux &= PCIE_PIPEMUX_MASK;
 	if (pipemux == PCIE_PIPEMUX_SELECT_STRAP) {
 		regmap_read(core->cdru, CDRU_STRAP_DATA_LSW_OFFSET, &pipemux);

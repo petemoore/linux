@@ -95,7 +95,7 @@ static unsigned long ingenic_ost_percpu_timer_recalc_rate(struct clk_hw *hw,
 	const struct ingenic_ost_clk_info *info = ost_clk->info;
 	unsigned int prescale;
 
-	prescale = readl(ost_clk->ost->base + info->ostccr_reg);
+	prescale = pete_readl("drivers/clocksource/ingenic-sysost.c:98", ost_clk->ost->base + info->ostccr_reg);
 
 	prescale = FIELD_GET(OSTCCR_PRESCALE1_MASK, prescale);
 
@@ -109,7 +109,7 @@ static unsigned long ingenic_ost_global_timer_recalc_rate(struct clk_hw *hw,
 	const struct ingenic_ost_clk_info *info = ost_clk->info;
 	unsigned int prescale;
 
-	prescale = readl(ost_clk->ost->base + info->ostccr_reg);
+	prescale = pete_readl("drivers/clocksource/ingenic-sysost.c:112", ost_clk->ost->base + info->ostccr_reg);
 
 	prescale = FIELD_GET(OSTCCR_PRESCALE2_MASK, prescale);
 
@@ -149,10 +149,10 @@ static int ingenic_ost_percpu_timer_set_rate(struct clk_hw *hw, unsigned long re
 	u8 prescale = ingenic_ost_get_prescale(parent_rate, req_rate);
 	int val;
 
-	val = readl(ost_clk->ost->base + info->ostccr_reg);
+	val = pete_readl("drivers/clocksource/ingenic-sysost.c:152", ost_clk->ost->base + info->ostccr_reg);
 	val &= ~OSTCCR_PRESCALE1_MASK;
 	val |= FIELD_PREP(OSTCCR_PRESCALE1_MASK, prescale);
-	writel(val, ost_clk->ost->base + info->ostccr_reg);
+	pete_writel("drivers/clocksource/ingenic-sysost.c:155", val, ost_clk->ost->base + info->ostccr_reg);
 
 	return 0;
 }
@@ -165,10 +165,10 @@ static int ingenic_ost_global_timer_set_rate(struct clk_hw *hw, unsigned long re
 	u8 prescale = ingenic_ost_get_prescale(parent_rate, req_rate);
 	int val;
 
-	val = readl(ost_clk->ost->base + info->ostccr_reg);
+	val = pete_readl("drivers/clocksource/ingenic-sysost.c:168", ost_clk->ost->base + info->ostccr_reg);
 	val &= ~OSTCCR_PRESCALE2_MASK;
 	val |= FIELD_PREP(OSTCCR_PRESCALE2_MASK, prescale);
-	writel(val, ost_clk->ost->base + info->ostccr_reg);
+	pete_writel("drivers/clocksource/ingenic-sysost.c:171", val, ost_clk->ost->base + info->ostccr_reg);
 
 	return 0;
 }
@@ -216,7 +216,7 @@ static u64 notrace ingenic_ost_global_timer_read_cntl(void)
 	struct ingenic_ost *ost = ingenic_ost;
 	unsigned int count;
 
-	count = readl(ost->base + OST_REG_OST2CNTL);
+	count = pete_readl("drivers/clocksource/ingenic-sysost.c:219", ost->base + OST_REG_OST2CNTL);
 
 	return count;
 }
@@ -235,7 +235,7 @@ static int ingenic_ost_cevt_set_state_shutdown(struct clock_event_device *evt)
 {
 	struct ingenic_ost *ost = to_ingenic_ost(evt);
 
-	writel(OSTECR_OST1ENC, ost->base + OST_REG_OSTECR);
+	pete_writel("drivers/clocksource/ingenic-sysost.c:238", OSTECR_OST1ENC, ost->base + OST_REG_OSTECR);
 
 	return 0;
 }
@@ -245,11 +245,11 @@ static int ingenic_ost_cevt_set_next(unsigned long next,
 {
 	struct ingenic_ost *ost = to_ingenic_ost(evt);
 
-	writel((u32)~OSTFR_FFLAG, ost->base + OST_REG_OSTFR);
-	writel(next, ost->base + OST_REG_OST1DFR);
-	writel(OSTCR_OST1CLR, ost->base + OST_REG_OSTCR);
-	writel(OSTESR_OST1ENS, ost->base + OST_REG_OSTESR);
-	writel((u32)~OSTMR_FMASK, ost->base + OST_REG_OSTMR);
+	pete_writel("drivers/clocksource/ingenic-sysost.c:248", (u32)~OSTFR_FFLAG, ost->base + OST_REG_OSTFR);
+	pete_writel("drivers/clocksource/ingenic-sysost.c:249", next, ost->base + OST_REG_OST1DFR);
+	pete_writel("drivers/clocksource/ingenic-sysost.c:250", OSTCR_OST1CLR, ost->base + OST_REG_OSTCR);
+	pete_writel("drivers/clocksource/ingenic-sysost.c:251", OSTESR_OST1ENS, ost->base + OST_REG_OSTESR);
+	pete_writel("drivers/clocksource/ingenic-sysost.c:252", (u32)~OSTMR_FMASK, ost->base + OST_REG_OSTMR);
 
 	return 0;
 }
@@ -259,7 +259,7 @@ static irqreturn_t ingenic_ost_cevt_cb(int irq, void *dev_id)
 	struct clock_event_device *evt = dev_id;
 	struct ingenic_ost *ost = to_ingenic_ost(evt);
 
-	writel(OSTECR_OST1ENC, ost->base + OST_REG_OSTECR);
+	pete_writel("drivers/clocksource/ingenic-sysost.c:262", OSTECR_OST1ENC, ost->base + OST_REG_OSTECR);
 
 	if (evt->event_handler)
 		evt->event_handler(evt);
@@ -284,9 +284,9 @@ static int __init ingenic_ost_register_clock(struct ingenic_ost *ost,
 	ost_clk->ost = ost;
 
 	/* Reset clock divider */
-	val = readl(ost->base + info->ostccr_reg);
+	val = pete_readl("drivers/clocksource/ingenic-sysost.c:287", ost->base + info->ostccr_reg);
 	val &= ~(OSTCCR_PRESCALE1_MASK | OSTCCR_PRESCALE2_MASK);
-	writel(val, ost->base + info->ostccr_reg);
+	pete_writel("drivers/clocksource/ingenic-sysost.c:289", val, ost->base + info->ostccr_reg);
 
 	err = clk_hw_register(NULL, &ost_clk->hw);
 	if (err) {
@@ -387,10 +387,10 @@ static int __init ingenic_ost_global_timer_init(struct device_node *np,
 	}
 
 	/* Clear counter CNT registers */
-	writel(OSTCR_OST2CLR, ost->base + OST_REG_OSTCR);
+	pete_writel("drivers/clocksource/ingenic-sysost.c:390", OSTCR_OST2CLR, ost->base + OST_REG_OSTCR);
 
 	/* Enable OST channel */
-	writel(OSTESR_OST2ENS, ost->base + OST_REG_OSTESR);
+	pete_writel("drivers/clocksource/ingenic-sysost.c:393", OSTESR_OST2ENS, ost->base + OST_REG_OSTESR);
 
 	cs->name = "ingenic-ost";
 	cs->rating = 400;

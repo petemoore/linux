@@ -151,12 +151,12 @@ struct etnaviv_gpu {
 
 static inline void gpu_write(struct etnaviv_gpu *gpu, u32 reg, u32 data)
 {
-	writel(data, gpu->mmio + reg);
+	pete_writel("drivers/gpu/drm/etnaviv/etnaviv_gpu.h:154", data, gpu->mmio + reg);
 }
 
 static inline u32 gpu_read(struct etnaviv_gpu *gpu, u32 reg)
 {
-	return readl(gpu->mmio + reg);
+	return pete_readl("drivers/gpu/drm/etnaviv/etnaviv_gpu.h:159", gpu->mmio + reg);
 }
 
 int etnaviv_gpu_get_param(struct etnaviv_gpu *gpu, u32 param, u64 *value);

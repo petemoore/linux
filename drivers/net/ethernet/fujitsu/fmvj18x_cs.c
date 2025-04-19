@@ -561,18 +561,18 @@ static int fmvj18x_get_hwinfo(struct pcmcia_device *link, u_char *node_id)
      *  'yy' is MAC address.
     */ 
     for (i = 0; i < 0x200; i++) {
-	if (readb(base+i*2) == 0x22) {	
-		if (readb(base+(i-1)*2) == 0xff &&
-		    readb(base+(i+5)*2) == 0x04 &&
-		    readb(base+(i+6)*2) == 0x06 &&
-		    readb(base+(i+13)*2) == 0xff)
+	if (pete_readb("drivers/net/ethernet/fujitsu/fmvj18x_cs.c:564", base+i*2) == 0x22) {	
+		if (pete_readb("drivers/net/ethernet/fujitsu/fmvj18x_cs.c:565", base+(i-1)*2) == 0xff &&
+		    pete_readb("drivers/net/ethernet/fujitsu/fmvj18x_cs.c:566", base+(i+5)*2) == 0x04 &&
+		    pete_readb("drivers/net/ethernet/fujitsu/fmvj18x_cs.c:567", base+(i+6)*2) == 0x06 &&
+		    pete_readb("drivers/net/ethernet/fujitsu/fmvj18x_cs.c:568", base+(i+13)*2) == 0xff)
 			break;
 	}
     }
 
     if (i != 0x200) {
 	for (j = 0 ; j < 6; j++,i++) {
-	    node_id[j] = readb(base+(i+7)*2);
+	    node_id[j] = pete_readb("drivers/net/ethernet/fujitsu/fmvj18x_cs.c:575", base+(i+7)*2);
 	}
     }
 
@@ -612,14 +612,14 @@ static int fmvj18x_setup_mfc(struct pcmcia_device *link)
     }
     
     ioaddr = dev->base_addr;
-    writeb(0x47, lp->base+0x800);	/* Config Option Register of LAN */
-    writeb(0x0,  lp->base+0x802);	/* Config and Status Register */
+    pete_writeb("drivers/net/ethernet/fujitsu/fmvj18x_cs.c:615", 0x47, lp->base+0x800);	/* Config Option Register of LAN */
+    pete_writeb("drivers/net/ethernet/fujitsu/fmvj18x_cs.c:616", 0x0,  lp->base+0x802);	/* Config and Status Register */
 
-    writeb(ioaddr & 0xff, lp->base+0x80a);	  /* I/O Base(Low) of LAN */
-    writeb((ioaddr >> 8) & 0xff, lp->base+0x80c); /* I/O Base(High) of LAN */
+    pete_writeb("drivers/net/ethernet/fujitsu/fmvj18x_cs.c:618", ioaddr & 0xff, lp->base+0x80a);	  /* I/O Base(Low) of LAN */
+    pete_writeb("drivers/net/ethernet/fujitsu/fmvj18x_cs.c:619", (ioaddr >> 8) & 0xff, lp->base+0x80c); /* I/O Base(High) of LAN */
    
-    writeb(0x45, lp->base+0x820);	/* Config Option Register of Modem */
-    writeb(0x8,  lp->base+0x822);	/* Config and Status Register */
+    pete_writeb("drivers/net/ethernet/fujitsu/fmvj18x_cs.c:621", 0x45, lp->base+0x820);	/* Config Option Register of Modem */
+    pete_writeb("drivers/net/ethernet/fujitsu/fmvj18x_cs.c:622", 0x8,  lp->base+0x822);	/* Config and Status Register */
 
     return 0;
 
@@ -764,8 +764,8 @@ static irqreturn_t fjn_interrupt(int dummy, void *dev_id)
 
     if (lp->base != NULL) {
 	/* Ack interrupt for multifunction card */
-	writeb(0x01, lp->base+0x802);
-	writeb(0x09, lp->base+0x822);
+	pete_writeb("drivers/net/ethernet/fujitsu/fmvj18x_cs.c:767", 0x01, lp->base+0x802);
+	pete_writeb("drivers/net/ethernet/fujitsu/fmvj18x_cs.c:768", 0x09, lp->base+0x822);
     }
 
     return IRQ_HANDLED;

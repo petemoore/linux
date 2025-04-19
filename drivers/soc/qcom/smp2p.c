@@ -216,7 +216,7 @@ static irqreturn_t qcom_smp2p_intr(int irq, void *data)
 		if (!entry->value)
 			continue;
 
-		val = readl(entry->value);
+		val = pete_readl("drivers/soc/qcom/smp2p.c:219", entry->value);
 
 		status = val ^ entry->last_value;
 		entry->last_value = val;
@@ -324,10 +324,10 @@ static int smp2p_update_bits(void *data, u32 mask, u32 value)
 	u32 val;
 
 	spin_lock_irqsave(&entry->lock, flags);
-	val = orig = readl(entry->value);
+	val = orig = pete_readl("drivers/soc/qcom/smp2p.c:327", entry->value);
 	val &= ~mask;
 	val |= value;
-	writel(val, entry->value);
+	pete_writel("drivers/soc/qcom/smp2p.c:330", val, entry->value);
 	spin_unlock_irqrestore(&entry->lock, flags);
 
 	if (val != orig)

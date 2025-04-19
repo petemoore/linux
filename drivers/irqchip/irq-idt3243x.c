@@ -98,7 +98,7 @@ static int idt_pic_init(struct device_node *of_node, struct device_node *parent)
 	idtpic->gc = gc;
 
 	/* Mask interrupts. */
-	writel(0xffffffff, idtpic->base + IDT_PIC_IRQ_MASK);
+	pete_writel("drivers/irqchip/irq-idt3243x.c:101", 0xffffffff, idtpic->base + IDT_PIC_IRQ_MASK);
 	gc->mask_cache = 0xffffffff;
 
 	irq_set_chained_handler_and_data(parent_irq,

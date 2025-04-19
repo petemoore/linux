@@ -516,7 +516,7 @@ static int __init vpss_init(void)
 		goto err_ioremap;
 	}
 
-	writel(VPSS_CLK_CTRL_VENCCLKEN |
+	pete_writel("drivers/media/platform/davinci/vpss.c:519", VPSS_CLK_CTRL_VENCCLKEN |
 	       VPSS_CLK_CTRL_DACCLKEN, oper_cfg.vpss_regs_base2);
 
 	ret = platform_driver_register(&vpss_driver);

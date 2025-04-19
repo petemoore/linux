@@ -859,8 +859,8 @@ static const struct mv_hw_ops mv_soc_65n_ops = {
 
 static inline void writelfl(unsigned long data, void __iomem *addr)
 {
-	writel(data, addr);
-	(void) readl(addr);	/* flush to avoid PCI posted write */
+	pete_writel("drivers/ata/sata_mv.c:862", data, addr);
+	(void) pete_readl("drivers/ata/sata_mv.c:863", addr);	/* flush to avoid PCI posted write */
 }
 
 static inline unsigned int mv_hc_from_port(unsigned int port)
@@ -948,10 +948,10 @@ static void mv_save_cached_regs(struct ata_port *ap)
 	void __iomem *port_mmio = mv_ap_base(ap);
 	struct mv_port_priv *pp = ap->private_data;
 
-	pp->cached.fiscfg = readl(port_mmio + FISCFG);
-	pp->cached.ltmode = readl(port_mmio + LTMODE);
-	pp->cached.haltcond = readl(port_mmio + EDMA_HALTCOND);
-	pp->cached.unknown_rsvd = readl(port_mmio + EDMA_UNKNOWN_RSVD);
+	pp->cached.fiscfg = pete_readl("drivers/ata/sata_mv.c:951", port_mmio + FISCFG);
+	pp->cached.ltmode = pete_readl("drivers/ata/sata_mv.c:952", port_mmio + LTMODE);
+	pp->cached.haltcond = pete_readl("drivers/ata/sata_mv.c:953", port_mmio + EDMA_HALTCOND);
+	pp->cached.unknown_rsvd = pete_readl("drivers/ata/sata_mv.c:954", port_mmio + EDMA_UNKNOWN_RSVD);
 }
 
 /**
@@ -985,7 +985,7 @@ static inline void mv_write_cached_reg(void __iomem *addr, u32 *old, u32 new)
 				return;
 			}
 		}
-		writel(new, addr); /* unaffected by the errata */
+		pete_writel("drivers/ata/sata_mv.c:988", new, addr); /* unaffected by the errata */
 	}
 }
 
@@ -1002,7 +1002,7 @@ static void mv_set_edma_ptrs(void __iomem *port_mmio,
 	index = pp->req_idx << EDMA_REQ_Q_PTR_SHIFT;
 
 	WARN_ON(pp->crqb_dma & 0x3ff);
-	writel((pp->crqb_dma >> 16) >> 16, port_mmio + EDMA_REQ_Q_BASE_HI);
+	pete_writel("drivers/ata/sata_mv.c:1005", (pp->crqb_dma >> 16) >> 16, port_mmio + EDMA_REQ_Q_BASE_HI);
 	writelfl((pp->crqb_dma & EDMA_REQ_Q_BASE_LO_MASK) | index,
 		 port_mmio + EDMA_REQ_Q_IN_PTR);
 	writelfl(index, port_mmio + EDMA_REQ_Q_OUT_PTR);
@@ -1014,7 +1014,7 @@ static void mv_set_edma_ptrs(void __iomem *port_mmio,
 	index = pp->resp_idx << EDMA_RSP_Q_PTR_SHIFT;
 
 	WARN_ON(pp->crpb_dma & 0xff);
-	writel((pp->crpb_dma >> 16) >> 16, port_mmio + EDMA_RSP_Q_BASE_HI);
+	pete_writel("drivers/ata/sata_mv.c:1017", (pp->crpb_dma >> 16) >> 16, port_mmio + EDMA_RSP_Q_BASE_HI);
 	writelfl(index, port_mmio + EDMA_RSP_Q_IN_PTR);
 	writelfl((pp->crpb_dma & EDMA_RSP_Q_BASE_LO_MASK) | index,
 		 port_mmio + EDMA_RSP_Q_OUT_PTR);
@@ -1119,10 +1119,10 @@ static void mv_set_irq_coalescing(struct ata_host *host,
 		 * GEN_II/GEN_IIE with dual host controllers:
 		 * one set of global thresholds for the entire chip.
 		 */
-		writel(clks,  mmio + IRQ_COAL_TIME_THRESHOLD);
-		writel(count, mmio + IRQ_COAL_IO_THRESHOLD);
+		pete_writel("drivers/ata/sata_mv.c:1122", clks,  mmio + IRQ_COAL_TIME_THRESHOLD);
+		pete_writel("drivers/ata/sata_mv.c:1123", count, mmio + IRQ_COAL_IO_THRESHOLD);
 		/* clear leftover coal IRQ bit */
-		writel(~ALL_PORTS_COAL_IRQ, mmio + IRQ_COAL_CAUSE);
+		pete_writel("drivers/ata/sata_mv.c:1125", ~ALL_PORTS_COAL_IRQ, mmio + IRQ_COAL_CAUSE);
 		if (count)
 			coal_enable = ALL_PORTS_COAL_DONE;
 		clks = count = 0; /* force clearing of regular regs below */
@@ -1132,16 +1132,16 @@ static void mv_set_irq_coalescing(struct ata_host *host,
 	 * All chips: independent thresholds for each HC on the chip.
 	 */
 	hc_mmio = mv_hc_base_from_port(mmio, 0);
-	writel(clks,  hc_mmio + HC_IRQ_COAL_TIME_THRESHOLD);
-	writel(count, hc_mmio + HC_IRQ_COAL_IO_THRESHOLD);
-	writel(~HC_COAL_IRQ, hc_mmio + HC_IRQ_CAUSE);
+	pete_writel("drivers/ata/sata_mv.c:1135", clks,  hc_mmio + HC_IRQ_COAL_TIME_THRESHOLD);
+	pete_writel("drivers/ata/sata_mv.c:1136", count, hc_mmio + HC_IRQ_COAL_IO_THRESHOLD);
+	pete_writel("drivers/ata/sata_mv.c:1137", ~HC_COAL_IRQ, hc_mmio + HC_IRQ_CAUSE);
 	if (count)
 		coal_enable |= PORTS_0_3_COAL_DONE;
 	if (is_dual_hc) {
 		hc_mmio = mv_hc_base_from_port(mmio, MV_PORTS_PER_HC);
-		writel(clks,  hc_mmio + HC_IRQ_COAL_TIME_THRESHOLD);
-		writel(count, hc_mmio + HC_IRQ_COAL_IO_THRESHOLD);
-		writel(~HC_COAL_IRQ, hc_mmio + HC_IRQ_CAUSE);
+		pete_writel("drivers/ata/sata_mv.c:1142", clks,  hc_mmio + HC_IRQ_COAL_TIME_THRESHOLD);
+		pete_writel("drivers/ata/sata_mv.c:1143", count, hc_mmio + HC_IRQ_COAL_IO_THRESHOLD);
+		pete_writel("drivers/ata/sata_mv.c:1144", ~HC_COAL_IRQ, hc_mmio + HC_IRQ_CAUSE);
 		if (count)
 			coal_enable |= PORTS_4_7_COAL_DONE;
 	}
@@ -1198,7 +1198,7 @@ static void mv_wait_for_edma_empty_idle(struct ata_port *ap)
 	 * as a rough guess at what even more drives might require.
 	 */
 	for (i = 0; i < timeout; ++i) {
-		u32 edma_stat = readl(port_mmio + EDMA_STATUS);
+		u32 edma_stat = pete_readl("drivers/ata/sata_mv.c:1201", port_mmio + EDMA_STATUS);
 		if ((edma_stat & empty_idle) == empty_idle)
 			break;
 		udelay(per_loop);
@@ -1222,7 +1222,7 @@ static int mv_stop_edma_engine(void __iomem *port_mmio)
 
 	/* Wait for the chip to confirm eDMA is off. */
 	for (i = 10000; i > 0; i--) {
-		u32 reg = readl(port_mmio + EDMA_CMD);
+		u32 reg = pete_readl("drivers/ata/sata_mv.c:1225", port_mmio + EDMA_CMD);
 		if (!(reg & EDMA_EN))
 			return 0;
 		udelay(10);
@@ -1255,7 +1255,7 @@ static void mv_dump_mem(void __iomem *start, unsigned bytes)
 	for (b = 0; b < bytes; ) {
 		DPRINTK("%p: ", start + b);
 		for (w = 0; b < bytes && w < 4; w++) {
-			printk("%08x ", readl(start + b));
+			printk("%08x ", pete_readl("drivers/ata/sata_mv.c:1258", start + b));
 			b += sizeof(u32);
 		}
 		printk("\n");
@@ -1350,7 +1350,7 @@ static int mv_scr_read(struct ata_link *link, unsigned int sc_reg_in, u32 *val)
 	unsigned int ofs = mv_scr_offset(sc_reg_in);
 
 	if (ofs != 0xffffffffU) {
-		*val = readl(mv_ap_base(link->ap) + ofs);
+		*val = pete_readl("drivers/ata/sata_mv.c:1353", mv_ap_base(link->ap) + ofs);
 		return 0;
 	} else
 		return -EINVAL;
@@ -1377,7 +1377,7 @@ static int mv_scr_write(struct ata_link *link, unsigned int sc_reg_in, u32 val)
 			 * The proprietary driver does this for
 			 * all chip versions, and so do we.
 			 */
-			if ((val & 0xf) == 1 || (readl(addr) & 0xf) == 1)
+			if ((val & 0xf) == 1 || (pete_readl("drivers/ata/sata_mv.c:1380", addr) & 0xf) == 1)
 				val |= 0xf000;
 
 			if (hpriv->hp_flags & MV_HP_FIX_LP_PHY_CTL) {
@@ -1513,13 +1513,13 @@ static void mv_60x1_errata_sata25(struct ata_port *ap, int want_ncq)
 	u32 old, new;
 
 	/* workaround for 88SX60x1 FEr SATA#25 (part 1) */
-	old = readl(hpriv->base + GPIO_PORT_CTL);
+	old = pete_readl("drivers/ata/sata_mv.c:1516", hpriv->base + GPIO_PORT_CTL);
 	if (want_ncq)
 		new = old | (1 << 22);
 	else
 		new = old & ~(1 << 22);
 	if (new != old)
-		writel(new, hpriv->base + GPIO_PORT_CTL);
+		pete_writel("drivers/ata/sata_mv.c:1522", new, hpriv->base + GPIO_PORT_CTL);
 }
 
 /*
@@ -1571,8 +1571,8 @@ static void mv_soc_led_blink_enable(struct ata_port *ap)
 		return;
 	hpriv->hp_flags |= MV_HP_QUIRK_LED_BLINK_EN;
 	hc_mmio = mv_hc_base_from_port(mv_host_base(host), ap->port_no);
-	led_ctrl = readl(hc_mmio + SOC_LED_CTRL);
-	writel(led_ctrl | SOC_LED_CTRL_BLINK, hc_mmio + SOC_LED_CTRL);
+	led_ctrl = pete_readl("drivers/ata/sata_mv.c:1574", hc_mmio + SOC_LED_CTRL);
+	pete_writel("drivers/ata/sata_mv.c:1575", led_ctrl | SOC_LED_CTRL_BLINK, hc_mmio + SOC_LED_CTRL);
 }
 
 static void mv_soc_led_blink_disable(struct ata_port *ap)
@@ -1597,8 +1597,8 @@ static void mv_soc_led_blink_disable(struct ata_port *ap)
 
 	hpriv->hp_flags &= ~MV_HP_QUIRK_LED_BLINK_EN;
 	hc_mmio = mv_hc_base_from_port(mv_host_base(host), ap->port_no);
-	led_ctrl = readl(hc_mmio + SOC_LED_CTRL);
-	writel(led_ctrl & ~SOC_LED_CTRL_BLINK, hc_mmio + SOC_LED_CTRL);
+	led_ctrl = pete_readl("drivers/ata/sata_mv.c:1600", hc_mmio + SOC_LED_CTRL);
+	pete_writel("drivers/ata/sata_mv.c:1601", led_ctrl & ~SOC_LED_CTRL_BLINK, hc_mmio + SOC_LED_CTRL);
 }
 
 static void mv_edma_cfg(struct ata_port *ap, int want_ncq, int want_edma)
@@ -1890,10 +1890,10 @@ static void mv_bmdma_setup(struct ata_queued_cmd *qc)
 	mv_fill_sg(qc);
 
 	/* clear all DMA cmd bits */
-	writel(0, port_mmio + BMDMA_CMD);
+	pete_writel("drivers/ata/sata_mv.c:1893", 0, port_mmio + BMDMA_CMD);
 
 	/* load PRD table addr. */
-	writel((pp->sg_tbl_dma[qc->hw_tag] >> 16) >> 16,
+	pete_writel("drivers/ata/sata_mv.c:1896", (pp->sg_tbl_dma[qc->hw_tag] >> 16) >> 16,
 		port_mmio + BMDMA_PRD_HIGH);
 	writelfl(pp->sg_tbl_dma[qc->hw_tag],
 		port_mmio + BMDMA_PRD_LOW);
@@ -1935,7 +1935,7 @@ static void mv_bmdma_stop_ap(struct ata_port *ap)
 	u32 cmd;
 
 	/* clear start/stop bit */
-	cmd = readl(port_mmio + BMDMA_CMD);
+	cmd = pete_readl("drivers/ata/sata_mv.c:1938", port_mmio + BMDMA_CMD);
 	if (cmd & ATA_DMA_START) {
 		cmd &= ~ATA_DMA_START;
 		writelfl(cmd, port_mmio + BMDMA_CMD);
@@ -1968,7 +1968,7 @@ static u8 mv_bmdma_status(struct ata_port *ap)
 	 * Other bits are valid only if ATA_DMA_ACTIVE==0,
 	 * and the ATA_DMA_INTR bit doesn't exist.
 	 */
-	reg = readl(port_mmio + BMDMA_STATUS);
+	reg = pete_readl("drivers/ata/sata_mv.c:1971", port_mmio + BMDMA_STATUS);
 	if (reg & ATA_DMA_ACTIVE)
 		status = ATA_DMA_ACTIVE;
 	else if (reg & ATA_DMA_ERR)
@@ -2235,13 +2235,13 @@ static unsigned int mv_send_fis(struct ata_port *ap, u32 *fis, int nwords)
 	int i, timeout = 200, final_word = nwords - 1;
 
 	/* Initiate FIS transmission mode */
-	old_ifctl = readl(port_mmio + SATA_IFCTL);
+	old_ifctl = pete_readl("drivers/ata/sata_mv.c:2238", port_mmio + SATA_IFCTL);
 	ifctl = 0x100 | (old_ifctl & 0xf);
 	writelfl(ifctl, port_mmio + SATA_IFCTL);
 
 	/* Send all words of the FIS except for the final word */
 	for (i = 0; i < final_word; ++i)
-		writel(fis[i], port_mmio + VENDOR_UNIQUE_FIS);
+		pete_writel("drivers/ata/sata_mv.c:2244", fis[i], port_mmio + VENDOR_UNIQUE_FIS);
 
 	/* Flag end-of-transmission, and then send the final word */
 	writelfl(ifctl | 0x200, port_mmio + SATA_IFCTL);
@@ -2252,7 +2252,7 @@ static unsigned int mv_send_fis(struct ata_port *ap, u32 *fis, int nwords)
 	 * This typically takes just a single iteration.
 	 */
 	do {
-		ifstat = readl(port_mmio + SATA_IFSTAT);
+		ifstat = pete_readl("drivers/ata/sata_mv.c:2255", port_mmio + SATA_IFSTAT);
 	} while (!(ifstat & 0x1000) && --timeout);
 
 	/* Restore original port configuration */
@@ -2466,7 +2466,7 @@ static unsigned int mv_get_err_pmp_map(struct ata_port *ap)
 {
 	void __iomem *port_mmio = mv_ap_base(ap);
 
-	return readl(port_mmio + SATA_TESTCTL) >> 16;
+	return pete_readl("drivers/ata/sata_mv.c:2469", port_mmio + SATA_TESTCTL) >> 16;
 }
 
 static void mv_pmp_eh_prep(struct ata_port *ap, unsigned int pmp_map)
@@ -2497,9 +2497,9 @@ static int mv_req_q_empty(struct ata_port *ap)
 	void __iomem *port_mmio = mv_ap_base(ap);
 	u32 in_ptr, out_ptr;
 
-	in_ptr  = (readl(port_mmio + EDMA_REQ_Q_IN_PTR)
+	in_ptr  = (pete_readl("drivers/ata/sata_mv.c:2500", port_mmio + EDMA_REQ_Q_IN_PTR)
 			>> EDMA_REQ_Q_PTR_SHIFT) & MV_MAX_Q_DEPTH_MASK;
-	out_ptr = (readl(port_mmio + EDMA_REQ_Q_OUT_PTR)
+	out_ptr = (pete_readl("drivers/ata/sata_mv.c:2502", port_mmio + EDMA_REQ_Q_OUT_PTR)
 			>> EDMA_REQ_Q_PTR_SHIFT) & MV_MAX_Q_DEPTH_MASK;
 	return (in_ptr == out_ptr);	/* 1 == queue_is_empty */
 }
@@ -2657,9 +2657,9 @@ static void mv_err_intr(struct ata_port *ap)
 	sata_scr_read(&ap->link, SCR_ERROR, &serr);
 	sata_scr_write_flush(&ap->link, SCR_ERROR, serr);
 
-	edma_err_cause = readl(port_mmio + EDMA_ERR_IRQ_CAUSE);
+	edma_err_cause = pete_readl("drivers/ata/sata_mv.c:2660", port_mmio + EDMA_ERR_IRQ_CAUSE);
 	if (IS_GEN_IIE(hpriv) && (edma_err_cause & EDMA_ERR_TRANS_IRQ_7)) {
-		fis_cause = readl(port_mmio + FIS_IRQ_CAUSE);
+		fis_cause = pete_readl("drivers/ata/sata_mv.c:2662", port_mmio + FIS_IRQ_CAUSE);
 		writelfl(~fis_cause, port_mmio + FIS_IRQ_CAUSE);
 	}
 	writelfl(~edma_err_cause, port_mmio + EDMA_ERR_IRQ_CAUSE);
@@ -2810,7 +2810,7 @@ static void mv_process_crpb_entries(struct ata_port *ap, struct mv_port_priv *pp
 	int ncq_enabled = (pp->pp_flags & MV_PP_FLAG_NCQ_EN);
 
 	/* Get the hardware queue position index */
-	in_index = (readl(port_mmio + EDMA_RSP_Q_IN_PTR)
+	in_index = (pete_readl("drivers/ata/sata_mv.c:2813", port_mmio + EDMA_RSP_Q_IN_PTR)
 			>> EDMA_RSP_Q_PTR_SHIFT) & MV_MAX_Q_DEPTH_MASK;
 
 	/* Process new responses from since the last time we looked */
@@ -2892,7 +2892,7 @@ static int mv_host_intr(struct ata_host *host, u32 main_irq_cause)
 
 	/* If asserted, clear the "all ports" IRQ coalescing bit */
 	if (main_irq_cause & ALL_PORTS_COAL_DONE)
-		writel(~ALL_PORTS_COAL_IRQ, mmio + IRQ_COAL_CAUSE);
+		pete_writel("drivers/ata/sata_mv.c:2895", ~ALL_PORTS_COAL_IRQ, mmio + IRQ_COAL_CAUSE);
 
 	for (port = 0; port < hpriv->n_ports; port++) {
 		struct ata_port *ap = host->ports[port];
@@ -2958,7 +2958,7 @@ static int mv_pci_error(struct ata_host *host, void __iomem *mmio)
 	unsigned int i, err_mask, printed = 0;
 	u32 err_cause;
 
-	err_cause = readl(mmio + hpriv->irq_cause_offset);
+	err_cause = pete_readl("drivers/ata/sata_mv.c:2961", mmio + hpriv->irq_cause_offset);
 
 	dev_err(host->dev, "PCI ERROR; PCI IRQ cause=0x%08x\n", err_cause);
 
@@ -3017,7 +3017,7 @@ static irqreturn_t mv_interrupt(int irq, void *dev_instance)
 	if (using_msi)
 		mv_write_main_irq_mask(0, hpriv);
 
-	main_irq_cause = readl(hpriv->main_irq_cause_addr);
+	main_irq_cause = pete_readl("drivers/ata/sata_mv.c:3020", hpriv->main_irq_cause_addr);
 	pending_irqs   = main_irq_cause & hpriv->main_irq_mask;
 	/*
 	 * Deal with cases where we either have nothing pending, or have read
@@ -3064,7 +3064,7 @@ static int mv5_scr_read(struct ata_link *link, unsigned int sc_reg_in, u32 *val)
 	unsigned int ofs = mv5_scr_offset(sc_reg_in);
 
 	if (ofs != 0xffffffffU) {
-		*val = readl(addr + ofs);
+		*val = pete_readl("drivers/ata/sata_mv.c:3067", addr + ofs);
 		return 0;
 	} else
 		return -EINVAL;
@@ -3092,9 +3092,9 @@ static void mv5_reset_bus(struct ata_host *host, void __iomem *mmio)
 	early_5080 = (pdev->device == 0x5080) && (pdev->revision == 0);
 
 	if (!early_5080) {
-		u32 tmp = readl(mmio + MV_PCI_EXP_ROM_BAR_CTL);
+		u32 tmp = pete_readl("drivers/ata/sata_mv.c:3095", mmio + MV_PCI_EXP_ROM_BAR_CTL);
 		tmp |= (1 << 0);
-		writel(tmp, mmio + MV_PCI_EXP_ROM_BAR_CTL);
+		pete_writel("drivers/ata/sata_mv.c:3097", tmp, mmio + MV_PCI_EXP_ROM_BAR_CTL);
 	}
 
 	mv_reset_pci_bus(host, mmio);
@@ -3102,7 +3102,7 @@ static void mv5_reset_bus(struct ata_host *host, void __iomem *mmio)
 
 static void mv5_reset_flash(struct mv_host_priv *hpriv, void __iomem *mmio)
 {
-	writel(0x0fcfffff, mmio + FLASH_CTL);
+	pete_writel("drivers/ata/sata_mv.c:3105", 0x0fcfffff, mmio + FLASH_CTL);
 }
 
 static void mv5_read_preamp(struct mv_host_priv *hpriv, int idx,
@@ -3111,7 +3111,7 @@ static void mv5_read_preamp(struct mv_host_priv *hpriv, int idx,
 	void __iomem *phy_mmio = mv5_phy_base(mmio, idx);
 	u32 tmp;
 
-	tmp = readl(phy_mmio + MV5_PHY_MODE);
+	tmp = pete_readl("drivers/ata/sata_mv.c:3114", phy_mmio + MV5_PHY_MODE);
 
 	hpriv->signal[idx].pre = tmp & 0x1800;	/* bits 12:11 */
 	hpriv->signal[idx].amps = tmp & 0xe0;	/* bits 7:5 */
@@ -3121,13 +3121,13 @@ static void mv5_enable_leds(struct mv_host_priv *hpriv, void __iomem *mmio)
 {
 	u32 tmp;
 
-	writel(0, mmio + GPIO_PORT_CTL);
+	pete_writel("drivers/ata/sata_mv.c:3124", 0, mmio + GPIO_PORT_CTL);
 
 	/* FIXME: handle MV_HP_ERRATA_50XXB2 errata */
 
-	tmp = readl(mmio + MV_PCI_EXP_ROM_BAR_CTL);
+	tmp = pete_readl("drivers/ata/sata_mv.c:3128", mmio + MV_PCI_EXP_ROM_BAR_CTL);
 	tmp |= ~(1 << 0);
-	writel(tmp, mmio + MV_PCI_EXP_ROM_BAR_CTL);
+	pete_writel("drivers/ata/sata_mv.c:3130", tmp, mmio + MV_PCI_EXP_ROM_BAR_CTL);
 }
 
 static void mv5_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
@@ -3139,26 +3139,26 @@ static void mv5_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
 	int fix_apm_sq = (hpriv->hp_flags & MV_HP_ERRATA_50XXB0);
 
 	if (fix_apm_sq) {
-		tmp = readl(phy_mmio + MV5_LTMODE);
+		tmp = pete_readl("drivers/ata/sata_mv.c:3142", phy_mmio + MV5_LTMODE);
 		tmp |= (1 << 19);
-		writel(tmp, phy_mmio + MV5_LTMODE);
+		pete_writel("drivers/ata/sata_mv.c:3144", tmp, phy_mmio + MV5_LTMODE);
 
-		tmp = readl(phy_mmio + MV5_PHY_CTL);
+		tmp = pete_readl("drivers/ata/sata_mv.c:3146", phy_mmio + MV5_PHY_CTL);
 		tmp &= ~0x3;
 		tmp |= 0x1;
-		writel(tmp, phy_mmio + MV5_PHY_CTL);
+		pete_writel("drivers/ata/sata_mv.c:3149", tmp, phy_mmio + MV5_PHY_CTL);
 	}
 
-	tmp = readl(phy_mmio + MV5_PHY_MODE);
+	tmp = pete_readl("drivers/ata/sata_mv.c:3152", phy_mmio + MV5_PHY_MODE);
 	tmp &= ~mask;
 	tmp |= hpriv->signal[port].pre;
 	tmp |= hpriv->signal[port].amps;
-	writel(tmp, phy_mmio + MV5_PHY_MODE);
+	pete_writel("drivers/ata/sata_mv.c:3156", tmp, phy_mmio + MV5_PHY_MODE);
 }
 
 
 #undef ZERO
-#define ZERO(reg) writel(0, port_mmio + (reg))
+#define ZERO(reg) pete_writel("drivers/ata/sata_mv.c:3161", 0, port_mmio + (reg))
 static void mv5_reset_hc_port(struct mv_host_priv *hpriv, void __iomem *mmio,
 			     unsigned int port)
 {
@@ -3167,7 +3167,7 @@ static void mv5_reset_hc_port(struct mv_host_priv *hpriv, void __iomem *mmio,
 	mv_reset_channel(hpriv, mmio, port);
 
 	ZERO(0x028);	/* command */
-	writel(0x11f, port_mmio + EDMA_CFG);
+	pete_writel("drivers/ata/sata_mv.c:3170", 0x11f, port_mmio + EDMA_CFG);
 	ZERO(0x004);	/* timer */
 	ZERO(0x008);	/* irq err cause */
 	ZERO(0x00c);	/* irq err mask */
@@ -3178,11 +3178,11 @@ static void mv5_reset_hc_port(struct mv_host_priv *hpriv, void __iomem *mmio,
 	ZERO(0x024);	/* respq outp */
 	ZERO(0x020);	/* respq inp */
 	ZERO(0x02c);	/* test control */
-	writel(0xbc, port_mmio + EDMA_IORDY_TMOUT);
+	pete_writel("drivers/ata/sata_mv.c:3181", 0xbc, port_mmio + EDMA_IORDY_TMOUT);
 }
 #undef ZERO
 
-#define ZERO(reg) writel(0, hc_mmio + (reg))
+#define ZERO(reg) pete_writel("drivers/ata/sata_mv.c:3185", 0, hc_mmio + (reg))
 static void mv5_reset_one_hc(struct mv_host_priv *hpriv, void __iomem *mmio,
 			unsigned int hc)
 {
@@ -3194,10 +3194,10 @@ static void mv5_reset_one_hc(struct mv_host_priv *hpriv, void __iomem *mmio,
 	ZERO(0x014);
 	ZERO(0x018);
 
-	tmp = readl(hc_mmio + 0x20);
+	tmp = pete_readl("drivers/ata/sata_mv.c:3197", hc_mmio + 0x20);
 	tmp &= 0x1c1c1c1c;
 	tmp |= 0x03030303;
-	writel(tmp, hc_mmio + 0x20);
+	pete_writel("drivers/ata/sata_mv.c:3200", tmp, hc_mmio + 0x20);
 }
 #undef ZERO
 
@@ -3218,19 +3218,19 @@ static int mv5_reset_hc(struct mv_host_priv *hpriv, void __iomem *mmio,
 }
 
 #undef ZERO
-#define ZERO(reg) writel(0, mmio + (reg))
+#define ZERO(reg) pete_writel("drivers/ata/sata_mv.c:3221", 0, mmio + (reg))
 static void mv_reset_pci_bus(struct ata_host *host, void __iomem *mmio)
 {
 	struct mv_host_priv *hpriv = host->private_data;
 	u32 tmp;
 
-	tmp = readl(mmio + MV_PCI_MODE);
+	tmp = pete_readl("drivers/ata/sata_mv.c:3227", mmio + MV_PCI_MODE);
 	tmp &= 0xff00ffff;
-	writel(tmp, mmio + MV_PCI_MODE);
+	pete_writel("drivers/ata/sata_mv.c:3229", tmp, mmio + MV_PCI_MODE);
 
 	ZERO(MV_PCI_DISC_TIMER);
 	ZERO(MV_PCI_MSI_TRIGGER);
-	writel(0x000100ff, mmio + MV_PCI_XBAR_TMOUT);
+	pete_writel("drivers/ata/sata_mv.c:3233", 0x000100ff, mmio + MV_PCI_XBAR_TMOUT);
 	ZERO(MV_PCI_SERR_MASK);
 	ZERO(hpriv->irq_cause_offset);
 	ZERO(hpriv->irq_mask_offset);
@@ -3247,10 +3247,10 @@ static void mv6_reset_flash(struct mv_host_priv *hpriv, void __iomem *mmio)
 
 	mv5_reset_flash(hpriv, mmio);
 
-	tmp = readl(mmio + GPIO_PORT_CTL);
+	tmp = pete_readl("drivers/ata/sata_mv.c:3250", mmio + GPIO_PORT_CTL);
 	tmp &= 0x3;
 	tmp |= (1 << 5) | (1 << 6);
-	writel(tmp, mmio + GPIO_PORT_CTL);
+	pete_writel("drivers/ata/sata_mv.c:3253", tmp, mmio + GPIO_PORT_CTL);
 }
 
 /*
@@ -3272,12 +3272,12 @@ static int mv6_reset_hc(struct mv_host_priv *hpriv, void __iomem *mmio,
 	/* Following procedure defined in PCI "main command and status
 	 * register" table.
 	 */
-	t = readl(reg);
-	writel(t | STOP_PCI_MASTER, reg);
+	t = pete_readl("drivers/ata/sata_mv.c:3275", reg);
+	pete_writel("drivers/ata/sata_mv.c:3276", t | STOP_PCI_MASTER, reg);
 
 	for (i = 0; i < 1000; i++) {
 		udelay(1);
-		t = readl(reg);
+		t = pete_readl("drivers/ata/sata_mv.c:3280", reg);
 		if (PCI_MASTER_EMPTY & t)
 			break;
 	}
@@ -3290,8 +3290,8 @@ static int mv6_reset_hc(struct mv_host_priv *hpriv, void __iomem *mmio,
 	/* set reset */
 	i = 5;
 	do {
-		writel(t | GLOB_SFT_RST, reg);
-		t = readl(reg);
+		pete_writel("drivers/ata/sata_mv.c:3293", t | GLOB_SFT_RST, reg);
+		t = pete_readl("drivers/ata/sata_mv.c:3294", reg);
 		udelay(1);
 	} while (!(GLOB_SFT_RST & t) && (i-- > 0));
 
@@ -3304,8 +3304,8 @@ static int mv6_reset_hc(struct mv_host_priv *hpriv, void __iomem *mmio,
 	/* clear reset and *reenable the PCI master* (not mentioned in spec) */
 	i = 5;
 	do {
-		writel(t & ~(GLOB_SFT_RST | STOP_PCI_MASTER), reg);
-		t = readl(reg);
+		pete_writel("drivers/ata/sata_mv.c:3307", t & ~(GLOB_SFT_RST | STOP_PCI_MASTER), reg);
+		t = pete_readl("drivers/ata/sata_mv.c:3308", reg);
 		udelay(1);
 	} while ((GLOB_SFT_RST & t) && (i-- > 0));
 
@@ -3323,7 +3323,7 @@ static void mv6_read_preamp(struct mv_host_priv *hpriv, int idx,
 	void __iomem *port_mmio;
 	u32 tmp;
 
-	tmp = readl(mmio + RESET_CFG);
+	tmp = pete_readl("drivers/ata/sata_mv.c:3326", mmio + RESET_CFG);
 	if ((tmp & (1 << 0)) == 0) {
 		hpriv->signal[idx].amps = 0x7 << 8;
 		hpriv->signal[idx].pre = 0x1 << 5;
@@ -3331,7 +3331,7 @@ static void mv6_read_preamp(struct mv_host_priv *hpriv, int idx,
 	}
 
 	port_mmio = mv_port_base(mmio, idx);
-	tmp = readl(port_mmio + PHY_MODE2);
+	tmp = pete_readl("drivers/ata/sata_mv.c:3334", port_mmio + PHY_MODE2);
 
 	hpriv->signal[idx].amps = tmp & 0x700;	/* bits 10:8 */
 	hpriv->signal[idx].pre = tmp & 0xe0;	/* bits 7:5 */
@@ -3339,7 +3339,7 @@ static void mv6_read_preamp(struct mv_host_priv *hpriv, int idx,
 
 static void mv6_enable_leds(struct mv_host_priv *hpriv, void __iomem *mmio)
 {
-	writel(0x00000060, mmio + GPIO_PORT_CTL);
+	pete_writel("drivers/ata/sata_mv.c:3342", 0x00000060, mmio + GPIO_PORT_CTL);
 }
 
 static void mv6_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
@@ -3355,16 +3355,16 @@ static void mv6_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
 	u32 m2, m3;
 
 	if (fix_phy_mode2) {
-		m2 = readl(port_mmio + PHY_MODE2);
+		m2 = pete_readl("drivers/ata/sata_mv.c:3358", port_mmio + PHY_MODE2);
 		m2 &= ~(1 << 16);
 		m2 |= (1 << 31);
-		writel(m2, port_mmio + PHY_MODE2);
+		pete_writel("drivers/ata/sata_mv.c:3361", m2, port_mmio + PHY_MODE2);
 
 		udelay(200);
 
-		m2 = readl(port_mmio + PHY_MODE2);
+		m2 = pete_readl("drivers/ata/sata_mv.c:3365", port_mmio + PHY_MODE2);
 		m2 &= ~((1 << 16) | (1 << 31));
-		writel(m2, port_mmio + PHY_MODE2);
+		pete_writel("drivers/ata/sata_mv.c:3367", m2, port_mmio + PHY_MODE2);
 
 		udelay(200);
 	}
@@ -3373,7 +3373,7 @@ static void mv6_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
 	 * Gen-II/IIe PHY_MODE3 errata RM#2:
 	 * Achieves better receiver noise performance than the h/w default:
 	 */
-	m3 = readl(port_mmio + PHY_MODE3);
+	m3 = pete_readl("drivers/ata/sata_mv.c:3376", port_mmio + PHY_MODE3);
 	m3 = (m3 & 0x1f) | (0x5555601 << 5);
 
 	/* Guideline 88F5182 (GL# SATA-S11) */
@@ -3381,7 +3381,7 @@ static void mv6_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
 		m3 &= ~0x1c;
 
 	if (fix_phy_mode4) {
-		u32 m4 = readl(port_mmio + PHY_MODE4);
+		u32 m4 = pete_readl("drivers/ata/sata_mv.c:3384", port_mmio + PHY_MODE4);
 		/*
 		 * Enforce reserved-bit restrictions on GenIIe devices only.
 		 * For earlier chipsets, force only the internal config field
@@ -3391,7 +3391,7 @@ static void mv6_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
 			m4 = (m4 & ~PHY_MODE4_RSVD_ZEROS) | PHY_MODE4_RSVD_ONES;
 		else
 			m4 = (m4 & ~PHY_MODE4_CFG_MASK) | PHY_MODE4_CFG_VALUE;
-		writel(m4, port_mmio + PHY_MODE4);
+		pete_writel("drivers/ata/sata_mv.c:3394", m4, port_mmio + PHY_MODE4);
 	}
 	/*
 	 * Workaround for 60x1-B2 errata SATA#13:
@@ -3399,10 +3399,10 @@ static void mv6_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
 	 * so we must always rewrite PHY_MODE3 after PHY_MODE4.
 	 * Or ensure we use writelfl() when writing PHY_MODE4.
 	 */
-	writel(m3, port_mmio + PHY_MODE3);
+	pete_writel("drivers/ata/sata_mv.c:3402", m3, port_mmio + PHY_MODE3);
 
 	/* Revert values of pre-emphasis and signal amps to the saved ones */
-	m2 = readl(port_mmio + PHY_MODE2);
+	m2 = pete_readl("drivers/ata/sata_mv.c:3405", port_mmio + PHY_MODE2);
 
 	m2 &= ~MV_M2_PREAMP_MASK;
 	m2 |= hpriv->signal[port].amps;
@@ -3415,7 +3415,7 @@ static void mv6_phy_errata(struct mv_host_priv *hpriv, void __iomem *mmio,
 		m2 |= 0x0000900F;
 	}
 
-	writel(m2, port_mmio + PHY_MODE2);
+	pete_writel("drivers/ata/sata_mv.c:3418", m2, port_mmio + PHY_MODE2);
 }
 
 /* TODO: use the generic LED interface to configure the SATA Presence */
@@ -3433,14 +3433,14 @@ static void mv_soc_read_preamp(struct mv_host_priv *hpriv, int idx,
 	u32 tmp;
 
 	port_mmio = mv_port_base(mmio, idx);
-	tmp = readl(port_mmio + PHY_MODE2);
+	tmp = pete_readl("drivers/ata/sata_mv.c:3436", port_mmio + PHY_MODE2);
 
 	hpriv->signal[idx].amps = tmp & 0x700;	/* bits 10:8 */
 	hpriv->signal[idx].pre = tmp & 0xe0;	/* bits 7:5 */
 }
 
 #undef ZERO
-#define ZERO(reg) writel(0, port_mmio + (reg))
+#define ZERO(reg) pete_writel("drivers/ata/sata_mv.c:3443", 0, port_mmio + (reg))
 static void mv_soc_reset_hc_port(struct mv_host_priv *hpriv,
 					void __iomem *mmio, unsigned int port)
 {
@@ -3449,7 +3449,7 @@ static void mv_soc_reset_hc_port(struct mv_host_priv *hpriv,
 	mv_reset_channel(hpriv, mmio, port);
 
 	ZERO(0x028);		/* command */
-	writel(0x101f, port_mmio + EDMA_CFG);
+	pete_writel("drivers/ata/sata_mv.c:3452", 0x101f, port_mmio + EDMA_CFG);
 	ZERO(0x004);		/* timer */
 	ZERO(0x008);		/* irq err cause */
 	ZERO(0x00c);		/* irq err mask */
@@ -3460,12 +3460,12 @@ static void mv_soc_reset_hc_port(struct mv_host_priv *hpriv,
 	ZERO(0x024);		/* respq outp */
 	ZERO(0x020);		/* respq inp */
 	ZERO(0x02c);		/* test control */
-	writel(0x800, port_mmio + EDMA_IORDY_TMOUT);
+	pete_writel("drivers/ata/sata_mv.c:3463", 0x800, port_mmio + EDMA_IORDY_TMOUT);
 }
 
 #undef ZERO
 
-#define ZERO(reg) writel(0, hc_mmio + (reg))
+#define ZERO(reg) pete_writel("drivers/ata/sata_mv.c:3468", 0, hc_mmio + (reg))
 static void mv_soc_reset_one_hc(struct mv_host_priv *hpriv,
 				       void __iomem *mmio)
 {
@@ -3509,29 +3509,29 @@ static void mv_soc_65n_phy_errata(struct mv_host_priv *hpriv,
 	void __iomem *port_mmio = mv_port_base(mmio, port);
 	u32	reg;
 
-	reg = readl(port_mmio + PHY_MODE3);
+	reg = pete_readl("drivers/ata/sata_mv.c:3512", port_mmio + PHY_MODE3);
 	reg &= ~(0x3 << 27);	/* SELMUPF (bits 28:27) to 1 */
 	reg |= (0x1 << 27);
 	reg &= ~(0x3 << 29);	/* SELMUPI (bits 30:29) to 1 */
 	reg |= (0x1 << 29);
-	writel(reg, port_mmio + PHY_MODE3);
+	pete_writel("drivers/ata/sata_mv.c:3517", reg, port_mmio + PHY_MODE3);
 
-	reg = readl(port_mmio + PHY_MODE4);
+	reg = pete_readl("drivers/ata/sata_mv.c:3519", port_mmio + PHY_MODE4);
 	reg &= ~0x1;	/* SATU_OD8 (bit 0) to 0, reserved bit 16 must be set */
 	reg |= (0x1 << 16);
-	writel(reg, port_mmio + PHY_MODE4);
+	pete_writel("drivers/ata/sata_mv.c:3522", reg, port_mmio + PHY_MODE4);
 
-	reg = readl(port_mmio + PHY_MODE9_GEN2);
+	reg = pete_readl("drivers/ata/sata_mv.c:3524", port_mmio + PHY_MODE9_GEN2);
 	reg &= ~0xf;	/* TXAMP[3:0] (bits 3:0) to 8 */
 	reg |= 0x8;
 	reg &= ~(0x1 << 14);	/* TXAMP[4] (bit 14) to 0 */
-	writel(reg, port_mmio + PHY_MODE9_GEN2);
+	pete_writel("drivers/ata/sata_mv.c:3528", reg, port_mmio + PHY_MODE9_GEN2);
 
-	reg = readl(port_mmio + PHY_MODE9_GEN1);
+	reg = pete_readl("drivers/ata/sata_mv.c:3530", port_mmio + PHY_MODE9_GEN1);
 	reg &= ~0xf;	/* TXAMP[3:0] (bits 3:0) to 8 */
 	reg |= 0x8;
 	reg &= ~(0x1 << 14);	/* TXAMP[4] (bit 14) to 0 */
-	writel(reg, port_mmio + PHY_MODE9_GEN1);
+	pete_writel("drivers/ata/sata_mv.c:3534", reg, port_mmio + PHY_MODE9_GEN1);
 }
 
 /*
@@ -3545,14 +3545,14 @@ static bool soc_is_65n(struct mv_host_priv *hpriv)
 {
 	void __iomem *port0_mmio = mv_port_base(hpriv->base, 0);
 
-	if (readl(port0_mmio + PHYCFG_OFS))
+	if (pete_readl("drivers/ata/sata_mv.c:3548", port0_mmio + PHYCFG_OFS))
 		return true;
 	return false;
 }
 
 static void mv_setup_ifcfg(void __iomem *port_mmio, int want_gen2i)
 {
-	u32 ifcfg = readl(port_mmio + SATA_IFCFG);
+	u32 ifcfg = pete_readl("drivers/ata/sata_mv.c:3555", port_mmio + SATA_IFCFG);
 
 	ifcfg = (ifcfg & 0xf7f) | 0x9b1000;	/* from chip spec */
 	if (want_gen2i)
@@ -3596,7 +3596,7 @@ static void mv_pmp_select(struct ata_port *ap, int pmp)
 {
 	if (sata_pmp_supported(ap)) {
 		void __iomem *port_mmio = mv_ap_base(ap);
-		u32 reg = readl(port_mmio + SATA_IFCTL);
+		u32 reg = pete_readl("drivers/ata/sata_mv.c:3599", port_mmio + SATA_IFCTL);
 		int old = reg & 0xf;
 
 		if (old != pmp) {
@@ -3676,7 +3676,7 @@ static void mv_eh_thaw(struct ata_port *ap)
 	u32 hc_irq_cause;
 
 	/* clear EDMA errors on this port */
-	writel(0, port_mmio + EDMA_ERR_IRQ_CAUSE);
+	pete_writel("drivers/ata/sata_mv.c:3679", 0, port_mmio + EDMA_ERR_IRQ_CAUSE);
 
 	/* clear pending irq events */
 	hc_irq_cause = ~((DEV_IRQ | DMA_IRQ) << hardport);
@@ -3718,16 +3718,16 @@ static void mv_port_init(struct ata_ioports *port,  void __iomem *port_mmio)
 
 	/* Clear any currently outstanding port interrupt conditions */
 	serr = port_mmio + mv_scr_offset(SCR_ERROR);
-	writelfl(readl(serr), serr);
+	writelfl(pete_readl("drivers/ata/sata_mv.c:3721", serr), serr);
 	writelfl(0, port_mmio + EDMA_ERR_IRQ_CAUSE);
 
 	/* unmask all non-transient EDMA error interrupts */
 	writelfl(~EDMA_ERR_IRQ_TRANSIENT, port_mmio + EDMA_ERR_IRQ_MASK);
 
 	VPRINTK("EDMA cfg=0x%08x EDMA IRQ err cause/mask=0x%08x/0x%08x\n",
-		readl(port_mmio + EDMA_CFG),
-		readl(port_mmio + EDMA_ERR_IRQ_CAUSE),
-		readl(port_mmio + EDMA_ERR_IRQ_MASK));
+		pete_readl("drivers/ata/sata_mv.c:3728", port_mmio + EDMA_CFG),
+		pete_readl("drivers/ata/sata_mv.c:3729", port_mmio + EDMA_ERR_IRQ_CAUSE),
+		pete_readl("drivers/ata/sata_mv.c:3730", port_mmio + EDMA_ERR_IRQ_MASK));
 }
 
 static unsigned int mv_in_pcix_mode(struct ata_host *host)
@@ -3738,7 +3738,7 @@ static unsigned int mv_in_pcix_mode(struct ata_host *host)
 
 	if (IS_SOC(hpriv) || !IS_PCIE(hpriv))
 		return 0;	/* not PCI-X capable */
-	reg = readl(mmio + MV_PCI_MODE);
+	reg = pete_readl("drivers/ata/sata_mv.c:3741", mmio + MV_PCI_MODE);
 	if ((reg & MV_PCI_MODE_MASK) == 0)
 		return 0;	/* conventional PCI mode */
 	return 1;	/* chip is in PCI-X mode */
@@ -3751,7 +3751,7 @@ static int mv_pci_cut_through_okay(struct ata_host *host)
 	u32 reg;
 
 	if (!mv_in_pcix_mode(host)) {
-		reg = readl(mmio + MV_PCI_COMMAND);
+		reg = pete_readl("drivers/ata/sata_mv.c:3754", mmio + MV_PCI_COMMAND);
 		if (reg & MV_PCI_COMMAND_MRDTRIG)
 			return 0; /* not okay */
 	}
@@ -3765,7 +3765,7 @@ static void mv_60x1b2_errata_pci7(struct ata_host *host)
 
 	/* workaround for 60x1-B2 errata PCI#7 */
 	if (mv_in_pcix_mode(host)) {
-		u32 reg = readl(mmio + MV_PCI_COMMAND);
+		u32 reg = pete_readl("drivers/ata/sata_mv.c:3768", mmio + MV_PCI_COMMAND);
 		writelfl(reg & ~MV_PCI_COMMAND_MWRCOM, mmio + MV_PCI_COMMAND);
 	}
 }
@@ -3943,7 +3943,7 @@ static int mv_init_host(struct ata_host *host)
 	}
 
 	/* initialize shadow irq mask with register's value */
-	hpriv->main_irq_mask = readl(hpriv->main_irq_mask_addr);
+	hpriv->main_irq_mask = pete_readl("drivers/ata/sata_mv.c:3946", hpriv->main_irq_mask_addr);
 
 	/* global interrupt mask: 0 == mask everything */
 	mv_set_main_irq_mask(host, ~0, 0);
@@ -3974,8 +3974,8 @@ static int mv_init_host(struct ata_host *host)
 
 		VPRINTK("HC%i: HC config=0x%08x HC IRQ cause "
 			"(before clear)=0x%08x\n", hc,
-			readl(hc_mmio + HC_CFG),
-			readl(hc_mmio + HC_IRQ_CAUSE));
+			pete_readl("drivers/ata/sata_mv.c:3977", hc_mmio + HC_CFG),
+			pete_readl("drivers/ata/sata_mv.c:3978", hc_mmio + HC_IRQ_CAUSE));
 
 		/* Clear any currently outstanding hc interrupt conditions */
 		writelfl(0, hc_mmio + HC_IRQ_CAUSE);
@@ -4026,18 +4026,18 @@ static void mv_conf_mbus_windows(struct mv_host_priv *hpriv,
 	int i;
 
 	for (i = 0; i < 4; i++) {
-		writel(0, hpriv->base + WINDOW_CTRL(i));
-		writel(0, hpriv->base + WINDOW_BASE(i));
+		pete_writel("drivers/ata/sata_mv.c:4029", 0, hpriv->base + WINDOW_CTRL(i));
+		pete_writel("drivers/ata/sata_mv.c:4030", 0, hpriv->base + WINDOW_BASE(i));
 	}
 
 	for (i = 0; i < dram->num_cs; i++) {
 		const struct mbus_dram_window *cs = dram->cs + i;
 
-		writel(((cs->size - 1) & 0xffff0000) |
+		pete_writel("drivers/ata/sata_mv.c:4036", ((cs->size - 1) & 0xffff0000) |
 			(cs->mbus_attr << 8) |
 			(dram->mbus_dram_target_id << 4) | 1,
 			hpriv->base + WINDOW_CTRL(i));
-		writel(cs->base, hpriv->base + WINDOW_BASE(i));
+		pete_writel("drivers/ata/sata_mv.c:4040", cs->base, hpriv->base + WINDOW_BASE(i));
 	}
 }
 

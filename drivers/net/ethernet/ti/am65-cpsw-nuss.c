@@ -135,22 +135,22 @@ static void am65_cpsw_port_set_sl_mac(struct am65_cpsw_port *slave,
 		     (dev_addr[2] << 16) | (dev_addr[3] << 24);
 	u32 mac_lo = (dev_addr[4] << 0) | (dev_addr[5] << 8);
 
-	writel(mac_hi, slave->port_base + AM65_CPSW_PORTN_REG_SA_H);
-	writel(mac_lo, slave->port_base + AM65_CPSW_PORTN_REG_SA_L);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:138", mac_hi, slave->port_base + AM65_CPSW_PORTN_REG_SA_H);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:139", mac_lo, slave->port_base + AM65_CPSW_PORTN_REG_SA_L);
 }
 
 static void am65_cpsw_sl_ctl_reset(struct am65_cpsw_port *port)
 {
 	cpsw_sl_reset(port->slave.mac_sl, 100);
 	/* Max length register has to be restored after MAC SL reset */
-	writel(AM65_CPSW_MAX_PACKET_SIZE,
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:146", AM65_CPSW_MAX_PACKET_SIZE,
 	       port->port_base + AM65_CPSW_PORT_REG_RX_MAXLEN);
 }
 
 static void am65_cpsw_nuss_get_ver(struct am65_cpsw_common *common)
 {
-	common->nuss_ver = readl(common->ss_base);
-	common->cpsw_ver = readl(common->cpsw_base);
+	common->nuss_ver = pete_readl("drivers/net/ethernet/ti/am65-cpsw-nuss.c:152", common->ss_base);
+	common->cpsw_ver = pete_readl("drivers/net/ethernet/ti/am65-cpsw-nuss.c:153", common->cpsw_base);
 	dev_info(common->dev,
 		 "initializing am65 cpsw nuss version 0x%08X, cpsw version 0x%08X Ports: %u quirks:%08x\n",
 		common->nuss_ver,
@@ -403,7 +403,7 @@ void am65_cpsw_nuss_set_p0_ptype(struct am65_cpsw_common *common)
 	u32 val, pri_map;
 
 	/* P0 set Receive Priority Type */
-	val = readl(host_p->port_base + AM65_CPSW_PORT_REG_PRI_CTL);
+	val = pete_readl("drivers/net/ethernet/ti/am65-cpsw-nuss.c:406", host_p->port_base + AM65_CPSW_PORT_REG_PRI_CTL);
 
 	if (common->pf_p0_rx_ptype_rrobin) {
 		val |= AM65_CPSW_PORT_REG_PRI_CTL_RX_PTYPE_RROBIN;
@@ -417,8 +417,8 @@ void am65_cpsw_nuss_set_p0_ptype(struct am65_cpsw_common *common)
 		pri_map = 0x76543210;
 	}
 
-	writel(pri_map, host_p->port_base + AM65_CPSW_PORT_REG_RX_PRI_MAP);
-	writel(val, host_p->port_base + AM65_CPSW_PORT_REG_PRI_CTL);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:420", pri_map, host_p->port_base + AM65_CPSW_PORT_REG_RX_PRI_MAP);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:421", val, host_p->port_base + AM65_CPSW_PORT_REG_PRI_CTL);
 }
 
 static void am65_cpsw_init_host_port_switch(struct am65_cpsw_common *common);
@@ -438,17 +438,17 @@ static int am65_cpsw_nuss_common_open(struct am65_cpsw_common *common,
 		return 0;
 
 	/* Control register */
-	writel(AM65_CPSW_CTL_P0_ENABLE | AM65_CPSW_CTL_P0_TX_CRC_REMOVE |
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:441", AM65_CPSW_CTL_P0_ENABLE | AM65_CPSW_CTL_P0_TX_CRC_REMOVE |
 	       AM65_CPSW_CTL_VLAN_AWARE | AM65_CPSW_CTL_P0_RX_PAD,
 	       common->cpsw_base + AM65_CPSW_REG_CTL);
 	/* Max length register */
-	writel(AM65_CPSW_MAX_PACKET_SIZE,
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:445", AM65_CPSW_MAX_PACKET_SIZE,
 	       host_p->port_base + AM65_CPSW_PORT_REG_RX_MAXLEN);
 	/* set base flow_id */
-	writel(common->rx_flow_id_base,
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:448", common->rx_flow_id_base,
 	       host_p->port_base + AM65_CPSW_PORT0_REG_FLOW_ID_OFFSET);
 	/* en tx crc offload */
-	writel(AM65_CPSW_P0_REG_CTL_RX_CHECKSUM_EN, host_p->port_base + AM65_CPSW_P0_REG_CTL);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:451", AM65_CPSW_P0_REG_CTL_RX_CHECKSUM_EN, host_p->port_base + AM65_CPSW_P0_REG_CTL);
 
 	am65_cpsw_nuss_set_p0_ptype(common);
 
@@ -460,10 +460,10 @@ static int am65_cpsw_nuss_common_open(struct am65_cpsw_common *common,
 		if (!port->disabled)
 			val |=  BIT(port->port_id);
 	}
-	writel(val, common->cpsw_base + AM65_CPSW_REG_STAT_PORT_EN);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:463", val, common->cpsw_base + AM65_CPSW_REG_STAT_PORT_EN);
 
 	/* disable priority elevation */
-	writel(0, common->cpsw_base + AM65_CPSW_REG_PTYPE);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:466", 0, common->cpsw_base + AM65_CPSW_REG_PTYPE);
 
 	cpsw_ale_start(common->ale);
 
@@ -576,8 +576,8 @@ static int am65_cpsw_nuss_common_stop(struct am65_cpsw_common *common)
 
 	cpsw_ale_stop(common->ale);
 
-	writel(0, common->cpsw_base + AM65_CPSW_REG_CTL);
-	writel(0, common->cpsw_base + AM65_CPSW_REG_STAT_PORT_EN);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:579", 0, common->cpsw_base + AM65_CPSW_REG_CTL);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:580", 0, common->cpsw_base + AM65_CPSW_REG_STAT_PORT_EN);
 
 	dev_dbg(common->dev, "cpsw_nuss stopped\n");
 	return 0;
@@ -1385,12 +1385,12 @@ static int am65_cpsw_nuss_hwtstamp_set(struct net_device *ndev,
 		ts_ctrl |= AM65_CPSW_TS_TX_ANX_ALL_EN |
 			   AM65_CPSW_PN_TS_CTL_TX_VLAN_LT1_EN;
 
-	writel(seq_id, port->port_base + AM65_CPSW_PORTN_REG_TS_SEQ_LTYPE_REG);
-	writel(ts_vlan_ltype, port->port_base +
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:1388", seq_id, port->port_base + AM65_CPSW_PORTN_REG_TS_SEQ_LTYPE_REG);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:1389", ts_vlan_ltype, port->port_base +
 	       AM65_CPSW_PORTN_REG_TS_VLAN_LTYPE_REG);
-	writel(ts_ctrl_ltype2, port->port_base +
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:1391", ts_ctrl_ltype2, port->port_base +
 	       AM65_CPSW_PORTN_REG_TS_CTL_LTYPE2);
-	writel(ts_ctrl, port->port_base + AM65_CPSW_PORTN_REG_TS_CTL);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:1393", ts_ctrl, port->port_base + AM65_CPSW_PORTN_REG_TS_CTL);
 
 	/* en/dis RX timestamp */
 	am65_cpts_rx_enable(common->cpts, port->rx_ts_enabled);
@@ -2213,7 +2213,7 @@ static void am65_cpsw_init_host_port_switch(struct am65_cpsw_common *common)
 {
 	struct am65_cpsw_host *host = am65_common_get_host(common);
 
-	writel(common->default_vlan, host->port_base + AM65_CPSW_PORT_VLAN_REG_OFFSET);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:2216", common->default_vlan, host->port_base + AM65_CPSW_PORT_VLAN_REG_OFFSET);
 
 	am65_cpsw_init_stp_ale_entry(common);
 
@@ -2226,7 +2226,7 @@ static void am65_cpsw_init_host_port_emac(struct am65_cpsw_common *common)
 {
 	struct am65_cpsw_host *host = am65_common_get_host(common);
 
-	writel(0, host->port_base + AM65_CPSW_PORT_VLAN_REG_OFFSET);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:2229", 0, host->port_base + AM65_CPSW_PORT_VLAN_REG_OFFSET);
 
 	cpsw_ale_control_set(common->ale, HOST_PORT_NUM, ALE_P0_UNI_FLOOD, 0);
 	dev_dbg(common->dev, "unset P0_UNI_FLOOD\n");
@@ -2257,7 +2257,7 @@ static void am65_cpsw_init_port_emac_ale(struct  am65_cpsw_port *port)
 	struct am65_cpsw_common *common = port->common;
 	u32 port_mask;
 
-	writel(slave->port_vlan, port->port_base + AM65_CPSW_PORT_VLAN_REG_OFFSET);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:2260", slave->port_vlan, port->port_base + AM65_CPSW_PORT_VLAN_REG_OFFSET);
 
 	if (slave->mac_only)
 		/* enable mac-only mode on port */
@@ -2293,7 +2293,7 @@ static void am65_cpsw_init_port_switch_ale(struct am65_cpsw_port *port)
 			   port_mask, ALE_VLAN, slave->port_vlan,
 			   ALE_MCAST_FWD_2);
 
-	writel(slave->port_vlan, port->port_base + AM65_CPSW_PORT_VLAN_REG_OFFSET);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-nuss.c:2296", slave->port_vlan, port->port_base + AM65_CPSW_PORT_VLAN_REG_OFFSET);
 
 	cpsw_ale_control_set(cpsw->ale, port->port_id,
 			     ALE_PORT_MACONLY, 0);

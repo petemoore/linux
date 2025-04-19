@@ -20,8 +20,8 @@ static int ccu_reset_assert(struct reset_controller_dev *rcdev,
 
 	spin_lock_irqsave(ccu->lock, flags);
 
-	reg = readl(ccu->base + map->reg);
-	writel(reg & ~map->bit, ccu->base + map->reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_reset.c:23", ccu->base + map->reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu_reset.c:24", reg & ~map->bit, ccu->base + map->reg);
 
 	spin_unlock_irqrestore(ccu->lock, flags);
 
@@ -38,8 +38,8 @@ static int ccu_reset_deassert(struct reset_controller_dev *rcdev,
 
 	spin_lock_irqsave(ccu->lock, flags);
 
-	reg = readl(ccu->base + map->reg);
-	writel(reg | map->bit, ccu->base + map->reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_reset.c:41", ccu->base + map->reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu_reset.c:42", reg | map->bit, ccu->base + map->reg);
 
 	spin_unlock_irqrestore(ccu->lock, flags);
 
@@ -66,7 +66,7 @@ static int ccu_reset_status(struct reset_controller_dev *rcdev,
 	 * The reset control API expects 0 if reset is not asserted,
 	 * which is the opposite of what our hardware uses.
 	 */
-	return !(map->bit & readl(ccu->base + map->reg));
+	return !(map->bit & pete_readl("drivers/clk/sunxi-ng/ccu_reset.c:69", ccu->base + map->reg));
 }
 
 const struct reset_control_ops ccu_reset_ops = {

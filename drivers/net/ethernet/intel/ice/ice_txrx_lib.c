@@ -30,7 +30,7 @@ void ice_release_rx_desc(struct ice_ring *rx_ring, u16 val)
 		 * such as IA-64).
 		 */
 		wmb();
-		writel(val, rx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/ice/ice_txrx_lib.c:33", val, rx_ring->tail);
 	}
 }
 

@@ -96,13 +96,13 @@ static irqreturn_t p2wi_interrupt(int irq, void *dev_id)
 	struct p2wi *p2wi = dev_id;
 	unsigned long status;
 
-	status = readl(p2wi->regs + P2WI_INTS);
+	status = pete_readl("drivers/i2c/busses/i2c-sun6i-p2wi.c:99", p2wi->regs + P2WI_INTS);
 	p2wi->status = status;
 
 	/* Clear interrupts */
 	status &= (P2WI_INTS_LOAD_BSY | P2WI_INTS_TRANS_ERR |
 		   P2WI_INTS_TRANS_OVER);
-	writel(status, p2wi->regs + P2WI_INTS);
+	pete_writel("drivers/i2c/busses/i2c-sun6i-p2wi.c:105", status, p2wi->regs + P2WI_INTS);
 
 	complete(&p2wi->complete);
 
@@ -129,26 +129,26 @@ static int p2wi_smbus_xfer(struct i2c_adapter *adap, u16 addr,
 	if (!data)
 		return -EINVAL;
 
-	writel(command, p2wi->regs + P2WI_DADDR0);
+	pete_writel("drivers/i2c/busses/i2c-sun6i-p2wi.c:132", command, p2wi->regs + P2WI_DADDR0);
 
 	if (read_write == I2C_SMBUS_READ)
 		dlen |= P2WI_DLEN_READ;
 	else
-		writel(data->byte, p2wi->regs + P2WI_DATA0);
+		pete_writel("drivers/i2c/busses/i2c-sun6i-p2wi.c:137", data->byte, p2wi->regs + P2WI_DATA0);
 
-	writel(dlen, p2wi->regs + P2WI_DLEN);
+	pete_writel("drivers/i2c/busses/i2c-sun6i-p2wi.c:139", dlen, p2wi->regs + P2WI_DLEN);
 
-	if (readl(p2wi->regs + P2WI_CTRL) & P2WI_CTRL_START_TRANS) {
+	if (pete_readl("drivers/i2c/busses/i2c-sun6i-p2wi.c:141", p2wi->regs + P2WI_CTRL) & P2WI_CTRL_START_TRANS) {
 		dev_err(&adap->dev, "P2WI bus busy\n");
 		return -EBUSY;
 	}
 
 	reinit_completion(&p2wi->complete);
 
-	writel(P2WI_INTS_LOAD_BSY | P2WI_INTS_TRANS_ERR | P2WI_INTS_TRANS_OVER,
+	pete_writel("drivers/i2c/busses/i2c-sun6i-p2wi.c:148", P2WI_INTS_LOAD_BSY | P2WI_INTS_TRANS_ERR | P2WI_INTS_TRANS_OVER,
 	       p2wi->regs + P2WI_INTE);
 
-	writel(P2WI_CTRL_START_TRANS | P2WI_CTRL_GLOBAL_INT_ENB,
+	pete_writel("drivers/i2c/busses/i2c-sun6i-p2wi.c:151", P2WI_CTRL_START_TRANS | P2WI_CTRL_GLOBAL_INT_ENB,
 	       p2wi->regs + P2WI_CTRL);
 
 	wait_for_completion(&p2wi->complete);
@@ -164,7 +164,7 @@ static int p2wi_smbus_xfer(struct i2c_adapter *adap, u16 addr,
 	}
 
 	if (read_write == I2C_SMBUS_READ)
-		data->byte = readl(p2wi->regs + P2WI_DATA0);
+		data->byte = pete_readl("drivers/i2c/busses/i2c-sun6i-p2wi.c:167", p2wi->regs + P2WI_DATA0);
 
 	return 0;
 }
@@ -282,7 +282,7 @@ static int p2wi_probe(struct platform_device *pdev)
 		goto err_reset_assert;
 	}
 
-	writel(P2WI_CTRL_SOFT_RST, p2wi->regs + P2WI_CTRL);
+	pete_writel("drivers/i2c/busses/i2c-sun6i-p2wi.c:285", P2WI_CTRL_SOFT_RST, p2wi->regs + P2WI_CTRL);
 
 	clk_div = parent_clk_freq / clk_freq;
 	if (!clk_div) {
@@ -297,7 +297,7 @@ static int p2wi_probe(struct platform_device *pdev)
 		clk_div = P2WI_CCR_MAX_CLK_DIV;
 	}
 
-	writel(P2WI_CCR_SDA_OUT_DELAY(1) | P2WI_CCR_CLK_DIV(clk_div),
+	pete_writel("drivers/i2c/busses/i2c-sun6i-p2wi.c:300", P2WI_CCR_SDA_OUT_DELAY(1) | P2WI_CCR_CLK_DIV(clk_div),
 	       p2wi->regs + P2WI_CCR);
 
 	ret = i2c_add_adapter(&p2wi->adapter);

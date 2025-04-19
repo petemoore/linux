@@ -375,11 +375,11 @@ static void fsmc_enable_hwecc(struct nand_chip *chip, int mode)
 {
 	struct fsmc_nand_data *host = nand_to_fsmc(chip);
 
-	writel_relaxed(readl(host->regs_va + FSMC_PC) & ~FSMC_ECCPLEN_256,
+	writel_relaxed(pete_readl("drivers/mtd/nand/raw/fsmc_nand.c:378", host->regs_va + FSMC_PC) & ~FSMC_ECCPLEN_256,
 		       host->regs_va + FSMC_PC);
-	writel_relaxed(readl(host->regs_va + FSMC_PC) & ~FSMC_ECCEN,
+	writel_relaxed(pete_readl("drivers/mtd/nand/raw/fsmc_nand.c:380", host->regs_va + FSMC_PC) & ~FSMC_ECCEN,
 		       host->regs_va + FSMC_PC);
-	writel_relaxed(readl(host->regs_va + FSMC_PC) | FSMC_ECCEN,
+	writel_relaxed(pete_readl("drivers/mtd/nand/raw/fsmc_nand.c:382", host->regs_va + FSMC_PC) | FSMC_ECCEN,
 		       host->regs_va + FSMC_PC);
 }
 
@@ -1009,9 +1009,9 @@ static void fsmc_nand_disable(struct fsmc_nand_data *host)
 {
 	u32 val;
 
-	val = readl(host->regs_va + FSMC_PC);
+	val = pete_readl("drivers/mtd/nand/raw/fsmc_nand.c:1012", host->regs_va + FSMC_PC);
 	val &= ~FSMC_ENABLE;
-	writel(val, host->regs_va + FSMC_PC);
+	pete_writel("drivers/mtd/nand/raw/fsmc_nand.c:1014", val, host->regs_va + FSMC_PC);
 }
 
 /*
@@ -1081,7 +1081,7 @@ static int __init fsmc_nand_probe(struct platform_device *pdev)
 	 * AMBA PrimeCell bus. However it is not a PrimeCell.
 	 */
 	for (pid = 0, i = 0; i < 4; i++)
-		pid |= (readl(base + resource_size(res) - 0x20 + 4 * i) &
+		pid |= (pete_readl("drivers/mtd/nand/raw/fsmc_nand.c:1084", base + resource_size(res) - 0x20 + 4 * i) &
 			255) << (i * 8);
 
 	host->pid = pid;

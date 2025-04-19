@@ -150,9 +150,9 @@ static void setup_packet(
 
 	/* autoincrementing */
 	sl811_write(sl811, bank + SL11H_BUFADDRREG, addr);
-	writeb(len, data_reg);
-	writeb(SL_SETUP /* | ep->epnum */, data_reg);
-	writeb(usb_pipedevice(urb->pipe), data_reg);
+	pete_writeb("drivers/usb/host/sl811-hcd.c:153", len, data_reg);
+	pete_writeb("drivers/usb/host/sl811-hcd.c:154", SL_SETUP /* | ep->epnum */, data_reg);
+	pete_writeb("drivers/usb/host/sl811-hcd.c:155", usb_pipedevice(urb->pipe), data_reg);
 
 	/* always OUT/data0 */
 	sl811_write(sl811, bank + SL11H_HOSTCTLREG,
@@ -178,9 +178,9 @@ static void status_packet(
 
 	/* autoincrementing */
 	sl811_write(sl811, bank + SL11H_BUFADDRREG, 0);
-	writeb(0, data_reg);
-	writeb((do_out ? SL_OUT : SL_IN) /* | ep->epnum */, data_reg);
-	writeb(usb_pipedevice(urb->pipe), data_reg);
+	pete_writeb("drivers/usb/host/sl811-hcd.c:181", 0, data_reg);
+	pete_writeb("drivers/usb/host/sl811-hcd.c:182", (do_out ? SL_OUT : SL_IN) /* | ep->epnum */, data_reg);
+	pete_writeb("drivers/usb/host/sl811-hcd.c:183", usb_pipedevice(urb->pipe), data_reg);
 
 	/* always data1; sometimes IN */
 	control |= SL11H_HCTLMASK_TOGGLE;
@@ -218,9 +218,9 @@ static void in_packet(
 
 	/* autoincrementing */
 	sl811_write(sl811, bank + SL11H_BUFADDRREG, addr);
-	writeb(len, data_reg);
-	writeb(SL_IN | ep->epnum, data_reg);
-	writeb(usb_pipedevice(urb->pipe), data_reg);
+	pete_writeb("drivers/usb/host/sl811-hcd.c:221", len, data_reg);
+	pete_writeb("drivers/usb/host/sl811-hcd.c:222", SL_IN | ep->epnum, data_reg);
+	pete_writeb("drivers/usb/host/sl811-hcd.c:223", usb_pipedevice(urb->pipe), data_reg);
 
 	sl811_write(sl811, bank + SL11H_HOSTCTLREG, control);
 	ep->length = min_t(u32, len,
@@ -261,9 +261,9 @@ static void out_packet(
 
 	/* autoincrementing */
 	sl811_write(sl811, bank + SL11H_BUFADDRREG, addr);
-	writeb(len, data_reg);
-	writeb(SL_OUT | ep->epnum, data_reg);
-	writeb(usb_pipedevice(urb->pipe), data_reg);
+	pete_writeb("drivers/usb/host/sl811-hcd.c:264", len, data_reg);
+	pete_writeb("drivers/usb/host/sl811-hcd.c:265", SL_OUT | ep->epnum, data_reg);
+	pete_writeb("drivers/usb/host/sl811-hcd.c:266", usb_pipedevice(urb->pipe), data_reg);
 
 	sl811_write(sl811, bank + SL11H_HOSTCTLREG,
 			control | SL11H_HCTLMASK_OUT);
@@ -1192,8 +1192,8 @@ sl811h_timer(struct timer_list *t)
 
 		/* autoincrementing */
 		sl811_write(sl811, SL811_EP_A(SL11H_BUFLNTHREG), 0);
-		writeb(SL_SOF, sl811->data_reg);
-		writeb(0, sl811->data_reg);
+		pete_writeb("drivers/usb/host/sl811-hcd.c:1195", SL_SOF, sl811->data_reg);
+		pete_writeb("drivers/usb/host/sl811-hcd.c:1196", 0, sl811->data_reg);
 		sl811_write(sl811, SL811_EP_A(SL11H_HOSTCTLREG),
 				SL11H_HCTLMASK_ARM);
 

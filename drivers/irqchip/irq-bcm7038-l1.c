@@ -109,7 +109,7 @@ static inline u32 l1_readl(void __iomem *reg)
 	if (IS_ENABLED(CONFIG_MIPS) && IS_ENABLED(CONFIG_CPU_BIG_ENDIAN))
 		return ioread32be(reg);
 	else
-		return readl(reg);
+		return pete_readl("drivers/irqchip/irq-bcm7038-l1.c:112", reg);
 }
 
 static inline void l1_writel(u32 val, void __iomem *reg)
@@ -117,7 +117,7 @@ static inline void l1_writel(u32 val, void __iomem *reg)
 	if (IS_ENABLED(CONFIG_MIPS) && IS_ENABLED(CONFIG_CPU_BIG_ENDIAN))
 		iowrite32be(val, reg);
 	else
-		writel(val, reg);
+		pete_writel("drivers/irqchip/irq-bcm7038-l1.c:120", val, reg);
 }
 
 static void bcm7038_l1_irq_handle(struct irq_desc *desc)

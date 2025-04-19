@@ -96,11 +96,11 @@ static void meson_g12a_crtc_atomic_enable(struct drm_crtc *crtc,
 	}
 
 	/* VD1 Preblend vertical start/end */
-	writel(FIELD_PREP(GENMASK(11, 0), 2303),
+	pete_writel("drivers/gpu/drm/meson/meson_crtc.c:99", FIELD_PREP(GENMASK(11, 0), 2303),
 	       priv->io_base + _REG(VPP_PREBLEND_VD1_V_START_END));
 
 	/* Setup Blender */
-	writel(crtc_state->mode.hdisplay |
+	pete_writel("drivers/gpu/drm/meson/meson_crtc.c:103", crtc_state->mode.hdisplay |
 	       crtc_state->mode.vdisplay << 16,
 	       priv->io_base + _REG(VPP_POSTBLEND_H_SIZE));
 
@@ -132,11 +132,11 @@ static void meson_crtc_atomic_enable(struct drm_crtc *crtc,
 	}
 
 	/* Enable VPP Postblend */
-	writel(crtc_state->mode.hdisplay,
+	pete_writel("drivers/gpu/drm/meson/meson_crtc.c:135", crtc_state->mode.hdisplay,
 	       priv->io_base + _REG(VPP_POSTBLEND_H_SIZE));
 
 	/* VD1 Preblend vertical start/end */
-	writel(FIELD_PREP(GENMASK(11, 0), 2303),
+	pete_writel("drivers/gpu/drm/meson/meson_crtc.c:139", FIELD_PREP(GENMASK(11, 0), 2303),
 			priv->io_base + _REG(VPP_PREBLEND_VD1_V_START_END));
 
 	writel_bits_relaxed(VPP_POSTBLEND_ENABLE, VPP_POSTBLEND_ENABLE,

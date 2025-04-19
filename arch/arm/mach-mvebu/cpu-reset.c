@@ -34,9 +34,9 @@ int mvebu_cpu_reset_deassert(int cpu)
 	if (CPU_RESET_OFFSET(cpu) >= cpu_reset_size)
 		return -EINVAL;
 
-	reg = readl(cpu_reset_base + CPU_RESET_OFFSET(cpu));
+	reg = pete_readl("arch/arm/mach-mvebu/cpu-reset.c:37", cpu_reset_base + CPU_RESET_OFFSET(cpu));
 	reg &= ~CPU_RESET_ASSERT;
-	writel(reg, cpu_reset_base + CPU_RESET_OFFSET(cpu));
+	pete_writel("arch/arm/mach-mvebu/cpu-reset.c:39", reg, cpu_reset_base + CPU_RESET_OFFSET(cpu));
 
 	return 0;
 }

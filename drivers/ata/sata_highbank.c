@@ -216,8 +216,8 @@ static u32 __combo_phy_reg_read(u8 sata_port, u32 addr)
 	u32 data;
 	u8 dev = port_data[sata_port].phy_devs;
 	spin_lock(&cphy_lock);
-	writel(CPHY_MAP(dev, addr), port_data[sata_port].phy_base + 0x800);
-	data = readl(port_data[sata_port].phy_base + CPHY_ADDR(addr));
+	pete_writel("drivers/ata/sata_highbank.c:219", CPHY_MAP(dev, addr), port_data[sata_port].phy_base + 0x800);
+	data = pete_readl("drivers/ata/sata_highbank.c:220", port_data[sata_port].phy_base + CPHY_ADDR(addr));
 	spin_unlock(&cphy_lock);
 	return data;
 }
@@ -226,8 +226,8 @@ static void __combo_phy_reg_write(u8 sata_port, u32 addr, u32 data)
 {
 	u8 dev = port_data[sata_port].phy_devs;
 	spin_lock(&cphy_lock);
-	writel(CPHY_MAP(dev, addr), port_data[sata_port].phy_base + 0x800);
-	writel(data, port_data[sata_port].phy_base + CPHY_ADDR(addr));
+	pete_writel("drivers/ata/sata_highbank.c:229", CPHY_MAP(dev, addr), port_data[sata_port].phy_base + 0x800);
+	pete_writel("drivers/ata/sata_highbank.c:230", data, port_data[sata_port].phy_base + CPHY_ADDR(addr));
 	spin_unlock(&cphy_lock);
 }
 
@@ -584,10 +584,10 @@ static int ahci_highbank_suspend(struct device *dev)
 	 * Software must disable interrupts prior to requesting a
 	 * transition of the HBA to D3 state.
 	 */
-	ctl = readl(mmio + HOST_CTL);
+	ctl = pete_readl("drivers/ata/sata_highbank.c:587", mmio + HOST_CTL);
 	ctl &= ~HOST_IRQ_EN;
-	writel(ctl, mmio + HOST_CTL);
-	readl(mmio + HOST_CTL); /* flush */
+	pete_writel("drivers/ata/sata_highbank.c:589", ctl, mmio + HOST_CTL);
+	pete_readl("drivers/ata/sata_highbank.c:590", mmio + HOST_CTL); /* flush */
 
 	return ata_host_suspend(host, PMSG_SUSPEND);
 }

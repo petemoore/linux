@@ -158,7 +158,7 @@ static void ftide010_set_dmamode(struct ata_port *ap, struct ata_device *adev)
 		f66m_en_mask = FTIDE010_CLK_MOD_DEV1_CLK_SEL;
 	}
 
-	clkreg = readb(ftide->base + FTIDE010_CLK_MOD);
+	clkreg = pete_readb("drivers/ata/pata_ftide010.c:161", ftide->base + FTIDE010_CLK_MOD);
 	clkreg &= ~udma_en_mask;
 	clkreg &= ~f66m_en_mask;
 
@@ -184,8 +184,8 @@ static void ftide010_set_dmamode(struct ata_port *ap, struct ata_device *adev)
 		dev_dbg(ftide->dev, "UDMA write clkreg = %02x, timreg = %02x\n",
 			clkreg, timreg);
 
-		writeb(clkreg, ftide->base + FTIDE010_CLK_MOD);
-		writeb(timreg, ftide->base + FTIDE010_UDMA_TIMING0 + devno);
+		pete_writeb("drivers/ata/pata_ftide010.c:187", clkreg, ftide->base + FTIDE010_CLK_MOD);
+		pete_writeb("drivers/ata/pata_ftide010.c:188", timreg, ftide->base + FTIDE010_UDMA_TIMING0 + devno);
 	} else {
 		i = speed & ~XFER_MW_DMA_0;
 		dev_dbg(ftide->dev, "set MWDMA mode %02x, index %d\n",
@@ -203,8 +203,8 @@ static void ftide010_set_dmamode(struct ata_port *ap, struct ata_device *adev)
 			"MWDMA write clkreg = %02x, timreg = %02x\n",
 			clkreg, timreg);
 		/* This will affect all devices */
-		writeb(clkreg, ftide->base + FTIDE010_CLK_MOD);
-		writeb(timreg, ftide->base + FTIDE010_MWDMA_TIMING);
+		pete_writeb("drivers/ata/pata_ftide010.c:206", clkreg, ftide->base + FTIDE010_CLK_MOD);
+		pete_writeb("drivers/ata/pata_ftide010.c:207", timreg, ftide->base + FTIDE010_MWDMA_TIMING);
 	}
 
 	/*
@@ -224,7 +224,7 @@ static void ftide010_set_piomode(struct ata_port *ap, struct ata_device *adev)
 
 	dev_dbg(ftide->dev, "set PIO mode %02x, index %d\n",
 		adev->pio_mode, pio);
-	writeb(pio_active_time[pio] << 4 | pio_recovery_time[pio],
+	pete_writeb("drivers/ata/pata_ftide010.c:227", pio_active_time[pio] << 4 | pio_recovery_time[pio],
 	       ftide->base + FTIDE010_PIO_TIMING);
 }
 
@@ -526,7 +526,7 @@ static int pata_ftide010_probe(struct platform_device *pdev)
 	}
 
 	dev_info(dev, "device ID %08x, irq %d, reg %pR\n",
-		 readl(ftide->base + FTIDE010_IDE_DEVICE_ID), irq, res);
+		 pete_readl("drivers/ata/pata_ftide010.c:529", ftide->base + FTIDE010_IDE_DEVICE_ID), irq, res);
 
 	ret = ata_host_activate(ftide->host, irq, ata_bmdma_interrupt,
 				0, &pata_ftide010_sht);

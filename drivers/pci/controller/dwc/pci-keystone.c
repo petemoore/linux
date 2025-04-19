@@ -136,13 +136,13 @@ struct keystone_pcie {
 
 static u32 ks_pcie_app_readl(struct keystone_pcie *ks_pcie, u32 offset)
 {
-	return readl(ks_pcie->va_app_base + offset);
+	return pete_readl("drivers/pci/controller/dwc/pci-keystone.c:139", ks_pcie->va_app_base + offset);
 }
 
 static void ks_pcie_app_writel(struct keystone_pcie *ks_pcie, u32 offset,
 			       u32 val)
 {
-	writel(val, ks_pcie->va_app_base + offset);
+	pete_writel("drivers/pci/controller/dwc/pci-keystone.c:145", val, ks_pcie->va_app_base + offset);
 }
 
 static void ks_pcie_msi_irq_ack(struct irq_data *data)
@@ -812,7 +812,7 @@ static int __init ks_pcie_host_init(struct pcie_port *pp)
 
 	ks_pcie_stop_link(pci);
 	ks_pcie_setup_rc_app_regs(ks_pcie);
-	writew(PCI_IO_RANGE_TYPE_32 | (PCI_IO_RANGE_TYPE_32 << 8),
+	pete_writew("drivers/pci/controller/dwc/pci-keystone.c:815", PCI_IO_RANGE_TYPE_32 | (PCI_IO_RANGE_TYPE_32 << 8),
 			pci->dbi_base + PCI_IO_BASE);
 
 	ret = ks_pcie_init_id(ks_pcie);

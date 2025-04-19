@@ -660,8 +660,8 @@ static bool reg_pattern_test(struct e1000_adapter *adapter, u64 *data, int reg,
 	int i;
 
 	for (i = 0; i < ARRAY_SIZE(test); i++) {
-		writel(write & test[i], address);
-		read = readl(address);
+		pete_writel("drivers/net/ethernet/intel/e1000/e1000_ethtool.c:663", write & test[i], address);
+		read = pete_readl("drivers/net/ethernet/intel/e1000/e1000_ethtool.c:664", address);
 		if (read != (write & test[i] & mask)) {
 			e_err(drv, "pattern test reg %04X failed: "
 			      "got 0x%08X expected 0x%08X\n",
@@ -680,8 +680,8 @@ static bool reg_set_and_check(struct e1000_adapter *adapter, u64 *data, int reg,
 	u8 __iomem *address = hw->hw_addr + reg;
 	u32 read;
 
-	writel(write & mask, address);
-	read = readl(address);
+	pete_writel("drivers/net/ethernet/intel/e1000/e1000_ethtool.c:683", write & mask, address);
+	read = pete_readl("drivers/net/ethernet/intel/e1000/e1000_ethtool.c:684", address);
 	if ((read & mask) != (write & mask)) {
 		e_err(drv, "set/check reg %04X test failed: "
 		      "got 0x%08X expected 0x%08X\n",

@@ -109,7 +109,7 @@ static void rockchip_cpuclk_set_dividers(struct rockchip_cpuclk *cpuclk,
 
 		pr_debug("%s: setting reg 0x%x to 0x%x\n",
 			 __func__, clksel->reg, clksel->val);
-		writel(clksel->val, cpuclk->reg_base + clksel->reg);
+		pete_writel("drivers/clk/rockchip/clk-cpu.c:112", clksel->val, cpuclk->reg_base + clksel->reg);
 	}
 }
 
@@ -160,13 +160,13 @@ static int rockchip_cpuclk_pre_rate_change(struct rockchip_cpuclk *cpuclk,
 			 __func__, alt_div, alt_prate, ndata->old_rate);
 
 		for (i = 0; i < reg_data->num_cores; i++) {
-			writel(HIWORD_UPDATE(alt_div, reg_data->div_core_mask[i],
+			pete_writel("drivers/clk/rockchip/clk-cpu.c:163", HIWORD_UPDATE(alt_div, reg_data->div_core_mask[i],
 					     reg_data->div_core_shift[i]),
 			       cpuclk->reg_base + reg_data->core_reg[i]);
 		}
 	}
 	/* select alternate parent */
-	writel(HIWORD_UPDATE(reg_data->mux_core_alt,
+	pete_writel("drivers/clk/rockchip/clk-cpu.c:169", HIWORD_UPDATE(reg_data->mux_core_alt,
 			     reg_data->mux_core_mask,
 			     reg_data->mux_core_shift),
 	       cpuclk->reg_base + reg_data->core_reg[0]);
@@ -202,14 +202,14 @@ static int rockchip_cpuclk_post_rate_change(struct rockchip_cpuclk *cpuclk,
 	 * primary parent by the extra dividers that were needed for the alt.
 	 */
 
-	writel(HIWORD_UPDATE(reg_data->mux_core_main,
+	pete_writel("drivers/clk/rockchip/clk-cpu.c:205", HIWORD_UPDATE(reg_data->mux_core_main,
 			     reg_data->mux_core_mask,
 			     reg_data->mux_core_shift),
 	       cpuclk->reg_base + reg_data->core_reg[0]);
 
 	/* remove dividers */
 	for (i = 0; i < reg_data->num_cores; i++) {
-		writel(HIWORD_UPDATE(0, reg_data->div_core_mask[i],
+		pete_writel("drivers/clk/rockchip/clk-cpu.c:212", HIWORD_UPDATE(0, reg_data->div_core_mask[i],
 				     reg_data->div_core_shift[i]),
 		       cpuclk->reg_base + reg_data->core_reg[i]);
 	}

@@ -51,13 +51,13 @@ struct uart_pxa_port {
 static inline unsigned int serial_in(struct uart_pxa_port *up, int offset)
 {
 	offset <<= 2;
-	return readl(up->port.membase + offset);
+	return pete_readl("drivers/tty/serial/pxa.c:54", up->port.membase + offset);
 }
 
 static inline void serial_out(struct uart_pxa_port *up, int offset, int value)
 {
 	offset <<= 2;
-	writel(value, up->port.membase + offset);
+	pete_writel("drivers/tty/serial/pxa.c:60", value, up->port.membase + offset);
 }
 
 static void serial_pxa_enable_ms(struct uart_port *port)

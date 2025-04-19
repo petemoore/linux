@@ -197,7 +197,7 @@ static bool sci_controller_isr(struct isci_host *ihost)
 	 * emptied the completion queue from a previous interrupt
 	 * FIXME: really!?
 	 */
-	writel(SMU_ISR_COMPLETION, &ihost->smu_registers->interrupt_status);
+	pete_writel("drivers/scsi/isci/host.c:200", SMU_ISR_COMPLETION, &ihost->smu_registers->interrupt_status);
 
 	/* There is a race in the hardware that could cause us not to be
 	 * notified of an interrupt completion if we do not take this
@@ -207,8 +207,8 @@ static bool sci_controller_isr(struct isci_host *ihost)
 	 */
 	spin_lock(&ihost->scic_lock);
 	if (test_bit(IHOST_IRQ_ENABLED, &ihost->flags)) {
-		writel(0xFF000000, &ihost->smu_registers->interrupt_mask);
-		writel(0, &ihost->smu_registers->interrupt_mask);
+		pete_writel("drivers/scsi/isci/host.c:210", 0xFF000000, &ihost->smu_registers->interrupt_mask);
+		pete_writel("drivers/scsi/isci/host.c:211", 0, &ihost->smu_registers->interrupt_mask);
 	}
 	spin_unlock(&ihost->scic_lock);
 
@@ -230,7 +230,7 @@ static bool sci_controller_error_isr(struct isci_host *ihost)
 	u32 interrupt_status;
 
 	interrupt_status =
-		readl(&ihost->smu_registers->interrupt_status);
+		pete_readl("drivers/scsi/isci/host.c:233", &ihost->smu_registers->interrupt_status);
 	interrupt_status &= (SMU_ISR_QUEUE_ERROR | SMU_ISR_QUEUE_SUSPEND);
 
 	if (interrupt_status != 0) {
@@ -246,8 +246,8 @@ static bool sci_controller_error_isr(struct isci_host *ihost)
 	 * then unmask the error interrupts so if there was another interrupt
 	 * pending we will be notified.
 	 * Could we write the value of (SMU_ISR_QUEUE_ERROR | SMU_ISR_QUEUE_SUSPEND)? */
-	writel(0xff, &ihost->smu_registers->interrupt_mask);
-	writel(0, &ihost->smu_registers->interrupt_mask);
+	pete_writel("drivers/scsi/isci/host.c:249", 0xff, &ihost->smu_registers->interrupt_mask);
+	pete_writel("drivers/scsi/isci/host.c:250", 0, &ihost->smu_registers->interrupt_mask);
 
 	return false;
 }
@@ -564,7 +564,7 @@ static void sci_controller_process_completions(struct isci_host *ihost)
 			get_cycle |
 			SMU_CQGR_GEN_VAL(POINTER, get_index);
 
-		writel(ihost->completion_queue_get,
+		pete_writel("drivers/scsi/isci/host.c:567", ihost->completion_queue_get,
 		       &ihost->smu_registers->completion_queue_get);
 
 	}
@@ -581,13 +581,13 @@ static void sci_controller_error_handler(struct isci_host *ihost)
 	u32 interrupt_status;
 
 	interrupt_status =
-		readl(&ihost->smu_registers->interrupt_status);
+		pete_readl("drivers/scsi/isci/host.c:584", &ihost->smu_registers->interrupt_status);
 
 	if ((interrupt_status & SMU_ISR_QUEUE_SUSPEND) &&
 	    sci_controller_completion_queue_has_entries(ihost)) {
 
 		sci_controller_process_completions(ihost);
-		writel(SMU_ISR_QUEUE_SUSPEND, &ihost->smu_registers->interrupt_status);
+		pete_writel("drivers/scsi/isci/host.c:590", SMU_ISR_QUEUE_SUSPEND, &ihost->smu_registers->interrupt_status);
 	} else {
 		dev_err(&ihost->pdev->dev, "%s: status: %#x\n", __func__,
 			interrupt_status);
@@ -600,7 +600,7 @@ static void sci_controller_error_handler(struct isci_host *ihost)
 	/* If we dont process any completions I am not sure that we want to do this.
 	 * We are in the middle of a hardware fault and should probably be reset.
 	 */
-	writel(0, &ihost->smu_registers->interrupt_mask);
+	pete_writel("drivers/scsi/isci/host.c:603", 0, &ihost->smu_registers->interrupt_mask);
 }
 
 irqreturn_t isci_intx_isr(int vec, void *data)
@@ -609,7 +609,7 @@ irqreturn_t isci_intx_isr(int vec, void *data)
 	struct isci_host *ihost = data;
 
 	if (sci_controller_isr(ihost)) {
-		writel(SMU_ISR_COMPLETION, &ihost->smu_registers->interrupt_status);
+		pete_writel("drivers/scsi/isci/host.c:612", SMU_ISR_COMPLETION, &ihost->smu_registers->interrupt_status);
 		tasklet_schedule(&ihost->completion_tasklet);
 		ret = IRQ_HANDLED;
 	} else if (sci_controller_error_isr(ihost)) {
@@ -702,14 +702,14 @@ static u32 sci_controller_get_suggested_start_timeout(struct isci_host *ihost)
 static void sci_controller_enable_interrupts(struct isci_host *ihost)
 {
 	set_bit(IHOST_IRQ_ENABLED, &ihost->flags);
-	writel(0, &ihost->smu_registers->interrupt_mask);
+	pete_writel("drivers/scsi/isci/host.c:705", 0, &ihost->smu_registers->interrupt_mask);
 }
 
 void sci_controller_disable_interrupts(struct isci_host *ihost)
 {
 	clear_bit(IHOST_IRQ_ENABLED, &ihost->flags);
-	writel(0xffffffff, &ihost->smu_registers->interrupt_mask);
-	readl(&ihost->smu_registers->interrupt_mask); /* flush */
+	pete_writel("drivers/scsi/isci/host.c:711", 0xffffffff, &ihost->smu_registers->interrupt_mask);
+	pete_readl("drivers/scsi/isci/host.c:712", &ihost->smu_registers->interrupt_mask); /* flush */
 }
 
 static void sci_controller_enable_port_task_scheduler(struct isci_host *ihost)
@@ -717,11 +717,11 @@ static void sci_controller_enable_port_task_scheduler(struct isci_host *ihost)
 	u32 port_task_scheduler_value;
 
 	port_task_scheduler_value =
-		readl(&ihost->scu_registers->peg0.ptsg.control);
+		pete_readl("drivers/scsi/isci/host.c:720", &ihost->scu_registers->peg0.ptsg.control);
 	port_task_scheduler_value |=
 		(SCU_PTSGCR_GEN_BIT(ETM_ENABLE) |
 		 SCU_PTSGCR_GEN_BIT(PTSG_ENABLE));
-	writel(port_task_scheduler_value,
+	pete_writel("drivers/scsi/isci/host.c:724", port_task_scheduler_value,
 	       &ihost->scu_registers->peg0.ptsg.control);
 }
 
@@ -735,13 +735,13 @@ static void sci_controller_assign_task_entries(struct isci_host *ihost)
 	 */
 
 	task_assignment =
-		readl(&ihost->smu_registers->task_context_assignment[0]);
+		pete_readl("drivers/scsi/isci/host.c:738", &ihost->smu_registers->task_context_assignment[0]);
 
 	task_assignment |= (SMU_TCA_GEN_VAL(STARTING, 0)) |
 		(SMU_TCA_GEN_VAL(ENDING,  ihost->task_context_entries - 1)) |
 		(SMU_TCA_GEN_BIT(RANGE_CHECK_ENABLE));
 
-	writel(task_assignment,
+	pete_writel("drivers/scsi/isci/host.c:744", task_assignment,
 		&ihost->smu_registers->task_context_assignment[0]);
 
 }
@@ -759,7 +759,7 @@ static void sci_controller_initialize_completion_queue(struct isci_host *ihost)
 		(SMU_CQC_QUEUE_LIMIT_SET(SCU_MAX_COMPLETION_QUEUE_ENTRIES - 1) |
 		 SMU_CQC_EVENT_LIMIT_SET(SCU_MAX_EVENTS - 1));
 
-	writel(completion_queue_control_value,
+	pete_writel("drivers/scsi/isci/host.c:762", completion_queue_control_value,
 	       &ihost->smu_registers->completion_queue_control);
 
 
@@ -771,7 +771,7 @@ static void sci_controller_initialize_completion_queue(struct isci_host *ihost)
 		| (SMU_CQGR_GEN_BIT(EVENT_ENABLE))
 		);
 
-	writel(completion_queue_get_value,
+	pete_writel("drivers/scsi/isci/host.c:774", completion_queue_get_value,
 	       &ihost->smu_registers->completion_queue_get);
 
 	/* Set the completion queue put pointer */
@@ -780,7 +780,7 @@ static void sci_controller_initialize_completion_queue(struct isci_host *ihost)
 		| (SMU_CQPR_GEN_VAL(EVENT_POINTER, 0))
 		);
 
-	writel(completion_queue_put_value,
+	pete_writel("drivers/scsi/isci/host.c:783", completion_queue_put_value,
 	       &ihost->smu_registers->completion_queue_put);
 
 	/* Initialize the cycle bit of the completion queue entries */
@@ -803,7 +803,7 @@ static void sci_controller_initialize_unsolicited_frame_queue(struct isci_host *
 	frame_queue_control_value =
 		SCU_UFQC_GEN_VAL(QUEUE_SIZE, SCU_MAX_UNSOLICITED_FRAMES);
 
-	writel(frame_queue_control_value,
+	pete_writel("drivers/scsi/isci/host.c:806", frame_queue_control_value,
 	       &ihost->scu_registers->sdma.unsolicited_frame_queue_control);
 
 	/* Setup the get pointer for the unsolicited frame queue */
@@ -812,11 +812,11 @@ static void sci_controller_initialize_unsolicited_frame_queue(struct isci_host *
 		|  SCU_UFQGP_GEN_BIT(ENABLE_BIT)
 		);
 
-	writel(frame_queue_get_value,
+	pete_writel("drivers/scsi/isci/host.c:815", frame_queue_get_value,
 	       &ihost->scu_registers->sdma.unsolicited_frame_get_pointer);
 	/* Setup the put pointer for the unsolicited frame queue */
 	frame_queue_put_value = SCU_UFQPP_GEN_VAL(POINTER, 0);
-	writel(frame_queue_put_value,
+	pete_writel("drivers/scsi/isci/host.c:819", frame_queue_put_value,
 	       &ihost->scu_registers->sdma.unsolicited_frame_put_pointer);
 }
 
@@ -1069,10 +1069,10 @@ static void sci_controller_completion_handler(struct isci_host *ihost)
 		sci_controller_process_completions(ihost);
 
 	/* Clear the interrupt and enable all interrupts again */
-	writel(SMU_ISR_COMPLETION, &ihost->smu_registers->interrupt_status);
+	pete_writel("drivers/scsi/isci/host.c:1072", SMU_ISR_COMPLETION, &ihost->smu_registers->interrupt_status);
 	/* Could we write the value of SMU_ISR_COMPLETION? */
-	writel(0xFF000000, &ihost->smu_registers->interrupt_mask);
-	writel(0, &ihost->smu_registers->interrupt_mask);
+	pete_writel("drivers/scsi/isci/host.c:1074", 0xFF000000, &ihost->smu_registers->interrupt_mask);
+	pete_writel("drivers/scsi/isci/host.c:1075", 0, &ihost->smu_registers->interrupt_mask);
 }
 
 void ireq_done(struct isci_host *ihost, struct isci_request *ireq, struct sas_task *task)
@@ -1130,7 +1130,7 @@ void isci_host_completion_routine(unsigned long data)
 	 * the coalesence timeout doubles at each encoding step, so
 	 * update it based on the ilog2 value of the outstanding requests
 	 */
-	writel(SMU_ICC_GEN_VAL(NUMBER, active) |
+	pete_writel("drivers/scsi/isci/host.c:1133", SMU_ICC_GEN_VAL(NUMBER, active) |
 	       SMU_ICC_GEN_VAL(TIMER, ISCI_COALESCE_BASE + ilog2(active)),
 	       &ihost->smu_registers->interrupt_coalesce_control);
 }
@@ -1242,7 +1242,7 @@ void isci_host_deinit(struct isci_host *ihost)
 
 	/* disable output data selects */
 	for (i = 0; i < isci_gpio_count(ihost); i++)
-		writel(SGPIO_HW_CONTROL, &ihost->scu_registers->peg0.sgpio.output_data_select[i]);
+		pete_writel("drivers/scsi/isci/host.c:1245", SGPIO_HW_CONTROL, &ihost->scu_registers->peg0.sgpio.output_data_select[i]);
 
 	set_bit(IHOST_STOP_PENDING, &ihost->flags);
 
@@ -1262,7 +1262,7 @@ void isci_host_deinit(struct isci_host *ihost)
 	/* disable sgpio: where the above wait should give time for the
 	 * enclosure to sample the gpios going inactive
 	 */
-	writel(0, &ihost->scu_registers->peg0.sgpio.interface_control);
+	pete_writel("drivers/scsi/isci/host.c:1265", 0, &ihost->scu_registers->peg0.sgpio.interface_control);
 
 	spin_lock_irq(&ihost->scic_lock);
 	sci_controller_reset(ihost);
@@ -1427,7 +1427,7 @@ sci_controller_set_interrupt_coalescence(struct isci_host *ihost,
 			return SCI_FAILURE_INVALID_PARAMETER_VALUE;
 	}
 
-	writel(SMU_ICC_GEN_VAL(NUMBER, coalesce_number) |
+	pete_writel("drivers/scsi/isci/host.c:1430", SMU_ICC_GEN_VAL(NUMBER, coalesce_number) |
 	       SMU_ICC_GEN_VAL(TIMER, timeout_encode),
 	       &ihost->smu_registers->interrupt_coalesce_control);
 
@@ -1445,12 +1445,12 @@ static void sci_controller_ready_state_enter(struct sci_base_state_machine *sm)
 	u32 val;
 
 	/* enable clock gating for power control of the scu unit */
-	val = readl(&ihost->smu_registers->clock_gating_control);
+	val = pete_readl("drivers/scsi/isci/host.c:1448", &ihost->smu_registers->clock_gating_control);
 	val &= ~(SMU_CGUCR_GEN_BIT(REGCLK_ENABLE) |
 		 SMU_CGUCR_GEN_BIT(TXCLK_ENABLE) |
 		 SMU_CGUCR_GEN_BIT(XCLK_ENABLE));
 	val |= SMU_CGUCR_GEN_BIT(IDLE_ENABLE);
-	writel(val, &ihost->smu_registers->clock_gating_control);
+	pete_writel("drivers/scsi/isci/host.c:1453", val, &ihost->smu_registers->clock_gating_control);
 
 	/* set the default interrupt coalescence number and timeout value. */
 	sci_controller_set_interrupt_coalescence(ihost, 0, 0);
@@ -1543,19 +1543,19 @@ static void sci_controller_reset_hardware(struct isci_host *ihost)
 	sci_controller_disable_interrupts(ihost);
 
 	/* Reset the SCU */
-	writel(0xFFFFFFFF, &ihost->smu_registers->soft_reset_control);
+	pete_writel("drivers/scsi/isci/host.c:1546", 0xFFFFFFFF, &ihost->smu_registers->soft_reset_control);
 
 	/* Delay for 1ms to before clearing the CQP and UFQPR. */
 	udelay(1000);
 
 	/* The write to the CQGR clears the CQP */
-	writel(0x00000000, &ihost->smu_registers->completion_queue_get);
+	pete_writel("drivers/scsi/isci/host.c:1552", 0x00000000, &ihost->smu_registers->completion_queue_get);
 
 	/* The write to the UFQGP clears the UFQPR */
-	writel(0, &ihost->scu_registers->sdma.unsolicited_frame_get_pointer);
+	pete_writel("drivers/scsi/isci/host.c:1555", 0, &ihost->scu_registers->sdma.unsolicited_frame_get_pointer);
 
 	/* clear all interrupts */
-	writel(~SMU_INTERRUPT_STATUS_RESERVED_MASK, &ihost->smu_registers->interrupt_status);
+	pete_writel("drivers/scsi/isci/host.c:1558", ~SMU_INTERRUPT_STATUS_RESERVED_MASK, &ihost->smu_registers->interrupt_status);
 }
 
 static void sci_controller_resetting_state_enter(struct sci_base_state_machine *sm)
@@ -1928,45 +1928,45 @@ static void sci_controller_afe_initialization(struct isci_host *ihost)
 	unsigned char cable_selection_mask = *to_cable_select(ihost);
 
 	/* Clear DFX Status registers */
-	writel(0x0081000f, &afe->afe_dfx_master_control0);
+	pete_writel("drivers/scsi/isci/host.c:1931", 0x0081000f, &afe->afe_dfx_master_control0);
 	udelay(AFE_REGISTER_WRITE_DELAY);
 
 	if (is_b0(pdev) || is_c0(pdev) || is_c1(pdev)) {
 		/* PM Rx Equalization Save, PM SPhy Rx Acknowledgement
 		 * Timer, PM Stagger Timer
 		 */
-		writel(0x0007FFFF, &afe->afe_pmsn_master_control2);
+		pete_writel("drivers/scsi/isci/host.c:1938", 0x0007FFFF, &afe->afe_pmsn_master_control2);
 		udelay(AFE_REGISTER_WRITE_DELAY);
 	}
 
 	/* Configure bias currents to normal */
 	if (is_a2(pdev))
-		writel(0x00005A00, &afe->afe_bias_control);
+		pete_writel("drivers/scsi/isci/host.c:1944", 0x00005A00, &afe->afe_bias_control);
 	else if (is_b0(pdev) || is_c0(pdev))
-		writel(0x00005F00, &afe->afe_bias_control);
+		pete_writel("drivers/scsi/isci/host.c:1946", 0x00005F00, &afe->afe_bias_control);
 	else if (is_c1(pdev))
-		writel(0x00005500, &afe->afe_bias_control);
+		pete_writel("drivers/scsi/isci/host.c:1948", 0x00005500, &afe->afe_bias_control);
 
 	udelay(AFE_REGISTER_WRITE_DELAY);
 
 	/* Enable PLL */
 	if (is_a2(pdev))
-		writel(0x80040908, &afe->afe_pll_control0);
+		pete_writel("drivers/scsi/isci/host.c:1954", 0x80040908, &afe->afe_pll_control0);
 	else if (is_b0(pdev) || is_c0(pdev))
-		writel(0x80040A08, &afe->afe_pll_control0);
+		pete_writel("drivers/scsi/isci/host.c:1956", 0x80040A08, &afe->afe_pll_control0);
 	else if (is_c1(pdev)) {
-		writel(0x80000B08, &afe->afe_pll_control0);
+		pete_writel("drivers/scsi/isci/host.c:1958", 0x80000B08, &afe->afe_pll_control0);
 		udelay(AFE_REGISTER_WRITE_DELAY);
-		writel(0x00000B08, &afe->afe_pll_control0);
+		pete_writel("drivers/scsi/isci/host.c:1960", 0x00000B08, &afe->afe_pll_control0);
 		udelay(AFE_REGISTER_WRITE_DELAY);
-		writel(0x80000B08, &afe->afe_pll_control0);
+		pete_writel("drivers/scsi/isci/host.c:1962", 0x80000B08, &afe->afe_pll_control0);
 	}
 
 	udelay(AFE_REGISTER_WRITE_DELAY);
 
 	/* Wait for the PLL to lock */
 	do {
-		afe_status = readl(&afe->afe_common_block_status);
+		afe_status = pete_readl("drivers/scsi/isci/host.c:1969", &afe->afe_common_block_status);
 		udelay(AFE_REGISTER_WRITE_DELAY);
 	} while ((afe_status & 0x00001000) == 0);
 
@@ -1974,7 +1974,7 @@ static void sci_controller_afe_initialization(struct isci_host *ihost)
 		/* Shorten SAS SNW lock time (RxLock timer value from 76
 		 * us to 50 us)
 		 */
-		writel(0x7bcc96ad, &afe->afe_pmsn_master_control0);
+		pete_writel("drivers/scsi/isci/host.c:1977", 0x7bcc96ad, &afe->afe_pmsn_master_control0);
 		udelay(AFE_REGISTER_WRITE_DELAY);
 	}
 
@@ -1990,34 +1990,34 @@ static void sci_controller_afe_initialization(struct isci_host *ihost)
 			/* All defaults, except the Receive Word
 			 * Alignament/Comma Detect Enable....(0xe800)
 			 */
-			writel(0x00004512, &xcvr->afe_xcvr_control0);
+			pete_writel("drivers/scsi/isci/host.c:1993", 0x00004512, &xcvr->afe_xcvr_control0);
 			udelay(AFE_REGISTER_WRITE_DELAY);
 
-			writel(0x0050100F, &xcvr->afe_xcvr_control1);
+			pete_writel("drivers/scsi/isci/host.c:1996", 0x0050100F, &xcvr->afe_xcvr_control1);
 			udelay(AFE_REGISTER_WRITE_DELAY);
 		} else if (is_b0(pdev)) {
 			/* Configure transmitter SSC parameters */
-			writel(0x00030000, &xcvr->afe_tx_ssc_control);
+			pete_writel("drivers/scsi/isci/host.c:2000", 0x00030000, &xcvr->afe_tx_ssc_control);
 			udelay(AFE_REGISTER_WRITE_DELAY);
 		} else if (is_c0(pdev)) {
 			/* Configure transmitter SSC parameters */
-			writel(0x00010202, &xcvr->afe_tx_ssc_control);
+			pete_writel("drivers/scsi/isci/host.c:2004", 0x00010202, &xcvr->afe_tx_ssc_control);
 			udelay(AFE_REGISTER_WRITE_DELAY);
 
 			/* All defaults, except the Receive Word
 			 * Alignament/Comma Detect Enable....(0xe800)
 			 */
-			writel(0x00014500, &xcvr->afe_xcvr_control0);
+			pete_writel("drivers/scsi/isci/host.c:2010", 0x00014500, &xcvr->afe_xcvr_control0);
 			udelay(AFE_REGISTER_WRITE_DELAY);
 		} else if (is_c1(pdev)) {
 			/* Configure transmitter SSC parameters */
-			writel(0x00010202, &xcvr->afe_tx_ssc_control);
+			pete_writel("drivers/scsi/isci/host.c:2014", 0x00010202, &xcvr->afe_tx_ssc_control);
 			udelay(AFE_REGISTER_WRITE_DELAY);
 
 			/* All defaults, except the Receive Word
 			 * Alignament/Comma Detect Enable....(0xe800)
 			 */
-			writel(0x0001C500, &xcvr->afe_xcvr_control0);
+			pete_writel("drivers/scsi/isci/host.c:2020", 0x0001C500, &xcvr->afe_xcvr_control0);
 			udelay(AFE_REGISTER_WRITE_DELAY);
 		}
 
@@ -2025,30 +2025,30 @@ static void sci_controller_afe_initialization(struct isci_host *ihost)
 		 * PWRDNRX) & increase TX int & ext bias 20%....(0xe85c)
 		 */
 		if (is_a2(pdev))
-			writel(0x000003F0, &xcvr->afe_channel_control);
+			pete_writel("drivers/scsi/isci/host.c:2028", 0x000003F0, &xcvr->afe_channel_control);
 		else if (is_b0(pdev)) {
-			writel(0x000003D7, &xcvr->afe_channel_control);
+			pete_writel("drivers/scsi/isci/host.c:2030", 0x000003D7, &xcvr->afe_channel_control);
 			udelay(AFE_REGISTER_WRITE_DELAY);
 
-			writel(0x000003D4, &xcvr->afe_channel_control);
+			pete_writel("drivers/scsi/isci/host.c:2033", 0x000003D4, &xcvr->afe_channel_control);
 		} else if (is_c0(pdev)) {
-			writel(0x000001E7, &xcvr->afe_channel_control);
+			pete_writel("drivers/scsi/isci/host.c:2035", 0x000001E7, &xcvr->afe_channel_control);
 			udelay(AFE_REGISTER_WRITE_DELAY);
 
-			writel(0x000001E4, &xcvr->afe_channel_control);
+			pete_writel("drivers/scsi/isci/host.c:2038", 0x000001E4, &xcvr->afe_channel_control);
 		} else if (is_c1(pdev)) {
-			writel(cable_length_long ? 0x000002F7 : 0x000001F7,
+			pete_writel("drivers/scsi/isci/host.c:2040", cable_length_long ? 0x000002F7 : 0x000001F7,
 			       &xcvr->afe_channel_control);
 			udelay(AFE_REGISTER_WRITE_DELAY);
 
-			writel(cable_length_long ? 0x000002F4 : 0x000001F4,
+			pete_writel("drivers/scsi/isci/host.c:2044", cable_length_long ? 0x000002F4 : 0x000001F4,
 			       &xcvr->afe_channel_control);
 		}
 		udelay(AFE_REGISTER_WRITE_DELAY);
 
 		if (is_a2(pdev)) {
 			/* Enable TX equalization (0xe824) */
-			writel(0x00040000, &xcvr->afe_tx_control);
+			pete_writel("drivers/scsi/isci/host.c:2051", 0x00040000, &xcvr->afe_tx_control);
 			udelay(AFE_REGISTER_WRITE_DELAY);
 		}
 
@@ -2057,65 +2057,65 @@ static void sci_controller_afe_initialization(struct isci_host *ihost)
 			 * TPD=0x0(TX Power On), RDD=0x0(RX Detect
 			 * Enabled) ....(0xe800)
 			 */
-			writel(0x00004100, &xcvr->afe_xcvr_control0);
+			pete_writel("drivers/scsi/isci/host.c:2060", 0x00004100, &xcvr->afe_xcvr_control0);
 		else if (is_c0(pdev))
-			writel(0x00014100, &xcvr->afe_xcvr_control0);
+			pete_writel("drivers/scsi/isci/host.c:2062", 0x00014100, &xcvr->afe_xcvr_control0);
 		else if (is_c1(pdev))
-			writel(0x0001C100, &xcvr->afe_xcvr_control0);
+			pete_writel("drivers/scsi/isci/host.c:2064", 0x0001C100, &xcvr->afe_xcvr_control0);
 		udelay(AFE_REGISTER_WRITE_DELAY);
 
 		/* Leave DFE/FFE on */
 		if (is_a2(pdev))
-			writel(0x3F11103F, &xcvr->afe_rx_ssc_control0);
+			pete_writel("drivers/scsi/isci/host.c:2069", 0x3F11103F, &xcvr->afe_rx_ssc_control0);
 		else if (is_b0(pdev)) {
-			writel(0x3F11103F, &xcvr->afe_rx_ssc_control0);
+			pete_writel("drivers/scsi/isci/host.c:2071", 0x3F11103F, &xcvr->afe_rx_ssc_control0);
 			udelay(AFE_REGISTER_WRITE_DELAY);
 			/* Enable TX equalization (0xe824) */
-			writel(0x00040000, &xcvr->afe_tx_control);
+			pete_writel("drivers/scsi/isci/host.c:2074", 0x00040000, &xcvr->afe_tx_control);
 		} else if (is_c0(pdev)) {
-			writel(0x01400C0F, &xcvr->afe_rx_ssc_control1);
+			pete_writel("drivers/scsi/isci/host.c:2076", 0x01400C0F, &xcvr->afe_rx_ssc_control1);
 			udelay(AFE_REGISTER_WRITE_DELAY);
 
-			writel(0x3F6F103F, &xcvr->afe_rx_ssc_control0);
+			pete_writel("drivers/scsi/isci/host.c:2079", 0x3F6F103F, &xcvr->afe_rx_ssc_control0);
 			udelay(AFE_REGISTER_WRITE_DELAY);
 
 			/* Enable TX equalization (0xe824) */
-			writel(0x00040000, &xcvr->afe_tx_control);
+			pete_writel("drivers/scsi/isci/host.c:2083", 0x00040000, &xcvr->afe_tx_control);
 		} else if (is_c1(pdev)) {
-			writel(cable_length_long ? 0x01500C0C :
+			pete_writel("drivers/scsi/isci/host.c:2085", cable_length_long ? 0x01500C0C :
 			       cable_length_medium ? 0x01400C0D : 0x02400C0D,
 			       &xcvr->afe_xcvr_control1);
 			udelay(AFE_REGISTER_WRITE_DELAY);
 
-			writel(0x000003E0, &xcvr->afe_dfx_rx_control1);
+			pete_writel("drivers/scsi/isci/host.c:2090", 0x000003E0, &xcvr->afe_dfx_rx_control1);
 			udelay(AFE_REGISTER_WRITE_DELAY);
 
-			writel(cable_length_long ? 0x33091C1F :
+			pete_writel("drivers/scsi/isci/host.c:2093", cable_length_long ? 0x33091C1F :
 			       cable_length_medium ? 0x3315181F : 0x2B17161F,
 			       &xcvr->afe_rx_ssc_control0);
 			udelay(AFE_REGISTER_WRITE_DELAY);
 
 			/* Enable TX equalization (0xe824) */
-			writel(0x00040000, &xcvr->afe_tx_control);
+			pete_writel("drivers/scsi/isci/host.c:2099", 0x00040000, &xcvr->afe_tx_control);
 		}
 
 		udelay(AFE_REGISTER_WRITE_DELAY);
 
-		writel(oem_phy->afe_tx_amp_control0, &xcvr->afe_tx_amp_control0);
+		pete_writel("drivers/scsi/isci/host.c:2104", oem_phy->afe_tx_amp_control0, &xcvr->afe_tx_amp_control0);
 		udelay(AFE_REGISTER_WRITE_DELAY);
 
-		writel(oem_phy->afe_tx_amp_control1, &xcvr->afe_tx_amp_control1);
+		pete_writel("drivers/scsi/isci/host.c:2107", oem_phy->afe_tx_amp_control1, &xcvr->afe_tx_amp_control1);
 		udelay(AFE_REGISTER_WRITE_DELAY);
 
-		writel(oem_phy->afe_tx_amp_control2, &xcvr->afe_tx_amp_control2);
+		pete_writel("drivers/scsi/isci/host.c:2110", oem_phy->afe_tx_amp_control2, &xcvr->afe_tx_amp_control2);
 		udelay(AFE_REGISTER_WRITE_DELAY);
 
-		writel(oem_phy->afe_tx_amp_control3, &xcvr->afe_tx_amp_control3);
+		pete_writel("drivers/scsi/isci/host.c:2113", oem_phy->afe_tx_amp_control3, &xcvr->afe_tx_amp_control3);
 		udelay(AFE_REGISTER_WRITE_DELAY);
 	}
 
 	/* Transfer control to the PEs */
-	writel(0x00010f00, &afe->afe_dfx_master_control0);
+	pete_writel("drivers/scsi/isci/host.c:2118", 0x00010f00, &afe->afe_dfx_master_control0);
 	udelay(AFE_REGISTER_WRITE_DELAY);
 }
 
@@ -2160,7 +2160,7 @@ static enum sci_status sci_controller_initialize(struct isci_host *ihost)
 
 
 	/* Take the hardware out of reset */
-	writel(0, &ihost->smu_registers->soft_reset_control);
+	pete_writel("drivers/scsi/isci/host.c:2163", 0, &ihost->smu_registers->soft_reset_control);
 
 	/*
 	 * / @todo Provide meaningfull error code for hardware failure
@@ -2170,7 +2170,7 @@ static enum sci_status sci_controller_initialize(struct isci_host *ihost)
 
 		/* Loop until the hardware reports success */
 		udelay(SCU_CONTEXT_RAM_INIT_STALL_TIME);
-		status = readl(&ihost->smu_registers->control_status);
+		status = pete_readl("drivers/scsi/isci/host.c:2173", &ihost->smu_registers->control_status);
 
 		if ((status & SCU_RAM_INIT_COMPLETED) == SCU_RAM_INIT_COMPLETED)
 			break;
@@ -2181,7 +2181,7 @@ static enum sci_status sci_controller_initialize(struct isci_host *ihost)
 	/*
 	 * Determine what are the actaul device capacities that the
 	 * hardware will support */
-	val = readl(&ihost->smu_registers->device_context_capacity);
+	val = pete_readl("drivers/scsi/isci/host.c:2184", &ihost->smu_registers->device_context_capacity);
 
 	/* Record the smaller of the two capacity values */
 	ihost->logical_port_entries = min(smu_max_ports(val), SCI_MAX_PORTS);
@@ -2196,17 +2196,17 @@ static enum sci_status sci_controller_initialize(struct isci_host *ihost)
 		struct scu_port_task_scheduler_group_registers __iomem
 			*ptsg = &ihost->scu_registers->peg0.ptsg;
 
-		writel(i, &ptsg->protocol_engine[i]);
+		pete_writel("drivers/scsi/isci/host.c:2199", i, &ptsg->protocol_engine[i]);
 	}
 
 	/* Initialize hardware PCI Relaxed ordering in DMA engines */
-	val = readl(&ihost->scu_registers->sdma.pdma_configuration);
+	val = pete_readl("drivers/scsi/isci/host.c:2203", &ihost->scu_registers->sdma.pdma_configuration);
 	val |= SCU_PDMACR_GEN_BIT(PCI_RELAXED_ORDERING_ENABLE);
-	writel(val, &ihost->scu_registers->sdma.pdma_configuration);
+	pete_writel("drivers/scsi/isci/host.c:2205", val, &ihost->scu_registers->sdma.pdma_configuration);
 
-	val = readl(&ihost->scu_registers->sdma.cdma_configuration);
+	val = pete_readl("drivers/scsi/isci/host.c:2207", &ihost->scu_registers->sdma.cdma_configuration);
 	val |= SCU_CDMACR_GEN_BIT(PCI_RELAXED_ORDERING_ENABLE);
-	writel(val, &ihost->scu_registers->sdma.cdma_configuration);
+	pete_writel("drivers/scsi/isci/host.c:2209", val, &ihost->scu_registers->sdma.cdma_configuration);
 
 	/*
 	 * Initialize the PHYs before the PORTs because the PHY registers
@@ -2300,14 +2300,14 @@ static int sci_controller_mem_init(struct isci_host *ihost)
 	if (err)
 		return err;
 
-	writel(lower_32_bits(ihost->cq_dma), &ihost->smu_registers->completion_queue_lower);
-	writel(upper_32_bits(ihost->cq_dma), &ihost->smu_registers->completion_queue_upper);
+	pete_writel("drivers/scsi/isci/host.c:2303", lower_32_bits(ihost->cq_dma), &ihost->smu_registers->completion_queue_lower);
+	pete_writel("drivers/scsi/isci/host.c:2304", upper_32_bits(ihost->cq_dma), &ihost->smu_registers->completion_queue_upper);
 
-	writel(lower_32_bits(ihost->rnc_dma), &ihost->smu_registers->remote_node_context_lower);
-	writel(upper_32_bits(ihost->rnc_dma), &ihost->smu_registers->remote_node_context_upper);
+	pete_writel("drivers/scsi/isci/host.c:2306", lower_32_bits(ihost->rnc_dma), &ihost->smu_registers->remote_node_context_lower);
+	pete_writel("drivers/scsi/isci/host.c:2307", upper_32_bits(ihost->rnc_dma), &ihost->smu_registers->remote_node_context_upper);
 
-	writel(lower_32_bits(ihost->tc_dma), &ihost->smu_registers->host_task_table_lower);
-	writel(upper_32_bits(ihost->tc_dma), &ihost->smu_registers->host_task_table_upper);
+	pete_writel("drivers/scsi/isci/host.c:2309", lower_32_bits(ihost->tc_dma), &ihost->smu_registers->host_task_table_lower);
+	pete_writel("drivers/scsi/isci/host.c:2310", upper_32_bits(ihost->tc_dma), &ihost->smu_registers->host_task_table_upper);
 
 	sci_unsolicited_frame_control_construct(ihost);
 
@@ -2315,14 +2315,14 @@ static int sci_controller_mem_init(struct isci_host *ihost)
 	 * Inform the silicon as to the location of the UF headers and
 	 * address table.
 	 */
-	writel(lower_32_bits(ihost->uf_control.headers.physical_address),
+	pete_writel("drivers/scsi/isci/host.c:2318", lower_32_bits(ihost->uf_control.headers.physical_address),
 		&ihost->scu_registers->sdma.uf_header_base_address_lower);
-	writel(upper_32_bits(ihost->uf_control.headers.physical_address),
+	pete_writel("drivers/scsi/isci/host.c:2320", upper_32_bits(ihost->uf_control.headers.physical_address),
 		&ihost->scu_registers->sdma.uf_header_base_address_upper);
 
-	writel(lower_32_bits(ihost->uf_control.address_table.physical_address),
+	pete_writel("drivers/scsi/isci/host.c:2323", lower_32_bits(ihost->uf_control.address_table.physical_address),
 		&ihost->scu_registers->sdma.uf_address_table_lower);
-	writel(upper_32_bits(ihost->uf_control.address_table.physical_address),
+	pete_writel("drivers/scsi/isci/host.c:2325", upper_32_bits(ihost->uf_control.address_table.physical_address),
 		&ihost->scu_registers->sdma.uf_address_table_upper);
 
 	return 0;
@@ -2368,10 +2368,10 @@ int isci_host_init(struct isci_host *ihost)
 		return err;
 
 	/* enable sgpio */
-	writel(1, &ihost->scu_registers->peg0.sgpio.interface_control);
+	pete_writel("drivers/scsi/isci/host.c:2371", 1, &ihost->scu_registers->peg0.sgpio.interface_control);
 	for (i = 0; i < isci_gpio_count(ihost); i++)
-		writel(SGPIO_HW_CONTROL, &ihost->scu_registers->peg0.sgpio.output_data_select[i]);
-	writel(0, &ihost->scu_registers->peg0.sgpio.vendor_specific_code);
+		pete_writel("drivers/scsi/isci/host.c:2373", SGPIO_HW_CONTROL, &ihost->scu_registers->peg0.sgpio.output_data_select[i]);
+	pete_writel("drivers/scsi/isci/host.c:2374", 0, &ihost->scu_registers->peg0.sgpio.vendor_specific_code);
 
 	return 0;
 }
@@ -2452,7 +2452,7 @@ void sci_controller_post_request(struct isci_host *ihost, u32 request)
 	dev_dbg(&ihost->pdev->dev, "%s[%d]: %#x\n",
 		__func__, ihost->id, request);
 
-	writel(request, &ihost->smu_registers->post_context_port);
+	pete_writel("drivers/scsi/isci/host.c:2455", request, &ihost->smu_registers->post_context_port);
 }
 
 struct isci_request *sci_request_by_tag(struct isci_host *ihost, u16 io_tag)
@@ -2543,7 +2543,7 @@ void sci_controller_copy_sata_response(void *response_buffer,
 void sci_controller_release_frame(struct isci_host *ihost, u32 frame_index)
 {
 	if (sci_unsolicited_frame_control_release_frame(&ihost->uf_control, frame_index))
-		writel(ihost->uf_control.get,
+		pete_writel("drivers/scsi/isci/host.c:2546", ihost->uf_control.get,
 			&ihost->scu_registers->sdma.unsolicited_frame_get_pointer);
 }
 
@@ -2777,7 +2777,7 @@ static int sci_write_gpio_tx_gp(struct isci_host *ihost, u8 reg_index, u8 reg_co
 
 		if (i < 3)
 			break;
-		writel(val, &ihost->scu_registers->peg0.sgpio.output_data_select[d]);
+		pete_writel("drivers/scsi/isci/host.c:2780", val, &ihost->scu_registers->peg0.sgpio.output_data_select[d]);
 	}
 
 	/* unless reg_index is > 1, we should always be able to write at

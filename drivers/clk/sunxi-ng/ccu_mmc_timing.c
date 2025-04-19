@@ -29,12 +29,12 @@ int sunxi_ccu_set_mmc_timing_mode(struct clk *clk, bool new_mode)
 
 	spin_lock_irqsave(cm->lock, flags);
 
-	val = readl(cm->base + cm->reg);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu_mmc_timing.c:32", cm->base + cm->reg);
 	if (new_mode)
 		val |= CCU_MMC_NEW_TIMING_MODE;
 	else
 		val &= ~CCU_MMC_NEW_TIMING_MODE;
-	writel(val, cm->base + cm->reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu_mmc_timing.c:37", val, cm->base + cm->reg);
 
 	spin_unlock_irqrestore(cm->lock, flags);
 
@@ -58,6 +58,6 @@ int sunxi_ccu_get_mmc_timing_mode(struct clk *clk)
 	if (!(cm->features & CCU_FEATURE_MMC_TIMING_SWITCH))
 		return -ENOTSUPP;
 
-	return !!(readl(cm->base + cm->reg) & CCU_MMC_NEW_TIMING_MODE);
+	return !!(pete_readl("drivers/clk/sunxi-ng/ccu_mmc_timing.c:61", cm->base + cm->reg) & CCU_MMC_NEW_TIMING_MODE);
 }
 EXPORT_SYMBOL_GPL(sunxi_ccu_get_mmc_timing_mode);

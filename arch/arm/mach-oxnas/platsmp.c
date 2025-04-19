@@ -36,15 +36,15 @@ static int __init ox820_boot_secondary(unsigned int cpu,
 	 * until it receives a soft interrupt, and then the
 	 * secondary CPU branches to this address.
 	 */
-	writel(virt_to_phys(ox820_secondary_startup),
+	pete_writel("arch/arm/mach-oxnas/platsmp.c:39", virt_to_phys(ox820_secondary_startup),
 			cpu_ctrl + HOLDINGPEN_LOCATION_OFFSET);
 
-	writel(cpu, cpu_ctrl + HOLDINGPEN_CPU_OFFSET);
+	pete_writel("arch/arm/mach-oxnas/platsmp.c:42", cpu, cpu_ctrl + HOLDINGPEN_CPU_OFFSET);
 
 	/*
 	 * Enable GIC cpu interface in CPU Interface Control Register
 	 */
-	writel(GIC_CPU_CTRL_ENABLE,
+	pete_writel("arch/arm/mach-oxnas/platsmp.c:47", GIC_CPU_CTRL_ENABLE,
 		gic_cpu_ctrl + GIC_NCPU_OFFSET(cpu) + GIC_CPU_CTRL);
 
 	/*

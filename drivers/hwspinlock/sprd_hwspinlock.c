@@ -44,12 +44,12 @@ static int sprd_hwspinlock_trylock(struct hwspinlock *lock)
 	void __iomem *addr = lock->priv;
 	int user_id, lock_id;
 
-	if (!readl(addr))
+	if (!pete_readl("drivers/hwspinlock/sprd_hwspinlock.c:47", addr))
 		return 1;
 
 	lock_id = hwlock_to_id(lock);
 	/* get the hardware spinlock master/user id */
-	user_id = readl(sprd_hwlock->base + HWSPINLOCK_MASTERID(lock_id));
+	user_id = pete_readl("drivers/hwspinlock/sprd_hwspinlock.c:52", sprd_hwlock->base + HWSPINLOCK_MASTERID(lock_id));
 	dev_warn(sprd_hwlock->bank.dev,
 		 "hwspinlock [%d] lock failed and master/user id = %d!\n",
 		 lock_id, user_id);
@@ -61,7 +61,7 @@ static void sprd_hwspinlock_unlock(struct hwspinlock *lock)
 {
 	void __iomem *lock_addr = lock->priv;
 
-	writel(HWSPINLOCK_NOTTAKEN, lock_addr);
+	pete_writel("drivers/hwspinlock/sprd_hwspinlock.c:64", HWSPINLOCK_NOTTAKEN, lock_addr);
 }
 
 /* The specs recommended below number as the retry delay time */
@@ -122,7 +122,7 @@ static int sprd_hwspinlock_probe(struct platform_device *pdev)
 	}
 
 	/* set the hwspinlock to record user id to identify subsystems */
-	writel(HWSPINLOCK_USER_BITS, sprd_hwlock->base + HWSPINLOCK_RECCTRL);
+	pete_writel("drivers/hwspinlock/sprd_hwspinlock.c:125", HWSPINLOCK_USER_BITS, sprd_hwlock->base + HWSPINLOCK_RECCTRL);
 
 	for (i = 0; i < SPRD_HWLOCKS_NUM; i++) {
 		lock = &sprd_hwlock->bank.lock[i];

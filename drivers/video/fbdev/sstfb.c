@@ -181,7 +181,7 @@ static void sst_dbg_print_write_reg(u32 reg, u32 val) {
 
 static inline u32 __sst_read(u8 __iomem *vbase, u32 reg)
 {
-	u32 ret = readl(vbase + reg);
+	u32 ret = pete_readl("drivers/video/fbdev/sstfb.c:184", vbase + reg);
 	sst_dbg_print_read_reg(reg, ret);
 	return ret;
 }
@@ -189,7 +189,7 @@ static inline u32 __sst_read(u8 __iomem *vbase, u32 reg)
 static inline void __sst_write(u8 __iomem *vbase, u32 reg, u32 val)
 {
 	sst_dbg_print_write_reg(reg, val);
-	writel(val, vbase + reg);
+	pete_writel("drivers/video/fbdev/sstfb.c:192", val, vbase + reg);
 }
 
 static inline void __sst_set_bits(u8 __iomem *vbase, u32 reg, u32 val)
@@ -834,23 +834,23 @@ static int sst_get_memsize(struct fb_info *info, __u32 *memsize)
 		return 1;
 	}
 
-	writel(0xdeadbeef, fbbase_virt);
-	writel(0xdeadbeef, fbbase_virt+0x100000);
-	writel(0xdeadbeef, fbbase_virt+0x200000);
+	pete_writel("drivers/video/fbdev/sstfb.c:837", 0xdeadbeef, fbbase_virt);
+	pete_writel("drivers/video/fbdev/sstfb.c:838", 0xdeadbeef, fbbase_virt+0x100000);
+	pete_writel("drivers/video/fbdev/sstfb.c:839", 0xdeadbeef, fbbase_virt+0x200000);
 	f_ddprintk("0MB: %#x, 1MB: %#x, 2MB: %#x\n",
-	           readl(fbbase_virt), readl(fbbase_virt + 0x100000),
-	           readl(fbbase_virt + 0x200000));
+	           pete_readl("drivers/video/fbdev/sstfb.c:841", fbbase_virt), pete_readl("drivers/video/fbdev/sstfb.c:841", fbbase_virt + 0x100000),
+	           pete_readl("drivers/video/fbdev/sstfb.c:842", fbbase_virt + 0x200000));
 
-	writel(0xabcdef01, fbbase_virt);
+	pete_writel("drivers/video/fbdev/sstfb.c:844", 0xabcdef01, fbbase_virt);
 
 	f_ddprintk("0MB: %#x, 1MB: %#x, 2MB: %#x\n",
-	           readl(fbbase_virt), readl(fbbase_virt + 0x100000),
-	           readl(fbbase_virt + 0x200000));
+	           pete_readl("drivers/video/fbdev/sstfb.c:847", fbbase_virt), pete_readl("drivers/video/fbdev/sstfb.c:847", fbbase_virt + 0x100000),
+	           pete_readl("drivers/video/fbdev/sstfb.c:848", fbbase_virt + 0x200000));
 
 	/* checks for 4mb lfb, then 2, then defaults to 1 */
-	if (readl(fbbase_virt + 0x200000) == 0xdeadbeef)
+	if (pete_readl("drivers/video/fbdev/sstfb.c:851", fbbase_virt + 0x200000) == 0xdeadbeef)
 		*memsize = 0x400000;
-	else if (readl(fbbase_virt + 0x100000) == 0xdeadbeef)
+	else if (pete_readl("drivers/video/fbdev/sstfb.c:853", fbbase_virt + 0x100000) == 0xdeadbeef)
 		*memsize = 0x200000;
 	else
 		*memsize = 0x100000;

@@ -96,9 +96,9 @@ static void plt_clk_reg_update(struct clk_plt *clk, u32 mask, u32 val)
 
 	spin_lock_irqsave(&clk->lock, flags);
 
-	tmp = readl(clk->reg);
+	tmp = pete_readl("drivers/clk/x86/clk-pmc-atom.c:99", clk->reg);
 	tmp = (tmp & ~mask) | (val & mask);
-	writel(tmp, clk->reg);
+	pete_writel("drivers/clk/x86/clk-pmc-atom.c:101", tmp, clk->reg);
 
 	spin_unlock_irqrestore(&clk->lock, flags);
 }
@@ -117,7 +117,7 @@ static u8 plt_clk_get_parent(struct clk_hw *hw)
 	struct clk_plt *clk = to_clk_plt(hw);
 	u32 value;
 
-	value = readl(clk->reg);
+	value = pete_readl("drivers/clk/x86/clk-pmc-atom.c:120", clk->reg);
 
 	return plt_reg_to_parent(value);
 }
@@ -143,7 +143,7 @@ static int plt_clk_is_enabled(struct clk_hw *hw)
 	struct clk_plt *clk = to_clk_plt(hw);
 	u32 value;
 
-	value = readl(clk->reg);
+	value = pete_readl("drivers/clk/x86/clk-pmc-atom.c:146", clk->reg);
 
 	return plt_reg_to_enabled(value);
 }

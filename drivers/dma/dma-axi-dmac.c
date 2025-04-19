@@ -166,12 +166,12 @@ static struct axi_dmac_desc *to_axi_dmac_desc(struct virt_dma_desc *vdesc)
 static void axi_dmac_write(struct axi_dmac *axi_dmac, unsigned int reg,
 	unsigned int val)
 {
-	writel(val, axi_dmac->base + reg);
+	pete_writel("drivers/dma/dma-axi-dmac.c:169", val, axi_dmac->base + reg);
 }
 
 static int axi_dmac_read(struct axi_dmac *axi_dmac, unsigned int reg)
 {
-	return readl(axi_dmac->base + reg);
+	return pete_readl("drivers/dma/dma-axi-dmac.c:174", axi_dmac->base + reg);
 }
 
 static int axi_dmac_src_is_mem(struct axi_dmac_chan *chan)

@@ -103,7 +103,7 @@ static void wil_print_ring(struct seq_file *s, struct wil6210_priv *wil,
 	seq_printf(s, "  hwtail = [0x%08x] -> ", ring->hwtail);
 	x = wmi_addr(wil, ring->hwtail);
 	if (x) {
-		v = readl(x);
+		v = pete_readl("drivers/net/wireless/ath/wil6210/debugfs.c:106", x);
 		seq_printf(s, "0x%08x = %d\n", v, v);
 	} else {
 		seq_puts(s, "???\n");
@@ -402,7 +402,7 @@ static int wil_debugfs_iomem_x32_get(void *data, u64 *val)
 	if (ret < 0)
 		return ret;
 
-	*val = readl((void __iomem *)d->offset);
+	*val = pete_readl("drivers/net/wireless/ath/wil6210/debugfs.c:405", (void __iomem *)d->offset);
 
 	wil_pm_runtime_put(wil);
 
@@ -600,7 +600,7 @@ static int memread_show(struct seq_file *s, void *data)
 	a = wmi_buffer(wil, cpu_to_le32(mem_addr));
 
 	if (a)
-		seq_printf(s, "[0x%08x] = 0x%08x\n", mem_addr, readl(a));
+		seq_printf(s, "[0x%08x] = 0x%08x\n", mem_addr, pete_readl("drivers/net/wireless/ath/wil6210/debugfs.c:603", a));
 	else
 		seq_printf(s, "[0x%08x] = INVALID\n", mem_addr);
 

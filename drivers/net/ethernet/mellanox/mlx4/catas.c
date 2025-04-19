@@ -103,7 +103,7 @@ static int mlx4_reset_slave(struct mlx4_dev *dev)
 	if (pci_channel_offline(dev->persist->pdev))
 		return 0;
 
-	comm_flags = swab32(readl((__iomem char *)priv->mfunc.comm +
+	comm_flags = swab32(pete_readl("drivers/net/ethernet/mellanox/mlx4/catas.c:106", (__iomem char *)priv->mfunc.comm +
 				  MLX4_COMM_CHAN_FLAGS));
 	if (comm_flags == 0xffffffff) {
 		mlx4_err(dev, "VF reset is not needed\n");
@@ -132,7 +132,7 @@ static int mlx4_reset_slave(struct mlx4_dev *dev)
 
 	end = msecs_to_jiffies(MLX4_COMM_TIME) + jiffies;
 	while (time_before(jiffies, end)) {
-		comm_flags = swab32(readl((__iomem char *)priv->mfunc.comm +
+		comm_flags = swab32(pete_readl("drivers/net/ethernet/mellanox/mlx4/catas.c:135", (__iomem char *)priv->mfunc.comm +
 					  MLX4_COMM_CHAN_FLAGS));
 		rst_ack = (comm_flags & (u32)(1 << COM_CHAN_RST_ACK_OFFSET)) >>
 			COM_CHAN_RST_ACK_OFFSET;
@@ -226,7 +226,7 @@ static void dump_err_buf(struct mlx4_dev *dev)
 	mlx4_err(dev, "Internal error detected:\n");
 	for (i = 0; i < priv->fw.catas_size; ++i)
 		mlx4_err(dev, "  buf[%02x]: %08x\n",
-			 i, swab32(readl(priv->catas_err.map + i)));
+			 i, swab32(pete_readl("drivers/net/ethernet/mellanox/mlx4/catas.c:229", priv->catas_err.map + i)));
 }
 
 static void poll_catas(struct timer_list *t)
@@ -236,12 +236,12 @@ static void poll_catas(struct timer_list *t)
 	u32 slave_read;
 
 	if (mlx4_is_slave(dev)) {
-		slave_read = swab32(readl(&priv->mfunc.comm->slave_read));
+		slave_read = swab32(pete_readl("drivers/net/ethernet/mellanox/mlx4/catas.c:239", &priv->mfunc.comm->slave_read));
 		if (mlx4_comm_internal_err(slave_read)) {
 			mlx4_warn(dev, "Internal error detected on the communication channel\n");
 			goto internal_err;
 		}
-	} else if (readl(priv->catas_err.map)) {
+	} else if (pete_readl("drivers/net/ethernet/mellanox/mlx4/catas.c:244", priv->catas_err.map)) {
 		dump_err_buf(dev);
 		goto internal_err;
 	}

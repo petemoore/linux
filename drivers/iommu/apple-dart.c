@@ -197,7 +197,7 @@ apple_dart_hw_enable_translation(struct apple_dart_stream_map *stream_map)
 	int sid;
 
 	for_each_set_bit(sid, &stream_map->sidmap, DART_MAX_STREAMS)
-		writel(DART_TCR_TRANSLATE_ENABLE,
+		pete_writel("drivers/iommu/apple-dart.c:200", DART_TCR_TRANSLATE_ENABLE,
 		       stream_map->dart->regs + DART_TCR(sid));
 }
 
@@ -206,7 +206,7 @@ static void apple_dart_hw_disable_dma(struct apple_dart_stream_map *stream_map)
 	int sid;
 
 	for_each_set_bit(sid, &stream_map->sidmap, DART_MAX_STREAMS)
-		writel(0, stream_map->dart->regs + DART_TCR(sid));
+		pete_writel("drivers/iommu/apple-dart.c:209", 0, stream_map->dart->regs + DART_TCR(sid));
 }
 
 static void
@@ -216,7 +216,7 @@ apple_dart_hw_enable_bypass(struct apple_dart_stream_map *stream_map)
 
 	WARN_ON(!stream_map->dart->supports_bypass);
 	for_each_set_bit(sid, &stream_map->sidmap, DART_MAX_STREAMS)
-		writel(DART_TCR_BYPASS0_ENABLE | DART_TCR_BYPASS1_ENABLE,
+		pete_writel("drivers/iommu/apple-dart.c:219", DART_TCR_BYPASS0_ENABLE | DART_TCR_BYPASS1_ENABLE,
 		       stream_map->dart->regs + DART_TCR(sid));
 }
 
@@ -227,7 +227,7 @@ static void apple_dart_hw_set_ttbr(struct apple_dart_stream_map *stream_map,
 
 	WARN_ON(paddr & ((1 << DART_TTBR_SHIFT) - 1));
 	for_each_set_bit(sid, &stream_map->sidmap, DART_MAX_STREAMS)
-		writel(DART_TTBR_VALID | (paddr >> DART_TTBR_SHIFT),
+		pete_writel("drivers/iommu/apple-dart.c:230", DART_TTBR_VALID | (paddr >> DART_TTBR_SHIFT),
 		       stream_map->dart->regs + DART_TTBR(sid, idx));
 }
 
@@ -237,7 +237,7 @@ static void apple_dart_hw_clear_ttbr(struct apple_dart_stream_map *stream_map,
 	int sid;
 
 	for_each_set_bit(sid, &stream_map->sidmap, DART_MAX_STREAMS)
-		writel(0, stream_map->dart->regs + DART_TTBR(sid, idx));
+		pete_writel("drivers/iommu/apple-dart.c:240", 0, stream_map->dart->regs + DART_TTBR(sid, idx));
 }
 
 static void
@@ -259,8 +259,8 @@ apple_dart_hw_stream_command(struct apple_dart_stream_map *stream_map,
 
 	spin_lock_irqsave(&stream_map->dart->lock, flags);
 
-	writel(stream_map->sidmap, stream_map->dart->regs + DART_STREAM_SELECT);
-	writel(command, stream_map->dart->regs + DART_STREAM_COMMAND);
+	pete_writel("drivers/iommu/apple-dart.c:262", stream_map->sidmap, stream_map->dart->regs + DART_STREAM_SELECT);
+	pete_writel("drivers/iommu/apple-dart.c:263", command, stream_map->dart->regs + DART_STREAM_COMMAND);
 
 	ret = readl_poll_timeout_atomic(
 		stream_map->dart->regs + DART_STREAM_COMMAND, command_reg,
@@ -291,7 +291,7 @@ static int apple_dart_hw_reset(struct apple_dart *dart)
 	u32 config;
 	struct apple_dart_stream_map stream_map;
 
-	config = readl(dart->regs + DART_CONFIG);
+	config = pete_readl("drivers/iommu/apple-dart.c:294", dart->regs + DART_CONFIG);
 	if (config & DART_CONFIG_LOCK) {
 		dev_err(dart->dev, "DART is locked down until reboot: %08x\n",
 			config);
@@ -304,10 +304,10 @@ static int apple_dart_hw_reset(struct apple_dart *dart)
 	apple_dart_hw_clear_all_ttbrs(&stream_map);
 
 	/* enable all streams globally since TCR is used to control isolation */
-	writel(DART_STREAM_ALL, dart->regs + DART_STREAMS_ENABLE);
+	pete_writel("drivers/iommu/apple-dart.c:307", DART_STREAM_ALL, dart->regs + DART_STREAMS_ENABLE);
 
 	/* clear any pending errors before the interrupt is unmasked */
-	writel(readl(dart->regs + DART_ERROR), dart->regs + DART_ERROR);
+	pete_writel("drivers/iommu/apple-dart.c:310", pete_readl("drivers/iommu/apple-dart.c:310", dart->regs + DART_ERROR), dart->regs + DART_ERROR);
 
 	return apple_dart_hw_invalidate_tlb(&stream_map);
 }
@@ -764,10 +764,10 @@ static irqreturn_t apple_dart_irq(int irq, void *dev)
 {
 	struct apple_dart *dart = dev;
 	const char *fault_name = NULL;
-	u32 error = readl(dart->regs + DART_ERROR);
+	u32 error = pete_readl("drivers/iommu/apple-dart.c:767", dart->regs + DART_ERROR);
 	u32 error_code = FIELD_GET(DART_ERROR_CODE, error);
-	u32 addr_lo = readl(dart->regs + DART_ERROR_ADDR_LO);
-	u32 addr_hi = readl(dart->regs + DART_ERROR_ADDR_HI);
+	u32 addr_lo = pete_readl("drivers/iommu/apple-dart.c:769", dart->regs + DART_ERROR_ADDR_LO);
+	u32 addr_hi = pete_readl("drivers/iommu/apple-dart.c:770", dart->regs + DART_ERROR_ADDR_HI);
 	u64 addr = addr_lo | (((u64)addr_hi) << 32);
 	u8 stream_idx = FIELD_GET(DART_ERROR_STREAM, error);
 
@@ -793,7 +793,7 @@ static irqreturn_t apple_dart_irq(int irq, void *dev)
 		"translation fault: status:0x%x stream:%d code:0x%x (%s) at 0x%llx",
 		error, stream_idx, error_code, fault_name, addr);
 
-	writel(error, dart->regs + DART_ERROR);
+	pete_writel("drivers/iommu/apple-dart.c:796", error, dart->regs + DART_ERROR);
 	return IRQ_HANDLED;
 }
 
@@ -859,8 +859,8 @@ static int apple_dart_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_clk_disable;
 
-	dart_params[0] = readl(dart->regs + DART_PARAMS1);
-	dart_params[1] = readl(dart->regs + DART_PARAMS2);
+	dart_params[0] = pete_readl("drivers/iommu/apple-dart.c:862", dart->regs + DART_PARAMS1);
+	dart_params[1] = pete_readl("drivers/iommu/apple-dart.c:863", dart->regs + DART_PARAMS2);
 	dart->pgsize = 1 << FIELD_GET(DART_PARAMS_PAGE_SHIFT, dart_params[0]);
 	dart->supports_bypass = dart_params[1] & DART_PARAMS_BYPASS_SUPPORT;
 	dart->force_bypass = dart->pgsize > PAGE_SIZE;

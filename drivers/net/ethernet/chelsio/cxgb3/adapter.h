@@ -269,7 +269,7 @@ struct adapter {
 
 static inline u32 t3_read_reg(struct adapter *adapter, u32 reg_addr)
 {
-	u32 val = readl(adapter->regs + reg_addr);
+	u32 val = pete_readl("drivers/net/ethernet/chelsio/cxgb3/adapter.h:272", adapter->regs + reg_addr);
 
 	CH_DBG(adapter, MMIO, "read register 0x%x value 0x%x\n", reg_addr, val);
 	return val;
@@ -278,7 +278,7 @@ static inline u32 t3_read_reg(struct adapter *adapter, u32 reg_addr)
 static inline void t3_write_reg(struct adapter *adapter, u32 reg_addr, u32 val)
 {
 	CH_DBG(adapter, MMIO, "setting register 0x%x to 0x%x\n", reg_addr, val);
-	writel(val, adapter->regs + reg_addr);
+	pete_writel("drivers/net/ethernet/chelsio/cxgb3/adapter.h:281", val, adapter->regs + reg_addr);
 }
 
 static inline struct port_info *adap2pinfo(struct adapter *adap, int idx)

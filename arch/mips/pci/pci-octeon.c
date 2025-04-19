@@ -608,7 +608,7 @@ static int __init octeon_pci_setup(void)
 	/*
 	 * Remap the Octeon BAR 2 above all 32 bit devices
 	 * (0x8000000000ul).  This is done here so it is remapped
-	 * before the readl()'s below. We don't want BAR2 overlapping
+	 * before the pete_readl("arch/mips/pci/pci-octeon.c:611", )'s below. We don't want BAR2 overlapping
 	 * with BAR0/BAR1 during these reads.
 	 */
 	octeon_npi_write32(CVMX_NPI_PCI_CFG08,

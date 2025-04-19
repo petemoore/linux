@@ -175,7 +175,7 @@ static int ready_gate_clk_enable(struct clk_hw *hw)
 	 * interruptions and enable op does not allow to be interrupted.
 	 */
 	do {
-		bit_status = !(readl(gate->reg) & BIT(rgate->bit_rdy));
+		bit_status = !(pete_readl("drivers/clk/clk-stm32h7.c:178", gate->reg) & BIT(rgate->bit_rdy));
 
 		if (bit_status)
 			udelay(100);
@@ -198,7 +198,7 @@ static void ready_gate_clk_disable(struct clk_hw *hw)
 	clk_gate_ops.disable(hw);
 
 	do {
-		bit_status = !!(readl(gate->reg) & BIT(rgate->bit_rdy));
+		bit_status = !!(pete_readl("drivers/clk/clk-stm32h7.c:201", gate->reg) & BIT(rgate->bit_rdy));
 
 		if (bit_status)
 			udelay(100);
@@ -437,9 +437,9 @@ static unsigned long timer_ker_recalc_rate(struct clk_hw *hw,
 	u32 prescaler;
 	u32 mul;
 
-	timpre = (readl(base + RCC_CFGR) >> 15) & 0x01;
+	timpre = (pete_readl("drivers/clk/clk-stm32h7.c:440", base + RCC_CFGR) >> 15) & 0x01;
 
-	prescaler = (readl(base + RCC_D2CFGR) >> dppre_shift) & 0x03;
+	prescaler = (pete_readl("drivers/clk/clk-stm32h7.c:442", base + RCC_D2CFGR) >> dppre_shift) & 0x03;
 
 	mul = 2;
 
@@ -728,7 +728,7 @@ static int pll_frac_is_enabled(struct clk_hw *hw)
 	struct stm32_pll_obj *clk_elem = to_pll(hw);
 	struct stm32_fractional_divider *fd = &clk_elem->div;
 
-	return (readl(fd->freg_status) >> fd->freg_bit) & 0x01;
+	return (pete_readl("drivers/clk/clk-stm32h7.c:731", fd->freg_status) >> fd->freg_bit) & 0x01;
 }
 
 static unsigned long pll_read_frac(struct clk_hw *hw)
@@ -736,7 +736,7 @@ static unsigned long pll_read_frac(struct clk_hw *hw)
 	struct stm32_pll_obj *clk_elem = to_pll(hw);
 	struct stm32_fractional_divider *fd = &clk_elem->div;
 
-	return (readl(fd->freg_value) >> fd->fshift) &
+	return (pete_readl("drivers/clk/clk-stm32h7.c:739", fd->freg_value) >> fd->fshift) &
 		GENMASK(fd->fwidth - 1, 0);
 }
 
@@ -749,11 +749,11 @@ static unsigned long pll_fd_recalc_rate(struct clk_hw *hw,
 	u32 val, mask;
 	u64 rate, rate1 = 0;
 
-	val = readl(fd->mreg);
+	val = pete_readl("drivers/clk/clk-stm32h7.c:752", fd->mreg);
 	mask = GENMASK(fd->mwidth - 1, 0) << fd->mshift;
 	m = (val & mask) >> fd->mshift;
 
-	val = readl(fd->nreg);
+	val = pete_readl("drivers/clk/clk-stm32h7.c:756", fd->nreg);
 	mask = GENMASK(fd->nwidth - 1, 0) << fd->nshift;
 	n = ((val & mask) >> fd->nshift) + 1;
 

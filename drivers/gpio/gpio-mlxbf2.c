@@ -122,7 +122,7 @@ static int mlxbf2_gpio_lock_acquire(struct mlxbf2_gpio_context *gs)
 	mutex_lock(yu_arm_gpio_lock_param.lock);
 	raw_spin_lock(&gs->gc.bgpio_lock);
 
-	arm_gpio_lock_val = readl(yu_arm_gpio_lock_param.io);
+	arm_gpio_lock_val = pete_readl("drivers/gpio/gpio-mlxbf2.c:125", yu_arm_gpio_lock_param.io);
 
 	/*
 	 * When lock active bit[31] is set, ModeX is write enabled
@@ -133,7 +133,7 @@ static int mlxbf2_gpio_lock_acquire(struct mlxbf2_gpio_context *gs)
 		return -EINVAL;
 	}
 
-	writel(YU_ARM_GPIO_LOCK_ACQUIRE, yu_arm_gpio_lock_param.io);
+	pete_writel("drivers/gpio/gpio-mlxbf2.c:136", YU_ARM_GPIO_LOCK_ACQUIRE, yu_arm_gpio_lock_param.io);
 
 	return 0;
 }
@@ -145,7 +145,7 @@ static void mlxbf2_gpio_lock_release(struct mlxbf2_gpio_context *gs)
 	__releases(&gs->gc.bgpio_lock)
 	__releases(yu_arm_gpio_lock_param.lock)
 {
-	writel(YU_ARM_GPIO_LOCK_RELEASE, yu_arm_gpio_lock_param.io);
+	pete_writel("drivers/gpio/gpio-mlxbf2.c:148", YU_ARM_GPIO_LOCK_RELEASE, yu_arm_gpio_lock_param.io);
 	raw_spin_unlock(&gs->gc.bgpio_lock);
 	mutex_unlock(yu_arm_gpio_lock_param.lock);
 }
@@ -182,8 +182,8 @@ static int mlxbf2_gpio_direction_input(struct gpio_chip *chip,
 	if (ret < 0)
 		return ret;
 
-	writel(BIT(offset), gs->gpio_io + YU_GPIO_MODE0_CLEAR);
-	writel(BIT(offset), gs->gpio_io + YU_GPIO_MODE1_CLEAR);
+	pete_writel("drivers/gpio/gpio-mlxbf2.c:185", BIT(offset), gs->gpio_io + YU_GPIO_MODE0_CLEAR);
+	pete_writel("drivers/gpio/gpio-mlxbf2.c:186", BIT(offset), gs->gpio_io + YU_GPIO_MODE1_CLEAR);
 
 	mlxbf2_gpio_lock_release(gs);
 
@@ -210,8 +210,8 @@ static int mlxbf2_gpio_direction_output(struct gpio_chip *chip,
 	if (ret < 0)
 		return ret;
 
-	writel(BIT(offset), gs->gpio_io + YU_GPIO_MODE1_CLEAR);
-	writel(BIT(offset), gs->gpio_io + YU_GPIO_MODE0_SET);
+	pete_writel("drivers/gpio/gpio-mlxbf2.c:213", BIT(offset), gs->gpio_io + YU_GPIO_MODE1_CLEAR);
+	pete_writel("drivers/gpio/gpio-mlxbf2.c:214", BIT(offset), gs->gpio_io + YU_GPIO_MODE0_SET);
 
 	mlxbf2_gpio_lock_release(gs);
 
@@ -281,9 +281,9 @@ static int __maybe_unused mlxbf2_gpio_suspend(struct device *dev)
 {
 	struct mlxbf2_gpio_context *gs = dev_get_drvdata(dev);
 
-	gs->csave_regs->gpio_mode0 = readl(gs->gpio_io +
+	gs->csave_regs->gpio_mode0 = pete_readl("drivers/gpio/gpio-mlxbf2.c:284", gs->gpio_io +
 		YU_GPIO_MODE0);
-	gs->csave_regs->gpio_mode1 = readl(gs->gpio_io +
+	gs->csave_regs->gpio_mode1 = pete_readl("drivers/gpio/gpio-mlxbf2.c:286", gs->gpio_io +
 		YU_GPIO_MODE1);
 
 	return 0;
@@ -293,9 +293,9 @@ static int __maybe_unused mlxbf2_gpio_resume(struct device *dev)
 {
 	struct mlxbf2_gpio_context *gs = dev_get_drvdata(dev);
 
-	writel(gs->csave_regs->gpio_mode0, gs->gpio_io +
+	pete_writel("drivers/gpio/gpio-mlxbf2.c:296", gs->csave_regs->gpio_mode0, gs->gpio_io +
 		YU_GPIO_MODE0);
-	writel(gs->csave_regs->gpio_mode1, gs->gpio_io +
+	pete_writel("drivers/gpio/gpio-mlxbf2.c:298", gs->csave_regs->gpio_mode1, gs->gpio_io +
 		YU_GPIO_MODE1);
 
 	return 0;

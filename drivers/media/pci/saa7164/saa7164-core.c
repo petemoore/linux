@@ -1111,7 +1111,7 @@ static int saa7164_seq_show(struct seq_file *m, void *v)
 		if (c == 0)
 			seq_printf(m, " %04x:", i);
 
-		seq_printf(m, " %02x", readb(b->m_pdwSetRing + i));
+		seq_printf(m, " %02x", pete_readb("drivers/media/pci/saa7164/saa7164-core.c:1114", b->m_pdwSetRing + i));
 
 		if (++c == 16) {
 			seq_puts(m, "\n");
@@ -1126,7 +1126,7 @@ static int saa7164_seq_show(struct seq_file *m, void *v)
 		if (c == 0)
 			seq_printf(m, " %04x:", i);
 
-		seq_printf(m, " %02x", readb(b->m_pdwGetRing + i));
+		seq_printf(m, " %02x", pete_readb("drivers/media/pci/saa7164/saa7164-core.c:1129", b->m_pdwGetRing + i));
 
 		if (++c == 16) {
 			seq_puts(m, "\n");

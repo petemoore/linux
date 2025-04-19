@@ -67,8 +67,8 @@
 #define NV_RD32(p,i)    (__raw_readl((void __iomem *)(p) + (i)))
 
 /* VGA I/O is now always done through MMIO */
-#define VGA_WR08(p,i,d) (writeb((d), (void __iomem *)(p) + (i)))
-#define VGA_RD08(p,i)   (readb((void __iomem *)(p) + (i)))
+#define VGA_WR08(p,i,d) (pete_writeb("drivers/video/fbdev/nvidia/nv_local.h:70", (d), (void __iomem *)(p) + (i)))
+#define VGA_RD08(p,i)   (pete_readb("drivers/video/fbdev/nvidia/nv_local.h:71", (void __iomem *)(p) + (i)))
 
 #define NVDmaNext(par, data) \
      NV_WR32(&(par)->dmaBase[(par)->dmaCurrent++], 0, (data))

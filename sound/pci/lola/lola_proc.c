@@ -164,17 +164,17 @@ static void lola_proc_regs_read(struct snd_info_entry *entry,
 
 	for (i = 0; i < 0x40; i += 4) {
 		snd_iprintf(buffer, "BAR0 %02x: %08x\n", i,
-			    readl(chip->bar[BAR0].remap_addr + i));
+			    pete_readl("sound/pci/lola/lola_proc.c:167", chip->bar[BAR0].remap_addr + i));
 	}
 	snd_iprintf(buffer, "\n");
 	for (i = 0; i < 0x30; i += 4) {
 		snd_iprintf(buffer, "BAR1 %02x: %08x\n", i,
-			    readl(chip->bar[BAR1].remap_addr + i));
+			    pete_readl("sound/pci/lola/lola_proc.c:172", chip->bar[BAR1].remap_addr + i));
 	}
 	snd_iprintf(buffer, "\n");
 	for (i = 0x80; i < 0xa0; i += 4) {
 		snd_iprintf(buffer, "BAR1 %02x: %08x\n", i,
-			    readl(chip->bar[BAR1].remap_addr + i));
+			    pete_readl("sound/pci/lola/lola_proc.c:177", chip->bar[BAR1].remap_addr + i));
 	}
 	snd_iprintf(buffer, "\n");
 	for (i = 0; i < 32; i++) {

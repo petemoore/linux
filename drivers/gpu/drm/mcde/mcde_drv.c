@@ -113,13 +113,13 @@ static irqreturn_t mcde_irq(int irq, void *data)
 	struct mcde *mcde = data;
 	u32 val;
 
-	val = readl(mcde->regs + MCDE_MISERR);
+	val = pete_readl("drivers/gpu/drm/mcde/mcde_drv.c:116", mcde->regs + MCDE_MISERR);
 
 	mcde_display_irq(mcde);
 
 	if (val)
 		dev_info(mcde->dev, "some error IRQ\n");
-	writel(val, mcde->regs + MCDE_RISERR);
+	pete_writel("drivers/gpu/drm/mcde/mcde_drv.c:122", val, mcde->regs + MCDE_RISERR);
 
 	return IRQ_HANDLED;
 }
@@ -370,7 +370,7 @@ static int mcde_probe(struct platform_device *pdev)
 	 * but surely you can add more versions if you have them and
 	 * need them.
 	 */
-	pid = readl(mcde->regs + MCDE_PID);
+	pid = pete_readl("drivers/gpu/drm/mcde/mcde_drv.c:373", mcde->regs + MCDE_PID);
 	dev_info(dev, "found MCDE HW revision %d.%d (dev %d, metal fix %d)\n",
 		 (pid & MCDE_PID_MAJOR_VERSION_MASK)
 		 >> MCDE_PID_MAJOR_VERSION_SHIFT,
@@ -388,8 +388,8 @@ static int mcde_probe(struct platform_device *pdev)
 
 	/* Disable and clear any pending interrupts */
 	mcde_display_disable_irqs(mcde);
-	writel(0, mcde->regs + MCDE_IMSCERR);
-	writel(0xFFFFFFFF, mcde->regs + MCDE_RISERR);
+	pete_writel("drivers/gpu/drm/mcde/mcde_drv.c:391", 0, mcde->regs + MCDE_IMSCERR);
+	pete_writel("drivers/gpu/drm/mcde/mcde_drv.c:392", 0xFFFFFFFF, mcde->regs + MCDE_RISERR);
 
 	/* Spawn child devices for the DSI ports */
 	devm_of_platform_populate(dev);

@@ -1079,10 +1079,10 @@ struct sa_registers {
 #define SA_INIT_NUM_MSIXVECTORS		1
 #define SA_MINIPORT_REVISION		SA_INIT_NUM_MSIXVECTORS
 
-#define sa_readw(AEP, CSR)		readl(&((AEP)->regs.sa->CSR))
-#define sa_readl(AEP, CSR)		readl(&((AEP)->regs.sa->CSR))
-#define sa_writew(AEP, CSR, value)	writew(value, &((AEP)->regs.sa->CSR))
-#define sa_writel(AEP, CSR, value)	writel(value, &((AEP)->regs.sa->CSR))
+#define sa_readw(AEP, CSR)		pete_readl("drivers/scsi/aacraid/aacraid.h:1082", &((AEP)->regs.sa->CSR))
+#define sa_readl(AEP, CSR)		pete_readl("drivers/scsi/aacraid/aacraid.h:1083", &((AEP)->regs.sa->CSR))
+#define sa_writew(AEP, CSR, value)	pete_writew("drivers/scsi/aacraid/aacraid.h:1084", value, &((AEP)->regs.sa->CSR))
+#define sa_writel(AEP, CSR, value)	pete_writel("drivers/scsi/aacraid/aacraid.h:1085", value, &((AEP)->regs.sa->CSR))
 
 /*
  *	Rx Message Unit Registers
@@ -1141,10 +1141,10 @@ struct rx_registers {
 	struct rx_inbound		IndexRegs;
 };
 
-#define rx_readb(AEP, CSR)		readb(&((AEP)->regs.rx->CSR))
-#define rx_readl(AEP, CSR)		readl(&((AEP)->regs.rx->CSR))
-#define rx_writeb(AEP, CSR, value)	writeb(value, &((AEP)->regs.rx->CSR))
-#define rx_writel(AEP, CSR, value)	writel(value, &((AEP)->regs.rx->CSR))
+#define rx_readb(AEP, CSR)		pete_readb("drivers/scsi/aacraid/aacraid.h:1144", &((AEP)->regs.rx->CSR))
+#define rx_readl(AEP, CSR)		pete_readl("drivers/scsi/aacraid/aacraid.h:1145", &((AEP)->regs.rx->CSR))
+#define rx_writeb(AEP, CSR, value)	pete_writeb("drivers/scsi/aacraid/aacraid.h:1146", value, &((AEP)->regs.rx->CSR))
+#define rx_writel(AEP, CSR, value)	pete_writel("drivers/scsi/aacraid/aacraid.h:1147", value, &((AEP)->regs.rx->CSR))
 
 /*
  *	Rkt Message Unit Registers (same as Rx, except a larger reserve region)
@@ -1159,10 +1159,10 @@ struct rkt_registers {
 	struct rkt_inbound		IndexRegs;	 /* 2300h - */
 };
 
-#define rkt_readb(AEP, CSR)		readb(&((AEP)->regs.rkt->CSR))
-#define rkt_readl(AEP, CSR)		readl(&((AEP)->regs.rkt->CSR))
-#define rkt_writeb(AEP, CSR, value)	writeb(value, &((AEP)->regs.rkt->CSR))
-#define rkt_writel(AEP, CSR, value)	writel(value, &((AEP)->regs.rkt->CSR))
+#define rkt_readb(AEP, CSR)		pete_readb("drivers/scsi/aacraid/aacraid.h:1162", &((AEP)->regs.rkt->CSR))
+#define rkt_readl(AEP, CSR)		pete_readl("drivers/scsi/aacraid/aacraid.h:1163", &((AEP)->regs.rkt->CSR))
+#define rkt_writeb(AEP, CSR, value)	pete_writeb("drivers/scsi/aacraid/aacraid.h:1164", value, &((AEP)->regs.rkt->CSR))
+#define rkt_writel(AEP, CSR, value)	pete_writel("drivers/scsi/aacraid/aacraid.h:1165", value, &((AEP)->regs.rkt->CSR))
 
 /*
  * PMC SRC message unit registers
@@ -1207,14 +1207,14 @@ struct src_registers {
 	} u;
 };
 
-#define src_readb(AEP, CSR)		readb(&((AEP)->regs.src.bar0->CSR))
-#define src_readl(AEP, CSR)		readl(&((AEP)->regs.src.bar0->CSR))
-#define src_writeb(AEP, CSR, value)	writeb(value, \
+#define src_readb(AEP, CSR)		pete_readb("drivers/scsi/aacraid/aacraid.h:1210", &((AEP)->regs.src.bar0->CSR))
+#define src_readl(AEP, CSR)		pete_readl("drivers/scsi/aacraid/aacraid.h:1211", &((AEP)->regs.src.bar0->CSR))
+#define src_writeb(AEP, CSR, value)	pete_writeb("drivers/scsi/aacraid/aacraid.h:1212", value, \
 						&((AEP)->regs.src.bar0->CSR))
-#define src_writel(AEP, CSR, value)	writel(value, \
+#define src_writel(AEP, CSR, value)	pete_writel("drivers/scsi/aacraid/aacraid.h:1214", value, \
 						&((AEP)->regs.src.bar0->CSR))
 #if defined(writeq)
-#define	src_writeq(AEP, CSR, value)	writeq(value, \
+#define	src_writeq(AEP, CSR, value)	pete_writeq("drivers/scsi/aacraid/aacraid.h:1217", value, \
 						&((AEP)->regs.src.bar0->CSR))
 #endif
 

@@ -388,17 +388,17 @@ static dma_addr_t korina_rx_dma(struct korina_private *lp, int idx)
 static inline void korina_abort_dma(struct net_device *dev,
 					struct dma_reg *ch)
 {
-	if (readl(&ch->dmac) & DMA_CHAN_RUN_BIT) {
-		writel(0x10, &ch->dmac);
+	if (pete_readl("drivers/net/ethernet/korina.c:391", &ch->dmac) & DMA_CHAN_RUN_BIT) {
+		pete_writel("drivers/net/ethernet/korina.c:392", 0x10, &ch->dmac);
 
-		while (!(readl(&ch->dmas) & DMA_STAT_HALT))
+		while (!(pete_readl("drivers/net/ethernet/korina.c:394", &ch->dmas) & DMA_STAT_HALT))
 			netif_trans_update(dev);
 
-		writel(0, &ch->dmas);
+		pete_writel("drivers/net/ethernet/korina.c:397", 0, &ch->dmas);
 	}
 
-	writel(0, &ch->dmadptr);
-	writel(0, &ch->dmandptr);
+	pete_writel("drivers/net/ethernet/korina.c:400", 0, &ch->dmadptr);
+	pete_writel("drivers/net/ethernet/korina.c:401", 0, &ch->dmandptr);
 }
 
 static void korina_abort_tx(struct net_device *dev)
@@ -458,7 +458,7 @@ static int korina_send_packet(struct sk_buff *skb, struct net_device *dev)
 	chain_prev = (idx - 1) & KORINA_TDS_MASK;
 	chain_next = (idx + 1) & KORINA_TDS_MASK;
 
-	if (readl(&(lp->tx_dma_regs->dmandptr)) == 0) {
+	if (pete_readl("drivers/net/ethernet/korina.c:461", &(lp->tx_dma_regs->dmandptr)) == 0) {
 		if (lp->tx_chain_status == desc_is_empty) {
 			/* Update tail */
 			td->control = DMA_COUNT(length) |
@@ -466,7 +466,7 @@ static int korina_send_packet(struct sk_buff *skb, struct net_device *dev)
 			/* Move tail */
 			lp->tx_chain_tail = chain_next;
 			/* Write to NDPTR */
-			writel(korina_tx_dma(lp, lp->tx_chain_head),
+			pete_writel("drivers/net/ethernet/korina.c:469", korina_tx_dma(lp, lp->tx_chain_head),
 			       &lp->tx_dma_regs->dmandptr);
 			/* Move head to tail */
 			lp->tx_chain_head = lp->tx_chain_tail;
@@ -482,7 +482,7 @@ static int korina_send_packet(struct sk_buff *skb, struct net_device *dev)
 			/* Move tail */
 			lp->tx_chain_tail = chain_next;
 			/* Write to NDPTR */
-			writel(korina_tx_dma(lp, lp->tx_chain_head),
+			pete_writel("drivers/net/ethernet/korina.c:485", korina_tx_dma(lp, lp->tx_chain_head),
 			       &lp->tx_dma_regs->dmandptr);
 			/* Move head to tail */
 			lp->tx_chain_head = lp->tx_chain_tail;
@@ -538,18 +538,18 @@ static int korina_mdio_read(struct net_device *dev, int phy, int reg)
 	if (ret < 0)
 		return ret;
 
-	writel(phy << 8 | reg, &lp->eth_regs->miimaddr);
-	writel(1, &lp->eth_regs->miimcmd);
+	pete_writel("drivers/net/ethernet/korina.c:541", phy << 8 | reg, &lp->eth_regs->miimaddr);
+	pete_writel("drivers/net/ethernet/korina.c:542", 1, &lp->eth_regs->miimcmd);
 
 	ret = korina_mdio_wait(lp);
 	if (ret < 0)
 		return ret;
 
-	if (readl(&lp->eth_regs->miimind) & ETH_MII_IND_NV)
+	if (pete_readl("drivers/net/ethernet/korina.c:548", &lp->eth_regs->miimind) & ETH_MII_IND_NV)
 		return -EINVAL;
 
-	ret = readl(&lp->eth_regs->miimrdd);
-	writel(0, &lp->eth_regs->miimcmd);
+	ret = pete_readl("drivers/net/ethernet/korina.c:551", &lp->eth_regs->miimrdd);
+	pete_writel("drivers/net/ethernet/korina.c:552", 0, &lp->eth_regs->miimcmd);
 	return ret;
 }
 
@@ -560,9 +560,9 @@ static void korina_mdio_write(struct net_device *dev, int phy, int reg, int val)
 	if (korina_mdio_wait(lp))
 		return;
 
-	writel(0, &lp->eth_regs->miimcmd);
-	writel(phy << 8 | reg, &lp->eth_regs->miimaddr);
-	writel(val, &lp->eth_regs->miimwtd);
+	pete_writel("drivers/net/ethernet/korina.c:563", 0, &lp->eth_regs->miimcmd);
+	pete_writel("drivers/net/ethernet/korina.c:564", phy << 8 | reg, &lp->eth_regs->miimaddr);
+	pete_writel("drivers/net/ethernet/korina.c:565", val, &lp->eth_regs->miimwtd);
 }
 
 /* Ethernet Rx DMA interrupt */
@@ -573,10 +573,10 @@ static irqreturn_t korina_rx_dma_interrupt(int irq, void *dev_id)
 	u32 dmas, dmasm;
 	irqreturn_t retval;
 
-	dmas = readl(&lp->rx_dma_regs->dmas);
+	dmas = pete_readl("drivers/net/ethernet/korina.c:576", &lp->rx_dma_regs->dmas);
 	if (dmas & (DMA_STAT_DONE | DMA_STAT_HALT | DMA_STAT_ERR)) {
-		dmasm = readl(&lp->rx_dma_regs->dmasm);
-		writel(dmasm | (DMA_STAT_DONE |
+		dmasm = pete_readl("drivers/net/ethernet/korina.c:578", &lp->rx_dma_regs->dmasm);
+		pete_writel("drivers/net/ethernet/korina.c:579", dmasm | (DMA_STAT_DONE |
 				DMA_STAT_HALT | DMA_STAT_ERR),
 				&lp->rx_dma_regs->dmasm);
 
@@ -680,19 +680,19 @@ next:
 
 		lp->rx_next_done = (lp->rx_next_done + 1) & KORINA_RDS_MASK;
 		rd = &lp->rd_ring[lp->rx_next_done];
-		writel((u32)~DMA_STAT_DONE, &lp->rx_dma_regs->dmas);
+		pete_writel("drivers/net/ethernet/korina.c:683", (u32)~DMA_STAT_DONE, &lp->rx_dma_regs->dmas);
 	}
 
-	dmas = readl(&lp->rx_dma_regs->dmas);
+	dmas = pete_readl("drivers/net/ethernet/korina.c:686", &lp->rx_dma_regs->dmas);
 
 	if (dmas & DMA_STAT_HALT) {
-		writel((u32)~(DMA_STAT_HALT | DMA_STAT_ERR),
+		pete_writel("drivers/net/ethernet/korina.c:689", (u32)~(DMA_STAT_HALT | DMA_STAT_ERR),
 		       &lp->rx_dma_regs->dmas);
 
 		lp->dma_halt_cnt++;
 		rd->devcs = 0;
 		rd->ca = lp->rx_skb_dma[lp->rx_next_done];
-		writel(korina_rx_dma(lp, rd - lp->rd_ring),
+		pete_writel("drivers/net/ethernet/korina.c:695", korina_rx_dma(lp, rd - lp->rd_ring),
 		       &lp->rx_dma_regs->dmandptr);
 	}
 
@@ -710,7 +710,7 @@ static int korina_poll(struct napi_struct *napi, int budget)
 	if (work_done < budget) {
 		napi_complete_done(napi, work_done);
 
-		writel(readl(&lp->rx_dma_regs->dmasm) &
+		pete_writel("drivers/net/ethernet/korina.c:713", pete_readl("drivers/net/ethernet/korina.c:713", &lp->rx_dma_regs->dmasm) &
 			~(DMA_STAT_DONE | DMA_STAT_HALT | DMA_STAT_ERR),
 			&lp->rx_dma_regs->dmasm);
 	}
@@ -749,14 +749,14 @@ static void korina_multicast_list(struct net_device *dev)
 		recognise |= ETH_ARC_AFM;
 
 		/* Fill the MAC hash tables with their values */
-		writel((u32)(hash_table[1] << 16 | hash_table[0]),
+		pete_writel("drivers/net/ethernet/korina.c:752", (u32)(hash_table[1] << 16 | hash_table[0]),
 					&lp->eth_regs->ethhash0);
-		writel((u32)(hash_table[3] << 16 | hash_table[2]),
+		pete_writel("drivers/net/ethernet/korina.c:754", (u32)(hash_table[3] << 16 | hash_table[2]),
 					&lp->eth_regs->ethhash1);
 	}
 
 	spin_lock_irqsave(&lp->lock, flags);
-	writel(recognise, &lp->eth_regs->etharc);
+	pete_writel("drivers/net/ethernet/korina.c:759", recognise, &lp->eth_regs->etharc);
 	spin_unlock_irqrestore(&lp->lock, flags);
 }
 
@@ -837,10 +837,10 @@ static void korina_tx(struct net_device *dev)
 	}
 
 	/* Clear the DMA status register */
-	dmas = readl(&lp->tx_dma_regs->dmas);
-	writel(~dmas, &lp->tx_dma_regs->dmas);
+	dmas = pete_readl("drivers/net/ethernet/korina.c:840", &lp->tx_dma_regs->dmas);
+	pete_writel("drivers/net/ethernet/korina.c:841", ~dmas, &lp->tx_dma_regs->dmas);
 
-	writel(readl(&lp->tx_dma_regs->dmasm) &
+	pete_writel("drivers/net/ethernet/korina.c:843", pete_readl("drivers/net/ethernet/korina.c:843", &lp->tx_dma_regs->dmasm) &
 			~(DMA_STAT_FINI | DMA_STAT_ERR),
 			&lp->tx_dma_regs->dmasm);
 
@@ -855,18 +855,18 @@ korina_tx_dma_interrupt(int irq, void *dev_id)
 	u32 dmas, dmasm;
 	irqreturn_t retval;
 
-	dmas = readl(&lp->tx_dma_regs->dmas);
+	dmas = pete_readl("drivers/net/ethernet/korina.c:858", &lp->tx_dma_regs->dmas);
 
 	if (dmas & (DMA_STAT_FINI | DMA_STAT_ERR)) {
-		dmasm = readl(&lp->tx_dma_regs->dmasm);
-		writel(dmasm | (DMA_STAT_FINI | DMA_STAT_ERR),
+		dmasm = pete_readl("drivers/net/ethernet/korina.c:861", &lp->tx_dma_regs->dmasm);
+		pete_writel("drivers/net/ethernet/korina.c:862", dmasm | (DMA_STAT_FINI | DMA_STAT_ERR),
 				&lp->tx_dma_regs->dmasm);
 
 		korina_tx(dev);
 
 		if (lp->tx_chain_status == desc_filled &&
-			(readl(&(lp->tx_dma_regs->dmandptr)) == 0)) {
-			writel(korina_tx_dma(lp, lp->tx_chain_head),
+			(pete_readl("drivers/net/ethernet/korina.c:868", &(lp->tx_dma_regs->dmandptr)) == 0)) {
+			pete_writel("drivers/net/ethernet/korina.c:869", korina_tx_dma(lp, lp->tx_chain_head),
 			       &lp->tx_dma_regs->dmandptr);
 			lp->tx_chain_status = desc_is_empty;
 			lp->tx_chain_head = lp->tx_chain_tail;
@@ -890,10 +890,10 @@ static void korina_check_media(struct net_device *dev, unsigned int init_media)
 	mii_check_media(&lp->mii_if, 1, init_media);
 
 	if (lp->mii_if.full_duplex)
-		writel(readl(&lp->eth_regs->ethmac2) | ETH_MAC2_FD,
+		pete_writel("drivers/net/ethernet/korina.c:893", pete_readl("drivers/net/ethernet/korina.c:893", &lp->eth_regs->ethmac2) | ETH_MAC2_FD,
 						&lp->eth_regs->ethmac2);
 	else
-		writel(readl(&lp->eth_regs->ethmac2) & ~ETH_MAC2_FD,
+		pete_writel("drivers/net/ethernet/korina.c:896", pete_readl("drivers/net/ethernet/korina.c:896", &lp->eth_regs->ethmac2) & ~ETH_MAC2_FD,
 						&lp->eth_regs->ethmac2);
 }
 
@@ -1070,12 +1070,12 @@ static int korina_init(struct net_device *dev)
 	korina_abort_rx(dev);
 
 	/* reset ethernet logic */
-	writel(0, &lp->eth_regs->ethintfc);
-	while ((readl(&lp->eth_regs->ethintfc) & ETH_INT_FC_RIP))
+	pete_writel("drivers/net/ethernet/korina.c:1073", 0, &lp->eth_regs->ethintfc);
+	while ((pete_readl("drivers/net/ethernet/korina.c:1074", &lp->eth_regs->ethintfc) & ETH_INT_FC_RIP))
 		netif_trans_update(dev);
 
 	/* Enable Ethernet Interface */
-	writel(ETH_INT_FC_EN, &lp->eth_regs->ethintfc);
+	pete_writel("drivers/net/ethernet/korina.c:1078", ETH_INT_FC_EN, &lp->eth_regs->ethintfc);
 
 	/* Allocate rings */
 	if (korina_alloc_ring(dev)) {
@@ -1084,54 +1084,54 @@ static int korina_init(struct net_device *dev)
 		return -ENOMEM;
 	}
 
-	writel(0, &lp->rx_dma_regs->dmas);
+	pete_writel("drivers/net/ethernet/korina.c:1087", 0, &lp->rx_dma_regs->dmas);
 	/* Start Rx DMA */
-	writel(0, &lp->rx_dma_regs->dmandptr);
-	writel(korina_rx_dma(lp, 0), &lp->rx_dma_regs->dmadptr);
+	pete_writel("drivers/net/ethernet/korina.c:1089", 0, &lp->rx_dma_regs->dmandptr);
+	pete_writel("drivers/net/ethernet/korina.c:1090", korina_rx_dma(lp, 0), &lp->rx_dma_regs->dmadptr);
 
-	writel(readl(&lp->tx_dma_regs->dmasm) &
+	pete_writel("drivers/net/ethernet/korina.c:1092", pete_readl("drivers/net/ethernet/korina.c:1092", &lp->tx_dma_regs->dmasm) &
 			~(DMA_STAT_FINI | DMA_STAT_ERR),
 			&lp->tx_dma_regs->dmasm);
-	writel(readl(&lp->rx_dma_regs->dmasm) &
+	pete_writel("drivers/net/ethernet/korina.c:1095", pete_readl("drivers/net/ethernet/korina.c:1095", &lp->rx_dma_regs->dmasm) &
 			~(DMA_STAT_DONE | DMA_STAT_HALT | DMA_STAT_ERR),
 			&lp->rx_dma_regs->dmasm);
 
 	/* Accept only packets destined for this Ethernet device address */
-	writel(ETH_ARC_AB, &lp->eth_regs->etharc);
+	pete_writel("drivers/net/ethernet/korina.c:1100", ETH_ARC_AB, &lp->eth_regs->etharc);
 
 	/* Set all Ether station address registers to their initial values */
-	writel(STATION_ADDRESS_LOW(dev), &lp->eth_regs->ethsal0);
-	writel(STATION_ADDRESS_HIGH(dev), &lp->eth_regs->ethsah0);
+	pete_writel("drivers/net/ethernet/korina.c:1103", STATION_ADDRESS_LOW(dev), &lp->eth_regs->ethsal0);
+	pete_writel("drivers/net/ethernet/korina.c:1104", STATION_ADDRESS_HIGH(dev), &lp->eth_regs->ethsah0);
 
-	writel(STATION_ADDRESS_LOW(dev), &lp->eth_regs->ethsal1);
-	writel(STATION_ADDRESS_HIGH(dev), &lp->eth_regs->ethsah1);
+	pete_writel("drivers/net/ethernet/korina.c:1106", STATION_ADDRESS_LOW(dev), &lp->eth_regs->ethsal1);
+	pete_writel("drivers/net/ethernet/korina.c:1107", STATION_ADDRESS_HIGH(dev), &lp->eth_regs->ethsah1);
 
-	writel(STATION_ADDRESS_LOW(dev), &lp->eth_regs->ethsal2);
-	writel(STATION_ADDRESS_HIGH(dev), &lp->eth_regs->ethsah2);
+	pete_writel("drivers/net/ethernet/korina.c:1109", STATION_ADDRESS_LOW(dev), &lp->eth_regs->ethsal2);
+	pete_writel("drivers/net/ethernet/korina.c:1110", STATION_ADDRESS_HIGH(dev), &lp->eth_regs->ethsah2);
 
-	writel(STATION_ADDRESS_LOW(dev), &lp->eth_regs->ethsal3);
-	writel(STATION_ADDRESS_HIGH(dev), &lp->eth_regs->ethsah3);
+	pete_writel("drivers/net/ethernet/korina.c:1112", STATION_ADDRESS_LOW(dev), &lp->eth_regs->ethsal3);
+	pete_writel("drivers/net/ethernet/korina.c:1113", STATION_ADDRESS_HIGH(dev), &lp->eth_regs->ethsah3);
 
 
 	/* Frame Length Checking, Pad Enable, CRC Enable, Full Duplex set */
-	writel(ETH_MAC2_PE | ETH_MAC2_CEN | ETH_MAC2_FD,
+	pete_writel("drivers/net/ethernet/korina.c:1117", ETH_MAC2_PE | ETH_MAC2_CEN | ETH_MAC2_FD,
 			&lp->eth_regs->ethmac2);
 
 	/* Back to back inter-packet-gap */
-	writel(0x15, &lp->eth_regs->ethipgt);
+	pete_writel("drivers/net/ethernet/korina.c:1121", 0x15, &lp->eth_regs->ethipgt);
 	/* Non - Back to back inter-packet-gap */
-	writel(0x12, &lp->eth_regs->ethipgr);
+	pete_writel("drivers/net/ethernet/korina.c:1123", 0x12, &lp->eth_regs->ethipgr);
 
 	/* Management Clock Prescaler Divisor
 	 * Clock independent setting */
-	writel(((lp->mii_clock_freq) / MII_CLOCK + 1) & ~1,
+	pete_writel("drivers/net/ethernet/korina.c:1127", ((lp->mii_clock_freq) / MII_CLOCK + 1) & ~1,
 	       &lp->eth_regs->ethmcp);
-	writel(0, &lp->eth_regs->miimcfg);
+	pete_writel("drivers/net/ethernet/korina.c:1129", 0, &lp->eth_regs->miimcfg);
 
 	/* don't transmit until fifo contains 48b */
-	writel(48, &lp->eth_regs->ethfifott);
+	pete_writel("drivers/net/ethernet/korina.c:1132", 48, &lp->eth_regs->ethfifott);
 
-	writel(ETH_MAC1_RE, &lp->eth_regs->ethmac1);
+	pete_writel("drivers/net/ethernet/korina.c:1134", ETH_MAC1_RE, &lp->eth_regs->ethmac1);
 
 	korina_check_media(dev, 1);
 
@@ -1156,10 +1156,10 @@ static void korina_restart_task(struct work_struct *work)
 	disable_irq(lp->rx_irq);
 	disable_irq(lp->tx_irq);
 
-	writel(readl(&lp->tx_dma_regs->dmasm) |
+	pete_writel("drivers/net/ethernet/korina.c:1159", pete_readl("drivers/net/ethernet/korina.c:1159", &lp->tx_dma_regs->dmasm) |
 				DMA_STAT_FINI | DMA_STAT_ERR,
 				&lp->tx_dma_regs->dmasm);
-	writel(readl(&lp->rx_dma_regs->dmasm) |
+	pete_writel("drivers/net/ethernet/korina.c:1162", pete_readl("drivers/net/ethernet/korina.c:1162", &lp->rx_dma_regs->dmasm) |
 				DMA_STAT_DONE | DMA_STAT_HALT | DMA_STAT_ERR,
 				&lp->rx_dma_regs->dmasm);
 
@@ -1245,14 +1245,14 @@ static int korina_close(struct net_device *dev)
 	disable_irq(lp->tx_irq);
 
 	korina_abort_tx(dev);
-	tmp = readl(&lp->tx_dma_regs->dmasm);
+	tmp = pete_readl("drivers/net/ethernet/korina.c:1248", &lp->tx_dma_regs->dmasm);
 	tmp = tmp | DMA_STAT_FINI | DMA_STAT_ERR;
-	writel(tmp, &lp->tx_dma_regs->dmasm);
+	pete_writel("drivers/net/ethernet/korina.c:1250", tmp, &lp->tx_dma_regs->dmasm);
 
 	korina_abort_rx(dev);
-	tmp = readl(&lp->rx_dma_regs->dmasm);
+	tmp = pete_readl("drivers/net/ethernet/korina.c:1253", &lp->rx_dma_regs->dmasm);
 	tmp = tmp | DMA_STAT_DONE | DMA_STAT_HALT | DMA_STAT_ERR;
-	writel(tmp, &lp->rx_dma_regs->dmasm);
+	pete_writel("drivers/net/ethernet/korina.c:1255", tmp, &lp->rx_dma_regs->dmasm);
 
 	napi_disable(&lp->napi);
 

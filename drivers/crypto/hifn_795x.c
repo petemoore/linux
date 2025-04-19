@@ -628,22 +628,22 @@ struct hifn_request_context {
 
 static inline u32 hifn_read_0(struct hifn_device *dev, u32 reg)
 {
-	return readl(dev->bar[0] + reg);
+	return pete_readl("drivers/crypto/hifn_795x.c:631", dev->bar[0] + reg);
 }
 
 static inline u32 hifn_read_1(struct hifn_device *dev, u32 reg)
 {
-	return readl(dev->bar[1] + reg);
+	return pete_readl("drivers/crypto/hifn_795x.c:636", dev->bar[1] + reg);
 }
 
 static inline void hifn_write_0(struct hifn_device *dev, u32 reg, u32 val)
 {
-	writel((__force u32)cpu_to_le32(val), dev->bar[0] + reg);
+	pete_writel("drivers/crypto/hifn_795x.c:641", (__force u32)cpu_to_le32(val), dev->bar[0] + reg);
 }
 
 static inline void hifn_write_1(struct hifn_device *dev, u32 reg, u32 val)
 {
-	writel((__force u32)cpu_to_le32(val), dev->bar[1] + reg);
+	pete_writel("drivers/crypto/hifn_795x.c:646", (__force u32)cpu_to_le32(val), dev->bar[1] + reg);
 }
 
 static void hifn_wait_puc(struct hifn_device *dev)

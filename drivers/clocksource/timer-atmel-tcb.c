@@ -75,14 +75,14 @@ static void tc_clksrc_suspend(struct clocksource *cs)
 	int i;
 
 	for (i = 0; i < ARRAY_SIZE(tcb_cache); i++) {
-		tcb_cache[i].cmr = readl(tcaddr + ATMEL_TC_REG(i, CMR));
-		tcb_cache[i].imr = readl(tcaddr + ATMEL_TC_REG(i, IMR));
-		tcb_cache[i].rc = readl(tcaddr + ATMEL_TC_REG(i, RC));
-		tcb_cache[i].clken = !!(readl(tcaddr + ATMEL_TC_REG(i, SR)) &
+		tcb_cache[i].cmr = pete_readl("drivers/clocksource/timer-atmel-tcb.c:78", tcaddr + ATMEL_TC_REG(i, CMR));
+		tcb_cache[i].imr = pete_readl("drivers/clocksource/timer-atmel-tcb.c:79", tcaddr + ATMEL_TC_REG(i, IMR));
+		tcb_cache[i].rc = pete_readl("drivers/clocksource/timer-atmel-tcb.c:80", tcaddr + ATMEL_TC_REG(i, RC));
+		tcb_cache[i].clken = !!(pete_readl("drivers/clocksource/timer-atmel-tcb.c:81", tcaddr + ATMEL_TC_REG(i, SR)) &
 					ATMEL_TC_CLKSTA);
 	}
 
-	bmr_cache = readl(tcaddr + ATMEL_TC_BMR);
+	bmr_cache = pete_readl("drivers/clocksource/timer-atmel-tcb.c:85", tcaddr + ATMEL_TC_BMR);
 }
 
 static void tc_clksrc_resume(struct clocksource *cs)
@@ -91,23 +91,23 @@ static void tc_clksrc_resume(struct clocksource *cs)
 
 	for (i = 0; i < ARRAY_SIZE(tcb_cache); i++) {
 		/* Restore registers for the channel, RA and RB are not used  */
-		writel(tcb_cache[i].cmr, tcaddr + ATMEL_TC_REG(i, CMR));
-		writel(tcb_cache[i].rc, tcaddr + ATMEL_TC_REG(i, RC));
-		writel(0, tcaddr + ATMEL_TC_REG(i, RA));
-		writel(0, tcaddr + ATMEL_TC_REG(i, RB));
+		pete_writel("drivers/clocksource/timer-atmel-tcb.c:94", tcb_cache[i].cmr, tcaddr + ATMEL_TC_REG(i, CMR));
+		pete_writel("drivers/clocksource/timer-atmel-tcb.c:95", tcb_cache[i].rc, tcaddr + ATMEL_TC_REG(i, RC));
+		pete_writel("drivers/clocksource/timer-atmel-tcb.c:96", 0, tcaddr + ATMEL_TC_REG(i, RA));
+		pete_writel("drivers/clocksource/timer-atmel-tcb.c:97", 0, tcaddr + ATMEL_TC_REG(i, RB));
 		/* Disable all the interrupts */
-		writel(0xff, tcaddr + ATMEL_TC_REG(i, IDR));
+		pete_writel("drivers/clocksource/timer-atmel-tcb.c:99", 0xff, tcaddr + ATMEL_TC_REG(i, IDR));
 		/* Reenable interrupts that were enabled before suspending */
-		writel(tcb_cache[i].imr, tcaddr + ATMEL_TC_REG(i, IER));
+		pete_writel("drivers/clocksource/timer-atmel-tcb.c:101", tcb_cache[i].imr, tcaddr + ATMEL_TC_REG(i, IER));
 		/* Start the clock if it was used */
 		if (tcb_cache[i].clken)
-			writel(ATMEL_TC_CLKEN, tcaddr + ATMEL_TC_REG(i, CCR));
+			pete_writel("drivers/clocksource/timer-atmel-tcb.c:104", ATMEL_TC_CLKEN, tcaddr + ATMEL_TC_REG(i, CCR));
 	}
 
 	/* Dual channel, chain channels */
-	writel(bmr_cache, tcaddr + ATMEL_TC_BMR);
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:108", bmr_cache, tcaddr + ATMEL_TC_BMR);
 	/* Finally, trigger all the channels*/
-	writel(ATMEL_TC_SYNC, tcaddr + ATMEL_TC_BCR);
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:110", ATMEL_TC_SYNC, tcaddr + ATMEL_TC_BCR);
 }
 
 static struct clocksource clksrc = {
@@ -162,8 +162,8 @@ static int tc_shutdown(struct clock_event_device *d)
 	struct tc_clkevt_device *tcd = to_tc_clkevt(d);
 	void __iomem		*regs = tcd->regs;
 
-	writel(0xff, regs + ATMEL_TC_REG(2, IDR));
-	writel(ATMEL_TC_CLKDIS, regs + ATMEL_TC_REG(2, CCR));
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:165", 0xff, regs + ATMEL_TC_REG(2, IDR));
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:166", ATMEL_TC_CLKDIS, regs + ATMEL_TC_REG(2, CCR));
 	if (!clockevent_state_detached(d))
 		clk_disable(tcd->clk);
 
@@ -181,9 +181,9 @@ static int tc_set_oneshot(struct clock_event_device *d)
 	clk_enable(tcd->clk);
 
 	/* count up to RC, then irq and stop */
-	writel(timer_clock | ATMEL_TC_CPCSTOP | ATMEL_TC_WAVE |
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:184", timer_clock | ATMEL_TC_CPCSTOP | ATMEL_TC_WAVE |
 		     ATMEL_TC_WAVESEL_UP_AUTO, regs + ATMEL_TC_REG(2, CMR));
-	writel(ATMEL_TC_CPCS, regs + ATMEL_TC_REG(2, IER));
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:186", ATMEL_TC_CPCS, regs + ATMEL_TC_REG(2, IER));
 
 	/* set_next_event() configures and starts the timer */
 	return 0;
@@ -203,15 +203,15 @@ static int tc_set_periodic(struct clock_event_device *d)
 	clk_enable(tcd->clk);
 
 	/* count up to RC, then irq and restart */
-	writel(timer_clock | ATMEL_TC_WAVE | ATMEL_TC_WAVESEL_UP_AUTO,
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:206", timer_clock | ATMEL_TC_WAVE | ATMEL_TC_WAVESEL_UP_AUTO,
 		     regs + ATMEL_TC_REG(2, CMR));
-	writel((tcd->rate + HZ / 2) / HZ, tcaddr + ATMEL_TC_REG(2, RC));
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:208", (tcd->rate + HZ / 2) / HZ, tcaddr + ATMEL_TC_REG(2, RC));
 
 	/* Enable clock and interrupts on RC compare */
-	writel(ATMEL_TC_CPCS, regs + ATMEL_TC_REG(2, IER));
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:211", ATMEL_TC_CPCS, regs + ATMEL_TC_REG(2, IER));
 
 	/* go go gadget! */
-	writel(ATMEL_TC_CLKEN | ATMEL_TC_SWTRG, regs +
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:214", ATMEL_TC_CLKEN | ATMEL_TC_SWTRG, regs +
 		     ATMEL_TC_REG(2, CCR));
 	return 0;
 }
@@ -312,43 +312,43 @@ static int __init setup_clkevents(struct atmel_tc *tc, int divisor_idx)
 static void __init tcb_setup_dual_chan(struct atmel_tc *tc, int mck_divisor_idx)
 {
 	/* channel 0:  waveform mode, input mclk/8, clock TIOA0 on overflow */
-	writel(mck_divisor_idx			/* likely divide-by-8 */
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:315", mck_divisor_idx			/* likely divide-by-8 */
 			| ATMEL_TC_WAVE
 			| ATMEL_TC_WAVESEL_UP		/* free-run */
 			| ATMEL_TC_ACPA_SET		/* TIOA0 rises at 0 */
 			| ATMEL_TC_ACPC_CLEAR,		/* (duty cycle 50%) */
 			tcaddr + ATMEL_TC_REG(0, CMR));
-	writel(0x0000, tcaddr + ATMEL_TC_REG(0, RA));
-	writel(0x8000, tcaddr + ATMEL_TC_REG(0, RC));
-	writel(0xff, tcaddr + ATMEL_TC_REG(0, IDR));	/* no irqs */
-	writel(ATMEL_TC_CLKEN, tcaddr + ATMEL_TC_REG(0, CCR));
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:321", 0x0000, tcaddr + ATMEL_TC_REG(0, RA));
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:322", 0x8000, tcaddr + ATMEL_TC_REG(0, RC));
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:323", 0xff, tcaddr + ATMEL_TC_REG(0, IDR));	/* no irqs */
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:324", ATMEL_TC_CLKEN, tcaddr + ATMEL_TC_REG(0, CCR));
 
 	/* channel 1:  waveform mode, input TIOA0 */
-	writel(ATMEL_TC_XC1			/* input: TIOA0 */
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:327", ATMEL_TC_XC1			/* input: TIOA0 */
 			| ATMEL_TC_WAVE
 			| ATMEL_TC_WAVESEL_UP,		/* free-run */
 			tcaddr + ATMEL_TC_REG(1, CMR));
-	writel(0xff, tcaddr + ATMEL_TC_REG(1, IDR));	/* no irqs */
-	writel(ATMEL_TC_CLKEN, tcaddr + ATMEL_TC_REG(1, CCR));
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:331", 0xff, tcaddr + ATMEL_TC_REG(1, IDR));	/* no irqs */
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:332", ATMEL_TC_CLKEN, tcaddr + ATMEL_TC_REG(1, CCR));
 
 	/* chain channel 0 to channel 1*/
-	writel(ATMEL_TC_TC1XC1S_TIOA0, tcaddr + ATMEL_TC_BMR);
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:335", ATMEL_TC_TC1XC1S_TIOA0, tcaddr + ATMEL_TC_BMR);
 	/* then reset all the timers */
-	writel(ATMEL_TC_SYNC, tcaddr + ATMEL_TC_BCR);
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:337", ATMEL_TC_SYNC, tcaddr + ATMEL_TC_BCR);
 }
 
 static void __init tcb_setup_single_chan(struct atmel_tc *tc, int mck_divisor_idx)
 {
 	/* channel 0:  waveform mode, input mclk/8 */
-	writel(mck_divisor_idx			/* likely divide-by-8 */
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:343", mck_divisor_idx			/* likely divide-by-8 */
 			| ATMEL_TC_WAVE
 			| ATMEL_TC_WAVESEL_UP,		/* free-run */
 			tcaddr + ATMEL_TC_REG(0, CMR));
-	writel(0xff, tcaddr + ATMEL_TC_REG(0, IDR));	/* no irqs */
-	writel(ATMEL_TC_CLKEN, tcaddr + ATMEL_TC_REG(0, CCR));
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:347", 0xff, tcaddr + ATMEL_TC_REG(0, IDR));	/* no irqs */
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:348", ATMEL_TC_CLKEN, tcaddr + ATMEL_TC_REG(0, CCR));
 
 	/* then reset all the timers */
-	writel(ATMEL_TC_SYNC, tcaddr + ATMEL_TC_BCR);
+	pete_writel("drivers/clocksource/timer-atmel-tcb.c:351", ATMEL_TC_SYNC, tcaddr + ATMEL_TC_BCR);
 }
 
 static struct atmel_tcb_config tcb_rm9200_config = {
@@ -422,7 +422,7 @@ static int __init tcb_clksrc_init(struct device_node *node)
 	bits = tc.tcb_config->counter_width;
 
 	for (i = 0; i < ARRAY_SIZE(tc.irq); i++)
-		writel(ATMEL_TC_ALL_IRQ, tc.regs + ATMEL_TC_REG(i, IDR));
+		pete_writel("drivers/clocksource/timer-atmel-tcb.c:425", ATMEL_TC_ALL_IRQ, tc.regs + ATMEL_TC_REG(i, IDR));
 
 	ret = clk_prepare_enable(t0_clk);
 	if (ret) {

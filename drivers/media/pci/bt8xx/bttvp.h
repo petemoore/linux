@@ -513,8 +513,8 @@ static inline unsigned int bttv_muxsel(const struct bttv *btv,
 
 #endif
 
-#define btwrite(dat,adr)    writel((dat), btv->bt848_mmio+(adr))
-#define btread(adr)         readl(btv->bt848_mmio+(adr))
+#define btwrite(dat,adr)    pete_writel("drivers/media/pci/bt8xx/bttvp.h:516", (dat), btv->bt848_mmio+(adr))
+#define btread(adr)         pete_readl("drivers/media/pci/bt8xx/bttvp.h:517", btv->bt848_mmio+(adr))
 
 #define btand(dat,adr)      btwrite((dat) & btread(adr), adr)
 #define btor(dat,adr)       btwrite((dat) | btread(adr), adr)

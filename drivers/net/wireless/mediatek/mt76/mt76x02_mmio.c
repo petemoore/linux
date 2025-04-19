@@ -352,7 +352,7 @@ static bool mt76x02_tx_hang(struct mt76x02_dev *dev)
 			continue;
 
 		prev_dma_idx = dev->mt76.tx_dma_idx[i];
-		dma_idx = readl(&q->regs->dma_idx);
+		dma_idx = pete_readl("drivers/net/wireless/mediatek/mt76/mt76x02_mmio.c:355", &q->regs->dma_idx);
 		dev->mt76.tx_dma_idx[i] = dma_idx;
 
 		if (prev_dma_idx == dma_idx)

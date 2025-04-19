@@ -64,9 +64,9 @@ static int mlb_usio_irq[CONFIG_SERIAL_MILBEAUT_USIO_PORTS][2];
 
 static void mlb_usio_stop_tx(struct uart_port *port)
 {
-	writew(readw(port->membase + MLB_USIO_REG_FCR) & ~MLB_USIO_FCR_FTIE,
+	pete_writew("drivers/tty/serial/milbeaut_usio.c:67", pete_readw("drivers/tty/serial/milbeaut_usio.c:67", port->membase + MLB_USIO_REG_FCR) & ~MLB_USIO_FCR_FTIE,
 	       port->membase + MLB_USIO_REG_FCR);
-	writeb(readb(port->membase + MLB_USIO_REG_SCR) & ~MLB_USIO_SCR_TBIE,
+	pete_writeb("drivers/tty/serial/milbeaut_usio.c:69", pete_readb("drivers/tty/serial/milbeaut_usio.c:69", port->membase + MLB_USIO_REG_SCR) & ~MLB_USIO_SCR_TBIE,
 	       port->membase + MLB_USIO_REG_SCR);
 }
 
@@ -75,14 +75,14 @@ static void mlb_usio_tx_chars(struct uart_port *port)
 	struct circ_buf *xmit = &port->state->xmit;
 	int count;
 
-	writew(readw(port->membase + MLB_USIO_REG_FCR) & ~MLB_USIO_FCR_FTIE,
+	pete_writew("drivers/tty/serial/milbeaut_usio.c:78", pete_readw("drivers/tty/serial/milbeaut_usio.c:78", port->membase + MLB_USIO_REG_FCR) & ~MLB_USIO_FCR_FTIE,
 	       port->membase + MLB_USIO_REG_FCR);
-	writeb(readb(port->membase + MLB_USIO_REG_SCR) &
+	pete_writeb("drivers/tty/serial/milbeaut_usio.c:80", pete_readb("drivers/tty/serial/milbeaut_usio.c:80", port->membase + MLB_USIO_REG_SCR) &
 	       ~(MLB_USIO_SCR_TIE | MLB_USIO_SCR_TBIE),
 	       port->membase + MLB_USIO_REG_SCR);
 
 	if (port->x_char) {
-		writew(port->x_char, port->membase + MLB_USIO_REG_DR);
+		pete_writew("drivers/tty/serial/milbeaut_usio.c:85", port->x_char, port->membase + MLB_USIO_REG_DR);
 		port->icount.tx++;
 		port->x_char = 0;
 		return;
@@ -93,10 +93,10 @@ static void mlb_usio_tx_chars(struct uart_port *port)
 	}
 
 	count = port->fifosize -
-		(readw(port->membase + MLB_USIO_REG_FBYTE) & 0xff);
+		(pete_readw("drivers/tty/serial/milbeaut_usio.c:96", port->membase + MLB_USIO_REG_FBYTE) & 0xff);
 
 	do {
-		writew(xmit->buf[xmit->tail], port->membase + MLB_USIO_REG_DR);
+		pete_writew("drivers/tty/serial/milbeaut_usio.c:99", xmit->buf[xmit->tail], port->membase + MLB_USIO_REG_DR);
 
 		xmit->tail = (xmit->tail + 1) & (UART_XMIT_SIZE - 1);
 		port->icount.tx++;
@@ -105,10 +105,10 @@ static void mlb_usio_tx_chars(struct uart_port *port)
 
 	} while (--count > 0);
 
-	writew(readw(port->membase + MLB_USIO_REG_FCR) & ~MLB_USIO_FCR_FDRQ,
+	pete_writew("drivers/tty/serial/milbeaut_usio.c:108", pete_readw("drivers/tty/serial/milbeaut_usio.c:108", port->membase + MLB_USIO_REG_FCR) & ~MLB_USIO_FCR_FDRQ,
 	       port->membase + MLB_USIO_REG_FCR);
 
-	writeb(readb(port->membase + MLB_USIO_REG_SCR) | MLB_USIO_SCR_TBIE,
+	pete_writeb("drivers/tty/serial/milbeaut_usio.c:111", pete_readb("drivers/tty/serial/milbeaut_usio.c:111", port->membase + MLB_USIO_REG_SCR) | MLB_USIO_SCR_TBIE,
 	       port->membase + MLB_USIO_REG_SCR);
 
 	if (uart_circ_chars_pending(xmit) < WAKEUP_CHARS)
@@ -120,28 +120,28 @@ static void mlb_usio_tx_chars(struct uart_port *port)
 
 static void mlb_usio_start_tx(struct uart_port *port)
 {
-	u16 fcr = readw(port->membase + MLB_USIO_REG_FCR);
+	u16 fcr = pete_readw("drivers/tty/serial/milbeaut_usio.c:123", port->membase + MLB_USIO_REG_FCR);
 
-	writew(fcr | MLB_USIO_FCR_FTIE, port->membase + MLB_USIO_REG_FCR);
+	pete_writew("drivers/tty/serial/milbeaut_usio.c:125", fcr | MLB_USIO_FCR_FTIE, port->membase + MLB_USIO_REG_FCR);
 	if (!(fcr & MLB_USIO_FCR_FDRQ))
 		return;
 
-	writeb(readb(port->membase + MLB_USIO_REG_SCR) | MLB_USIO_SCR_TBIE,
+	pete_writeb("drivers/tty/serial/milbeaut_usio.c:129", pete_readb("drivers/tty/serial/milbeaut_usio.c:129", port->membase + MLB_USIO_REG_SCR) | MLB_USIO_SCR_TBIE,
 	       port->membase + MLB_USIO_REG_SCR);
 
-	if (readb(port->membase + MLB_USIO_REG_SSR) & MLB_USIO_SSR_TBI)
+	if (pete_readb("drivers/tty/serial/milbeaut_usio.c:132", port->membase + MLB_USIO_REG_SSR) & MLB_USIO_SSR_TBI)
 		mlb_usio_tx_chars(port);
 }
 
 static void mlb_usio_stop_rx(struct uart_port *port)
 {
-	writeb(readb(port->membase + MLB_USIO_REG_SCR) & ~MLB_USIO_SCR_RIE,
+	pete_writeb("drivers/tty/serial/milbeaut_usio.c:138", pete_readb("drivers/tty/serial/milbeaut_usio.c:138", port->membase + MLB_USIO_REG_SCR) & ~MLB_USIO_SCR_RIE,
 	       port->membase + MLB_USIO_REG_SCR);
 }
 
 static void mlb_usio_enable_ms(struct uart_port *port)
 {
-	writeb(readb(port->membase + MLB_USIO_REG_SCR) |
+	pete_writeb("drivers/tty/serial/milbeaut_usio.c:144", pete_readb("drivers/tty/serial/milbeaut_usio.c:144", port->membase + MLB_USIO_REG_SCR) |
 	       MLB_USIO_SCR_RIE | MLB_USIO_SCR_RXE,
 	       port->membase + MLB_USIO_REG_SCR);
 }
@@ -155,14 +155,14 @@ static void mlb_usio_rx_chars(struct uart_port *port)
 	int max_count = 2;
 
 	while (max_count--) {
-		status = readb(port->membase + MLB_USIO_REG_SSR);
+		status = pete_readb("drivers/tty/serial/milbeaut_usio.c:158", port->membase + MLB_USIO_REG_SSR);
 
 		if (!(status & MLB_USIO_SSR_RDRF))
 			break;
 
 		if (!(status & (MLB_USIO_SSR_ORE | MLB_USIO_SSR_FRE |
 				MLB_USIO_SSR_PE))) {
-			ch = readw(port->membase + MLB_USIO_REG_DR);
+			ch = pete_readw("drivers/tty/serial/milbeaut_usio.c:165", port->membase + MLB_USIO_REG_DR);
 			flag = TTY_NORMAL;
 			port->icount.rx++;
 			if (uart_handle_sysrq_char(port, ch))
@@ -192,12 +192,12 @@ static void mlb_usio_rx_chars(struct uart_port *port)
 			uart_insert_char(port, status, MLB_USIO_SSR_ORE,
 					 ch, flag);
 
-		writeb(readb(port->membase + MLB_USIO_REG_SSR) |
+		pete_writeb("drivers/tty/serial/milbeaut_usio.c:195", pete_readb("drivers/tty/serial/milbeaut_usio.c:195", port->membase + MLB_USIO_REG_SSR) |
 				MLB_USIO_SSR_REC,
 				port->membase + MLB_USIO_REG_SSR);
 
-		max_count = readw(port->membase + MLB_USIO_REG_FBYTE) >> 8;
-		writew(readw(port->membase + MLB_USIO_REG_FCR) |
+		max_count = pete_readw("drivers/tty/serial/milbeaut_usio.c:199", port->membase + MLB_USIO_REG_FBYTE) >> 8;
+		pete_writew("drivers/tty/serial/milbeaut_usio.c:200", pete_readw("drivers/tty/serial/milbeaut_usio.c:200", port->membase + MLB_USIO_REG_FCR) |
 		       MLB_USIO_FCR_FE2 | MLB_USIO_FCR_FRIIE,
 		port->membase + MLB_USIO_REG_FCR);
 	}
@@ -221,7 +221,7 @@ static irqreturn_t mlb_usio_tx_irq(int irq, void *dev_id)
 	struct uart_port *port = dev_id;
 
 	spin_lock(&port->lock);
-	if (readb(port->membase + MLB_USIO_REG_SSR) & MLB_USIO_SSR_TBI)
+	if (pete_readb("drivers/tty/serial/milbeaut_usio.c:224", port->membase + MLB_USIO_REG_SSR) & MLB_USIO_SSR_TBI)
 		mlb_usio_tx_chars(port);
 	spin_unlock(&port->lock);
 
@@ -230,7 +230,7 @@ static irqreturn_t mlb_usio_tx_irq(int irq, void *dev_id)
 
 static unsigned int mlb_usio_tx_empty(struct uart_port *port)
 {
-	return (readb(port->membase + MLB_USIO_REG_SSR) & MLB_USIO_SSR_TBI) ?
+	return (pete_readb("drivers/tty/serial/milbeaut_usio.c:233", port->membase + MLB_USIO_REG_SSR) & MLB_USIO_SSR_TBI) ?
 		TIOCSER_TEMT : 0;
 }
 
@@ -266,23 +266,23 @@ static int mlb_usio_startup(struct uart_port *port)
 		return ret;
 	}
 
-	escr = readb(port->membase + MLB_USIO_REG_ESCR);
+	escr = pete_readb("drivers/tty/serial/milbeaut_usio.c:269", port->membase + MLB_USIO_REG_ESCR);
 	if (of_property_read_bool(port->dev->of_node, "auto-flow-control"))
 		escr |= MLB_USIO_ESCR_FLWEN;
 	spin_lock_irqsave(&port->lock, flags);
-	writeb(0, port->membase + MLB_USIO_REG_SCR);
-	writeb(escr, port->membase + MLB_USIO_REG_ESCR);
-	writeb(MLB_USIO_SCR_UPCL, port->membase + MLB_USIO_REG_SCR);
-	writeb(MLB_USIO_SSR_REC, port->membase + MLB_USIO_REG_SSR);
-	writew(0, port->membase + MLB_USIO_REG_FCR);
-	writew(MLB_USIO_FCR_FCL1 | MLB_USIO_FCR_FCL2,
+	pete_writeb("drivers/tty/serial/milbeaut_usio.c:273", 0, port->membase + MLB_USIO_REG_SCR);
+	pete_writeb("drivers/tty/serial/milbeaut_usio.c:274", escr, port->membase + MLB_USIO_REG_ESCR);
+	pete_writeb("drivers/tty/serial/milbeaut_usio.c:275", MLB_USIO_SCR_UPCL, port->membase + MLB_USIO_REG_SCR);
+	pete_writeb("drivers/tty/serial/milbeaut_usio.c:276", MLB_USIO_SSR_REC, port->membase + MLB_USIO_REG_SSR);
+	pete_writew("drivers/tty/serial/milbeaut_usio.c:277", 0, port->membase + MLB_USIO_REG_FCR);
+	pete_writew("drivers/tty/serial/milbeaut_usio.c:278", MLB_USIO_FCR_FCL1 | MLB_USIO_FCR_FCL2,
 	       port->membase + MLB_USIO_REG_FCR);
-	writew(MLB_USIO_FCR_FE1 | MLB_USIO_FCR_FE2 | MLB_USIO_FCR_FRIIE,
+	pete_writew("drivers/tty/serial/milbeaut_usio.c:280", MLB_USIO_FCR_FE1 | MLB_USIO_FCR_FE2 | MLB_USIO_FCR_FRIIE,
 	       port->membase + MLB_USIO_REG_FCR);
-	writew(0, port->membase + MLB_USIO_REG_FBYTE);
-	writew(BIT(12), port->membase + MLB_USIO_REG_FBYTE);
+	pete_writew("drivers/tty/serial/milbeaut_usio.c:282", 0, port->membase + MLB_USIO_REG_FBYTE);
+	pete_writew("drivers/tty/serial/milbeaut_usio.c:283", BIT(12), port->membase + MLB_USIO_REG_FBYTE);
 
-	writeb(MLB_USIO_SCR_TXE  | MLB_USIO_SCR_RIE | MLB_USIO_SCR_TBIE |
+	pete_writeb("drivers/tty/serial/milbeaut_usio.c:285", MLB_USIO_SCR_TXE  | MLB_USIO_SCR_RIE | MLB_USIO_SCR_TBIE |
 	       MLB_USIO_SCR_RXE, port->membase + MLB_USIO_REG_SCR);
 	spin_unlock_irqrestore(&port->lock, flags);
 
@@ -353,20 +353,20 @@ static void mlb_usio_set_termios(struct uart_port *port,
 	if ((termios->c_cflag & CREAD) == 0)
 		port->ignore_status_mask |= MLB_USIO_SSR_RDRF;
 
-	writeb(0, port->membase + MLB_USIO_REG_SCR);
-	writeb(MLB_USIO_SCR_UPCL, port->membase + MLB_USIO_REG_SCR);
-	writeb(MLB_USIO_SSR_REC, port->membase + MLB_USIO_REG_SSR);
-	writew(0, port->membase + MLB_USIO_REG_FCR);
-	writeb(smr, port->membase + MLB_USIO_REG_SMR);
-	writeb(escr, port->membase + MLB_USIO_REG_ESCR);
-	writew(quot, port->membase + MLB_USIO_REG_BGR);
-	writew(0, port->membase + MLB_USIO_REG_FCR);
-	writew(MLB_USIO_FCR_FCL1 | MLB_USIO_FCR_FCL2 | MLB_USIO_FCR_FE1 |
+	pete_writeb("drivers/tty/serial/milbeaut_usio.c:356", 0, port->membase + MLB_USIO_REG_SCR);
+	pete_writeb("drivers/tty/serial/milbeaut_usio.c:357", MLB_USIO_SCR_UPCL, port->membase + MLB_USIO_REG_SCR);
+	pete_writeb("drivers/tty/serial/milbeaut_usio.c:358", MLB_USIO_SSR_REC, port->membase + MLB_USIO_REG_SSR);
+	pete_writew("drivers/tty/serial/milbeaut_usio.c:359", 0, port->membase + MLB_USIO_REG_FCR);
+	pete_writeb("drivers/tty/serial/milbeaut_usio.c:360", smr, port->membase + MLB_USIO_REG_SMR);
+	pete_writeb("drivers/tty/serial/milbeaut_usio.c:361", escr, port->membase + MLB_USIO_REG_ESCR);
+	pete_writew("drivers/tty/serial/milbeaut_usio.c:362", quot, port->membase + MLB_USIO_REG_BGR);
+	pete_writew("drivers/tty/serial/milbeaut_usio.c:363", 0, port->membase + MLB_USIO_REG_FCR);
+	pete_writew("drivers/tty/serial/milbeaut_usio.c:364", MLB_USIO_FCR_FCL1 | MLB_USIO_FCR_FCL2 | MLB_USIO_FCR_FE1 |
 	       MLB_USIO_FCR_FE2 | MLB_USIO_FCR_FRIIE,
 	       port->membase + MLB_USIO_REG_FCR);
-	writew(0, port->membase + MLB_USIO_REG_FBYTE);
-	writew(BIT(12), port->membase + MLB_USIO_REG_FBYTE);
-	writeb(MLB_USIO_SCR_RIE | MLB_USIO_SCR_RXE | MLB_USIO_SCR_TBIE |
+	pete_writew("drivers/tty/serial/milbeaut_usio.c:367", 0, port->membase + MLB_USIO_REG_FBYTE);
+	pete_writew("drivers/tty/serial/milbeaut_usio.c:368", BIT(12), port->membase + MLB_USIO_REG_FBYTE);
+	pete_writeb("drivers/tty/serial/milbeaut_usio.c:369", MLB_USIO_SCR_RIE | MLB_USIO_SCR_RXE | MLB_USIO_SCR_TBIE |
 	       MLB_USIO_SCR_TXE, port->membase + MLB_USIO_REG_SCR);
 	spin_unlock_irqrestore(&port->lock, flags);
 }
@@ -402,10 +402,10 @@ static const struct uart_ops mlb_usio_ops = {
 
 static void mlb_usio_console_putchar(struct uart_port *port, int c)
 {
-	while (!(readb(port->membase + MLB_USIO_REG_SSR) & MLB_USIO_SSR_TDRE))
+	while (!(pete_readb("drivers/tty/serial/milbeaut_usio.c:405", port->membase + MLB_USIO_REG_SSR) & MLB_USIO_SSR_TDRE))
 		cpu_relax();
 
-	writew(c, port->membase + MLB_USIO_REG_DR);
+	pete_writew("drivers/tty/serial/milbeaut_usio.c:408", c, port->membase + MLB_USIO_REG_DR);
 }
 
 static void mlb_usio_console_write(struct console *co, const char *s,

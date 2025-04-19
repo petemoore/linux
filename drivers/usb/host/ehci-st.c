@@ -56,7 +56,7 @@ static int st_ehci_platform_reset(struct usb_hcd *hcd)
 
 	/* Set EHCI packet buffer IN/OUT threshold to 128 bytes */
 	threshold = 128 | (128 << 16);
-	writel(threshold, hcd->regs + AHB2STBUS_INSREG01);
+	pete_writel("drivers/usb/host/ehci-st.c:59", threshold, hcd->regs + AHB2STBUS_INSREG01);
 
 	ehci->caps = hcd->regs + pdata->caps_offset;
 	return ehci_setup(hcd);

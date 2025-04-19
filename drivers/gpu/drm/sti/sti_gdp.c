@@ -144,7 +144,7 @@ static const uint32_t gdp_supported_formats[] = {
 };
 
 #define DBGFS_DUMP(reg) seq_printf(s, "\n  %-25s 0x%08X", #reg, \
-				   readl(gdp->regs + reg ## _OFFSET))
+				   pete_readl("drivers/gpu/drm/sti/sti_gdp.c:147", gdp->regs + reg ## _OFFSET))
 
 static void gdp_dbg_ctl(struct seq_file *s, int val)
 {
@@ -225,25 +225,25 @@ static int gdp_dbg_show(struct seq_file *s, void *data)
 		   sti_plane_to_str(&gdp->plane), gdp->regs);
 
 	DBGFS_DUMP(GAM_GDP_CTL);
-	gdp_dbg_ctl(s, readl(gdp->regs + GAM_GDP_CTL_OFFSET));
+	gdp_dbg_ctl(s, pete_readl("drivers/gpu/drm/sti/sti_gdp.c:228", gdp->regs + GAM_GDP_CTL_OFFSET));
 	DBGFS_DUMP(GAM_GDP_AGC);
 	DBGFS_DUMP(GAM_GDP_VPO);
-	gdp_dbg_vpo(s, readl(gdp->regs + GAM_GDP_VPO_OFFSET));
+	gdp_dbg_vpo(s, pete_readl("drivers/gpu/drm/sti/sti_gdp.c:231", gdp->regs + GAM_GDP_VPO_OFFSET));
 	DBGFS_DUMP(GAM_GDP_VPS);
-	gdp_dbg_vps(s, readl(gdp->regs + GAM_GDP_VPS_OFFSET));
+	gdp_dbg_vps(s, pete_readl("drivers/gpu/drm/sti/sti_gdp.c:233", gdp->regs + GAM_GDP_VPS_OFFSET));
 	DBGFS_DUMP(GAM_GDP_PML);
 	DBGFS_DUMP(GAM_GDP_PMP);
 	DBGFS_DUMP(GAM_GDP_SIZE);
-	gdp_dbg_size(s, readl(gdp->regs + GAM_GDP_SIZE_OFFSET));
+	gdp_dbg_size(s, pete_readl("drivers/gpu/drm/sti/sti_gdp.c:237", gdp->regs + GAM_GDP_SIZE_OFFSET));
 	DBGFS_DUMP(GAM_GDP_NVN);
-	gdp_dbg_nvn(s, gdp, readl(gdp->regs + GAM_GDP_NVN_OFFSET));
+	gdp_dbg_nvn(s, gdp, pete_readl("drivers/gpu/drm/sti/sti_gdp.c:239", gdp->regs + GAM_GDP_NVN_OFFSET));
 	DBGFS_DUMP(GAM_GDP_KEY1);
 	DBGFS_DUMP(GAM_GDP_KEY2);
 	DBGFS_DUMP(GAM_GDP_PPT);
-	gdp_dbg_ppt(s, readl(gdp->regs + GAM_GDP_PPT_OFFSET));
+	gdp_dbg_ppt(s, pete_readl("drivers/gpu/drm/sti/sti_gdp.c:243", gdp->regs + GAM_GDP_PPT_OFFSET));
 	DBGFS_DUMP(GAM_GDP_CML);
 	DBGFS_DUMP(GAM_GDP_MST);
-	gdp_dbg_mst(s, readl(gdp->regs + GAM_GDP_MST_OFFSET));
+	gdp_dbg_mst(s, pete_readl("drivers/gpu/drm/sti/sti_gdp.c:246", gdp->regs + GAM_GDP_MST_OFFSET));
 
 	seq_puts(s, "\n\n");
 	if (!crtc)
@@ -397,7 +397,7 @@ static struct sti_gdp_node_list *sti_gdp_get_free_nodes(struct sti_gdp *gdp)
 	int hw_nvn;
 	unsigned int i;
 
-	hw_nvn = readl(gdp->regs + GAM_GDP_NVN_OFFSET);
+	hw_nvn = pete_readl("drivers/gpu/drm/sti/sti_gdp.c:400", gdp->regs + GAM_GDP_NVN_OFFSET);
 	if (!hw_nvn)
 		goto end;
 
@@ -429,7 +429,7 @@ struct sti_gdp_node_list *sti_gdp_get_current_nodes(struct sti_gdp *gdp)
 	int hw_nvn;
 	unsigned int i;
 
-	hw_nvn = readl(gdp->regs + GAM_GDP_NVN_OFFSET);
+	hw_nvn = pete_readl("drivers/gpu/drm/sti/sti_gdp.c:432", gdp->regs + GAM_GDP_NVN_OFFSET);
 	if (!hw_nvn)
 		goto end;
 
@@ -827,10 +827,10 @@ static void sti_gdp_atomic_update(struct drm_plane *drm_plane,
 	dma_updated_btm = list->btm_field_paddr;
 
 	dev_dbg(gdp->dev, "Current NVN:0x%X\n",
-		readl(gdp->regs + GAM_GDP_NVN_OFFSET));
+		pete_readl("drivers/gpu/drm/sti/sti_gdp.c:830", gdp->regs + GAM_GDP_NVN_OFFSET));
 	dev_dbg(gdp->dev, "Posted buff: %lx current buff: %x\n",
 		(unsigned long)cma_obj->paddr,
-		readl(gdp->regs + GAM_GDP_PML_OFFSET));
+		pete_readl("drivers/gpu/drm/sti/sti_gdp.c:833", gdp->regs + GAM_GDP_PML_OFFSET));
 
 	if (!curr_list) {
 		/* First update or invalid node should directly write in the
@@ -838,7 +838,7 @@ static void sti_gdp_atomic_update(struct drm_plane *drm_plane,
 		DRM_DEBUG_DRIVER("%s first update (or invalid node)\n",
 				 sti_plane_to_str(plane));
 
-		writel(gdp->is_curr_top ?
+		pete_writel("drivers/gpu/drm/sti/sti_gdp.c:841", gdp->is_curr_top ?
 				dma_updated_btm : dma_updated_top,
 				gdp->regs + GAM_GDP_NVN_OFFSET);
 		goto end;
@@ -852,12 +852,12 @@ static void sti_gdp_atomic_update(struct drm_plane *drm_plane,
 			curr_list->btm_field->gam_gdp_nvn = dma_updated_top;
 		} else {
 			/* Direct update to avoid one frame delay */
-			writel(dma_updated_top,
+			pete_writel("drivers/gpu/drm/sti/sti_gdp.c:855", dma_updated_top,
 			       gdp->regs + GAM_GDP_NVN_OFFSET);
 		}
 	} else {
 		/* Direct update for progressive to avoid one frame delay */
-		writel(dma_updated_top, gdp->regs + GAM_GDP_NVN_OFFSET);
+		pete_writel("drivers/gpu/drm/sti/sti_gdp.c:860", dma_updated_top, gdp->regs + GAM_GDP_NVN_OFFSET);
 	}
 
 end:

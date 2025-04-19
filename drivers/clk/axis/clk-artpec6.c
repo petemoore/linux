@@ -62,7 +62,7 @@ static void of_artpec6_clkctrl_setup(struct device_node *np)
 	BUG_ON(clkdata->syscon_base == NULL);
 
 	/* Read PLL1 factors configured by boot strap pins. */
-	pll_mode = (readl(clkdata->syscon_base) >> 6) & 3;
+	pll_mode = (pete_readl("drivers/clk/axis/clk-artpec6.c:65", clkdata->syscon_base) >> 6) & 3;
 	switch (pll_mode) {
 	case 0:		/* DDR3-2133 mode */
 		pll_m = 4;
@@ -183,18 +183,18 @@ static int artpec6_clkctrl_probe(struct platform_device *pdev)
 					     0, &clkdata->i2scfg_lock);
 		} else if (frac_clk_name[i]) {
 			/* Lock the mux for internal clock reference. */
-			muxreg = readl(clkdata->syscon_base + 0x14);
+			muxreg = pete_readl("drivers/clk/axis/clk-artpec6.c:186", clkdata->syscon_base + 0x14);
 			muxreg &= ~BIT(i);
-			writel(muxreg, clkdata->syscon_base + 0x14);
+			pete_writel("drivers/clk/axis/clk-artpec6.c:188", muxreg, clkdata->syscon_base + 0x14);
 			clks[i2s_clk_indexes[i]] =
 			    clk_register_fixed_factor(dev, i2s_clk_names[i],
 						      frac_clk_name[i], 0, 1,
 						      1);
 		} else if (i2s_refclk_name) {
 			/* Lock the mux for external clock reference. */
-			muxreg = readl(clkdata->syscon_base + 0x14);
+			muxreg = pete_readl("drivers/clk/axis/clk-artpec6.c:195", clkdata->syscon_base + 0x14);
 			muxreg |= BIT(i);
-			writel(muxreg, clkdata->syscon_base + 0x14);
+			pete_writel("drivers/clk/axis/clk-artpec6.c:197", muxreg, clkdata->syscon_base + 0x14);
 			clks[i2s_clk_indexes[i]] =
 			    clk_register_fixed_factor(dev, i2s_clk_names[i],
 						      i2s_refclk_name, 0, 1, 1);

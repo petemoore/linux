@@ -33,13 +33,13 @@ static const uint32_t qla8044_reg_tbl[] = {
 uint32_t
 qla8044_rd_reg(struct qla_hw_data *ha, ulong addr)
 {
-	return readl((void __iomem *) (ha->nx_pcibase + addr));
+	return pete_readl("drivers/scsi/qla2xxx/qla_nx2.c:36", (void __iomem *) (ha->nx_pcibase + addr));
 }
 
 void
 qla8044_wr_reg(struct qla_hw_data *ha, ulong addr, uint32_t val)
 {
-	writel(val, (void __iomem *)((ha)->nx_pcibase + addr));
+	pete_writel("drivers/scsi/qla2xxx/qla_nx2.c:42", val, (void __iomem *)((ha)->nx_pcibase + addr));
 }
 
 int
@@ -2571,7 +2571,7 @@ qla8044_minidump_process_rdocm(struct scsi_qla_host *vha,
 	    __func__, r_addr, r_stride, loop_cnt);
 
 	for (i = 0; i < loop_cnt; i++) {
-		r_value = readl((void __iomem *)(r_addr + ha->nx_pcibase));
+		r_value = pete_readl("drivers/scsi/qla2xxx/qla_nx2.c:2574", (void __iomem *)(r_addr + ha->nx_pcibase));
 		*data_ptr++ = r_value;
 		r_addr += r_stride;
 	}

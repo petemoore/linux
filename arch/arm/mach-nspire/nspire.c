@@ -33,7 +33,7 @@ static void nspire_restart(enum reboot_mode mode, const char *cmd)
 	if (!base)
 		return;
 
-	writel(2, base + NSPIRE_MISC_HWRESET);
+	pete_writel("arch/arm/mach-nspire/nspire.c:36", 2, base + NSPIRE_MISC_HWRESET);
 }
 
 DT_MACHINE_START(NSPIRE, "TI-NSPIRE")

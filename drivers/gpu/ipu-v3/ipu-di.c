@@ -122,12 +122,12 @@ enum di_sync_wave {
 
 static inline u32 ipu_di_read(struct ipu_di *di, unsigned offset)
 {
-	return readl(di->base + offset);
+	return pete_readl("drivers/gpu/ipu-v3/ipu-di.c:125", di->base + offset);
 }
 
 static inline void ipu_di_write(struct ipu_di *di, u32 value, unsigned offset)
 {
-	writel(value, di->base + offset);
+	pete_writel("drivers/gpu/ipu-v3/ipu-di.c:130", value, di->base + offset);
 }
 
 static void ipu_di_data_wave_config(struct ipu_di *di,

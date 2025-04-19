@@ -4891,7 +4891,7 @@ static void __snr_uncore_mmio_init_box(struct intel_uncore_box *box,
 				       unsigned int device)
 {
 	if (!snr_uncore_mmio_map(box, box_ctl, mem_offset, device))
-		writel(IVBEP_PMON_BOX_CTL_INT, box->io_addr);
+		pete_writel("arch/x86/events/intel/uncore_snbep.c:4894", IVBEP_PMON_BOX_CTL_INT, box->io_addr);
 }
 
 static void snr_uncore_mmio_init_box(struct intel_uncore_box *box)
@@ -4908,9 +4908,9 @@ static void snr_uncore_mmio_disable_box(struct intel_uncore_box *box)
 	if (!box->io_addr)
 		return;
 
-	config = readl(box->io_addr);
+	config = pete_readl("arch/x86/events/intel/uncore_snbep.c:4911", box->io_addr);
 	config |= SNBEP_PMON_BOX_CTL_FRZ;
-	writel(config, box->io_addr);
+	pete_writel("arch/x86/events/intel/uncore_snbep.c:4913", config, box->io_addr);
 }
 
 static void snr_uncore_mmio_enable_box(struct intel_uncore_box *box)
@@ -4920,9 +4920,9 @@ static void snr_uncore_mmio_enable_box(struct intel_uncore_box *box)
 	if (!box->io_addr)
 		return;
 
-	config = readl(box->io_addr);
+	config = pete_readl("arch/x86/events/intel/uncore_snbep.c:4923", box->io_addr);
 	config &= ~SNBEP_PMON_BOX_CTL_FRZ;
-	writel(config, box->io_addr);
+	pete_writel("arch/x86/events/intel/uncore_snbep.c:4925", config, box->io_addr);
 }
 
 static void snr_uncore_mmio_enable_event(struct intel_uncore_box *box,
@@ -4936,7 +4936,7 @@ static void snr_uncore_mmio_enable_event(struct intel_uncore_box *box,
 	if (!uncore_mmio_is_valid_offset(box, hwc->config_base))
 		return;
 
-	writel(hwc->config | SNBEP_PMON_CTL_EN,
+	pete_writel("arch/x86/events/intel/uncore_snbep.c:4939", hwc->config | SNBEP_PMON_CTL_EN,
 	       box->io_addr + hwc->config_base);
 }
 
@@ -4951,7 +4951,7 @@ static void snr_uncore_mmio_disable_event(struct intel_uncore_box *box,
 	if (!uncore_mmio_is_valid_offset(box, hwc->config_base))
 		return;
 
-	writel(hwc->config, box->io_addr + hwc->config_base);
+	pete_writel("arch/x86/events/intel/uncore_snbep.c:4954", hwc->config, box->io_addr + hwc->config_base);
 }
 
 static struct intel_uncore_ops snr_uncore_mmio_ops = {
@@ -5753,9 +5753,9 @@ static void spr_uncore_mmio_enable_event(struct intel_uncore_box *box,
 		return;
 
 	if (uncore_pmc_fixed(hwc->idx))
-		writel(SNBEP_PMON_CTL_EN, box->io_addr + hwc->config_base);
+		pete_writel("arch/x86/events/intel/uncore_snbep.c:5756", SNBEP_PMON_CTL_EN, box->io_addr + hwc->config_base);
 	else
-		writel(hwc->config, box->io_addr + hwc->config_base);
+		pete_writel("arch/x86/events/intel/uncore_snbep.c:5758", hwc->config, box->io_addr + hwc->config_base);
 }
 
 static struct intel_uncore_ops spr_uncore_mmio_ops = {

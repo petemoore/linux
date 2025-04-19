@@ -80,12 +80,12 @@ void lpc32xx_loopback_set(resource_size_t mapbase, int state)
 		return;
 	}
 
-	tmp = readl(LPC32XX_UARTCTL_CLOOP);
+	tmp = pete_readl("arch/arm/mach-lpc32xx/serial.c:83", LPC32XX_UARTCTL_CLOOP);
 	if (state)
 		tmp |= (1 << bit);
 	else
 		tmp &= ~(1 << bit);
-	writel(tmp, LPC32XX_UARTCTL_CLOOP);
+	pete_writel("arch/arm/mach-lpc32xx/serial.c:88", tmp, LPC32XX_UARTCTL_CLOOP);
 }
 EXPORT_SYMBOL_GPL(lpc32xx_loopback_set);
 

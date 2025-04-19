@@ -488,7 +488,7 @@ static int validate_esw_config(struct qlcnic_adapter *adapter,
 	u8 pci_func;
 
 	if (qlcnic_82xx_check(adapter))
-		op_mode = readl(ahw->pci_base0 + QLCNIC_DRV_OP_MODE);
+		op_mode = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_sysfs.c:491", ahw->pci_base0 + QLCNIC_DRV_OP_MODE);
 	else
 		op_mode = QLCRDX(ahw, QLC_83XX_DRV_OP_MODE);
 

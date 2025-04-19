@@ -24,21 +24,21 @@ static inline void
 min_xtp (void)
 {
 	if (smp_int_redirect & SMP_IRQ_REDIRECTION)
-		writeb(0x00, ipi_base_addr + XTP_OFFSET); /* XTP to min */
+		pete_writeb("arch/ia64/include/asm/xtp.h:27", 0x00, ipi_base_addr + XTP_OFFSET); /* XTP to min */
 }
 
 static inline void
 normal_xtp (void)
 {
 	if (smp_int_redirect & SMP_IRQ_REDIRECTION)
-		writeb(0x08, ipi_base_addr + XTP_OFFSET); /* XTP normal */
+		pete_writeb("arch/ia64/include/asm/xtp.h:34", 0x08, ipi_base_addr + XTP_OFFSET); /* XTP normal */
 }
 
 static inline void
 max_xtp (void)
 {
 	if (smp_int_redirect & SMP_IRQ_REDIRECTION)
-		writeb(0x0f, ipi_base_addr + XTP_OFFSET); /* Set XTP to max */
+		pete_writeb("arch/ia64/include/asm/xtp.h:41", 0x0f, ipi_base_addr + XTP_OFFSET); /* Set XTP to max */
 }
 
 #endif /* CONFIG_SMP */

@@ -594,7 +594,7 @@ static int bcm2711_release_bsc(struct brcmstb_i2c_dev *dev)
 	if (IS_ERR(autoi2c))
 		return PTR_ERR(autoi2c);
 
-	writel(AUTOI2C_CTRL0_RELEASE_BSC, autoi2c + AUTOI2C_CTRL0);
+	pete_writel("drivers/i2c/busses/i2c-brcmstb.c:597", AUTOI2C_CTRL0_RELEASE_BSC, autoi2c + AUTOI2C_CTRL0);
 	devm_iounmap(&pdev->dev, autoi2c);
 
 	/* We need to reset the controller after the release */

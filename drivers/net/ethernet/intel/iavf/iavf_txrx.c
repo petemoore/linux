@@ -788,7 +788,7 @@ static inline void iavf_release_rx_desc(struct iavf_ring *rx_ring, u32 val)
 	 * such as IA-64).
 	 */
 	wmb();
-	writel(val, rx_ring->tail);
+	pete_writel("drivers/net/ethernet/intel/iavf/iavf_txrx.c:791", val, rx_ring->tail);
 }
 
 /**
@@ -2367,7 +2367,7 @@ static inline void iavf_tx_map(struct iavf_ring *tx_ring, struct sk_buff *skb,
 
 	/* notify HW of packet */
 	if (netif_xmit_stopped(txring_txq(tx_ring)) || !netdev_xmit_more()) {
-		writel(i, tx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/iavf/iavf_txrx.c:2370", i, tx_ring->tail);
 	}
 
 	return;

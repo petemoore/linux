@@ -76,7 +76,7 @@ void mtk_ddp_write(struct cmdq_pkt *cmdq_pkt, unsigned int value,
 			       cmdq_reg->offset + offset, value);
 	else
 #endif
-		writel(value, regs + offset);
+		pete_writel("drivers/gpu/drm/mediatek/mtk_drm_ddp_comp.c:79", value, regs + offset);
 }
 
 void mtk_ddp_write_relaxed(struct cmdq_pkt *cmdq_pkt, unsigned int value,
@@ -102,10 +102,10 @@ void mtk_ddp_write_mask(struct cmdq_pkt *cmdq_pkt, unsigned int value,
 				    cmdq_reg->offset + offset, value, mask);
 	} else {
 #endif
-		u32 tmp = readl(regs + offset);
+		u32 tmp = pete_readl("drivers/gpu/drm/mediatek/mtk_drm_ddp_comp.c:105", regs + offset);
 
 		tmp = (tmp & ~mask) | (value & mask);
-		writel(tmp, regs + offset);
+		pete_writel("drivers/gpu/drm/mediatek/mtk_drm_ddp_comp.c:108", tmp, regs + offset);
 #if IS_REACHABLE(CONFIG_MTK_CMDQ)
 	}
 #endif
@@ -175,14 +175,14 @@ static void mtk_od_start(struct device *dev)
 {
 	struct mtk_ddp_comp_dev *priv = dev_get_drvdata(dev);
 
-	writel(1, priv->regs + DISP_OD_EN);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_drm_ddp_comp.c:178", 1, priv->regs + DISP_OD_EN);
 }
 
 static void mtk_ufoe_start(struct device *dev)
 {
 	struct mtk_ddp_comp_dev *priv = dev_get_drvdata(dev);
 
-	writel(UFO_BYPASS, priv->regs + DISP_REG_UFO_START);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_drm_ddp_comp.c:185", UFO_BYPASS, priv->regs + DISP_REG_UFO_START);
 }
 
 static void mtk_dither_config(struct device *dev, unsigned int w,
@@ -201,7 +201,7 @@ static void mtk_dither_start(struct device *dev)
 {
 	struct mtk_ddp_comp_dev *priv = dev_get_drvdata(dev);
 
-	writel(DITHER_EN, priv->regs + DISP_DITHER_EN);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_drm_ddp_comp.c:204", DITHER_EN, priv->regs + DISP_DITHER_EN);
 }
 
 static void mtk_dither_stop(struct device *dev)

@@ -128,13 +128,13 @@ struct ti_qspi {
 static inline unsigned long ti_qspi_read(struct ti_qspi *qspi,
 		unsigned long reg)
 {
-	return readl(qspi->base + reg);
+	return pete_readl("drivers/spi/spi-ti-qspi.c:131", qspi->base + reg);
 }
 
 static inline void ti_qspi_write(struct ti_qspi *qspi,
 		unsigned long val, unsigned long reg)
 {
-	writel(val, qspi->base + reg);
+	pete_writel("drivers/spi/spi-ti-qspi.c:137", val, qspi->base + reg);
 }
 
 static int ti_qspi_setup(struct spi_device *spi)
@@ -266,21 +266,21 @@ static int qspi_write_msg(struct ti_qspi *qspi, struct spi_transfer *t,
 				u32 *txp = (u32 *)txbuf;
 
 				data = cpu_to_be32(*txp++);
-				writel(data, qspi->base +
+				pete_writel("drivers/spi/spi-ti-qspi.c:269", data, qspi->base +
 				       QSPI_SPI_DATA_REG_3);
 				data = cpu_to_be32(*txp++);
-				writel(data, qspi->base +
+				pete_writel("drivers/spi/spi-ti-qspi.c:272", data, qspi->base +
 				       QSPI_SPI_DATA_REG_2);
 				data = cpu_to_be32(*txp++);
-				writel(data, qspi->base +
+				pete_writel("drivers/spi/spi-ti-qspi.c:275", data, qspi->base +
 				       QSPI_SPI_DATA_REG_1);
 				data = cpu_to_be32(*txp++);
-				writel(data, qspi->base +
+				pete_writel("drivers/spi/spi-ti-qspi.c:278", data, qspi->base +
 				       QSPI_SPI_DATA_REG);
 				xfer_len = QSPI_WLEN_MAX_BYTES;
 				cmd |= QSPI_WLEN(QSPI_WLEN_MAX_BITS);
 			} else {
-				writeb(*txbuf, qspi->base + QSPI_SPI_DATA_REG);
+				pete_writeb("drivers/spi/spi-ti-qspi.c:283", *txbuf, qspi->base + QSPI_SPI_DATA_REG);
 				cmd = qspi->cmd | QSPI_WR_SNGL;
 				xfer_len = wlen;
 				cmd |= QSPI_WLEN(wlen);
@@ -289,12 +289,12 @@ static int qspi_write_msg(struct ti_qspi *qspi, struct spi_transfer *t,
 		case 2:
 			dev_dbg(qspi->dev, "tx cmd %08x dc %08x data %04x\n",
 					cmd, qspi->dc, *txbuf);
-			writew(*((u16 *)txbuf), qspi->base + QSPI_SPI_DATA_REG);
+			pete_writew("drivers/spi/spi-ti-qspi.c:292", *((u16 *)txbuf), qspi->base + QSPI_SPI_DATA_REG);
 			break;
 		case 4:
 			dev_dbg(qspi->dev, "tx cmd %08x dc %08x data %08x\n",
 					cmd, qspi->dc, *txbuf);
-			writel(*((u32 *)txbuf), qspi->base + QSPI_SPI_DATA_REG);
+			pete_writel("drivers/spi/spi-ti-qspi.c:297", *((u32 *)txbuf), qspi->base + QSPI_SPI_DATA_REG);
 			break;
 		}
 
@@ -374,17 +374,17 @@ static int qspi_read_msg(struct ti_qspi *qspi, struct spi_transfer *t,
 			 */
 			if (count >= QSPI_WLEN_MAX_BYTES) {
 				u32 *rxp = (u32 *) rxbuf;
-				rx = readl(qspi->base + QSPI_SPI_DATA_REG_3);
+				rx = pete_readl("drivers/spi/spi-ti-qspi.c:377", qspi->base + QSPI_SPI_DATA_REG_3);
 				*rxp++ = be32_to_cpu(rx);
-				rx = readl(qspi->base + QSPI_SPI_DATA_REG_2);
+				rx = pete_readl("drivers/spi/spi-ti-qspi.c:379", qspi->base + QSPI_SPI_DATA_REG_2);
 				*rxp++ = be32_to_cpu(rx);
-				rx = readl(qspi->base + QSPI_SPI_DATA_REG_1);
+				rx = pete_readl("drivers/spi/spi-ti-qspi.c:381", qspi->base + QSPI_SPI_DATA_REG_1);
 				*rxp++ = be32_to_cpu(rx);
-				rx = readl(qspi->base + QSPI_SPI_DATA_REG);
+				rx = pete_readl("drivers/spi/spi-ti-qspi.c:383", qspi->base + QSPI_SPI_DATA_REG);
 				*rxp++ = be32_to_cpu(rx);
 			} else {
 				u8 *rxp = rxbuf;
-				rx = readl(qspi->base + QSPI_SPI_DATA_REG);
+				rx = pete_readl("drivers/spi/spi-ti-qspi.c:387", qspi->base + QSPI_SPI_DATA_REG);
 				if (rx_wlen >= 8)
 					*rxp++ = rx >> (rx_wlen - 8);
 				if (rx_wlen >= 16)
@@ -396,10 +396,10 @@ static int qspi_read_msg(struct ti_qspi *qspi, struct spi_transfer *t,
 			}
 			break;
 		case 2:
-			*((u16 *)rxbuf) = readw(qspi->base + QSPI_SPI_DATA_REG);
+			*((u16 *)rxbuf) = pete_readw("drivers/spi/spi-ti-qspi.c:399", qspi->base + QSPI_SPI_DATA_REG);
 			break;
 		case 4:
-			*((u32 *)rxbuf) = readl(qspi->base + QSPI_SPI_DATA_REG);
+			*((u32 *)rxbuf) = pete_readl("drivers/spi/spi-ti-qspi.c:402", qspi->base + QSPI_SPI_DATA_REG);
 			break;
 		}
 		rxbuf += rxlen;

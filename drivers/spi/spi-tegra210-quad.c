@@ -189,16 +189,16 @@ struct tegra_qspi {
 
 static inline u32 tegra_qspi_readl(struct tegra_qspi *tqspi, unsigned long offset)
 {
-	return readl(tqspi->base + offset);
+	return pete_readl("drivers/spi/spi-tegra210-quad.c:192", tqspi->base + offset);
 }
 
 static inline void tegra_qspi_writel(struct tegra_qspi *tqspi, u32 value, unsigned long offset)
 {
-	writel(value, tqspi->base + offset);
+	pete_writel("drivers/spi/spi-tegra210-quad.c:197", value, tqspi->base + offset);
 
 	/* read back register to make sure that register writes completed */
 	if (offset != QSPI_TX_FIFO)
-		readl(tqspi->base + QSPI_COMMAND1);
+		pete_readl("drivers/spi/spi-tegra210-quad.c:201", tqspi->base + QSPI_COMMAND1);
 }
 
 static void tegra_qspi_mask_clear_irq(struct tegra_qspi *tqspi)

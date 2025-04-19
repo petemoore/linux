@@ -111,14 +111,14 @@ struct cdns_salvo_phy {
 static const struct of_device_id cdns_salvo_phy_of_match[];
 static u16 cdns_salvo_read(struct cdns_salvo_phy *salvo_phy, u32 reg)
 {
-	return (u16)readl(salvo_phy->base +
+	return (u16)pete_readl("drivers/phy/cadence/phy-cadence-salvo.c:114", salvo_phy->base +
 		reg * (1 << salvo_phy->data->reg_offset_shift));
 }
 
 static void cdns_salvo_write(struct cdns_salvo_phy *salvo_phy,
 			     u32 reg, u16 val)
 {
-	writel(val, salvo_phy->base +
+	pete_writel("drivers/phy/cadence/phy-cadence-salvo.c:121", val, salvo_phy->base +
 		reg * (1 << salvo_phy->data->reg_offset_shift));
 }
 

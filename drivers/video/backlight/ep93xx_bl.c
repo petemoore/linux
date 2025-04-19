@@ -27,7 +27,7 @@ static int ep93xxbl_set(struct backlight_device *bl, int brightness)
 {
 	struct ep93xxbl *ep93xxbl = bl_get_data(bl);
 
-	writel((brightness << 8) | EP93XX_MAX_COUNT, ep93xxbl->mmio);
+	pete_writel("drivers/video/backlight/ep93xx_bl.c:30", (brightness << 8) | EP93XX_MAX_COUNT, ep93xxbl->mmio);
 
 	ep93xxbl->brightness = brightness;
 

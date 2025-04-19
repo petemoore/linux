@@ -31,7 +31,7 @@ i915_vm_to_dpt(struct i915_address_space *vm)
 
 static void gen8_set_pte(void __iomem *addr, gen8_pte_t pte)
 {
-	writeq(pte, addr);
+	pete_writeq("drivers/gpu/drm/i915/display/intel_dpt.c:34", pte, addr);
 }
 
 static void dpt_insert_page(struct i915_address_space *vm,

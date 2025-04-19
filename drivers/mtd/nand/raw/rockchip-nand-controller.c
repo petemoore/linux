@@ -251,7 +251,7 @@ static int rk_nfc_hw_ecc_setup(struct nand_chip *chip, u32 strength)
 	if (i >= NFC_ECC_MAX_MODES)
 		return -EINVAL;
 
-	writel(reg, nfc->regs + nfc->cfg->bchctl_off);
+	pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:254", reg, nfc->regs + nfc->cfg->bchctl_off);
 
 	/* Save chip ECC setting */
 	nfc->cur_ecc = strength;
@@ -271,7 +271,7 @@ static void rk_nfc_select_chip(struct nand_chip *chip, int cs)
 		/* Deselect the currently selected target. */
 		val = readl_relaxed(nfc->regs + NFC_FMCTL);
 		val &= ~FMCTL_CE_SEL_M;
-		writel(val, nfc->regs + NFC_FMCTL);
+		pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:274", val, nfc->regs + NFC_FMCTL);
 		return;
 	}
 
@@ -282,14 +282,14 @@ static void rk_nfc_select_chip(struct nand_chip *chip, int cs)
 	val &= ~FMCTL_CE_SEL_M;
 	val |= FMCTL_CE_SEL(nfc->selected_bank);
 
-	writel(val, nfc->regs + NFC_FMCTL);
+	pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:285", val, nfc->regs + NFC_FMCTL);
 
 	/*
 	 * Compare current chip timing with selected chip timing and
 	 * change if needed.
 	 */
 	if (nfc->cur_timing != rknand->timing) {
-		writel(rknand->timing, nfc->regs + NFC_FMWAIT);
+		pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:292", rknand->timing, nfc->regs + NFC_FMWAIT);
 		nfc->cur_timing = rknand->timing;
 	}
 
@@ -326,7 +326,7 @@ static void rk_nfc_write_buf(struct rk_nfc *nfc, const u8 *buf, int len)
 	int i;
 
 	for (i = 0; i < len; i++)
-		writeb(buf[i], nfc->regs + nfc->band_offset + BANK_DATA);
+		pete_writeb("drivers/mtd/nand/raw/rockchip-nand-controller.c:329", buf[i], nfc->regs + nfc->band_offset + BANK_DATA);
 }
 
 static int rk_nfc_cmd(struct nand_chip *chip,
@@ -345,7 +345,7 @@ static int rk_nfc_cmd(struct nand_chip *chip,
 
 		switch (instr->type) {
 		case NAND_OP_CMD_INSTR:
-			writeb(instr->ctx.cmd.opcode,
+			pete_writeb("drivers/mtd/nand/raw/rockchip-nand-controller.c:348", instr->ctx.cmd.opcode,
 			       nfc->regs + reg_offset + BANK_CMD);
 			break;
 
@@ -354,7 +354,7 @@ static int rk_nfc_cmd(struct nand_chip *chip,
 			start = nand_subop_get_addr_start_off(subop, i);
 
 			for (j = 0; j < 8 && j + start < remaining; j++)
-				writeb(instr->ctx.addr.addrs[j + start],
+				pete_writeb("drivers/mtd/nand/raw/rockchip-nand-controller.c:357", instr->ctx.addr.addrs[j + start],
 				       nfc->regs + reg_offset + BANK_ADDR);
 			break;
 
@@ -481,15 +481,15 @@ static void rk_nfc_xfer_start(struct rk_nfc *nfc, u8 rw, u8 n_KB,
 		bch_reg = readl_relaxed(nfc->regs + nfc->cfg->bchctl_off);
 		bch_reg = (bch_reg & (~BCHCTL_BANK_M)) |
 			  (nfc->selected_bank << BCHCTL_BANK);
-		writel(bch_reg, nfc->regs + nfc->cfg->bchctl_off);
+		pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:484", bch_reg, nfc->regs + nfc->cfg->bchctl_off);
 	}
 
-	writel(dma_reg, nfc->regs + nfc->cfg->dma_cfg_off);
-	writel((u32)dma_data, nfc->regs + nfc->cfg->dma_data_buf_off);
-	writel((u32)dma_oob, nfc->regs + nfc->cfg->dma_oob_buf_off);
-	writel(fl_reg, nfc->regs + nfc->cfg->flctl_off);
+	pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:487", dma_reg, nfc->regs + nfc->cfg->dma_cfg_off);
+	pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:488", (u32)dma_data, nfc->regs + nfc->cfg->dma_data_buf_off);
+	pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:489", (u32)dma_oob, nfc->regs + nfc->cfg->dma_oob_buf_off);
+	pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:490", fl_reg, nfc->regs + nfc->cfg->flctl_off);
 	fl_reg |= FLCTL_XFER_ST;
-	writel(fl_reg, nfc->regs + nfc->cfg->flctl_off);
+	pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:492", fl_reg, nfc->regs + nfc->cfg->flctl_off);
 }
 
 static int rk_nfc_wait_for_xfer_done(struct rk_nfc *nfc)
@@ -658,7 +658,7 @@ static int rk_nfc_write_page_hwecc(struct nand_chip *chip, const u8 *buf,
 				 DMA_TO_DEVICE);
 
 	reinit_completion(&nfc->done);
-	writel(INT_DMA, nfc->regs + nfc->cfg->int_en_off);
+	pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:661", INT_DMA, nfc->regs + nfc->cfg->int_en_off);
 
 	rk_nfc_xfer_start(nfc, NFC_WRITE, ecc->steps, dma_data,
 			  dma_oob);
@@ -786,7 +786,7 @@ static int rk_nfc_read_page_hwecc(struct nand_chip *chip, u8 *buf, int oob_on,
 	}
 
 	reinit_completion(&nfc->done);
-	writel(INT_DMA, nfc->regs + nfc->cfg->int_en_off);
+	pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:789", INT_DMA, nfc->regs + nfc->cfg->int_en_off);
 	rk_nfc_xfer_start(nfc, NFC_READ, ecc->steps, dma_data,
 			  dma_oob);
 	ret = wait_for_completion_timeout(&nfc->done,
@@ -867,14 +867,14 @@ static int rk_nfc_read_oob(struct nand_chip *chip, int page)
 static inline void rk_nfc_hw_init(struct rk_nfc *nfc)
 {
 	/* Disable flash wp. */
-	writel(FMCTL_WP, nfc->regs + NFC_FMCTL);
+	pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:870", FMCTL_WP, nfc->regs + NFC_FMCTL);
 	/* Config default timing 40ns at 150 Mhz NFC clock. */
-	writel(0x1081, nfc->regs + NFC_FMWAIT);
+	pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:872", 0x1081, nfc->regs + NFC_FMWAIT);
 	nfc->cur_timing = 0x1081;
 	/* Disable randomizer and DMA. */
-	writel(0, nfc->regs + nfc->cfg->randmz_off);
-	writel(0, nfc->regs + nfc->cfg->dma_cfg_off);
-	writel(FLCTL_RST, nfc->regs + nfc->cfg->flctl_off);
+	pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:875", 0, nfc->regs + nfc->cfg->randmz_off);
+	pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:876", 0, nfc->regs + nfc->cfg->dma_cfg_off);
+	pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:877", FLCTL_RST, nfc->regs + nfc->cfg->flctl_off);
 }
 
 static irqreturn_t rk_nfc_irq(int irq, void *id)
@@ -888,8 +888,8 @@ static irqreturn_t rk_nfc_irq(int irq, void *id)
 	if (!(sta & ien))
 		return IRQ_NONE;
 
-	writel(sta, nfc->regs + nfc->cfg->int_clr_off);
-	writel(~sta & ien, nfc->regs + nfc->cfg->int_en_off);
+	pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:891", sta, nfc->regs + nfc->cfg->int_clr_off);
+	pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:892", ~sta & ien, nfc->regs + nfc->cfg->int_en_off);
 
 	complete(&nfc->done);
 
@@ -1408,7 +1408,7 @@ static int rk_nfc_probe(struct platform_device *pdev)
 		goto clk_disable;
 	}
 
-	writel(0, nfc->regs + nfc->cfg->int_en_off);
+	pete_writel("drivers/mtd/nand/raw/rockchip-nand-controller.c:1411", 0, nfc->regs + nfc->cfg->int_en_off);
 	ret = devm_request_irq(dev, irq, rk_nfc_irq, 0x0, "rk-nand", nfc);
 	if (ret) {
 		dev_err(dev, "failed to request NFC irq\n");

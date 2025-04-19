@@ -37,12 +37,12 @@ static int armada375_usb_phy_init(struct phy *phy)
 	if (!cluster_phy)
 		return -ENODEV;
 
-	reg = readl(cluster_phy->reg);
+	reg = pete_readl("drivers/phy/marvell/phy-armada375-usb2.c:40", cluster_phy->reg);
 	if (cluster_phy->use_usb3)
 		reg |= USB2_PHY_CONFIG_DISABLE;
 	else
 		reg &= ~USB2_PHY_CONFIG_DISABLE;
-	writel(reg, cluster_phy->reg);
+	pete_writel("drivers/phy/marvell/phy-armada375-usb2.c:45", reg, cluster_phy->reg);
 
 	return 0;
 }

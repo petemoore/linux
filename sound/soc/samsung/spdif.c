@@ -109,11 +109,11 @@ static void spdif_snd_txctrl(struct samsung_spdif_info *spdif, int on)
 
 	dev_dbg(spdif->dev, "Entered %s\n", __func__);
 
-	clkcon = readl(regs + CLKCON) & CLKCTL_MASK;
+	clkcon = pete_readl("sound/soc/samsung/spdif.c:112", regs + CLKCON) & CLKCTL_MASK;
 	if (on)
-		writel(clkcon | CLKCTL_PWR_ON, regs + CLKCON);
+		pete_writel("sound/soc/samsung/spdif.c:114", clkcon | CLKCTL_PWR_ON, regs + CLKCON);
 	else
-		writel(clkcon & ~CLKCTL_PWR_ON, regs + CLKCON);
+		pete_writel("sound/soc/samsung/spdif.c:116", clkcon & ~CLKCTL_PWR_ON, regs + CLKCON);
 }
 
 static int spdif_set_sysclk(struct snd_soc_dai *cpu_dai,
@@ -124,14 +124,14 @@ static int spdif_set_sysclk(struct snd_soc_dai *cpu_dai,
 
 	dev_dbg(spdif->dev, "Entered %s\n", __func__);
 
-	clkcon = readl(spdif->regs + CLKCON);
+	clkcon = pete_readl("sound/soc/samsung/spdif.c:127", spdif->regs + CLKCON);
 
 	if (clk_id == SND_SOC_SPDIF_INT_MCLK)
 		clkcon &= ~CLKCTL_MCLK_EXT;
 	else
 		clkcon |= CLKCTL_MCLK_EXT;
 
-	writel(clkcon, spdif->regs + CLKCON);
+	pete_writel("sound/soc/samsung/spdif.c:134", clkcon, spdif->regs + CLKCON);
 
 	spdif->clk_rate = freq;
 
@@ -198,9 +198,9 @@ static int spdif_hw_params(struct snd_pcm_substream *substream,
 
 	spin_lock_irqsave(&spdif->lock, flags);
 
-	con = readl(regs + CON) & CON_MASK;
-	cstas = readl(regs + CSTAS) & CSTAS_MASK;
-	clkcon = readl(regs + CLKCON) & CLKCTL_MASK;
+	con = pete_readl("sound/soc/samsung/spdif.c:201", regs + CON) & CON_MASK;
+	cstas = pete_readl("sound/soc/samsung/spdif.c:202", regs + CSTAS) & CSTAS_MASK;
+	clkcon = pete_readl("sound/soc/samsung/spdif.c:203", regs + CLKCON) & CLKCTL_MASK;
 
 	con &= ~CON_FIFO_TH_MASK;
 	con |= (0x7 << CON_FIFO_TH_SHIFT);
@@ -264,9 +264,9 @@ static int spdif_hw_params(struct snd_pcm_substream *substream,
 	cstas |= CSTAS_CATEGORY_CODE_CDP;
 	cstas |= CSTAS_NO_COPYRIGHT;
 
-	writel(con, regs + CON);
-	writel(cstas, regs + CSTAS);
-	writel(clkcon, regs + CLKCON);
+	pete_writel("sound/soc/samsung/spdif.c:267", con, regs + CON);
+	pete_writel("sound/soc/samsung/spdif.c:268", cstas, regs + CSTAS);
+	pete_writel("sound/soc/samsung/spdif.c:269", clkcon, regs + CLKCON);
 
 	spin_unlock_irqrestore(&spdif->lock, flags);
 
@@ -286,13 +286,13 @@ static void spdif_shutdown(struct snd_pcm_substream *substream,
 
 	dev_dbg(spdif->dev, "Entered %s\n", __func__);
 
-	con = readl(regs + CON) & CON_MASK;
-	clkcon = readl(regs + CLKCON) & CLKCTL_MASK;
+	con = pete_readl("sound/soc/samsung/spdif.c:289", regs + CON) & CON_MASK;
+	clkcon = pete_readl("sound/soc/samsung/spdif.c:290", regs + CLKCON) & CLKCTL_MASK;
 
-	writel(con | CON_SW_RESET, regs + CON);
+	pete_writel("sound/soc/samsung/spdif.c:292", con | CON_SW_RESET, regs + CON);
 	cpu_relax();
 
-	writel(clkcon & ~CLKCTL_PWR_ON, regs + CLKCON);
+	pete_writel("sound/soc/samsung/spdif.c:295", clkcon & ~CLKCTL_PWR_ON, regs + CLKCON);
 }
 
 #ifdef CONFIG_PM
@@ -303,11 +303,11 @@ static int spdif_suspend(struct snd_soc_component *component)
 
 	dev_dbg(spdif->dev, "Entered %s\n", __func__);
 
-	spdif->saved_clkcon = readl(spdif->regs	+ CLKCON) & CLKCTL_MASK;
-	spdif->saved_con = readl(spdif->regs + CON) & CON_MASK;
-	spdif->saved_cstas = readl(spdif->regs + CSTAS) & CSTAS_MASK;
+	spdif->saved_clkcon = pete_readl("sound/soc/samsung/spdif.c:306", spdif->regs	+ CLKCON) & CLKCTL_MASK;
+	spdif->saved_con = pete_readl("sound/soc/samsung/spdif.c:307", spdif->regs + CON) & CON_MASK;
+	spdif->saved_cstas = pete_readl("sound/soc/samsung/spdif.c:308", spdif->regs + CSTAS) & CSTAS_MASK;
 
-	writel(con | CON_SW_RESET, spdif->regs + CON);
+	pete_writel("sound/soc/samsung/spdif.c:310", con | CON_SW_RESET, spdif->regs + CON);
 	cpu_relax();
 
 	return 0;
@@ -319,9 +319,9 @@ static int spdif_resume(struct snd_soc_component *component)
 
 	dev_dbg(spdif->dev, "Entered %s\n", __func__);
 
-	writel(spdif->saved_clkcon, spdif->regs	+ CLKCON);
-	writel(spdif->saved_con, spdif->regs + CON);
-	writel(spdif->saved_cstas, spdif->regs + CSTAS);
+	pete_writel("sound/soc/samsung/spdif.c:322", spdif->saved_clkcon, spdif->regs	+ CLKCON);
+	pete_writel("sound/soc/samsung/spdif.c:323", spdif->saved_con, spdif->regs + CON);
+	pete_writel("sound/soc/samsung/spdif.c:324", spdif->saved_cstas, spdif->regs + CSTAS);
 
 	return 0;
 }

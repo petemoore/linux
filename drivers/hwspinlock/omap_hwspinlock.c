@@ -40,7 +40,7 @@ static int omap_hwspinlock_trylock(struct hwspinlock *lock)
 	void __iomem *lock_addr = lock->priv;
 
 	/* attempt to acquire the lock by reading its value */
-	return (SPINLOCK_NOTTAKEN == readl(lock_addr));
+	return (SPINLOCK_NOTTAKEN == pete_readl("drivers/hwspinlock/omap_hwspinlock.c:43", lock_addr));
 }
 
 static void omap_hwspinlock_unlock(struct hwspinlock *lock)
@@ -48,7 +48,7 @@ static void omap_hwspinlock_unlock(struct hwspinlock *lock)
 	void __iomem *lock_addr = lock->priv;
 
 	/* release the lock by writing 0 to it */
-	writel(SPINLOCK_NOTTAKEN, lock_addr);
+	pete_writel("drivers/hwspinlock/omap_hwspinlock.c:51", SPINLOCK_NOTTAKEN, lock_addr);
 }
 
 /*
@@ -101,7 +101,7 @@ static int omap_hwspinlock_probe(struct platform_device *pdev)
 	}
 
 	/* Determine number of locks */
-	i = readl(io_base + SYSSTATUS_OFFSET);
+	i = pete_readl("drivers/hwspinlock/omap_hwspinlock.c:104", io_base + SYSSTATUS_OFFSET);
 	i >>= SPINLOCK_NUMLOCKS_BIT_OFFSET;
 
 	/*

@@ -91,7 +91,7 @@ static const struct mtd_ooblayout_ops nand_ooblayout_docg3_ops = {
 
 static inline u8 doc_readb(struct docg3 *docg3, u16 reg)
 {
-	u8 val = readb(docg3->cascade->base + reg);
+	u8 val = pete_readb("drivers/mtd/devices/docg3.c:94", docg3->cascade->base + reg);
 
 	trace_docg3_io(0, 8, reg, (int)val);
 	return val;
@@ -99,7 +99,7 @@ static inline u8 doc_readb(struct docg3 *docg3, u16 reg)
 
 static inline u16 doc_readw(struct docg3 *docg3, u16 reg)
 {
-	u16 val = readw(docg3->cascade->base + reg);
+	u16 val = pete_readw("drivers/mtd/devices/docg3.c:102", docg3->cascade->base + reg);
 
 	trace_docg3_io(0, 16, reg, (int)val);
 	return val;
@@ -107,13 +107,13 @@ static inline u16 doc_readw(struct docg3 *docg3, u16 reg)
 
 static inline void doc_writeb(struct docg3 *docg3, u8 val, u16 reg)
 {
-	writeb(val, docg3->cascade->base + reg);
+	pete_writeb("drivers/mtd/devices/docg3.c:110", val, docg3->cascade->base + reg);
 	trace_docg3_io(1, 8, reg, val);
 }
 
 static inline void doc_writew(struct docg3 *docg3, u16 val, u16 reg)
 {
-	writew(val, docg3->cascade->base + reg);
+	pete_writew("drivers/mtd/devices/docg3.c:116", val, docg3->cascade->base + reg);
 	trace_docg3_io(1, 16, reg, val);
 }
 

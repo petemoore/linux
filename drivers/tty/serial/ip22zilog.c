@@ -111,9 +111,9 @@ static unsigned char read_zsreg(struct zilog_channel *channel,
 {
 	unsigned char retval;
 
-	writeb(reg, &channel->control);
+	pete_writeb("drivers/tty/serial/ip22zilog.c:114", reg, &channel->control);
 	ZSDELAY();
-	retval = readb(&channel->control);
+	retval = pete_readb("drivers/tty/serial/ip22zilog.c:116", &channel->control);
 	ZSDELAY();
 
 	return retval;
@@ -122,9 +122,9 @@ static unsigned char read_zsreg(struct zilog_channel *channel,
 static void write_zsreg(struct zilog_channel *channel,
 			unsigned char reg, unsigned char value)
 {
-	writeb(reg, &channel->control);
+	pete_writeb("drivers/tty/serial/ip22zilog.c:125", reg, &channel->control);
 	ZSDELAY();
-	writeb(value, &channel->control);
+	pete_writeb("drivers/tty/serial/ip22zilog.c:127", value, &channel->control);
 	ZSDELAY();
 }
 
@@ -135,17 +135,17 @@ static void ip22zilog_clear_fifo(struct zilog_channel *channel)
 	for (i = 0; i < 32; i++) {
 		unsigned char regval;
 
-		regval = readb(&channel->control);
+		regval = pete_readb("drivers/tty/serial/ip22zilog.c:138", &channel->control);
 		ZSDELAY();
 		if (regval & Rx_CH_AV)
 			break;
 
 		regval = read_zsreg(channel, R1);
-		readb(&channel->data);
+		pete_readb("drivers/tty/serial/ip22zilog.c:144", &channel->data);
 		ZSDELAY();
 
 		if (regval & (PAR_ERR | Rx_OVR | CRC_ERR)) {
-			writeb(ERR_RES, &channel->control);
+			pete_writeb("drivers/tty/serial/ip22zilog.c:148", ERR_RES, &channel->control);
 			ZSDELAY();
 			ZS_WSYNC(channel);
 		}
@@ -167,7 +167,7 @@ static void __load_zsregs(struct zilog_channel *channel, unsigned char *regs)
 		udelay(100);
 	}
 
-	writeb(ERR_RES, &channel->control);
+	pete_writeb("drivers/tty/serial/ip22zilog.c:170", ERR_RES, &channel->control);
 	ZSDELAY();
 	ZS_WSYNC(channel);
 
@@ -253,19 +253,19 @@ static bool ip22zilog_receive_chars(struct uart_ip22zilog_port *up,
 	bool push = up->port.state != NULL;
 
 	for (;;) {
-		ch = readb(&channel->control);
+		ch = pete_readb("drivers/tty/serial/ip22zilog.c:256", &channel->control);
 		ZSDELAY();
 		if (!(ch & Rx_CH_AV))
 			break;
 
 		r1 = read_zsreg(channel, R1);
 		if (r1 & (PAR_ERR | Rx_OVR | CRC_ERR)) {
-			writeb(ERR_RES, &channel->control);
+			pete_writeb("drivers/tty/serial/ip22zilog.c:263", ERR_RES, &channel->control);
 			ZSDELAY();
 			ZS_WSYNC(channel);
 		}
 
-		ch = readb(&channel->data);
+		ch = pete_readb("drivers/tty/serial/ip22zilog.c:268", &channel->data);
 		ZSDELAY();
 
 		ch &= up->parity_mask;
@@ -315,10 +315,10 @@ static void ip22zilog_status_handle(struct uart_ip22zilog_port *up,
 {
 	unsigned char status;
 
-	status = readb(&channel->control);
+	status = pete_readb("drivers/tty/serial/ip22zilog.c:318", &channel->control);
 	ZSDELAY();
 
-	writeb(RES_EXT_INT, &channel->control);
+	pete_writeb("drivers/tty/serial/ip22zilog.c:321", RES_EXT_INT, &channel->control);
 	ZSDELAY();
 	ZS_WSYNC(channel);
 
@@ -358,7 +358,7 @@ static void ip22zilog_transmit_chars(struct uart_ip22zilog_port *up,
 	struct circ_buf *xmit;
 
 	if (ZS_IS_CONS(up)) {
-		unsigned char status = readb(&channel->control);
+		unsigned char status = pete_readb("drivers/tty/serial/ip22zilog.c:361", &channel->control);
 		ZSDELAY();
 
 		/* TX still busy?  Just wait for the next TX done interrupt.
@@ -387,7 +387,7 @@ static void ip22zilog_transmit_chars(struct uart_ip22zilog_port *up,
 
 	if (up->port.x_char) {
 		up->flags |= IP22ZILOG_FLAG_TX_ACTIVE;
-		writeb(up->port.x_char, &channel->data);
+		pete_writeb("drivers/tty/serial/ip22zilog.c:390", up->port.x_char, &channel->data);
 		ZSDELAY();
 		ZS_WSYNC(channel);
 
@@ -405,7 +405,7 @@ static void ip22zilog_transmit_chars(struct uart_ip22zilog_port *up,
 		goto ack_tx_int;
 
 	up->flags |= IP22ZILOG_FLAG_TX_ACTIVE;
-	writeb(xmit->buf[xmit->tail], &channel->data);
+	pete_writeb("drivers/tty/serial/ip22zilog.c:408", xmit->buf[xmit->tail], &channel->data);
 	ZSDELAY();
 	ZS_WSYNC(channel);
 
@@ -418,7 +418,7 @@ static void ip22zilog_transmit_chars(struct uart_ip22zilog_port *up,
 	return;
 
 ack_tx_int:
-	writeb(RES_Tx_P, &channel->control);
+	pete_writeb("drivers/tty/serial/ip22zilog.c:421", RES_Tx_P, &channel->control);
 	ZSDELAY();
 	ZS_WSYNC(channel);
 }
@@ -438,7 +438,7 @@ static irqreturn_t ip22zilog_interrupt(int irq, void *dev_id)
 
 		/* Channel A */
 		if (r3 & (CHAEXT | CHATxIP | CHARxIP)) {
-			writeb(RES_H_IUS, &channel->control);
+			pete_writeb("drivers/tty/serial/ip22zilog.c:441", RES_H_IUS, &channel->control);
 			ZSDELAY();
 			ZS_WSYNC(channel);
 
@@ -461,7 +461,7 @@ static irqreturn_t ip22zilog_interrupt(int irq, void *dev_id)
 
 		spin_lock(&up->port.lock);
 		if (r3 & (CHBEXT | CHBTxIP | CHBRxIP)) {
-			writeb(RES_H_IUS, &channel->control);
+			pete_writeb("drivers/tty/serial/ip22zilog.c:464", RES_H_IUS, &channel->control);
 			ZSDELAY();
 			ZS_WSYNC(channel);
 
@@ -492,7 +492,7 @@ static __inline__ unsigned char ip22zilog_read_channel_status(struct uart_port *
 	unsigned char status;
 
 	channel = ZILOG_CHANNEL_FROM_PORT(port);
-	status = readb(&channel->control);
+	status = pete_readb("drivers/tty/serial/ip22zilog.c:495", &channel->control);
 	ZSDELAY();
 
 	return status;
@@ -583,7 +583,7 @@ static void ip22zilog_start_tx(struct uart_port *port)
 	up->flags |= IP22ZILOG_FLAG_TX_ACTIVE;
 	up->flags &= ~IP22ZILOG_FLAG_TX_STOPPED;
 
-	status = readb(&channel->control);
+	status = pete_readb("drivers/tty/serial/ip22zilog.c:586", &channel->control);
 	ZSDELAY();
 
 	/* TX busy?  Just wait for the TX done interrupt.  */
@@ -594,7 +594,7 @@ static void ip22zilog_start_tx(struct uart_port *port)
 	 * IRQ sending engine.
 	 */
 	if (port->x_char) {
-		writeb(port->x_char, &channel->data);
+		pete_writeb("drivers/tty/serial/ip22zilog.c:597", port->x_char, &channel->data);
 		ZSDELAY();
 		ZS_WSYNC(channel);
 
@@ -605,7 +605,7 @@ static void ip22zilog_start_tx(struct uart_port *port)
 
 		if (uart_circ_empty(xmit))
 			return;
-		writeb(xmit->buf[xmit->tail], &channel->data);
+		pete_writeb("drivers/tty/serial/ip22zilog.c:608", xmit->buf[xmit->tail], &channel->data);
 		ZSDELAY();
 		ZS_WSYNC(channel);
 
@@ -719,7 +719,7 @@ static void __ip22zilog_startup(struct uart_ip22zilog_port *up)
 	__load_zsregs(channel, up->curregs);
 	/* set master interrupt enable */
 	write_zsreg(channel, R9, up->curregs[R9]);
-	up->prev_status = readb(&channel->control);
+	up->prev_status = pete_readb("drivers/tty/serial/ip22zilog.c:722", &channel->control);
 
 	/* Enable receiver and transmitter.  */
 	up->curregs[R3] |= RxENAB;
@@ -999,7 +999,7 @@ static void ip22zilog_put_char(struct uart_port *port, int ch)
 	 * udelay with ZSDELAY as that is a NOP on some platforms.  -DaveM
 	 */
 	do {
-		unsigned char val = readb(&channel->control);
+		unsigned char val = pete_readb("drivers/tty/serial/ip22zilog.c:1002", &channel->control);
 		if (val & Tx_BUF_EMP) {
 			ZSDELAY();
 			break;
@@ -1007,7 +1007,7 @@ static void ip22zilog_put_char(struct uart_port *port, int ch)
 		udelay(5);
 	} while (--loops);
 
-	writeb(ch, &channel->data);
+	pete_writeb("drivers/tty/serial/ip22zilog.c:1010", ch, &channel->data);
 	ZSDELAY();
 	ZS_WSYNC(channel);
 }

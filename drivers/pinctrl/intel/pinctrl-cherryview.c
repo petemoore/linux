@@ -568,7 +568,7 @@ static u32 chv_pctrl_readl(struct intel_pinctrl *pctrl, unsigned int offset)
 {
 	const struct intel_community *community = &pctrl->communities[0];
 
-	return readl(community->regs + offset);
+	return pete_readl("drivers/pinctrl/intel/pinctrl-cherryview.c:571", community->regs + offset);
 }
 
 static void chv_pctrl_writel(struct intel_pinctrl *pctrl, unsigned int offset, u32 value)
@@ -577,8 +577,8 @@ static void chv_pctrl_writel(struct intel_pinctrl *pctrl, unsigned int offset, u
 	void __iomem *reg = community->regs + offset;
 
 	/* Write and simple read back to confirm the bus transferring done */
-	writel(value, reg);
-	readl(reg);
+	pete_writel("drivers/pinctrl/intel/pinctrl-cherryview.c:580", value, reg);
+	pete_readl("drivers/pinctrl/intel/pinctrl-cherryview.c:581", reg);
 }
 
 static void __iomem *chv_padreg(struct intel_pinctrl *pctrl, unsigned int offset,
@@ -595,7 +595,7 @@ static void __iomem *chv_padreg(struct intel_pinctrl *pctrl, unsigned int offset
 
 static u32 chv_readl(struct intel_pinctrl *pctrl, unsigned int pin, unsigned int offset)
 {
-	return readl(chv_padreg(pctrl, pin, offset));
+	return pete_readl("drivers/pinctrl/intel/pinctrl-cherryview.c:598", chv_padreg(pctrl, pin, offset));
 }
 
 static void chv_writel(struct intel_pinctrl *pctrl, unsigned int pin, unsigned int offset, u32 value)
@@ -603,8 +603,8 @@ static void chv_writel(struct intel_pinctrl *pctrl, unsigned int pin, unsigned i
 	void __iomem *reg = chv_padreg(pctrl, pin, offset);
 
 	/* Write and simple read back to confirm the bus transferring done */
-	writel(value, reg);
-	readl(reg);
+	pete_writel("drivers/pinctrl/intel/pinctrl-cherryview.c:606", value, reg);
+	pete_readl("drivers/pinctrl/intel/pinctrl-cherryview.c:607", reg);
 }
 
 /* When Pad Cfg is locked, driver can only change GPIOTXState or GPIORXState */

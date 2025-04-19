@@ -27,7 +27,7 @@ static int rmobile_reset_handler(struct notifier_block *this,
 	pr_debug("%s %lu\n", __func__, mode);
 
 	/* Let's assume we have acquired the HPB semaphore */
-	writel(RESCNT2_PRES, sysc_base2 + RESCNT2);
+	pete_writel("drivers/power/reset/rmobile-reset.c:30", RESCNT2_PRES, sysc_base2 + RESCNT2);
 
 	return NOTIFY_DONE;
 }

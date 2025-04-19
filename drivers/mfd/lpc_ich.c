@@ -1090,11 +1090,11 @@ static bool lpc_ich_byt_set_writeable(void __iomem *base, void *data)
 {
 	u32 val;
 
-	val = readl(base + BYT_BCR);
+	val = pete_readl("drivers/mfd/lpc_ich.c:1093", base + BYT_BCR);
 	if (!(val & BYT_BCR_WPD)) {
 		val |= BYT_BCR_WPD;
-		writel(val, base + BYT_BCR);
-		val = readl(base + BYT_BCR);
+		pete_writel("drivers/mfd/lpc_ich.c:1096", val, base + BYT_BCR);
+		val = pete_readl("drivers/mfd/lpc_ich.c:1097", base + BYT_BCR);
 	}
 
 	return val & BYT_BCR_WPD;

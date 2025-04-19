@@ -13,12 +13,12 @@
 
 static inline void _write_litex_subregister(u32 val, void __iomem *addr)
 {
-	writel((u32 __force)cpu_to_le32(val), addr);
+	pete_writel("include/linux/litex.h:16", (u32 __force)cpu_to_le32(val), addr);
 }
 
 static inline u32 _read_litex_subregister(void __iomem *addr)
 {
-	return le32_to_cpu((__le32 __force)readl(addr));
+	return le32_to_cpu((__le32 __force)pete_readl("include/linux/litex.h:21", addr));
 }
 
 /*

@@ -27,8 +27,8 @@
  * Host Controller Capabilities and Operation Registers
  */
 
-#define reg_read(r)		readl(hci->base_regs + (r))
-#define reg_write(r, v)		writel(v, hci->base_regs + (r))
+#define reg_read(r)		pete_readl("drivers/i3c/master/mipi-i3c-hci/core.c:30", hci->base_regs + (r))
+#define reg_write(r, v)		pete_writel("drivers/i3c/master/mipi-i3c-hci/core.c:31", v, hci->base_regs + (r))
 #define reg_set(r, v)		reg_write(r, reg_read(r) | (v))
 #define reg_clear(r, v)		reg_write(r, reg_read(r) & ~(v))
 

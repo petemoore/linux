@@ -26,12 +26,12 @@ struct anarion_gmac {
 
 static uint32_t gmac_read_reg(struct anarion_gmac *gmac, uint8_t reg)
 {
-	return readl((void *)(gmac->ctl_block + reg));
+	return pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-anarion.c:29", (void *)(gmac->ctl_block + reg));
 };
 
 static void gmac_write_reg(struct anarion_gmac *gmac, uint8_t reg, uint32_t val)
 {
-	writel(val, (void *)(gmac->ctl_block + reg));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-anarion.c:34", val, (void *)(gmac->ctl_block + reg));
 }
 
 static int anarion_gmac_init(struct platform_device *pdev, void *priv)

@@ -33,7 +33,7 @@
 /* #define S5P_MFC_DEBUG_REGWRITE  */
 #ifdef S5P_MFC_DEBUG_REGWRITE
 #undef writel
-#define writel(v, r)							\
+#define pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:36", v, r)							\
 	do {								\
 		pr_err("MFCWRITE(%p): %08x\n", r, (unsigned int)v);	\
 	__raw_writel(v, r);						\
@@ -499,10 +499,10 @@ static int s5p_mfc_set_dec_stream_buffer_v6(struct s5p_mfc_ctx *ctx,
 	mfc_debug(2, "inst_no: %d, buf_addr: 0x%08x,\n"
 		"buf_size: 0x%08x (%d)\n",
 		ctx->inst_no, buf_addr, strm_size, strm_size);
-	writel(strm_size, mfc_regs->d_stream_data_size);
-	writel(buf_addr, mfc_regs->d_cpb_buffer_addr);
-	writel(buf_size->cpb, mfc_regs->d_cpb_buffer_size);
-	writel(start_num_byte, mfc_regs->d_cpb_buffer_offset);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:502", strm_size, mfc_regs->d_stream_data_size);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:503", buf_addr, mfc_regs->d_cpb_buffer_addr);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:504", buf_size->cpb, mfc_regs->d_cpb_buffer_size);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:505", start_num_byte, mfc_regs->d_cpb_buffer_offset);
 
 	mfc_debug_leave();
 	return 0;
@@ -526,17 +526,17 @@ static int s5p_mfc_set_dec_frame_buffer_v6(struct s5p_mfc_ctx *ctx)
 	mfc_debug(2, "Total DPB COUNT: %d\n", ctx->total_dpb_count);
 	mfc_debug(2, "Setting display delay to %d\n", ctx->display_delay);
 
-	writel(ctx->total_dpb_count, mfc_regs->d_num_dpb);
-	writel(ctx->luma_size, mfc_regs->d_first_plane_dpb_size);
-	writel(ctx->chroma_size, mfc_regs->d_second_plane_dpb_size);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:529", ctx->total_dpb_count, mfc_regs->d_num_dpb);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:530", ctx->luma_size, mfc_regs->d_first_plane_dpb_size);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:531", ctx->chroma_size, mfc_regs->d_second_plane_dpb_size);
 
-	writel(buf_addr1, mfc_regs->d_scratch_buffer_addr);
-	writel(ctx->scratch_buf_size, mfc_regs->d_scratch_buffer_size);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:533", buf_addr1, mfc_regs->d_scratch_buffer_addr);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:534", ctx->scratch_buf_size, mfc_regs->d_scratch_buffer_size);
 
 	if (IS_MFCV8_PLUS(dev)) {
-		writel(ctx->img_width,
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:537", ctx->img_width,
 			mfc_regs->d_first_plane_dpb_stride_size);
-		writel(ctx->img_width,
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:539", ctx->img_width,
 			mfc_regs->d_second_plane_dpb_stride_size);
 	}
 
@@ -546,8 +546,8 @@ static int s5p_mfc_set_dec_frame_buffer_v6(struct s5p_mfc_ctx *ctx)
 	if (ctx->codec_mode == S5P_FIMV_CODEC_H264_DEC ||
 			ctx->codec_mode == S5P_FIMV_CODEC_H264_MVC_DEC ||
 			ctx->codec_mode == S5P_FIMV_CODEC_HEVC_DEC) {
-		writel(ctx->mv_size, mfc_regs->d_mv_buffer_size);
-		writel(ctx->mv_count, mfc_regs->d_num_mv);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:549", ctx->mv_size, mfc_regs->d_mv_buffer_size);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:550", ctx->mv_count, mfc_regs->d_num_mv);
 	}
 
 	frame_size = ctx->luma_size;
@@ -560,11 +560,11 @@ static int s5p_mfc_set_dec_frame_buffer_v6(struct s5p_mfc_ctx *ctx)
 		/* Bank2 */
 		mfc_debug(2, "Luma %d: %zx\n", i,
 					ctx->dst_bufs[i].cookie.raw.luma);
-		writel(ctx->dst_bufs[i].cookie.raw.luma,
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:563", ctx->dst_bufs[i].cookie.raw.luma,
 				mfc_regs->d_first_plane_dpb + i * 4);
 		mfc_debug(2, "\tChroma %d: %zx\n", i,
 					ctx->dst_bufs[i].cookie.raw.chroma);
-		writel(ctx->dst_bufs[i].cookie.raw.chroma,
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:567", ctx->dst_bufs[i].cookie.raw.chroma,
 				mfc_regs->d_second_plane_dpb + i * 4);
 	}
 	if (ctx->codec_mode == S5P_MFC_CODEC_H264_DEC ||
@@ -579,14 +579,14 @@ static int s5p_mfc_set_dec_frame_buffer_v6(struct s5p_mfc_ctx *ctx)
 
 			mfc_debug(2, "\tBuf1: %zx, size: %d\n",
 					buf_addr1, buf_size1);
-			writel(buf_addr1, mfc_regs->d_mv_buffer + i * 4);
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:582", buf_addr1, mfc_regs->d_mv_buffer + i * 4);
 			buf_addr1 += frame_size_mv;
 			buf_size1 -= frame_size_mv;
 		}
 	}
 	if (ctx->codec_mode == S5P_FIMV_CODEC_VP9_DEC) {
-		writel(buf_addr1, mfc_regs->d_static_buffer_addr);
-		writel(DEC_VP9_STATIC_BUFFER_SIZE,
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:588", buf_addr1, mfc_regs->d_static_buffer_addr);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:589", DEC_VP9_STATIC_BUFFER_SIZE,
 				mfc_regs->d_static_buffer_size);
 		buf_addr1 += DEC_VP9_STATIC_BUFFER_SIZE;
 		buf_size1 -= DEC_VP9_STATIC_BUFFER_SIZE;
@@ -599,7 +599,7 @@ static int s5p_mfc_set_dec_frame_buffer_v6(struct s5p_mfc_ctx *ctx)
 		return -ENOMEM;
 	}
 
-	writel(ctx->inst_no, mfc_regs->instance_id);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:602", ctx->inst_no, mfc_regs->instance_id);
 	s5p_mfc_hw_call(dev->mfc_cmds, cmd_host2risc, dev,
 			S5P_FIMV_CH_INIT_BUFS_V6, NULL);
 
@@ -614,8 +614,8 @@ static int s5p_mfc_set_enc_stream_buffer_v6(struct s5p_mfc_ctx *ctx,
 	struct s5p_mfc_dev *dev = ctx->dev;
 	const struct s5p_mfc_regs *mfc_regs = dev->mfc_regs;
 
-	writel(addr, mfc_regs->e_stream_buffer_addr); /* 16B align */
-	writel(size, mfc_regs->e_stream_buffer_size);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:617", addr, mfc_regs->e_stream_buffer_addr); /* 16B align */
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:618", size, mfc_regs->e_stream_buffer_size);
 
 	mfc_debug(2, "stream buf addr: 0x%08lx, size: 0x%x\n",
 		  addr, size);
@@ -629,8 +629,8 @@ static void s5p_mfc_set_enc_frame_buffer_v6(struct s5p_mfc_ctx *ctx,
 	struct s5p_mfc_dev *dev = ctx->dev;
 	const struct s5p_mfc_regs *mfc_regs = dev->mfc_regs;
 
-	writel(y_addr, mfc_regs->e_source_first_plane_addr);
-	writel(c_addr, mfc_regs->e_source_second_plane_addr);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:632", y_addr, mfc_regs->e_source_first_plane_addr);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:633", c_addr, mfc_regs->e_source_second_plane_addr);
 
 	mfc_debug(2, "enc src y buf addr: 0x%08lx\n", y_addr);
 	mfc_debug(2, "enc src c buf addr: 0x%08lx\n", c_addr);
@@ -643,11 +643,11 @@ static void s5p_mfc_get_enc_frame_buffer_v6(struct s5p_mfc_ctx *ctx,
 	const struct s5p_mfc_regs *mfc_regs = dev->mfc_regs;
 	unsigned long enc_recon_y_addr, enc_recon_c_addr;
 
-	*y_addr = readl(mfc_regs->e_encoded_source_first_plane_addr);
-	*c_addr = readl(mfc_regs->e_encoded_source_second_plane_addr);
+	*y_addr = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:646", mfc_regs->e_encoded_source_first_plane_addr);
+	*c_addr = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:647", mfc_regs->e_encoded_source_second_plane_addr);
 
-	enc_recon_y_addr = readl(mfc_regs->e_recon_luma_dpb_addr);
-	enc_recon_c_addr = readl(mfc_regs->e_recon_chroma_dpb_addr);
+	enc_recon_y_addr = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:649", mfc_regs->e_recon_luma_dpb_addr);
+	enc_recon_c_addr = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:650", mfc_regs->e_recon_chroma_dpb_addr);
 
 	mfc_debug(2, "recon y addr: 0x%08lx y_addr: 0x%08lx\n", enc_recon_y_addr, *y_addr);
 	mfc_debug(2, "recon c addr: 0x%08lx\n", enc_recon_c_addr);
@@ -671,41 +671,41 @@ static int s5p_mfc_set_enc_ref_buffer_v6(struct s5p_mfc_ctx *ctx)
 	if (IS_MFCV10(dev)) {
 		/* start address of per buffer is aligned */
 		for (i = 0; i < ctx->pb_count; i++) {
-			writel(buf_addr1, mfc_regs->e_luma_dpb + (4 * i));
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:674", buf_addr1, mfc_regs->e_luma_dpb + (4 * i));
 			buf_addr1 += ctx->luma_dpb_size;
 			buf_size1 -= ctx->luma_dpb_size;
 		}
 		for (i = 0; i < ctx->pb_count; i++) {
-			writel(buf_addr1, mfc_regs->e_chroma_dpb + (4 * i));
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:679", buf_addr1, mfc_regs->e_chroma_dpb + (4 * i));
 			buf_addr1 += ctx->chroma_dpb_size;
 			buf_size1 -= ctx->chroma_dpb_size;
 		}
 		for (i = 0; i < ctx->pb_count; i++) {
-			writel(buf_addr1, mfc_regs->e_me_buffer + (4 * i));
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:684", buf_addr1, mfc_regs->e_me_buffer + (4 * i));
 			buf_addr1 += ctx->me_buffer_size;
 			buf_size1 -= ctx->me_buffer_size;
 		}
 	} else {
 		for (i = 0; i < ctx->pb_count; i++) {
-			writel(buf_addr1, mfc_regs->e_luma_dpb + (4 * i));
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:690", buf_addr1, mfc_regs->e_luma_dpb + (4 * i));
 			buf_addr1 += ctx->luma_dpb_size;
-			writel(buf_addr1, mfc_regs->e_chroma_dpb + (4 * i));
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:692", buf_addr1, mfc_regs->e_chroma_dpb + (4 * i));
 			buf_addr1 += ctx->chroma_dpb_size;
-			writel(buf_addr1, mfc_regs->e_me_buffer + (4 * i));
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:694", buf_addr1, mfc_regs->e_me_buffer + (4 * i));
 			buf_addr1 += ctx->me_buffer_size;
 			buf_size1 -= (ctx->luma_dpb_size + ctx->chroma_dpb_size
 					+ ctx->me_buffer_size);
 		}
 	}
 
-	writel(buf_addr1, mfc_regs->e_scratch_buffer_addr);
-	writel(ctx->scratch_buf_size, mfc_regs->e_scratch_buffer_size);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:701", buf_addr1, mfc_regs->e_scratch_buffer_addr);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:702", ctx->scratch_buf_size, mfc_regs->e_scratch_buffer_size);
 	buf_addr1 += ctx->scratch_buf_size;
 	buf_size1 -= ctx->scratch_buf_size;
 
-	writel(buf_addr1, mfc_regs->e_tmv_buffer0);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:706", buf_addr1, mfc_regs->e_tmv_buffer0);
 	buf_addr1 += ctx->tmv_buffer_size >> 1;
-	writel(buf_addr1, mfc_regs->e_tmv_buffer1);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:708", buf_addr1, mfc_regs->e_tmv_buffer1);
 	buf_addr1 += ctx->tmv_buffer_size >> 1;
 	buf_size1 -= ctx->tmv_buffer_size;
 
@@ -716,7 +716,7 @@ static int s5p_mfc_set_enc_ref_buffer_v6(struct s5p_mfc_ctx *ctx)
 		return -ENOMEM;
 	}
 
-	writel(ctx->inst_no, mfc_regs->instance_id);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:719", ctx->inst_no, mfc_regs->instance_id);
 	s5p_mfc_hw_call(dev->mfc_cmds, cmd_host2risc, dev,
 			S5P_FIMV_CH_INIT_BUFS_V6, NULL);
 
@@ -732,15 +732,15 @@ static int s5p_mfc_set_slice_mode(struct s5p_mfc_ctx *ctx)
 
 	/* multi-slice control */
 	/* multi-slice MB number or bit size */
-	writel(ctx->slice_mode, mfc_regs->e_mslice_mode);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:735", ctx->slice_mode, mfc_regs->e_mslice_mode);
 	if (ctx->slice_mode == V4L2_MPEG_VIDEO_MULTI_SLICE_MODE_MAX_MB) {
-		writel(ctx->slice_size.mb, mfc_regs->e_mslice_size_mb);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:737", ctx->slice_size.mb, mfc_regs->e_mslice_size_mb);
 	} else if (ctx->slice_mode ==
 			V4L2_MPEG_VIDEO_MULTI_SLICE_MODE_MAX_BYTES) {
-		writel(ctx->slice_size.bits, mfc_regs->e_mslice_size_bits);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:740", ctx->slice_size.bits, mfc_regs->e_mslice_size_bits);
 	} else {
-		writel(0x0, mfc_regs->e_mslice_size_mb);
-		writel(0x0, mfc_regs->e_mslice_size_bits);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:742", 0x0, mfc_regs->e_mslice_size_mb);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:743", 0x0, mfc_regs->e_mslice_size_bits);
 	}
 
 	return 0;
@@ -756,21 +756,21 @@ static int s5p_mfc_set_enc_params(struct s5p_mfc_ctx *ctx)
 	mfc_debug_enter();
 
 	/* width */
-	writel(ctx->img_width, mfc_regs->e_frame_width); /* 16 align */
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:759", ctx->img_width, mfc_regs->e_frame_width); /* 16 align */
 	/* height */
-	writel(ctx->img_height, mfc_regs->e_frame_height); /* 16 align */
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:761", ctx->img_height, mfc_regs->e_frame_height); /* 16 align */
 
 	/* cropped width */
-	writel(ctx->img_width, mfc_regs->e_cropped_frame_width);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:764", ctx->img_width, mfc_regs->e_cropped_frame_width);
 	/* cropped height */
-	writel(ctx->img_height, mfc_regs->e_cropped_frame_height);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:766", ctx->img_height, mfc_regs->e_cropped_frame_height);
 	/* cropped offset */
-	writel(0x0, mfc_regs->e_frame_crop_offset);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:768", 0x0, mfc_regs->e_frame_crop_offset);
 
 	/* pictype : IDR period */
 	reg = 0;
 	reg |= p->gop_size & 0xFFFF;
-	writel(reg, mfc_regs->e_gop_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:773", reg, mfc_regs->e_gop_config);
 
 	/* multi-slice control */
 	/* multi-slice MB number or bit size */
@@ -778,65 +778,65 @@ static int s5p_mfc_set_enc_params(struct s5p_mfc_ctx *ctx)
 	reg = 0;
 	if (p->slice_mode == V4L2_MPEG_VIDEO_MULTI_SLICE_MODE_MAX_MB) {
 		reg |= (0x1 << 3);
-		writel(reg, mfc_regs->e_enc_options);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:781", reg, mfc_regs->e_enc_options);
 		ctx->slice_size.mb = p->slice_mb;
 	} else if (p->slice_mode == V4L2_MPEG_VIDEO_MULTI_SLICE_MODE_MAX_BYTES) {
 		reg |= (0x1 << 3);
-		writel(reg, mfc_regs->e_enc_options);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:785", reg, mfc_regs->e_enc_options);
 		ctx->slice_size.bits = p->slice_bit;
 	} else {
 		reg &= ~(0x1 << 3);
-		writel(reg, mfc_regs->e_enc_options);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:789", reg, mfc_regs->e_enc_options);
 	}
 
 	s5p_mfc_set_slice_mode(ctx);
 
 	/* cyclic intra refresh */
-	writel(p->intra_refresh_mb, mfc_regs->e_ir_size);
-	reg = readl(mfc_regs->e_enc_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:795", p->intra_refresh_mb, mfc_regs->e_ir_size);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:796", mfc_regs->e_enc_options);
 	if (p->intra_refresh_mb == 0)
 		reg &= ~(0x1 << 4);
 	else
 		reg |= (0x1 << 4);
-	writel(reg, mfc_regs->e_enc_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:801", reg, mfc_regs->e_enc_options);
 
 	/* 'NON_REFERENCE_STORE_ENABLE' for debugging */
-	reg = readl(mfc_regs->e_enc_options);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:804", mfc_regs->e_enc_options);
 	reg &= ~(0x1 << 9);
-	writel(reg, mfc_regs->e_enc_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:806", reg, mfc_regs->e_enc_options);
 
 	/* memory structure cur. frame */
 	if (ctx->src_fmt->fourcc == V4L2_PIX_FMT_NV12M) {
 		/* 0: Linear, 1: 2D tiled*/
-		reg = readl(mfc_regs->e_enc_options);
+		reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:811", mfc_regs->e_enc_options);
 		reg &= ~(0x1 << 7);
-		writel(reg, mfc_regs->e_enc_options);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:813", reg, mfc_regs->e_enc_options);
 		/* 0: NV12(CbCr), 1: NV21(CrCb) */
-		writel(0x0, mfc_regs->pixel_format);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:815", 0x0, mfc_regs->pixel_format);
 	} else if (ctx->src_fmt->fourcc == V4L2_PIX_FMT_NV21M) {
 		/* 0: Linear, 1: 2D tiled*/
-		reg = readl(mfc_regs->e_enc_options);
+		reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:818", mfc_regs->e_enc_options);
 		reg &= ~(0x1 << 7);
-		writel(reg, mfc_regs->e_enc_options);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:820", reg, mfc_regs->e_enc_options);
 		/* 0: NV12(CbCr), 1: NV21(CrCb) */
-		writel(0x1, mfc_regs->pixel_format);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:822", 0x1, mfc_regs->pixel_format);
 	} else if (ctx->src_fmt->fourcc == V4L2_PIX_FMT_NV12MT_16X16) {
 		/* 0: Linear, 1: 2D tiled*/
-		reg = readl(mfc_regs->e_enc_options);
+		reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:825", mfc_regs->e_enc_options);
 		reg |= (0x1 << 7);
-		writel(reg, mfc_regs->e_enc_options);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:827", reg, mfc_regs->e_enc_options);
 		/* 0: NV12(CbCr), 1: NV21(CrCb) */
-		writel(0x0, mfc_regs->pixel_format);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:829", 0x0, mfc_regs->pixel_format);
 	}
 
 	/* memory structure recon. frame */
 	/* 0: Linear, 1: 2D tiled */
-	reg = readl(mfc_regs->e_enc_options);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:834", mfc_regs->e_enc_options);
 	reg |= (0x1 << 8);
-	writel(reg, mfc_regs->e_enc_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:836", reg, mfc_regs->e_enc_options);
 
 	/* padding control & value */
-	writel(0x0, mfc_regs->e_padding_ctrl);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:839", 0x0, mfc_regs->e_padding_ctrl);
 	if (p->pad) {
 		reg = 0;
 		/** enable */
@@ -847,64 +847,64 @@ static int s5p_mfc_set_enc_params(struct s5p_mfc_ctx *ctx)
 		reg |= ((p->pad_cb & 0xFF) << 8);
 		/** y value */
 		reg |= p->pad_luma & 0xFF;
-		writel(reg, mfc_regs->e_padding_ctrl);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:850", reg, mfc_regs->e_padding_ctrl);
 	}
 
 	/* rate control config. */
 	reg = 0;
 	/* frame-level rate control */
 	reg |= ((p->rc_frame & 0x1) << 9);
-	writel(reg, mfc_regs->e_rc_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:857", reg, mfc_regs->e_rc_config);
 
 	/* bit rate */
 	if (p->rc_frame)
-		writel(p->rc_bitrate,
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:861", p->rc_bitrate,
 			mfc_regs->e_rc_bit_rate);
 	else
-		writel(1, mfc_regs->e_rc_bit_rate);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:864", 1, mfc_regs->e_rc_bit_rate);
 
 	/* reaction coefficient */
 	if (p->rc_frame) {
 		if (p->rc_reaction_coeff < TIGHT_CBR_MAX) /* tight CBR */
-			writel(1, mfc_regs->e_rc_mode);
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:869", 1, mfc_regs->e_rc_mode);
 		else					  /* loose CBR */
-			writel(2, mfc_regs->e_rc_mode);
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:871", 2, mfc_regs->e_rc_mode);
 	}
 
 	/* seq header ctrl */
-	reg = readl(mfc_regs->e_enc_options);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:875", mfc_regs->e_enc_options);
 	reg &= ~(0x1 << 2);
 	reg |= ((p->seq_hdr_mode & 0x1) << 2);
 
 	/* frame skip mode */
 	reg &= ~(0x3);
 	reg |= (p->frame_skip_mode & 0x3);
-	writel(reg, mfc_regs->e_enc_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:882", reg, mfc_regs->e_enc_options);
 
 	/* 'DROP_CONTROL_ENABLE', disable */
-	reg = readl(mfc_regs->e_rc_config);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:885", mfc_regs->e_rc_config);
 	reg &= ~(0x1 << 10);
-	writel(reg, mfc_regs->e_rc_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:887", reg, mfc_regs->e_rc_config);
 
 	/* setting for MV range [16, 256] */
 	reg = (p->mv_h_range & S5P_FIMV_E_MV_RANGE_V6_MASK);
-	writel(reg, mfc_regs->e_mv_hor_range);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:891", reg, mfc_regs->e_mv_hor_range);
 
 	reg = (p->mv_v_range & S5P_FIMV_E_MV_RANGE_V6_MASK);
-	writel(reg, mfc_regs->e_mv_ver_range);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:894", reg, mfc_regs->e_mv_ver_range);
 
-	writel(0x0, mfc_regs->e_frame_insertion);
-	writel(0x0, mfc_regs->e_roi_buffer_addr);
-	writel(0x0, mfc_regs->e_param_change);
-	writel(0x0, mfc_regs->e_rc_roi_ctrl);
-	writel(0x0, mfc_regs->e_picture_tag);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:896", 0x0, mfc_regs->e_frame_insertion);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:897", 0x0, mfc_regs->e_roi_buffer_addr);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:898", 0x0, mfc_regs->e_param_change);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:899", 0x0, mfc_regs->e_rc_roi_ctrl);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:900", 0x0, mfc_regs->e_picture_tag);
 
-	writel(0x0, mfc_regs->e_bit_count_enable);
-	writel(0x0, mfc_regs->e_max_bit_count);
-	writel(0x0, mfc_regs->e_min_bit_count);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:902", 0x0, mfc_regs->e_bit_count_enable);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:903", 0x0, mfc_regs->e_max_bit_count);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:904", 0x0, mfc_regs->e_min_bit_count);
 
-	writel(0x0, mfc_regs->e_metadata_buffer_addr);
-	writel(0x0, mfc_regs->e_metadata_buffer_size);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:906", 0x0, mfc_regs->e_metadata_buffer_addr);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:907", 0x0, mfc_regs->e_metadata_buffer_size);
 
 	mfc_debug_leave();
 
@@ -925,10 +925,10 @@ static int s5p_mfc_set_enc_params_h264(struct s5p_mfc_ctx *ctx)
 	s5p_mfc_set_enc_params(ctx);
 
 	/* pictype : number of B */
-	reg = readl(mfc_regs->e_gop_config);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:928", mfc_regs->e_gop_config);
 	reg &= ~(0x3 << 16);
 	reg |= ((p->num_b_frame & 0x3) << 16);
-	writel(reg, mfc_regs->e_gop_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:931", reg, mfc_regs->e_gop_config);
 
 	/* profile & level */
 	reg = 0;
@@ -936,19 +936,19 @@ static int s5p_mfc_set_enc_params_h264(struct s5p_mfc_ctx *ctx)
 	reg |= ((p_h264->level & 0xFF) << 8);
 	/** profile - 0 ~ 3 */
 	reg |= p_h264->profile & 0x3F;
-	writel(reg, mfc_regs->e_picture_profile);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:939", reg, mfc_regs->e_picture_profile);
 
 	/* rate control config. */
-	reg = readl(mfc_regs->e_rc_config);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:942", mfc_regs->e_rc_config);
 	/** macroblock level rate control */
 	reg &= ~(0x1 << 8);
 	reg |= ((p->rc_mb & 0x1) << 8);
-	writel(reg, mfc_regs->e_rc_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:946", reg, mfc_regs->e_rc_config);
 
 	/** frame QP */
 	reg &= ~(0x3F);
 	reg |= p_h264->rc_frame_qp & 0x3F;
-	writel(reg, mfc_regs->e_rc_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:951", reg, mfc_regs->e_rc_config);
 
 	/* max & min value of QP */
 	reg = 0;
@@ -956,16 +956,16 @@ static int s5p_mfc_set_enc_params_h264(struct s5p_mfc_ctx *ctx)
 	reg |= ((p_h264->rc_max_qp & 0x3F) << 8);
 	/** min QP */
 	reg |= p_h264->rc_min_qp & 0x3F;
-	writel(reg, mfc_regs->e_rc_qp_bound);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:959", reg, mfc_regs->e_rc_qp_bound);
 
 	/* other QPs */
-	writel(0x0, mfc_regs->e_fixed_picture_qp);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:962", 0x0, mfc_regs->e_fixed_picture_qp);
 	if (!p->rc_frame && !p->rc_mb) {
 		reg = 0;
 		reg |= ((p_h264->rc_b_frame_qp & 0x3F) << 16);
 		reg |= ((p_h264->rc_p_frame_qp & 0x3F) << 8);
 		reg |= p_h264->rc_frame_qp & 0x3F;
-		writel(reg, mfc_regs->e_fixed_picture_qp);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:968", reg, mfc_regs->e_fixed_picture_qp);
 	}
 
 	/* frame rate */
@@ -973,38 +973,38 @@ static int s5p_mfc_set_enc_params_h264(struct s5p_mfc_ctx *ctx)
 		reg = 0;
 		reg |= ((p->rc_framerate_num & 0xFFFF) << 16);
 		reg |= p->rc_framerate_denom & 0xFFFF;
-		writel(reg, mfc_regs->e_rc_frame_rate);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:976", reg, mfc_regs->e_rc_frame_rate);
 	}
 
 	/* vbv buffer size */
 	if (p->frame_skip_mode ==
 			V4L2_MPEG_MFC51_VIDEO_FRAME_SKIP_MODE_BUF_LIMIT) {
-		writel(p_h264->cpb_size & 0xFFFF,
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:982", p_h264->cpb_size & 0xFFFF,
 				mfc_regs->e_vbv_buffer_size);
 
 		if (p->rc_frame)
-			writel(p->vbv_delay, mfc_regs->e_vbv_init_delay);
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:986", p->vbv_delay, mfc_regs->e_vbv_init_delay);
 	}
 
 	/* interlace */
 	reg = 0;
 	reg |= ((p_h264->interlace & 0x1) << 3);
-	writel(reg, mfc_regs->e_h264_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:992", reg, mfc_regs->e_h264_options);
 
 	/* height */
 	if (p_h264->interlace) {
-		writel(ctx->img_height >> 1,
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:996", ctx->img_height >> 1,
 				mfc_regs->e_frame_height); /* 32 align */
 		/* cropped height */
-		writel(ctx->img_height >> 1,
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:999", ctx->img_height >> 1,
 				mfc_regs->e_cropped_frame_height);
 	}
 
 	/* loop filter ctrl */
-	reg = readl(mfc_regs->e_h264_options);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1004", mfc_regs->e_h264_options);
 	reg &= ~(0x3 << 1);
 	reg |= ((p_h264->loop_filter_mode & 0x3) << 1);
-	writel(reg, mfc_regs->e_h264_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1007", reg, mfc_regs->e_h264_options);
 
 	/* loopfilter alpha offset */
 	if (p_h264->loop_filter_alpha < 0) {
@@ -1014,7 +1014,7 @@ static int s5p_mfc_set_enc_params_h264(struct s5p_mfc_ctx *ctx)
 		reg = 0x00;
 		reg |= (p_h264->loop_filter_alpha & 0xF);
 	}
-	writel(reg, mfc_regs->e_h264_lf_alpha_offset);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1017", reg, mfc_regs->e_h264_lf_alpha_offset);
 
 	/* loopfilter beta offset */
 	if (p_h264->loop_filter_beta < 0) {
@@ -1024,28 +1024,28 @@ static int s5p_mfc_set_enc_params_h264(struct s5p_mfc_ctx *ctx)
 		reg = 0x00;
 		reg |= (p_h264->loop_filter_beta & 0xF);
 	}
-	writel(reg, mfc_regs->e_h264_lf_beta_offset);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1027", reg, mfc_regs->e_h264_lf_beta_offset);
 
 	/* entropy coding mode */
-	reg = readl(mfc_regs->e_h264_options);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1030", mfc_regs->e_h264_options);
 	reg &= ~(0x1);
 	reg |= p_h264->entropy_mode & 0x1;
-	writel(reg, mfc_regs->e_h264_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1033", reg, mfc_regs->e_h264_options);
 
 	/* number of ref. picture */
-	reg = readl(mfc_regs->e_h264_options);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1036", mfc_regs->e_h264_options);
 	reg &= ~(0x1 << 7);
 	reg |= (((p_h264->num_ref_pic_4p - 1) & 0x1) << 7);
-	writel(reg, mfc_regs->e_h264_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1039", reg, mfc_regs->e_h264_options);
 
 	/* 8x8 transform enable */
-	reg = readl(mfc_regs->e_h264_options);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1042", mfc_regs->e_h264_options);
 	reg &= ~(0x3 << 12);
 	reg |= ((p_h264->_8x8_transform & 0x3) << 12);
-	writel(reg, mfc_regs->e_h264_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1045", reg, mfc_regs->e_h264_options);
 
 	/* macroblock adaptive scaling features */
-	writel(0x0, mfc_regs->e_mb_rc_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1048", 0x0, mfc_regs->e_mb_rc_config);
 	if (p->rc_mb) {
 		reg = 0;
 		/** dark region */
@@ -1056,95 +1056,95 @@ static int s5p_mfc_set_enc_params_h264(struct s5p_mfc_ctx *ctx)
 		reg |= ((p_h264->rc_mb_static & 0x1) << 1);
 		/** high activity region */
 		reg |= p_h264->rc_mb_activity & 0x1;
-		writel(reg, mfc_regs->e_mb_rc_config);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1059", reg, mfc_regs->e_mb_rc_config);
 	}
 
 	/* aspect ratio VUI */
-	reg = readl(mfc_regs->e_h264_options);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1063", mfc_regs->e_h264_options);
 	reg &= ~(0x1 << 5);
 	reg |= ((p_h264->vui_sar & 0x1) << 5);
-	writel(reg, mfc_regs->e_h264_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1066", reg, mfc_regs->e_h264_options);
 
-	writel(0x0, mfc_regs->e_aspect_ratio);
-	writel(0x0, mfc_regs->e_extended_sar);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1068", 0x0, mfc_regs->e_aspect_ratio);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1069", 0x0, mfc_regs->e_extended_sar);
 	if (p_h264->vui_sar) {
 		/* aspect ration IDC */
 		reg = 0;
 		reg |= p_h264->vui_sar_idc & 0xFF;
-		writel(reg, mfc_regs->e_aspect_ratio);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1074", reg, mfc_regs->e_aspect_ratio);
 		if (p_h264->vui_sar_idc == 0xFF) {
 			/* extended SAR */
 			reg = 0;
 			reg |= (p_h264->vui_ext_sar_width & 0xFFFF) << 16;
 			reg |= p_h264->vui_ext_sar_height & 0xFFFF;
-			writel(reg, mfc_regs->e_extended_sar);
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1080", reg, mfc_regs->e_extended_sar);
 		}
 	}
 
 	/* intra picture period for H.264 open GOP */
 	/* control */
-	reg = readl(mfc_regs->e_h264_options);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1086", mfc_regs->e_h264_options);
 	reg &= ~(0x1 << 4);
 	reg |= ((p_h264->open_gop & 0x1) << 4);
-	writel(reg, mfc_regs->e_h264_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1089", reg, mfc_regs->e_h264_options);
 
 	/* value */
-	writel(0x0, mfc_regs->e_h264_i_period);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1092", 0x0, mfc_regs->e_h264_i_period);
 	if (p_h264->open_gop) {
 		reg = 0;
 		reg |= p_h264->open_gop_size & 0xFFFF;
-		writel(reg, mfc_regs->e_h264_i_period);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1096", reg, mfc_regs->e_h264_i_period);
 	}
 
 	/* 'WEIGHTED_BI_PREDICTION' for B is disable */
-	reg = readl(mfc_regs->e_h264_options);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1100", mfc_regs->e_h264_options);
 	reg &= ~(0x3 << 9);
-	writel(reg, mfc_regs->e_h264_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1102", reg, mfc_regs->e_h264_options);
 
 	/* 'CONSTRAINED_INTRA_PRED_ENABLE' is disable */
-	reg = readl(mfc_regs->e_h264_options);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1105", mfc_regs->e_h264_options);
 	reg &= ~(0x1 << 14);
-	writel(reg, mfc_regs->e_h264_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1107", reg, mfc_regs->e_h264_options);
 
 	/* ASO */
-	reg = readl(mfc_regs->e_h264_options);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1110", mfc_regs->e_h264_options);
 	reg &= ~(0x1 << 6);
 	reg |= ((p_h264->aso & 0x1) << 6);
-	writel(reg, mfc_regs->e_h264_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1113", reg, mfc_regs->e_h264_options);
 
 	/* hier qp enable */
-	reg = readl(mfc_regs->e_h264_options);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1116", mfc_regs->e_h264_options);
 	reg &= ~(0x1 << 8);
 	reg |= ((p_h264->open_gop & 0x1) << 8);
-	writel(reg, mfc_regs->e_h264_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1119", reg, mfc_regs->e_h264_options);
 	reg = 0;
 	if (p_h264->hier_qp && p_h264->hier_qp_layer) {
 		reg |= (p_h264->hier_qp_type & 0x1) << 0x3;
 		reg |= p_h264->hier_qp_layer & 0x7;
-		writel(reg, mfc_regs->e_h264_num_t_layer);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1124", reg, mfc_regs->e_h264_num_t_layer);
 		/* QP value for each layer */
 		for (i = 0; i < p_h264->hier_qp_layer &&
 				i < ARRAY_SIZE(p_h264->hier_qp_layer_qp); i++) {
-			writel(p_h264->hier_qp_layer_qp[i],
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1128", p_h264->hier_qp_layer_qp[i],
 				mfc_regs->e_h264_hierarchical_qp_layer0
 				+ i * 4);
 		}
 	}
 	/* number of coding layer should be zero when hierarchical is disable */
-	writel(reg, mfc_regs->e_h264_num_t_layer);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1134", reg, mfc_regs->e_h264_num_t_layer);
 
 	/* frame packing SEI generation */
-	reg = readl(mfc_regs->e_h264_options);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1137", mfc_regs->e_h264_options);
 	reg &= ~(0x1 << 25);
 	reg |= ((p_h264->sei_frame_packing & 0x1) << 25);
-	writel(reg, mfc_regs->e_h264_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1140", reg, mfc_regs->e_h264_options);
 	if (p_h264->sei_frame_packing) {
 		reg = 0;
 		/** current frame0 flag */
 		reg |= ((p_h264->sei_fp_curr_frame_0 & 0x1) << 2);
 		/** arrangement type */
 		reg |= p_h264->sei_fp_arrangement_type & 0x3;
-		writel(reg, mfc_regs->e_h264_frame_packing_sei_info);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1147", reg, mfc_regs->e_h264_frame_packing_sei_info);
 	}
 
 	if (p_h264->fmo) {
@@ -1153,7 +1153,7 @@ static int s5p_mfc_set_enc_params_h264(struct s5p_mfc_ctx *ctx)
 			if (p_h264->fmo_slice_grp > 4)
 				p_h264->fmo_slice_grp = 4;
 			for (i = 0; i < (p_h264->fmo_slice_grp & 0xF); i++)
-				writel(p_h264->fmo_run_len[i] - 1,
+				pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1156", p_h264->fmo_run_len[i] - 1,
 					mfc_regs->e_h264_fmo_run_length_minus1_0
 					+ i * 4);
 			break;
@@ -1165,10 +1165,10 @@ static int s5p_mfc_set_enc_params_h264(struct s5p_mfc_ctx *ctx)
 		case V4L2_MPEG_VIDEO_H264_FMO_MAP_TYPE_WIPE_SCAN:
 			if (p_h264->fmo_slice_grp > 2)
 				p_h264->fmo_slice_grp = 2;
-			writel(p_h264->fmo_chg_dir & 0x1,
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1168", p_h264->fmo_chg_dir & 0x1,
 				mfc_regs->e_h264_fmo_slice_grp_change_dir);
 			/* the valid range is 0 ~ number of macroblocks -1 */
-			writel(p_h264->fmo_chg_rate,
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1171", p_h264->fmo_chg_rate,
 			mfc_regs->e_h264_fmo_slice_grp_change_rate_minus1);
 			break;
 		default:
@@ -1179,12 +1179,12 @@ static int s5p_mfc_set_enc_params_h264(struct s5p_mfc_ctx *ctx)
 			break;
 		}
 
-		writel(p_h264->fmo_map_type,
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1182", p_h264->fmo_map_type,
 				mfc_regs->e_h264_fmo_slice_grp_map_type);
-		writel(p_h264->fmo_slice_grp - 1,
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1184", p_h264->fmo_slice_grp - 1,
 				mfc_regs->e_h264_fmo_num_slice_grp_minus1);
 	} else {
-		writel(0, mfc_regs->e_h264_fmo_num_slice_grp_minus1);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1187", 0, mfc_regs->e_h264_fmo_num_slice_grp_minus1);
 	}
 
 	mfc_debug_leave();
@@ -1205,10 +1205,10 @@ static int s5p_mfc_set_enc_params_mpeg4(struct s5p_mfc_ctx *ctx)
 	s5p_mfc_set_enc_params(ctx);
 
 	/* pictype : number of B */
-	reg = readl(mfc_regs->e_gop_config);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1208", mfc_regs->e_gop_config);
 	reg &= ~(0x3 << 16);
 	reg |= ((p->num_b_frame & 0x3) << 16);
-	writel(reg, mfc_regs->e_gop_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1211", reg, mfc_regs->e_gop_config);
 
 	/* profile & level */
 	reg = 0;
@@ -1216,19 +1216,19 @@ static int s5p_mfc_set_enc_params_mpeg4(struct s5p_mfc_ctx *ctx)
 	reg |= ((p_mpeg4->level & 0xFF) << 8);
 	/** profile - 0 ~ 1 */
 	reg |= p_mpeg4->profile & 0x3F;
-	writel(reg, mfc_regs->e_picture_profile);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1219", reg, mfc_regs->e_picture_profile);
 
 	/* rate control config. */
-	reg = readl(mfc_regs->e_rc_config);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1222", mfc_regs->e_rc_config);
 	/** macroblock level rate control */
 	reg &= ~(0x1 << 8);
 	reg |= ((p->rc_mb & 0x1) << 8);
-	writel(reg, mfc_regs->e_rc_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1226", reg, mfc_regs->e_rc_config);
 
 	/** frame QP */
 	reg &= ~(0x3F);
 	reg |= p_mpeg4->rc_frame_qp & 0x3F;
-	writel(reg, mfc_regs->e_rc_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1231", reg, mfc_regs->e_rc_config);
 
 	/* max & min value of QP */
 	reg = 0;
@@ -1236,16 +1236,16 @@ static int s5p_mfc_set_enc_params_mpeg4(struct s5p_mfc_ctx *ctx)
 	reg |= ((p_mpeg4->rc_max_qp & 0x3F) << 8);
 	/** min QP */
 	reg |= p_mpeg4->rc_min_qp & 0x3F;
-	writel(reg, mfc_regs->e_rc_qp_bound);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1239", reg, mfc_regs->e_rc_qp_bound);
 
 	/* other QPs */
-	writel(0x0, mfc_regs->e_fixed_picture_qp);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1242", 0x0, mfc_regs->e_fixed_picture_qp);
 	if (!p->rc_frame && !p->rc_mb) {
 		reg = 0;
 		reg |= ((p_mpeg4->rc_b_frame_qp & 0x3F) << 16);
 		reg |= ((p_mpeg4->rc_p_frame_qp & 0x3F) << 8);
 		reg |= p_mpeg4->rc_frame_qp & 0x3F;
-		writel(reg, mfc_regs->e_fixed_picture_qp);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1248", reg, mfc_regs->e_fixed_picture_qp);
 	}
 
 	/* frame rate */
@@ -1253,21 +1253,21 @@ static int s5p_mfc_set_enc_params_mpeg4(struct s5p_mfc_ctx *ctx)
 		reg = 0;
 		reg |= ((p->rc_framerate_num & 0xFFFF) << 16);
 		reg |= p->rc_framerate_denom & 0xFFFF;
-		writel(reg, mfc_regs->e_rc_frame_rate);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1256", reg, mfc_regs->e_rc_frame_rate);
 	}
 
 	/* vbv buffer size */
 	if (p->frame_skip_mode ==
 			V4L2_MPEG_MFC51_VIDEO_FRAME_SKIP_MODE_BUF_LIMIT) {
-		writel(p->vbv_size & 0xFFFF, mfc_regs->e_vbv_buffer_size);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1262", p->vbv_size & 0xFFFF, mfc_regs->e_vbv_buffer_size);
 
 		if (p->rc_frame)
-			writel(p->vbv_delay, mfc_regs->e_vbv_init_delay);
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1265", p->vbv_delay, mfc_regs->e_vbv_init_delay);
 	}
 
 	/* Disable HEC */
-	writel(0x0, mfc_regs->e_mpeg4_options);
-	writel(0x0, mfc_regs->e_mpeg4_hec_period);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1269", 0x0, mfc_regs->e_mpeg4_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1270", 0x0, mfc_regs->e_mpeg4_hec_period);
 
 	mfc_debug_leave();
 
@@ -1290,19 +1290,19 @@ static int s5p_mfc_set_enc_params_h263(struct s5p_mfc_ctx *ctx)
 	reg = 0;
 	/** profile */
 	reg |= (0x1 << 4);
-	writel(reg, mfc_regs->e_picture_profile);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1293", reg, mfc_regs->e_picture_profile);
 
 	/* rate control config. */
-	reg = readl(mfc_regs->e_rc_config);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1296", mfc_regs->e_rc_config);
 	/** macroblock level rate control */
 	reg &= ~(0x1 << 8);
 	reg |= ((p->rc_mb & 0x1) << 8);
-	writel(reg, mfc_regs->e_rc_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1300", reg, mfc_regs->e_rc_config);
 
 	/** frame QP */
 	reg &= ~(0x3F);
 	reg |= p_h263->rc_frame_qp & 0x3F;
-	writel(reg, mfc_regs->e_rc_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1305", reg, mfc_regs->e_rc_config);
 
 	/* max & min value of QP */
 	reg = 0;
@@ -1310,16 +1310,16 @@ static int s5p_mfc_set_enc_params_h263(struct s5p_mfc_ctx *ctx)
 	reg |= ((p_h263->rc_max_qp & 0x3F) << 8);
 	/** min QP */
 	reg |= p_h263->rc_min_qp & 0x3F;
-	writel(reg, mfc_regs->e_rc_qp_bound);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1313", reg, mfc_regs->e_rc_qp_bound);
 
 	/* other QPs */
-	writel(0x0, mfc_regs->e_fixed_picture_qp);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1316", 0x0, mfc_regs->e_fixed_picture_qp);
 	if (!p->rc_frame && !p->rc_mb) {
 		reg = 0;
 		reg |= ((p_h263->rc_b_frame_qp & 0x3F) << 16);
 		reg |= ((p_h263->rc_p_frame_qp & 0x3F) << 8);
 		reg |= p_h263->rc_frame_qp & 0x3F;
-		writel(reg, mfc_regs->e_fixed_picture_qp);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1322", reg, mfc_regs->e_fixed_picture_qp);
 	}
 
 	/* frame rate */
@@ -1327,16 +1327,16 @@ static int s5p_mfc_set_enc_params_h263(struct s5p_mfc_ctx *ctx)
 		reg = 0;
 		reg |= ((p->rc_framerate_num & 0xFFFF) << 16);
 		reg |= p->rc_framerate_denom & 0xFFFF;
-		writel(reg, mfc_regs->e_rc_frame_rate);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1330", reg, mfc_regs->e_rc_frame_rate);
 	}
 
 	/* vbv buffer size */
 	if (p->frame_skip_mode ==
 			V4L2_MPEG_MFC51_VIDEO_FRAME_SKIP_MODE_BUF_LIMIT) {
-		writel(p->vbv_size & 0xFFFF, mfc_regs->e_vbv_buffer_size);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1336", p->vbv_size & 0xFFFF, mfc_regs->e_vbv_buffer_size);
 
 		if (p->rc_frame)
-			writel(p->vbv_delay, mfc_regs->e_vbv_init_delay);
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1339", p->vbv_delay, mfc_regs->e_vbv_init_delay);
 	}
 
 	mfc_debug_leave();
@@ -1358,57 +1358,57 @@ static int s5p_mfc_set_enc_params_vp8(struct s5p_mfc_ctx *ctx)
 	s5p_mfc_set_enc_params(ctx);
 
 	/* pictype : number of B */
-	reg = readl(mfc_regs->e_gop_config);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1361", mfc_regs->e_gop_config);
 	reg &= ~(0x3 << 16);
 	reg |= ((p->num_b_frame & 0x3) << 16);
-	writel(reg, mfc_regs->e_gop_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1364", reg, mfc_regs->e_gop_config);
 
 	/* profile - 0 ~ 3 */
 	reg = p_vp8->profile & 0x3;
-	writel(reg, mfc_regs->e_picture_profile);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1368", reg, mfc_regs->e_picture_profile);
 
 	/* rate control config. */
-	reg = readl(mfc_regs->e_rc_config);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1371", mfc_regs->e_rc_config);
 	/** macroblock level rate control */
 	reg &= ~(0x1 << 8);
 	reg |= ((p->rc_mb & 0x1) << 8);
-	writel(reg, mfc_regs->e_rc_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1375", reg, mfc_regs->e_rc_config);
 
 	/* frame rate */
 	if (p->rc_frame && p->rc_framerate_num && p->rc_framerate_denom) {
 		reg = 0;
 		reg |= ((p->rc_framerate_num & 0xFFFF) << 16);
 		reg |= p->rc_framerate_denom & 0xFFFF;
-		writel(reg, mfc_regs->e_rc_frame_rate);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1382", reg, mfc_regs->e_rc_frame_rate);
 	}
 
 	/* frame QP */
 	reg &= ~(0x7F);
 	reg |= p_vp8->rc_frame_qp & 0x7F;
-	writel(reg, mfc_regs->e_rc_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1388", reg, mfc_regs->e_rc_config);
 
 	/* other QPs */
-	writel(0x0, mfc_regs->e_fixed_picture_qp);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1391", 0x0, mfc_regs->e_fixed_picture_qp);
 	if (!p->rc_frame && !p->rc_mb) {
 		reg = 0;
 		reg |= ((p_vp8->rc_p_frame_qp & 0x7F) << 8);
 		reg |= p_vp8->rc_frame_qp & 0x7F;
-		writel(reg, mfc_regs->e_fixed_picture_qp);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1396", reg, mfc_regs->e_fixed_picture_qp);
 	}
 
 	/* max QP */
 	reg = ((p_vp8->rc_max_qp & 0x7F) << 8);
 	/* min QP */
 	reg |= p_vp8->rc_min_qp & 0x7F;
-	writel(reg, mfc_regs->e_rc_qp_bound);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1403", reg, mfc_regs->e_rc_qp_bound);
 
 	/* vbv buffer size */
 	if (p->frame_skip_mode ==
 			V4L2_MPEG_MFC51_VIDEO_FRAME_SKIP_MODE_BUF_LIMIT) {
-		writel(p->vbv_size & 0xFFFF, mfc_regs->e_vbv_buffer_size);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1408", p->vbv_size & 0xFFFF, mfc_regs->e_vbv_buffer_size);
 
 		if (p->rc_frame)
-			writel(p->vbv_delay, mfc_regs->e_vbv_init_delay);
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1411", p->vbv_delay, mfc_regs->e_vbv_init_delay);
 	}
 
 	/* VP8 specific params */
@@ -1430,7 +1430,7 @@ static int s5p_mfc_set_enc_params_vp8(struct s5p_mfc_ctx *ctx)
 	}
 	reg |= (val & 0xF) << 3;
 	reg |= (p_vp8->num_ref & 0x2);
-	writel(reg, mfc_regs->e_vp8_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1433", reg, mfc_regs->e_vp8_options);
 
 	mfc_debug_leave();
 
@@ -1451,11 +1451,11 @@ static int s5p_mfc_set_enc_params_hevc(struct s5p_mfc_ctx *ctx)
 	s5p_mfc_set_enc_params(ctx);
 
 	/* pictype : number of B */
-	reg = readl(mfc_regs->e_gop_config);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1454", mfc_regs->e_gop_config);
 	/* num_b_frame - 0 ~ 2 */
 	reg &= ~(0x3 << 16);
 	reg |= (p->num_b_frame << 16);
-	writel(reg, mfc_regs->e_gop_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1458", reg, mfc_regs->e_gop_config);
 
 	/* UHD encoding case */
 	if ((ctx->img_width == 3840) && (ctx->img_height == 2160)) {
@@ -1473,7 +1473,7 @@ static int s5p_mfc_set_enc_params_hevc(struct s5p_mfc_ctx *ctx)
 	reg |= (p_hevc->level << 8);
 	/* tier - 0 ~ 1 */
 	reg |= (p_hevc->tier << 16);
-	writel(reg, mfc_regs->e_picture_profile);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1476", reg, mfc_regs->e_picture_profile);
 
 	switch (p_hevc->loopfilter) {
 	case V4L2_MPEG_VIDEO_HEVC_LOOP_FILTER_MODE_DISABLED:
@@ -1510,52 +1510,52 @@ static int s5p_mfc_set_enc_params_hevc(struct s5p_mfc_ctx *ctx)
 	reg |= (p_hevc->encoding_nostartcode_enable & 0x1) << 23;
 	reg |= (p_hevc->prepend_sps_pps_to_idr << 26);
 
-	writel(reg, mfc_regs->e_hevc_options);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1513", reg, mfc_regs->e_hevc_options);
 	/* refresh period */
 	if (p_hevc->refreshtype) {
 		reg = 0;
 		reg |= (p_hevc->refreshperiod & 0xFFFF);
-		writel(reg, mfc_regs->e_hevc_refresh_period);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1518", reg, mfc_regs->e_hevc_refresh_period);
 	}
 	/* loop filter setting */
 	if (!(p_hevc->loopfilter_disable & 0x1)) {
 		reg = 0;
 		reg |= (p_hevc->lf_beta_offset_div2);
-		writel(reg, mfc_regs->e_hevc_lf_beta_offset_div2);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1524", reg, mfc_regs->e_hevc_lf_beta_offset_div2);
 		reg = 0;
 		reg |= (p_hevc->lf_tc_offset_div2);
-		writel(reg, mfc_regs->e_hevc_lf_tc_offset_div2);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1527", reg, mfc_regs->e_hevc_lf_tc_offset_div2);
 	}
 	/* hier qp enable */
 	if (p_hevc->num_hier_layer) {
 		reg = 0;
 		reg |= (p_hevc->hier_qp_type & 0x1) << 0x3;
 		reg |= p_hevc->num_hier_layer & 0x7;
-		writel(reg, mfc_regs->e_num_t_layer);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1534", reg, mfc_regs->e_num_t_layer);
 		/* QP value for each layer */
 		if (p_hevc->hier_qp_enable) {
 			for (i = 0; i < 7; i++)
-				writel(p_hevc->hier_qp_layer[i],
+				pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1538", p_hevc->hier_qp_layer[i],
 					mfc_regs->e_hier_qp_layer0 + i * 4);
 		}
 		if (p->rc_frame) {
 			for (i = 0; i < 7; i++)
-				writel(p_hevc->hier_bit_layer[i],
+				pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1543", p_hevc->hier_bit_layer[i],
 						mfc_regs->e_hier_bit_rate_layer0
 						+ i * 4);
 		}
 	}
 
 	/* rate control config. */
-	reg = readl(mfc_regs->e_rc_config);
+	reg = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1550", mfc_regs->e_rc_config);
 	/* macroblock level rate control */
 	reg &= ~(0x1 << 8);
 	reg |= (p->rc_mb << 8);
-	writel(reg, mfc_regs->e_rc_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1554", reg, mfc_regs->e_rc_config);
 	/* frame QP */
 	reg &= ~(0xFF);
 	reg |= p_hevc->rc_frame_qp;
-	writel(reg, mfc_regs->e_rc_config);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1558", reg, mfc_regs->e_rc_config);
 
 	/* frame rate */
 	if (p->rc_frame) {
@@ -1564,7 +1564,7 @@ static int s5p_mfc_set_enc_params_hevc(struct s5p_mfc_ctx *ctx)
 		reg |= ((p_hevc->rc_framerate) << 16);
 		reg &= ~(0xFFFF);
 		reg |= FRAME_DELTA_DEFAULT;
-		writel(reg, mfc_regs->e_rc_frame_rate);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1567", reg, mfc_regs->e_rc_frame_rate);
 	}
 
 	/* max & min value of QP */
@@ -1575,9 +1575,9 @@ static int s5p_mfc_set_enc_params_hevc(struct s5p_mfc_ctx *ctx)
 	/* min QP */
 	reg &= ~(0xFF);
 	reg |= p_hevc->rc_min_qp;
-	writel(reg, mfc_regs->e_rc_qp_bound);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1578", reg, mfc_regs->e_rc_qp_bound);
 
-	writel(0x0, mfc_regs->e_fixed_picture_qp);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1580", 0x0, mfc_regs->e_fixed_picture_qp);
 	if (!p->rc_frame && !p->rc_mb) {
 		reg = 0;
 		reg &= ~(0xFF << 16);
@@ -1586,7 +1586,7 @@ static int s5p_mfc_set_enc_params_hevc(struct s5p_mfc_ctx *ctx)
 		reg |= (p_hevc->rc_p_frame_qp << 8);
 		reg &= ~(0xFF);
 		reg |= p_hevc->rc_frame_qp;
-		writel(reg, mfc_regs->e_fixed_picture_qp);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1589", reg, mfc_regs->e_fixed_picture_qp);
 	}
 	mfc_debug_leave();
 
@@ -1605,20 +1605,20 @@ static int s5p_mfc_init_decode_v6(struct s5p_mfc_ctx *ctx)
 	mfc_debug(2, "InstNo: %d/%d\n", ctx->inst_no,
 			S5P_FIMV_CH_SEQ_HEADER_V6);
 	mfc_debug(2, "BUFs: %08x %08x %08x\n",
-		  readl(mfc_regs->d_cpb_buffer_addr),
-		  readl(mfc_regs->d_cpb_buffer_addr),
-		  readl(mfc_regs->d_cpb_buffer_addr));
+		  pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1608", mfc_regs->d_cpb_buffer_addr),
+		  pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1609", mfc_regs->d_cpb_buffer_addr),
+		  pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1610", mfc_regs->d_cpb_buffer_addr));
 
 	/* FMO_ASO_CTRL - 0: Enable, 1: Disable */
 	reg |= (fmo_aso_ctrl << S5P_FIMV_D_OPT_FMO_ASO_CTRL_MASK_V6);
 
 	if (ctx->display_delay_enable) {
 		reg |= (0x1 << S5P_FIMV_D_OPT_DDELAY_EN_SHIFT_V6);
-		writel(ctx->display_delay, mfc_regs->d_display_delay);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1617", ctx->display_delay, mfc_regs->d_display_delay);
 	}
 
 	if (IS_MFCV7_PLUS(dev) || IS_MFCV6_V2(dev)) {
-		writel(reg, mfc_regs->d_dec_options);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1621", reg, mfc_regs->d_dec_options);
 		reg = 0;
 	}
 
@@ -1633,21 +1633,21 @@ static int s5p_mfc_init_decode_v6(struct s5p_mfc_ctx *ctx)
 		reg |= (0x1 << S5P_FIMV_D_OPT_TILE_MODE_SHIFT_V6);
 
 	if (IS_MFCV7_PLUS(dev) || IS_MFCV6_V2(dev))
-		writel(reg, mfc_regs->d_init_buffer_options);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1636", reg, mfc_regs->d_init_buffer_options);
 	else
-		writel(reg, mfc_regs->d_dec_options);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1638", reg, mfc_regs->d_dec_options);
 
 	/* 0: NV12(CbCr), 1: NV21(CrCb) */
 	if (ctx->dst_fmt->fourcc == V4L2_PIX_FMT_NV21M)
-		writel(0x1, mfc_regs->pixel_format);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1642", 0x1, mfc_regs->pixel_format);
 	else
-		writel(0x0, mfc_regs->pixel_format);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1644", 0x0, mfc_regs->pixel_format);
 
 
 	/* sei parse */
-	writel(ctx->sei_fp_parse & 0x1, mfc_regs->d_sei_enable);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1648", ctx->sei_fp_parse & 0x1, mfc_regs->d_sei_enable);
 
-	writel(ctx->inst_no, mfc_regs->instance_id);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1650", ctx->inst_no, mfc_regs->instance_id);
 	s5p_mfc_hw_call(dev->mfc_cmds, cmd_host2risc, dev,
 			S5P_FIMV_CH_SEQ_HEADER_V6, NULL);
 
@@ -1662,7 +1662,7 @@ static inline void s5p_mfc_set_flush(struct s5p_mfc_ctx *ctx, int flush)
 
 	if (flush) {
 		dev->curr_ctx = ctx->num;
-		writel(ctx->inst_no, mfc_regs->instance_id);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1665", ctx->inst_no, mfc_regs->instance_id);
 		s5p_mfc_hw_call(dev->mfc_cmds, cmd_host2risc, dev,
 				S5P_FIMV_H2R_CMD_FLUSH_V6, NULL);
 	}
@@ -1675,10 +1675,10 @@ static int s5p_mfc_decode_one_frame_v6(struct s5p_mfc_ctx *ctx,
 	struct s5p_mfc_dev *dev = ctx->dev;
 	const struct s5p_mfc_regs *mfc_regs = dev->mfc_regs;
 
-	writel(ctx->dec_dst_flag, mfc_regs->d_available_dpb_flag_lower);
-	writel(ctx->slice_interface & 0x1, mfc_regs->d_slice_if_enable);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1678", ctx->dec_dst_flag, mfc_regs->d_available_dpb_flag_lower);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1679", ctx->slice_interface & 0x1, mfc_regs->d_slice_if_enable);
 
-	writel(ctx->inst_no, mfc_regs->instance_id);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1681", ctx->inst_no, mfc_regs->instance_id);
 	/* Issue different commands to instance basing on whether it
 	 * is the last frame or not. */
 	switch (last_frame) {
@@ -1722,11 +1722,11 @@ static int s5p_mfc_init_encode_v6(struct s5p_mfc_ctx *ctx)
 
 	/* Set stride lengths for v7 & above */
 	if (IS_MFCV7_PLUS(dev)) {
-		writel(ctx->img_width, mfc_regs->e_source_first_plane_stride);
-		writel(ctx->img_width, mfc_regs->e_source_second_plane_stride);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1725", ctx->img_width, mfc_regs->e_source_first_plane_stride);
+		pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1726", ctx->img_width, mfc_regs->e_source_second_plane_stride);
 	}
 
-	writel(ctx->inst_no, mfc_regs->instance_id);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1729", ctx->inst_no, mfc_regs->instance_id);
 	s5p_mfc_hw_call(dev->mfc_cmds, cmd_host2risc, dev,
 			S5P_FIMV_CH_SEQ_HEADER_V6, NULL);
 
@@ -1743,7 +1743,7 @@ static int s5p_mfc_h264_set_aso_slice_order_v6(struct s5p_mfc_ctx *ctx)
 
 	if (p_h264->aso) {
 		for (i = 0; i < ARRAY_SIZE(p_h264->aso_slice_order); i++) {
-			writel(p_h264->aso_slice_order[i],
+			pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1746", p_h264->aso_slice_order[i],
 				mfc_regs->e_h264_aso_slice_order_0 + i * 4);
 		}
 	}
@@ -1771,7 +1771,7 @@ static int s5p_mfc_encode_one_frame_v6(struct s5p_mfc_ctx *ctx)
 	else
 		cmd = S5P_FIMV_CH_LAST_FRAME_V6;
 
-	writel(ctx->inst_no, mfc_regs->instance_id);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:1774", ctx->inst_no, mfc_regs->instance_id);
 	s5p_mfc_hw_call(dev->mfc_cmds, cmd_host2risc, dev, cmd, NULL);
 
 	mfc_debug(2, "--\n");
@@ -2079,8 +2079,8 @@ static void s5p_mfc_try_run_v6(struct s5p_mfc_dev *dev)
 static void s5p_mfc_clear_int_flags_v6(struct s5p_mfc_dev *dev)
 {
 	const struct s5p_mfc_regs *mfc_regs = dev->mfc_regs;
-	writel(0, mfc_regs->risc2host_command);
-	writel(0, mfc_regs->risc2host_int);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2082", 0, mfc_regs->risc2host_command);
+	pete_writel("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2083", 0, mfc_regs->risc2host_int);
 }
 
 static unsigned int
@@ -2089,7 +2089,7 @@ s5p_mfc_read_info_v6(struct s5p_mfc_ctx *ctx, unsigned long ofs)
 	int ret;
 
 	s5p_mfc_clock_on();
-	ret = readl((void __iomem *)ofs);
+	ret = pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2092", (void __iomem *)ofs);
 	s5p_mfc_clock_off();
 
 	return ret;
@@ -2097,51 +2097,51 @@ s5p_mfc_read_info_v6(struct s5p_mfc_ctx *ctx, unsigned long ofs)
 
 static int s5p_mfc_get_dspl_y_adr_v6(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->d_display_first_plane_addr);
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2100", dev->mfc_regs->d_display_first_plane_addr);
 }
 
 static int s5p_mfc_get_dec_y_adr_v6(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->d_decoded_first_plane_addr);
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2105", dev->mfc_regs->d_decoded_first_plane_addr);
 }
 
 static int s5p_mfc_get_dspl_status_v6(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->d_display_status);
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2110", dev->mfc_regs->d_display_status);
 }
 
 static int s5p_mfc_get_dec_status_v6(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->d_decoded_status);
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2115", dev->mfc_regs->d_decoded_status);
 }
 
 static int s5p_mfc_get_dec_frame_type_v6(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->d_decoded_frame_type) &
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2120", dev->mfc_regs->d_decoded_frame_type) &
 		S5P_FIMV_DECODE_FRAME_MASK_V6;
 }
 
 static int s5p_mfc_get_disp_frame_type_v6(struct s5p_mfc_ctx *ctx)
 {
 	struct s5p_mfc_dev *dev = ctx->dev;
-	return readl(dev->mfc_regs->d_display_frame_type) &
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2127", dev->mfc_regs->d_display_frame_type) &
 		S5P_FIMV_DECODE_FRAME_MASK_V6;
 }
 
 static int s5p_mfc_get_consumed_stream_v6(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->d_decoded_nal_size);
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2133", dev->mfc_regs->d_decoded_nal_size);
 }
 
 static int s5p_mfc_get_int_reason_v6(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->risc2host_command) &
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2138", dev->mfc_regs->risc2host_command) &
 		S5P_FIMV_RISC2HOST_CMD_MASK;
 }
 
 static int s5p_mfc_get_int_err_v6(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->error_code);
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2144", dev->mfc_regs->error_code);
 }
 
 static int s5p_mfc_err_dec_v6(unsigned int err)
@@ -2151,52 +2151,52 @@ static int s5p_mfc_err_dec_v6(unsigned int err)
 
 static int s5p_mfc_get_img_width_v6(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->d_display_frame_width);
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2154", dev->mfc_regs->d_display_frame_width);
 }
 
 static int s5p_mfc_get_img_height_v6(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->d_display_frame_height);
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2159", dev->mfc_regs->d_display_frame_height);
 }
 
 static int s5p_mfc_get_dpb_count_v6(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->d_min_num_dpb);
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2164", dev->mfc_regs->d_min_num_dpb);
 }
 
 static int s5p_mfc_get_mv_count_v6(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->d_min_num_mv);
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2169", dev->mfc_regs->d_min_num_mv);
 }
 
 static int s5p_mfc_get_min_scratch_buf_size(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->d_min_scratch_buffer_size);
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2174", dev->mfc_regs->d_min_scratch_buffer_size);
 }
 
 static int s5p_mfc_get_e_min_scratch_buf_size(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->e_min_scratch_buffer_size);
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2179", dev->mfc_regs->e_min_scratch_buffer_size);
 }
 
 static int s5p_mfc_get_inst_no_v6(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->ret_instance_id);
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2184", dev->mfc_regs->ret_instance_id);
 }
 
 static int s5p_mfc_get_enc_dpb_count_v6(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->e_num_dpb);
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2189", dev->mfc_regs->e_num_dpb);
 }
 
 static int s5p_mfc_get_enc_strm_size_v6(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->e_stream_size);
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2194", dev->mfc_regs->e_stream_size);
 }
 
 static int s5p_mfc_get_enc_slice_type_v6(struct s5p_mfc_dev *dev)
 {
-	return readl(dev->mfc_regs->e_slice_type);
+	return pete_readl("drivers/media/platform/s5p-mfc/s5p_mfc_opr_v6.c:2199", dev->mfc_regs->e_slice_type);
 }
 
 static unsigned int s5p_mfc_get_pic_type_top_v6(struct s5p_mfc_ctx *ctx)

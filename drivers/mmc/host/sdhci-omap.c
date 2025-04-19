@@ -125,13 +125,13 @@ static void sdhci_omap_stop_clock(struct sdhci_omap_host *omap_host);
 static inline u32 sdhci_omap_readl(struct sdhci_omap_host *host,
 				   unsigned int offset)
 {
-	return readl(host->base + offset);
+	return pete_readl("drivers/mmc/host/sdhci-omap.c:128", host->base + offset);
 }
 
 static inline void sdhci_omap_writel(struct sdhci_omap_host *host,
 				     unsigned int offset, u32 data)
 {
-	writel(data, host->base + offset);
+	pete_writel("drivers/mmc/host/sdhci-omap.c:134", data, host->base + offset);
 }
 
 static int sdhci_omap_set_pbias(struct sdhci_omap_host *omap_host,

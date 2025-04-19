@@ -231,11 +231,11 @@ static inline void sun6i_dma_dump_com_regs(struct sun6i_dma_dev *sdev)
 		"\tpend0(%04x): 0x%08x\n"
 		"\tpend1(%04x): 0x%08x\n"
 		"\tstats(%04x): 0x%08x\n",
-		DMA_IRQ_EN(0), readl(sdev->base + DMA_IRQ_EN(0)),
-		DMA_IRQ_EN(1), readl(sdev->base + DMA_IRQ_EN(1)),
-		DMA_IRQ_STAT(0), readl(sdev->base + DMA_IRQ_STAT(0)),
-		DMA_IRQ_STAT(1), readl(sdev->base + DMA_IRQ_STAT(1)),
-		DMA_STAT, readl(sdev->base + DMA_STAT));
+		DMA_IRQ_EN(0), pete_readl("drivers/dma/sun6i-dma.c:234", sdev->base + DMA_IRQ_EN(0)),
+		DMA_IRQ_EN(1), pete_readl("drivers/dma/sun6i-dma.c:235", sdev->base + DMA_IRQ_EN(1)),
+		DMA_IRQ_STAT(0), pete_readl("drivers/dma/sun6i-dma.c:236", sdev->base + DMA_IRQ_STAT(0)),
+		DMA_IRQ_STAT(1), pete_readl("drivers/dma/sun6i-dma.c:237", sdev->base + DMA_IRQ_STAT(1)),
+		DMA_STAT, pete_readl("drivers/dma/sun6i-dma.c:238", sdev->base + DMA_STAT));
 }
 
 static inline void sun6i_dma_dump_chan_regs(struct sun6i_dma_dev *sdev,
@@ -254,21 +254,21 @@ static inline void sun6i_dma_dump_chan_regs(struct sun6i_dma_dev *sdev,
 		"\t_para(%04x): \t0x%08x\n\n",
 		pchan->idx, &reg,
 		DMA_CHAN_ENABLE,
-		readl(pchan->base + DMA_CHAN_ENABLE),
+		pete_readl("drivers/dma/sun6i-dma.c:257", pchan->base + DMA_CHAN_ENABLE),
 		DMA_CHAN_PAUSE,
-		readl(pchan->base + DMA_CHAN_PAUSE),
+		pete_readl("drivers/dma/sun6i-dma.c:259", pchan->base + DMA_CHAN_PAUSE),
 		DMA_CHAN_LLI_ADDR,
-		readl(pchan->base + DMA_CHAN_LLI_ADDR),
+		pete_readl("drivers/dma/sun6i-dma.c:261", pchan->base + DMA_CHAN_LLI_ADDR),
 		DMA_CHAN_CUR_CFG,
-		readl(pchan->base + DMA_CHAN_CUR_CFG),
+		pete_readl("drivers/dma/sun6i-dma.c:263", pchan->base + DMA_CHAN_CUR_CFG),
 		DMA_CHAN_CUR_SRC,
-		readl(pchan->base + DMA_CHAN_CUR_SRC),
+		pete_readl("drivers/dma/sun6i-dma.c:265", pchan->base + DMA_CHAN_CUR_SRC),
 		DMA_CHAN_CUR_DST,
-		readl(pchan->base + DMA_CHAN_CUR_DST),
+		pete_readl("drivers/dma/sun6i-dma.c:267", pchan->base + DMA_CHAN_CUR_DST),
 		DMA_CHAN_CUR_CNT,
-		readl(pchan->base + DMA_CHAN_CUR_CNT),
+		pete_readl("drivers/dma/sun6i-dma.c:269", pchan->base + DMA_CHAN_CUR_CNT),
 		DMA_CHAN_CUR_PARA,
-		readl(pchan->base + DMA_CHAN_CUR_PARA));
+		pete_readl("drivers/dma/sun6i-dma.c:271", pchan->base + DMA_CHAN_CUR_PARA));
 }
 
 static inline s8 convert_burst(u32 maxburst)
@@ -294,12 +294,12 @@ static inline s8 convert_buswidth(enum dma_slave_buswidth addr_width)
 
 static void sun6i_enable_clock_autogate_a23(struct sun6i_dma_dev *sdev)
 {
-	writel(SUN8I_DMA_GATE_ENABLE, sdev->base + SUN8I_DMA_GATE);
+	pete_writel("drivers/dma/sun6i-dma.c:297", SUN8I_DMA_GATE_ENABLE, sdev->base + SUN8I_DMA_GATE);
 }
 
 static void sun6i_enable_clock_autogate_h3(struct sun6i_dma_dev *sdev)
 {
-	writel(SUNXI_H3_DMA_GATE_ENABLE, sdev->base + SUNXI_H3_DMA_GATE);
+	pete_writel("drivers/dma/sun6i-dma.c:302", SUNXI_H3_DMA_GATE_ENABLE, sdev->base + SUNXI_H3_DMA_GATE);
 }
 
 static void sun6i_set_burst_length_a31(u32 *p_cfg, s8 src_burst, s8 dst_burst)
@@ -345,8 +345,8 @@ static size_t sun6i_get_chan_size(struct sun6i_pchan *pchan)
 	size_t bytes;
 	dma_addr_t pos;
 
-	pos = readl(pchan->base + DMA_CHAN_LLI_ADDR);
-	bytes = readl(pchan->base + DMA_CHAN_CUR_CNT);
+	pos = pete_readl("drivers/dma/sun6i-dma.c:348", pchan->base + DMA_CHAN_LLI_ADDR);
+	bytes = pete_readl("drivers/dma/sun6i-dma.c:349", pchan->base + DMA_CHAN_CUR_CNT);
 
 	if (pos == LLI_LAST_ITEM)
 		return bytes;
@@ -452,14 +452,14 @@ static int sun6i_dma_start_desc(struct sun6i_vchan *vchan)
 
 	vchan->irq_type = vchan->cyclic ? DMA_IRQ_PKG : DMA_IRQ_QUEUE;
 
-	irq_val = readl(sdev->base + DMA_IRQ_EN(irq_reg));
+	irq_val = pete_readl("drivers/dma/sun6i-dma.c:455", sdev->base + DMA_IRQ_EN(irq_reg));
 	irq_val &= ~((DMA_IRQ_HALF | DMA_IRQ_PKG | DMA_IRQ_QUEUE) <<
 			(irq_offset * DMA_IRQ_CHAN_WIDTH));
 	irq_val |= vchan->irq_type << (irq_offset * DMA_IRQ_CHAN_WIDTH);
-	writel(irq_val, sdev->base + DMA_IRQ_EN(irq_reg));
+	pete_writel("drivers/dma/sun6i-dma.c:459", irq_val, sdev->base + DMA_IRQ_EN(irq_reg));
 
-	writel(pchan->desc->p_lli, pchan->base + DMA_CHAN_LLI_ADDR);
-	writel(DMA_CHAN_ENABLE_START, pchan->base + DMA_CHAN_ENABLE);
+	pete_writel("drivers/dma/sun6i-dma.c:461", pchan->desc->p_lli, pchan->base + DMA_CHAN_LLI_ADDR);
+	pete_writel("drivers/dma/sun6i-dma.c:462", DMA_CHAN_ENABLE_START, pchan->base + DMA_CHAN_ENABLE);
 
 	sun6i_dma_dump_com_regs(sdev);
 	sun6i_dma_dump_chan_regs(sdev, pchan);
@@ -541,14 +541,14 @@ static irqreturn_t sun6i_dma_interrupt(int irq, void *dev_id)
 	u32 status;
 
 	for (i = 0; i < sdev->num_pchans / DMA_IRQ_CHAN_NR; i++) {
-		status = readl(sdev->base + DMA_IRQ_STAT(i));
+		status = pete_readl("drivers/dma/sun6i-dma.c:544", sdev->base + DMA_IRQ_STAT(i));
 		if (!status)
 			continue;
 
 		dev_dbg(sdev->slave.dev, "DMA irq status %s: 0x%x\n",
 			i ? "high" : "low", status);
 
-		writel(status, sdev->base + DMA_IRQ_STAT(i));
+		pete_writel("drivers/dma/sun6i-dma.c:551", status, sdev->base + DMA_IRQ_STAT(i));
 
 		for (j = 0; (j < DMA_IRQ_CHAN_NR) && status; j++) {
 			pchan = sdev->pchans + j;
@@ -845,7 +845,7 @@ static int sun6i_dma_pause(struct dma_chan *chan)
 	dev_dbg(chan2dev(chan), "vchan %p: pause\n", &vchan->vc);
 
 	if (pchan) {
-		writel(DMA_CHAN_PAUSE_PAUSE,
+		pete_writel("drivers/dma/sun6i-dma.c:848", DMA_CHAN_PAUSE_PAUSE,
 		       pchan->base + DMA_CHAN_PAUSE);
 	} else {
 		spin_lock(&sdev->lock);
@@ -868,7 +868,7 @@ static int sun6i_dma_resume(struct dma_chan *chan)
 	spin_lock_irqsave(&vchan->vc.lock, flags);
 
 	if (pchan) {
-		writel(DMA_CHAN_PAUSE_RESUME,
+		pete_writel("drivers/dma/sun6i-dma.c:871", DMA_CHAN_PAUSE_RESUME,
 		       pchan->base + DMA_CHAN_PAUSE);
 	} else if (!list_empty(&vchan->vc.desc_issued)) {
 		spin_lock(&sdev->lock);
@@ -908,8 +908,8 @@ static int sun6i_dma_terminate_all(struct dma_chan *chan)
 	vchan_get_all_descriptors(&vchan->vc, &head);
 
 	if (pchan) {
-		writel(DMA_CHAN_ENABLE_STOP, pchan->base + DMA_CHAN_ENABLE);
-		writel(DMA_CHAN_PAUSE_RESUME, pchan->base + DMA_CHAN_PAUSE);
+		pete_writel("drivers/dma/sun6i-dma.c:911", DMA_CHAN_ENABLE_STOP, pchan->base + DMA_CHAN_ENABLE);
+		pete_writel("drivers/dma/sun6i-dma.c:912", DMA_CHAN_PAUSE_RESUME, pchan->base + DMA_CHAN_PAUSE);
 
 		vchan->phy = NULL;
 		pchan->vchan = NULL;
@@ -1026,8 +1026,8 @@ static struct dma_chan *sun6i_dma_of_xlate(struct of_phandle_args *dma_spec,
 static inline void sun6i_kill_tasklet(struct sun6i_dma_dev *sdev)
 {
 	/* Disable all interrupts from DMA */
-	writel(0, sdev->base + DMA_IRQ_EN(0));
-	writel(0, sdev->base + DMA_IRQ_EN(1));
+	pete_writel("drivers/dma/sun6i-dma.c:1029", 0, sdev->base + DMA_IRQ_EN(0));
+	pete_writel("drivers/dma/sun6i-dma.c:1030", 0, sdev->base + DMA_IRQ_EN(1));
 
 	/* Prevent spurious interrupts from scheduling the tasklet */
 	atomic_inc(&sdev->tasklet_shutdown);

@@ -303,7 +303,7 @@ static int bcm2836_boot_secondary(unsigned int cpu, struct task_struct *idle)
 		return -ENOMEM;
 	}
 
-	writel(virt_to_phys(secondary_startup),
+	pete_writel("arch/arm/mach-bcm/platsmp.c:306", virt_to_phys(secondary_startup),
 	       intc_base + LOCAL_MAILBOX3_SET0 + 16 * cpu);
 
 	dsb(sy);

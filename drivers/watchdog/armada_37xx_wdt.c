@@ -90,34 +90,34 @@ static u64 get_counter_value(struct armada_37xx_watchdog *dev, int id)
 	 * when low is read, high is latched into flip-flops so that it can be
 	 * read consistently without using software debouncing
 	 */
-	val = readl(dev->reg + CNTR_COUNT_LOW(id));
-	val |= ((u64)readl(dev->reg + CNTR_COUNT_HIGH(id))) << 32;
+	val = pete_readl("drivers/watchdog/armada_37xx_wdt.c:93", dev->reg + CNTR_COUNT_LOW(id));
+	val |= ((u64)pete_readl("drivers/watchdog/armada_37xx_wdt.c:94", dev->reg + CNTR_COUNT_HIGH(id))) << 32;
 
 	return val;
 }
 
 static void set_counter_value(struct armada_37xx_watchdog *dev, int id, u64 val)
 {
-	writel(val & 0xffffffff, dev->reg + CNTR_COUNT_LOW(id));
-	writel(val >> 32, dev->reg + CNTR_COUNT_HIGH(id));
+	pete_writel("drivers/watchdog/armada_37xx_wdt.c:101", val & 0xffffffff, dev->reg + CNTR_COUNT_LOW(id));
+	pete_writel("drivers/watchdog/armada_37xx_wdt.c:102", val >> 32, dev->reg + CNTR_COUNT_HIGH(id));
 }
 
 static void counter_enable(struct armada_37xx_watchdog *dev, int id)
 {
 	u32 reg;
 
-	reg = readl(dev->reg + CNTR_CTRL(id));
+	reg = pete_readl("drivers/watchdog/armada_37xx_wdt.c:109", dev->reg + CNTR_CTRL(id));
 	reg |= CNTR_CTRL_ENABLE;
-	writel(reg, dev->reg + CNTR_CTRL(id));
+	pete_writel("drivers/watchdog/armada_37xx_wdt.c:111", reg, dev->reg + CNTR_CTRL(id));
 }
 
 static void counter_disable(struct armada_37xx_watchdog *dev, int id)
 {
 	u32 reg;
 
-	reg = readl(dev->reg + CNTR_CTRL(id));
+	reg = pete_readl("drivers/watchdog/armada_37xx_wdt.c:118", dev->reg + CNTR_CTRL(id));
 	reg &= ~CNTR_CTRL_ENABLE;
-	writel(reg, dev->reg + CNTR_CTRL(id));
+	pete_writel("drivers/watchdog/armada_37xx_wdt.c:120", reg, dev->reg + CNTR_CTRL(id));
 }
 
 static void init_counter(struct armada_37xx_watchdog *dev, int id, u32 mode,
@@ -125,7 +125,7 @@ static void init_counter(struct armada_37xx_watchdog *dev, int id, u32 mode,
 {
 	u32 reg;
 
-	reg = readl(dev->reg + CNTR_CTRL(id));
+	reg = pete_readl("drivers/watchdog/armada_37xx_wdt.c:128", dev->reg + CNTR_CTRL(id));
 
 	reg &= ~(CNTR_CTRL_MODE_MASK | CNTR_CTRL_PRESCALE_MASK |
 		 CNTR_CTRL_TRIG_SRC_MASK);
@@ -139,7 +139,7 @@ static void init_counter(struct armada_37xx_watchdog *dev, int id, u32 mode,
 	/* set trigger source */
 	reg |= trig_src & CNTR_CTRL_TRIG_SRC_MASK;
 
-	writel(reg, dev->reg + CNTR_CTRL(id));
+	pete_writel("drivers/watchdog/armada_37xx_wdt.c:142", reg, dev->reg + CNTR_CTRL(id));
 }
 
 static int armada_37xx_wdt_ping(struct watchdog_device *wdt)
@@ -190,7 +190,7 @@ static bool armada_37xx_wdt_is_running(struct armada_37xx_watchdog *dev)
 	if ((reg & WDT_TIMER_SELECT_MASK) != WDT_TIMER_SELECT_VAL)
 		return false;
 
-	reg = readl(dev->reg + CNTR_CTRL(CNTR_ID_WDOG));
+	reg = pete_readl("drivers/watchdog/armada_37xx_wdt.c:193", dev->reg + CNTR_CTRL(CNTR_ID_WDOG));
 	return !!(reg & CNTR_CTRL_ACTIVE);
 }
 

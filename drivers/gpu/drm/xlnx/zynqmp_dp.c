@@ -332,12 +332,12 @@ static inline struct zynqmp_dp *connector_to_dp(struct drm_connector *connector)
 
 static void zynqmp_dp_write(struct zynqmp_dp *dp, int offset, u32 val)
 {
-	writel(val, dp->iomem + offset);
+	pete_writel("drivers/gpu/drm/xlnx/zynqmp_dp.c:335", val, dp->iomem + offset);
 }
 
 static u32 zynqmp_dp_read(struct zynqmp_dp *dp, int offset)
 {
-	return readl(dp->iomem + offset);
+	return pete_readl("drivers/gpu/drm/xlnx/zynqmp_dp.c:340", dp->iomem + offset);
 }
 
 static void zynqmp_dp_clr(struct zynqmp_dp *dp, int offset, u32 clr)

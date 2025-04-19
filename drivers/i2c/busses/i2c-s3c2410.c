@@ -186,16 +186,16 @@ static inline void s3c24xx_i2c_disable_ack(struct s3c24xx_i2c *i2c)
 {
 	unsigned long tmp;
 
-	tmp = readl(i2c->regs + S3C2410_IICCON);
-	writel(tmp & ~S3C2410_IICCON_ACKEN, i2c->regs + S3C2410_IICCON);
+	tmp = pete_readl("drivers/i2c/busses/i2c-s3c2410.c:189", i2c->regs + S3C2410_IICCON);
+	pete_writel("drivers/i2c/busses/i2c-s3c2410.c:190", tmp & ~S3C2410_IICCON_ACKEN, i2c->regs + S3C2410_IICCON);
 }
 
 static inline void s3c24xx_i2c_enable_ack(struct s3c24xx_i2c *i2c)
 {
 	unsigned long tmp;
 
-	tmp = readl(i2c->regs + S3C2410_IICCON);
-	writel(tmp | S3C2410_IICCON_ACKEN, i2c->regs + S3C2410_IICCON);
+	tmp = pete_readl("drivers/i2c/busses/i2c-s3c2410.c:197", i2c->regs + S3C2410_IICCON);
+	pete_writel("drivers/i2c/busses/i2c-s3c2410.c:198", tmp | S3C2410_IICCON_ACKEN, i2c->regs + S3C2410_IICCON);
 }
 
 /* irq enable/disable functions */
@@ -203,16 +203,16 @@ static inline void s3c24xx_i2c_disable_irq(struct s3c24xx_i2c *i2c)
 {
 	unsigned long tmp;
 
-	tmp = readl(i2c->regs + S3C2410_IICCON);
-	writel(tmp & ~S3C2410_IICCON_IRQEN, i2c->regs + S3C2410_IICCON);
+	tmp = pete_readl("drivers/i2c/busses/i2c-s3c2410.c:206", i2c->regs + S3C2410_IICCON);
+	pete_writel("drivers/i2c/busses/i2c-s3c2410.c:207", tmp & ~S3C2410_IICCON_IRQEN, i2c->regs + S3C2410_IICCON);
 }
 
 static inline void s3c24xx_i2c_enable_irq(struct s3c24xx_i2c *i2c)
 {
 	unsigned long tmp;
 
-	tmp = readl(i2c->regs + S3C2410_IICCON);
-	writel(tmp | S3C2410_IICCON_IRQEN, i2c->regs + S3C2410_IICCON);
+	tmp = pete_readl("drivers/i2c/busses/i2c-s3c2410.c:214", i2c->regs + S3C2410_IICCON);
+	pete_writel("drivers/i2c/busses/i2c-s3c2410.c:215", tmp | S3C2410_IICCON_IRQEN, i2c->regs + S3C2410_IICCON);
 }
 
 static bool is_ack(struct s3c24xx_i2c *i2c)
@@ -220,9 +220,9 @@ static bool is_ack(struct s3c24xx_i2c *i2c)
 	int tries;
 
 	for (tries = 50; tries; --tries) {
-		if (readl(i2c->regs + S3C2410_IICCON)
+		if (pete_readl("drivers/i2c/busses/i2c-s3c2410.c:223", i2c->regs + S3C2410_IICCON)
 			& S3C2410_IICCON_IRQPEND) {
-			if (!(readl(i2c->regs + S3C2410_IICSTAT)
+			if (!(pete_readl("drivers/i2c/busses/i2c-s3c2410.c:225", i2c->regs + S3C2410_IICSTAT)
 				& S3C2410_IICSTAT_LASTBIT))
 				return true;
 		}
@@ -257,11 +257,11 @@ static void s3c24xx_i2c_message_start(struct s3c24xx_i2c *i2c,
 	/* todo - check for whether ack wanted or not */
 	s3c24xx_i2c_enable_ack(i2c);
 
-	iiccon = readl(i2c->regs + S3C2410_IICCON);
-	writel(stat, i2c->regs + S3C2410_IICSTAT);
+	iiccon = pete_readl("drivers/i2c/busses/i2c-s3c2410.c:260", i2c->regs + S3C2410_IICCON);
+	pete_writel("drivers/i2c/busses/i2c-s3c2410.c:261", stat, i2c->regs + S3C2410_IICSTAT);
 
 	dev_dbg(i2c->dev, "START: %08lx to IICSTAT, %02x to DS\n", stat, addr);
-	writeb(addr, i2c->regs + S3C2410_IICDS);
+	pete_writeb("drivers/i2c/busses/i2c-s3c2410.c:264", addr, i2c->regs + S3C2410_IICDS);
 
 	/*
 	 * delay here to ensure the data byte has gotten onto the bus
@@ -270,15 +270,15 @@ static void s3c24xx_i2c_message_start(struct s3c24xx_i2c *i2c,
 	ndelay(i2c->tx_setup);
 
 	dev_dbg(i2c->dev, "iiccon, %08lx\n", iiccon);
-	writel(iiccon, i2c->regs + S3C2410_IICCON);
+	pete_writel("drivers/i2c/busses/i2c-s3c2410.c:273", iiccon, i2c->regs + S3C2410_IICCON);
 
 	stat |= S3C2410_IICSTAT_START;
-	writel(stat, i2c->regs + S3C2410_IICSTAT);
+	pete_writel("drivers/i2c/busses/i2c-s3c2410.c:276", stat, i2c->regs + S3C2410_IICSTAT);
 
 	if (i2c->quirks & QUIRK_POLL) {
 		while ((i2c->msg_num != 0) && is_ack(i2c)) {
 			i2c_s3c_irq_nextbyte(i2c, stat);
-			stat = readl(i2c->regs + S3C2410_IICSTAT);
+			stat = pete_readl("drivers/i2c/busses/i2c-s3c2410.c:281", i2c->regs + S3C2410_IICSTAT);
 
 			if (stat & S3C2410_IICSTAT_ARBITR)
 				dev_err(i2c->dev, "deal with arbitration loss\n");
@@ -288,7 +288,7 @@ static void s3c24xx_i2c_message_start(struct s3c24xx_i2c *i2c,
 
 static inline void s3c24xx_i2c_stop(struct s3c24xx_i2c *i2c, int ret)
 {
-	unsigned long iicstat = readl(i2c->regs + S3C2410_IICSTAT);
+	unsigned long iicstat = pete_readl("drivers/i2c/busses/i2c-s3c2410.c:291", i2c->regs + S3C2410_IICSTAT);
 
 	dev_dbg(i2c->dev, "STOP\n");
 
@@ -333,7 +333,7 @@ static inline void s3c24xx_i2c_stop(struct s3c24xx_i2c *i2c, int ret)
 		/* stop the transfer */
 		iicstat &= ~S3C2410_IICSTAT_START;
 	}
-	writel(iicstat, i2c->regs + S3C2410_IICSTAT);
+	pete_writel("drivers/i2c/busses/i2c-s3c2410.c:336", iicstat, i2c->regs + S3C2410_IICSTAT);
 
 	i2c->state = STATE_STOP;
 
@@ -451,7 +451,7 @@ static int i2c_s3c_irq_nextbyte(struct s3c24xx_i2c *i2c, unsigned long iicstat)
 
 		if (!is_msgend(i2c)) {
 			byte = i2c->msg->buf[i2c->msg_ptr++];
-			writeb(byte, i2c->regs + S3C2410_IICDS);
+			pete_writeb("drivers/i2c/busses/i2c-s3c2410.c:454", byte, i2c->regs + S3C2410_IICDS);
 
 			/*
 			 * delay after writing the byte to allow the
@@ -505,7 +505,7 @@ static int i2c_s3c_irq_nextbyte(struct s3c24xx_i2c *i2c, unsigned long iicstat)
 		 * something with it, and then work out whether we are
 		 * going to do any more read/write
 		 */
-		byte = readb(i2c->regs + S3C2410_IICDS);
+		byte = pete_readb("drivers/i2c/busses/i2c-s3c2410.c:508", i2c->regs + S3C2410_IICDS);
 		i2c->msg->buf[i2c->msg_ptr++] = byte;
 
 		/* Add actual length to read for smbus block read */
@@ -544,9 +544,9 @@ static int i2c_s3c_irq_nextbyte(struct s3c24xx_i2c *i2c, unsigned long iicstat)
 	/* acknowlegde the IRQ and get back on with the work */
 
  out_ack:
-	tmp = readl(i2c->regs + S3C2410_IICCON);
+	tmp = pete_readl("drivers/i2c/busses/i2c-s3c2410.c:547", i2c->regs + S3C2410_IICCON);
 	tmp &= ~S3C2410_IICCON_IRQPEND;
-	writel(tmp, i2c->regs + S3C2410_IICCON);
+	pete_writel("drivers/i2c/busses/i2c-s3c2410.c:549", tmp, i2c->regs + S3C2410_IICCON);
  out:
 	return ret;
 }
@@ -560,7 +560,7 @@ static irqreturn_t s3c24xx_i2c_irq(int irqno, void *dev_id)
 	unsigned long status;
 	unsigned long tmp;
 
-	status = readl(i2c->regs + S3C2410_IICSTAT);
+	status = pete_readl("drivers/i2c/busses/i2c-s3c2410.c:563", i2c->regs + S3C2410_IICSTAT);
 
 	if (status & S3C2410_IICSTAT_ARBITR) {
 		/* deal with arbitration loss */
@@ -570,9 +570,9 @@ static irqreturn_t s3c24xx_i2c_irq(int irqno, void *dev_id)
 	if (i2c->state == STATE_IDLE) {
 		dev_dbg(i2c->dev, "IRQ: error i2c->state == IDLE\n");
 
-		tmp = readl(i2c->regs + S3C2410_IICCON);
+		tmp = pete_readl("drivers/i2c/busses/i2c-s3c2410.c:573", i2c->regs + S3C2410_IICCON);
 		tmp &= ~S3C2410_IICCON_IRQPEND;
-		writel(tmp, i2c->regs +  S3C2410_IICCON);
+		pete_writel("drivers/i2c/busses/i2c-s3c2410.c:575", tmp, i2c->regs +  S3C2410_IICCON);
 		goto out;
 	}
 
@@ -600,15 +600,15 @@ static inline void s3c24xx_i2c_disable_bus(struct s3c24xx_i2c *i2c)
 	unsigned long tmp;
 
 	/* Stop driving the I2C pins */
-	tmp = readl(i2c->regs + S3C2410_IICSTAT);
+	tmp = pete_readl("drivers/i2c/busses/i2c-s3c2410.c:603", i2c->regs + S3C2410_IICSTAT);
 	tmp &= ~S3C2410_IICSTAT_TXRXEN;
-	writel(tmp, i2c->regs + S3C2410_IICSTAT);
+	pete_writel("drivers/i2c/busses/i2c-s3c2410.c:605", tmp, i2c->regs + S3C2410_IICSTAT);
 
 	/* We don't expect any interrupts now, and don't want send acks */
-	tmp = readl(i2c->regs + S3C2410_IICCON);
+	tmp = pete_readl("drivers/i2c/busses/i2c-s3c2410.c:608", i2c->regs + S3C2410_IICCON);
 	tmp &= ~(S3C2410_IICCON_IRQEN | S3C2410_IICCON_IRQPEND |
 		S3C2410_IICCON_ACKEN);
-	writel(tmp, i2c->regs + S3C2410_IICCON);
+	pete_writel("drivers/i2c/busses/i2c-s3c2410.c:611", tmp, i2c->regs + S3C2410_IICCON);
 }
 
 
@@ -621,7 +621,7 @@ static int s3c24xx_i2c_set_master(struct s3c24xx_i2c *i2c)
 	int timeout = 400;
 
 	while (timeout-- > 0) {
-		iicstat = readl(i2c->regs + S3C2410_IICSTAT);
+		iicstat = pete_readl("drivers/i2c/busses/i2c-s3c2410.c:624", i2c->regs + S3C2410_IICSTAT);
 
 		if (!(iicstat & S3C2410_IICSTAT_BUSBUSY))
 			return 0;
@@ -657,10 +657,10 @@ static void s3c24xx_i2c_wait_idle(struct s3c24xx_i2c *i2c)
 	 * instructions so busy wait briefly to avoid scheduling overhead.
 	 */
 	spins = 3;
-	iicstat = readl(i2c->regs + S3C2410_IICSTAT);
+	iicstat = pete_readl("drivers/i2c/busses/i2c-s3c2410.c:660", i2c->regs + S3C2410_IICSTAT);
 	while ((iicstat & S3C2410_IICSTAT_START) && --spins) {
 		cpu_relax();
-		iicstat = readl(i2c->regs + S3C2410_IICSTAT);
+		iicstat = pete_readl("drivers/i2c/busses/i2c-s3c2410.c:663", i2c->regs + S3C2410_IICSTAT);
 	}
 
 	/*
@@ -677,7 +677,7 @@ static void s3c24xx_i2c_wait_idle(struct s3c24xx_i2c *i2c)
 		if (delay < S3C2410_IDLE_TIMEOUT / 10)
 			delay <<= 1;
 		now = ktime_get();
-		iicstat = readl(i2c->regs + S3C2410_IICSTAT);
+		iicstat = pete_readl("drivers/i2c/busses/i2c-s3c2410.c:680", i2c->regs + S3C2410_IICSTAT);
 	}
 
 	if (iicstat & S3C2410_IICSTAT_START)
@@ -853,7 +853,7 @@ static int s3c24xx_i2c_clockrate(struct s3c24xx_i2c *i2c, unsigned int *got)
 
 	*got = freq;
 
-	iiccon = readl(i2c->regs + S3C2410_IICCON);
+	iiccon = pete_readl("drivers/i2c/busses/i2c-s3c2410.c:856", i2c->regs + S3C2410_IICCON);
 	iiccon &= ~(S3C2410_IICCON_SCALEMASK | S3C2410_IICCON_TXDIV_512);
 	iiccon |= (divs-1);
 
@@ -863,7 +863,7 @@ static int s3c24xx_i2c_clockrate(struct s3c24xx_i2c *i2c, unsigned int *got)
 	if (i2c->quirks & QUIRK_POLL)
 		iiccon |= S3C2410_IICCON_SCALE(2);
 
-	writel(iiccon, i2c->regs + S3C2410_IICCON);
+	pete_writel("drivers/i2c/busses/i2c-s3c2410.c:866", iiccon, i2c->regs + S3C2410_IICCON);
 
 	if (i2c->quirks & QUIRK_S3C2440) {
 		unsigned long sda_delay;
@@ -879,7 +879,7 @@ static int s3c24xx_i2c_clockrate(struct s3c24xx_i2c *i2c, unsigned int *got)
 			sda_delay = 0;
 
 		dev_dbg(i2c->dev, "IICLC=%08lx\n", sda_delay);
-		writel(sda_delay, i2c->regs + S3C2440_IICLC);
+		pete_writel("drivers/i2c/busses/i2c-s3c2410.c:882", sda_delay, i2c->regs + S3C2440_IICLC);
 	}
 
 	return 0;
@@ -984,12 +984,12 @@ static int s3c24xx_i2c_init(struct s3c24xx_i2c *i2c)
 
 	/* write slave address */
 
-	writeb(pdata->slave_addr, i2c->regs + S3C2410_IICADD);
+	pete_writeb("drivers/i2c/busses/i2c-s3c2410.c:987", pdata->slave_addr, i2c->regs + S3C2410_IICADD);
 
 	dev_info(i2c->dev, "slave address 0x%02x\n", pdata->slave_addr);
 
-	writel(0, i2c->regs + S3C2410_IICCON);
-	writel(0, i2c->regs + S3C2410_IICSTAT);
+	pete_writel("drivers/i2c/busses/i2c-s3c2410.c:991", 0, i2c->regs + S3C2410_IICCON);
+	pete_writel("drivers/i2c/busses/i2c-s3c2410.c:992", 0, i2c->regs + S3C2410_IICSTAT);
 
 	/* we need to work out the divisors for the clock... */
 
@@ -1002,7 +1002,7 @@ static int s3c24xx_i2c_init(struct s3c24xx_i2c *i2c)
 
 	dev_info(i2c->dev, "bus frequency set to %d KHz\n", freq);
 	dev_dbg(i2c->dev, "S3C2410_IICCON=0x%02x\n",
-		readl(i2c->regs + S3C2410_IICCON));
+		pete_readl("drivers/i2c/busses/i2c-s3c2410.c:1005", i2c->regs + S3C2410_IICCON));
 
 	return 0;
 }

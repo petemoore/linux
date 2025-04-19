@@ -290,12 +290,12 @@ struct advk_pcie {
 
 static inline void advk_writel(struct advk_pcie *pcie, u32 val, u64 reg)
 {
-	writel(val, pcie->base + reg);
+	pete_writel("drivers/pci/controller/pci-aardvark.c:293", val, pcie->base + reg);
 }
 
 static inline u32 advk_readl(struct advk_pcie *pcie, u64 reg)
 {
-	return readl(pcie->base + reg);
+	return pete_readl("drivers/pci/controller/pci-aardvark.c:298", pcie->base + reg);
 }
 
 static u8 advk_pcie_ltssm_state(struct advk_pcie *pcie)

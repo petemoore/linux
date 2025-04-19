@@ -29,7 +29,7 @@ static struct resource pci0_res[] = {
 static void rb_machine_restart(char *command)
 {
 	/* just jump to the reset vector */
-	writel(0x80000001, IDT434_REG_BASE + RST);
+	pete_writel("arch/mips/rb532/setup.c:32", 0x80000001, IDT434_REG_BASE + RST);
 	((void (*)(void)) KSEG1ADDR(0x1FC00000u))();
 }
 

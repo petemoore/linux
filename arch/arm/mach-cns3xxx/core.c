@@ -98,10 +98,10 @@ void cns3xxx_power_off(void)
 
 	printk(KERN_INFO "powering system down...\n");
 
-	clkctrl = readl(pm_base + PM_SYS_CLK_CTRL_OFFSET);
+	clkctrl = pete_readl("arch/arm/mach-cns3xxx/core.c:101", pm_base + PM_SYS_CLK_CTRL_OFFSET);
 	clkctrl &= 0xfffff1ff;
 	clkctrl |= (0x5 << 9);		/* Hibernate */
-	writel(clkctrl, pm_base + PM_SYS_CLK_CTRL_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:104", clkctrl, pm_base + PM_SYS_CLK_CTRL_OFFSET);
 
 }
 
@@ -112,40 +112,40 @@ static void __iomem *cns3xxx_tmr1;
 
 static int cns3xxx_shutdown(struct clock_event_device *clk)
 {
-	writel(0, cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:115", 0, cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
 	return 0;
 }
 
 static int cns3xxx_set_oneshot(struct clock_event_device *clk)
 {
-	unsigned long ctrl = readl(cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
+	unsigned long ctrl = pete_readl("arch/arm/mach-cns3xxx/core.c:121", cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
 
 	/* period set, and timer enabled in 'next_event' hook */
 	ctrl |= (1 << 2) | (1 << 9);
-	writel(ctrl, cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:125", ctrl, cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
 	return 0;
 }
 
 static int cns3xxx_set_periodic(struct clock_event_device *clk)
 {
-	unsigned long ctrl = readl(cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
+	unsigned long ctrl = pete_readl("arch/arm/mach-cns3xxx/core.c:131", cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
 	int pclk = cns3xxx_cpu_clock() / 8;
 	int reload;
 
 	reload = pclk * 20 / (3 * HZ) * 0x25000;
-	writel(reload, cns3xxx_tmr1 + TIMER1_AUTO_RELOAD_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:136", reload, cns3xxx_tmr1 + TIMER1_AUTO_RELOAD_OFFSET);
 	ctrl |= (1 << 0) | (1 << 2) | (1 << 9);
-	writel(ctrl, cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:138", ctrl, cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
 	return 0;
 }
 
 static int cns3xxx_timer_set_next_event(unsigned long evt,
 					struct clock_event_device *unused)
 {
-	unsigned long ctrl = readl(cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
+	unsigned long ctrl = pete_readl("arch/arm/mach-cns3xxx/core.c:145", cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
 
-	writel(evt, cns3xxx_tmr1 + TIMER1_AUTO_RELOAD_OFFSET);
-	writel(ctrl | (1 << 0), cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:147", evt, cns3xxx_tmr1 + TIMER1_AUTO_RELOAD_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:148", ctrl | (1 << 0), cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
 
 	return 0;
 }
@@ -181,8 +181,8 @@ static irqreturn_t cns3xxx_timer_interrupt(int irq, void *dev_id)
 	u32 val;
 
 	/* Clear the interrupt */
-	val = readl(stat);
-	writel(val & ~(1 << 2), stat);
+	val = pete_readl("arch/arm/mach-cns3xxx/core.c:184", stat);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:185", val & ~(1 << 2), stat);
 
 	evt->event_handler(evt);
 
@@ -202,41 +202,41 @@ static void __init __cns3xxx_timer_init(unsigned int timer_irq)
 	 */
 
 	/* disable timer1 and timer2 */
-	writel(0, cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:205", 0, cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
 	/* stop free running timer3 */
-	writel(0, cns3xxx_tmr1 + TIMER_FREERUN_CONTROL_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:207", 0, cns3xxx_tmr1 + TIMER_FREERUN_CONTROL_OFFSET);
 
 	/* timer1 */
-	writel(0x5C800, cns3xxx_tmr1 + TIMER1_COUNTER_OFFSET);
-	writel(0x5C800, cns3xxx_tmr1 + TIMER1_AUTO_RELOAD_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:210", 0x5C800, cns3xxx_tmr1 + TIMER1_COUNTER_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:211", 0x5C800, cns3xxx_tmr1 + TIMER1_AUTO_RELOAD_OFFSET);
 
-	writel(0, cns3xxx_tmr1 + TIMER1_MATCH_V1_OFFSET);
-	writel(0, cns3xxx_tmr1 + TIMER1_MATCH_V2_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:213", 0, cns3xxx_tmr1 + TIMER1_MATCH_V1_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:214", 0, cns3xxx_tmr1 + TIMER1_MATCH_V2_OFFSET);
 
 	/* mask irq, non-mask timer1 overflow */
-	irq_mask = readl(cns3xxx_tmr1 + TIMER1_2_INTERRUPT_MASK_OFFSET);
+	irq_mask = pete_readl("arch/arm/mach-cns3xxx/core.c:217", cns3xxx_tmr1 + TIMER1_2_INTERRUPT_MASK_OFFSET);
 	irq_mask &= ~(1 << 2);
 	irq_mask |= 0x03;
-	writel(irq_mask, cns3xxx_tmr1 + TIMER1_2_INTERRUPT_MASK_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:220", irq_mask, cns3xxx_tmr1 + TIMER1_2_INTERRUPT_MASK_OFFSET);
 
 	/* down counter */
-	val = readl(cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
+	val = pete_readl("arch/arm/mach-cns3xxx/core.c:223", cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
 	val |= (1 << 9);
-	writel(val, cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:225", val, cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
 
 	/* timer2 */
-	writel(0, cns3xxx_tmr1 + TIMER2_MATCH_V1_OFFSET);
-	writel(0, cns3xxx_tmr1 + TIMER2_MATCH_V2_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:228", 0, cns3xxx_tmr1 + TIMER2_MATCH_V1_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:229", 0, cns3xxx_tmr1 + TIMER2_MATCH_V2_OFFSET);
 
 	/* mask irq */
-	irq_mask = readl(cns3xxx_tmr1 + TIMER1_2_INTERRUPT_MASK_OFFSET);
+	irq_mask = pete_readl("arch/arm/mach-cns3xxx/core.c:232", cns3xxx_tmr1 + TIMER1_2_INTERRUPT_MASK_OFFSET);
 	irq_mask |= ((1 << 3) | (1 << 4) | (1 << 5));
-	writel(irq_mask, cns3xxx_tmr1 + TIMER1_2_INTERRUPT_MASK_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:234", irq_mask, cns3xxx_tmr1 + TIMER1_2_INTERRUPT_MASK_OFFSET);
 
 	/* down counter */
-	val = readl(cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
+	val = pete_readl("arch/arm/mach-cns3xxx/core.c:237", cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
 	val |= (1 << 10);
-	writel(val, cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:239", val, cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
 
 	/* Make irqs happen for the system timer */
 	if (request_irq(timer_irq, cns3xxx_timer_interrupt,
@@ -272,9 +272,9 @@ void __init cns3xxx_l2x0_init(void)
 	 *
 	 * 1 cycle of latency for setup, read and write accesses
 	 */
-	val = readl(base + L310_TAG_LATENCY_CTRL);
+	val = pete_readl("arch/arm/mach-cns3xxx/core.c:275", base + L310_TAG_LATENCY_CTRL);
 	val &= 0xfffff888;
-	writel(val, base + L310_TAG_LATENCY_CTRL);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:277", val, base + L310_TAG_LATENCY_CTRL);
 
 	/*
 	 * Data RAM Control register
@@ -285,9 +285,9 @@ void __init cns3xxx_l2x0_init(void)
 	 *
 	 * 1 cycle of latency for setup, read and write accesses
 	 */
-	val = readl(base + L310_DATA_LATENCY_CTRL);
+	val = pete_readl("arch/arm/mach-cns3xxx/core.c:288", base + L310_DATA_LATENCY_CTRL);
 	val &= 0xfffff888;
-	writel(val, base + L310_DATA_LATENCY_CTRL);
+	pete_writel("arch/arm/mach-cns3xxx/core.c:290", val, base + L310_DATA_LATENCY_CTRL);
 
 	/* 32 KiB, 8-way, parity disable */
 	l2x0_init(base, 0x00500000, 0xfe0f0fff);

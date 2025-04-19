@@ -372,10 +372,10 @@ static int pl08x_phy_channel_busy(struct pl08x_phy_chan *ch)
 
 	/* If we have a special busy register, take a shortcut */
 	if (ch->reg_busy) {
-		val = readl(ch->reg_busy);
+		val = pete_readl("drivers/dma/amba-pl08x.c:375", ch->reg_busy);
 		return !!(val & BIT(ch->id));
 	}
-	val = readl(ch->reg_config);
+	val = pete_readl("drivers/dma/amba-pl08x.c:378", ch->reg_config);
 	return val & PL080_CONFIG_ACTIVE;
 }
 
@@ -515,7 +515,7 @@ static void pl08x_write_lli(struct pl08x_driver_data *pl08x,
 		writel_relaxed(lli[PL080S_LLI_CCTL2],
 				phychan->base + PL080S_CH_CONTROL2);
 
-	writel(ccfg, phychan->reg_config);
+	pete_writel("drivers/dma/amba-pl08x.c:518", ccfg, phychan->reg_config);
 }
 
 /*
@@ -544,28 +544,28 @@ static void pl08x_start_next_txd(struct pl08x_dma_chan *plchan)
 
 	/* Enable the DMA channel */
 	/* Do not access config register until channel shows as disabled */
-	while (readl(pl08x->base + PL080_EN_CHAN) & BIT(phychan->id))
+	while (pete_readl("drivers/dma/amba-pl08x.c:547", pl08x->base + PL080_EN_CHAN) & BIT(phychan->id))
 		cpu_relax();
 
 	/* Do not access config register until channel shows as inactive */
 	if (phychan->ftdmac020) {
-		val = readl(phychan->reg_config);
+		val = pete_readl("drivers/dma/amba-pl08x.c:552", phychan->reg_config);
 		while (val & FTDMAC020_CH_CFG_BUSY)
-			val = readl(phychan->reg_config);
+			val = pete_readl("drivers/dma/amba-pl08x.c:554", phychan->reg_config);
 
-		val = readl(phychan->reg_control);
+		val = pete_readl("drivers/dma/amba-pl08x.c:556", phychan->reg_control);
 		while (val & FTDMAC020_CH_CSR_EN)
-			val = readl(phychan->reg_control);
+			val = pete_readl("drivers/dma/amba-pl08x.c:558", phychan->reg_control);
 
-		writel(val | FTDMAC020_CH_CSR_EN,
+		pete_writel("drivers/dma/amba-pl08x.c:560", val | FTDMAC020_CH_CSR_EN,
 		       phychan->reg_control);
 	} else {
-		val = readl(phychan->reg_config);
+		val = pete_readl("drivers/dma/amba-pl08x.c:563", phychan->reg_config);
 		while ((val & PL080_CONFIG_ACTIVE) ||
 		       (val & PL080_CONFIG_ENABLE))
-			val = readl(phychan->reg_config);
+			val = pete_readl("drivers/dma/amba-pl08x.c:566", phychan->reg_config);
 
-		writel(val | PL080_CONFIG_ENABLE, phychan->reg_config);
+		pete_writel("drivers/dma/amba-pl08x.c:568", val | PL080_CONFIG_ENABLE, phychan->reg_config);
 	}
 }
 
@@ -586,16 +586,16 @@ static void pl08x_pause_phy_chan(struct pl08x_phy_chan *ch)
 
 	if (ch->ftdmac020) {
 		/* Use the enable bit on the FTDMAC020 */
-		val = readl(ch->reg_control);
+		val = pete_readl("drivers/dma/amba-pl08x.c:589", ch->reg_control);
 		val &= ~FTDMAC020_CH_CSR_EN;
-		writel(val, ch->reg_control);
+		pete_writel("drivers/dma/amba-pl08x.c:591", val, ch->reg_control);
 		return;
 	}
 
 	/* Set the HALT bit and wait for the FIFO to drain */
-	val = readl(ch->reg_config);
+	val = pete_readl("drivers/dma/amba-pl08x.c:596", ch->reg_config);
 	val |= PL080_CONFIG_HALT;
-	writel(val, ch->reg_config);
+	pete_writel("drivers/dma/amba-pl08x.c:598", val, ch->reg_config);
 
 	/* Wait for channel inactive */
 	for (timeout = 1000; timeout; timeout--) {
@@ -613,16 +613,16 @@ static void pl08x_resume_phy_chan(struct pl08x_phy_chan *ch)
 
 	/* Use the enable bit on the FTDMAC020 */
 	if (ch->ftdmac020) {
-		val = readl(ch->reg_control);
+		val = pete_readl("drivers/dma/amba-pl08x.c:616", ch->reg_control);
 		val |= FTDMAC020_CH_CSR_EN;
-		writel(val, ch->reg_control);
+		pete_writel("drivers/dma/amba-pl08x.c:618", val, ch->reg_control);
 		return;
 	}
 
 	/* Clear the HALT bit */
-	val = readl(ch->reg_config);
+	val = pete_readl("drivers/dma/amba-pl08x.c:623", ch->reg_config);
 	val &= ~PL080_CONFIG_HALT;
-	writel(val, ch->reg_config);
+	pete_writel("drivers/dma/amba-pl08x.c:625", val, ch->reg_config);
 }
 
 /*
@@ -639,33 +639,33 @@ static void pl08x_terminate_phy_chan(struct pl08x_driver_data *pl08x,
 	/* The layout for the FTDMAC020 is different */
 	if (ch->ftdmac020) {
 		/* Disable all interrupts */
-		val = readl(ch->reg_config);
+		val = pete_readl("drivers/dma/amba-pl08x.c:642", ch->reg_config);
 		val |= (FTDMAC020_CH_CFG_INT_ABT_MASK |
 			FTDMAC020_CH_CFG_INT_ERR_MASK |
 			FTDMAC020_CH_CFG_INT_TC_MASK);
-		writel(val, ch->reg_config);
+		pete_writel("drivers/dma/amba-pl08x.c:646", val, ch->reg_config);
 
 		/* Abort and disable channel */
-		val = readl(ch->reg_control);
+		val = pete_readl("drivers/dma/amba-pl08x.c:649", ch->reg_control);
 		val &= ~FTDMAC020_CH_CSR_EN;
 		val |= FTDMAC020_CH_CSR_ABT;
-		writel(val, ch->reg_control);
+		pete_writel("drivers/dma/amba-pl08x.c:652", val, ch->reg_control);
 
 		/* Clear ABT and ERR interrupt flags */
-		writel(BIT(ch->id) | BIT(ch->id + 16),
+		pete_writel("drivers/dma/amba-pl08x.c:655", BIT(ch->id) | BIT(ch->id + 16),
 		       pl08x->base + PL080_ERR_CLEAR);
-		writel(BIT(ch->id), pl08x->base + PL080_TC_CLEAR);
+		pete_writel("drivers/dma/amba-pl08x.c:657", BIT(ch->id), pl08x->base + PL080_TC_CLEAR);
 
 		return;
 	}
 
-	val = readl(ch->reg_config);
+	val = pete_readl("drivers/dma/amba-pl08x.c:662", ch->reg_config);
 	val &= ~(PL080_CONFIG_ENABLE | PL080_CONFIG_ERR_IRQ_MASK |
 		 PL080_CONFIG_TC_IRQ_MASK);
-	writel(val, ch->reg_config);
+	pete_writel("drivers/dma/amba-pl08x.c:665", val, ch->reg_config);
 
-	writel(BIT(ch->id), pl08x->base + PL080_ERR_CLEAR);
-	writel(BIT(ch->id), pl08x->base + PL080_TC_CLEAR);
+	pete_writel("drivers/dma/amba-pl08x.c:667", BIT(ch->id), pl08x->base + PL080_ERR_CLEAR);
+	pete_writel("drivers/dma/amba-pl08x.c:668", BIT(ch->id), pl08x->base + PL080_TC_CLEAR);
 }
 
 static u32 get_bytes_in_phy_channel(struct pl08x_phy_chan *ch)
@@ -674,21 +674,21 @@ static u32 get_bytes_in_phy_channel(struct pl08x_phy_chan *ch)
 	u32 bytes;
 
 	if (ch->ftdmac020) {
-		bytes = readl(ch->base + FTDMAC020_CH_SIZE);
+		bytes = pete_readl("drivers/dma/amba-pl08x.c:677", ch->base + FTDMAC020_CH_SIZE);
 
-		val = readl(ch->reg_control);
+		val = pete_readl("drivers/dma/amba-pl08x.c:679", ch->reg_control);
 		val &= FTDMAC020_CH_CSR_SRC_WIDTH_MSK;
 		val >>= FTDMAC020_CH_CSR_SRC_WIDTH_SHIFT;
 	} else if (ch->pl080s) {
-		val = readl(ch->base + PL080S_CH_CONTROL2);
+		val = pete_readl("drivers/dma/amba-pl08x.c:683", ch->base + PL080S_CH_CONTROL2);
 		bytes = val & PL080S_CONTROL_TRANSFER_SIZE_MASK;
 
-		val = readl(ch->reg_control);
+		val = pete_readl("drivers/dma/amba-pl08x.c:686", ch->reg_control);
 		val &= PL080_CONTROL_SWIDTH_MASK;
 		val >>= PL080_CONTROL_SWIDTH_SHIFT;
 	} else {
 		/* Plain PL08x */
-		val = readl(ch->reg_control);
+		val = pete_readl("drivers/dma/amba-pl08x.c:691", ch->reg_control);
 		bytes = val & PL080_CONTROL_TRANSFER_SIZE_MASK;
 
 		val &= PL080_CONTROL_SWIDTH_MASK;
@@ -771,7 +771,7 @@ static u32 pl08x_getbytes_chan(struct pl08x_dma_chan *plchan)
 	 * Follow the LLIs to get the number of remaining
 	 * bytes in the currently active transaction.
 	 */
-	clli = readl(ch->reg_lli) & ~PL080_LLI_LM_AHB2;
+	clli = pete_readl("drivers/dma/amba-pl08x.c:774", ch->reg_lli) & ~PL080_LLI_LM_AHB2;
 
 	/* First get the remaining bytes in the active transfer */
 	bytes = get_bytes_in_phy_channel(ch);
@@ -2283,10 +2283,10 @@ static void pl08x_ensure_on(struct pl08x_driver_data *pl08x)
 		return;
 	/* The FTDMAC020 variant does this in another register */
 	if (pl08x->vd->ftdmac020) {
-		writel(PL080_CONFIG_ENABLE, pl08x->base + FTDMAC020_CSR);
+		pete_writel("drivers/dma/amba-pl08x.c:2286", PL080_CONFIG_ENABLE, pl08x->base + FTDMAC020_CSR);
 		return;
 	}
-	writel(PL080_CONFIG_ENABLE, pl08x->base + PL080_CONFIG);
+	pete_writel("drivers/dma/amba-pl08x.c:2289", PL080_CONFIG_ENABLE, pl08x->base + PL080_CONFIG);
 }
 
 static irqreturn_t pl08x_irq(int irq, void *dev)
@@ -2295,15 +2295,15 @@ static irqreturn_t pl08x_irq(int irq, void *dev)
 	u32 mask = 0, err, tc, i;
 
 	/* check & clear - ERR & TC interrupts */
-	err = readl(pl08x->base + PL080_ERR_STATUS);
+	err = pete_readl("drivers/dma/amba-pl08x.c:2298", pl08x->base + PL080_ERR_STATUS);
 	if (err) {
 		dev_err(&pl08x->adev->dev, "%s error interrupt, register value 0x%08x\n",
 			__func__, err);
-		writel(err, pl08x->base + PL080_ERR_CLEAR);
+		pete_writel("drivers/dma/amba-pl08x.c:2302", err, pl08x->base + PL080_ERR_CLEAR);
 	}
-	tc = readl(pl08x->base + PL080_TC_STATUS);
+	tc = pete_readl("drivers/dma/amba-pl08x.c:2304", pl08x->base + PL080_TC_STATUS);
 	if (tc)
-		writel(tc, pl08x->base + PL080_TC_CLEAR);
+		pete_writel("drivers/dma/amba-pl08x.c:2306", tc, pl08x->base + PL080_TC_CLEAR);
 
 	if (!err && !tc)
 		return IRQ_NONE;
@@ -2736,10 +2736,10 @@ static int pl08x_probe(struct amba_device *adev, const struct amba_id *id)
 	if (vd->ftdmac020) {
 		u32 val;
 
-		val = readl(pl08x->base + FTDMAC020_REVISION);
+		val = pete_readl("drivers/dma/amba-pl08x.c:2739", pl08x->base + FTDMAC020_REVISION);
 		dev_info(&pl08x->adev->dev, "FTDMAC020 %d.%d rel %d\n",
 			 (val >> 16) & 0xff, (val >> 8) & 0xff, val & 0xff);
-		val = readl(pl08x->base + FTDMAC020_FEATURE);
+		val = pete_readl("drivers/dma/amba-pl08x.c:2742", pl08x->base + FTDMAC020_FEATURE);
 		dev_info(&pl08x->adev->dev, "FTDMAC020 %d channels, "
 			 "%s built-in bridge, %s, %s linked lists\n",
 			 (val >> 12) & 0x0f,
@@ -2852,10 +2852,10 @@ static int pl08x_probe(struct amba_device *adev, const struct amba_id *id)
 	/* Clear any pending interrupts */
 	if (vd->ftdmac020)
 		/* This variant has error IRQs in bits 16-19 */
-		writel(0x0000FFFF, pl08x->base + PL080_ERR_CLEAR);
+		pete_writel("drivers/dma/amba-pl08x.c:2855", 0x0000FFFF, pl08x->base + PL080_ERR_CLEAR);
 	else
-		writel(0x000000FF, pl08x->base + PL080_ERR_CLEAR);
-	writel(0x000000FF, pl08x->base + PL080_TC_CLEAR);
+		pete_writel("drivers/dma/amba-pl08x.c:2857", 0x000000FF, pl08x->base + PL080_ERR_CLEAR);
+	pete_writel("drivers/dma/amba-pl08x.c:2858", 0x000000FF, pl08x->base + PL080_TC_CLEAR);
 
 	/* Attach the interrupt handler */
 	ret = request_irq(adev->irq[0], pl08x_irq, 0, DRIVER_NAME, pl08x);
@@ -2907,7 +2907,7 @@ static int pl08x_probe(struct amba_device *adev, const struct amba_id *id)
 		if (vd->nomadik) {
 			u32 val;
 
-			val = readl(ch->reg_config);
+			val = pete_readl("drivers/dma/amba-pl08x.c:2910", ch->reg_config);
 			if (val & (PL080N_CONFIG_ITPROT | PL080N_CONFIG_SECPROT)) {
 				dev_info(&adev->dev, "physical channel %d reserved for secure access only\n", i);
 				ch->locked = true;

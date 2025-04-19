@@ -88,7 +88,7 @@ static int tegra_wdt_start(struct watchdog_device *wdd)
 	 */
 	val = 1000000ul / 4;
 	val |= (TIMER_EN | TIMER_PERIODIC);
-	writel(val, wdt->tmr_regs + TIMER_PTV);
+	pete_writel("drivers/watchdog/tegra_wdt.c:91", val, wdt->tmr_regs + TIMER_PTV);
 
 	/*
 	 * Set number of periods and start counter.
@@ -100,9 +100,9 @@ static int tegra_wdt_start(struct watchdog_device *wdd)
 	val = WDT_TIMER_ID |
 	      (wdd->timeout << WDT_CFG_PERIOD_SHIFT) |
 	      WDT_CFG_PMC2CAR_RST_EN;
-	writel(val, wdt->wdt_regs + WDT_CFG);
+	pete_writel("drivers/watchdog/tegra_wdt.c:103", val, wdt->wdt_regs + WDT_CFG);
 
-	writel(WDT_CMD_START_COUNTER, wdt->wdt_regs + WDT_CMD);
+	pete_writel("drivers/watchdog/tegra_wdt.c:105", WDT_CMD_START_COUNTER, wdt->wdt_regs + WDT_CMD);
 
 	return 0;
 }
@@ -111,9 +111,9 @@ static int tegra_wdt_stop(struct watchdog_device *wdd)
 {
 	struct tegra_wdt *wdt = watchdog_get_drvdata(wdd);
 
-	writel(WDT_UNLOCK_PATTERN, wdt->wdt_regs + WDT_UNLOCK);
-	writel(WDT_CMD_DISABLE_COUNTER, wdt->wdt_regs + WDT_CMD);
-	writel(0, wdt->tmr_regs + TIMER_PTV);
+	pete_writel("drivers/watchdog/tegra_wdt.c:114", WDT_UNLOCK_PATTERN, wdt->wdt_regs + WDT_UNLOCK);
+	pete_writel("drivers/watchdog/tegra_wdt.c:115", WDT_CMD_DISABLE_COUNTER, wdt->wdt_regs + WDT_CMD);
+	pete_writel("drivers/watchdog/tegra_wdt.c:116", 0, wdt->tmr_regs + TIMER_PTV);
 
 	return 0;
 }
@@ -122,7 +122,7 @@ static int tegra_wdt_ping(struct watchdog_device *wdd)
 {
 	struct tegra_wdt *wdt = watchdog_get_drvdata(wdd);
 
-	writel(WDT_CMD_START_COUNTER, wdt->wdt_regs + WDT_CMD);
+	pete_writel("drivers/watchdog/tegra_wdt.c:125", WDT_CMD_START_COUNTER, wdt->wdt_regs + WDT_CMD);
 
 	return 0;
 }
@@ -147,7 +147,7 @@ static unsigned int tegra_wdt_get_timeleft(struct watchdog_device *wdd)
 	int count;
 	int exp;
 
-	val = readl(wdt->wdt_regs + WDT_STS);
+	val = pete_readl("drivers/watchdog/tegra_wdt.c:150", wdt->wdt_regs + WDT_STS);
 
 	/* Current countdown (from timeout) */
 	count = (val >> WDT_STS_COUNT_SHIFT) & WDT_STS_COUNT_MASK;

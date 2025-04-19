@@ -92,12 +92,12 @@ static void exynos_pcie_deinit_clk_resources(struct exynos_pcie *ep)
 
 static void exynos_pcie_writel(void __iomem *base, u32 val, u32 reg)
 {
-	writel(val, base + reg);
+	pete_writel("drivers/pci/controller/dwc/pci-exynos.c:95", val, base + reg);
 }
 
 static u32 exynos_pcie_readl(void __iomem *base, u32 reg)
 {
-	return readl(base + reg);
+	return pete_readl("drivers/pci/controller/dwc/pci-exynos.c:100", base + reg);
 }
 
 static void exynos_pcie_sideband_dbi_w_mode(struct exynos_pcie *ep, bool on)

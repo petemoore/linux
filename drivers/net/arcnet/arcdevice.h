@@ -386,9 +386,9 @@ void arcnet_timeout(struct net_device *dev, unsigned int txqueue);
 	outsb((addr) + BUS_ALIGN * (offset), buffer, count)
 
 #define arcnet_readb(addr, offset)					\
-	readb((addr) + (offset))
+	pete_readb("drivers/net/arcnet/arcdevice.h:389", (addr) + (offset))
 #define arcnet_writeb(value, addr, offset)				\
-	writeb(value, (addr) + (offset))
+	pete_writeb("drivers/net/arcnet/arcdevice.h:391", value, (addr) + (offset))
 
 #endif				/* __KERNEL__ */
 #endif				/* _LINUX_ARCDEVICE_H */

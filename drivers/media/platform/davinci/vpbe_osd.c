@@ -49,14 +49,14 @@ static inline u32 osd_read(struct osd_state *sd, u32 offset)
 {
 	struct osd_state *osd = sd;
 
-	return readl(osd->osd_base + offset);
+	return pete_readl("drivers/media/platform/davinci/vpbe_osd.c:52", osd->osd_base + offset);
 }
 
 static inline u32 osd_write(struct osd_state *sd, u32 val, u32 offset)
 {
 	struct osd_state *osd = sd;
 
-	writel(val, osd->osd_base + offset);
+	pete_writel("drivers/media/platform/davinci/vpbe_osd.c:59", val, osd->osd_base + offset);
 
 	return val;
 }
@@ -66,9 +66,9 @@ static inline u32 osd_set(struct osd_state *sd, u32 mask, u32 offset)
 	struct osd_state *osd = sd;
 
 	void __iomem *addr = osd->osd_base + offset;
-	u32 val = readl(addr) | mask;
+	u32 val = pete_readl("drivers/media/platform/davinci/vpbe_osd.c:69", addr) | mask;
 
-	writel(val, addr);
+	pete_writel("drivers/media/platform/davinci/vpbe_osd.c:71", val, addr);
 
 	return val;
 }
@@ -78,9 +78,9 @@ static inline u32 osd_clear(struct osd_state *sd, u32 mask, u32 offset)
 	struct osd_state *osd = sd;
 
 	void __iomem *addr = osd->osd_base + offset;
-	u32 val = readl(addr) & ~mask;
+	u32 val = pete_readl("drivers/media/platform/davinci/vpbe_osd.c:81", addr) & ~mask;
 
-	writel(val, addr);
+	pete_writel("drivers/media/platform/davinci/vpbe_osd.c:83", val, addr);
 
 	return val;
 }
@@ -91,9 +91,9 @@ static inline u32 osd_modify(struct osd_state *sd, u32 mask, u32 val,
 	struct osd_state *osd = sd;
 
 	void __iomem *addr = osd->osd_base + offset;
-	u32 new_val = (readl(addr) & ~mask) | (val & mask);
+	u32 new_val = (pete_readl("drivers/media/platform/davinci/vpbe_osd.c:94", addr) & ~mask) | (val & mask);
 
-	writel(new_val, addr);
+	pete_writel("drivers/media/platform/davinci/vpbe_osd.c:96", new_val, addr);
 
 	return new_val;
 }

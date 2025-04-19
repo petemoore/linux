@@ -488,7 +488,7 @@ static int dm355_venc_setup_clock(enum vpbe_enc_timings_type type,
 
 	switch (type) {
 	case VPBE_ENC_STD:
-		writel(VPSS_DACCLKEN_ENABLE | VPSS_VENCCLKEN_ENABLE,
+		pete_writel("arch/arm/mach-davinci/dm355.c:491", VPSS_DACCLKEN_ENABLE | VPSS_VENCCLKEN_ENABLE,
 		       vpss_clk_ctrl_reg);
 		break;
 	case VPBE_ENC_DV_TIMINGS:
@@ -497,7 +497,7 @@ static int dm355_venc_setup_clock(enum vpbe_enc_timings_type type,
 			 * For HD, use external clock source since we cannot
 			 * support HD mode with internal clocks.
 			 */
-			writel(VPSS_MUXSEL_EXTCLK_ENABLE, vpss_clk_ctrl_reg);
+			pete_writel("arch/arm/mach-davinci/dm355.c:500", VPSS_MUXSEL_EXTCLK_ENABLE, vpss_clk_ctrl_reg);
 		break;
 	default:
 		return -EINVAL;

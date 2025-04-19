@@ -245,7 +245,7 @@ unsigned int snd_hdac_aligned_read(void __iomem *addr, unsigned int mask)
 	unsigned int shift = ((unsigned long)(addr) & 0x3) << 3;
 	unsigned int v;
 
-	v = readl(aligned_addr);
+	v = pete_readl("sound/hda/hdac_bus.c:248", aligned_addr);
 	return (v >> shift) & mask;
 }
 EXPORT_SYMBOL_GPL(snd_hdac_aligned_read);
@@ -258,10 +258,10 @@ void snd_hdac_aligned_write(unsigned int val, void __iomem *addr,
 	unsigned int shift = ((unsigned long)(addr) & 0x3) << 3;
 	unsigned int v;
 
-	v = readl(aligned_addr);
+	v = pete_readl("sound/hda/hdac_bus.c:261", aligned_addr);
 	v &= ~(mask << shift);
 	v |= val << shift;
-	writel(v, aligned_addr);
+	pete_writel("sound/hda/hdac_bus.c:264", v, aligned_addr);
 }
 EXPORT_SYMBOL_GPL(snd_hdac_aligned_write);
 #endif /* CONFIG_SND_HDA_ALIGNED_MMIO */

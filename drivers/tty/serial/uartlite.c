@@ -556,12 +556,12 @@ static void early_uartlite_putc(struct uart_port *port, int c)
 	unsigned retries = 1000000;
 
 	while (--retries &&
-	       (readl(port->membase + ULITE_STATUS) & ULITE_STATUS_TXFULL))
+	       (pete_readl("drivers/tty/serial/uartlite.c:559", port->membase + ULITE_STATUS) & ULITE_STATUS_TXFULL))
 		;
 
 	/* Only attempt the iowrite if we didn't timeout */
 	if (retries)
-		writel(c & 0xff, port->membase + ULITE_TX);
+		pete_writel("drivers/tty/serial/uartlite.c:564", c & 0xff, port->membase + ULITE_TX);
 }
 
 static void early_uartlite_write(struct console *console,

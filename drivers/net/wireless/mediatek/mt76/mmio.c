@@ -10,7 +10,7 @@ static u32 mt76_mmio_rr(struct mt76_dev *dev, u32 offset)
 {
 	u32 val;
 
-	val = readl(dev->mmio.regs + offset);
+	val = pete_readl("drivers/net/wireless/mediatek/mt76/mmio.c:13", dev->mmio.regs + offset);
 	trace_reg_rr(dev, offset, val);
 
 	return val;
@@ -19,7 +19,7 @@ static u32 mt76_mmio_rr(struct mt76_dev *dev, u32 offset)
 static void mt76_mmio_wr(struct mt76_dev *dev, u32 offset, u32 val)
 {
 	trace_reg_wr(dev, offset, val);
-	writel(val, dev->mmio.regs + offset);
+	pete_writel("drivers/net/wireless/mediatek/mt76/mmio.c:22", val, dev->mmio.regs + offset);
 }
 
 static u32 mt76_mmio_rmw(struct mt76_dev *dev, u32 offset, u32 mask, u32 val)

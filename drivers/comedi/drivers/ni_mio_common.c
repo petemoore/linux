@@ -222,7 +222,7 @@ static const int num_adc_stages_611x = 3;
 static void ni_writel(struct comedi_device *dev, unsigned int data, int reg)
 {
 	if (dev->mmio)
-		writel(data, dev->mmio + reg);
+		pete_writel("drivers/comedi/drivers/ni_mio_common.c:225", data, dev->mmio + reg);
 	else
 		outl(data, dev->iobase + reg);
 }
@@ -230,7 +230,7 @@ static void ni_writel(struct comedi_device *dev, unsigned int data, int reg)
 static void ni_writew(struct comedi_device *dev, unsigned int data, int reg)
 {
 	if (dev->mmio)
-		writew(data, dev->mmio + reg);
+		pete_writew("drivers/comedi/drivers/ni_mio_common.c:233", data, dev->mmio + reg);
 	else
 		outw(data, dev->iobase + reg);
 }
@@ -238,7 +238,7 @@ static void ni_writew(struct comedi_device *dev, unsigned int data, int reg)
 static void ni_writeb(struct comedi_device *dev, unsigned int data, int reg)
 {
 	if (dev->mmio)
-		writeb(data, dev->mmio + reg);
+		pete_writeb("drivers/comedi/drivers/ni_mio_common.c:241", data, dev->mmio + reg);
 	else
 		outb(data, dev->iobase + reg);
 }
@@ -246,7 +246,7 @@ static void ni_writeb(struct comedi_device *dev, unsigned int data, int reg)
 static unsigned int ni_readl(struct comedi_device *dev, int reg)
 {
 	if (dev->mmio)
-		return readl(dev->mmio + reg);
+		return pete_readl("drivers/comedi/drivers/ni_mio_common.c:249", dev->mmio + reg);
 
 	return inl(dev->iobase + reg);
 }
@@ -254,7 +254,7 @@ static unsigned int ni_readl(struct comedi_device *dev, int reg)
 static unsigned int ni_readw(struct comedi_device *dev, int reg)
 {
 	if (dev->mmio)
-		return readw(dev->mmio + reg);
+		return pete_readw("drivers/comedi/drivers/ni_mio_common.c:257", dev->mmio + reg);
 
 	return inw(dev->iobase + reg);
 }
@@ -262,7 +262,7 @@ static unsigned int ni_readw(struct comedi_device *dev, int reg)
 static unsigned int ni_readb(struct comedi_device *dev, int reg)
 {
 	if (dev->mmio)
-		return readb(dev->mmio + reg);
+		return pete_readb("drivers/comedi/drivers/ni_mio_common.c:265", dev->mmio + reg);
 
 	return inb(dev->iobase + reg);
 }

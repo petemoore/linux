@@ -39,12 +39,12 @@ static void bq4802_write_io(struct bq4802 *p, int off, u8 val)
 
 static u8 bq4802_read_mem(struct bq4802 *p, int off)
 {
-	return readb(p->regs + off);
+	return pete_readb("drivers/rtc/rtc-bq4802.c:42", p->regs + off);
 }
 
 static void bq4802_write_mem(struct bq4802 *p, int off, u8 val)
 {
-	writeb(val, p->regs + off);
+	pete_writeb("drivers/rtc/rtc-bq4802.c:47", val, p->regs + off);
 }
 
 static int bq4802_read_time(struct device *dev, struct rtc_time *tm)

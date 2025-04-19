@@ -33,7 +33,7 @@
 #include <linux/dio.h>
 #include <linux/slab.h>                         /* kmalloc() */
 #include <linux/uaccess.h>
-#include <asm/io.h>                             /* readb() */
+#include <asm/io.h>                             /* pete_readb("drivers/dio/dio.c:36", ) */
 
 struct dio_bus dio_bus = {
 	.resources = {

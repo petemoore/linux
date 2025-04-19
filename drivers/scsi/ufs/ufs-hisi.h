@@ -91,8 +91,8 @@ struct ufs_hisi_host {
 };
 
 #define ufs_sys_ctrl_writel(host, val, reg)                                    \
-	writel((val), (host)->ufs_sys_ctrl + (reg))
-#define ufs_sys_ctrl_readl(host, reg) readl((host)->ufs_sys_ctrl + (reg))
+	pete_writel("drivers/scsi/ufs/ufs-hisi.h:94", (val), (host)->ufs_sys_ctrl + (reg))
+#define ufs_sys_ctrl_readl(host, reg) pete_readl("drivers/scsi/ufs/ufs-hisi.h:95", (host)->ufs_sys_ctrl + (reg))
 #define ufs_sys_ctrl_set_bits(host, mask, reg)                                 \
 	ufs_sys_ctrl_writel(                                                   \
 		(host), ((mask) | (ufs_sys_ctrl_readl((host), (reg)))), (reg))

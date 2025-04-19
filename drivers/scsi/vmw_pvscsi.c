@@ -207,12 +207,12 @@ pvscsi_get_context(const struct pvscsi_adapter *adapter, u64 context)
 static void pvscsi_reg_write(const struct pvscsi_adapter *adapter,
 			     u32 offset, u32 val)
 {
-	writel(val, adapter->mmioBase + offset);
+	pete_writel("drivers/scsi/vmw_pvscsi.c:210", val, adapter->mmioBase + offset);
 }
 
 static u32 pvscsi_reg_read(const struct pvscsi_adapter *adapter, u32 offset)
 {
-	return readl(adapter->mmioBase + offset);
+	return pete_readl("drivers/scsi/vmw_pvscsi.c:215", adapter->mmioBase + offset);
 }
 
 static u32 pvscsi_read_intr_status(const struct pvscsi_adapter *adapter)

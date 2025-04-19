@@ -35,10 +35,10 @@ static void rcar_gen3_phy_pcie_modify_reg(struct phy *p, unsigned int reg,
 
 	spin_lock_irqsave(&phy->lock, flags);
 
-	value = readl(base + reg);
+	value = pete_readl("drivers/phy/renesas/phy-rcar-gen3-pcie.c:38", base + reg);
 	value &= ~clear;
 	value |= set;
-	writel(value, base + reg);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen3-pcie.c:41", value, base + reg);
 
 	spin_unlock_irqrestore(&phy->lock, flags);
 }

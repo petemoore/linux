@@ -138,7 +138,7 @@ static int fsl_ehci_drv_probe(struct platform_device *pdev)
 		tmp |= CTRL_UTMI_PHY_EN;
 		iowrite32be(tmp, hcd->regs + FSL_SOC_USB_CTRL);
 
-		writel(PORT_PTS_UTMI, hcd->regs + FSL_SOC_USB_PORTSC1);
+		pete_writel("drivers/usb/host/ehci-fsl.c:141", PORT_PTS_UTMI, hcd->regs + FSL_SOC_USB_PORTSC1);
 	}
 
 	/* Don't need to set host mode here. It will be done by tdi_reset() */
@@ -657,17 +657,17 @@ static int ehci_start_port_reset(struct usb_hcd *hcd, unsigned port)
 	port--;
 
 	/* start port reset before HNP protocol time out */
-	status = readl(&ehci->regs->port_status[port]);
+	status = pete_readl("drivers/usb/host/ehci-fsl.c:660", &ehci->regs->port_status[port]);
 	if (!(status & PORT_CONNECT))
 		return -ENODEV;
 
 	/* hub_wq will finish the reset later */
 	if (ehci_is_TDI(ehci)) {
-		writel(PORT_RESET |
+		pete_writel("drivers/usb/host/ehci-fsl.c:666", PORT_RESET |
 		       (status & ~(PORT_CSC | PORT_PEC | PORT_OCC)),
 		       &ehci->regs->port_status[port]);
 	} else {
-		writel(PORT_RESET, &ehci->regs->port_status[port]);
+		pete_writel("drivers/usb/host/ehci-fsl.c:670", PORT_RESET, &ehci->regs->port_status[port]);
 	}
 
 	return 0;

@@ -10,8 +10,8 @@
 #include "lima_vm.h"
 #include "lima_regs.h"
 
-#define mmu_write(reg, data) writel(data, ip->iomem + reg)
-#define mmu_read(reg) readl(ip->iomem + reg)
+#define mmu_write(reg, data) pete_writel("drivers/gpu/drm/lima/lima_mmu.c:13", data, ip->iomem + reg)
+#define mmu_read(reg) pete_readl("drivers/gpu/drm/lima/lima_mmu.c:14", ip->iomem + reg)
 
 #define lima_mmu_send_command(cmd, addr, val, cond)	     \
 ({							     \

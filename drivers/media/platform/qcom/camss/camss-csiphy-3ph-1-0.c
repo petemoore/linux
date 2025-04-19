@@ -151,7 +151,7 @@ static void csiphy_hw_version_read(struct csiphy_device *csiphy,
 {
 	u32 hw_version;
 
-	writel(CSIPHY_3PH_CMN_CSI_COMMON_CTRL6_SHOW_REV_ID,
+	pete_writel("drivers/media/platform/qcom/camss/camss-csiphy-3ph-1-0.c:154", CSIPHY_3PH_CMN_CSI_COMMON_CTRL6_SHOW_REV_ID,
 	       csiphy->base + CSIPHY_3PH_CMN_CSI_COMMON_CTRLn(6));
 
 	hw_version = readl_relaxed(csiphy->base +

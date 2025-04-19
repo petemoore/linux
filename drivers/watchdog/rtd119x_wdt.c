@@ -38,7 +38,7 @@ static int rtd119x_wdt_start(struct watchdog_device *wdev)
 	val = readl_relaxed(data->base + RTD119X_TCWCR);
 	val &= ~RTD119X_TCWCR_WDEN_MASK;
 	val |= RTD119X_TCWCR_WDEN_ENABLED;
-	writel(val, data->base + RTD119X_TCWCR);
+	pete_writel("drivers/watchdog/rtd119x_wdt.c:41", val, data->base + RTD119X_TCWCR);
 
 	return 0;
 }
@@ -51,7 +51,7 @@ static int rtd119x_wdt_stop(struct watchdog_device *wdev)
 	val = readl_relaxed(data->base + RTD119X_TCWCR);
 	val &= ~RTD119X_TCWCR_WDEN_MASK;
 	val |= RTD119X_TCWCR_WDEN_DISABLED;
-	writel(val, data->base + RTD119X_TCWCR);
+	pete_writel("drivers/watchdog/rtd119x_wdt.c:54", val, data->base + RTD119X_TCWCR);
 
 	return 0;
 }
@@ -69,7 +69,7 @@ static int rtd119x_wdt_set_timeout(struct watchdog_device *wdev, unsigned int va
 {
 	struct rtd119x_watchdog_device *data = watchdog_get_drvdata(wdev);
 
-	writel(val * clk_get_rate(data->clk), data->base + RTD119X_TCWOV);
+	pete_writel("drivers/watchdog/rtd119x_wdt.c:72", val * clk_get_rate(data->clk), data->base + RTD119X_TCWOV);
 
 	data->wdt_dev.timeout = val;
 

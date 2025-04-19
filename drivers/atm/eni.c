@@ -151,8 +151,8 @@ static int tx_complete = 0,dma_complete = 0,queued = 0,requeued = 0,
 static struct atm_dev *eni_boards = NULL;
 
 /* Read/write registers on card */
-#define eni_in(r)	readl(eni_dev->reg+(r)*4)
-#define eni_out(v,r)	writel((v),eni_dev->reg+(r)*4)
+#define eni_in(r)	pete_readl("drivers/atm/eni.c:154", eni_dev->reg+(r)*4)
+#define eni_out(v,r)	pete_writel("drivers/atm/eni.c:155", (v),eni_dev->reg+(r)*4)
 
 
 /*-------------------------------- utilities --------------------------------*/
@@ -323,7 +323,7 @@ static void rx_ident_err(struct atm_vcc *vcc)
 	    eni_vcc->rxing,eni_vcc->words);
 	printk(KERN_ALERT "  host descr 0x%lx, rx pos 0x%lx, descr value "
 	    "0x%x\n",eni_vcc->descr,eni_vcc->rx_pos,
-	    (unsigned) readl(eni_vcc->recv+eni_vcc->descr*4));
+	    (unsigned) pete_readl("drivers/atm/eni.c:326", eni_vcc->recv+eni_vcc->descr*4));
 	printk(KERN_ALERT "  last %p, servicing %d\n",eni_vcc->last,
 	    eni_vcc->servicing);
 	EVENT("---dump ends here---\n",0,0);
@@ -461,8 +461,8 @@ static int do_rx_dma(struct atm_vcc *vcc,struct sk_buff *skb,
 		goto trouble;
 	}
         for (i = 0; i < j; i++) {
-		writel(dma[i*2],eni_dev->rx_dma+dma_wr*8);
-		writel(dma[i*2+1],eni_dev->rx_dma+dma_wr*8+4);
+		pete_writel("drivers/atm/eni.c:464", dma[i*2],eni_dev->rx_dma+dma_wr*8);
+		pete_writel("drivers/atm/eni.c:465", dma[i*2+1],eni_dev->rx_dma+dma_wr*8+4);
 		dma_wr = (dma_wr+1) & (NR_DMA_RX-1);
         }
 	if (skb) {
@@ -512,7 +512,7 @@ static int rx_aal0(struct atm_vcc *vcc)
 
 	DPRINTK(">rx_aal0\n");
 	eni_vcc = ENI_VCC(vcc);
-	descr = readl(eni_vcc->recv+eni_vcc->descr*4);
+	descr = pete_readl("drivers/atm/eni.c:515", eni_vcc->recv+eni_vcc->descr*4);
 	if ((descr & MID_RED_IDEN) != (MID_RED_RX_ID << MID_RED_SHIFT)) {
 		rx_ident_err(vcc);
 		return 1;
@@ -550,7 +550,7 @@ static int rx_aal5(struct atm_vcc *vcc)
 	EVENT("rx_aal5\n",0,0);
 	DPRINTK(">rx_aal5\n");
 	eni_vcc = ENI_VCC(vcc);
-	descr = readl(eni_vcc->recv+eni_vcc->descr*4);
+	descr = pete_readl("drivers/atm/eni.c:553", eni_vcc->recv+eni_vcc->descr*4);
 	if ((descr & MID_RED_IDEN) != (MID_RED_RX_ID << MID_RED_SHIFT)) {
 		rx_ident_err(vcc);
 		return 1;
@@ -581,7 +581,7 @@ static int rx_aal5(struct atm_vcc *vcc)
 	else {
 		size = (descr & MID_RED_COUNT)*(ATM_CELL_PAYLOAD >> 2);
 		DPRINTK("size=%ld\n",size);
-		length = readl(eni_vcc->recv+(((eni_vcc->descr+size-1) &
+		length = pete_readl("drivers/atm/eni.c:584", eni_vcc->recv+(((eni_vcc->descr+size-1) &
 		    (eni_vcc->words-1)))*4) & 0xffff;
 				/* -trailer(2)+header(1) */
 		if (length && length <= (size << 2)-8 && length <=
@@ -618,29 +618,29 @@ static inline int rx_vcc(struct atm_vcc *vcc)
 	eni_vcc = ENI_VCC(vcc);
 	vci_dsc = ENI_DEV(vcc->dev)->vci+vcc->vci*16;
 	EVENT("rx_vcc(1)\n",0,0);
-	while (eni_vcc->descr != (tmp = (readl(vci_dsc+4) & MID_VCI_DESCR) >>
+	while (eni_vcc->descr != (tmp = (pete_readl("drivers/atm/eni.c:621", vci_dsc+4) & MID_VCI_DESCR) >>
 	    MID_VCI_DESCR_SHIFT)) {
 		EVENT("rx_vcc(2: host dsc=0x%lx, nic dsc=0x%lx)\n",
 		    eni_vcc->descr,tmp);
 		DPRINTK("CB_DESCR %ld REG_DESCR %d\n",ENI_VCC(vcc)->descr,
-		    (((unsigned) readl(vci_dsc+4) & MID_VCI_DESCR) >>
+		    (((unsigned) pete_readl("drivers/atm/eni.c:626", vci_dsc+4) & MID_VCI_DESCR) >>
 		    MID_VCI_DESCR_SHIFT));
 		if (ENI_VCC(vcc)->rx(vcc)) return 1;
 	}
 	/* clear IN_SERVICE flag */
-	writel(readl(vci_dsc) & ~MID_VCI_IN_SERVICE,vci_dsc);
+	pete_writel("drivers/atm/eni.c:631", pete_readl("drivers/atm/eni.c:631", vci_dsc) & ~MID_VCI_IN_SERVICE,vci_dsc);
 	/*
 	 * If new data has arrived between evaluating the while condition and
 	 * clearing IN_SERVICE, we wouldn't be notified until additional data
 	 * follows. So we have to loop again to be sure.
 	 */
 	EVENT("rx_vcc(3)\n",0,0);
-	while (ENI_VCC(vcc)->descr != (tmp = (readl(vci_dsc+4) & MID_VCI_DESCR)
+	while (ENI_VCC(vcc)->descr != (tmp = (pete_readl("drivers/atm/eni.c:638", vci_dsc+4) & MID_VCI_DESCR)
 	    >> MID_VCI_DESCR_SHIFT)) {
 		EVENT("rx_vcc(4: host dsc=0x%lx, nic dsc=0x%lx)\n",
 		    eni_vcc->descr,tmp);
 		DPRINTK("CB_DESCR %ld REG_DESCR %d\n",ENI_VCC(vcc)->descr,
-		    (((unsigned) readl(vci_dsc+4) & MID_VCI_DESCR) >>
+		    (((unsigned) pete_readl("drivers/atm/eni.c:643", vci_dsc+4) & MID_VCI_DESCR) >>
 		    MID_VCI_DESCR_SHIFT));
 		if (ENI_VCC(vcc)->rx(vcc)) return 1;
 	}
@@ -682,7 +682,7 @@ static void get_service(struct atm_dev *dev)
 	DPRINTK(">get_service\n");
 	eni_dev = ENI_DEV(dev);
 	while (eni_in(MID_SERV_WRITE) != eni_dev->serv_read) {
-		vci = readl(eni_dev->service+eni_dev->serv_read*4);
+		vci = pete_readl("drivers/atm/eni.c:685", eni_dev->service+eni_dev->serv_read*4);
 		eni_dev->serv_read = (eni_dev->serv_read+1) & (NR_SERVICE-1);
 		vcc = eni_dev->rx_map[vci & 1023];
 		if (!vcc) {
@@ -746,7 +746,7 @@ static void dequeue_rx(struct atm_dev *dev)
 		first = 0;
 		vci_dsc = eni_dev->vci+vcc->vci*16;
 		if (!EEPMOK(eni_vcc->rx_pos,ENI_PRV_SIZE(skb),
-		    (readl(vci_dsc+4) & MID_VCI_READ) >> MID_VCI_READ_SHIFT,
+		    (pete_readl("drivers/atm/eni.c:749", vci_dsc+4) & MID_VCI_READ) >> MID_VCI_READ_SHIFT,
 		    eni_vcc->words)) {
 			EVENT("requeuing\n",0,0);
 			skb_queue_head(&eni_dev->rx_queue,skb);
@@ -818,13 +818,13 @@ static int open_rx_second(struct atm_vcc *vcc)
 	DPRINTK("loc 0x%x\n",(unsigned) (eni_vcc->recv-eni_dev->ram)/4);
 	size = eni_vcc->words >> 8;
 	for (order = -1; size; order++) size >>= 1;
-	writel(0,here+4); /* descr, read = 0 */
-	writel(0,here+8); /* write, state, count = 0 */
+	pete_writel("drivers/atm/eni.c:821", 0,here+4); /* descr, read = 0 */
+	pete_writel("drivers/atm/eni.c:822", 0,here+8); /* write, state, count = 0 */
 	if (eni_dev->rx_map[vcc->vci])
 		printk(KERN_CRIT DEV_LABEL "(itf %d): BUG - VCI %d already "
 		    "in use\n",vcc->dev->number,vcc->vci);
 	eni_dev->rx_map[vcc->vci] = vcc; /* now it counts */
-	writel(((vcc->qos.aal != ATM_AAL5 ? MID_MODE_RAW : MID_MODE_AAL5) <<
+	pete_writel("drivers/atm/eni.c:827", ((vcc->qos.aal != ATM_AAL5 ? MID_MODE_RAW : MID_MODE_AAL5) <<
 	    MID_VCI_MODE_SHIFT) | MID_VCI_PTI_MODE |
 	    (((eni_vcc->recv-eni_dev->ram) >> (MID_LOC_SKIP+2)) <<
 	    MID_VCI_LOCATION_SHIFT) | (order << MID_VCI_SIZE_SHIFT),here);
@@ -845,12 +845,12 @@ static void close_rx(struct atm_vcc *vcc)
 	if (vcc->vpi != ATM_VPI_UNSPEC && vcc->vci != ATM_VCI_UNSPEC) {
 		here = eni_dev->vci+vcc->vci*16;
 		/* block receiver */
-		writel((readl(here) & ~MID_VCI_MODE) | (MID_MODE_TRASH <<
+		pete_writel("drivers/atm/eni.c:848", (pete_readl("drivers/atm/eni.c:848", here) & ~MID_VCI_MODE) | (MID_MODE_TRASH <<
 		    MID_VCI_MODE_SHIFT),here);
 		/* wait for receiver to become idle */
 		udelay(27);
 		/* discard pending cell */
-		writel(readl(here) & ~MID_VCI_IN_SERVICE,here);
+		pete_writel("drivers/atm/eni.c:853", pete_readl("drivers/atm/eni.c:853", here) & ~MID_VCI_IN_SERVICE,here);
 		/* don't accept any new ones */
 		eni_dev->rx_map[vcc->vci] = NULL;
 		/* wait for RX queue to drain */
@@ -877,7 +877,7 @@ static void close_rx(struct atm_vcc *vcc)
 			u32 tmp;
 
 			tasklet_disable(&eni_dev->task);
-			tmp = readl(eni_dev->vci+vcc->vci*16+4) & MID_VCI_READ;
+			tmp = pete_readl("drivers/atm/eni.c:880", eni_dev->vci+vcc->vci*16+4) & MID_VCI_READ;
 			at_end = eni_vcc->rx_pos == tmp >> MID_VCI_READ_SHIFT;
 			tasklet_enable(&eni_dev->task);
 			if (at_end) break;
@@ -1148,23 +1148,23 @@ DPRINTK("doing direct send\n"); /* @@@ well, this doesn't work anyway */
 	j++;
 	DPRINTK("DMA at end: %d\n",j);
 	/* store frame */
-	writel((MID_SEG_TX_ID << MID_SEG_ID_SHIFT) |
+	pete_writel("drivers/atm/eni.c:1151", (MID_SEG_TX_ID << MID_SEG_ID_SHIFT) |
 	    (aal5 ? MID_SEG_AAL5 : 0) | (tx->prescaler << MID_SEG_PR_SHIFT) |
 	    (tx->resolution << MID_SEG_RATE_SHIFT) |
 	    (size/(ATM_CELL_PAYLOAD/4)),tx->send+tx->tx_pos*4);
-/*printk("dsc = 0x%08lx\n",(unsigned long) readl(tx->send+tx->tx_pos*4));*/
-	writel((vcc->vci << MID_SEG_VCI_SHIFT) |
+/*printk("dsc = 0x%08lx\n",(unsigned long) pete_readl("drivers/atm/eni.c:1155", tx->send+tx->tx_pos*4));*/
+	pete_writel("drivers/atm/eni.c:1156", (vcc->vci << MID_SEG_VCI_SHIFT) |
             (aal5 ? 0 : (skb_data3 & 0xf)) |
 	    (ATM_SKB(skb)->atm_options & ATM_ATMOPT_CLP ? MID_SEG_CLP : 0),
 	    tx->send+((tx->tx_pos+1) & (tx->words-1))*4);
 	DPRINTK("size: %d, len:%d\n",size,skb->len);
 	if (aal5)
-		writel(skb->len,tx->send+
+		pete_writel("drivers/atm/eni.c:1162", skb->len,tx->send+
                     ((tx->tx_pos+size-AAL5_TRAILER) & (tx->words-1))*4);
 	j = j >> 1;
 	for (i = 0; i < j; i++) {
-		writel(eni_dev->dma[i*2],eni_dev->tx_dma+dma_wr*8);
-		writel(eni_dev->dma[i*2+1],eni_dev->tx_dma+dma_wr*8+4);
+		pete_writel("drivers/atm/eni.c:1166", eni_dev->dma[i*2],eni_dev->tx_dma+dma_wr*8);
+		pete_writel("drivers/atm/eni.c:1167", eni_dev->dma[i*2+1],eni_dev->tx_dma+dma_wr*8+4);
 		dma_wr = (dma_wr+1) & (NR_DMA_TX-1);
 	}
 	ENI_PRV_POS(skb) = tx->tx_pos;
@@ -1692,7 +1692,7 @@ static int get_esi_fpga(struct atm_dev *dev, void __iomem *base)
 	int i;
 
 	mac_base = base+EPROM_SIZE-sizeof(struct midway_eprom);
-	for (i = 0; i < ESI_LEN; i++) dev->esi[i] = readb(mac_base+(i^3));
+	for (i = 0; i < ESI_LEN; i++) dev->esi[i] = pete_readb("drivers/atm/eni.c:1695", mac_base+(i^3));
 	return 0;
 }
 
@@ -1734,12 +1734,12 @@ static int eni_do_init(struct atm_dev *dev)
 	/* id may not be present in ASIC Tonga boards - check this @@@ */
 	if (!eni_dev->asic) {
 		eprom = (base+EPROM_SIZE-sizeof(struct midway_eprom));
-		if (readl(&eprom->magic) != ENI155_MAGIC) {
+		if (pete_readl("drivers/atm/eni.c:1737", &eprom->magic) != ENI155_MAGIC) {
 			printk("\n");
 			printk(KERN_ERR DEV_LABEL
 			       "(itf %d): bad magic - expected 0x%x, got 0x%x\n",
 			       dev->number, ENI155_MAGIC,
-			       (unsigned)readl(&eprom->magic));
+			       (unsigned)pete_readl("drivers/atm/eni.c:1742", &eprom->magic));
 			error = -EINVAL;
 			goto unmap;
 		}
@@ -1749,16 +1749,16 @@ static int eni_do_init(struct atm_dev *dev)
 	eni_dev->ram = base+RAM_BASE;
 	last = MAP_MAX_SIZE-RAM_BASE;
 	for (i = last-RAM_INCREMENT; i >= 0; i -= RAM_INCREMENT) {
-		writel(0x55555555,eni_dev->ram+i);
-		if (readl(eni_dev->ram+i) != 0x55555555) last = i;
+		pete_writel("drivers/atm/eni.c:1752", 0x55555555,eni_dev->ram+i);
+		if (pete_readl("drivers/atm/eni.c:1753", eni_dev->ram+i) != 0x55555555) last = i;
 		else {
-			writel(0xAAAAAAAA,eni_dev->ram+i);
-			if (readl(eni_dev->ram+i) != 0xAAAAAAAA) last = i;
-			else writel(i,eni_dev->ram+i);
+			pete_writel("drivers/atm/eni.c:1755", 0xAAAAAAAA,eni_dev->ram+i);
+			if (pete_readl("drivers/atm/eni.c:1756", eni_dev->ram+i) != 0xAAAAAAAA) last = i;
+			else pete_writel("drivers/atm/eni.c:1757", i,eni_dev->ram+i);
 		}
 	}
 	for (i = 0; i < last; i += RAM_INCREMENT)
-		if (readl(eni_dev->ram+i) != i) break;
+		if (pete_readl("drivers/atm/eni.c:1761", eni_dev->ram+i) != i) break;
 	eni_dev->mem = i;
 	memset_io(eni_dev->ram,0,eni_dev->mem);
 	/* TODO: should shrink allocation now */
@@ -1983,7 +1983,7 @@ static int eni_change_qos(struct atm_vcc *vcc,struct atm_qos *qos,int flgs)
 
 		if (ATM_SKB(skb)->vcc != vcc) continue;
 		dsc = tx->send+ENI_PRV_POS(skb)*4;
-		writel((readl(dsc) & ~(MID_SEG_RATE | MID_SEG_PR)) |
+		pete_writel("drivers/atm/eni.c:1986", (pete_readl("drivers/atm/eni.c:1986", dsc) & ~(MID_SEG_RATE | MID_SEG_PR)) |
 		    (tx->prescaler << MID_SEG_PR_SHIFT) |
 		    (tx->resolution << MID_SEG_RATE_SHIFT), dsc);
 	}
@@ -2069,14 +2069,14 @@ static int eni_send(struct atm_vcc *vcc,struct sk_buff *skb)
 static void eni_phy_put(struct atm_dev *dev,unsigned char value,
     unsigned long addr)
 {
-	writel(value,ENI_DEV(dev)->phy+addr*4);
+	pete_writel("drivers/atm/eni.c:2072", value,ENI_DEV(dev)->phy+addr*4);
 }
 
 
 
 static unsigned char eni_phy_get(struct atm_dev *dev,unsigned long addr)
 {
-	return readl(ENI_DEV(dev)->phy+addr*4);
+	return pete_readl("drivers/atm/eni.c:2079", ENI_DEV(dev)->phy+addr*4);
 }
 
 

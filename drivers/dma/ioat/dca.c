@@ -134,8 +134,8 @@ static int ioat_dca_add_requester(struct dca_provider *dca, struct device *dev)
 			ioatdca->req_slots[i].pdev = pdev;
 			ioatdca->req_slots[i].rid = id;
 			global_req_table =
-			      readw(ioatdca->dca_base + IOAT3_DCA_GREQID_OFFSET);
-			writel(id | IOAT_DCA_GREQID_VALID,
+			      pete_readw("drivers/dma/ioat/dca.c:137", ioatdca->dca_base + IOAT3_DCA_GREQID_OFFSET);
+			pete_writel("drivers/dma/ioat/dca.c:138", id | IOAT_DCA_GREQID_VALID,
 			       ioatdca->iobase + global_req_table + (i * 4));
 			return i;
 		}
@@ -160,8 +160,8 @@ static int ioat_dca_remove_requester(struct dca_provider *dca,
 	for (i = 0; i < ioatdca->max_requesters; i++) {
 		if (ioatdca->req_slots[i].pdev == pdev) {
 			global_req_table =
-			      readw(ioatdca->dca_base + IOAT3_DCA_GREQID_OFFSET);
-			writel(0, ioatdca->iobase + global_req_table + (i * 4));
+			      pete_readw("drivers/dma/ioat/dca.c:163", ioatdca->dca_base + IOAT3_DCA_GREQID_OFFSET);
+			pete_writel("drivers/dma/ioat/dca.c:164", 0, ioatdca->iobase + global_req_table + (i * 4));
 			ioatdca->req_slots[i].pdev = NULL;
 			ioatdca->req_slots[i].rid = 0;
 			ioatdca->requester_count--;
@@ -215,12 +215,12 @@ static int ioat_dca_count_dca_slots(void *iobase, u16 dca_offset)
 	u32 req;
 	u16 global_req_table;
 
-	global_req_table = readw(iobase + dca_offset + IOAT3_DCA_GREQID_OFFSET);
+	global_req_table = pete_readw("drivers/dma/ioat/dca.c:218", iobase + dca_offset + IOAT3_DCA_GREQID_OFFSET);
 	if (global_req_table == 0)
 		return 0;
 
 	do {
-		req = readl(iobase + global_req_table + (slots * sizeof(u32)));
+		req = pete_readl("drivers/dma/ioat/dca.c:223", iobase + global_req_table + (slots * sizeof(u32)));
 		slots++;
 	} while ((req & IOAT_DCA_GREQID_LASTID) == 0);
 
@@ -267,7 +267,7 @@ struct dca_provider *ioat_dca_init(struct pci_dev *pdev, void __iomem *iobase)
 	if (!system_has_dca_enabled(pdev))
 		return NULL;
 
-	dca_offset = readw(iobase + IOAT_DCAOFFSET_OFFSET);
+	dca_offset = pete_readw("drivers/dma/ioat/dca.c:270", iobase + IOAT_DCAOFFSET_OFFSET);
 	if (dca_offset == 0)
 		return NULL;
 
@@ -286,16 +286,16 @@ struct dca_provider *ioat_dca_init(struct pci_dev *pdev, void __iomem *iobase)
 	ioatdca->max_requesters = slots;
 
 	/* some bios might not know to turn these on */
-	csi_fsb_control = readw(ioatdca->dca_base + IOAT3_CSI_CONTROL_OFFSET);
+	csi_fsb_control = pete_readw("drivers/dma/ioat/dca.c:289", ioatdca->dca_base + IOAT3_CSI_CONTROL_OFFSET);
 	if ((csi_fsb_control & IOAT3_CSI_CONTROL_PREFETCH) == 0) {
 		csi_fsb_control |= IOAT3_CSI_CONTROL_PREFETCH;
-		writew(csi_fsb_control,
+		pete_writew("drivers/dma/ioat/dca.c:292", csi_fsb_control,
 		       ioatdca->dca_base + IOAT3_CSI_CONTROL_OFFSET);
 	}
-	pcie_control = readw(ioatdca->dca_base + IOAT3_PCI_CONTROL_OFFSET);
+	pcie_control = pete_readw("drivers/dma/ioat/dca.c:295", ioatdca->dca_base + IOAT3_PCI_CONTROL_OFFSET);
 	if ((pcie_control & IOAT3_PCI_CONTROL_MEMWR) == 0) {
 		pcie_control |= IOAT3_PCI_CONTROL_MEMWR;
-		writew(pcie_control,
+		pete_writew("drivers/dma/ioat/dca.c:298", pcie_control,
 		       ioatdca->dca_base + IOAT3_PCI_CONTROL_OFFSET);
 	}
 
@@ -304,9 +304,9 @@ struct dca_provider *ioat_dca_init(struct pci_dev *pdev, void __iomem *iobase)
 
 	/* copy out the APIC to DCA tag map */
 	tag_map.low =
-		readl(ioatdca->dca_base + IOAT3_APICID_TAG_MAP_OFFSET_LOW);
+		pete_readl("drivers/dma/ioat/dca.c:307", ioatdca->dca_base + IOAT3_APICID_TAG_MAP_OFFSET_LOW);
 	tag_map.high =
-		readl(ioatdca->dca_base + IOAT3_APICID_TAG_MAP_OFFSET_HIGH);
+		pete_readl("drivers/dma/ioat/dca.c:309", ioatdca->dca_base + IOAT3_APICID_TAG_MAP_OFFSET_HIGH);
 	for (i = 0; i < 8; i++) {
 		bit = tag_map.full >> (8 * i);
 		ioatdca->tag_map[i] = bit & DCA_TAG_MAP_MASK;

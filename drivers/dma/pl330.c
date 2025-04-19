@@ -869,7 +869,7 @@ static bool _until_dmac_idle(struct pl330_thread *thrd)
 
 	do {
 		/* Until Manager is Idle */
-		if (!(readl(regs + DBGSTATUS) & DBG_BUSY))
+		if (!(pete_readl("drivers/dma/pl330.c:872", regs + DBGSTATUS) & DBG_BUSY))
 			break;
 
 		cpu_relax();
@@ -898,13 +898,13 @@ static inline void _execute_DBGINSN(struct pl330_thread *thrd,
 		val |= (1 << 0);
 		val |= (thrd->id << 8); /* Channel Number */
 	}
-	writel(val, regs + DBGINST0);
+	pete_writel("drivers/dma/pl330.c:901", val, regs + DBGINST0);
 
 	val = le32_to_cpu(*((__le32 *)&insn[2]));
-	writel(val, regs + DBGINST1);
+	pete_writel("drivers/dma/pl330.c:904", val, regs + DBGINST1);
 
 	/* Get going */
-	writel(0, regs + DBGCMD);
+	pete_writel("drivers/dma/pl330.c:907", 0, regs + DBGCMD);
 }
 
 static inline u32 _state(struct pl330_thread *thrd)
@@ -913,9 +913,9 @@ static inline u32 _state(struct pl330_thread *thrd)
 	u32 val;
 
 	if (is_manager(thrd))
-		val = readl(regs + DS) & 0xf;
+		val = pete_readl("drivers/dma/pl330.c:916", regs + DS) & 0xf;
 	else
-		val = readl(regs + CS(thrd->id)) & 0xf;
+		val = pete_readl("drivers/dma/pl330.c:918", regs + CS(thrd->id)) & 0xf;
 
 	switch (val) {
 	case DS_ST_STOP:
@@ -969,7 +969,7 @@ static void _stop(struct pl330_thread *thrd)
 {
 	void __iomem *regs = thrd->dmac->base;
 	u8 insn[6] = {0, 0, 0, 0, 0, 0};
-	u32 inten = readl(regs + INTEN);
+	u32 inten = pete_readl("drivers/dma/pl330.c:972", regs + INTEN);
 
 	if (_state(thrd) == PL330_STATE_FAULT_COMPLETING)
 		UNTIL(thrd, PL330_STATE_FAULTING | PL330_STATE_KILLING);
@@ -986,9 +986,9 @@ static void _stop(struct pl330_thread *thrd)
 
 	/* clear the event */
 	if (inten & (1 << thrd->ev))
-		writel(1 << thrd->ev, regs + INTCLR);
+		pete_writel("drivers/dma/pl330.c:989", 1 << thrd->ev, regs + INTCLR);
 	/* Stop generating interrupts for SEV */
-	writel(inten & ~(1 << thrd->ev), regs + INTEN);
+	pete_writel("drivers/dma/pl330.c:991", inten & ~(1 << thrd->ev), regs + INTEN);
 }
 
 /* Start doing req 'idx' of thread 'thrd' */
@@ -1040,7 +1040,7 @@ static bool _trigger(struct pl330_thread *thrd)
 	_emit_GO(0, insn, &go);
 
 	/* Set to generate interrupts for SEV */
-	writel(readl(regs + INTEN) | (1 << thrd->ev), regs + INTEN);
+	pete_writel("drivers/dma/pl330.c:1043", pete_readl("drivers/dma/pl330.c:1043", regs + INTEN) | (1 << thrd->ev), regs + INTEN);
 
 	/* Only manager can execute GO */
 	_execute_DBGINSN(thrd, insn, true);
@@ -1605,7 +1605,7 @@ static void pl330_dotask(struct tasklet_struct *t)
 
 			_stop(thrd);
 
-			if (readl(regs + FSC) & (1 << thrd->id))
+			if (pete_readl("drivers/dma/pl330.c:1608", regs + FSC) & (1 << thrd->id))
 				err = PL330_ERR_FAIL;
 			else
 				err = PL330_ERR_ABORT;
@@ -1642,13 +1642,13 @@ static int pl330_update(struct pl330_dmac *pl330)
 
 	spin_lock_irqsave(&pl330->lock, flags);
 
-	val = readl(regs + FSM) & 0x1;
+	val = pete_readl("drivers/dma/pl330.c:1645", regs + FSM) & 0x1;
 	if (val)
 		pl330->dmac_tbd.reset_mngr = true;
 	else
 		pl330->dmac_tbd.reset_mngr = false;
 
-	val = readl(regs + FSC) & ((1 << pl330->pcfg.num_chan) - 1);
+	val = pete_readl("drivers/dma/pl330.c:1651", regs + FSC) & ((1 << pl330->pcfg.num_chan) - 1);
 	pl330->dmac_tbd.reset_chan |= val;
 	if (val) {
 		int i = 0;
@@ -1656,8 +1656,8 @@ static int pl330_update(struct pl330_dmac *pl330)
 			if (val & (1 << i)) {
 				dev_info(pl330->ddma.dev,
 					"Reset Channel-%d\t CS-%x FTC-%x\n",
-						i, readl(regs + CS(i)),
-						readl(regs + FTC(i)));
+						i, pete_readl("drivers/dma/pl330.c:1659", regs + CS(i)),
+						pete_readl("drivers/dma/pl330.c:1660", regs + FTC(i)));
 				_stop(&pl330->channels[i]);
 			}
 			i++;
@@ -1665,7 +1665,7 @@ static int pl330_update(struct pl330_dmac *pl330)
 	}
 
 	/* Check which event happened i.e, thread notified */
-	val = readl(regs + ES);
+	val = pete_readl("drivers/dma/pl330.c:1668", regs + ES);
 	if (pl330->pcfg.num_events < 32
 			&& val & ~((1 << pl330->pcfg.num_events) - 1)) {
 		pl330->dmac_tbd.reset_dmac = true;
@@ -1678,12 +1678,12 @@ static int pl330_update(struct pl330_dmac *pl330)
 	for (ev = 0; ev < pl330->pcfg.num_events; ev++) {
 		if (val & (1 << ev)) { /* Event occurred */
 			struct pl330_thread *thrd;
-			u32 inten = readl(regs + INTEN);
+			u32 inten = pete_readl("drivers/dma/pl330.c:1681", regs + INTEN);
 			int active;
 
 			/* Clear the event */
 			if (inten & (1 << ev))
-				writel(1 << ev, regs + INTCLR);
+				pete_writel("drivers/dma/pl330.c:1686", 1 << ev, regs + INTCLR);
 
 			ret = 1;
 
@@ -1818,41 +1818,41 @@ static void read_dmac_config(struct pl330_dmac *pl330)
 	void __iomem *regs = pl330->base;
 	u32 val;
 
-	val = readl(regs + CRD) >> CRD_DATA_WIDTH_SHIFT;
+	val = pete_readl("drivers/dma/pl330.c:1821", regs + CRD) >> CRD_DATA_WIDTH_SHIFT;
 	val &= CRD_DATA_WIDTH_MASK;
 	pl330->pcfg.data_bus_width = 8 * (1 << val);
 
-	val = readl(regs + CRD) >> CRD_DATA_BUFF_SHIFT;
+	val = pete_readl("drivers/dma/pl330.c:1825", regs + CRD) >> CRD_DATA_BUFF_SHIFT;
 	val &= CRD_DATA_BUFF_MASK;
 	pl330->pcfg.data_buf_dep = val + 1;
 
-	val = readl(regs + CR0) >> CR0_NUM_CHANS_SHIFT;
+	val = pete_readl("drivers/dma/pl330.c:1829", regs + CR0) >> CR0_NUM_CHANS_SHIFT;
 	val &= CR0_NUM_CHANS_MASK;
 	val += 1;
 	pl330->pcfg.num_chan = val;
 
-	val = readl(regs + CR0);
+	val = pete_readl("drivers/dma/pl330.c:1834", regs + CR0);
 	if (val & CR0_PERIPH_REQ_SET) {
 		val = (val >> CR0_NUM_PERIPH_SHIFT) & CR0_NUM_PERIPH_MASK;
 		val += 1;
 		pl330->pcfg.num_peri = val;
-		pl330->pcfg.peri_ns = readl(regs + CR4);
+		pl330->pcfg.peri_ns = pete_readl("drivers/dma/pl330.c:1839", regs + CR4);
 	} else {
 		pl330->pcfg.num_peri = 0;
 	}
 
-	val = readl(regs + CR0);
+	val = pete_readl("drivers/dma/pl330.c:1844", regs + CR0);
 	if (val & CR0_BOOT_MAN_NS)
 		pl330->pcfg.mode |= DMAC_MODE_NS;
 	else
 		pl330->pcfg.mode &= ~DMAC_MODE_NS;
 
-	val = readl(regs + CR0) >> CR0_NUM_EVENTS_SHIFT;
+	val = pete_readl("drivers/dma/pl330.c:1850", regs + CR0) >> CR0_NUM_EVENTS_SHIFT;
 	val &= CR0_NUM_EVENTS_MASK;
 	val += 1;
 	pl330->pcfg.num_events = val;
 
-	pl330->pcfg.irq_ns = readl(regs + CR3);
+	pl330->pcfg.irq_ns = pete_readl("drivers/dma/pl330.c:1855", regs + CR3);
 }
 
 static inline void _reset_thread(struct pl330_thread *thrd)
@@ -2376,10 +2376,10 @@ static int pl330_get_current_xferred_count(struct dma_pl330_chan *pch,
 	pm_runtime_get_sync(pl330->ddma.dev);
 	val = addr = 0;
 	if (desc->rqcfg.src_inc) {
-		val = readl(regs + SA(thrd->id));
+		val = pete_readl("drivers/dma/pl330.c:2379", regs + SA(thrd->id));
 		addr = desc->px.src_addr;
 	} else {
-		val = readl(regs + DA(thrd->id));
+		val = pete_readl("drivers/dma/pl330.c:2382", regs + DA(thrd->id));
 		addr = desc->px.dst_addr;
 	}
 	pm_runtime_mark_last_busy(pch->dmac->ddma.dev);

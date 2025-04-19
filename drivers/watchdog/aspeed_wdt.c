@@ -105,10 +105,10 @@ static void aspeed_wdt_enable(struct aspeed_wdt *wdt, int count)
 {
 	wdt->ctrl |= WDT_CTRL_ENABLE;
 
-	writel(0, wdt->base + WDT_CTRL);
-	writel(count, wdt->base + WDT_RELOAD_VALUE);
-	writel(WDT_RESTART_MAGIC, wdt->base + WDT_RESTART);
-	writel(wdt->ctrl, wdt->base + WDT_CTRL);
+	pete_writel("drivers/watchdog/aspeed_wdt.c:108", 0, wdt->base + WDT_CTRL);
+	pete_writel("drivers/watchdog/aspeed_wdt.c:109", count, wdt->base + WDT_RELOAD_VALUE);
+	pete_writel("drivers/watchdog/aspeed_wdt.c:110", WDT_RESTART_MAGIC, wdt->base + WDT_RESTART);
+	pete_writel("drivers/watchdog/aspeed_wdt.c:111", wdt->ctrl, wdt->base + WDT_CTRL);
 }
 
 static int aspeed_wdt_start(struct watchdog_device *wdd)
@@ -125,7 +125,7 @@ static int aspeed_wdt_stop(struct watchdog_device *wdd)
 	struct aspeed_wdt *wdt = to_aspeed_wdt(wdd);
 
 	wdt->ctrl &= ~WDT_CTRL_ENABLE;
-	writel(wdt->ctrl, wdt->base + WDT_CTRL);
+	pete_writel("drivers/watchdog/aspeed_wdt.c:128", wdt->ctrl, wdt->base + WDT_CTRL);
 
 	return 0;
 }
@@ -134,7 +134,7 @@ static int aspeed_wdt_ping(struct watchdog_device *wdd)
 {
 	struct aspeed_wdt *wdt = to_aspeed_wdt(wdd);
 
-	writel(WDT_RESTART_MAGIC, wdt->base + WDT_RESTART);
+	pete_writel("drivers/watchdog/aspeed_wdt.c:137", WDT_RESTART_MAGIC, wdt->base + WDT_RESTART);
 
 	return 0;
 }
@@ -149,8 +149,8 @@ static int aspeed_wdt_set_timeout(struct watchdog_device *wdd,
 
 	actual = min(timeout, wdd->max_hw_heartbeat_ms / 1000);
 
-	writel(actual * WDT_RATE_1MHZ, wdt->base + WDT_RELOAD_VALUE);
-	writel(WDT_RESTART_MAGIC, wdt->base + WDT_RESTART);
+	pete_writel("drivers/watchdog/aspeed_wdt.c:152", actual * WDT_RATE_1MHZ, wdt->base + WDT_RELOAD_VALUE);
+	pete_writel("drivers/watchdog/aspeed_wdt.c:153", WDT_RESTART_MAGIC, wdt->base + WDT_RESTART);
 
 	return 0;
 }
@@ -173,7 +173,7 @@ static ssize_t access_cs0_show(struct device *dev,
 			       struct device_attribute *attr, char *buf)
 {
 	struct aspeed_wdt *wdt = dev_get_drvdata(dev);
-	u32 status = readl(wdt->base + WDT_TIMEOUT_STATUS);
+	u32 status = pete_readl("drivers/watchdog/aspeed_wdt.c:176", wdt->base + WDT_TIMEOUT_STATUS);
 
 	return sysfs_emit(buf, "%u\n",
 			  !(status & WDT_TIMEOUT_STATUS_BOOT_SECONDARY));
@@ -190,7 +190,7 @@ static ssize_t access_cs0_store(struct device *dev,
 		return -EINVAL;
 
 	if (val)
-		writel(WDT_CLEAR_TIMEOUT_AND_BOOT_CODE_SELECTION,
+		pete_writel("drivers/watchdog/aspeed_wdt.c:193", WDT_CLEAR_TIMEOUT_AND_BOOT_CODE_SELECTION,
 		       wdt->base + WDT_CLEAR_TIMEOUT_STATUS);
 
 	return size;
@@ -309,7 +309,7 @@ static int aspeed_wdt_probe(struct platform_device *pdev)
 	if (of_property_read_bool(np, "aspeed,alt-boot"))
 		wdt->ctrl |= WDT_CTRL_BOOT_SECONDARY;
 
-	if (readl(wdt->base + WDT_CTRL) & WDT_CTRL_ENABLE)  {
+	if (pete_readl("drivers/watchdog/aspeed_wdt.c:312", wdt->base + WDT_CTRL) & WDT_CTRL_ENABLE)  {
 		/*
 		 * The watchdog is running, but invoke aspeed_wdt_start() to
 		 * write wdt->ctrl to WDT_CTRL to ensure the watchdog's
@@ -322,7 +322,7 @@ static int aspeed_wdt_probe(struct platform_device *pdev)
 
 	if ((of_device_is_compatible(np, "aspeed,ast2500-wdt")) ||
 		(of_device_is_compatible(np, "aspeed,ast2600-wdt"))) {
-		u32 reg = readl(wdt->base + WDT_RESET_WIDTH);
+		u32 reg = pete_readl("drivers/watchdog/aspeed_wdt.c:325", wdt->base + WDT_RESET_WIDTH);
 
 		reg &= config->ext_pulse_width_mask;
 		if (of_property_read_bool(np, "aspeed,ext-push-pull"))
@@ -330,7 +330,7 @@ static int aspeed_wdt_probe(struct platform_device *pdev)
 		else
 			reg |= WDT_OPEN_DRAIN_MAGIC;
 
-		writel(reg, wdt->base + WDT_RESET_WIDTH);
+		pete_writel("drivers/watchdog/aspeed_wdt.c:333", reg, wdt->base + WDT_RESET_WIDTH);
 
 		reg &= config->ext_pulse_width_mask;
 		if (of_property_read_bool(np, "aspeed,ext-active-high"))
@@ -338,7 +338,7 @@ static int aspeed_wdt_probe(struct platform_device *pdev)
 		else
 			reg |= WDT_ACTIVE_LOW_MAGIC;
 
-		writel(reg, wdt->base + WDT_RESET_WIDTH);
+		pete_writel("drivers/watchdog/aspeed_wdt.c:341", reg, wdt->base + WDT_RESET_WIDTH);
 	}
 
 	if (!of_property_read_u32(np, "aspeed,ext-pulse-duration", &duration)) {
@@ -364,10 +364,10 @@ static int aspeed_wdt_probe(struct platform_device *pdev)
 		 *
 		 * This implies a value of 0 gives a 1us pulse.
 		 */
-		writel(duration - 1, wdt->base + WDT_RESET_WIDTH);
+		pete_writel("drivers/watchdog/aspeed_wdt.c:367", duration - 1, wdt->base + WDT_RESET_WIDTH);
 	}
 
-	status = readl(wdt->base + WDT_TIMEOUT_STATUS);
+	status = pete_readl("drivers/watchdog/aspeed_wdt.c:370", wdt->base + WDT_TIMEOUT_STATUS);
 	if (status & WDT_TIMEOUT_STATUS_BOOT_SECONDARY) {
 		wdt->wdd.bootstatus = WDIOF_CARDRESET;
 

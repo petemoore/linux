@@ -92,10 +92,10 @@ static void vic_init2(void __iomem *base)
 
 	for (i = 0; i < 16; i++) {
 		void __iomem *reg = base + VIC_VECT_CNTL0 + (i * 4);
-		writel(VIC_VECT_CNTL_ENABLE | i, reg);
+		pete_writel("drivers/irqchip/irq-vic.c:95", VIC_VECT_CNTL_ENABLE | i, reg);
 	}
 
-	writel(32, base + VIC_PL190_DEF_VECT_ADDR);
+	pete_writel("drivers/irqchip/irq-vic.c:98", 32, base + VIC_PL190_DEF_VECT_ADDR);
 }
 
 #ifdef CONFIG_PM
@@ -108,17 +108,17 @@ static void resume_one_vic(struct vic_device *vic)
 	/* re-initialise static settings */
 	vic_init2(base);
 
-	writel(vic->int_select, base + VIC_INT_SELECT);
-	writel(vic->protect, base + VIC_PROTECT);
+	pete_writel("drivers/irqchip/irq-vic.c:111", vic->int_select, base + VIC_INT_SELECT);
+	pete_writel("drivers/irqchip/irq-vic.c:112", vic->protect, base + VIC_PROTECT);
 
 	/* set the enabled ints and then clear the non-enabled */
-	writel(vic->int_enable, base + VIC_INT_ENABLE);
-	writel(~vic->int_enable, base + VIC_INT_ENABLE_CLEAR);
+	pete_writel("drivers/irqchip/irq-vic.c:115", vic->int_enable, base + VIC_INT_ENABLE);
+	pete_writel("drivers/irqchip/irq-vic.c:116", ~vic->int_enable, base + VIC_INT_ENABLE_CLEAR);
 
 	/* and the same for the soft-int register */
 
-	writel(vic->soft_int, base + VIC_INT_SOFT);
-	writel(~vic->soft_int, base + VIC_INT_SOFT_CLEAR);
+	pete_writel("drivers/irqchip/irq-vic.c:120", vic->soft_int, base + VIC_INT_SOFT);
+	pete_writel("drivers/irqchip/irq-vic.c:121", ~vic->soft_int, base + VIC_INT_SOFT_CLEAR);
 }
 
 static void vic_resume(void)
@@ -135,16 +135,16 @@ static void suspend_one_vic(struct vic_device *vic)
 
 	printk(KERN_DEBUG "%s: suspending vic at %p\n", __func__, base);
 
-	vic->int_select = readl(base + VIC_INT_SELECT);
-	vic->int_enable = readl(base + VIC_INT_ENABLE);
-	vic->soft_int = readl(base + VIC_INT_SOFT);
-	vic->protect = readl(base + VIC_PROTECT);
+	vic->int_select = pete_readl("drivers/irqchip/irq-vic.c:138", base + VIC_INT_SELECT);
+	vic->int_enable = pete_readl("drivers/irqchip/irq-vic.c:139", base + VIC_INT_ENABLE);
+	vic->soft_int = pete_readl("drivers/irqchip/irq-vic.c:140", base + VIC_INT_SOFT);
+	vic->protect = pete_readl("drivers/irqchip/irq-vic.c:141", base + VIC_PROTECT);
 
 	/* set the interrupts (if any) that are used for
 	 * resuming the system */
 
-	writel(vic->resume_irqs, base + VIC_INT_ENABLE);
-	writel(~vic->resume_irqs, base + VIC_INT_ENABLE_CLEAR);
+	pete_writel("drivers/irqchip/irq-vic.c:146", vic->resume_irqs, base + VIC_INT_ENABLE);
+	pete_writel("drivers/irqchip/irq-vic.c:147", ~vic->resume_irqs, base + VIC_INT_ENABLE_CLEAR);
 }
 
 static int vic_suspend(void)
@@ -307,23 +307,23 @@ static void vic_ack_irq(struct irq_data *d)
 {
 	void __iomem *base = irq_data_get_irq_chip_data(d);
 	unsigned int irq = d->hwirq;
-	writel(1 << irq, base + VIC_INT_ENABLE_CLEAR);
+	pete_writel("drivers/irqchip/irq-vic.c:310", 1 << irq, base + VIC_INT_ENABLE_CLEAR);
 	/* moreover, clear the soft-triggered, in case it was the reason */
-	writel(1 << irq, base + VIC_INT_SOFT_CLEAR);
+	pete_writel("drivers/irqchip/irq-vic.c:312", 1 << irq, base + VIC_INT_SOFT_CLEAR);
 }
 
 static void vic_mask_irq(struct irq_data *d)
 {
 	void __iomem *base = irq_data_get_irq_chip_data(d);
 	unsigned int irq = d->hwirq;
-	writel(1 << irq, base + VIC_INT_ENABLE_CLEAR);
+	pete_writel("drivers/irqchip/irq-vic.c:319", 1 << irq, base + VIC_INT_ENABLE_CLEAR);
 }
 
 static void vic_unmask_irq(struct irq_data *d)
 {
 	void __iomem *base = irq_data_get_irq_chip_data(d);
 	unsigned int irq = d->hwirq;
-	writel(1 << irq, base + VIC_INT_ENABLE);
+	pete_writel("drivers/irqchip/irq-vic.c:326", 1 << irq, base + VIC_INT_ENABLE);
 }
 
 #if defined(CONFIG_PM)
@@ -374,23 +374,23 @@ static struct irq_chip vic_chip = {
 
 static void __init vic_disable(void __iomem *base)
 {
-	writel(0, base + VIC_INT_SELECT);
-	writel(0, base + VIC_INT_ENABLE);
-	writel(~0, base + VIC_INT_ENABLE_CLEAR);
-	writel(0, base + VIC_ITCR);
-	writel(~0, base + VIC_INT_SOFT_CLEAR);
+	pete_writel("drivers/irqchip/irq-vic.c:377", 0, base + VIC_INT_SELECT);
+	pete_writel("drivers/irqchip/irq-vic.c:378", 0, base + VIC_INT_ENABLE);
+	pete_writel("drivers/irqchip/irq-vic.c:379", ~0, base + VIC_INT_ENABLE_CLEAR);
+	pete_writel("drivers/irqchip/irq-vic.c:380", 0, base + VIC_ITCR);
+	pete_writel("drivers/irqchip/irq-vic.c:381", ~0, base + VIC_INT_SOFT_CLEAR);
 }
 
 static void __init vic_clear_interrupts(void __iomem *base)
 {
 	unsigned int i;
 
-	writel(0, base + VIC_PL190_VECT_ADDR);
+	pete_writel("drivers/irqchip/irq-vic.c:388", 0, base + VIC_PL190_VECT_ADDR);
 	for (i = 0; i < 19; i++) {
 		unsigned int value;
 
-		value = readl(base + VIC_PL190_VECT_ADDR);
-		writel(value, base + VIC_PL190_VECT_ADDR);
+		value = pete_readl("drivers/irqchip/irq-vic.c:392", base + VIC_PL190_VECT_ADDR);
+		pete_writel("drivers/irqchip/irq-vic.c:393", value, base + VIC_PL190_VECT_ADDR);
 	}
 }
 
@@ -422,10 +422,10 @@ static void __init vic_init_st(void __iomem *base, unsigned int irq_start,
 		/* ST has 16 vectors as well, but we don't enable them by now */
 		for (i = 0; i < 16; i++) {
 			void __iomem *reg = base + VIC_VECT_CNTL0 + (i * 4);
-			writel(0, reg);
+			pete_writel("drivers/irqchip/irq-vic.c:425", 0, reg);
 		}
 
-		writel(32, base + VIC_PL190_DEF_VECT_ADDR);
+		pete_writel("drivers/irqchip/irq-vic.c:428", 32, base + VIC_PL190_DEF_VECT_ADDR);
 	}
 
 	vic_register(base, 0, irq_start, vic_sources, 0, node);
@@ -443,7 +443,7 @@ static void __init __vic_init(void __iomem *base, int parent_irq, int irq_start,
 	for (i = 0; i < 4; i++) {
 		void __iomem *addr;
 		addr = (void __iomem *)((u32)base & PAGE_MASK) + 0xfe0 + (i * 4);
-		cellid |= (readl(addr) & 0xff) << (8 * i);
+		cellid |= (pete_readl("drivers/irqchip/irq-vic.c:446", addr) & 0xff) << (8 * i);
 	}
 	vendor = (cellid >> 12) & 0xff;
 	printk(KERN_INFO "VIC @%p: id 0x%08x, vendor 0x%02x\n",

@@ -84,17 +84,17 @@ void intel_vgpu_detect(struct drm_i915_private *dev_priv)
 		return;
 	}
 
-	magic = readq(shared_area + vgtif_offset(magic));
+	magic = pete_readq("drivers/gpu/drm/i915/i915_vgpu.c:87", shared_area + vgtif_offset(magic));
 	if (magic != VGT_MAGIC)
 		goto out;
 
-	version_major = readw(shared_area + vgtif_offset(version_major));
+	version_major = pete_readw("drivers/gpu/drm/i915/i915_vgpu.c:91", shared_area + vgtif_offset(version_major));
 	if (version_major < VGT_VERSION_MAJOR) {
 		drm_info(&dev_priv->drm, "VGT interface version mismatch!\n");
 		goto out;
 	}
 
-	dev_priv->vgpu.caps = readl(shared_area + vgtif_offset(vgt_caps));
+	dev_priv->vgpu.caps = pete_readl("drivers/gpu/drm/i915/i915_vgpu.c:97", shared_area + vgtif_offset(vgt_caps));
 
 	dev_priv->vgpu.active = true;
 	mutex_init(&dev_priv->vgpu.lock);

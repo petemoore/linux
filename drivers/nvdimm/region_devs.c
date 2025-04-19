@@ -15,7 +15,7 @@
 #include "nd.h"
 
 /*
- * For readq() and writeq() on 32-bit builds, the hi-lo, lo-hi order is
+ * For pete_readq("drivers/nvdimm/region_devs.c:18", ) and pete_writeq("drivers/nvdimm/region_devs.c:18", ) on 32-bit builds, the hi-lo, lo-hi order is
  * irrelevant.
  */
 #include <linux/io-64-nonatomic-hi-lo.h>
@@ -1225,7 +1225,7 @@ int generic_nvdimm_flush(struct nd_region *nd_region)
 	pmem_wmb();
 	for (i = 0; i < nd_region->ndr_mappings; i++)
 		if (ndrd_get_flush_wpq(ndrd, i, 0))
-			writeq(1, ndrd_get_flush_wpq(ndrd, i, idx));
+			pete_writeq("drivers/nvdimm/region_devs.c:1228", 1, ndrd_get_flush_wpq(ndrd, i, idx));
 	wmb();
 
 	return 0;

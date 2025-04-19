@@ -70,7 +70,7 @@ int __vgic_v2_perform_cpuif_access(struct kvm_vcpu *vcpu)
 	if (kvm_vcpu_dabt_iswrite(vcpu)) {
 		u32 data = vcpu_get_reg(vcpu, rd);
 		if (__is_be(vcpu)) {
-			/* guest pre-swabbed data, undo this for writel() */
+			/* guest pre-swabbed data, undo this for pete_writel("arch/arm64/kvm/hyp/vgic-v2-cpuif-proxy.c:73", ) */
 			data = __kvm_swab32(data);
 		}
 		writel_relaxed(data, addr);

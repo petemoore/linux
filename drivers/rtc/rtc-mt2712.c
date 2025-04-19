@@ -84,13 +84,13 @@ struct mt2712_rtc {
 
 static inline u32 mt2712_readl(struct mt2712_rtc *mt2712_rtc, u32 reg)
 {
-	return readl(mt2712_rtc->base + reg);
+	return pete_readl("drivers/rtc/rtc-mt2712.c:87", mt2712_rtc->base + reg);
 }
 
 static inline void mt2712_writel(struct mt2712_rtc *mt2712_rtc,
 				 u32 reg, u32 val)
 {
-	writel(val, mt2712_rtc->base + reg);
+	pete_writel("drivers/rtc/rtc-mt2712.c:93", val, mt2712_rtc->base + reg);
 }
 
 static void mt2712_rtc_write_trigger(struct mt2712_rtc *mt2712_rtc)

@@ -64,14 +64,14 @@ static int sun6i_hwspinlock_trylock(struct hwspinlock *lock)
 {
 	void __iomem *lock_addr = lock->priv;
 
-	return (readl(lock_addr) == SPINLOCK_NOTTAKEN);
+	return (pete_readl("drivers/hwspinlock/sun6i_hwspinlock.c:67", lock_addr) == SPINLOCK_NOTTAKEN);
 }
 
 static void sun6i_hwspinlock_unlock(struct hwspinlock *lock)
 {
 	void __iomem *lock_addr = lock->priv;
 
-	writel(SPINLOCK_NOTTAKEN, lock_addr);
+	pete_writel("drivers/hwspinlock/sun6i_hwspinlock.c:74", SPINLOCK_NOTTAKEN, lock_addr);
 }
 
 static const struct hwspinlock_ops sun6i_hwspinlock_ops = {
@@ -143,7 +143,7 @@ static int sun6i_hwspinlock_probe(struct platform_device *pdev)
 	 * this is the reason 0x1 is considered being 32 locks and bit 30 is taken into account
 	 * verified on H2+ (datasheet 0x1 = 32 locks) and H5 (datasheet 01 = 64 locks)
 	 */
-	num_banks = readl(io_base + SPINLOCK_SYSSTATUS_REG) >> 28;
+	num_banks = pete_readl("drivers/hwspinlock/sun6i_hwspinlock.c:146", io_base + SPINLOCK_SYSSTATUS_REG) >> 28;
 	switch (num_banks) {
 	case 1 ... 4:
 		priv->nlocks = 1 << (4 + num_banks);

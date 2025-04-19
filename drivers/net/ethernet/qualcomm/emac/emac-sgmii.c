@@ -94,10 +94,10 @@ static void emac_sgmii_link_init(struct emac_adapter *adpt)
 	/* Always use autonegotiation. It works no matter how the external
 	 * PHY is configured.
 	 */
-	val = readl(phy->base + EMAC_SGMII_PHY_AUTONEG_CFG2);
+	val = pete_readl("drivers/net/ethernet/qualcomm/emac/emac-sgmii.c:97", phy->base + EMAC_SGMII_PHY_AUTONEG_CFG2);
 	val &= ~(FORCE_AN_RX_CFG | FORCE_AN_TX_CFG);
 	val |= AN_ENABLE;
-	writel(val, phy->base + EMAC_SGMII_PHY_AUTONEG_CFG2);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-sgmii.c:100", val, phy->base + EMAC_SGMII_PHY_AUTONEG_CFG2);
 }
 
 static int emac_sgmii_irq_clear(struct emac_adapter *adpt, u8 irq_bits)
@@ -142,7 +142,7 @@ static irqreturn_t emac_sgmii_interrupt(int irq, void *data)
 	struct emac_sgmii *phy = &adpt->phy;
 	u8 status;
 
-	status = readl(phy->base + EMAC_SGMII_PHY_INTERRUPT_STATUS);
+	status = pete_readl("drivers/net/ethernet/qualcomm/emac/emac-sgmii.c:145", phy->base + EMAC_SGMII_PHY_INTERRUPT_STATUS);
 	status &= SGMII_ISR_MASK;
 	if (!status)
 		return IRQ_HANDLED;
@@ -182,13 +182,13 @@ static void emac_sgmii_reset_prepare(struct emac_adapter *adpt)
 	u32 val;
 
 	/* Reset PHY */
-	val = readl(phy->base + EMAC_EMAC_WRAPPER_CSR2);
-	writel(((val & ~PHY_RESET) | PHY_RESET), phy->base +
+	val = pete_readl("drivers/net/ethernet/qualcomm/emac/emac-sgmii.c:185", phy->base + EMAC_EMAC_WRAPPER_CSR2);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-sgmii.c:186", ((val & ~PHY_RESET) | PHY_RESET), phy->base +
 	       EMAC_EMAC_WRAPPER_CSR2);
 	/* Ensure phy-reset command is written to HW before the release cmd */
 	msleep(50);
-	val = readl(phy->base + EMAC_EMAC_WRAPPER_CSR2);
-	writel((val & ~PHY_RESET), phy->base + EMAC_EMAC_WRAPPER_CSR2);
+	val = pete_readl("drivers/net/ethernet/qualcomm/emac/emac-sgmii.c:190", phy->base + EMAC_EMAC_WRAPPER_CSR2);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-sgmii.c:191", (val & ~PHY_RESET), phy->base + EMAC_EMAC_WRAPPER_CSR2);
 	/* Ensure phy-reset release command is written to HW before initializing
 	 * SGMII
 	 */
@@ -219,7 +219,7 @@ static int emac_sgmii_common_open(struct emac_adapter *adpt)
 		ret = emac_sgmii_irq_clear(adpt, 0xff);
 		if (ret)
 			return ret;
-		writel(0, sgmii->base + EMAC_SGMII_PHY_INTERRUPT_MASK);
+		pete_writel("drivers/net/ethernet/qualcomm/emac/emac-sgmii.c:222", 0, sgmii->base + EMAC_SGMII_PHY_INTERRUPT_MASK);
 
 		ret = request_irq(sgmii->irq, emac_sgmii_interrupt, 0,
 				  "emac-sgmii", adpt);
@@ -238,7 +238,7 @@ static void emac_sgmii_common_close(struct emac_adapter *adpt)
 	struct emac_sgmii *sgmii = &adpt->phy;
 
 	/* Make sure interrupts are disabled */
-	writel(0, sgmii->base + EMAC_SGMII_PHY_INTERRUPT_MASK);
+	pete_writel("drivers/net/ethernet/qualcomm/emac/emac-sgmii.c:241", 0, sgmii->base + EMAC_SGMII_PHY_INTERRUPT_MASK);
 	free_irq(sgmii->irq, adpt);
 }
 
@@ -254,11 +254,11 @@ static int emac_sgmii_common_link_change(struct emac_adapter *adpt, bool linkup)
 		if (ret)
 			return ret;
 
-		writel(SGMII_ISR_MASK,
+		pete_writel("drivers/net/ethernet/qualcomm/emac/emac-sgmii.c:257", SGMII_ISR_MASK,
 		       sgmii->base + EMAC_SGMII_PHY_INTERRUPT_MASK);
 	} else {
 		/* Disable interrupts */
-		writel(0, sgmii->base + EMAC_SGMII_PHY_INTERRUPT_MASK);
+		pete_writel("drivers/net/ethernet/qualcomm/emac/emac-sgmii.c:261", 0, sgmii->base + EMAC_SGMII_PHY_INTERRUPT_MASK);
 		synchronize_irq(sgmii->irq);
 	}
 

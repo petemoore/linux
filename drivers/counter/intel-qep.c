@@ -83,13 +83,13 @@ struct intel_qep {
 
 static inline u32 intel_qep_readl(struct intel_qep *qep, u32 offset)
 {
-	return readl(qep->regs + offset);
+	return pete_readl("drivers/counter/intel-qep.c:86", qep->regs + offset);
 }
 
 static inline void intel_qep_writel(struct intel_qep *qep,
 				    u32 offset, u32 value)
 {
-	writel(value, qep->regs + offset);
+	pete_writel("drivers/counter/intel-qep.c:92", value, qep->regs + offset);
 }
 
 static void intel_qep_init(struct intel_qep *qep)

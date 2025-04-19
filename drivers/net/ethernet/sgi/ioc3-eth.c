@@ -228,10 +228,10 @@ static void __ioc3_set_mac_address(struct net_device *dev)
 {
 	struct ioc3_private *ip = netdev_priv(dev);
 
-	writel((dev->dev_addr[5] <<  8) |
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:231", (dev->dev_addr[5] <<  8) |
 	       dev->dev_addr[4],
 	       &ip->regs->emar_h);
-	writel((dev->dev_addr[3] << 24) |
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:234", (dev->dev_addr[3] << 24) |
 	       (dev->dev_addr[2] << 16) |
 	       (dev->dev_addr[1] <<  8) |
 	       dev->dev_addr[0],
@@ -260,14 +260,14 @@ static int ioc3_mdio_read(struct net_device *dev, int phy, int reg)
 	struct ioc3_private *ip = netdev_priv(dev);
 	struct ioc3_ethregs *regs = ip->regs;
 
-	while (readl(&regs->micr) & MICR_BUSY)
+	while (pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:263", &regs->micr) & MICR_BUSY)
 		;
-	writel((phy << MICR_PHYADDR_SHIFT) | reg | MICR_READTRIG,
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:265", (phy << MICR_PHYADDR_SHIFT) | reg | MICR_READTRIG,
 	       &regs->micr);
-	while (readl(&regs->micr) & MICR_BUSY)
+	while (pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:267", &regs->micr) & MICR_BUSY)
 		;
 
-	return readl(&regs->midr_r) & MIDR_DATA_MASK;
+	return pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:270", &regs->midr_r) & MIDR_DATA_MASK;
 }
 
 static void ioc3_mdio_write(struct net_device *dev, int phy, int reg, int data)
@@ -275,11 +275,11 @@ static void ioc3_mdio_write(struct net_device *dev, int phy, int reg, int data)
 	struct ioc3_private *ip = netdev_priv(dev);
 	struct ioc3_ethregs *regs = ip->regs;
 
-	while (readl(&regs->micr) & MICR_BUSY)
+	while (pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:278", &regs->micr) & MICR_BUSY)
 		;
-	writel(data, &regs->midr_w);
-	writel((phy << MICR_PHYADDR_SHIFT) | reg, &regs->micr);
-	while (readl(&regs->micr) & MICR_BUSY)
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:280", data, &regs->midr_w);
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:281", (phy << MICR_PHYADDR_SHIFT) | reg, &regs->micr);
+	while (pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:282", &regs->micr) & MICR_BUSY)
 		;
 }
 
@@ -290,7 +290,7 @@ static struct net_device_stats *ioc3_get_stats(struct net_device *dev)
 	struct ioc3_private *ip = netdev_priv(dev);
 	struct ioc3_ethregs *regs = ip->regs;
 
-	dev->stats.collisions += readl(&regs->etcdc) & ETCDC_COLLCNT_MASK;
+	dev->stats.collisions += pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:293", &regs->etcdc) & ETCDC_COLLCNT_MASK;
 	return &dev->stats;
 }
 
@@ -437,7 +437,7 @@ next:
 		rxb = (struct ioc3_erxbuf *)(skb->data - RX_OFFSET);
 		w0 = be32_to_cpu(rxb->w0);
 	}
-	writel((n_entry << 3) | ERPIR_ARM, &ip->regs->erpir);
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:440", (n_entry << 3) | ERPIR_ARM, &ip->regs->erpir);
 	ip->rx_pi = n_entry;
 	ip->rx_ci = rx_entry;
 }
@@ -452,7 +452,7 @@ static inline void ioc3_tx(struct net_device *dev)
 	u32 etcir;
 
 	spin_lock(&ip->ioc3_lock);
-	etcir = readl(&regs->etcir);
+	etcir = pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:455", &regs->etcir);
 
 	tx_entry = (etcir >> 7) & TX_RING_MASK;
 	o_entry = ip->tx_ci;
@@ -468,7 +468,7 @@ static inline void ioc3_tx(struct net_device *dev)
 
 		o_entry = (o_entry + 1) & TX_RING_MASK;	/* Next */
 
-		etcir = readl(&regs->etcir);		/* More pkts sent?  */
+		etcir = pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:471", &regs->etcir);		/* More pkts sent?  */
 		tx_entry = (etcir >> 7) & TX_RING_MASK;
 	}
 
@@ -535,9 +535,9 @@ static irqreturn_t ioc3_interrupt(int irq, void *dev_id)
 	struct ioc3_ethregs *regs = ip->regs;
 	u32 eisr;
 
-	eisr = readl(&regs->eisr);
-	writel(eisr, &regs->eisr);
-	readl(&regs->eisr);				/* Flush */
+	eisr = pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:538", &regs->eisr);
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:539", eisr, &regs->eisr);
+	pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:540", &regs->eisr);				/* Flush */
 
 	if (eisr & (EISR_RXOFLO | EISR_RXBUFOFLO | EISR_RXMEMERR |
 		    EISR_RXPARERR | EISR_TXBUFUFLO | EISR_TXMEMERR))
@@ -557,13 +557,13 @@ static inline void ioc3_setup_duplex(struct ioc3_private *ip)
 	spin_lock_irq(&ip->ioc3_lock);
 
 	if (ip->mii.full_duplex) {
-		writel(ETCSR_FD, &regs->etcsr);
+		pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:560", ETCSR_FD, &regs->etcsr);
 		ip->emcr |= EMCR_DUPLEX;
 	} else {
-		writel(ETCSR_HD, &regs->etcsr);
+		pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:563", ETCSR_HD, &regs->etcsr);
 		ip->emcr &= ~EMCR_DUPLEX;
 	}
-	writel(ip->emcr, &regs->emcr);
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:566", ip->emcr, &regs->emcr);
 
 	spin_unlock_irq(&ip->ioc3_lock);
 }
@@ -697,17 +697,17 @@ static inline void ioc3_ssram_disc(struct ioc3_private *ip)
 	u32 pattern = 0x5555;
 
 	/* Assume the larger size SSRAM and enable parity checking */
-	writel(readl(&regs->emcr) | (EMCR_BUFSIZ | EMCR_RAMPAR), &regs->emcr);
-	readl(&regs->emcr); /* Flush */
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:700", pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:700", &regs->emcr) | (EMCR_BUFSIZ | EMCR_RAMPAR), &regs->emcr);
+	pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:701", &regs->emcr); /* Flush */
 
-	writel(pattern, ssram0);
-	writel(~pattern & IOC3_SSRAM_DM, ssram1);
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:703", pattern, ssram0);
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:704", ~pattern & IOC3_SSRAM_DM, ssram1);
 
-	if ((readl(ssram0) & IOC3_SSRAM_DM) != pattern ||
-	    (readl(ssram1) & IOC3_SSRAM_DM) != (~pattern & IOC3_SSRAM_DM)) {
+	if ((pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:706", ssram0) & IOC3_SSRAM_DM) != pattern ||
+	    (pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:707", ssram1) & IOC3_SSRAM_DM) != (~pattern & IOC3_SSRAM_DM)) {
 		/* set ssram size to 64 KB */
 		ip->emcr |= EMCR_RAMPAR;
-		writel(readl(&regs->emcr) & ~EMCR_BUFSIZ, &regs->emcr);
+		pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:710", pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:710", &regs->emcr) & ~EMCR_BUFSIZ, &regs->emcr);
 	} else {
 		ip->emcr |= EMCR_BUFSIZ | EMCR_RAMPAR;
 	}
@@ -720,21 +720,21 @@ static void ioc3_init(struct net_device *dev)
 
 	del_timer_sync(&ip->ioc3_timer);	/* Kill if running	*/
 
-	writel(EMCR_RST, &regs->emcr);		/* Reset		*/
-	readl(&regs->emcr);			/* Flush WB		*/
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:723", EMCR_RST, &regs->emcr);		/* Reset		*/
+	pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:724", &regs->emcr);			/* Flush WB		*/
 	udelay(4);				/* Give it time ...	*/
-	writel(0, &regs->emcr);
-	readl(&regs->emcr);
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:726", 0, &regs->emcr);
+	pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:727", &regs->emcr);
 
 	/* Misc registers  */
-	writel(ERBAR_VAL, &regs->erbar);
-	readl(&regs->etcdc);			/* Clear on read */
-	writel(15, &regs->ercsr);		/* RX low watermark  */
-	writel(0, &regs->ertr);			/* Interrupt immediately */
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:730", ERBAR_VAL, &regs->erbar);
+	pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:731", &regs->etcdc);			/* Clear on read */
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:732", 15, &regs->ercsr);		/* RX low watermark  */
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:733", 0, &regs->ertr);			/* Interrupt immediately */
 	__ioc3_set_mac_address(dev);
-	writel(ip->ehar_h, &regs->ehar_h);
-	writel(ip->ehar_l, &regs->ehar_l);
-	writel(42, &regs->ersr);		/* XXX should be random */
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:735", ip->ehar_h, &regs->ehar_h);
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:736", ip->ehar_l, &regs->ehar_l);
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:737", 42, &regs->ersr);		/* XXX should be random */
 }
 
 static void ioc3_start(struct ioc3_private *ip)
@@ -744,38 +744,38 @@ static void ioc3_start(struct ioc3_private *ip)
 
 	/* Now the rx ring base, consume & produce registers.  */
 	ring = ioc3_map(ip->rxr_dma, PCI64_ATTR_PREC);
-	writel(ring >> 32, &regs->erbr_h);
-	writel(ring & 0xffffffff, &regs->erbr_l);
-	writel(ip->rx_ci << 3, &regs->ercir);
-	writel((ip->rx_pi << 3) | ERPIR_ARM, &regs->erpir);
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:747", ring >> 32, &regs->erbr_h);
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:748", ring & 0xffffffff, &regs->erbr_l);
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:749", ip->rx_ci << 3, &regs->ercir);
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:750", (ip->rx_pi << 3) | ERPIR_ARM, &regs->erpir);
 
 	ring = ioc3_map(ip->txr_dma, PCI64_ATTR_PREC);
 
 	ip->txqlen = 0;					/* nothing queued  */
 
 	/* Now the tx ring base, consume & produce registers.  */
-	writel(ring >> 32, &regs->etbr_h);
-	writel(ring & 0xffffffff, &regs->etbr_l);
-	writel(ip->tx_pi << 7, &regs->etpir);
-	writel(ip->tx_ci << 7, &regs->etcir);
-	readl(&regs->etcir);				/* Flush */
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:757", ring >> 32, &regs->etbr_h);
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:758", ring & 0xffffffff, &regs->etbr_l);
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:759", ip->tx_pi << 7, &regs->etpir);
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:760", ip->tx_ci << 7, &regs->etcir);
+	pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:761", &regs->etcir);				/* Flush */
 
 	ip->emcr |= ((RX_OFFSET / 2) << EMCR_RXOFF_SHIFT) | EMCR_TXDMAEN |
 		    EMCR_TXEN | EMCR_RXDMAEN | EMCR_RXEN | EMCR_PADEN;
-	writel(ip->emcr, &regs->emcr);
-	writel(EISR_RXTIMERINT | EISR_RXOFLO | EISR_RXBUFOFLO |
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:765", ip->emcr, &regs->emcr);
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:766", EISR_RXTIMERINT | EISR_RXOFLO | EISR_RXBUFOFLO |
 	       EISR_RXMEMERR | EISR_RXPARERR | EISR_TXBUFUFLO |
 	       EISR_TXEXPLICIT | EISR_TXMEMERR, &regs->eier);
-	readl(&regs->eier);
+	pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:769", &regs->eier);
 }
 
 static inline void ioc3_stop(struct ioc3_private *ip)
 {
 	struct ioc3_ethregs *regs = ip->regs;
 
-	writel(0, &regs->emcr);			/* Shutup */
-	writel(0, &regs->eier);			/* Disable interrupts */
-	readl(&regs->eier);			/* Flush */
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:776", 0, &regs->emcr);			/* Shutup */
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:777", 0, &regs->eier);			/* Disable interrupts */
+	pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:778", &regs->eier);			/* Flush */
 }
 
 static int ioc3_open(struct net_device *dev)
@@ -1087,7 +1087,7 @@ static netdev_tx_t ioc3_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	ip->tx_skbs[produce] = skb;			/* Remember skb */
 	produce = (produce + 1) & TX_RING_MASK;
 	ip->tx_pi = produce;
-	writel(produce << 7, &ip->regs->etpir);		/* Fire ... */
+	pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:1090", produce << 7, &ip->regs->etpir);		/* Fire ... */
 
 	ip->txqlen++;
 
@@ -1244,12 +1244,12 @@ static void ioc3_set_multicast_list(struct net_device *dev)
 
 	if (dev->flags & IFF_PROMISC) {			/* Set promiscuous.  */
 		ip->emcr |= EMCR_PROMISC;
-		writel(ip->emcr, &regs->emcr);
-		readl(&regs->emcr);
+		pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:1247", ip->emcr, &regs->emcr);
+		pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:1248", &regs->emcr);
 	} else {
 		ip->emcr &= ~EMCR_PROMISC;
-		writel(ip->emcr, &regs->emcr);		/* Clear promiscuous. */
-		readl(&regs->emcr);
+		pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:1251", ip->emcr, &regs->emcr);		/* Clear promiscuous. */
+		pete_readl("drivers/net/ethernet/sgi/ioc3-eth.c:1252", &regs->emcr);
 
 		if ((dev->flags & IFF_ALLMULTI) ||
 		    (netdev_mc_count(dev) > 64)) {
@@ -1266,8 +1266,8 @@ static void ioc3_set_multicast_list(struct net_device *dev)
 			ip->ehar_h = ehar >> 32;
 			ip->ehar_l = ehar & 0xffffffff;
 		}
-		writel(ip->ehar_h, &regs->ehar_h);
-		writel(ip->ehar_l, &regs->ehar_l);
+		pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:1269", ip->ehar_h, &regs->ehar_h);
+		pete_writel("drivers/net/ethernet/sgi/ioc3-eth.c:1270", ip->ehar_l, &regs->ehar_l);
 	}
 
 	spin_unlock_irq(&ip->ioc3_lock);

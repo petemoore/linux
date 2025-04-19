@@ -88,12 +88,12 @@ static int d7s_release(struct inode *inode, struct file *f)
 		struct d7s *p = d7s_device;
 		u8 regval = 0;
 
-		regval = readb(p->regs);
+		regval = pete_readb("drivers/sbus/char/display7seg.c:91", p->regs);
 		if (p->flipped)
 			regval |= D7S_FLIP;
 		else
 			regval &= ~D7S_FLIP;
-		writeb(regval, p->regs);
+		pete_writeb("drivers/sbus/char/display7seg.c:96", regval, p->regs);
 	}
 
 	return 0;
@@ -102,7 +102,7 @@ static int d7s_release(struct inode *inode, struct file *f)
 static long d7s_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
 	struct d7s *p = d7s_device;
-	u8 regs = readb(p->regs);
+	u8 regs = pete_readb("drivers/sbus/char/display7seg.c:105", p->regs);
 	int error = 0;
 	u8 ireg = 0;
 
@@ -125,7 +125,7 @@ static long d7s_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 			else
 				ireg &= ~D7S_FLIP;
 		}
-		writeb(ireg, p->regs);
+		pete_writeb("drivers/sbus/char/display7seg.c:128", ireg, p->regs);
 		break;
 
 	case D7SIOCRD:
@@ -144,7 +144,7 @@ static long d7s_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	case D7SIOCTM:
 		/* toggle device mode-- flip display orientation */
 		regs ^= D7S_FLIP;
-		writeb(regs, p->regs);
+		pete_writeb("drivers/sbus/char/display7seg.c:147", regs, p->regs);
 		break;
 	}
 	mutex_unlock(&d7s_mutex);
@@ -198,7 +198,7 @@ static int d7s_probe(struct platform_device *op)
 	/* OBP option "d7s-flipped?" is honored as default for the
 	 * device, and reset default when detached
 	 */
-	regs = readb(p->regs);
+	regs = pete_readb("drivers/sbus/char/display7seg.c:201", p->regs);
 	opts = of_find_node_by_path("/options");
 	if (opts &&
 	    of_get_property(opts, "d7s-flipped?", NULL))
@@ -209,7 +209,7 @@ static int d7s_probe(struct platform_device *op)
 	else
 		regs &= ~D7S_FLIP;
 
-	writeb(regs,  p->regs);
+	pete_writeb("drivers/sbus/char/display7seg.c:212", regs,  p->regs);
 
 	printk(KERN_INFO PFX "7-Segment Display%pOF at [%s:0x%llx] %s\n",
 	       op->dev.of_node,
@@ -233,7 +233,7 @@ out_iounmap:
 static int d7s_remove(struct platform_device *op)
 {
 	struct d7s *p = dev_get_drvdata(&op->dev);
-	u8 regs = readb(p->regs);
+	u8 regs = pete_readb("drivers/sbus/char/display7seg.c:236", p->regs);
 
 	/* Honor OBP d7s-flipped? unless operating in solaris-compat mode */
 	if (sol_compat) {
@@ -241,7 +241,7 @@ static int d7s_remove(struct platform_device *op)
 			regs |= D7S_FLIP;
 		else
 			regs &= ~D7S_FLIP;
-		writeb(regs, p->regs);
+		pete_writeb("drivers/sbus/char/display7seg.c:244", regs, p->regs);
 	}
 
 	misc_deregister(&d7s_miscdev);

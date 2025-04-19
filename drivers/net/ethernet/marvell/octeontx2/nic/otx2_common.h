@@ -484,14 +484,14 @@ static inline void otx2_write64(struct otx2_nic *nic, u64 offset, u64 val)
 {
 	void __iomem *addr = otx2_get_regaddr(nic, offset);
 
-	writeq(val, addr);
+	pete_writeq("drivers/net/ethernet/marvell/octeontx2/nic/otx2_common.h:487", val, addr);
 }
 
 static inline u64 otx2_read64(struct otx2_nic *nic, u64 offset)
 {
 	void __iomem *addr = otx2_get_regaddr(nic, offset);
 
-	return readq(addr);
+	return pete_readq("drivers/net/ethernet/marvell/octeontx2/nic/otx2_common.h:494", addr);
 }
 
 /* Mbox bounce buffer APIs */
@@ -563,7 +563,7 @@ static inline u64 otx2_atomic64_add(u64 incr, u64 *ptr)
 }
 
 #else
-#define otx2_write128(lo, hi, addr)		writeq((hi) | (lo), addr)
+#define otx2_write128(lo, hi, addr)		pete_writeq("drivers/net/ethernet/marvell/octeontx2/nic/otx2_common.h:566", (hi) | (lo), addr)
 #define otx2_atomic64_add(incr, ptr)		({ *ptr += incr; })
 #endif
 

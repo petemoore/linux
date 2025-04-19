@@ -52,12 +52,12 @@ static void __iomem *clocksource_timer_counter;
 
 static u64 notrace lpc32xx_read_sched_clock(void)
 {
-	return readl(clocksource_timer_counter);
+	return pete_readl("drivers/clocksource/timer-lpc32xx.c:55", clocksource_timer_counter);
 }
 
 static unsigned long lpc32xx_delay_timer_read(void)
 {
-	return readl(clocksource_timer_counter);
+	return pete_readl("drivers/clocksource/timer-lpc32xx.c:60", clocksource_timer_counter);
 }
 
 static struct delay_timer lpc32xx_delay_timer = {

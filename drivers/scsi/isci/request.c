@@ -783,7 +783,7 @@ static u32 sci_req_tx_bytes(struct isci_request *ireq)
 	struct isci_host *ihost = ireq->owning_controller;
 	u32 ret_val = 0;
 
-	if (readl(&ihost->smu_registers->address_modifier) == 0) {
+	if (pete_readl("drivers/scsi/isci/request.c:786", &ihost->smu_registers->address_modifier) == 0) {
 		void __iomem *scu_reg_base = ihost->scu_registers;
 
 		/* get the bytes of data from the Address == BAR1 + 20002Ch + (256*TCi) where
@@ -792,7 +792,7 @@ static u32 sci_req_tx_bytes(struct isci_request *ireq)
 		 *            = start of task context SRAM + offset of (type.ssp.data_offset)
 		 *   TCi is the io_tag of struct sci_request
 		 */
-		ret_val = readl(scu_reg_base +
+		ret_val = pete_readl("drivers/scsi/isci/request.c:795", scu_reg_base +
 				(SCU_TASK_CONTEXT_SRAM + offsetof(struct scu_task_context, type.ssp.data_offset)) +
 				((sizeof(struct scu_task_context)) * ISCI_TAG_TCI(ireq->io_tag)));
 	}

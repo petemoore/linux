@@ -27,8 +27,8 @@ static void (*old_machine_restart)(char *command);
 static void __iomem *tb0219_base;
 static DEFINE_SPINLOCK(tb0219_lock);
 
-#define tb0219_read(offset)		readw(tb0219_base + (offset))
-#define tb0219_write(offset, value)	writew((value), tb0219_base + (offset))
+#define tb0219_read(offset)		pete_readw("drivers/char/tb0219.c:30", tb0219_base + (offset))
+#define tb0219_write(offset, value)	pete_writew("drivers/char/tb0219.c:31", (value), tb0219_base + (offset))
 
 #define TB0219_START	0x0a000000UL
 #define TB0219_SIZE	0x20UL

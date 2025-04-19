@@ -230,7 +230,7 @@ static u8 ssb_pcmcia_read8(struct ssb_device *dev, u16 offset)
 	spin_lock_irqsave(&bus->bar_lock, flags);
 	err = select_core_and_segment(dev, &offset);
 	if (likely(!err))
-		value = readb(bus->mmio + offset);
+		value = pete_readb("drivers/ssb/pcmcia.c:233", bus->mmio + offset);
 	spin_unlock_irqrestore(&bus->bar_lock, flags);
 
 	return value;
@@ -246,7 +246,7 @@ static u16 ssb_pcmcia_read16(struct ssb_device *dev, u16 offset)
 	spin_lock_irqsave(&bus->bar_lock, flags);
 	err = select_core_and_segment(dev, &offset);
 	if (likely(!err))
-		value = readw(bus->mmio + offset);
+		value = pete_readw("drivers/ssb/pcmcia.c:249", bus->mmio + offset);
 	spin_unlock_irqrestore(&bus->bar_lock, flags);
 
 	return value;
@@ -262,8 +262,8 @@ static u32 ssb_pcmcia_read32(struct ssb_device *dev, u16 offset)
 	spin_lock_irqsave(&bus->bar_lock, flags);
 	err = select_core_and_segment(dev, &offset);
 	if (likely(!err)) {
-		lo = readw(bus->mmio + offset);
-		hi = readw(bus->mmio + offset + 2);
+		lo = pete_readw("drivers/ssb/pcmcia.c:265", bus->mmio + offset);
+		hi = pete_readw("drivers/ssb/pcmcia.c:266", bus->mmio + offset + 2);
 	}
 	spin_unlock_irqrestore(&bus->bar_lock, flags);
 
@@ -337,7 +337,7 @@ static void ssb_pcmcia_write8(struct ssb_device *dev, u16 offset, u8 value)
 	spin_lock_irqsave(&bus->bar_lock, flags);
 	err = select_core_and_segment(dev, &offset);
 	if (likely(!err))
-		writeb(value, bus->mmio + offset);
+		pete_writeb("drivers/ssb/pcmcia.c:340", value, bus->mmio + offset);
 	spin_unlock_irqrestore(&bus->bar_lock, flags);
 }
 
@@ -350,7 +350,7 @@ static void ssb_pcmcia_write16(struct ssb_device *dev, u16 offset, u16 value)
 	spin_lock_irqsave(&bus->bar_lock, flags);
 	err = select_core_and_segment(dev, &offset);
 	if (likely(!err))
-		writew(value, bus->mmio + offset);
+		pete_writew("drivers/ssb/pcmcia.c:353", value, bus->mmio + offset);
 	spin_unlock_irqrestore(&bus->bar_lock, flags);
 }
 
@@ -363,8 +363,8 @@ static void ssb_pcmcia_write32(struct ssb_device *dev, u16 offset, u32 value)
 	spin_lock_irqsave(&bus->bar_lock, flags);
 	err = select_core_and_segment(dev, &offset);
 	if (likely(!err)) {
-		writew((value & 0x0000FFFF), bus->mmio + offset);
-		writew(((value & 0xFFFF0000) >> 16), bus->mmio + offset + 2);
+		pete_writew("drivers/ssb/pcmcia.c:366", (value & 0x0000FFFF), bus->mmio + offset);
+		pete_writew("drivers/ssb/pcmcia.c:367", ((value & 0xFFFF0000) >> 16), bus->mmio + offset + 2);
 	}
 	spin_unlock_irqrestore(&bus->bar_lock, flags);
 }

@@ -334,7 +334,7 @@ static void cmdq_set_db(struct hinic_cmdq *cmdq,
 
 	wmb();  /* write all before the doorbell */
 
-	writel(db_info, CMDQ_DB_ADDR(cmdq->db_base, prod_idx));
+	pete_writel("drivers/net/ethernet/huawei/hinic/hinic_hw_cmdq.c:337", db_info, CMDQ_DB_ADDR(cmdq->db_base, prod_idx));
 }
 
 static int cmdq_sync_cmd_direct_resp(struct hinic_cmdq *cmdq,

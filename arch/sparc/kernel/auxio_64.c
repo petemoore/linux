@@ -37,14 +37,14 @@ static void __auxio_rmw(u8 bits_on, u8 bits_off, int ebus)
 		spin_lock_irqsave(&auxio_lock, flags);
 
 		regval = (ebus ?
-			  (u8) readl(auxio_register) :
+			  (u8) pete_readl("arch/sparc/kernel/auxio_64.c:40", auxio_register) :
 			  sbus_readb(auxio_register));
 		newval =  regval | bits_on;
 		newval &= ~bits_off;
 		if (!ebus)
 			newval &= ~AUXIO_AUX1_MASK;
 		if (ebus)
-			writel((u32) newval, auxio_register);
+			pete_writel("arch/sparc/kernel/auxio_64.c:47", (u32) newval, auxio_register);
 		else
 			sbus_writeb(newval, auxio_register);
 		

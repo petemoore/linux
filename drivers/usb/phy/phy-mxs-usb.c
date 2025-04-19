@@ -237,10 +237,10 @@ static void mxs_phy_tx_init(struct mxs_phy *mxs_phy)
 
 	/* Update TX register if there is anything to write */
 	if (mxs_phy->tx_reg_mask) {
-		phytx = readl(base + HW_USBPHY_TX);
+		phytx = pete_readl("drivers/usb/phy/phy-mxs-usb.c:240", base + HW_USBPHY_TX);
 		phytx &= ~mxs_phy->tx_reg_mask;
 		phytx |= mxs_phy->tx_reg_set;
-		writel(phytx, base + HW_USBPHY_TX);
+		pete_writel("drivers/usb/phy/phy-mxs-usb.c:243", phytx, base + HW_USBPHY_TX);
 	}
 }
 
@@ -251,23 +251,23 @@ static int mxs_phy_pll_enable(void __iomem *base, bool enable)
 	if (enable) {
 		u32 value;
 
-		writel(BM_USBPHY_PLL_REG_ENABLE, base + HW_USBPHY_PLL_SIC_SET);
-		writel(BM_USBPHY_PLL_BYPASS, base + HW_USBPHY_PLL_SIC_CLR);
-		writel(BM_USBPHY_PLL_POWER, base + HW_USBPHY_PLL_SIC_SET);
+		pete_writel("drivers/usb/phy/phy-mxs-usb.c:254", BM_USBPHY_PLL_REG_ENABLE, base + HW_USBPHY_PLL_SIC_SET);
+		pete_writel("drivers/usb/phy/phy-mxs-usb.c:255", BM_USBPHY_PLL_BYPASS, base + HW_USBPHY_PLL_SIC_CLR);
+		pete_writel("drivers/usb/phy/phy-mxs-usb.c:256", BM_USBPHY_PLL_POWER, base + HW_USBPHY_PLL_SIC_SET);
 		ret = readl_poll_timeout(base + HW_USBPHY_PLL_SIC,
 			value, (value & BM_USBPHY_PLL_LOCK) != 0,
 			100, 10000);
 		if (ret)
 			return ret;
 
-		writel(BM_USBPHY_PLL_EN_USB_CLKS, base +
+		pete_writel("drivers/usb/phy/phy-mxs-usb.c:263", BM_USBPHY_PLL_EN_USB_CLKS, base +
 				HW_USBPHY_PLL_SIC_SET);
 	} else {
-		writel(BM_USBPHY_PLL_EN_USB_CLKS, base +
+		pete_writel("drivers/usb/phy/phy-mxs-usb.c:266", BM_USBPHY_PLL_EN_USB_CLKS, base +
 				HW_USBPHY_PLL_SIC_CLR);
-		writel(BM_USBPHY_PLL_POWER, base + HW_USBPHY_PLL_SIC_CLR);
-		writel(BM_USBPHY_PLL_BYPASS, base + HW_USBPHY_PLL_SIC_SET);
-		writel(BM_USBPHY_PLL_REG_ENABLE, base + HW_USBPHY_PLL_SIC_CLR);
+		pete_writel("drivers/usb/phy/phy-mxs-usb.c:268", BM_USBPHY_PLL_POWER, base + HW_USBPHY_PLL_SIC_CLR);
+		pete_writel("drivers/usb/phy/phy-mxs-usb.c:269", BM_USBPHY_PLL_BYPASS, base + HW_USBPHY_PLL_SIC_SET);
+		pete_writel("drivers/usb/phy/phy-mxs-usb.c:270", BM_USBPHY_PLL_REG_ENABLE, base + HW_USBPHY_PLL_SIC_CLR);
 	}
 
 	return ret;
@@ -289,14 +289,14 @@ static int mxs_phy_hw_init(struct mxs_phy *mxs_phy)
 		goto disable_pll;
 
 	/* Power up the PHY */
-	writel(0, base + HW_USBPHY_PWD);
+	pete_writel("drivers/usb/phy/phy-mxs-usb.c:292", 0, base + HW_USBPHY_PWD);
 
 	/*
 	 * USB PHY Ctrl Setting
 	 * - Auto clock/power on
 	 * - Enable full/low speed support
 	 */
-	writel(BM_USBPHY_CTRL_ENAUTOSET_USBCLKS |
+	pete_writel("drivers/usb/phy/phy-mxs-usb.c:299", BM_USBPHY_CTRL_ENAUTOSET_USBCLKS |
 		BM_USBPHY_CTRL_ENAUTOCLR_USBCLKGATE |
 		BM_USBPHY_CTRL_ENAUTOCLR_PHY_PWD |
 		BM_USBPHY_CTRL_ENAUTOCLR_CLKGATE |
@@ -306,7 +306,7 @@ static int mxs_phy_hw_init(struct mxs_phy *mxs_phy)
 	       base + HW_USBPHY_CTRL_SET);
 
 	if (mxs_phy->data->flags & MXS_PHY_NEED_IP_FIX)
-		writel(BM_USBPHY_IP_FIX, base + HW_USBPHY_IP_SET);
+		pete_writel("drivers/usb/phy/phy-mxs-usb.c:309", BM_USBPHY_IP_FIX, base + HW_USBPHY_IP_SET);
 
 	if (mxs_phy->regmap_anatop) {
 		unsigned int reg = mxs_phy->port_id ?
@@ -389,7 +389,7 @@ static void __mxs_phy_disconnect_line(struct mxs_phy *mxs_phy, bool disconnect)
 static bool mxs_phy_is_otg_host(struct mxs_phy *mxs_phy)
 {
 	void __iomem *base = mxs_phy->phy.io_priv;
-	u32 phyctrl = readl(base + HW_USBPHY_CTRL);
+	u32 phyctrl = pete_readl("drivers/usb/phy/phy-mxs-usb.c:392", base + HW_USBPHY_CTRL);
 
 	if (IS_ENABLED(CONFIG_USB_OTG) &&
 			!(phyctrl & BM_USBPHY_CTRL_OTG_ID_VALUE))
@@ -444,10 +444,10 @@ static void mxs_phy_shutdown(struct usb_phy *phy)
 			BM_USBPHY_CTRL_ENAUTOCLR_CLKGATE |
 			BM_USBPHY_CTRL_ENAUTO_PWRON_PLL;
 
-	writel(value, phy->io_priv + HW_USBPHY_CTRL_CLR);
-	writel(0xffffffff, phy->io_priv + HW_USBPHY_PWD);
+	pete_writel("drivers/usb/phy/phy-mxs-usb.c:447", value, phy->io_priv + HW_USBPHY_CTRL_CLR);
+	pete_writel("drivers/usb/phy/phy-mxs-usb.c:448", 0xffffffff, phy->io_priv + HW_USBPHY_PWD);
 
-	writel(BM_USBPHY_CTRL_CLKGATE,
+	pete_writel("drivers/usb/phy/phy-mxs-usb.c:450", BM_USBPHY_CTRL_CLKGATE,
 	       phy->io_priv + HW_USBPHY_CTRL_SET);
 
 	if (is_imx7ulp_phy(mxs_phy))
@@ -502,11 +502,11 @@ static int mxs_phy_suspend(struct usb_phy *x, int suspend)
 			 * several 32Khz cycles are needed.
 			 */
 			mxs_phy_clock_switch_delay();
-			writel(0xffbfffff, x->io_priv + HW_USBPHY_PWD);
+			pete_writel("drivers/usb/phy/phy-mxs-usb.c:505", 0xffbfffff, x->io_priv + HW_USBPHY_PWD);
 		} else {
-			writel(0xffffffff, x->io_priv + HW_USBPHY_PWD);
+			pete_writel("drivers/usb/phy/phy-mxs-usb.c:507", 0xffffffff, x->io_priv + HW_USBPHY_PWD);
 		}
-		writel(BM_USBPHY_CTRL_CLKGATE,
+		pete_writel("drivers/usb/phy/phy-mxs-usb.c:509", BM_USBPHY_CTRL_CLKGATE,
 		       x->io_priv + HW_USBPHY_CTRL_SET);
 		clk_disable_unprepare(mxs_phy->clk);
 	} else {
@@ -514,9 +514,9 @@ static int mxs_phy_suspend(struct usb_phy *x, int suspend)
 		ret = clk_prepare_enable(mxs_phy->clk);
 		if (ret)
 			return ret;
-		writel(BM_USBPHY_CTRL_CLKGATE,
+		pete_writel("drivers/usb/phy/phy-mxs-usb.c:517", BM_USBPHY_CTRL_CLKGATE,
 		       x->io_priv + HW_USBPHY_CTRL_CLR);
-		writel(0, x->io_priv + HW_USBPHY_PWD);
+		pete_writel("drivers/usb/phy/phy-mxs-usb.c:519", 0, x->io_priv + HW_USBPHY_PWD);
 	}
 
 	return 0;
@@ -546,7 +546,7 @@ static int mxs_phy_on_connect(struct usb_phy *phy,
 		(speed == USB_SPEED_HIGH) ? "HS" : "FS/LS");
 
 	if (speed == USB_SPEED_HIGH)
-		writel(BM_USBPHY_CTRL_ENHOSTDISCONDETECT,
+		pete_writel("drivers/usb/phy/phy-mxs-usb.c:549", BM_USBPHY_CTRL_ENHOSTDISCONDETECT,
 		       phy->io_priv + HW_USBPHY_CTRL_SET);
 
 	return 0;
@@ -559,9 +559,9 @@ static int mxs_phy_on_disconnect(struct usb_phy *phy,
 		(speed == USB_SPEED_HIGH) ? "HS" : "FS/LS");
 
 	/* Sometimes, the speed is not high speed when the error occurs */
-	if (readl(phy->io_priv + HW_USBPHY_CTRL) &
+	if (pete_readl("drivers/usb/phy/phy-mxs-usb.c:562", phy->io_priv + HW_USBPHY_CTRL) &
 			BM_USBPHY_CTRL_ENHOSTDISCONDETECT)
-		writel(BM_USBPHY_CTRL_ENHOSTDISCONDETECT,
+		pete_writel("drivers/usb/phy/phy-mxs-usb.c:564", BM_USBPHY_CTRL_ENHOSTDISCONDETECT,
 		       phy->io_priv + HW_USBPHY_CTRL_CLR);
 
 	return 0;

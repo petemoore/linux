@@ -41,12 +41,12 @@ struct ufs_mtk_phy {
 
 static inline u32 mphy_readl(struct ufs_mtk_phy *phy, u32 reg)
 {
-	return readl(phy->mmio + reg);
+	return pete_readl("drivers/phy/mediatek/phy-mtk-ufs.c:44", phy->mmio + reg);
 }
 
 static inline void mphy_writel(struct ufs_mtk_phy *phy, u32 val, u32 reg)
 {
-	writel(val, phy->mmio + reg);
+	pete_writel("drivers/phy/mediatek/phy-mtk-ufs.c:49", val, phy->mmio + reg);
 }
 
 static void mphy_set_bit(struct ufs_mtk_phy *phy, u32 reg, u32 bit)

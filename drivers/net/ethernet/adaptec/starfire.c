@@ -696,27 +696,27 @@ static int starfire_init_one(struct pci_dev *pdev,
 
 	/* Serial EEPROM reads are hidden by the hardware. */
 	for (i = 0; i < 6; i++)
-		dev->dev_addr[i] = readb(base + EEPROMCtrl + 20 - i);
+		dev->dev_addr[i] = pete_readb("drivers/net/ethernet/adaptec/starfire.c:699", base + EEPROMCtrl + 20 - i);
 
 #if ! defined(final_version) /* Dump the EEPROM contents during development. */
 	if (debug > 4)
 		for (i = 0; i < 0x20; i++)
 			printk("%2.2x%s",
-			       (unsigned int)readb(base + EEPROMCtrl + i),
+			       (unsigned int)pete_readb("drivers/net/ethernet/adaptec/starfire.c:705", base + EEPROMCtrl + i),
 			       i % 16 != 15 ? " " : "\n");
 #endif
 
 	/* Issue soft reset */
-	writel(MiiSoftReset, base + TxMode);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:710", MiiSoftReset, base + TxMode);
 	udelay(1000);
-	writel(0, base + TxMode);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:712", 0, base + TxMode);
 
 	/* Reset the chip to erase previous misconfiguration. */
-	writel(1, base + PCIDeviceConfig);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:715", 1, base + PCIDeviceConfig);
 	boguscnt = 1000;
 	while (--boguscnt > 0) {
 		udelay(10);
-		if ((readl(base + PCIDeviceConfig) & 1) == 0)
+		if ((pete_readl("drivers/net/ethernet/adaptec/starfire.c:719", base + PCIDeviceConfig) & 1) == 0)
 			break;
 	}
 	if (boguscnt == 0)
@@ -836,7 +836,7 @@ static int mdio_read(struct net_device *dev, int phy_id, int location)
 	int result, boguscnt=1000;
 	/* ??? Should we add a busy-wait here? */
 	do {
-		result = readl(mdio_addr);
+		result = pete_readl("drivers/net/ethernet/adaptec/starfire.c:839", mdio_addr);
 	} while ((result & 0xC0000000) != 0x80000000 && --boguscnt > 0);
 	if (boguscnt == 0)
 		return 0;
@@ -850,7 +850,7 @@ static void mdio_write(struct net_device *dev, int phy_id, int location, int val
 {
 	struct netdev_private *np = netdev_priv(dev);
 	void __iomem *mdio_addr = np->base + MIICtrl + (phy_id<<7) + (location<<2);
-	writel(value, mdio_addr);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:853", value, mdio_addr);
 	/* The busy-wait will occur before a read. */
 }
 
@@ -873,8 +873,8 @@ static int netdev_open(struct net_device *dev)
 		return retval;
 
 	/* Disable the Rx and Tx, and reset the chip. */
-	writel(0, ioaddr + GenCtrl);
-	writel(1, ioaddr + PCIDeviceConfig);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:876", 0, ioaddr + GenCtrl);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:877", 1, ioaddr + PCIDeviceConfig);
 	if (debug > 1)
 		printk(KERN_DEBUG "%s: netdev_open() irq %d.\n",
 		       dev->name, irq);
@@ -908,7 +908,7 @@ static int netdev_open(struct net_device *dev)
 	netif_carrier_off(dev);
 	init_ring(dev);
 	/* Set the size of the Rx buffers. */
-	writel((np->rx_buf_sz << RxBufferLenShift) |
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:911", (np->rx_buf_sz << RxBufferLenShift) |
 	       (0 << RxMinDescrThreshShift) |
 	       RxPrefetchMode | RxVariableQ |
 	       RX_Q_ENTRIES |
@@ -917,28 +917,28 @@ static int netdev_open(struct net_device *dev)
 	       ioaddr + RxDescQCtrl);
 
 	/* Set up the Rx DMA controller. */
-	writel(RxChecksumIgnore |
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:920", RxChecksumIgnore |
 	       (0 << RxEarlyIntThreshShift) |
 	       (6 << RxHighPrioThreshShift) |
 	       ((DMA_BURST_SIZE / 32) << RxBurstSizeShift),
 	       ioaddr + RxDMACtrl);
 
 	/* Set Tx descriptor */
-	writel((2 << TxHiPriFIFOThreshShift) |
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:927", (2 << TxHiPriFIFOThreshShift) |
 	       (0 << TxPadLenShift) |
 	       ((DMA_BURST_SIZE / 32) << TxDMABurstSizeShift) |
 	       TX_DESC_Q_ADDR_SIZE |
 	       TX_DESC_SPACING | TX_DESC_TYPE,
 	       ioaddr + TxDescCtrl);
 
-	writel( (np->queue_mem_dma >> 16) >> 16, ioaddr + RxDescQHiAddr);
-	writel( (np->queue_mem_dma >> 16) >> 16, ioaddr + TxRingHiAddr);
-	writel( (np->queue_mem_dma >> 16) >> 16, ioaddr + CompletionHiAddr);
-	writel(np->rx_ring_dma, ioaddr + RxDescQAddr);
-	writel(np->tx_ring_dma, ioaddr + TxRingPtr);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:934",  (np->queue_mem_dma >> 16) >> 16, ioaddr + RxDescQHiAddr);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:935",  (np->queue_mem_dma >> 16) >> 16, ioaddr + TxRingHiAddr);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:936",  (np->queue_mem_dma >> 16) >> 16, ioaddr + CompletionHiAddr);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:937", np->rx_ring_dma, ioaddr + RxDescQAddr);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:938", np->tx_ring_dma, ioaddr + TxRingPtr);
 
-	writel(np->tx_done_q_dma, ioaddr + TxCompletionAddr);
-	writel(np->rx_done_q_dma |
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:940", np->tx_done_q_dma, ioaddr + TxCompletionAddr);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:941", np->rx_done_q_dma |
 	       RxComplType |
 	       (0 << RxComplThreshShift),
 	       ioaddr + RxCompletionAddr);
@@ -948,30 +948,30 @@ static int netdev_open(struct net_device *dev)
 
 	/* Fill both the Tx SA register and the Rx perfect filter. */
 	for (i = 0; i < 6; i++)
-		writeb(dev->dev_addr[i], ioaddr + TxStationAddr + 5 - i);
+		pete_writeb("drivers/net/ethernet/adaptec/starfire.c:951", dev->dev_addr[i], ioaddr + TxStationAddr + 5 - i);
 	/* The first entry is special because it bypasses the VLAN filter.
 	   Don't use it. */
-	writew(0, ioaddr + PerfFilterTable);
-	writew(0, ioaddr + PerfFilterTable + 4);
-	writew(0, ioaddr + PerfFilterTable + 8);
+	pete_writew("drivers/net/ethernet/adaptec/starfire.c:954", 0, ioaddr + PerfFilterTable);
+	pete_writew("drivers/net/ethernet/adaptec/starfire.c:955", 0, ioaddr + PerfFilterTable + 4);
+	pete_writew("drivers/net/ethernet/adaptec/starfire.c:956", 0, ioaddr + PerfFilterTable + 8);
 	for (i = 1; i < 16; i++) {
 		__be16 *eaddrs = (__be16 *)dev->dev_addr;
 		void __iomem *setup_frm = ioaddr + PerfFilterTable + i * 16;
-		writew(be16_to_cpu(eaddrs[2]), setup_frm); setup_frm += 4;
-		writew(be16_to_cpu(eaddrs[1]), setup_frm); setup_frm += 4;
-		writew(be16_to_cpu(eaddrs[0]), setup_frm); setup_frm += 8;
+		pete_writew("drivers/net/ethernet/adaptec/starfire.c:960", be16_to_cpu(eaddrs[2]), setup_frm); setup_frm += 4;
+		pete_writew("drivers/net/ethernet/adaptec/starfire.c:961", be16_to_cpu(eaddrs[1]), setup_frm); setup_frm += 4;
+		pete_writew("drivers/net/ethernet/adaptec/starfire.c:962", be16_to_cpu(eaddrs[0]), setup_frm); setup_frm += 8;
 	}
 
 	/* Initialize other registers. */
 	/* Configure the PCI bus bursts and FIFO thresholds. */
 	np->tx_mode = TxFlowEnable|RxFlowEnable|PadEnable;	/* modified when link is up. */
-	writel(MiiSoftReset | np->tx_mode, ioaddr + TxMode);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:968", MiiSoftReset | np->tx_mode, ioaddr + TxMode);
 	udelay(1000);
-	writel(np->tx_mode, ioaddr + TxMode);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:970", np->tx_mode, ioaddr + TxMode);
 	np->tx_threshold = 4;
-	writel(np->tx_threshold, ioaddr + TxThreshold);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:972", np->tx_threshold, ioaddr + TxThreshold);
 
-	writel(np->intr_timer_ctrl, ioaddr + IntrTimerCtrl);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:974", np->intr_timer_ctrl, ioaddr + IntrTimerCtrl);
 
 	napi_enable(&np->napi);
 
@@ -985,20 +985,20 @@ static int netdev_open(struct net_device *dev)
 	check_duplex(dev);
 
 	/* Enable GPIO interrupts on link change */
-	writel(0x0f00ff00, ioaddr + GPIOCtrl);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:988", 0x0f00ff00, ioaddr + GPIOCtrl);
 
 	/* Set the interrupt mask */
-	writel(IntrRxDone | IntrRxEmpty | IntrDMAErr |
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:991", IntrRxDone | IntrRxEmpty | IntrDMAErr |
 	       IntrTxDMADone | IntrStatsMax | IntrLinkChange |
 	       IntrRxGFPDead | IntrNoTxCsum | IntrTxBadID,
 	       ioaddr + IntrEnable);
 	/* Enable PCI interrupts. */
-	writel(0x00800000 | readl(ioaddr + PCIDeviceConfig),
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:996", 0x00800000 | pete_readl("drivers/net/ethernet/adaptec/starfire.c:996", ioaddr + PCIDeviceConfig),
 	       ioaddr + PCIDeviceConfig);
 
 #ifdef VLAN_SUPPORT
 	/* Set VLAN type to 802.1q */
-	writel(ETH_P_8021Q, ioaddr + VlanType);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:1001", ETH_P_8021Q, ioaddr + VlanType);
 #endif /* VLAN_SUPPORT */
 
 	retval = request_firmware(&fw_rx, FIRMWARE_RX, &np->pci_dev->dev);
@@ -1032,15 +1032,15 @@ static int netdev_open(struct net_device *dev)
 
 	/* Load Rx/Tx firmware into the frame processors */
 	for (i = 0; i < rx_size; i++)
-		writel(be32_to_cpup(&fw_rx_data[i]), ioaddr + RxGfpMem + i * 4);
+		pete_writel("drivers/net/ethernet/adaptec/starfire.c:1035", be32_to_cpup(&fw_rx_data[i]), ioaddr + RxGfpMem + i * 4);
 	for (i = 0; i < tx_size; i++)
-		writel(be32_to_cpup(&fw_tx_data[i]), ioaddr + TxGfpMem + i * 4);
+		pete_writel("drivers/net/ethernet/adaptec/starfire.c:1037", be32_to_cpup(&fw_tx_data[i]), ioaddr + TxGfpMem + i * 4);
 	if (enable_hw_cksum)
 		/* Enable the Rx and Tx units, and the Rx/Tx frame processors. */
-		writel(TxEnable|TxGFPEnable|RxEnable|RxGFPEnable, ioaddr + GenCtrl);
+		pete_writel("drivers/net/ethernet/adaptec/starfire.c:1040", TxEnable|TxGFPEnable|RxEnable|RxGFPEnable, ioaddr + GenCtrl);
 	else
 		/* Enable the Rx and Tx units only. */
-		writel(TxEnable|RxEnable, ioaddr + GenCtrl);
+		pete_writel("drivers/net/ethernet/adaptec/starfire.c:1043", TxEnable|RxEnable, ioaddr + GenCtrl);
 
 	if (debug > 1)
 		printk(KERN_DEBUG "%s: Done netdev_open().\n",
@@ -1099,7 +1099,7 @@ static void tx_timeout(struct net_device *dev, unsigned int txqueue)
 	int old_debug;
 
 	printk(KERN_WARNING "%s: Transmit timed out, status %#8.8x, "
-	       "resetting...\n", dev->name, (int) readl(ioaddr + IntrStatus));
+	       "resetting...\n", dev->name, (int) pete_readl("drivers/net/ethernet/adaptec/starfire.c:1102", ioaddr + IntrStatus));
 
 	/* Perhaps we should reinitialize the hardware here. */
 
@@ -1150,7 +1150,7 @@ static void init_ring(struct net_device *dev)
 		/* Grrr, we cannot offset to correctly align the IP header. */
 		np->rx_ring[i].rxaddr = cpu_to_dma(np->rx_info[i].mapping | RxDescValid);
 	}
-	writew(i - 1, np->base + RxDescQIdx);
+	pete_writew("drivers/net/ethernet/adaptec/starfire.c:1153", i - 1, np->base + RxDescQIdx);
 	np->dirty_rx = (unsigned int)(i - RX_RING_SIZE);
 
 	/* Clear the remainder of the Rx buffer ring. */
@@ -1264,7 +1264,7 @@ static netdev_tx_t start_tx(struct sk_buff *skb, struct net_device *dev)
 	wmb();
 
 	/* Update the producer index. */
-	writel(entry * (sizeof(starfire_tx_desc) / 8), np->base + TxProducerIdx);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:1267", entry * (sizeof(starfire_tx_desc) / 8), np->base + TxProducerIdx);
 
 	/* 4 is arbitrary, but should be ok */
 	if ((np->cur_tx - np->dirty_tx) + 4 > TX_RING_SIZE)
@@ -1307,7 +1307,7 @@ static irqreturn_t intr_handler(int irq, void *dev_instance)
 	int handled = 0;
 
 	do {
-		u32 intr_status = readl(ioaddr + IntrClear);
+		u32 intr_status = pete_readl("drivers/net/ethernet/adaptec/starfire.c:1310", ioaddr + IntrClear);
 
 		if (debug > 4)
 			printk(KERN_DEBUG "%s: Interrupt status %#8.8x.\n",
@@ -1323,20 +1323,20 @@ static irqreturn_t intr_handler(int irq, void *dev_instance)
 
 			if (likely(napi_schedule_prep(&np->napi))) {
 				__napi_schedule(&np->napi);
-				enable = readl(ioaddr + IntrEnable);
+				enable = pete_readl("drivers/net/ethernet/adaptec/starfire.c:1326", ioaddr + IntrEnable);
 				enable &= ~(IntrRxDone | IntrRxEmpty);
-				writel(enable, ioaddr + IntrEnable);
+				pete_writel("drivers/net/ethernet/adaptec/starfire.c:1328", enable, ioaddr + IntrEnable);
 				/* flush PCI posting buffers */
-				readl(ioaddr + IntrEnable);
+				pete_readl("drivers/net/ethernet/adaptec/starfire.c:1330", ioaddr + IntrEnable);
 			} else {
 				/* Paranoia check */
-				enable = readl(ioaddr + IntrEnable);
+				enable = pete_readl("drivers/net/ethernet/adaptec/starfire.c:1333", ioaddr + IntrEnable);
 				if (enable & (IntrRxDone | IntrRxEmpty)) {
 					printk(KERN_INFO
 					       "%s: interrupt while in poll!\n",
 					       dev->name);
 					enable &= ~(IntrRxDone | IntrRxEmpty);
-					writel(enable, ioaddr + IntrEnable);
+					pete_writel("drivers/net/ethernet/adaptec/starfire.c:1339", enable, ioaddr + IntrEnable);
 				}
 			}
 		}
@@ -1344,7 +1344,7 @@ static irqreturn_t intr_handler(int irq, void *dev_instance)
 		/* Scavenge the skbuff list based on the Tx-done queue.
 		   There are redundant checks here that may be cleaned up
 		   after the driver has proven to be reliable. */
-		consumer = readl(ioaddr + TxConsumerIdx);
+		consumer = pete_readl("drivers/net/ethernet/adaptec/starfire.c:1347", ioaddr + TxConsumerIdx);
 		if (debug > 3)
 			printk(KERN_DEBUG "%s: Tx Consumer index is %d.\n",
 			       dev->name, consumer);
@@ -1383,7 +1383,7 @@ static irqreturn_t intr_handler(int irq, void *dev_instance)
 			np->tx_done_q[np->tx_done].status = 0;
 			np->tx_done = (np->tx_done + 1) % DONE_Q_SIZE;
 		}
-		writew(np->tx_done, ioaddr + CompletionQConsumerIdx + 2);
+		pete_writew("drivers/net/ethernet/adaptec/starfire.c:1386", np->tx_done, ioaddr + CompletionQConsumerIdx + 2);
 
 		if (netif_queue_stopped(dev) &&
 		    (np->cur_tx - np->dirty_tx + 4 < TX_RING_SIZE)) {
@@ -1414,7 +1414,7 @@ static irqreturn_t intr_handler(int irq, void *dev_instance)
 
 	if (debug > 4)
 		printk(KERN_DEBUG "%s: exiting interrupt, status=%#8.8x.\n",
-		       dev->name, (int) readl(ioaddr + IntrStatus));
+		       dev->name, (int) pete_readl("drivers/net/ethernet/adaptec/starfire.c:1417", ioaddr + IntrStatus));
 	return IRQ_RETVAL(handled);
 }
 
@@ -1537,7 +1537,7 @@ static int __netdev_rx(struct net_device *dev, int *quota)
 		retcode = 1;
 		goto out;
 	}
-	writew(np->rx_done, np->base + CompletionQConsumerIdx);
+	pete_writew("drivers/net/ethernet/adaptec/starfire.c:1540", np->rx_done, np->base + CompletionQConsumerIdx);
 
  out:
 	refill_rx_ring(dev);
@@ -1556,18 +1556,18 @@ static int netdev_poll(struct napi_struct *napi, int budget)
 	int quota = budget;
 
 	do {
-		writel(IntrRxDone | IntrRxEmpty, ioaddr + IntrClear);
+		pete_writel("drivers/net/ethernet/adaptec/starfire.c:1559", IntrRxDone | IntrRxEmpty, ioaddr + IntrClear);
 
 		if (__netdev_rx(dev, &quota))
 			goto out;
 
-		intr_status = readl(ioaddr + IntrStatus);
+		intr_status = pete_readl("drivers/net/ethernet/adaptec/starfire.c:1564", ioaddr + IntrStatus);
 	} while (intr_status & (IntrRxDone | IntrRxEmpty));
 
 	napi_complete(napi);
-	intr_status = readl(ioaddr + IntrEnable);
+	intr_status = pete_readl("drivers/net/ethernet/adaptec/starfire.c:1568", ioaddr + IntrEnable);
 	intr_status |= IntrRxDone | IntrRxEmpty;
-	writel(intr_status, ioaddr + IntrEnable);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:1570", intr_status, ioaddr + IntrEnable);
 
  out:
 	if (debug > 5)
@@ -1607,7 +1607,7 @@ static void refill_rx_ring(struct net_device *dev)
 			np->rx_ring[entry].rxaddr |= cpu_to_dma(RxDescEndRing);
 	}
 	if (entry >= 0)
-		writew(entry, np->base + RxDescQIdx);
+		pete_writew("drivers/net/ethernet/adaptec/starfire.c:1610", entry, np->base + RxDescQIdx);
 }
 
 
@@ -1667,9 +1667,9 @@ static void netdev_media_change(struct net_device *dev)
 			new_tx_mode |= FullDuplex;
 		if (np->tx_mode != new_tx_mode) {
 			np->tx_mode = new_tx_mode;
-			writel(np->tx_mode | MiiSoftReset, ioaddr + TxMode);
+			pete_writel("drivers/net/ethernet/adaptec/starfire.c:1670", np->tx_mode | MiiSoftReset, ioaddr + TxMode);
 			udelay(1000);
-			writel(np->tx_mode, ioaddr + TxMode);
+			pete_writel("drivers/net/ethernet/adaptec/starfire.c:1672", np->tx_mode, ioaddr + TxMode);
 		}
 
 		new_intr_timer_ctrl = np->intr_timer_ctrl & ~Timer10X;
@@ -1677,7 +1677,7 @@ static void netdev_media_change(struct net_device *dev)
 			new_intr_timer_ctrl |= Timer10X;
 		if (np->intr_timer_ctrl != new_intr_timer_ctrl) {
 			np->intr_timer_ctrl = new_intr_timer_ctrl;
-			writel(new_intr_timer_ctrl, ioaddr + IntrTimerCtrl);
+			pete_writel("drivers/net/ethernet/adaptec/starfire.c:1680", new_intr_timer_ctrl, ioaddr + IntrTimerCtrl);
 		}
 	} else {
 		netif_carrier_off(dev);
@@ -1693,7 +1693,7 @@ static void netdev_error(struct net_device *dev, int intr_status)
 	/* Came close to underrunning the Tx FIFO, increase threshold. */
 	if (intr_status & IntrTxDataLow) {
 		if (np->tx_threshold <= PKT_BUF_SZ / 16) {
-			writel(++np->tx_threshold, np->base + TxThreshold);
+			pete_writel("drivers/net/ethernet/adaptec/starfire.c:1696", ++np->tx_threshold, np->base + TxThreshold);
 			printk(KERN_NOTICE "%s: PCI bus congestion, increasing Tx FIFO threshold to %d bytes\n",
 			       dev->name, np->tx_threshold * 16);
 		} else
@@ -1719,22 +1719,22 @@ static struct net_device_stats *get_stats(struct net_device *dev)
 	void __iomem *ioaddr = np->base;
 
 	/* This adapter architecture needs no SMP locks. */
-	dev->stats.tx_bytes = readl(ioaddr + 0x57010);
-	dev->stats.rx_bytes = readl(ioaddr + 0x57044);
-	dev->stats.tx_packets = readl(ioaddr + 0x57000);
+	dev->stats.tx_bytes = pete_readl("drivers/net/ethernet/adaptec/starfire.c:1722", ioaddr + 0x57010);
+	dev->stats.rx_bytes = pete_readl("drivers/net/ethernet/adaptec/starfire.c:1723", ioaddr + 0x57044);
+	dev->stats.tx_packets = pete_readl("drivers/net/ethernet/adaptec/starfire.c:1724", ioaddr + 0x57000);
 	dev->stats.tx_aborted_errors =
-		readl(ioaddr + 0x57024) + readl(ioaddr + 0x57028);
-	dev->stats.tx_window_errors = readl(ioaddr + 0x57018);
+		pete_readl("drivers/net/ethernet/adaptec/starfire.c:1726", ioaddr + 0x57024) + pete_readl("drivers/net/ethernet/adaptec/starfire.c:1726", ioaddr + 0x57028);
+	dev->stats.tx_window_errors = pete_readl("drivers/net/ethernet/adaptec/starfire.c:1727", ioaddr + 0x57018);
 	dev->stats.collisions =
-		readl(ioaddr + 0x57004) + readl(ioaddr + 0x57008);
+		pete_readl("drivers/net/ethernet/adaptec/starfire.c:1729", ioaddr + 0x57004) + pete_readl("drivers/net/ethernet/adaptec/starfire.c:1729", ioaddr + 0x57008);
 
 	/* The chip only need report frame silently dropped. */
-	dev->stats.rx_dropped += readw(ioaddr + RxDMAStatus);
-	writew(0, ioaddr + RxDMAStatus);
-	dev->stats.rx_crc_errors = readl(ioaddr + 0x5703C);
-	dev->stats.rx_frame_errors = readl(ioaddr + 0x57040);
-	dev->stats.rx_length_errors = readl(ioaddr + 0x57058);
-	dev->stats.rx_missed_errors = readl(ioaddr + 0x5707C);
+	dev->stats.rx_dropped += pete_readw("drivers/net/ethernet/adaptec/starfire.c:1732", ioaddr + RxDMAStatus);
+	pete_writew("drivers/net/ethernet/adaptec/starfire.c:1733", 0, ioaddr + RxDMAStatus);
+	dev->stats.rx_crc_errors = pete_readl("drivers/net/ethernet/adaptec/starfire.c:1734", ioaddr + 0x5703C);
+	dev->stats.rx_frame_errors = pete_readl("drivers/net/ethernet/adaptec/starfire.c:1735", ioaddr + 0x57040);
+	dev->stats.rx_length_errors = pete_readl("drivers/net/ethernet/adaptec/starfire.c:1736", ioaddr + 0x57058);
+	dev->stats.rx_missed_errors = pete_readl("drivers/net/ethernet/adaptec/starfire.c:1737", ioaddr + 0x5707C);
 
 	return &dev->stats;
 }
@@ -1750,14 +1750,14 @@ static u32 set_vlan_mode(struct netdev_private *np)
 	for_each_set_bit(vid, np->active_vlans, VLAN_N_VID) {
 		if (vlan_count == 32)
 			break;
-		writew(vid, filter_addr);
+		pete_writew("drivers/net/ethernet/adaptec/starfire.c:1753", vid, filter_addr);
 		filter_addr += 16;
 		vlan_count++;
 	}
 	if (vlan_count == 32) {
 		ret |= PerfectFilterVlan;
 		while (vlan_count < 32) {
-			writew(0, filter_addr);
+			pete_writew("drivers/net/ethernet/adaptec/starfire.c:1760", 0, filter_addr);
 			filter_addr += 16;
 			vlan_count++;
 		}
@@ -1790,16 +1790,16 @@ static void set_rx_mode(struct net_device *dev)
 		__be16 *eaddrs;
 		netdev_for_each_mc_addr(ha, dev) {
 			eaddrs = (__be16 *) ha->addr;
-			writew(be16_to_cpu(eaddrs[2]), filter_addr); filter_addr += 4;
-			writew(be16_to_cpu(eaddrs[1]), filter_addr); filter_addr += 4;
-			writew(be16_to_cpu(eaddrs[0]), filter_addr); filter_addr += 8;
+			pete_writew("drivers/net/ethernet/adaptec/starfire.c:1793", be16_to_cpu(eaddrs[2]), filter_addr); filter_addr += 4;
+			pete_writew("drivers/net/ethernet/adaptec/starfire.c:1794", be16_to_cpu(eaddrs[1]), filter_addr); filter_addr += 4;
+			pete_writew("drivers/net/ethernet/adaptec/starfire.c:1795", be16_to_cpu(eaddrs[0]), filter_addr); filter_addr += 8;
 		}
 		eaddrs = (__be16 *)dev->dev_addr;
 		i = netdev_mc_count(dev) + 2;
 		while (i++ < 16) {
-			writew(be16_to_cpu(eaddrs[0]), filter_addr); filter_addr += 4;
-			writew(be16_to_cpu(eaddrs[1]), filter_addr); filter_addr += 4;
-			writew(be16_to_cpu(eaddrs[2]), filter_addr); filter_addr += 8;
+			pete_writew("drivers/net/ethernet/adaptec/starfire.c:1800", be16_to_cpu(eaddrs[0]), filter_addr); filter_addr += 4;
+			pete_writew("drivers/net/ethernet/adaptec/starfire.c:1801", be16_to_cpu(eaddrs[1]), filter_addr); filter_addr += 4;
+			pete_writew("drivers/net/ethernet/adaptec/starfire.c:1802", be16_to_cpu(eaddrs[2]), filter_addr); filter_addr += 8;
 		}
 		rx_mode |= AcceptBroadcast|PerfectFilter;
 	} else {
@@ -1821,15 +1821,15 @@ static void set_rx_mode(struct net_device *dev)
 		filter_addr = ioaddr + PerfFilterTable + 2 * 16;
 		eaddrs = (__be16 *)dev->dev_addr;
 		for (i = 2; i < 16; i++) {
-			writew(be16_to_cpu(eaddrs[0]), filter_addr); filter_addr += 4;
-			writew(be16_to_cpu(eaddrs[1]), filter_addr); filter_addr += 4;
-			writew(be16_to_cpu(eaddrs[2]), filter_addr); filter_addr += 8;
+			pete_writew("drivers/net/ethernet/adaptec/starfire.c:1824", be16_to_cpu(eaddrs[0]), filter_addr); filter_addr += 4;
+			pete_writew("drivers/net/ethernet/adaptec/starfire.c:1825", be16_to_cpu(eaddrs[1]), filter_addr); filter_addr += 4;
+			pete_writew("drivers/net/ethernet/adaptec/starfire.c:1826", be16_to_cpu(eaddrs[2]), filter_addr); filter_addr += 8;
 		}
 		for (filter_addr = ioaddr + HashTable, i = 0; i < 32; filter_addr+= 16, i++)
-			writew(mc_filter[i], filter_addr);
+			pete_writew("drivers/net/ethernet/adaptec/starfire.c:1829", mc_filter[i], filter_addr);
 		rx_mode |= AcceptBroadcast|PerfectFilter|HashFilter;
 	}
-	writel(rx_mode, ioaddr + RxFilterMode);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:1832", rx_mode, ioaddr + RxFilterMode);
 }
 
 static int check_if_running(struct net_device *dev)
@@ -1932,18 +1932,18 @@ static int netdev_close(struct net_device *dev)
 
 	if (debug > 1) {
 		printk(KERN_DEBUG "%s: Shutting down ethercard, Intr status %#8.8x.\n",
-			   dev->name, (int) readl(ioaddr + IntrStatus));
+			   dev->name, (int) pete_readl("drivers/net/ethernet/adaptec/starfire.c:1935", ioaddr + IntrStatus));
 		printk(KERN_DEBUG "%s: Queue pointers were Tx %d / %d, Rx %d / %d.\n",
 		       dev->name, np->cur_tx, np->dirty_tx,
 		       np->cur_rx, np->dirty_rx);
 	}
 
 	/* Disable interrupts by clearing the interrupt mask. */
-	writel(0, ioaddr + IntrEnable);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:1942", 0, ioaddr + IntrEnable);
 
 	/* Stop the chip's Tx and Rx processes. */
-	writel(0, ioaddr + GenCtrl);
-	readl(ioaddr + GenCtrl);
+	pete_writel("drivers/net/ethernet/adaptec/starfire.c:1945", 0, ioaddr + GenCtrl);
+	pete_readl("drivers/net/ethernet/adaptec/starfire.c:1946", ioaddr + GenCtrl);
 
 	if (debug > 5) {
 		printk(KERN_DEBUG"  Tx ring at %#llx:\n",

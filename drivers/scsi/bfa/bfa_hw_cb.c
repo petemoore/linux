@@ -31,7 +31,7 @@ bfa_hwcb_reginit(struct bfa_s *bfa)
 static void
 bfa_hwcb_reqq_ack_msix(struct bfa_s *bfa, int reqq)
 {
-	writel(__HFN_INT_CPE_Q0 << CPE_Q_NUM(bfa_ioc_pcifn(&bfa->ioc), reqq),
+	pete_writel("drivers/scsi/bfa/bfa_hw_cb.c:34", __HFN_INT_CPE_Q0 << CPE_Q_NUM(bfa_ioc_pcifn(&bfa->ioc), reqq),
 			bfa->iocfc.bfa_regs.intr_status);
 }
 
@@ -45,14 +45,14 @@ bfa_hwcb_reqq_ack_msix(struct bfa_s *bfa, int reqq)
 static void
 bfa_hwcb_rspq_ack_msix(struct bfa_s *bfa, int rspq, u32 ci)
 {
-	writel(__HFN_INT_RME_Q0 << RME_Q_NUM(bfa_ioc_pcifn(&bfa->ioc), rspq),
+	pete_writel("drivers/scsi/bfa/bfa_hw_cb.c:48", __HFN_INT_RME_Q0 << RME_Q_NUM(bfa_ioc_pcifn(&bfa->ioc), rspq),
 		bfa->iocfc.bfa_regs.intr_status);
 
 	if (bfa_rspq_ci(bfa, rspq) == ci)
 		return;
 
 	bfa_rspq_ci(bfa, rspq) = ci;
-	writel(ci, bfa->iocfc.bfa_regs.rme_q_ci[rspq]);
+	pete_writel("drivers/scsi/bfa/bfa_hw_cb.c:55", ci, bfa->iocfc.bfa_regs.rme_q_ci[rspq]);
 }
 
 void
@@ -62,7 +62,7 @@ bfa_hwcb_rspq_ack(struct bfa_s *bfa, int rspq, u32 ci)
 		return;
 
 	bfa_rspq_ci(bfa, rspq) = ci;
-	writel(ci, bfa->iocfc.bfa_regs.rme_q_ci[rspq]);
+	pete_writel("drivers/scsi/bfa/bfa_hw_cb.c:65", ci, bfa->iocfc.bfa_regs.rme_q_ci[rspq]);
 }
 
 void

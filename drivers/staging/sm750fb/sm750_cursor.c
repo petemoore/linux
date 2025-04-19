@@ -20,7 +20,7 @@
 #include "sm750_cursor.h"
 
 #define poke32(addr, data) \
-writel((data), cursor->mmio + (addr))
+pete_writel("drivers/staging/sm750fb/sm750_cursor.c:23", (data), cursor->mmio + (addr))
 
 /* cursor control for voyager and 718/750*/
 #define HWC_ADDRESS                         0x0

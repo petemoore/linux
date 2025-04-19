@@ -609,7 +609,7 @@ static int rockchip_restart_notify(struct notifier_block *this,
 	if (cb_restart)
 		cb_restart();
 
-	writel(0xfdb9, rst_base + reg_restart);
+	pete_writel("drivers/clk/rockchip/clk.c:612", 0xfdb9, rst_base + reg_restart);
 	return NOTIFY_DONE;
 }
 

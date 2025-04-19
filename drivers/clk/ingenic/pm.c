@@ -17,18 +17,18 @@ static void __iomem * __maybe_unused ingenic_cgu_base;
 
 static int __maybe_unused ingenic_cgu_pm_suspend(void)
 {
-	u32 val = readl(ingenic_cgu_base + CGU_REG_LCR);
+	u32 val = pete_readl("drivers/clk/ingenic/pm.c:20", ingenic_cgu_base + CGU_REG_LCR);
 
-	writel(val | LCR_LOW_POWER_MODE, ingenic_cgu_base + CGU_REG_LCR);
+	pete_writel("drivers/clk/ingenic/pm.c:22", val | LCR_LOW_POWER_MODE, ingenic_cgu_base + CGU_REG_LCR);
 
 	return 0;
 }
 
 static void __maybe_unused ingenic_cgu_pm_resume(void)
 {
-	u32 val = readl(ingenic_cgu_base + CGU_REG_LCR);
+	u32 val = pete_readl("drivers/clk/ingenic/pm.c:29", ingenic_cgu_base + CGU_REG_LCR);
 
-	writel(val & ~LCR_LOW_POWER_MODE, ingenic_cgu_base + CGU_REG_LCR);
+	pete_writel("drivers/clk/ingenic/pm.c:31", val & ~LCR_LOW_POWER_MODE, ingenic_cgu_base + CGU_REG_LCR);
 }
 
 static struct syscore_ops __maybe_unused ingenic_cgu_pm_ops = {

@@ -227,17 +227,17 @@ static int tegra_spi_runtime_resume(struct device *dev);
 static inline u32 tegra_spi_readl(struct tegra_spi_data *tspi,
 		unsigned long reg)
 {
-	return readl(tspi->base + reg);
+	return pete_readl("drivers/spi/spi-tegra114.c:230", tspi->base + reg);
 }
 
 static inline void tegra_spi_writel(struct tegra_spi_data *tspi,
 		u32 val, unsigned long reg)
 {
-	writel(val, tspi->base + reg);
+	pete_writel("drivers/spi/spi-tegra114.c:236", val, tspi->base + reg);
 
 	/* Read back register to make sure that register writes completed */
 	if (reg != SPI_TX_FIFO)
-		readl(tspi->base + SPI_COMMAND1);
+		pete_readl("drivers/spi/spi-tegra114.c:240", tspi->base + SPI_COMMAND1);
 }
 
 static void tegra_spi_clear_status(struct tegra_spi_data *tspi)

@@ -194,7 +194,7 @@ static void exynos4x12_setup_clk(struct samsung_usb2_phy_instance *inst)
 	struct samsung_usb2_phy_driver *drv = inst->drv;
 	u32 clk;
 
-	clk = readl(drv->reg_phy + EXYNOS_4x12_UPHYCLK);
+	clk = pete_readl("drivers/phy/samsung/phy-exynos4x12-usb2.c:197", drv->reg_phy + EXYNOS_4x12_UPHYCLK);
 	clk &= ~EXYNOS_4x12_UPHYCLK_PHYFSEL_MASK;
 
 	if (drv->cfg->has_refclk_sel)
@@ -202,7 +202,7 @@ static void exynos4x12_setup_clk(struct samsung_usb2_phy_instance *inst)
 
 	clk |= drv->ref_reg_val << EXYNOS_4x12_UPHYCLK_PHYFSEL_OFFSET;
 	clk |= EXYNOS_4x12_UPHYCLK_PHY1_COMMON_ON;
-	writel(clk, drv->reg_phy + EXYNOS_4x12_UPHYCLK);
+	pete_writel("drivers/phy/samsung/phy-exynos4x12-usb2.c:205", clk, drv->reg_phy + EXYNOS_4x12_UPHYCLK);
 }
 
 static void exynos4x12_phy_pwr(struct samsung_usb2_phy_instance *inst, bool on)
@@ -237,23 +237,23 @@ static void exynos4x12_phy_pwr(struct samsung_usb2_phy_instance *inst, bool on)
 	}
 
 	if (on) {
-		pwr = readl(drv->reg_phy + EXYNOS_4x12_UPHYPWR);
+		pwr = pete_readl("drivers/phy/samsung/phy-exynos4x12-usb2.c:240", drv->reg_phy + EXYNOS_4x12_UPHYPWR);
 		pwr &= ~phypwr;
-		writel(pwr, drv->reg_phy + EXYNOS_4x12_UPHYPWR);
+		pete_writel("drivers/phy/samsung/phy-exynos4x12-usb2.c:242", pwr, drv->reg_phy + EXYNOS_4x12_UPHYPWR);
 
-		rst = readl(drv->reg_phy + EXYNOS_4x12_UPHYRST);
+		rst = pete_readl("drivers/phy/samsung/phy-exynos4x12-usb2.c:244", drv->reg_phy + EXYNOS_4x12_UPHYRST);
 		rst |= rstbits;
-		writel(rst, drv->reg_phy + EXYNOS_4x12_UPHYRST);
+		pete_writel("drivers/phy/samsung/phy-exynos4x12-usb2.c:246", rst, drv->reg_phy + EXYNOS_4x12_UPHYRST);
 		udelay(10);
 		rst &= ~rstbits;
-		writel(rst, drv->reg_phy + EXYNOS_4x12_UPHYRST);
+		pete_writel("drivers/phy/samsung/phy-exynos4x12-usb2.c:249", rst, drv->reg_phy + EXYNOS_4x12_UPHYRST);
 		/* The following delay is necessary for the reset sequence to be
 		 * completed */
 		udelay(80);
 	} else {
-		pwr = readl(drv->reg_phy + EXYNOS_4x12_UPHYPWR);
+		pwr = pete_readl("drivers/phy/samsung/phy-exynos4x12-usb2.c:254", drv->reg_phy + EXYNOS_4x12_UPHYPWR);
 		pwr |= phypwr;
-		writel(pwr, drv->reg_phy + EXYNOS_4x12_UPHYPWR);
+		pete_writel("drivers/phy/samsung/phy-exynos4x12-usb2.c:256", pwr, drv->reg_phy + EXYNOS_4x12_UPHYPWR);
 	}
 }
 

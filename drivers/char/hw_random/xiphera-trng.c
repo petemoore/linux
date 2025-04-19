@@ -40,14 +40,14 @@ static int xiphera_trng_read(struct hwrng *rng, void *buf, size_t max, bool wait
 
 	while (max >= sizeof(u32)) {
 		/* check for data */
-		if (readl(trng->mem + STATUS_REG) == TRNG_NEW_RAND_AVAILABLE) {
-			*(u32 *)buf = readl(trng->mem + RAND_REG);
+		if (pete_readl("drivers/char/hw_random/xiphera-trng.c:43", trng->mem + STATUS_REG) == TRNG_NEW_RAND_AVAILABLE) {
+			*(u32 *)buf = pete_readl("drivers/char/hw_random/xiphera-trng.c:44", trng->mem + RAND_REG);
 			/*
 			 * Inform the trng of the read
 			 * and re-enable it to produce a new random number
 			 */
-			writel(HOST_TO_TRNG_READ, trng->mem + CONTROL_REG);
-			writel(HOST_TO_TRNG_ENABLE, trng->mem + CONTROL_REG);
+			pete_writel("drivers/char/hw_random/xiphera-trng.c:49", HOST_TO_TRNG_READ, trng->mem + CONTROL_REG);
+			pete_writel("drivers/char/hw_random/xiphera-trng.c:50", HOST_TO_TRNG_ENABLE, trng->mem + CONTROL_REG);
 			ret += sizeof(u32);
 			buf += sizeof(u32);
 			max -= sizeof(u32);
@@ -76,16 +76,16 @@ static int xiphera_trng_probe(struct platform_device *pdev)
 	 * the trng needs to be reset first which might not happen in time,
 	 * hence we incorporate a small delay to ensure proper behaviour
 	 */
-	writel(HOST_TO_TRNG_RESET, trng->mem + CONTROL_REG);
+	pete_writel("drivers/char/hw_random/xiphera-trng.c:79", HOST_TO_TRNG_RESET, trng->mem + CONTROL_REG);
 	usleep_range(100, 200);
 
-	if (readl(trng->mem + STATUS_REG) != TRNG_ACK_RESET) {
+	if (pete_readl("drivers/char/hw_random/xiphera-trng.c:82", trng->mem + STATUS_REG) != TRNG_ACK_RESET) {
 		/*
 		 * there is a small chance the trng is just not ready yet,
 		 * so we try one more time. If the second time fails, we give up
 		 */
 		usleep_range(100, 200);
-		if (readl(trng->mem + STATUS_REG) != TRNG_ACK_RESET) {
+		if (pete_readl("drivers/char/hw_random/xiphera-trng.c:88", trng->mem + STATUS_REG) != TRNG_ACK_RESET) {
 			dev_err(dev, "failed to reset the trng ip\n");
 			return -ENODEV;
 		}
@@ -95,14 +95,14 @@ static int xiphera_trng_probe(struct platform_device *pdev)
 	 * once again, to ensure proper behaviour we sleep
 	 * for a while after zeroizing the trng
 	 */
-	writel(HOST_TO_TRNG_RELEASE_RESET, trng->mem + CONTROL_REG);
-	writel(HOST_TO_TRNG_ENABLE, trng->mem + CONTROL_REG);
-	writel(HOST_TO_TRNG_ZEROIZE, trng->mem + CONTROL_REG);
+	pete_writel("drivers/char/hw_random/xiphera-trng.c:98", HOST_TO_TRNG_RELEASE_RESET, trng->mem + CONTROL_REG);
+	pete_writel("drivers/char/hw_random/xiphera-trng.c:99", HOST_TO_TRNG_ENABLE, trng->mem + CONTROL_REG);
+	pete_writel("drivers/char/hw_random/xiphera-trng.c:100", HOST_TO_TRNG_ZEROIZE, trng->mem + CONTROL_REG);
 	msleep(20);
 
-	if (readl(trng->mem + STATUS_REG) != TRNG_SUCCESSFUL_STARTUP) {
+	if (pete_readl("drivers/char/hw_random/xiphera-trng.c:103", trng->mem + STATUS_REG) != TRNG_SUCCESSFUL_STARTUP) {
 		/* diagnose the reason for the failure */
-		if (readl(trng->mem + STATUS_REG) == TRNG_FAILED_STARTUP) {
+		if (pete_readl("drivers/char/hw_random/xiphera-trng.c:105", trng->mem + STATUS_REG) == TRNG_FAILED_STARTUP) {
 			dev_err(dev, "trng ip startup-tests failed\n");
 			return -ENODEV;
 		}
@@ -110,7 +110,7 @@ static int xiphera_trng_probe(struct platform_device *pdev)
 		return -ENODEV;
 	}
 
-	writel(HOST_TO_TRNG_ACK_ZEROIZE, trng->mem + CONTROL_REG);
+	pete_writel("drivers/char/hw_random/xiphera-trng.c:113", HOST_TO_TRNG_ACK_ZEROIZE, trng->mem + CONTROL_REG);
 
 	trng->rng.name = pdev->name;
 	trng->rng.read = xiphera_trng_read;

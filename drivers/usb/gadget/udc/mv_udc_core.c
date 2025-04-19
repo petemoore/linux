@@ -87,7 +87,7 @@ static void ep0_reset(struct mv_udc *udc)
 
 		ep->dqh->next_dtd_ptr = EP_QUEUE_HEAD_NEXT_TERMINATE;
 
-		epctrlx = readl(&udc->op_regs->epctrlx[0]);
+		epctrlx = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:90", &udc->op_regs->epctrlx[0]);
 		if (i) {	/* TX */
 			epctrlx |= EPCTRL_TX_ENABLE
 				| (USB_ENDPOINT_XFER_CONTROL
@@ -99,7 +99,7 @@ static void ep0_reset(struct mv_udc *udc)
 					<< EPCTRL_RX_EP_TYPE_SHIFT);
 		}
 
-		writel(epctrlx, &udc->op_regs->epctrlx[0]);
+		pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:102", epctrlx, &udc->op_regs->epctrlx[0]);
 	}
 }
 
@@ -109,9 +109,9 @@ static void ep0_stall(struct mv_udc *udc)
 	u32	epctrlx;
 
 	/* set TX and RX to stall */
-	epctrlx = readl(&udc->op_regs->epctrlx[0]);
+	epctrlx = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:112", &udc->op_regs->epctrlx[0]);
 	epctrlx |= EPCTRL_RX_EP_STALL | EPCTRL_TX_EP_STALL;
-	writel(epctrlx, &udc->op_regs->epctrlx[0]);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:114", epctrlx, &udc->op_regs->epctrlx[0]);
 
 	/* update ep0 state */
 	udc->ep0_state = WAIT_FOR_SETUP;
@@ -186,7 +186,7 @@ static int process_ep_req(struct mv_udc *udc, int index,
 
 	while (curr_dqh->curr_dtd_ptr == curr_dtd->td_dma) {
 		if (curr_dtd->dtd_next == EP_QUEUE_HEAD_NEXT_TERMINATE) {
-			while (readl(&udc->op_regs->epstatus) & bit_pos)
+			while (pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:189", &udc->op_regs->epstatus) & bit_pos)
 				udelay(1);
 			break;
 		}
@@ -271,18 +271,18 @@ static int queue_dtd(struct mv_ep *ep, struct mv_req *req)
 
 		wmb();
 
-		if (readl(&udc->op_regs->epprime) & bit_pos)
+		if (pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:274", &udc->op_regs->epprime) & bit_pos)
 			goto done;
 
 		loops = LOOPS(READSAFE_TIMEOUT);
 		while (1) {
 			/* start with setting the semaphores */
-			usbcmd = readl(&udc->op_regs->usbcmd);
+			usbcmd = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:280", &udc->op_regs->usbcmd);
 			usbcmd |= USBCMD_ATDTW_TRIPWIRE_SET;
-			writel(usbcmd, &udc->op_regs->usbcmd);
+			pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:282", usbcmd, &udc->op_regs->usbcmd);
 
 			/* read the endpoint status */
-			epstatus = readl(&udc->op_regs->epstatus) & bit_pos;
+			epstatus = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:285", &udc->op_regs->epstatus) & bit_pos;
 
 			/*
 			 * Reread the ATDTW semaphore bit to check if it is
@@ -291,7 +291,7 @@ static int queue_dtd(struct mv_ep *ep, struct mv_req *req)
 			 * proceed with priming of endpoint if not already
 			 * primed.
 			 */
-			if (readl(&udc->op_regs->usbcmd)
+			if (pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:294", &udc->op_regs->usbcmd)
 				& USBCMD_ATDTW_TRIPWIRE_SET)
 				break;
 
@@ -306,9 +306,9 @@ static int queue_dtd(struct mv_ep *ep, struct mv_req *req)
 		}
 
 		/* Clear the semaphore */
-		usbcmd = readl(&udc->op_regs->usbcmd);
+		usbcmd = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:309", &udc->op_regs->usbcmd);
 		usbcmd &= USBCMD_ATDTW_TRIPWIRE_CLEAR;
-		writel(usbcmd, &udc->op_regs->usbcmd);
+		pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:311", usbcmd, &udc->op_regs->usbcmd);
 
 		if (epstatus)
 			goto done;
@@ -325,7 +325,7 @@ static int queue_dtd(struct mv_ep *ep, struct mv_req *req)
 	wmb();
 
 	/* Prime the Endpoint */
-	writel(bit_pos, &udc->op_regs->epprime);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:328", bit_pos, &udc->op_regs->epprime);
 
 done:
 	return retval;
@@ -463,14 +463,14 @@ static int mv_ep_enable(struct usb_ep *_ep,
 	bit_pos = 1 << ((direction == EP_DIR_OUT ? 0 : 16) + ep->ep_num);
 
 	/* Check if the Endpoint is Primed */
-	if ((readl(&udc->op_regs->epprime) & bit_pos)
-		|| (readl(&udc->op_regs->epstatus) & bit_pos)) {
+	if ((pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:466", &udc->op_regs->epprime) & bit_pos)
+		|| (pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:467", &udc->op_regs->epstatus) & bit_pos)) {
 		dev_info(&udc->dev->dev,
 			"ep=%d %s: Init ERROR: ENDPTPRIME=0x%x,"
 			" ENDPTSTATUS=0x%x, bit_pos=0x%x\n",
 			(unsigned)ep->ep_num, direction ? "SEND" : "RECV",
-			(unsigned)readl(&udc->op_regs->epprime),
-			(unsigned)readl(&udc->op_regs->epstatus),
+			(unsigned)pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:472", &udc->op_regs->epprime),
+			(unsigned)pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:473", &udc->op_regs->epstatus),
 			(unsigned)bit_pos);
 		goto en_done;
 	}
@@ -511,7 +511,7 @@ static int mv_ep_enable(struct usb_ep *_ep,
 	ep->stopped = 0;
 
 	/* Enable the endpoint for Rx or Tx and set the endpoint type */
-	epctrlx = readl(&udc->op_regs->epctrlx[ep->ep_num]);
+	epctrlx = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:514", &udc->op_regs->epctrlx[ep->ep_num]);
 	if (direction == EP_DIR_IN) {
 		epctrlx &= ~EPCTRL_TX_ALL_MASK;
 		epctrlx |= EPCTRL_TX_ENABLE | EPCTRL_TX_DATA_TOGGLE_RST
@@ -523,24 +523,24 @@ static int mv_ep_enable(struct usb_ep *_ep,
 			| ((desc->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK)
 				<< EPCTRL_RX_EP_TYPE_SHIFT);
 	}
-	writel(epctrlx, &udc->op_regs->epctrlx[ep->ep_num]);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:526", epctrlx, &udc->op_regs->epctrlx[ep->ep_num]);
 
 	/*
 	 * Implement Guideline (GL# USB-7) The unused endpoint type must
 	 * be programmed to bulk.
 	 */
-	epctrlx = readl(&udc->op_regs->epctrlx[ep->ep_num]);
+	epctrlx = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:532", &udc->op_regs->epctrlx[ep->ep_num]);
 	if ((epctrlx & EPCTRL_RX_ENABLE) == 0) {
 		epctrlx |= (USB_ENDPOINT_XFER_BULK
 				<< EPCTRL_RX_EP_TYPE_SHIFT);
-		writel(epctrlx, &udc->op_regs->epctrlx[ep->ep_num]);
+		pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:536", epctrlx, &udc->op_regs->epctrlx[ep->ep_num]);
 	}
 
-	epctrlx = readl(&udc->op_regs->epctrlx[ep->ep_num]);
+	epctrlx = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:539", &udc->op_regs->epctrlx[ep->ep_num]);
 	if ((epctrlx & EPCTRL_TX_ENABLE) == 0) {
 		epctrlx |= (USB_ENDPOINT_XFER_BULK
 				<< EPCTRL_TX_EP_TYPE_SHIFT);
-		writel(epctrlx, &udc->op_regs->epctrlx[ep->ep_num]);
+		pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:543", epctrlx, &udc->op_regs->epctrlx[ep->ep_num]);
 	}
 
 	spin_unlock_irqrestore(&udc->lock, flags);
@@ -575,11 +575,11 @@ static int  mv_ep_disable(struct usb_ep *_ep)
 	dqh->max_packet_length = 0;
 
 	/* Disable the endpoint for Rx or Tx and reset the endpoint type */
-	epctrlx = readl(&udc->op_regs->epctrlx[ep->ep_num]);
+	epctrlx = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:578", &udc->op_regs->epctrlx[ep->ep_num]);
 	epctrlx &= ~((direction == EP_DIR_IN)
 			? (EPCTRL_TX_ENABLE | EPCTRL_TX_TYPE)
 			: (EPCTRL_RX_ENABLE | EPCTRL_RX_TYPE));
-	writel(epctrlx, &udc->op_regs->epctrlx[ep->ep_num]);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:582", epctrlx, &udc->op_regs->epctrlx[ep->ep_num]);
 
 	/* nuke all pending requests (does flush) */
 	nuke(ep, -ESHUTDOWN);
@@ -648,16 +648,16 @@ static void mv_ep_fifo_flush(struct usb_ep *_ep)
 		if (loops == 0) {
 			dev_err(&udc->dev->dev,
 				"TIMEOUT for ENDPTSTATUS=0x%x, bit_pos=0x%x\n",
-				(unsigned)readl(&udc->op_regs->epstatus),
+				(unsigned)pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:651", &udc->op_regs->epstatus),
 				(unsigned)bit_pos);
 			return;
 		}
 		/* Write 1 to the Flush register */
-		writel(bit_pos, &udc->op_regs->epflush);
+		pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:656", bit_pos, &udc->op_regs->epflush);
 
 		/* Wait until flushing completed */
 		inter_loops = LOOPS(FLUSH_TIMEOUT);
-		while (readl(&udc->op_regs->epflush)) {
+		while (pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:660", &udc->op_regs->epflush)) {
 			/*
 			 * ENDPTFLUSH bit should be cleared to indicate this
 			 * operation is complete
@@ -666,7 +666,7 @@ static void mv_ep_fifo_flush(struct usb_ep *_ep)
 				dev_err(&udc->dev->dev,
 					"TIMEOUT for ENDPTFLUSH=0x%x,"
 					"bit_pos=0x%x\n",
-					(unsigned)readl(&udc->op_regs->epflush),
+					(unsigned)pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:669", &udc->op_regs->epflush),
 					(unsigned)bit_pos);
 				return;
 			}
@@ -674,7 +674,7 @@ static void mv_ep_fifo_flush(struct usb_ep *_ep)
 			udelay(LOOPS_USEC);
 		}
 		loops--;
-	} while (readl(&udc->op_regs->epstatus) & bit_pos);
+	} while (pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:677", &udc->op_regs->epstatus) & bit_pos);
 }
 
 /* queues (submits) an I/O request to an endpoint */
@@ -764,7 +764,7 @@ static void mv_prime_ep(struct mv_ep *ep, struct mv_req *req)
 	bit_pos = 1 << (((ep_dir(ep) == EP_DIR_OUT) ? 0 : 16) + ep->ep_num);
 
 	/* Prime the Endpoint */
-	writel(bit_pos, &ep->udc->op_regs->epprime);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:767", bit_pos, &ep->udc->op_regs->epprime);
 }
 
 /* dequeues (cancels, unlinks) an I/O request from an endpoint */
@@ -785,12 +785,12 @@ static int mv_ep_dequeue(struct usb_ep *_ep, struct usb_request *_req)
 
 	/* Stop the ep before we deal with the queue */
 	ep->stopped = 1;
-	epctrlx = readl(&udc->op_regs->epctrlx[ep->ep_num]);
+	epctrlx = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:788", &udc->op_regs->epctrlx[ep->ep_num]);
 	if (ep_dir(ep) == EP_DIR_IN)
 		epctrlx &= ~EPCTRL_TX_ENABLE;
 	else
 		epctrlx &= ~EPCTRL_RX_ENABLE;
-	writel(epctrlx, &udc->op_regs->epctrlx[ep->ep_num]);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:793", epctrlx, &udc->op_regs->epctrlx[ep->ep_num]);
 
 	/* make sure it's actually queued on this endpoint */
 	list_for_each_entry(req, &ep->queue, queue) {
@@ -829,7 +829,7 @@ static int mv_ep_dequeue(struct usb_ep *_ep, struct usb_request *_req)
 		struct mv_req *prev_req;
 
 		prev_req = list_entry(req->queue.prev, struct mv_req, queue);
-		writel(readl(&req->tail->dtd_next),
+		pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:832", pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:832", &req->tail->dtd_next),
 				&prev_req->tail->dtd_next);
 
 	}
@@ -838,12 +838,12 @@ static int mv_ep_dequeue(struct usb_ep *_ep, struct usb_request *_req)
 
 	/* Enable EP */
 out:
-	epctrlx = readl(&udc->op_regs->epctrlx[ep->ep_num]);
+	epctrlx = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:841", &udc->op_regs->epctrlx[ep->ep_num]);
 	if (ep_dir(ep) == EP_DIR_IN)
 		epctrlx |= EPCTRL_TX_ENABLE;
 	else
 		epctrlx |= EPCTRL_RX_ENABLE;
-	writel(epctrlx, &udc->op_regs->epctrlx[ep->ep_num]);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:846", epctrlx, &udc->op_regs->epctrlx[ep->ep_num]);
 	ep->stopped = stopped;
 
 	spin_unlock_irqrestore(&ep->udc->lock, flags);
@@ -854,7 +854,7 @@ static void ep_set_stall(struct mv_udc *udc, u8 ep_num, u8 direction, int stall)
 {
 	u32 epctrlx;
 
-	epctrlx = readl(&udc->op_regs->epctrlx[ep_num]);
+	epctrlx = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:857", &udc->op_regs->epctrlx[ep_num]);
 
 	if (stall) {
 		if (direction == EP_DIR_IN)
@@ -870,14 +870,14 @@ static void ep_set_stall(struct mv_udc *udc, u8 ep_num, u8 direction, int stall)
 			epctrlx |= EPCTRL_RX_DATA_TOGGLE_RST;
 		}
 	}
-	writel(epctrlx, &udc->op_regs->epctrlx[ep_num]);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:873", epctrlx, &udc->op_regs->epctrlx[ep_num]);
 }
 
 static int ep_is_stall(struct mv_udc *udc, u8 ep_num, u8 direction)
 {
 	u32 epctrlx;
 
-	epctrlx = readl(&udc->op_regs->epctrlx[ep_num]);
+	epctrlx = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:880", &udc->op_regs->epctrlx[ep_num]);
 
 	if (direction == EP_DIR_OUT)
 		return (epctrlx & EPCTRL_RX_EP_STALL) ? 1 : 0;
@@ -969,17 +969,17 @@ static void udc_stop(struct mv_udc *udc)
 	u32 tmp;
 
 	/* Disable interrupts */
-	tmp = readl(&udc->op_regs->usbintr);
+	tmp = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:972", &udc->op_regs->usbintr);
 	tmp &= ~(USBINTR_INT_EN | USBINTR_ERR_INT_EN |
 		USBINTR_PORT_CHANGE_DETECT_EN | USBINTR_RESET_EN);
-	writel(tmp, &udc->op_regs->usbintr);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:975", tmp, &udc->op_regs->usbintr);
 
 	udc->stopped = 1;
 
 	/* Reset the Run the bit in the command register to stop VUSB */
-	tmp = readl(&udc->op_regs->usbcmd);
+	tmp = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:980", &udc->op_regs->usbcmd);
 	tmp &= ~USBCMD_RUN_STOP;
-	writel(tmp, &udc->op_regs->usbcmd);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:982", tmp, &udc->op_regs->usbcmd);
 }
 
 static void udc_start(struct mv_udc *udc)
@@ -990,12 +990,12 @@ static void udc_start(struct mv_udc *udc)
 		| USBINTR_PORT_CHANGE_DETECT_EN
 		| USBINTR_RESET_EN | USBINTR_DEVICE_SUSPEND;
 	/* Enable interrupts */
-	writel(usbintr, &udc->op_regs->usbintr);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:993", usbintr, &udc->op_regs->usbintr);
 
 	udc->stopped = 0;
 
 	/* Set the Run bit in the command register */
-	writel(USBCMD_RUN_STOP, &udc->op_regs->usbcmd);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:998", USBCMD_RUN_STOP, &udc->op_regs->usbcmd);
 }
 
 static int udc_reset(struct mv_udc *udc)
@@ -1004,16 +1004,16 @@ static int udc_reset(struct mv_udc *udc)
 	u32 tmp, portsc;
 
 	/* Stop the controller */
-	tmp = readl(&udc->op_regs->usbcmd);
+	tmp = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1007", &udc->op_regs->usbcmd);
 	tmp &= ~USBCMD_RUN_STOP;
-	writel(tmp, &udc->op_regs->usbcmd);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1009", tmp, &udc->op_regs->usbcmd);
 
 	/* Reset the controller to get default values */
-	writel(USBCMD_CTRL_RESET, &udc->op_regs->usbcmd);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1012", USBCMD_CTRL_RESET, &udc->op_regs->usbcmd);
 
 	/* wait for reset to complete */
 	loops = LOOPS(RESET_TIMEOUT);
-	while (readl(&udc->op_regs->usbcmd) & USBCMD_CTRL_RESET) {
+	while (pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1016", &udc->op_regs->usbcmd) & USBCMD_CTRL_RESET) {
 		if (loops == 0) {
 			dev_err(&udc->dev->dev,
 				"Wait for RESET completed TIMEOUT\n");
@@ -1024,22 +1024,22 @@ static int udc_reset(struct mv_udc *udc)
 	}
 
 	/* set controller to device mode */
-	tmp = readl(&udc->op_regs->usbmode);
+	tmp = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1027", &udc->op_regs->usbmode);
 	tmp |= USBMODE_CTRL_MODE_DEVICE;
 
 	/* turn setup lockout off, require setup tripwire in usbcmd */
 	tmp |= USBMODE_SETUP_LOCK_OFF;
 
-	writel(tmp, &udc->op_regs->usbmode);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1033", tmp, &udc->op_regs->usbmode);
 
-	writel(0x0, &udc->op_regs->epsetupstat);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1035", 0x0, &udc->op_regs->epsetupstat);
 
 	/* Configure the Endpoint List Address */
-	writel(udc->ep_dqh_dma & USB_EP_LIST_ADDRESS_MASK,
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1038", udc->ep_dqh_dma & USB_EP_LIST_ADDRESS_MASK,
 		&udc->op_regs->eplistaddr);
 
-	portsc = readl(&udc->op_regs->portsc[0]);
-	if (readl(&udc->cap_regs->hcsparams) & HCSPARAMS_PPC)
+	portsc = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1041", &udc->op_regs->portsc[0]);
+	if (pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1042", &udc->cap_regs->hcsparams) & HCSPARAMS_PPC)
 		portsc &= (~PORTSCX_W1C_BITS | ~PORTSCX_PORT_POWER);
 
 	if (udc->force_fs)
@@ -1047,11 +1047,11 @@ static int udc_reset(struct mv_udc *udc)
 	else
 		portsc &= (~PORTSCX_FORCE_FULL_SPEED_CONNECT);
 
-	writel(portsc, &udc->op_regs->portsc[0]);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1050", portsc, &udc->op_regs->portsc[0]);
 
-	tmp = readl(&udc->op_regs->epctrlx[0]);
+	tmp = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1052", &udc->op_regs->epctrlx[0]);
 	tmp &= ~(EPCTRL_TX_EP_STALL | EPCTRL_RX_EP_STALL);
-	writel(tmp, &udc->op_regs->epctrlx[0]);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1054", tmp, &udc->op_regs->epctrlx[0]);
 
 	return 0;
 }
@@ -1117,7 +1117,7 @@ static int mv_udc_get_frame(struct usb_gadget *gadget)
 
 	udc = container_of(gadget, struct mv_udc, gadget);
 
-	retval = readl(&udc->op_regs->frindex) & USB_FRINDEX_MASKS;
+	retval = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1120", &udc->op_regs->frindex) & USB_FRINDEX_MASKS;
 
 	return retval;
 }
@@ -1132,13 +1132,13 @@ static int mv_udc_wakeup(struct usb_gadget *gadget)
 	if (!udc->remote_wakeup)
 		return -ENOTSUPP;
 
-	portsc = readl(&udc->op_regs->portsc);
+	portsc = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1135", &udc->op_regs->portsc);
 	/* not suspended? */
 	if (!(portsc & PORTSCX_PORT_SUSPEND))
 		return 0;
 	/* trigger force resume */
 	portsc |= PORTSCX_PORT_FORCE_RESUME;
-	writel(portsc, &udc->op_regs->portsc[0]);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1141", portsc, &udc->op_regs->portsc[0]);
 	return 0;
 }
 
@@ -1413,9 +1413,9 @@ static void mv_set_ptc(struct mv_udc *udc, u32 mode)
 {
 	u32 portsc;
 
-	portsc = readl(&udc->op_regs->portsc[0]);
+	portsc = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1416", &udc->op_regs->portsc[0]);
 	portsc |= mode << 16;
-	writel(portsc, &udc->op_regs->portsc[0]);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1418", portsc, &udc->op_regs->portsc[0]);
 }
 
 static void prime_status_complete(struct usb_ep *ep, struct usb_request *_req)
@@ -1725,7 +1725,7 @@ static void ep0_req_complete(struct mv_udc *udc,
 	if (udc->usb_state == USB_STATE_ADDRESS) {
 		/* set the new address */
 		new_addr = (u32)udc->dev_addr;
-		writel(new_addr << USB_DEVICE_ADDRESS_BIT_SHIFT,
+		pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1728", new_addr << USB_DEVICE_ADDRESS_BIT_SHIFT,
 			&udc->op_regs->deviceaddr);
 	}
 
@@ -1762,21 +1762,21 @@ static void get_setup_data(struct mv_udc *udc, u8 ep_num, u8 *buffer_ptr)
 	dqh = &udc->ep_dqh[ep_num * 2 + EP_DIR_OUT];
 
 	/* Clear bit in ENDPTSETUPSTAT */
-	writel((1 << ep_num), &udc->op_regs->epsetupstat);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1765", (1 << ep_num), &udc->op_regs->epsetupstat);
 
 	/* while a hazard exists when setup package arrives */
 	do {
 		/* Set Setup Tripwire */
-		temp = readl(&udc->op_regs->usbcmd);
-		writel(temp | USBCMD_SETUP_TRIPWIRE_SET, &udc->op_regs->usbcmd);
+		temp = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1770", &udc->op_regs->usbcmd);
+		pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1771", temp | USBCMD_SETUP_TRIPWIRE_SET, &udc->op_regs->usbcmd);
 
 		/* Copy the setup packet to local buffer */
 		memcpy(buffer_ptr, (u8 *) dqh->setup_buffer, 8);
-	} while (!(readl(&udc->op_regs->usbcmd) & USBCMD_SETUP_TRIPWIRE_SET));
+	} while (!(pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1775", &udc->op_regs->usbcmd) & USBCMD_SETUP_TRIPWIRE_SET));
 
 	/* Clear Setup Tripwire */
-	temp = readl(&udc->op_regs->usbcmd);
-	writel(temp & ~USBCMD_SETUP_TRIPWIRE_SET, &udc->op_regs->usbcmd);
+	temp = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1778", &udc->op_regs->usbcmd);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1779", temp & ~USBCMD_SETUP_TRIPWIRE_SET, &udc->op_regs->usbcmd);
 }
 
 static void irq_process_tr_complete(struct mv_udc *udc)
@@ -1793,7 +1793,7 @@ static void irq_process_tr_complete(struct mv_udc *udc)
 	 */
 
 	/* Process all Setup packet received interrupts */
-	tmp = readl(&udc->op_regs->epsetupstat);
+	tmp = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1796", &udc->op_regs->epsetupstat);
 
 	if (tmp) {
 		for (i = 0; i < udc->max_eps; i++) {
@@ -1811,12 +1811,12 @@ static void irq_process_tr_complete(struct mv_udc *udc)
 	 */
 
 	/* Process non-setup transaction complete interrupts */
-	tmp = readl(&udc->op_regs->epcomplete);
+	tmp = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1814", &udc->op_regs->epcomplete);
 
 	if (!tmp)
 		return;
 
-	writel(tmp, &udc->op_regs->epcomplete);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1819", tmp, &udc->op_regs->epcomplete);
 
 	for (i = 0; i < udc->max_eps * 2; i++) {
 		ep_num = i >> 1;
@@ -1862,25 +1862,25 @@ static void irq_process_reset(struct mv_udc *udc)
 	udc->remote_wakeup = 0;		/* default to 0 on reset */
 
 	/* The address bits are past bit 25-31. Set the address */
-	tmp = readl(&udc->op_regs->deviceaddr);
+	tmp = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1865", &udc->op_regs->deviceaddr);
 	tmp &= ~(USB_DEVICE_ADDRESS_MASK);
-	writel(tmp, &udc->op_regs->deviceaddr);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1867", tmp, &udc->op_regs->deviceaddr);
 
 	/* Clear all the setup token semaphores */
-	tmp = readl(&udc->op_regs->epsetupstat);
-	writel(tmp, &udc->op_regs->epsetupstat);
+	tmp = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1870", &udc->op_regs->epsetupstat);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1871", tmp, &udc->op_regs->epsetupstat);
 
 	/* Clear all the endpoint complete status bits */
-	tmp = readl(&udc->op_regs->epcomplete);
-	writel(tmp, &udc->op_regs->epcomplete);
+	tmp = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1874", &udc->op_regs->epcomplete);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1875", tmp, &udc->op_regs->epcomplete);
 
 	/* wait until all endptprime bits cleared */
 	loops = LOOPS(PRIME_TIMEOUT);
-	while (readl(&udc->op_regs->epprime) & 0xFFFFFFFF) {
+	while (pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1879", &udc->op_regs->epprime) & 0xFFFFFFFF) {
 		if (loops == 0) {
 			dev_err(&udc->dev->dev,
 				"Timeout for ENDPTPRIME = 0x%x\n",
-				readl(&udc->op_regs->epprime));
+				pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1883", &udc->op_regs->epprime));
 			break;
 		}
 		loops--;
@@ -1888,16 +1888,16 @@ static void irq_process_reset(struct mv_udc *udc)
 	}
 
 	/* Write 1s to the Flush register */
-	writel((u32)~0, &udc->op_regs->epflush);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:1891", (u32)~0, &udc->op_regs->epflush);
 
-	if (readl(&udc->op_regs->portsc[0]) & PORTSCX_PORT_RESET) {
+	if (pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1893", &udc->op_regs->portsc[0]) & PORTSCX_PORT_RESET) {
 		dev_info(&udc->dev->dev, "usb bus reset\n");
 		udc->usb_state = USB_STATE_DEFAULT;
 		/* reset all the queues, stop all USB activities */
 		gadget_reset(udc, udc->driver);
 	} else {
 		dev_info(&udc->dev->dev, "USB reset portsc 0x%x\n",
-			readl(&udc->op_regs->portsc));
+			pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1900", &udc->op_regs->portsc));
 
 		/*
 		 * re-initialize
@@ -1949,7 +1949,7 @@ static void irq_process_port_change(struct mv_udc *udc)
 {
 	u32 portsc;
 
-	portsc = readl(&udc->op_regs->portsc[0]);
+	portsc = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:1952", &udc->op_regs->portsc[0]);
 	if (!(portsc & PORTSCX_PORT_RESET)) {
 		/* Get the speed */
 		u32 speed = portsc & PORTSCX_PORT_SPEED_MASK;
@@ -2005,8 +2005,8 @@ static irqreturn_t mv_udc_irq(int irq, void *dev)
 
 	spin_lock(&udc->lock);
 
-	status = readl(&udc->op_regs->usbsts);
-	intr = readl(&udc->op_regs->usbintr);
+	status = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:2008", &udc->op_regs->usbsts);
+	intr = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:2009", &udc->op_regs->usbintr);
 	status &= intr;
 
 	if (status == 0) {
@@ -2015,7 +2015,7 @@ static irqreturn_t mv_udc_irq(int irq, void *dev)
 	}
 
 	/* Clear all the interrupts occurred */
-	writel(status, &udc->op_regs->usbsts);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:2018", status, &udc->op_regs->usbsts);
 
 	if (status & USBSTS_ERR)
 		irq_process_error(udc);
@@ -2178,16 +2178,16 @@ static int mv_udc_probe(struct platform_device *pdev)
 
 	udc->op_regs =
 		(struct mv_op_regs __iomem *)((unsigned long)udc->cap_regs
-		+ (readl(&udc->cap_regs->caplength_hciversion)
+		+ (pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:2181", &udc->cap_regs->caplength_hciversion)
 			& CAPLENGTH_MASK));
-	udc->max_eps = readl(&udc->cap_regs->dccparams) & DCCPARAMS_DEN_MASK;
+	udc->max_eps = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:2183", &udc->cap_regs->dccparams) & DCCPARAMS_DEN_MASK;
 
 	/*
 	 * some platform will use usb to download image, it may not disconnect
 	 * usb gadget before loading kernel. So first stop udc here.
 	 */
 	udc_stop(udc);
-	writel(0xFFFFFFFF, &udc->op_regs->usbsts);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:2190", 0xFFFFFFFF, &udc->op_regs->usbsts);
 
 	size = udc->max_eps * sizeof(struct mv_dqh) *2;
 	size = (size + DQH_ALIGNMENT - 1) & ~(DQH_ALIGNMENT - 1);
@@ -2400,9 +2400,9 @@ static void mv_udc_shutdown(struct platform_device *pdev)
 	udc = platform_get_drvdata(pdev);
 	/* reset controller mode to IDLE */
 	mv_udc_enable(udc);
-	mode = readl(&udc->op_regs->usbmode);
+	mode = pete_readl("drivers/usb/gadget/udc/mv_udc_core.c:2403", &udc->op_regs->usbmode);
 	mode &= ~3;
-	writel(mode, &udc->op_regs->usbmode);
+	pete_writel("drivers/usb/gadget/udc/mv_udc_core.c:2405", mode, &udc->op_regs->usbmode);
 	mv_udc_disable(udc);
 }
 

@@ -77,7 +77,7 @@ static const uint32_t cursor_supported_formats[] = {
 #define to_sti_cursor(x) container_of(x, struct sti_cursor, plane)
 
 #define DBGFS_DUMP(reg) seq_printf(s, "\n  %-25s 0x%08X", #reg, \
-				   readl(cursor->regs + reg))
+				   pete_readl("drivers/gpu/drm/sti/sti_cursor.c:80", cursor->regs + reg))
 
 static void cursor_dbg_vpo(struct seq_file *s, u32 val)
 {
@@ -113,14 +113,14 @@ static int cursor_dbg_show(struct seq_file *s, void *data)
 
 	DBGFS_DUMP(CUR_CTL);
 	DBGFS_DUMP(CUR_VPO);
-	cursor_dbg_vpo(s, readl(cursor->regs + CUR_VPO));
+	cursor_dbg_vpo(s, pete_readl("drivers/gpu/drm/sti/sti_cursor.c:116", cursor->regs + CUR_VPO));
 	DBGFS_DUMP(CUR_PML);
-	cursor_dbg_pml(s, cursor, readl(cursor->regs + CUR_PML));
+	cursor_dbg_pml(s, cursor, pete_readl("drivers/gpu/drm/sti/sti_cursor.c:118", cursor->regs + CUR_PML));
 	DBGFS_DUMP(CUR_PMP);
 	DBGFS_DUMP(CUR_SIZE);
-	cursor_dbg_size(s, readl(cursor->regs + CUR_SIZE));
+	cursor_dbg_size(s, pete_readl("drivers/gpu/drm/sti/sti_cursor.c:121", cursor->regs + CUR_SIZE));
 	DBGFS_DUMP(CUR_CML);
-	cursor_dbg_cml(s, cursor, readl(cursor->regs + CUR_CML));
+	cursor_dbg_cml(s, cursor, pete_readl("drivers/gpu/drm/sti/sti_cursor.c:123", cursor->regs + CUR_CML));
 	DBGFS_DUMP(CUR_AWS);
 	DBGFS_DUMP(CUR_AWE);
 	seq_putc(s, '\n');
@@ -286,24 +286,24 @@ static void sti_cursor_atomic_update(struct drm_plane *drm_plane,
 	y = sti_vtg_get_line_number(*mode, 0);
 	x = sti_vtg_get_pixel_number(*mode, 0);
 	val = y << 16 | x;
-	writel(val, cursor->regs + CUR_AWS);
+	pete_writel("drivers/gpu/drm/sti/sti_cursor.c:289", val, cursor->regs + CUR_AWS);
 	y = sti_vtg_get_line_number(*mode, mode->vdisplay - 1);
 	x = sti_vtg_get_pixel_number(*mode, mode->hdisplay - 1);
 	val = y << 16 | x;
-	writel(val, cursor->regs + CUR_AWE);
+	pete_writel("drivers/gpu/drm/sti/sti_cursor.c:293", val, cursor->regs + CUR_AWE);
 
 	/* Set memory location, size, and position */
-	writel(cursor->pixmap.paddr, cursor->regs + CUR_PML);
-	writel(cursor->width, cursor->regs + CUR_PMP);
-	writel(cursor->height << 16 | cursor->width, cursor->regs + CUR_SIZE);
+	pete_writel("drivers/gpu/drm/sti/sti_cursor.c:296", cursor->pixmap.paddr, cursor->regs + CUR_PML);
+	pete_writel("drivers/gpu/drm/sti/sti_cursor.c:297", cursor->width, cursor->regs + CUR_PMP);
+	pete_writel("drivers/gpu/drm/sti/sti_cursor.c:298", cursor->height << 16 | cursor->width, cursor->regs + CUR_SIZE);
 
 	y = sti_vtg_get_line_number(*mode, dst_y);
 	x = sti_vtg_get_pixel_number(*mode, dst_x);
-	writel((y << 16) | x, cursor->regs + CUR_VPO);
+	pete_writel("drivers/gpu/drm/sti/sti_cursor.c:302", (y << 16) | x, cursor->regs + CUR_VPO);
 
 	/* Set and fetch CLUT */
-	writel(cursor->clut_paddr, cursor->regs + CUR_CML);
-	writel(CUR_CTL_CLUT_UPDATE, cursor->regs + CUR_CTL);
+	pete_writel("drivers/gpu/drm/sti/sti_cursor.c:305", cursor->clut_paddr, cursor->regs + CUR_CML);
+	pete_writel("drivers/gpu/drm/sti/sti_cursor.c:306", CUR_CTL_CLUT_UPDATE, cursor->regs + CUR_CTL);
 
 	sti_plane_update_fps(plane, true, false);
 

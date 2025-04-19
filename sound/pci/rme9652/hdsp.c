@@ -635,7 +635,7 @@ static int hdsp_input_to_output_key (struct hdsp *hdsp, int in, int out)
 
 static void hdsp_write(struct hdsp *hdsp, int reg, int val)
 {
-	writel(val, hdsp->iobase + reg);
+	pete_writel("sound/pci/rme9652/hdsp.c:638", val, hdsp->iobase + reg);
 }
 
 static unsigned int hdsp_read(struct hdsp *hdsp, int reg)
@@ -4632,7 +4632,7 @@ static int snd_hdsp_capture_release(struct snd_pcm_substream *substream)
 /* helper functions for copying meter values */
 static inline int copy_u32_le(void __user *dest, void __iomem *src)
 {
-	u32 val = readl(src);
+	u32 val = pete_readl("sound/pci/rme9652/hdsp.c:4635", src);
 	return copy_to_user(dest, &val, 4);
 }
 
@@ -4640,8 +4640,8 @@ static inline int copy_u64_le(void __user *dest, void __iomem *src_low, void __i
 {
 	u32 rms_low, rms_high;
 	u64 rms;
-	rms_low = readl(src_low);
-	rms_high = readl(src_high);
+	rms_low = pete_readl("sound/pci/rme9652/hdsp.c:4643", src_low);
+	rms_high = pete_readl("sound/pci/rme9652/hdsp.c:4644", src_high);
 	rms = ((u64)rms_high << 32) | rms_low;
 	return copy_to_user(dest, &rms, 8);
 }
@@ -4650,8 +4650,8 @@ static inline int copy_u48_le(void __user *dest, void __iomem *src_low, void __i
 {
 	u32 rms_low, rms_high;
 	u64 rms;
-	rms_low = readl(src_low) & 0xffffff00;
-	rms_high = readl(src_high) & 0xffffff00;
+	rms_low = pete_readl("sound/pci/rme9652/hdsp.c:4653", src_low) & 0xffffff00;
+	rms_high = pete_readl("sound/pci/rme9652/hdsp.c:4654", src_high) & 0xffffff00;
 	rms = ((u64)rms_high << 32) | rms_low;
 	return copy_to_user(dest, &rms, 8);
 }

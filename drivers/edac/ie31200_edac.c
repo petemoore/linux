@@ -35,7 +35,7 @@
  * "
  *
  * Thus, we make use of the explicit: lo_hi_readq(), which breaks the readq into
- * 2 readl() calls. This restriction may be lifted in subsequent chip releases,
+ * 2 pete_readl("drivers/edac/ie31200_edac.c:38", ) calls. This restriction may be lifted in subsequent chip releases,
  * but lo_hi_readq() ensures that we are safe across all e3-1200 processors.
  */
 
@@ -461,7 +461,7 @@ static int ie31200_probe1(struct pci_dev *pdev, int dev_idx)
 
 	/* populate DIMM info */
 	for (i = 0; i < IE31200_CHANNELS; i++) {
-		addr_decode = readl(window + mad_offset +
+		addr_decode = pete_readl("drivers/edac/ie31200_edac.c:464", window + mad_offset +
 					(i * 4));
 		edac_dbg(0, "addr_decode: 0x%x\n", addr_decode);
 		for (j = 0; j < IE31200_DIMMS_PER_CHANNEL; j++) {

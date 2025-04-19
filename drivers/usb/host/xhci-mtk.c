@@ -121,30 +121,30 @@ static void xhci_mtk_set_frame_interval(struct xhci_hcd_mtk *mtk)
 	if (!of_device_is_compatible(dev->of_node, "mediatek,mt8195-xhci"))
 		return;
 
-	value = readl(hcd->regs + HFCNTR_CFG);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:124", hcd->regs + HFCNTR_CFG);
 	value &= ~(ITP_DELTA_CLK_MASK | FRMCNT_LEV1_RANG_MASK);
 	value |= (ITP_DELTA_CLK | FRMCNT_LEV1_RANG);
-	writel(value, hcd->regs + HFCNTR_CFG);
+	pete_writel("drivers/usb/host/xhci-mtk.c:127", value, hcd->regs + HFCNTR_CFG);
 
-	value = readl(hcd->regs + LS_EOF_CFG);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:129", hcd->regs + LS_EOF_CFG);
 	value &= ~XSEOF_OFFSET_MASK;
 	value |= LSEOF_OFFSET;
-	writel(value, hcd->regs + LS_EOF_CFG);
+	pete_writel("drivers/usb/host/xhci-mtk.c:132", value, hcd->regs + LS_EOF_CFG);
 
-	value = readl(hcd->regs + FS_EOF_CFG);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:134", hcd->regs + FS_EOF_CFG);
 	value &= ~XSEOF_OFFSET_MASK;
 	value |= FSEOF_OFFSET;
-	writel(value, hcd->regs + FS_EOF_CFG);
+	pete_writel("drivers/usb/host/xhci-mtk.c:137", value, hcd->regs + FS_EOF_CFG);
 
-	value = readl(hcd->regs + SS_GEN1_EOF_CFG);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:139", hcd->regs + SS_GEN1_EOF_CFG);
 	value &= ~XSEOF_OFFSET_MASK;
 	value |= SSG1EOF_OFFSET;
-	writel(value, hcd->regs + SS_GEN1_EOF_CFG);
+	pete_writel("drivers/usb/host/xhci-mtk.c:142", value, hcd->regs + SS_GEN1_EOF_CFG);
 
-	value = readl(hcd->regs + SS_GEN2_EOF_CFG);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:144", hcd->regs + SS_GEN2_EOF_CFG);
 	value &= ~XSEOF_OFFSET_MASK;
 	value |= SSG2EOF_OFFSET;
-	writel(value, hcd->regs + SS_GEN2_EOF_CFG);
+	pete_writel("drivers/usb/host/xhci-mtk.c:147", value, hcd->regs + SS_GEN2_EOF_CFG);
 }
 
 static int xhci_mtk_host_enable(struct xhci_hcd_mtk *mtk)
@@ -159,9 +159,9 @@ static int xhci_mtk_host_enable(struct xhci_hcd_mtk *mtk)
 		return 0;
 
 	/* power on host ip */
-	value = readl(&ippc->ip_pw_ctr1);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:162", &ippc->ip_pw_ctr1);
 	value &= ~CTRL1_IP_HOST_PDN;
-	writel(value, &ippc->ip_pw_ctr1);
+	pete_writel("drivers/usb/host/xhci-mtk.c:164", value, &ippc->ip_pw_ctr1);
 
 	/* power on and enable u3 ports except skipped ones */
 	for (i = 0; i < mtk->num_u3_ports; i++) {
@@ -170,10 +170,10 @@ static int xhci_mtk_host_enable(struct xhci_hcd_mtk *mtk)
 			continue;
 		}
 
-		value = readl(&ippc->u3_ctrl_p[i]);
+		value = pete_readl("drivers/usb/host/xhci-mtk.c:173", &ippc->u3_ctrl_p[i]);
 		value &= ~(CTRL_U3_PORT_PDN | CTRL_U3_PORT_DIS);
 		value |= CTRL_U3_PORT_HOST_SEL;
-		writel(value, &ippc->u3_ctrl_p[i]);
+		pete_writel("drivers/usb/host/xhci-mtk.c:176", value, &ippc->u3_ctrl_p[i]);
 	}
 
 	/* power on and enable all u2 ports except skipped ones */
@@ -181,10 +181,10 @@ static int xhci_mtk_host_enable(struct xhci_hcd_mtk *mtk)
 		if (BIT(i) & mtk->u2p_dis_msk)
 			continue;
 
-		value = readl(&ippc->u2_ctrl_p[i]);
+		value = pete_readl("drivers/usb/host/xhci-mtk.c:184", &ippc->u2_ctrl_p[i]);
 		value &= ~(CTRL_U2_PORT_PDN | CTRL_U2_PORT_DIS);
 		value |= CTRL_U2_PORT_HOST_SEL;
-		writel(value, &ippc->u2_ctrl_p[i]);
+		pete_writel("drivers/usb/host/xhci-mtk.c:187", value, &ippc->u2_ctrl_p[i]);
 	}
 
 	/*
@@ -222,9 +222,9 @@ static int xhci_mtk_host_disable(struct xhci_hcd_mtk *mtk)
 		if ((0x1 << i) & mtk->u3p_dis_msk)
 			continue;
 
-		value = readl(&ippc->u3_ctrl_p[i]);
+		value = pete_readl("drivers/usb/host/xhci-mtk.c:225", &ippc->u3_ctrl_p[i]);
 		value |= CTRL_U3_PORT_PDN;
-		writel(value, &ippc->u3_ctrl_p[i]);
+		pete_writel("drivers/usb/host/xhci-mtk.c:227", value, &ippc->u3_ctrl_p[i]);
 	}
 
 	/* power down all u2 ports except skipped ones */
@@ -232,15 +232,15 @@ static int xhci_mtk_host_disable(struct xhci_hcd_mtk *mtk)
 		if (BIT(i) & mtk->u2p_dis_msk)
 			continue;
 
-		value = readl(&ippc->u2_ctrl_p[i]);
+		value = pete_readl("drivers/usb/host/xhci-mtk.c:235", &ippc->u2_ctrl_p[i]);
 		value |= CTRL_U2_PORT_PDN;
-		writel(value, &ippc->u2_ctrl_p[i]);
+		pete_writel("drivers/usb/host/xhci-mtk.c:237", value, &ippc->u2_ctrl_p[i]);
 	}
 
 	/* power down host ip */
-	value = readl(&ippc->ip_pw_ctr1);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:241", &ippc->ip_pw_ctr1);
 	value |= CTRL1_IP_HOST_PDN;
-	writel(value, &ippc->ip_pw_ctr1);
+	pete_writel("drivers/usb/host/xhci-mtk.c:243", value, &ippc->ip_pw_ctr1);
 
 	/* wait for host ip to sleep */
 	ret = readl_poll_timeout(&ippc->ip_pw_sts1, value,
@@ -261,23 +261,23 @@ static int xhci_mtk_ssusb_config(struct xhci_hcd_mtk *mtk)
 		return 0;
 
 	/* reset whole ip */
-	value = readl(&ippc->ip_pw_ctr0);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:264", &ippc->ip_pw_ctr0);
 	value |= CTRL0_IP_SW_RST;
-	writel(value, &ippc->ip_pw_ctr0);
+	pete_writel("drivers/usb/host/xhci-mtk.c:266", value, &ippc->ip_pw_ctr0);
 	udelay(1);
-	value = readl(&ippc->ip_pw_ctr0);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:268", &ippc->ip_pw_ctr0);
 	value &= ~CTRL0_IP_SW_RST;
-	writel(value, &ippc->ip_pw_ctr0);
+	pete_writel("drivers/usb/host/xhci-mtk.c:270", value, &ippc->ip_pw_ctr0);
 
 	/*
 	 * device ip is default power-on in fact
 	 * power down device ip, otherwise ip-sleep will fail
 	 */
-	value = readl(&ippc->ip_pw_ctr2);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:276", &ippc->ip_pw_ctr2);
 	value |= CTRL2_IP_DEV_PDN;
-	writel(value, &ippc->ip_pw_ctr2);
+	pete_writel("drivers/usb/host/xhci-mtk.c:278", value, &ippc->ip_pw_ctr2);
 
-	value = readl(&ippc->ip_xhci_cap);
+	value = pete_readl("drivers/usb/host/xhci-mtk.c:280", &ippc->ip_xhci_cap);
 	mtk->num_u3_ports = CAP_U3_PORT_NUM(value);
 	mtk->num_u2_ports = CAP_U2_PORT_NUM(value);
 	dev_dbg(mtk->dev, "%s u2p:%d, u3p:%d\n", __func__,

@@ -209,7 +209,7 @@ static u32 mmdc_pmu_read_counter(struct mmdc_pmu *pmu_mmdc, int cfg)
 		return WARN_ONCE(1,
 			"invalid configuration %d for mmdc counter", cfg);
 	}
-	return readl(reg);
+	return pete_readl("arch/arm/mach-imx/mmdc.c:212", reg);
 }
 
 static int mmdc_pmu_offline_cpu(unsigned int cpu, struct hlist_node *node)
@@ -339,21 +339,21 @@ static void mmdc_pmu_event_start(struct perf_event *event, int flags)
 
 	local64_set(&hwc->prev_count, 0);
 
-	writel(DBG_RST, reg);
+	pete_writel("arch/arm/mach-imx/mmdc.c:342", DBG_RST, reg);
 
 	/*
 	 * Write the AXI id parameter to MADPCR1.
 	 */
 	val = event->attr.config1;
 	reg = mmdc_base + MMDC_MADPCR1;
-	writel(val, reg);
+	pete_writel("arch/arm/mach-imx/mmdc.c:349", val, reg);
 
 	reg = mmdc_base + MMDC_MADPCR0;
 	val = DBG_EN;
 	if (pmu_mmdc->devtype_data->flags & MMDC_FLAG_PROFILE_SEL)
 		val |= PROFILE_SEL;
 
-	writel(val, reg);
+	pete_writel("arch/arm/mach-imx/mmdc.c:356", val, reg);
 }
 
 static int mmdc_pmu_event_add(struct perf_event *event, int flags)
@@ -385,10 +385,10 @@ static void mmdc_pmu_event_stop(struct perf_event *event, int flags)
 	mmdc_base = pmu_mmdc->mmdc_base;
 	reg = mmdc_base + MMDC_MADPCR0;
 
-	writel(PRF_FRZ, reg);
+	pete_writel("arch/arm/mach-imx/mmdc.c:388", PRF_FRZ, reg);
 
 	reg = mmdc_base + MMDC_MADPCR1;
-	writel(MMDC_PRF_AXI_ID_CLEAR, reg);
+	pete_writel("arch/arm/mach-imx/mmdc.c:391", MMDC_PRF_AXI_ID_CLEAR, reg);
 
 	mmdc_pmu_event_update(event);
 }

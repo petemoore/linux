@@ -86,7 +86,7 @@ irqreturn_t cpsw_tx_interrupt(int irq, void *dev_id)
 {
 	struct cpsw_common *cpsw = dev_id;
 
-	writel(0, &cpsw->wr_regs->tx_en);
+	pete_writel("drivers/net/ethernet/ti/cpsw_priv.c:89", 0, &cpsw->wr_regs->tx_en);
 	cpdma_ctlr_eoi(cpsw->dma, CPDMA_EOI_TX);
 
 	if (cpsw->quirk_irq) {
@@ -102,7 +102,7 @@ irqreturn_t cpsw_rx_interrupt(int irq, void *dev_id)
 {
 	struct cpsw_common *cpsw = dev_id;
 
-	writel(0, &cpsw->wr_regs->rx_en);
+	pete_writel("drivers/net/ethernet/ti/cpsw_priv.c:105", 0, &cpsw->wr_regs->rx_en);
 	cpdma_ctlr_eoi(cpsw->dma, CPDMA_EOI_RX);
 
 	if (cpsw->quirk_irq) {
@@ -118,10 +118,10 @@ irqreturn_t cpsw_misc_interrupt(int irq, void *dev_id)
 {
 	struct cpsw_common *cpsw = dev_id;
 
-	writel(0, &cpsw->wr_regs->misc_en);
+	pete_writel("drivers/net/ethernet/ti/cpsw_priv.c:121", 0, &cpsw->wr_regs->misc_en);
 	cpdma_ctlr_eoi(cpsw->dma, CPDMA_EOI_MISC);
 	cpts_misc_interrupt(cpsw->cpts);
-	writel(0x10, &cpsw->wr_regs->misc_en);
+	pete_writel("drivers/net/ethernet/ti/cpsw_priv.c:124", 0x10, &cpsw->wr_regs->misc_en);
 
 	return IRQ_HANDLED;
 }
@@ -152,7 +152,7 @@ int cpsw_tx_mq_poll(struct napi_struct *napi_tx, int budget)
 
 	if (num_tx < budget) {
 		napi_complete(napi_tx);
-		writel(0xff, &cpsw->wr_regs->tx_en);
+		pete_writel("drivers/net/ethernet/ti/cpsw_priv.c:155", 0xff, &cpsw->wr_regs->tx_en);
 	}
 
 	return num_tx;
@@ -166,7 +166,7 @@ int cpsw_tx_poll(struct napi_struct *napi_tx, int budget)
 	num_tx = cpdma_chan_process(cpsw->txv[0].ch, budget);
 	if (num_tx < budget) {
 		napi_complete(napi_tx);
-		writel(0xff, &cpsw->wr_regs->tx_en);
+		pete_writel("drivers/net/ethernet/ti/cpsw_priv.c:169", 0xff, &cpsw->wr_regs->tx_en);
 		if (cpsw->tx_irq_disabled) {
 			cpsw->tx_irq_disabled = false;
 			enable_irq(cpsw->irqs_table[1]);
@@ -202,7 +202,7 @@ int cpsw_rx_mq_poll(struct napi_struct *napi_rx, int budget)
 
 	if (num_rx < budget) {
 		napi_complete_done(napi_rx, num_rx);
-		writel(0xff, &cpsw->wr_regs->rx_en);
+		pete_writel("drivers/net/ethernet/ti/cpsw_priv.c:205", 0xff, &cpsw->wr_regs->rx_en);
 	}
 
 	return num_rx;
@@ -216,7 +216,7 @@ int cpsw_rx_poll(struct napi_struct *napi_rx, int budget)
 	num_rx = cpdma_chan_process(cpsw->rxv[0].ch, budget);
 	if (num_rx < budget) {
 		napi_complete_done(napi_rx, num_rx);
-		writel(0xff, &cpsw->wr_regs->rx_en);
+		pete_writel("drivers/net/ethernet/ti/cpsw_priv.c:219", 0xff, &cpsw->wr_regs->rx_en);
 		if (cpsw->rx_irq_disabled) {
 			cpsw->rx_irq_disabled = false;
 			enable_irq(cpsw->irqs_table[0]);
@@ -445,7 +445,7 @@ int cpsw_init_common(struct cpsw_common *cpsw, void __iomem *ss_regs,
 	cpsw->rx_ch_num = 1;
 	cpsw->tx_ch_num = 1;
 
-	cpsw->version = readl(&cpsw->regs->id_ver);
+	cpsw->version = pete_readl("drivers/net/ethernet/ti/cpsw_priv.c:448", &cpsw->regs->id_ver);
 
 	memset(&dma_params, 0, sizeof(dma_params));
 	memset(&ale_params, 0, sizeof(ale_params));

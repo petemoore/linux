@@ -316,9 +316,9 @@ void xhci_ring_cmd_db(struct xhci_hcd *xhci)
 
 	trace_xhci_ring_host_doorbell(0, DB_VALUE_HOST);
 
-	writel(DB_VALUE_HOST, &xhci->dba->doorbell[0]);
+	pete_writel("drivers/usb/host/xhci-ring.c:319", DB_VALUE_HOST, &xhci->dba->doorbell[0]);
 	/* Flush PCI posted writes */
-	readl(&xhci->dba->doorbell[0]);
+	pete_readl("drivers/usb/host/xhci-ring.c:321", &xhci->dba->doorbell[0]);
 }
 
 static bool xhci_mod_cmd_timer(struct xhci_hcd *xhci, unsigned long delay)
@@ -453,9 +453,9 @@ void xhci_ring_ep_doorbell(struct xhci_hcd *xhci,
 
 	trace_xhci_ring_ep_doorbell(slot_id, DB_VALUE(ep_index, stream_id));
 
-	writel(DB_VALUE(ep_index, stream_id), db_addr);
+	pete_writel("drivers/usb/host/xhci-ring.c:456", DB_VALUE(ep_index, stream_id), db_addr);
 	/* flush the write */
-	readl(db_addr);
+	pete_readl("drivers/usb/host/xhci-ring.c:458", db_addr);
 }
 
 /* Ring the doorbell for any rings with pending URBs */
@@ -1305,7 +1305,7 @@ void xhci_stop_endpoint_command_watchdog(struct timer_list *t)
 		xhci_dbg(xhci, "Stop EP timer raced with cmd completion, exit");
 		return;
 	}
-	usbsts = readl(&xhci->op_regs->status);
+	usbsts = pete_readl("drivers/usb/host/xhci-ring.c:1308", &xhci->op_regs->status);
 
 	xhci_warn(xhci, "xHCI host not responding to stop endpoint command.\n");
 	xhci_warn(xhci, "USBSTS:%s\n", xhci_decode_usbsts(str, usbsts));
@@ -1900,12 +1900,12 @@ static void xhci_cavium_reset_phy_quirk(struct xhci_hcd *xhci)
 
 	do {
 		/* Assert PHY reset */
-		writel(0x6F, hcd->regs + 0x1048);
+		pete_writel("drivers/usb/host/xhci-ring.c:1903", 0x6F, hcd->regs + 0x1048);
 		udelay(10);
 		/* De-assert the PHY reset */
-		writel(0x7F, hcd->regs + 0x1048);
+		pete_writel("drivers/usb/host/xhci-ring.c:1906", 0x7F, hcd->regs + 0x1048);
 		udelay(200);
-		pll_lock_check = readl(hcd->regs + 0x1070);
+		pll_lock_check = pete_readl("drivers/usb/host/xhci-ring.c:1908", hcd->regs + 0x1070);
 	} while (!(pll_lock_check & 0x1) && --retry_count);
 }
 
@@ -1955,7 +1955,7 @@ static void handle_port_status(struct xhci_hcd *xhci,
 	hcd = port->rhub->hcd;
 	bus_state = &port->rhub->bus_state;
 	hcd_portnum = port->hcd_portnum;
-	portsc = readl(port->addr);
+	portsc = pete_readl("drivers/usb/host/xhci-ring.c:1958", port->addr);
 
 	xhci_dbg(xhci, "Port change event, %d-%d, id %d, portsc: 0x%x\n",
 		 hcd->self.busnum, hcd_portnum + 1, port_id, portsc);
@@ -1977,7 +1977,7 @@ static void handle_port_status(struct xhci_hcd *xhci,
 	if ((portsc & PORT_PLC) && (portsc & PORT_PLS_MASK) == XDEV_RESUME) {
 		xhci_dbg(xhci, "port resume event for port %d\n", port_id);
 
-		cmd_reg = readl(&xhci->op_regs->command);
+		cmd_reg = pete_readl("drivers/usb/host/xhci-ring.c:1980", &xhci->op_regs->command);
 		if (!(cmd_reg & CMD_RUN)) {
 			xhci_warn(xhci, "xHC is not running.\n");
 			goto cleanup;
@@ -3106,7 +3106,7 @@ irqreturn_t xhci_irq(struct usb_hcd *hcd)
 
 	spin_lock(&xhci->lock);
 	/* Check if the xHC generated the interrupt, or the irq is shared */
-	status = readl(&xhci->op_regs->status);
+	status = pete_readl("drivers/usb/host/xhci-ring.c:3109", &xhci->op_regs->status);
 	if (status == ~(u32)0) {
 		xhci_hc_died(xhci);
 		ret = IRQ_HANDLED;
@@ -3129,13 +3129,13 @@ irqreturn_t xhci_irq(struct usb_hcd *hcd)
 	 * Write 1 to clear the interrupt status.
 	 */
 	status |= STS_EINT;
-	writel(status, &xhci->op_regs->status);
+	pete_writel("drivers/usb/host/xhci-ring.c:3132", status, &xhci->op_regs->status);
 
 	if (!hcd->msi_enabled) {
 		u32 irq_pending;
-		irq_pending = readl(&xhci->ir_set->irq_pending);
+		irq_pending = pete_readl("drivers/usb/host/xhci-ring.c:3136", &xhci->ir_set->irq_pending);
 		irq_pending |= IMAN_IP;
-		writel(irq_pending, &xhci->ir_set->irq_pending);
+		pete_writel("drivers/usb/host/xhci-ring.c:3138", irq_pending, &xhci->ir_set->irq_pending);
 	}
 
 	if (xhci->xhc_state & XHCI_STATE_DYING ||
@@ -3625,14 +3625,14 @@ static void xhci_vl805_hub_tt_quirk(struct xhci_hcd *xhci, struct urb *urb,
 	}
 	if (single_td) {
 		while (timeout < 20 &&
-		       (readl(&xhci->run_regs->microframe_index) & 0x7) == 0) {
+		       (pete_readl("drivers/usb/host/xhci-ring.c:3628", &xhci->run_regs->microframe_index) & 0x7) == 0) {
 			udelay(10);
 			timeout++;
 		}
 		if (timeout >= 20)
 			xhci_warn(xhci, "MFINDEX didn't advance - %u.%u dodged\n",
-				  readl(&xhci->run_regs->microframe_index) >> 3,
-				  readl(&xhci->run_regs->microframe_index) & 7);
+				  pete_readl("drivers/usb/host/xhci-ring.c:3634", &xhci->run_regs->microframe_index) >> 3,
+				  pete_readl("drivers/usb/host/xhci-ring.c:3635", &xhci->run_regs->microframe_index) & 7);
 	}
 }
 
@@ -4045,7 +4045,7 @@ static int xhci_get_isoc_frame_id(struct xhci_hcd *xhci,
 	 * boundary, and the Start Frame ID value should be rounded up to the
 	 * nearest Frame boundary.
 	 */
-	current_frame_id = readl(&xhci->run_regs->microframe_index);
+	current_frame_id = pete_readl("drivers/usb/host/xhci-ring.c:4048", &xhci->run_regs->microframe_index);
 	start_frame_id = roundup(current_frame_id + ist + 1, 8);
 	end_frame_id = rounddown(current_frame_id + 895 * 8, 8);
 
@@ -4054,7 +4054,7 @@ static int xhci_get_isoc_frame_id(struct xhci_hcd *xhci,
 	end_frame_id = (end_frame_id >> 3) & 0x7ff;
 
 	xhci_dbg(xhci, "%s: index %d, reg 0x%x start_frame_id 0x%x, end_frame_id 0x%x, start_frame 0x%x\n",
-		 __func__, index, readl(&xhci->run_regs->microframe_index),
+		 __func__, index, pete_readl("drivers/usb/host/xhci-ring.c:4057", &xhci->run_regs->microframe_index),
 		 start_frame_id, end_frame_id, start_frame);
 
 	if (start_frame_id < end_frame_id) {
@@ -4348,7 +4348,7 @@ int xhci_queue_isoc_tx_prepare(struct xhci_hcd *xhci, gfp_t mem_flags,
 		}
 	}
 
-	start_frame = readl(&xhci->run_regs->microframe_index);
+	start_frame = pete_readl("drivers/usb/host/xhci-ring.c:4351", &xhci->run_regs->microframe_index);
 	start_frame &= 0x3fff;
 	/*
 	 * Round up to the next frame and consider the time before trb really

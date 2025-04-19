@@ -74,10 +74,10 @@ static int armada_debugfs_crtc_reg_write(struct file *file,
 		return -ERANGE;
 
 	dcrtc = ((struct seq_file *)file->private_data)->private;
-	v = readl(dcrtc->base + reg);
+	v = pete_readl("drivers/gpu/drm/armada/armada_debugfs.c:77", dcrtc->base + reg);
 	v &= ~mask;
 	v |= val & mask;
-	writel(v, dcrtc->base + reg);
+	pete_writel("drivers/gpu/drm/armada/armada_debugfs.c:80", v, dcrtc->base + reg);
 
 	return len;
 }

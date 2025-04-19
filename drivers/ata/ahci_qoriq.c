@@ -119,8 +119,8 @@ static int ahci_qoriq_hardreset(struct ata_link *link, unsigned int *class,
 	 * PxCMD and PxIS with the stored values.
 	 */
 	if (ls1021a_workaround) {
-		px_cmd = readl(port_mmio + PORT_CMD);
-		px_is = readl(port_mmio + PORT_IRQ_STAT);
+		px_cmd = pete_readl("drivers/ata/ahci_qoriq.c:122", port_mmio + PORT_CMD);
+		px_is = pete_readl("drivers/ata/ahci_qoriq.c:123", port_mmio + PORT_IRQ_STAT);
 	}
 
 	/* clear D2H reception area to properly wait for D2H FIS */
@@ -133,13 +133,13 @@ static int ahci_qoriq_hardreset(struct ata_link *link, unsigned int *class,
 
 	/* restore the PxCMD and PxIS on ls1021 */
 	if (ls1021a_workaround) {
-		px_val = readl(port_mmio + PORT_CMD);
+		px_val = pete_readl("drivers/ata/ahci_qoriq.c:136", port_mmio + PORT_CMD);
 		if (px_val != px_cmd)
-			writel(px_cmd, port_mmio + PORT_CMD);
+			pete_writel("drivers/ata/ahci_qoriq.c:138", px_cmd, port_mmio + PORT_CMD);
 
-		px_val = readl(port_mmio + PORT_IRQ_STAT);
+		px_val = pete_readl("drivers/ata/ahci_qoriq.c:140", port_mmio + PORT_IRQ_STAT);
 		if (px_val != px_is)
-			writel(px_is, port_mmio + PORT_IRQ_STAT);
+			pete_writel("drivers/ata/ahci_qoriq.c:142", px_is, port_mmio + PORT_IRQ_STAT);
 	}
 
 	hpriv->start_engine(ap);
@@ -177,15 +177,15 @@ static int ahci_qoriq_phy_init(struct ahci_host_priv *hpriv)
 		if (!(qpriv->ecc_addr || ecc_initialized))
 			return -EINVAL;
 		else if (qpriv->ecc_addr && !ecc_initialized)
-			writel(SATA_ECC_DISABLE, qpriv->ecc_addr);
-		writel(AHCI_PORT_PHY_1_CFG, reg_base + PORT_PHY1);
-		writel(LS1021A_PORT_PHY2, reg_base + PORT_PHY2);
-		writel(LS1021A_PORT_PHY3, reg_base + PORT_PHY3);
-		writel(LS1021A_PORT_PHY4, reg_base + PORT_PHY4);
-		writel(LS1021A_PORT_PHY5, reg_base + PORT_PHY5);
-		writel(AHCI_PORT_TRANS_CFG, reg_base + PORT_TRANS);
+			pete_writel("drivers/ata/ahci_qoriq.c:180", SATA_ECC_DISABLE, qpriv->ecc_addr);
+		pete_writel("drivers/ata/ahci_qoriq.c:181", AHCI_PORT_PHY_1_CFG, reg_base + PORT_PHY1);
+		pete_writel("drivers/ata/ahci_qoriq.c:182", LS1021A_PORT_PHY2, reg_base + PORT_PHY2);
+		pete_writel("drivers/ata/ahci_qoriq.c:183", LS1021A_PORT_PHY3, reg_base + PORT_PHY3);
+		pete_writel("drivers/ata/ahci_qoriq.c:184", LS1021A_PORT_PHY4, reg_base + PORT_PHY4);
+		pete_writel("drivers/ata/ahci_qoriq.c:185", LS1021A_PORT_PHY5, reg_base + PORT_PHY5);
+		pete_writel("drivers/ata/ahci_qoriq.c:186", AHCI_PORT_TRANS_CFG, reg_base + PORT_TRANS);
 		if (qpriv->is_dmacoherent)
-			writel(AHCI_PORT_AXICC_CFG,
+			pete_writel("drivers/ata/ahci_qoriq.c:188", AHCI_PORT_AXICC_CFG,
 					reg_base + LS1021A_AXICC_ADDR);
 		break;
 
@@ -193,39 +193,39 @@ static int ahci_qoriq_phy_init(struct ahci_host_priv *hpriv)
 		if (!(qpriv->ecc_addr || ecc_initialized))
 			return -EINVAL;
 		else if (qpriv->ecc_addr && !ecc_initialized)
-			writel(readl(qpriv->ecc_addr) |
+			pete_writel("drivers/ata/ahci_qoriq.c:196", pete_readl("drivers/ata/ahci_qoriq.c:196", qpriv->ecc_addr) |
 			       ECC_DIS_ARMV8_CH2,
 			       qpriv->ecc_addr);
-		writel(AHCI_PORT_PHY_1_CFG, reg_base + PORT_PHY1);
-		writel(AHCI_PORT_PHY2_CFG, reg_base + PORT_PHY2);
-		writel(AHCI_PORT_PHY3_CFG, reg_base + PORT_PHY3);
-		writel(AHCI_PORT_TRANS_CFG, reg_base + PORT_TRANS);
+		pete_writel("drivers/ata/ahci_qoriq.c:199", AHCI_PORT_PHY_1_CFG, reg_base + PORT_PHY1);
+		pete_writel("drivers/ata/ahci_qoriq.c:200", AHCI_PORT_PHY2_CFG, reg_base + PORT_PHY2);
+		pete_writel("drivers/ata/ahci_qoriq.c:201", AHCI_PORT_PHY3_CFG, reg_base + PORT_PHY3);
+		pete_writel("drivers/ata/ahci_qoriq.c:202", AHCI_PORT_TRANS_CFG, reg_base + PORT_TRANS);
 		if (qpriv->is_dmacoherent)
-			writel(AHCI_PORT_AXICC_CFG, reg_base + PORT_AXICC);
+			pete_writel("drivers/ata/ahci_qoriq.c:204", AHCI_PORT_AXICC_CFG, reg_base + PORT_AXICC);
 		break;
 
 	case AHCI_LS2080A:
-		writel(AHCI_PORT_PHY_1_CFG, reg_base + PORT_PHY1);
-		writel(AHCI_PORT_PHY2_CFG, reg_base + PORT_PHY2);
-		writel(AHCI_PORT_PHY3_CFG, reg_base + PORT_PHY3);
-		writel(AHCI_PORT_TRANS_CFG, reg_base + PORT_TRANS);
+		pete_writel("drivers/ata/ahci_qoriq.c:208", AHCI_PORT_PHY_1_CFG, reg_base + PORT_PHY1);
+		pete_writel("drivers/ata/ahci_qoriq.c:209", AHCI_PORT_PHY2_CFG, reg_base + PORT_PHY2);
+		pete_writel("drivers/ata/ahci_qoriq.c:210", AHCI_PORT_PHY3_CFG, reg_base + PORT_PHY3);
+		pete_writel("drivers/ata/ahci_qoriq.c:211", AHCI_PORT_TRANS_CFG, reg_base + PORT_TRANS);
 		if (qpriv->is_dmacoherent)
-			writel(AHCI_PORT_AXICC_CFG, reg_base + PORT_AXICC);
+			pete_writel("drivers/ata/ahci_qoriq.c:213", AHCI_PORT_AXICC_CFG, reg_base + PORT_AXICC);
 		break;
 
 	case AHCI_LS1046A:
 		if (!(qpriv->ecc_addr || ecc_initialized))
 			return -EINVAL;
 		else if (qpriv->ecc_addr && !ecc_initialized)
-			writel(readl(qpriv->ecc_addr) |
+			pete_writel("drivers/ata/ahci_qoriq.c:220", pete_readl("drivers/ata/ahci_qoriq.c:220", qpriv->ecc_addr) |
 			       ECC_DIS_ARMV8_CH2,
 			       qpriv->ecc_addr);
-		writel(AHCI_PORT_PHY_1_CFG, reg_base + PORT_PHY1);
-		writel(AHCI_PORT_PHY2_CFG, reg_base + PORT_PHY2);
-		writel(AHCI_PORT_PHY3_CFG, reg_base + PORT_PHY3);
-		writel(AHCI_PORT_TRANS_CFG, reg_base + PORT_TRANS);
+		pete_writel("drivers/ata/ahci_qoriq.c:223", AHCI_PORT_PHY_1_CFG, reg_base + PORT_PHY1);
+		pete_writel("drivers/ata/ahci_qoriq.c:224", AHCI_PORT_PHY2_CFG, reg_base + PORT_PHY2);
+		pete_writel("drivers/ata/ahci_qoriq.c:225", AHCI_PORT_PHY3_CFG, reg_base + PORT_PHY3);
+		pete_writel("drivers/ata/ahci_qoriq.c:226", AHCI_PORT_TRANS_CFG, reg_base + PORT_TRANS);
 		if (qpriv->is_dmacoherent)
-			writel(AHCI_PORT_AXICC_CFG, reg_base + PORT_AXICC);
+			pete_writel("drivers/ata/ahci_qoriq.c:228", AHCI_PORT_AXICC_CFG, reg_base + PORT_AXICC);
 		break;
 
 	case AHCI_LS1028A:
@@ -234,24 +234,24 @@ static int ahci_qoriq_phy_init(struct ahci_host_priv *hpriv)
 		if (!(qpriv->ecc_addr || ecc_initialized))
 			return -EINVAL;
 		else if (qpriv->ecc_addr && !ecc_initialized)
-			writel(readl(qpriv->ecc_addr) |
+			pete_writel("drivers/ata/ahci_qoriq.c:237", pete_readl("drivers/ata/ahci_qoriq.c:237", qpriv->ecc_addr) |
 			       ECC_DIS_LS1088A,
 			       qpriv->ecc_addr);
-		writel(AHCI_PORT_PHY_1_CFG, reg_base + PORT_PHY1);
-		writel(AHCI_PORT_PHY2_CFG, reg_base + PORT_PHY2);
-		writel(AHCI_PORT_PHY3_CFG, reg_base + PORT_PHY3);
-		writel(AHCI_PORT_TRANS_CFG, reg_base + PORT_TRANS);
+		pete_writel("drivers/ata/ahci_qoriq.c:240", AHCI_PORT_PHY_1_CFG, reg_base + PORT_PHY1);
+		pete_writel("drivers/ata/ahci_qoriq.c:241", AHCI_PORT_PHY2_CFG, reg_base + PORT_PHY2);
+		pete_writel("drivers/ata/ahci_qoriq.c:242", AHCI_PORT_PHY3_CFG, reg_base + PORT_PHY3);
+		pete_writel("drivers/ata/ahci_qoriq.c:243", AHCI_PORT_TRANS_CFG, reg_base + PORT_TRANS);
 		if (qpriv->is_dmacoherent)
-			writel(AHCI_PORT_AXICC_CFG, reg_base + PORT_AXICC);
+			pete_writel("drivers/ata/ahci_qoriq.c:245", AHCI_PORT_AXICC_CFG, reg_base + PORT_AXICC);
 		break;
 
 	case AHCI_LS2088A:
-		writel(AHCI_PORT_PHY_1_CFG, reg_base + PORT_PHY1);
-		writel(AHCI_PORT_PHY2_CFG, reg_base + PORT_PHY2);
-		writel(AHCI_PORT_PHY3_CFG, reg_base + PORT_PHY3);
-		writel(AHCI_PORT_TRANS_CFG, reg_base + PORT_TRANS);
+		pete_writel("drivers/ata/ahci_qoriq.c:249", AHCI_PORT_PHY_1_CFG, reg_base + PORT_PHY1);
+		pete_writel("drivers/ata/ahci_qoriq.c:250", AHCI_PORT_PHY2_CFG, reg_base + PORT_PHY2);
+		pete_writel("drivers/ata/ahci_qoriq.c:251", AHCI_PORT_PHY3_CFG, reg_base + PORT_PHY3);
+		pete_writel("drivers/ata/ahci_qoriq.c:252", AHCI_PORT_TRANS_CFG, reg_base + PORT_TRANS);
 		if (qpriv->is_dmacoherent)
-			writel(AHCI_PORT_AXICC_CFG, reg_base + PORT_AXICC);
+			pete_writel("drivers/ata/ahci_qoriq.c:254", AHCI_PORT_AXICC_CFG, reg_base + PORT_AXICC);
 		break;
 	}
 

@@ -1781,7 +1781,7 @@ static int pic32_pinmux_enable(struct pinctrl_dev *pctldev,
 				"setting function %s reg 0x%x = %d\n",
 				fname, functions->muxreg, functions->muxval);
 
-			writel(functions->muxval, pctl->reg_base + functions->muxreg);
+			pete_writel("drivers/pinctrl/pinctrl-pic32.c:1784", functions->muxval, pctl->reg_base + functions->muxreg);
 
 			return 0;
 		}
@@ -1805,7 +1805,7 @@ static int pic32_gpio_request_enable(struct pinctrl_dev *pctldev,
 	dev_dbg(pctl->dev, "requesting gpio %d in bank %d with mask 0x%x\n",
 		offset, bank->gpio_chip.base, mask);
 
-	writel(mask, bank->reg_base + PIC32_CLR(ANSEL_REG));
+	pete_writel("drivers/pinctrl/pinctrl-pic32.c:1808", mask, bank->reg_base + PIC32_CLR(ANSEL_REG));
 
 	return 0;
 }
@@ -1816,7 +1816,7 @@ static int pic32_gpio_direction_input(struct gpio_chip *chip,
 	struct pic32_gpio_bank *bank = gpiochip_get_data(chip);
 	u32 mask = BIT(offset);
 
-	writel(mask, bank->reg_base + PIC32_SET(TRIS_REG));
+	pete_writel("drivers/pinctrl/pinctrl-pic32.c:1819", mask, bank->reg_base + PIC32_SET(TRIS_REG));
 
 	return 0;
 }
@@ -1825,7 +1825,7 @@ static int pic32_gpio_get(struct gpio_chip *chip, unsigned offset)
 {
 	struct pic32_gpio_bank *bank = gpiochip_get_data(chip);
 
-	return !!(readl(bank->reg_base + PORT_REG) & BIT(offset));
+	return !!(pete_readl("drivers/pinctrl/pinctrl-pic32.c:1828", bank->reg_base + PORT_REG) & BIT(offset));
 }
 
 static void pic32_gpio_set(struct gpio_chip *chip, unsigned offset,
@@ -1835,9 +1835,9 @@ static void pic32_gpio_set(struct gpio_chip *chip, unsigned offset,
 	u32 mask = BIT(offset);
 
 	if (value)
-		writel(mask, bank->reg_base + PIC32_SET(PORT_REG));
+		pete_writel("drivers/pinctrl/pinctrl-pic32.c:1838", mask, bank->reg_base + PIC32_SET(PORT_REG));
 	else
-		writel(mask, bank->reg_base + PIC32_CLR(PORT_REG));
+		pete_writel("drivers/pinctrl/pinctrl-pic32.c:1840", mask, bank->reg_base + PIC32_CLR(PORT_REG));
 }
 
 static int pic32_gpio_direction_output(struct gpio_chip *chip,
@@ -1847,7 +1847,7 @@ static int pic32_gpio_direction_output(struct gpio_chip *chip,
 	u32 mask = BIT(offset);
 
 	pic32_gpio_set(chip, offset, value);
-	writel(mask, bank->reg_base + PIC32_CLR(TRIS_REG));
+	pete_writel("drivers/pinctrl/pinctrl-pic32.c:1850", mask, bank->reg_base + PIC32_CLR(TRIS_REG));
 
 	return 0;
 }
@@ -1886,25 +1886,25 @@ static int pic32_pinconf_get(struct pinctrl_dev *pctldev, unsigned pin,
 
 	switch (param) {
 	case PIN_CONFIG_BIAS_PULL_UP:
-		arg = !!(readl(bank->reg_base + CNPU_REG) & mask);
+		arg = !!(pete_readl("drivers/pinctrl/pinctrl-pic32.c:1889", bank->reg_base + CNPU_REG) & mask);
 		break;
 	case PIN_CONFIG_BIAS_PULL_DOWN:
-		arg = !!(readl(bank->reg_base + CNPD_REG) & mask);
+		arg = !!(pete_readl("drivers/pinctrl/pinctrl-pic32.c:1892", bank->reg_base + CNPD_REG) & mask);
 		break;
 	case PIN_CONFIG_MICROCHIP_DIGITAL:
-		arg = !(readl(bank->reg_base + ANSEL_REG) & mask);
+		arg = !(pete_readl("drivers/pinctrl/pinctrl-pic32.c:1895", bank->reg_base + ANSEL_REG) & mask);
 		break;
 	case PIN_CONFIG_MICROCHIP_ANALOG:
-		arg = !!(readl(bank->reg_base + ANSEL_REG) & mask);
+		arg = !!(pete_readl("drivers/pinctrl/pinctrl-pic32.c:1898", bank->reg_base + ANSEL_REG) & mask);
 		break;
 	case PIN_CONFIG_DRIVE_OPEN_DRAIN:
-		arg = !!(readl(bank->reg_base + ODCU_REG) & mask);
+		arg = !!(pete_readl("drivers/pinctrl/pinctrl-pic32.c:1901", bank->reg_base + ODCU_REG) & mask);
 		break;
 	case PIN_CONFIG_INPUT_ENABLE:
-		arg = !!(readl(bank->reg_base + TRIS_REG) & mask);
+		arg = !!(pete_readl("drivers/pinctrl/pinctrl-pic32.c:1904", bank->reg_base + TRIS_REG) & mask);
 		break;
 	case PIN_CONFIG_OUTPUT:
-		arg = !(readl(bank->reg_base + TRIS_REG) & mask);
+		arg = !(pete_readl("drivers/pinctrl/pinctrl-pic32.c:1907", bank->reg_base + TRIS_REG) & mask);
 		break;
 	default:
 		dev_err(pctl->dev, "Property %u not supported\n", param);
@@ -1937,23 +1937,23 @@ static int pic32_pinconf_set(struct pinctrl_dev *pctldev, unsigned pin,
 		switch (param) {
 		case PIN_CONFIG_BIAS_PULL_UP:
 			dev_dbg(pctl->dev, "   pullup\n");
-			writel(mask, bank->reg_base +PIC32_SET(CNPU_REG));
+			pete_writel("drivers/pinctrl/pinctrl-pic32.c:1940", mask, bank->reg_base +PIC32_SET(CNPU_REG));
 			break;
 		case PIN_CONFIG_BIAS_PULL_DOWN:
 			dev_dbg(pctl->dev, "   pulldown\n");
-			writel(mask, bank->reg_base + PIC32_SET(CNPD_REG));
+			pete_writel("drivers/pinctrl/pinctrl-pic32.c:1944", mask, bank->reg_base + PIC32_SET(CNPD_REG));
 			break;
 		case PIN_CONFIG_MICROCHIP_DIGITAL:
 			dev_dbg(pctl->dev, "   digital\n");
-			writel(mask, bank->reg_base + PIC32_CLR(ANSEL_REG));
+			pete_writel("drivers/pinctrl/pinctrl-pic32.c:1948", mask, bank->reg_base + PIC32_CLR(ANSEL_REG));
 			break;
 		case PIN_CONFIG_MICROCHIP_ANALOG:
 			dev_dbg(pctl->dev, "   analog\n");
-			writel(mask, bank->reg_base + PIC32_SET(ANSEL_REG));
+			pete_writel("drivers/pinctrl/pinctrl-pic32.c:1952", mask, bank->reg_base + PIC32_SET(ANSEL_REG));
 			break;
 		case PIN_CONFIG_DRIVE_OPEN_DRAIN:
 			dev_dbg(pctl->dev, "   opendrain\n");
-			writel(mask, bank->reg_base + PIC32_SET(ODCU_REG));
+			pete_writel("drivers/pinctrl/pinctrl-pic32.c:1956", mask, bank->reg_base + PIC32_SET(ODCU_REG));
 			break;
 		case PIN_CONFIG_INPUT_ENABLE:
 			pic32_gpio_direction_input(&bank->gpio_chip, offset);
@@ -1990,7 +1990,7 @@ static int pic32_gpio_get_direction(struct gpio_chip *chip, unsigned offset)
 {
 	struct pic32_gpio_bank *bank = gpiochip_get_data(chip);
 
-	if (readl(bank->reg_base + TRIS_REG) & BIT(offset))
+	if (pete_readl("drivers/pinctrl/pinctrl-pic32.c:1993", bank->reg_base + TRIS_REG) & BIT(offset))
 		return GPIO_LINE_DIRECTION_IN;
 
 	return GPIO_LINE_DIRECTION_OUT;
@@ -2000,21 +2000,21 @@ static void pic32_gpio_irq_ack(struct irq_data *data)
 {
 	struct pic32_gpio_bank *bank = irqd_to_bank(data);
 
-	writel(0, bank->reg_base + CNF_REG);
+	pete_writel("drivers/pinctrl/pinctrl-pic32.c:2003", 0, bank->reg_base + CNF_REG);
 }
 
 static void pic32_gpio_irq_mask(struct irq_data *data)
 {
 	struct pic32_gpio_bank *bank = irqd_to_bank(data);
 
-	writel(BIT(PIC32_CNCON_ON), bank->reg_base + PIC32_CLR(CNCON_REG));
+	pete_writel("drivers/pinctrl/pinctrl-pic32.c:2010", BIT(PIC32_CNCON_ON), bank->reg_base + PIC32_CLR(CNCON_REG));
 }
 
 static void pic32_gpio_irq_unmask(struct irq_data *data)
 {
 	struct pic32_gpio_bank *bank = irqd_to_bank(data);
 
-	writel(BIT(PIC32_CNCON_ON), bank->reg_base + PIC32_SET(CNCON_REG));
+	pete_writel("drivers/pinctrl/pinctrl-pic32.c:2017", BIT(PIC32_CNCON_ON), bank->reg_base + PIC32_SET(CNCON_REG));
 }
 
 static unsigned int pic32_gpio_irq_startup(struct irq_data *data)
@@ -2035,27 +2035,27 @@ static int pic32_gpio_irq_set_type(struct irq_data *data, unsigned int type)
 	switch (type & IRQ_TYPE_SENSE_MASK) {
 	case IRQ_TYPE_EDGE_RISING:
 		/* enable RISE */
-		writel(mask, bank->reg_base + PIC32_SET(CNEN_REG));
+		pete_writel("drivers/pinctrl/pinctrl-pic32.c:2038", mask, bank->reg_base + PIC32_SET(CNEN_REG));
 		/* disable FALL */
-		writel(mask, bank->reg_base + PIC32_CLR(CNNE_REG));
+		pete_writel("drivers/pinctrl/pinctrl-pic32.c:2040", mask, bank->reg_base + PIC32_CLR(CNNE_REG));
 		/* enable EDGE */
-		writel(BIT(PIC32_CNCON_EDGE), bank->reg_base + PIC32_SET(CNCON_REG));
+		pete_writel("drivers/pinctrl/pinctrl-pic32.c:2042", BIT(PIC32_CNCON_EDGE), bank->reg_base + PIC32_SET(CNCON_REG));
 		break;
 	case IRQ_TYPE_EDGE_FALLING:
 		/* disable RISE */
-		writel(mask, bank->reg_base + PIC32_CLR(CNEN_REG));
+		pete_writel("drivers/pinctrl/pinctrl-pic32.c:2046", mask, bank->reg_base + PIC32_CLR(CNEN_REG));
 		/* enable FALL */
-		writel(mask, bank->reg_base + PIC32_SET(CNNE_REG));
+		pete_writel("drivers/pinctrl/pinctrl-pic32.c:2048", mask, bank->reg_base + PIC32_SET(CNNE_REG));
 		/* enable EDGE */
-		writel(BIT(PIC32_CNCON_EDGE), bank->reg_base + PIC32_SET(CNCON_REG));
+		pete_writel("drivers/pinctrl/pinctrl-pic32.c:2050", BIT(PIC32_CNCON_EDGE), bank->reg_base + PIC32_SET(CNCON_REG));
 		break;
 	case IRQ_TYPE_EDGE_BOTH:
 		/* enable RISE */
-		writel(mask, bank->reg_base + PIC32_SET(CNEN_REG));
+		pete_writel("drivers/pinctrl/pinctrl-pic32.c:2054", mask, bank->reg_base + PIC32_SET(CNEN_REG));
 		/* enable FALL */
-		writel(mask, bank->reg_base + PIC32_SET(CNNE_REG));
+		pete_writel("drivers/pinctrl/pinctrl-pic32.c:2056", mask, bank->reg_base + PIC32_SET(CNNE_REG));
 		/* enable EDGE */
-		writel(BIT(PIC32_CNCON_EDGE), bank->reg_base + PIC32_SET(CNCON_REG));
+		pete_writel("drivers/pinctrl/pinctrl-pic32.c:2058", BIT(PIC32_CNCON_EDGE), bank->reg_base + PIC32_SET(CNCON_REG));
 		break;
 	default:
 		return -EINVAL;
@@ -2073,8 +2073,8 @@ static u32 pic32_gpio_get_pending(struct gpio_chip *gc, unsigned long status)
 	u32 cnen_rise, cnne_fall;
 	u32 pin;
 
-	cnen_rise = readl(bank->reg_base + CNEN_REG);
-	cnne_fall = readl(bank->reg_base + CNNE_REG);
+	cnen_rise = pete_readl("drivers/pinctrl/pinctrl-pic32.c:2076", bank->reg_base + CNEN_REG);
+	cnne_fall = pete_readl("drivers/pinctrl/pinctrl-pic32.c:2077", bank->reg_base + CNNE_REG);
 
 	for_each_set_bit(pin, &status, BITS_PER_LONG) {
 		u32 mask = BIT(pin);
@@ -2097,7 +2097,7 @@ static void pic32_gpio_irq_handler(struct irq_desc *desc)
 
 	chained_irq_enter(chip, desc);
 
-	stat = readl(bank->reg_base + CNF_REG);
+	stat = pete_readl("drivers/pinctrl/pinctrl-pic32.c:2100", bank->reg_base + CNF_REG);
 	pending = pic32_gpio_get_pending(gc, stat);
 
 	for_each_set_bit(pin, &pending, BITS_PER_LONG)

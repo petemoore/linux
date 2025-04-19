@@ -86,7 +86,7 @@ static irqreturn_t mtk_disp_ovl_irq_handler(int irq, void *dev_id)
 	struct mtk_disp_ovl *priv = dev_id;
 
 	/* Clear frame completion interrupt */
-	writel(0x0, priv->regs + DISP_REG_OVL_INTSTA);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_disp_ovl.c:89", 0x0, priv->regs + DISP_REG_OVL_INTSTA);
 
 	if (!priv->vblank_cb)
 		return IRQ_NONE;
@@ -118,7 +118,7 @@ void mtk_ovl_enable_vblank(struct device *dev)
 {
 	struct mtk_disp_ovl *ovl = dev_get_drvdata(dev);
 
-	writel(0x0, ovl->regs + DISP_REG_OVL_INTSTA);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_disp_ovl.c:121", 0x0, ovl->regs + DISP_REG_OVL_INTSTA);
 	writel_relaxed(OVL_FME_CPL_INT, ovl->regs + DISP_REG_OVL_INTEN);
 }
 
@@ -150,7 +150,7 @@ void mtk_ovl_start(struct device *dev)
 	if (ovl->data->smi_id_en) {
 		unsigned int reg;
 
-		reg = readl(ovl->regs + DISP_REG_OVL_DATAPATH_CON);
+		reg = pete_readl("drivers/gpu/drm/mediatek/mtk_disp_ovl.c:153", ovl->regs + DISP_REG_OVL_DATAPATH_CON);
 		reg = reg | OVL_LAYER_SMI_ID_EN;
 		writel_relaxed(reg, ovl->regs + DISP_REG_OVL_DATAPATH_CON);
 	}
@@ -165,7 +165,7 @@ void mtk_ovl_stop(struct device *dev)
 	if (ovl->data->smi_id_en) {
 		unsigned int reg;
 
-		reg = readl(ovl->regs + DISP_REG_OVL_DATAPATH_CON);
+		reg = pete_readl("drivers/gpu/drm/mediatek/mtk_disp_ovl.c:168", ovl->regs + DISP_REG_OVL_DATAPATH_CON);
 		reg = reg & ~OVL_LAYER_SMI_ID_EN;
 		writel_relaxed(reg, ovl->regs + DISP_REG_OVL_DATAPATH_CON);
 	}
@@ -351,9 +351,9 @@ void mtk_ovl_bgclr_in_on(struct device *dev)
 	struct mtk_disp_ovl *ovl = dev_get_drvdata(dev);
 	unsigned int reg;
 
-	reg = readl(ovl->regs + DISP_REG_OVL_DATAPATH_CON);
+	reg = pete_readl("drivers/gpu/drm/mediatek/mtk_disp_ovl.c:354", ovl->regs + DISP_REG_OVL_DATAPATH_CON);
 	reg = reg | OVL_BGCLR_SEL_IN;
-	writel(reg, ovl->regs + DISP_REG_OVL_DATAPATH_CON);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_disp_ovl.c:356", reg, ovl->regs + DISP_REG_OVL_DATAPATH_CON);
 }
 
 void mtk_ovl_bgclr_in_off(struct device *dev)
@@ -361,9 +361,9 @@ void mtk_ovl_bgclr_in_off(struct device *dev)
 	struct mtk_disp_ovl *ovl = dev_get_drvdata(dev);
 	unsigned int reg;
 
-	reg = readl(ovl->regs + DISP_REG_OVL_DATAPATH_CON);
+	reg = pete_readl("drivers/gpu/drm/mediatek/mtk_disp_ovl.c:364", ovl->regs + DISP_REG_OVL_DATAPATH_CON);
 	reg = reg & ~OVL_BGCLR_SEL_IN;
-	writel(reg, ovl->regs + DISP_REG_OVL_DATAPATH_CON);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_disp_ovl.c:366", reg, ovl->regs + DISP_REG_OVL_DATAPATH_CON);
 }
 
 static int mtk_disp_ovl_bind(struct device *dev, struct device *master,

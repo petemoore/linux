@@ -128,14 +128,14 @@ static void ahci_ceva_setup(struct ahci_host_priv *hpriv)
 	int i;
 
 	/* Set AHCI Enable */
-	tmp = readl(mmio + HOST_CTL);
+	tmp = pete_readl("drivers/ata/ahci_ceva.c:131", mmio + HOST_CTL);
 	tmp |= HOST_AHCI_EN;
-	writel(tmp, mmio + HOST_CTL);
+	pete_writel("drivers/ata/ahci_ceva.c:133", tmp, mmio + HOST_CTL);
 
 	for (i = 0; i < NR_PORTS; i++) {
 		/* TPSS TPRS scalars, CISE and Port Addr */
 		tmp = PCFG_TPSS_VAL | PCFG_TPRS_VAL | (PCFG_PAD_VAL + i);
-		writel(tmp, mmio + AHCI_VEND_PCFG);
+		pete_writel("drivers/ata/ahci_ceva.c:138", tmp, mmio + AHCI_VEND_PCFG);
 
 		/*
 		 * AXI Data bus width to 64
@@ -145,43 +145,43 @@ static void ahci_ceva_setup(struct ahci_host_priv *hpriv)
 		 */
 		tmp = PAXIC_ADBW_BW64 | PAXIC_MAWIDD(i) | PAXIC_MARIDD(i) |
 			PAXIC_MAWID(i) | PAXIC_MARID(i) | PAXIC_OTL;
-		writel(tmp, mmio + AHCI_VEND_PAXIC);
+		pete_writel("drivers/ata/ahci_ceva.c:148", tmp, mmio + AHCI_VEND_PAXIC);
 
 		/* Set AXI cache control register if CCi is enabled */
 		if (cevapriv->is_cci_enabled) {
-			tmp = readl(mmio + AHCI_VEND_AXICC);
+			tmp = pete_readl("drivers/ata/ahci_ceva.c:152", mmio + AHCI_VEND_AXICC);
 			tmp |= AXICC_ARCA_VAL | AXICC_ARCF_VAL |
 				AXICC_ARCH_VAL | AXICC_ARCP_VAL |
 				AXICC_AWCFD_VAL | AXICC_AWCD_VAL |
 				AXICC_AWCF_VAL;
-			writel(tmp, mmio + AHCI_VEND_AXICC);
+			pete_writel("drivers/ata/ahci_ceva.c:157", tmp, mmio + AHCI_VEND_AXICC);
 		}
 
 		/* Port Phy Cfg register enables */
 		tmp = PPCFG_TTA | PPCFG_PSS_EN | PPCFG_ESDF_EN;
-		writel(tmp, mmio + AHCI_VEND_PPCFG);
+		pete_writel("drivers/ata/ahci_ceva.c:162", tmp, mmio + AHCI_VEND_PPCFG);
 
 		/* Phy Control OOB timing parameters COMINIT */
-		writel(cevapriv->pp2c[i], mmio + AHCI_VEND_PP2C);
+		pete_writel("drivers/ata/ahci_ceva.c:165", cevapriv->pp2c[i], mmio + AHCI_VEND_PP2C);
 
 		/* Phy Control OOB timing parameters COMWAKE */
-		writel(cevapriv->pp3c[i], mmio + AHCI_VEND_PP3C);
+		pete_writel("drivers/ata/ahci_ceva.c:168", cevapriv->pp3c[i], mmio + AHCI_VEND_PP3C);
 
 		/* Phy Control Burst timing setting */
-		writel(cevapriv->pp4c[i], mmio + AHCI_VEND_PP4C);
+		pete_writel("drivers/ata/ahci_ceva.c:171", cevapriv->pp4c[i], mmio + AHCI_VEND_PP4C);
 
 		/* Rate Change Timer and Retry Interval Timer setting */
-		writel(cevapriv->pp5c[i], mmio + AHCI_VEND_PP5C);
+		pete_writel("drivers/ata/ahci_ceva.c:174", cevapriv->pp5c[i], mmio + AHCI_VEND_PP5C);
 
 		/* Rx Watermark setting  */
 		tmp = rx_watermark | PTC_RSVD;
-		writel(tmp, mmio + AHCI_VEND_PTC);
+		pete_writel("drivers/ata/ahci_ceva.c:178", tmp, mmio + AHCI_VEND_PTC);
 
 		/* Default to Gen 3 Speed and Gen 1 if Gen2 is broken */
 		tmp = PORT_SCTL_SPD_GEN3 | PORT_SCTL_IPM;
 		if (cevapriv->flags & CEVA_FLAG_BROKEN_GEN2)
 			tmp = PORT_SCTL_SPD_GEN1 | PORT_SCTL_IPM;
-		writel(tmp, mmio + PORT_SCR_CTL + PORT_BASE + PORT_OFFSET * i);
+		pete_writel("drivers/ata/ahci_ceva.c:184", tmp, mmio + PORT_SCR_CTL + PORT_BASE + PORT_OFFSET * i);
 	}
 }
 

@@ -74,7 +74,7 @@ static unsigned long g12a_ephy_pll_recalc_rate(struct clk_hw *hw,
 	struct g12a_ephy_pll *pll = g12a_ephy_pll_to_dev(hw);
 	u32 val, m, n;
 
-	val = readl(pll->base + ETH_PLL_CTL0);
+	val = pete_readl("drivers/net/mdio/mdio-mux-meson-g12a.c:77", pll->base + ETH_PLL_CTL0);
 	m = FIELD_GET(PLL_CTL0_M, val);
 	n = FIELD_GET(PLL_CTL0_N, val);
 
@@ -84,15 +84,15 @@ static unsigned long g12a_ephy_pll_recalc_rate(struct clk_hw *hw,
 static int g12a_ephy_pll_enable(struct clk_hw *hw)
 {
 	struct g12a_ephy_pll *pll = g12a_ephy_pll_to_dev(hw);
-	u32 val = readl(pll->base + ETH_PLL_CTL0);
+	u32 val = pete_readl("drivers/net/mdio/mdio-mux-meson-g12a.c:87", pll->base + ETH_PLL_CTL0);
 
 	/* Apply both enable an reset */
 	val |= PLL_CTL0_RST | PLL_CTL0_EN;
-	writel(val, pll->base + ETH_PLL_CTL0);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-g12a.c:91", val, pll->base + ETH_PLL_CTL0);
 
 	/* Clear the reset to let PLL lock */
 	val &= ~PLL_CTL0_RST;
-	writel(val, pll->base + ETH_PLL_CTL0);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-g12a.c:95", val, pll->base + ETH_PLL_CTL0);
 
 	/* Poll on the digital lock instead of the usual analog lock
 	 * This is done because bit 31 is unreliable on some SoC. Bit
@@ -108,10 +108,10 @@ static void g12a_ephy_pll_disable(struct clk_hw *hw)
 	struct g12a_ephy_pll *pll = g12a_ephy_pll_to_dev(hw);
 	u32 val;
 
-	val = readl(pll->base + ETH_PLL_CTL0);
+	val = pete_readl("drivers/net/mdio/mdio-mux-meson-g12a.c:111", pll->base + ETH_PLL_CTL0);
 	val &= ~PLL_CTL0_EN;
 	val |= PLL_CTL0_RST;
-	writel(val, pll->base + ETH_PLL_CTL0);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-g12a.c:114", val, pll->base + ETH_PLL_CTL0);
 }
 
 static int g12a_ephy_pll_is_enabled(struct clk_hw *hw)
@@ -119,7 +119,7 @@ static int g12a_ephy_pll_is_enabled(struct clk_hw *hw)
 	struct g12a_ephy_pll *pll = g12a_ephy_pll_to_dev(hw);
 	unsigned int val;
 
-	val = readl(pll->base + ETH_PLL_CTL0);
+	val = pete_readl("drivers/net/mdio/mdio-mux-meson-g12a.c:122", pll->base + ETH_PLL_CTL0);
 
 	return (val & PLL_CTL0_LOCK_DIG) ? 1 : 0;
 }
@@ -129,14 +129,14 @@ static int g12a_ephy_pll_init(struct clk_hw *hw)
 	struct g12a_ephy_pll *pll = g12a_ephy_pll_to_dev(hw);
 
 	/* Apply PLL HW settings */
-	writel(0x29c0040a, pll->base + ETH_PLL_CTL0);
-	writel(0x927e0000, pll->base + ETH_PLL_CTL1);
-	writel(0xac5f49e5, pll->base + ETH_PLL_CTL2);
-	writel(0x00000000, pll->base + ETH_PLL_CTL3);
-	writel(0x00000000, pll->base + ETH_PLL_CTL4);
-	writel(0x20200000, pll->base + ETH_PLL_CTL5);
-	writel(0x0000c002, pll->base + ETH_PLL_CTL6);
-	writel(0x00000023, pll->base + ETH_PLL_CTL7);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-g12a.c:132", 0x29c0040a, pll->base + ETH_PLL_CTL0);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-g12a.c:133", 0x927e0000, pll->base + ETH_PLL_CTL1);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-g12a.c:134", 0xac5f49e5, pll->base + ETH_PLL_CTL2);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-g12a.c:135", 0x00000000, pll->base + ETH_PLL_CTL3);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-g12a.c:136", 0x00000000, pll->base + ETH_PLL_CTL4);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-g12a.c:137", 0x20200000, pll->base + ETH_PLL_CTL5);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-g12a.c:138", 0x0000c002, pll->base + ETH_PLL_CTL6);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-g12a.c:139", 0x00000023, pll->base + ETH_PLL_CTL7);
 
 	return 0;
 }
@@ -164,7 +164,7 @@ static int g12a_enable_internal_mdio(struct g12a_mdio_mux *priv)
 	priv->pll_is_enabled = true;
 
 	/* Initialize ephy control */
-	writel(EPHY_G12A_ID, priv->regs + ETH_PHY_CNTL0);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-g12a.c:167", EPHY_G12A_ID, priv->regs + ETH_PHY_CNTL0);
 
 	/* Make sure we get a 0 -> 1 transition on the enable bit */
 	value = FIELD_PREP(PHY_CNTL1_ST_MODE, 3) |
@@ -172,14 +172,14 @@ static int g12a_enable_internal_mdio(struct g12a_mdio_mux *priv)
 		FIELD_PREP(PHY_CNTL1_MII_MODE, EPHY_MODE_RMII) |
 		PHY_CNTL1_CLK_EN |
 		PHY_CNTL1_CLKFREQ;
-	writel(value, priv->regs + ETH_PHY_CNTL1);
-	writel(PHY_CNTL2_USE_INTERNAL |
+	pete_writel("drivers/net/mdio/mdio-mux-meson-g12a.c:175", value, priv->regs + ETH_PHY_CNTL1);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-g12a.c:176", PHY_CNTL2_USE_INTERNAL |
 	       PHY_CNTL2_SMI_SRC_MAC |
 	       PHY_CNTL2_RX_CLK_EPHY,
 	       priv->regs + ETH_PHY_CNTL2);
 
 	value |= PHY_CNTL1_PHY_ENB;
-	writel(value, priv->regs + ETH_PHY_CNTL1);
+	pete_writel("drivers/net/mdio/mdio-mux-meson-g12a.c:182", value, priv->regs + ETH_PHY_CNTL1);
 
 	/* The phy needs a bit of time to power up */
 	mdelay(10);

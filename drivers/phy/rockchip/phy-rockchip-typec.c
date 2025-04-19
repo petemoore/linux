@@ -462,21 +462,21 @@ static void tcphy_cfg_24m(struct rockchip_typec_phy *tcphy)
 	 * cmn_ref_clk_sel = 3, select the 24Mhz for clk parent
 	 * cmn_psm_clk_dig_div = 2, set the clk division to 2
 	 */
-	writel(0x830, tcphy->base + PMA_CMN_CTRL1);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:465", 0x830, tcphy->base + PMA_CMN_CTRL1);
 	for (i = 0; i < 4; i++) {
 		/*
 		 * The following PHY configuration assumes a 24 MHz reference
 		 * clock.
 		 */
-		writel(0x90, tcphy->base + XCVR_DIAG_LANE_FCM_EN_MGN(i));
-		writel(0x960, tcphy->base + TX_RCVDET_EN_TMR(i));
-		writel(0x30, tcphy->base + TX_RCVDET_ST_TMR(i));
+		pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:471", 0x90, tcphy->base + XCVR_DIAG_LANE_FCM_EN_MGN(i));
+		pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:472", 0x960, tcphy->base + TX_RCVDET_EN_TMR(i));
+		pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:473", 0x30, tcphy->base + TX_RCVDET_ST_TMR(i));
 	}
 
-	rdata = readl(tcphy->base + CMN_DIAG_HSCLK_SEL);
+	rdata = pete_readl("drivers/phy/rockchip/phy-rockchip-typec.c:476", tcphy->base + CMN_DIAG_HSCLK_SEL);
 	rdata &= ~CLK_PLL_MASK;
 	rdata |= CLK_PLL_CONFIG;
-	writel(rdata, tcphy->base + CMN_DIAG_HSCLK_SEL);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:479", rdata, tcphy->base + CMN_DIAG_HSCLK_SEL);
 }
 
 static void tcphy_cfg_usb3_pll(struct rockchip_typec_phy *tcphy)
@@ -485,7 +485,7 @@ static void tcphy_cfg_usb3_pll(struct rockchip_typec_phy *tcphy)
 
 	/* load the configuration of PLL0 */
 	for (i = 0; i < ARRAY_SIZE(usb3_pll_cfg); i++)
-		writel(usb3_pll_cfg[i].value,
+		pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:488", usb3_pll_cfg[i].value,
 		       tcphy->base + usb3_pll_cfg[i].addr);
 }
 
@@ -494,67 +494,67 @@ static void tcphy_cfg_dp_pll(struct rockchip_typec_phy *tcphy)
 	u32 i;
 
 	/* set the default mode to RBR */
-	writel(DP_PLL_CLOCK_ENABLE | DP_PLL_ENABLE | DP_PLL_DATA_RATE_RBR,
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:497", DP_PLL_CLOCK_ENABLE | DP_PLL_ENABLE | DP_PLL_DATA_RATE_RBR,
 	       tcphy->base + DP_CLK_CTL);
 
 	/* load the configuration of PLL1 */
 	for (i = 0; i < ARRAY_SIZE(dp_pll_cfg); i++)
-		writel(dp_pll_cfg[i].value, tcphy->base + dp_pll_cfg[i].addr);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:502", dp_pll_cfg[i].value, tcphy->base + dp_pll_cfg[i].addr);
 }
 
 static void tcphy_tx_usb3_cfg_lane(struct rockchip_typec_phy *tcphy, u32 lane)
 {
-	writel(0x7799, tcphy->base + TX_PSC_A0(lane));
-	writel(0x7798, tcphy->base + TX_PSC_A1(lane));
-	writel(0x5098, tcphy->base + TX_PSC_A2(lane));
-	writel(0x5098, tcphy->base + TX_PSC_A3(lane));
-	writel(0, tcphy->base + TX_TXCC_MGNFS_MULT_000(lane));
-	writel(0xbf, tcphy->base + XCVR_DIAG_BIDI_CTRL(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:507", 0x7799, tcphy->base + TX_PSC_A0(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:508", 0x7798, tcphy->base + TX_PSC_A1(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:509", 0x5098, tcphy->base + TX_PSC_A2(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:510", 0x5098, tcphy->base + TX_PSC_A3(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:511", 0, tcphy->base + TX_TXCC_MGNFS_MULT_000(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:512", 0xbf, tcphy->base + XCVR_DIAG_BIDI_CTRL(lane));
 }
 
 static void tcphy_rx_usb3_cfg_lane(struct rockchip_typec_phy *tcphy, u32 lane)
 {
-	writel(0xa6fd, tcphy->base + RX_PSC_A0(lane));
-	writel(0xa6fd, tcphy->base + RX_PSC_A1(lane));
-	writel(0xa410, tcphy->base + RX_PSC_A2(lane));
-	writel(0x2410, tcphy->base + RX_PSC_A3(lane));
-	writel(0x23ff, tcphy->base + RX_PSC_CAL(lane));
-	writel(0x13, tcphy->base + RX_SIGDET_HL_FILT_TMR(lane));
-	writel(0x03e7, tcphy->base + RX_REE_CTRL_DATA_MASK(lane));
-	writel(0x1004, tcphy->base + RX_DIAG_SIGDET_TUNE(lane));
-	writel(0x2010, tcphy->base + RX_PSC_RDY(lane));
-	writel(0xfb, tcphy->base + XCVR_DIAG_BIDI_CTRL(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:517", 0xa6fd, tcphy->base + RX_PSC_A0(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:518", 0xa6fd, tcphy->base + RX_PSC_A1(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:519", 0xa410, tcphy->base + RX_PSC_A2(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:520", 0x2410, tcphy->base + RX_PSC_A3(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:521", 0x23ff, tcphy->base + RX_PSC_CAL(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:522", 0x13, tcphy->base + RX_SIGDET_HL_FILT_TMR(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:523", 0x03e7, tcphy->base + RX_REE_CTRL_DATA_MASK(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:524", 0x1004, tcphy->base + RX_DIAG_SIGDET_TUNE(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:525", 0x2010, tcphy->base + RX_PSC_RDY(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:526", 0xfb, tcphy->base + XCVR_DIAG_BIDI_CTRL(lane));
 }
 
 static void tcphy_dp_cfg_lane(struct rockchip_typec_phy *tcphy, u32 lane)
 {
 	u16 rdata;
 
-	writel(0xbefc, tcphy->base + XCVR_PSM_RCTRL(lane));
-	writel(0x6799, tcphy->base + TX_PSC_A0(lane));
-	writel(0x6798, tcphy->base + TX_PSC_A1(lane));
-	writel(0x98, tcphy->base + TX_PSC_A2(lane));
-	writel(0x98, tcphy->base + TX_PSC_A3(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:533", 0xbefc, tcphy->base + XCVR_PSM_RCTRL(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:534", 0x6799, tcphy->base + TX_PSC_A0(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:535", 0x6798, tcphy->base + TX_PSC_A1(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:536", 0x98, tcphy->base + TX_PSC_A2(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:537", 0x98, tcphy->base + TX_PSC_A3(lane));
 
-	writel(0, tcphy->base + TX_TXCC_MGNFS_MULT_000(lane));
-	writel(0, tcphy->base + TX_TXCC_MGNFS_MULT_001(lane));
-	writel(0, tcphy->base + TX_TXCC_MGNFS_MULT_010(lane));
-	writel(0, tcphy->base + TX_TXCC_MGNFS_MULT_011(lane));
-	writel(0, tcphy->base + TX_TXCC_MGNFS_MULT_100(lane));
-	writel(0, tcphy->base + TX_TXCC_MGNFS_MULT_101(lane));
-	writel(0, tcphy->base + TX_TXCC_MGNFS_MULT_110(lane));
-	writel(0, tcphy->base + TX_TXCC_MGNFS_MULT_111(lane));
-	writel(0, tcphy->base + TX_TXCC_CPOST_MULT_10(lane));
-	writel(0, tcphy->base + TX_TXCC_CPOST_MULT_01(lane));
-	writel(0, tcphy->base + TX_TXCC_CPOST_MULT_00(lane));
-	writel(0, tcphy->base + TX_TXCC_CPOST_MULT_11(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:539", 0, tcphy->base + TX_TXCC_MGNFS_MULT_000(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:540", 0, tcphy->base + TX_TXCC_MGNFS_MULT_001(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:541", 0, tcphy->base + TX_TXCC_MGNFS_MULT_010(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:542", 0, tcphy->base + TX_TXCC_MGNFS_MULT_011(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:543", 0, tcphy->base + TX_TXCC_MGNFS_MULT_100(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:544", 0, tcphy->base + TX_TXCC_MGNFS_MULT_101(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:545", 0, tcphy->base + TX_TXCC_MGNFS_MULT_110(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:546", 0, tcphy->base + TX_TXCC_MGNFS_MULT_111(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:547", 0, tcphy->base + TX_TXCC_CPOST_MULT_10(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:548", 0, tcphy->base + TX_TXCC_CPOST_MULT_01(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:549", 0, tcphy->base + TX_TXCC_CPOST_MULT_00(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:550", 0, tcphy->base + TX_TXCC_CPOST_MULT_11(lane));
 
-	writel(0x128, tcphy->base + TX_TXCC_CAL_SCLR_MULT(lane));
-	writel(0x400, tcphy->base + TX_DIAG_TX_DRV(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:552", 0x128, tcphy->base + TX_TXCC_CAL_SCLR_MULT(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:553", 0x400, tcphy->base + TX_DIAG_TX_DRV(lane));
 
-	rdata = readl(tcphy->base + XCVR_DIAG_PLLDRC_CTRL(lane));
+	rdata = pete_readl("drivers/phy/rockchip/phy-rockchip-typec.c:555", tcphy->base + XCVR_DIAG_PLLDRC_CTRL(lane));
 	rdata = (rdata & 0x8fff) | 0x6000;
-	writel(rdata, tcphy->base + XCVR_DIAG_PLLDRC_CTRL(lane));
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:557", rdata, tcphy->base + XCVR_DIAG_PLLDRC_CTRL(lane));
 }
 
 static inline int property_enable(struct rockchip_typec_phy *tcphy,
@@ -577,12 +577,12 @@ static void tcphy_dp_aux_set_flip(struct rockchip_typec_phy *tcphy)
 	 * 0, Normal polarity (if TYPEC, pulls up aux_m and pulls down
 	 * aux_p)
 	 */
-	tx_ana_ctrl_reg_1 = readl(tcphy->base + TX_ANA_CTRL_REG_1);
+	tx_ana_ctrl_reg_1 = pete_readl("drivers/phy/rockchip/phy-rockchip-typec.c:580", tcphy->base + TX_ANA_CTRL_REG_1);
 	if (!tcphy->flip)
 		tx_ana_ctrl_reg_1 |= AUXDA_POLARITY;
 	else
 		tx_ana_ctrl_reg_1 &= ~AUXDA_POLARITY;
-	writel(tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:585", tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
 }
 
 static void tcphy_dp_aux_calibration(struct rockchip_typec_phy *tcphy)
@@ -598,26 +598,26 @@ static void tcphy_dp_aux_calibration(struct rockchip_typec_phy *tcphy)
 	 * Calculate calibration code as per docs: use an average of the
 	 * pull down and pull up.  Then add in adjustments.
 	 */
-	val = readl(tcphy->base + CMN_TXPUCAL_CTRL);
+	val = pete_readl("drivers/phy/rockchip/phy-rockchip-typec.c:601", tcphy->base + CMN_TXPUCAL_CTRL);
 	pu_calib_code = CMN_CALIB_CODE_POS(val);
-	val = readl(tcphy->base + CMN_TXPDCAL_CTRL);
+	val = pete_readl("drivers/phy/rockchip/phy-rockchip-typec.c:603", tcphy->base + CMN_TXPDCAL_CTRL);
 	pd_calib_code = CMN_CALIB_CODE_POS(val);
-	val = readl(tcphy->base + CMN_TXPU_ADJ_CTRL);
+	val = pete_readl("drivers/phy/rockchip/phy-rockchip-typec.c:605", tcphy->base + CMN_TXPU_ADJ_CTRL);
 	pu_adj = CMN_CALIB_CODE(val);
-	val = readl(tcphy->base + CMN_TXPD_ADJ_CTRL);
+	val = pete_readl("drivers/phy/rockchip/phy-rockchip-typec.c:607", tcphy->base + CMN_TXPD_ADJ_CTRL);
 	pd_adj = CMN_CALIB_CODE(val);
 	calib = (pu_calib_code + pd_calib_code) / 2 + pu_adj + pd_adj;
 
 	/* disable txda_cal_latch_en for rewrite the calibration values */
-	tx_ana_ctrl_reg_1 = readl(tcphy->base + TX_ANA_CTRL_REG_1);
+	tx_ana_ctrl_reg_1 = pete_readl("drivers/phy/rockchip/phy-rockchip-typec.c:612", tcphy->base + TX_ANA_CTRL_REG_1);
 	tx_ana_ctrl_reg_1 &= ~TXDA_CAL_LATCH_EN;
-	writel(tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:614", tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
 
 	/* write the calibration, then delay 10 ms as sample in docs */
-	val = readl(tcphy->base + TX_DIG_CTRL_REG_2);
+	val = pete_readl("drivers/phy/rockchip/phy-rockchip-typec.c:617", tcphy->base + TX_DIG_CTRL_REG_2);
 	val &= ~(TX_RESCAL_CODE_MASK << TX_RESCAL_CODE_OFFSET);
 	val |= calib << TX_RESCAL_CODE_OFFSET;
-	writel(val, tcphy->base + TX_DIG_CTRL_REG_2);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:620", val, tcphy->base + TX_DIG_CTRL_REG_2);
 	usleep_range(10000, 10050);
 
 	/*
@@ -626,51 +626,51 @@ static void tcphy_dp_aux_calibration(struct rockchip_typec_phy *tcphy)
 	 * values.
 	 */
 	tx_ana_ctrl_reg_1 |= TXDA_CAL_LATCH_EN;
-	writel(tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:629", tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
 	usleep_range(150, 200);
 
 	/* set TX Voltage Level and TX Deemphasis to 0 */
-	writel(0, tcphy->base + PHY_DP_TX_CTL);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:633", 0, tcphy->base + PHY_DP_TX_CTL);
 
 	/* re-enable decap */
 	tx_ana_ctrl_reg_2 = XCVR_DECAP_EN;
-	writel(tx_ana_ctrl_reg_2, tcphy->base + TX_ANA_CTRL_REG_2);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:637", tx_ana_ctrl_reg_2, tcphy->base + TX_ANA_CTRL_REG_2);
 	udelay(1);
 	tx_ana_ctrl_reg_2 |= XCVR_DECAP_EN_DEL;
-	writel(tx_ana_ctrl_reg_2, tcphy->base + TX_ANA_CTRL_REG_2);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:640", tx_ana_ctrl_reg_2, tcphy->base + TX_ANA_CTRL_REG_2);
 
-	writel(0, tcphy->base + TX_ANA_CTRL_REG_3);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:642", 0, tcphy->base + TX_ANA_CTRL_REG_3);
 
 	tx_ana_ctrl_reg_1 |= TXDA_UPHY_SUPPLY_EN;
-	writel(tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:645", tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
 	udelay(1);
 	tx_ana_ctrl_reg_1 |= TXDA_UPHY_SUPPLY_EN_DEL;
-	writel(tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:648", tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
 
-	writel(0, tcphy->base + TX_ANA_CTRL_REG_5);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:650", 0, tcphy->base + TX_ANA_CTRL_REG_5);
 
 	/*
 	 * Programs txda_drv_ldo_prog[15:0], Sets driver LDO
 	 * voltage 16'h1001 for DP-AUX-TX and RX
 	 */
-	writel(0x1001, tcphy->base + TX_ANA_CTRL_REG_4);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:656", 0x1001, tcphy->base + TX_ANA_CTRL_REG_4);
 
 	/* re-enables Bandgap reference for LDO */
 	tx_ana_ctrl_reg_1 |= TXDA_DRV_LDO_EN;
-	writel(tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:660", tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
 	udelay(5);
 	tx_ana_ctrl_reg_1 |= TXDA_BGREF_EN;
-	writel(tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:663", tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
 
 	/*
 	 * re-enables the transmitter pre-driver, driver data selection MUX,
 	 * and receiver detect circuits.
 	 */
 	tx_ana_ctrl_reg_2 |= TXDA_DRV_PREDRV_EN;
-	writel(tx_ana_ctrl_reg_2, tcphy->base + TX_ANA_CTRL_REG_2);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:670", tx_ana_ctrl_reg_2, tcphy->base + TX_ANA_CTRL_REG_2);
 	udelay(1);
 	tx_ana_ctrl_reg_2 |= TXDA_DRV_PREDRV_EN_DEL;
-	writel(tx_ana_ctrl_reg_2, tcphy->base + TX_ANA_CTRL_REG_2);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:673", tx_ana_ctrl_reg_2, tcphy->base + TX_ANA_CTRL_REG_2);
 
 	/*
 	 * Do all the undocumented magic:
@@ -687,23 +687,23 @@ static void tcphy_dp_aux_calibration(struct rockchip_typec_phy *tcphy)
 	tx_ana_ctrl_reg_1 |= TXDA_DECAP_EN;
 	tx_ana_ctrl_reg_1 &= ~TXDA_DRV_LDO_EN;
 	tx_ana_ctrl_reg_1 &= ~TXDA_BGREF_EN;
-	writel(tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:690", tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
 	udelay(1);
 	tx_ana_ctrl_reg_1 |= TXDA_DECAP_EN_DEL;
-	writel(tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:693", tx_ana_ctrl_reg_1, tcphy->base + TX_ANA_CTRL_REG_1);
 
 	/*
 	 * Undo the work we did to set the LDO voltage.
 	 * This doesn't seem to help nor hurt, but it kinda goes with the
 	 * undocumented magic above.
 	 */
-	writel(0, tcphy->base + TX_ANA_CTRL_REG_4);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:700", 0, tcphy->base + TX_ANA_CTRL_REG_4);
 
 	/* Don't set voltage swing to 400 mV peak to peak (differential) */
-	writel(0, tcphy->base + TXDA_COEFF_CALC_CTRL);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:703", 0, tcphy->base + TXDA_COEFF_CALC_CTRL);
 
 	/* Init TXDA_CYA_AUXDA_CYA for unknown magic reasons */
-	writel(0, tcphy->base + TXDA_CYA_AUXDA_CYA);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:706", 0, tcphy->base + TXDA_CYA_AUXDA_CYA);
 
 	/*
 	 * More undocumented magic, presumably the goal of which is to
@@ -714,9 +714,9 @@ static void tcphy_dp_aux_calibration(struct rockchip_typec_phy *tcphy)
 	 * presumably the goal here is that we should never put the analog
 	 * driver in high impedance state.
 	 */
-	val = readl(tcphy->base + TX_DIG_CTRL_REG_2);
+	val = pete_readl("drivers/phy/rockchip/phy-rockchip-typec.c:717", tcphy->base + TX_DIG_CTRL_REG_2);
 	val |= TX_HIGH_Z_TM_EN;
-	writel(val, tcphy->base + TX_DIG_CTRL_REG_2);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:719", val, tcphy->base + TX_DIG_CTRL_REG_2);
 }
 
 static int tcphy_phy_init(struct rockchip_typec_phy *tcphy, u8 mode)
@@ -749,7 +749,7 @@ static int tcphy_phy_init(struct rockchip_typec_phy *tcphy, u8 mode)
 		for (i = 0; i < 4; i++)
 			tcphy_dp_cfg_lane(tcphy, i);
 
-		writel(PIN_ASSIGN_C_E, tcphy->base + PMA_LANE_CFG);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:752", PIN_ASSIGN_C_E, tcphy->base + PMA_LANE_CFG);
 	} else {
 		tcphy_cfg_usb3_pll(tcphy);
 		tcphy_cfg_dp_pll(tcphy);
@@ -765,10 +765,10 @@ static int tcphy_phy_init(struct rockchip_typec_phy *tcphy, u8 mode)
 			tcphy_dp_cfg_lane(tcphy, 3);
 		}
 
-		writel(PIN_ASSIGN_D_F, tcphy->base + PMA_LANE_CFG);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:768", PIN_ASSIGN_D_F, tcphy->base + PMA_LANE_CFG);
 	}
 
-	writel(DP_MODE_ENTER_A2, tcphy->base + DP_MODE_CTL);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:771", DP_MODE_ENTER_A2, tcphy->base + DP_MODE_CTL);
 
 	reset_control_deassert(tcphy->uphy_rst);
 
@@ -990,13 +990,13 @@ static int rockchip_dp_phy_power_on(struct phy *phy)
 
 	tcphy_dp_aux_calibration(tcphy);
 
-	writel(DP_MODE_ENTER_A0, tcphy->base + DP_MODE_CTL);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:993", DP_MODE_ENTER_A0, tcphy->base + DP_MODE_CTL);
 
 	ret = readx_poll_timeout(readl, tcphy->base + DP_MODE_CTL,
 				 val, val & DP_MODE_A0, 1000,
 				 PHY_MODE_SET_TIMEOUT);
 	if (ret < 0) {
-		writel(DP_MODE_ENTER_A2, tcphy->base + DP_MODE_CTL);
+		pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:999", DP_MODE_ENTER_A2, tcphy->base + DP_MODE_CTL);
 		dev_err(tcphy->dev, "failed to wait TCPHY enter A0\n");
 		goto power_on_finish;
 	}
@@ -1022,7 +1022,7 @@ static int rockchip_dp_phy_power_off(struct phy *phy)
 
 	tcphy->mode &= ~MODE_DFP_DP;
 
-	writel(DP_MODE_ENTER_A2, tcphy->base + DP_MODE_CTL);
+	pete_writel("drivers/phy/rockchip/phy-rockchip-typec.c:1025", DP_MODE_ENTER_A2, tcphy->base + DP_MODE_CTL);
 
 	if (tcphy->mode == MODE_DISCONNECT)
 		tcphy_phy_deinit(tcphy);

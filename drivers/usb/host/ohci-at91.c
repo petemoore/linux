@@ -109,7 +109,7 @@ static void at91_start_hc(struct platform_device *pdev)
 	/*
 	 * The USB host controller must remain in reset.
 	 */
-	writel(0, &regs->control);
+	pete_writel("drivers/usb/host/ohci-at91.c:112", 0, &regs->control);
 }
 
 static void at91_stop_hc(struct platform_device *pdev)

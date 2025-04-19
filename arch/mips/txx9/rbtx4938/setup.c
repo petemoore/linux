@@ -30,9 +30,9 @@
 static void rbtx4938_machine_restart(char *command)
 {
 	local_irq_disable();
-	writeb(1, rbtx4938_softresetlock_addr);
-	writeb(1, rbtx4938_sfvol_addr);
-	writeb(1, rbtx4938_softreset_addr);
+	pete_writeb("arch/mips/txx9/rbtx4938/setup.c:33", 1, rbtx4938_softresetlock_addr);
+	pete_writeb("arch/mips/txx9/rbtx4938/setup.c:34", 1, rbtx4938_sfvol_addr);
+	pete_writeb("arch/mips/txx9/rbtx4938/setup.c:35", 1, rbtx4938_softreset_addr);
 	/* fallback */
 	(*_machine_halt)();
 }
@@ -51,7 +51,7 @@ static void __init rbtx4938_pci_setup(void)
 			TXX9_PCI_OPT_CLK_66; /* already configured */
 
 	/* Reset PCI Bus */
-	writeb(0, rbtx4938_pcireset_addr);
+	pete_writeb("arch/mips/txx9/rbtx4938/setup.c:54", 0, rbtx4938_pcireset_addr);
 	/* Reset PCIC */
 	txx9_set64(&tx4938_ccfgptr->clkctr, TX4938_CLKCTR_PCIRST);
 	if ((txx9_pci_option & TXX9_PCI_OPT_CLK_MASK) ==
@@ -60,7 +60,7 @@ static void __init rbtx4938_pci_setup(void)
 	mdelay(10);
 	/* clear PCIC reset */
 	txx9_clear64(&tx4938_ccfgptr->clkctr, TX4938_CLKCTR_PCIRST);
-	writeb(1, rbtx4938_pcireset_addr);
+	pete_writeb("arch/mips/txx9/rbtx4938/setup.c:63", 1, rbtx4938_pcireset_addr);
 	iob();
 
 	tx4938_report_pciclk();
@@ -69,14 +69,14 @@ static void __init rbtx4938_pci_setup(void)
 	    TXX9_PCI_OPT_CLK_AUTO &&
 	    txx9_pci66_check(c, 0, 0)) {
 		/* Reset PCI Bus */
-		writeb(0, rbtx4938_pcireset_addr);
+		pete_writeb("arch/mips/txx9/rbtx4938/setup.c:72", 0, rbtx4938_pcireset_addr);
 		/* Reset PCIC */
 		txx9_set64(&tx4938_ccfgptr->clkctr, TX4938_CLKCTR_PCIRST);
 		tx4938_pciclk66_setup();
 		mdelay(10);
 		/* clear PCIC reset */
 		txx9_clear64(&tx4938_ccfgptr->clkctr, TX4938_CLKCTR_PCIRST);
-		writeb(1, rbtx4938_pcireset_addr);
+		pete_writeb("arch/mips/txx9/rbtx4938/setup.c:79", 1, rbtx4938_pcireset_addr);
 		iob();
 		/* Reinitialize PCIC */
 		tx4938_report_pciclk();
@@ -199,14 +199,14 @@ static void __init rbtx4938_mem_setup(void)
 	/* fixup piosel */
 	if ((pcfg & (TX4938_PCFG_ATA_SEL | TX4938_PCFG_NDF_SEL)) ==
 	    TX4938_PCFG_ATA_SEL)
-		writeb((readb(rbtx4938_piosel_addr) & 0x03) | 0x04,
+		pete_writeb("arch/mips/txx9/rbtx4938/setup.c:202", (pete_readb("arch/mips/txx9/rbtx4938/setup.c:202", rbtx4938_piosel_addr) & 0x03) | 0x04,
 		       rbtx4938_piosel_addr);
 	else if ((pcfg & (TX4938_PCFG_ATA_SEL | TX4938_PCFG_NDF_SEL)) ==
 		 TX4938_PCFG_NDF_SEL)
-		writeb((readb(rbtx4938_piosel_addr) & 0x03) | 0x08,
+		pete_writeb("arch/mips/txx9/rbtx4938/setup.c:206", (pete_readb("arch/mips/txx9/rbtx4938/setup.c:206", rbtx4938_piosel_addr) & 0x03) | 0x08,
 		       rbtx4938_piosel_addr);
 	else
-		writeb(readb(rbtx4938_piosel_addr) & ~(0x08 | 0x04),
+		pete_writeb("arch/mips/txx9/rbtx4938/setup.c:209", pete_readb("arch/mips/txx9/rbtx4938/setup.c:209", rbtx4938_piosel_addr) & ~(0x08 | 0x04),
 		       rbtx4938_piosel_addr);
 
 	rbtx4938_fpga_resource.name = "FPGA Registers";
@@ -218,10 +218,10 @@ static void __init rbtx4938_mem_setup(void)
 
 	_machine_restart = rbtx4938_machine_restart;
 
-	writeb(0xff, rbtx4938_led_addr);
+	pete_writeb("arch/mips/txx9/rbtx4938/setup.c:221", 0xff, rbtx4938_led_addr);
 	pr_info("RBTX4938 --- FPGA(Rev %02x) DIPSW:%02x,%02x\n",
-		readb(rbtx4938_fpga_rev_addr),
-		readb(rbtx4938_dipsw_addr), readb(rbtx4938_bdipsw_addr));
+		pete_readb("arch/mips/txx9/rbtx4938/setup.c:223", rbtx4938_fpga_rev_addr),
+		pete_readb("arch/mips/txx9/rbtx4938/setup.c:224", rbtx4938_dipsw_addr), pete_readb("arch/mips/txx9/rbtx4938/setup.c:224", rbtx4938_bdipsw_addr));
 }
 
 static void __init rbtx4938_ne_init(void)
@@ -247,12 +247,12 @@ static void rbtx4938_spi_gpio_set(struct gpio_chip *chip, unsigned int offset,
 	u8 val;
 	unsigned long flags;
 	spin_lock_irqsave(&rbtx4938_spi_gpio_lock, flags);
-	val = readb(rbtx4938_spics_addr);
+	val = pete_readb("arch/mips/txx9/rbtx4938/setup.c:250", rbtx4938_spics_addr);
 	if (value)
 		val |= 1 << offset;
 	else
 		val &= ~(1 << offset);
-	writeb(val, rbtx4938_spics_addr);
+	pete_writeb("arch/mips/txx9/rbtx4938/setup.c:255", val, rbtx4938_spics_addr);
 	mmiowb();
 	spin_unlock_irqrestore(&rbtx4938_spi_gpio_lock, flags);
 }
@@ -304,7 +304,7 @@ static void __init rbtx4938_mtd_init(void)
 		.width = 4,
 	};
 
-	switch (readb(rbtx4938_bdipsw_addr) & 7) {
+	switch (pete_readb("arch/mips/txx9/rbtx4938/setup.c:307", rbtx4938_bdipsw_addr) & 7) {
 	case 0:
 		/* Boot */
 		txx9_physmap_flash_init(0, 0x1fc00000, 0x400000, &pdata);

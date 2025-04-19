@@ -138,14 +138,14 @@ void sdw_intel_enable_irq(void __iomem *mmio_base, bool enable)
 {
 	u32 val;
 
-	val = readl(mmio_base + HDA_DSP_REG_ADSPIC2);
+	val = pete_readl("drivers/soundwire/intel_init.c:141", mmio_base + HDA_DSP_REG_ADSPIC2);
 
 	if (enable)
 		val |= HDA_DSP_REG_ADSPIC2_SNDW;
 	else
 		val &= ~HDA_DSP_REG_ADSPIC2_SNDW;
 
-	writel(val, mmio_base + HDA_DSP_REG_ADSPIC2);
+	pete_writel("drivers/soundwire/intel_init.c:148", val, mmio_base + HDA_DSP_REG_ADSPIC2);
 }
 EXPORT_SYMBOL_NS(sdw_intel_enable_irq, SOUNDWIRE_INTEL_INIT);
 

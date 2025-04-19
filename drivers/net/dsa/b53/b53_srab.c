@@ -95,12 +95,12 @@ static int b53_srab_request_grant(struct b53_device *dev)
 	u32 ctrls;
 	int i;
 
-	ctrls = readl(regs + B53_SRAB_CTRLS);
+	ctrls = pete_readl("drivers/net/dsa/b53/b53_srab.c:98", regs + B53_SRAB_CTRLS);
 	ctrls |= B53_SRAB_CTRLS_RCAREQ;
-	writel(ctrls, regs + B53_SRAB_CTRLS);
+	pete_writel("drivers/net/dsa/b53/b53_srab.c:100", ctrls, regs + B53_SRAB_CTRLS);
 
 	for (i = 0; i < 20; i++) {
-		ctrls = readl(regs + B53_SRAB_CTRLS);
+		ctrls = pete_readl("drivers/net/dsa/b53/b53_srab.c:103", regs + B53_SRAB_CTRLS);
 		if (ctrls & B53_SRAB_CTRLS_RCAGNT)
 			break;
 		usleep_range(10, 100);
@@ -117,9 +117,9 @@ static void b53_srab_release_grant(struct b53_device *dev)
 	u8 __iomem *regs = priv->regs;
 	u32 ctrls;
 
-	ctrls = readl(regs + B53_SRAB_CTRLS);
+	ctrls = pete_readl("drivers/net/dsa/b53/b53_srab.c:120", regs + B53_SRAB_CTRLS);
 	ctrls &= ~B53_SRAB_CTRLS_RCAREQ;
-	writel(ctrls, regs + B53_SRAB_CTRLS);
+	pete_writel("drivers/net/dsa/b53/b53_srab.c:122", ctrls, regs + B53_SRAB_CTRLS);
 }
 
 static int b53_srab_op(struct b53_device *dev, u8 page, u8 reg, u32 op)
@@ -134,11 +134,11 @@ static int b53_srab_op(struct b53_device *dev, u8 page, u8 reg, u32 op)
 		  (reg << B53_SRAB_CMDSTAT_REG) |
 		  B53_SRAB_CMDSTAT_GORDYN |
 		  op;
-	writel(cmdstat, regs + B53_SRAB_CMDSTAT);
+	pete_writel("drivers/net/dsa/b53/b53_srab.c:137", cmdstat, regs + B53_SRAB_CMDSTAT);
 
 	/* check if operation completed */
 	for (i = 0; i < 5; ++i) {
-		cmdstat = readl(regs + B53_SRAB_CMDSTAT);
+		cmdstat = pete_readl("drivers/net/dsa/b53/b53_srab.c:141", regs + B53_SRAB_CMDSTAT);
 		if (!(cmdstat & B53_SRAB_CMDSTAT_GORDYN))
 			break;
 		usleep_range(10, 100);
@@ -164,7 +164,7 @@ static int b53_srab_read8(struct b53_device *dev, u8 page, u8 reg, u8 *val)
 	if (ret)
 		goto err;
 
-	*val = readl(regs + B53_SRAB_RD_L) & 0xff;
+	*val = pete_readl("drivers/net/dsa/b53/b53_srab.c:167", regs + B53_SRAB_RD_L) & 0xff;
 
 err:
 	b53_srab_release_grant(dev);
@@ -186,7 +186,7 @@ static int b53_srab_read16(struct b53_device *dev, u8 page, u8 reg, u16 *val)
 	if (ret)
 		goto err;
 
-	*val = readl(regs + B53_SRAB_RD_L) & 0xffff;
+	*val = pete_readl("drivers/net/dsa/b53/b53_srab.c:189", regs + B53_SRAB_RD_L) & 0xffff;
 
 err:
 	b53_srab_release_grant(dev);
@@ -208,7 +208,7 @@ static int b53_srab_read32(struct b53_device *dev, u8 page, u8 reg, u32 *val)
 	if (ret)
 		goto err;
 
-	*val = readl(regs + B53_SRAB_RD_L);
+	*val = pete_readl("drivers/net/dsa/b53/b53_srab.c:211", regs + B53_SRAB_RD_L);
 
 err:
 	b53_srab_release_grant(dev);
@@ -230,8 +230,8 @@ static int b53_srab_read48(struct b53_device *dev, u8 page, u8 reg, u64 *val)
 	if (ret)
 		goto err;
 
-	*val = readl(regs + B53_SRAB_RD_L);
-	*val += ((u64)readl(regs + B53_SRAB_RD_H) & 0xffff) << 32;
+	*val = pete_readl("drivers/net/dsa/b53/b53_srab.c:233", regs + B53_SRAB_RD_L);
+	*val += ((u64)pete_readl("drivers/net/dsa/b53/b53_srab.c:234", regs + B53_SRAB_RD_H) & 0xffff) << 32;
 
 err:
 	b53_srab_release_grant(dev);
@@ -253,8 +253,8 @@ static int b53_srab_read64(struct b53_device *dev, u8 page, u8 reg, u64 *val)
 	if (ret)
 		goto err;
 
-	*val = readl(regs + B53_SRAB_RD_L);
-	*val += (u64)readl(regs + B53_SRAB_RD_H) << 32;
+	*val = pete_readl("drivers/net/dsa/b53/b53_srab.c:256", regs + B53_SRAB_RD_L);
+	*val += (u64)pete_readl("drivers/net/dsa/b53/b53_srab.c:257", regs + B53_SRAB_RD_H) << 32;
 
 err:
 	b53_srab_release_grant(dev);
@@ -272,7 +272,7 @@ static int b53_srab_write8(struct b53_device *dev, u8 page, u8 reg, u8 value)
 	if (ret)
 		goto err;
 
-	writel(value, regs + B53_SRAB_WD_L);
+	pete_writel("drivers/net/dsa/b53/b53_srab.c:275", value, regs + B53_SRAB_WD_L);
 
 	ret = b53_srab_op(dev, page, reg, B53_SRAB_CMDSTAT_WRITE);
 
@@ -293,7 +293,7 @@ static int b53_srab_write16(struct b53_device *dev, u8 page, u8 reg,
 	if (ret)
 		goto err;
 
-	writel(value, regs + B53_SRAB_WD_L);
+	pete_writel("drivers/net/dsa/b53/b53_srab.c:296", value, regs + B53_SRAB_WD_L);
 
 	ret = b53_srab_op(dev, page, reg, B53_SRAB_CMDSTAT_WRITE);
 
@@ -314,7 +314,7 @@ static int b53_srab_write32(struct b53_device *dev, u8 page, u8 reg,
 	if (ret)
 		goto err;
 
-	writel(value, regs + B53_SRAB_WD_L);
+	pete_writel("drivers/net/dsa/b53/b53_srab.c:317", value, regs + B53_SRAB_WD_L);
 
 	ret = b53_srab_op(dev, page, reg, B53_SRAB_CMDSTAT_WRITE);
 
@@ -335,8 +335,8 @@ static int b53_srab_write48(struct b53_device *dev, u8 page, u8 reg,
 	if (ret)
 		goto err;
 
-	writel((u32)value, regs + B53_SRAB_WD_L);
-	writel((u16)(value >> 32), regs + B53_SRAB_WD_H);
+	pete_writel("drivers/net/dsa/b53/b53_srab.c:338", (u32)value, regs + B53_SRAB_WD_L);
+	pete_writel("drivers/net/dsa/b53/b53_srab.c:339", (u16)(value >> 32), regs + B53_SRAB_WD_H);
 
 	ret = b53_srab_op(dev, page, reg, B53_SRAB_CMDSTAT_WRITE);
 
@@ -357,8 +357,8 @@ static int b53_srab_write64(struct b53_device *dev, u8 page, u8 reg,
 	if (ret)
 		goto err;
 
-	writel((u32)value, regs + B53_SRAB_WD_L);
-	writel((u32)(value >> 32), regs + B53_SRAB_WD_H);
+	pete_writel("drivers/net/dsa/b53/b53_srab.c:360", (u32)value, regs + B53_SRAB_WD_L);
+	pete_writel("drivers/net/dsa/b53/b53_srab.c:361", (u32)(value >> 32), regs + B53_SRAB_WD_H);
 
 	ret = b53_srab_op(dev, page, reg, B53_SRAB_CMDSTAT_WRITE);
 
@@ -386,7 +386,7 @@ static irqreturn_t b53_srab_port_isr(int irq, void *dev_id)
 	struct b53_srab_priv *priv = dev->priv;
 
 	/* Acknowledge the interrupt */
-	writel(BIT(port->num), priv->regs + B53_SRAB_INTR);
+	pete_writel("drivers/net/dsa/b53/b53_srab.c:389", BIT(port->num), priv->regs + B53_SRAB_INTR);
 
 	return IRQ_WAKE_THREAD;
 }
@@ -492,12 +492,12 @@ static void b53_srab_intr_set(struct b53_srab_priv *priv, bool set)
 {
 	u32 reg;
 
-	reg = readl(priv->regs + B53_SRAB_CTRLS);
+	reg = pete_readl("drivers/net/dsa/b53/b53_srab.c:495", priv->regs + B53_SRAB_CTRLS);
 	if (set)
 		reg |= B53_SRAB_CTRLS_HOST_INTR;
 	else
 		reg &= ~B53_SRAB_CTRLS_HOST_INTR;
-	writel(reg, priv->regs + B53_SRAB_CTRLS);
+	pete_writel("drivers/net/dsa/b53/b53_srab.c:500", reg, priv->regs + B53_SRAB_CTRLS);
 }
 
 static void b53_srab_prepare_irq(struct platform_device *pdev)
@@ -509,7 +509,7 @@ static void b53_srab_prepare_irq(struct platform_device *pdev)
 	char *name;
 
 	/* Clear all pending interrupts */
-	writel(0xffffffff, priv->regs + B53_SRAB_INTR);
+	pete_writel("drivers/net/dsa/b53/b53_srab.c:512", 0xffffffff, priv->regs + B53_SRAB_INTR);
 
 	for (i = 0; i < B53_N_PORTS; i++) {
 		port = &priv->port_intrs[i];
@@ -553,7 +553,7 @@ static void b53_srab_mux_init(struct platform_device *pdev)
 	for (port = 5; port > 3; port--, off += 4) {
 		p = &priv->port_intrs[port];
 
-		reg = readl(priv->mux_config + B53_MUX_CONFIG_P5 + off);
+		reg = pete_readl("drivers/net/dsa/b53/b53_srab.c:556", priv->mux_config + B53_MUX_CONFIG_P5 + off);
 		switch (reg & MUX_CONFIG_MASK) {
 		case MUX_CONFIG_SGMII:
 			p->mode = PHY_INTERFACE_MODE_SGMII;

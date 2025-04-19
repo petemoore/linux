@@ -526,12 +526,12 @@ static void log_ar_at_event(struct fw_ohci *ohci,
 
 static inline void reg_write(const struct fw_ohci *ohci, int offset, u32 data)
 {
-	writel(data, ohci->registers + offset);
+	pete_writel("drivers/firewire/ohci.c:529", data, ohci->registers + offset);
 }
 
 static inline u32 reg_read(const struct fw_ohci *ohci, int offset)
 {
-	return readl(ohci->registers + offset);
+	return pete_readl("drivers/firewire/ohci.c:534", ohci->registers + offset);
 }
 
 static inline void flush_writes(const struct fw_ohci *ohci)

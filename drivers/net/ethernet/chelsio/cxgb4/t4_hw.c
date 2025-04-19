@@ -670,7 +670,7 @@ int t4_memory_rw(struct adapter *adap, int win, int mtype, u32 addr,
 	 * Then a read of the adapter memory via the PCI-E Memory Window
 	 * will yield:
 	 *
-	 *     x = readl(i)
+	 *     x = pete_readl("drivers/net/ethernet/chelsio/cxgb4/t4_hw.c:673", i)
 	 *         31                  0
 	 *         [ b3 | b2 | b1 | b0 ]
 	 *
@@ -8933,12 +8933,12 @@ int t4_wait_dev_ready(void __iomem *regs)
 {
 	u32 whoami;
 
-	whoami = readl(regs + PL_WHOAMI_A);
+	whoami = pete_readl("drivers/net/ethernet/chelsio/cxgb4/t4_hw.c:8936", regs + PL_WHOAMI_A);
 	if (whoami != 0xffffffff && whoami != CIM_PF_NOACCESS)
 		return 0;
 
 	msleep(500);
-	whoami = readl(regs + PL_WHOAMI_A);
+	whoami = pete_readl("drivers/net/ethernet/chelsio/cxgb4/t4_hw.c:8941", regs + PL_WHOAMI_A);
 	return (whoami != 0xffffffff && whoami != CIM_PF_NOACCESS ? 0 : -EIO);
 }
 

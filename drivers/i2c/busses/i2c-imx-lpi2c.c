@@ -111,7 +111,7 @@ struct lpi2c_imx_struct {
 static void lpi2c_imx_intctrl(struct lpi2c_imx_struct *lpi2c_imx,
 			      unsigned int enable)
 {
-	writel(enable, lpi2c_imx->base + LPI2C_MIER);
+	pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:114", enable, lpi2c_imx->base + LPI2C_MIER);
 }
 
 static int lpi2c_imx_bus_busy(struct lpi2c_imx_struct *lpi2c_imx)
@@ -120,11 +120,11 @@ static int lpi2c_imx_bus_busy(struct lpi2c_imx_struct *lpi2c_imx)
 	unsigned int temp;
 
 	while (1) {
-		temp = readl(lpi2c_imx->base + LPI2C_MSR);
+		temp = pete_readl("drivers/i2c/busses/i2c-imx-lpi2c.c:123", lpi2c_imx->base + LPI2C_MSR);
 
 		/* check for arbitration lost, clear if set */
 		if (temp & MSR_ALF) {
-			writel(temp, lpi2c_imx->base + LPI2C_MSR);
+			pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:127", temp, lpi2c_imx->base + LPI2C_MSR);
 			return -EAGAIN;
 		}
 
@@ -165,13 +165,13 @@ static int lpi2c_imx_start(struct lpi2c_imx_struct *lpi2c_imx,
 {
 	unsigned int temp;
 
-	temp = readl(lpi2c_imx->base + LPI2C_MCR);
+	temp = pete_readl("drivers/i2c/busses/i2c-imx-lpi2c.c:168", lpi2c_imx->base + LPI2C_MCR);
 	temp |= MCR_RRF | MCR_RTF;
-	writel(temp, lpi2c_imx->base + LPI2C_MCR);
-	writel(0x7f00, lpi2c_imx->base + LPI2C_MSR);
+	pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:170", temp, lpi2c_imx->base + LPI2C_MCR);
+	pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:171", 0x7f00, lpi2c_imx->base + LPI2C_MSR);
 
 	temp = i2c_8bit_addr_from_msg(msgs) | (GEN_START << 8);
-	writel(temp, lpi2c_imx->base + LPI2C_MTDR);
+	pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:174", temp, lpi2c_imx->base + LPI2C_MTDR);
 
 	return lpi2c_imx_bus_busy(lpi2c_imx);
 }
@@ -181,10 +181,10 @@ static void lpi2c_imx_stop(struct lpi2c_imx_struct *lpi2c_imx)
 	unsigned long orig_jiffies = jiffies;
 	unsigned int temp;
 
-	writel(GEN_STOP << 8, lpi2c_imx->base + LPI2C_MTDR);
+	pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:184", GEN_STOP << 8, lpi2c_imx->base + LPI2C_MTDR);
 
 	do {
-		temp = readl(lpi2c_imx->base + LPI2C_MSR);
+		temp = pete_readl("drivers/i2c/busses/i2c-imx-lpi2c.c:187", lpi2c_imx->base + LPI2C_MSR);
 		if (temp & MSR_SDF)
 			break;
 
@@ -235,11 +235,11 @@ static int lpi2c_imx_config(struct lpi2c_imx_struct *lpi2c_imx)
 	if (lpi2c_imx->mode == ULTRA_FAST)
 		temp |= MCFGR1_IGNACK;
 
-	writel(temp, lpi2c_imx->base + LPI2C_MCFGR1);
+	pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:238", temp, lpi2c_imx->base + LPI2C_MCFGR1);
 
 	/* set MCFGR2: FILTSDA, FILTSCL */
 	temp = (filt << 16) | (filt << 24);
-	writel(temp, lpi2c_imx->base + LPI2C_MCFGR2);
+	pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:242", temp, lpi2c_imx->base + LPI2C_MCFGR2);
 
 	/* set MCCR: DATAVD, SETHOLD, CLKHI, CLKLO */
 	sethold = clkhi;
@@ -247,9 +247,9 @@ static int lpi2c_imx_config(struct lpi2c_imx_struct *lpi2c_imx)
 	temp = datavd << 24 | sethold << 16 | clkhi << 8 | clklo;
 
 	if (lpi2c_imx->mode == HS)
-		writel(temp, lpi2c_imx->base + LPI2C_MCCR1);
+		pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:250", temp, lpi2c_imx->base + LPI2C_MCCR1);
 	else
-		writel(temp, lpi2c_imx->base + LPI2C_MCCR0);
+		pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:252", temp, lpi2c_imx->base + LPI2C_MCCR0);
 
 	return 0;
 }
@@ -264,16 +264,16 @@ static int lpi2c_imx_master_enable(struct lpi2c_imx_struct *lpi2c_imx)
 		return ret;
 
 	temp = MCR_RST;
-	writel(temp, lpi2c_imx->base + LPI2C_MCR);
-	writel(0, lpi2c_imx->base + LPI2C_MCR);
+	pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:267", temp, lpi2c_imx->base + LPI2C_MCR);
+	pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:268", 0, lpi2c_imx->base + LPI2C_MCR);
 
 	ret = lpi2c_imx_config(lpi2c_imx);
 	if (ret)
 		goto rpm_put;
 
-	temp = readl(lpi2c_imx->base + LPI2C_MCR);
+	temp = pete_readl("drivers/i2c/busses/i2c-imx-lpi2c.c:274", lpi2c_imx->base + LPI2C_MCR);
 	temp |= MCR_MEN;
-	writel(temp, lpi2c_imx->base + LPI2C_MCR);
+	pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:276", temp, lpi2c_imx->base + LPI2C_MCR);
 
 	return 0;
 
@@ -288,9 +288,9 @@ static int lpi2c_imx_master_disable(struct lpi2c_imx_struct *lpi2c_imx)
 {
 	u32 temp;
 
-	temp = readl(lpi2c_imx->base + LPI2C_MCR);
+	temp = pete_readl("drivers/i2c/busses/i2c-imx-lpi2c.c:291", lpi2c_imx->base + LPI2C_MCR);
 	temp &= ~MCR_MEN;
-	writel(temp, lpi2c_imx->base + LPI2C_MCR);
+	pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:293", temp, lpi2c_imx->base + LPI2C_MCR);
 
 	pm_runtime_mark_last_busy(lpi2c_imx->adapter.dev.parent);
 	pm_runtime_put_autosuspend(lpi2c_imx->adapter.dev.parent);
@@ -313,9 +313,9 @@ static int lpi2c_imx_txfifo_empty(struct lpi2c_imx_struct *lpi2c_imx)
 	u32 txcnt;
 
 	do {
-		txcnt = readl(lpi2c_imx->base + LPI2C_MFSR) & 0xff;
+		txcnt = pete_readl("drivers/i2c/busses/i2c-imx-lpi2c.c:316", lpi2c_imx->base + LPI2C_MFSR) & 0xff;
 
-		if (readl(lpi2c_imx->base + LPI2C_MSR) & MSR_NDF) {
+		if (pete_readl("drivers/i2c/busses/i2c-imx-lpi2c.c:318", lpi2c_imx->base + LPI2C_MSR) & MSR_NDF) {
 			dev_dbg(&lpi2c_imx->adapter.dev, "NDF detected\n");
 			return -EIO;
 		}
@@ -333,7 +333,7 @@ static int lpi2c_imx_txfifo_empty(struct lpi2c_imx_struct *lpi2c_imx)
 
 static void lpi2c_imx_set_tx_watermark(struct lpi2c_imx_struct *lpi2c_imx)
 {
-	writel(lpi2c_imx->txfifosize >> 1, lpi2c_imx->base + LPI2C_MFCR);
+	pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:336", lpi2c_imx->txfifosize >> 1, lpi2c_imx->base + LPI2C_MFCR);
 }
 
 static void lpi2c_imx_set_rx_watermark(struct lpi2c_imx_struct *lpi2c_imx)
@@ -347,21 +347,21 @@ static void lpi2c_imx_set_rx_watermark(struct lpi2c_imx_struct *lpi2c_imx)
 	else
 		temp = 0;
 
-	writel(temp << 16, lpi2c_imx->base + LPI2C_MFCR);
+	pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:350", temp << 16, lpi2c_imx->base + LPI2C_MFCR);
 }
 
 static void lpi2c_imx_write_txfifo(struct lpi2c_imx_struct *lpi2c_imx)
 {
 	unsigned int data, txcnt;
 
-	txcnt = readl(lpi2c_imx->base + LPI2C_MFSR) & 0xff;
+	txcnt = pete_readl("drivers/i2c/busses/i2c-imx-lpi2c.c:357", lpi2c_imx->base + LPI2C_MFSR) & 0xff;
 
 	while (txcnt < lpi2c_imx->txfifosize) {
 		if (lpi2c_imx->delivered == lpi2c_imx->msglen)
 			break;
 
 		data = lpi2c_imx->tx_buf[lpi2c_imx->delivered++];
-		writel(data, lpi2c_imx->base + LPI2C_MTDR);
+		pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:364", data, lpi2c_imx->base + LPI2C_MTDR);
 		txcnt++;
 	}
 
@@ -377,7 +377,7 @@ static void lpi2c_imx_read_rxfifo(struct lpi2c_imx_struct *lpi2c_imx)
 	unsigned int temp, data;
 
 	do {
-		data = readl(lpi2c_imx->base + LPI2C_MRDR);
+		data = pete_readl("drivers/i2c/busses/i2c-imx-lpi2c.c:380", lpi2c_imx->base + LPI2C_MRDR);
 		if (data & MRDR_RXEMPTY)
 			break;
 
@@ -408,11 +408,11 @@ static void lpi2c_imx_read_rxfifo(struct lpi2c_imx_struct *lpi2c_imx)
 		lpi2c_imx->block_data = 0;
 		temp = remaining;
 		temp |= (RECV_DATA << 8);
-		writel(temp, lpi2c_imx->base + LPI2C_MTDR);
+		pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:411", temp, lpi2c_imx->base + LPI2C_MTDR);
 	} else if (!(lpi2c_imx->delivered & 0xff)) {
 		temp = (remaining > CHUNK_DATA ? CHUNK_DATA : remaining) - 1;
 		temp |= (RECV_DATA << 8);
-		writel(temp, lpi2c_imx->base + LPI2C_MTDR);
+		pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:415", temp, lpi2c_imx->base + LPI2C_MTDR);
 	}
 
 	lpi2c_imx_intctrl(lpi2c_imx, MIER_RDIE);
@@ -437,7 +437,7 @@ static void lpi2c_imx_read(struct lpi2c_imx_struct *lpi2c_imx,
 	lpi2c_imx_set_rx_watermark(lpi2c_imx);
 	temp = msgs->len > CHUNK_DATA ? CHUNK_DATA - 1 : msgs->len - 1;
 	temp |= (RECV_DATA << 8);
-	writel(temp, lpi2c_imx->base + LPI2C_MTDR);
+	pete_writel("drivers/i2c/busses/i2c-imx-lpi2c.c:440", temp, lpi2c_imx->base + LPI2C_MTDR);
 
 	lpi2c_imx_intctrl(lpi2c_imx, MIER_RDIE | MIER_NDIE);
 }
@@ -485,7 +485,7 @@ static int lpi2c_imx_xfer(struct i2c_adapter *adapter,
 stop:
 	lpi2c_imx_stop(lpi2c_imx);
 
-	temp = readl(lpi2c_imx->base + LPI2C_MSR);
+	temp = pete_readl("drivers/i2c/busses/i2c-imx-lpi2c.c:488", lpi2c_imx->base + LPI2C_MSR);
 	if ((temp & MSR_NDF) && !result)
 		result = -EIO;
 
@@ -505,7 +505,7 @@ static irqreturn_t lpi2c_imx_isr(int irq, void *dev_id)
 	unsigned int temp;
 
 	lpi2c_imx_intctrl(lpi2c_imx, 0);
-	temp = readl(lpi2c_imx->base + LPI2C_MSR);
+	temp = pete_readl("drivers/i2c/busses/i2c-imx-lpi2c.c:508", lpi2c_imx->base + LPI2C_MSR);
 
 	if (temp & MSR_RDF)
 		lpi2c_imx_read_rxfifo(lpi2c_imx);
@@ -594,7 +594,7 @@ static int lpi2c_imx_probe(struct platform_device *pdev)
 	pm_runtime_set_active(&pdev->dev);
 	pm_runtime_enable(&pdev->dev);
 
-	temp = readl(lpi2c_imx->base + LPI2C_PARAM);
+	temp = pete_readl("drivers/i2c/busses/i2c-imx-lpi2c.c:597", lpi2c_imx->base + LPI2C_PARAM);
 	lpi2c_imx->txfifosize = 1 << (temp & 0x0f);
 	lpi2c_imx->rxfifosize = 1 << ((temp >> 8) & 0x0f);
 

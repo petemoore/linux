@@ -53,7 +53,7 @@ static void sun4i_irq_ack(struct irq_data *irqd)
 	if (irq != 0)
 		return; /* Only IRQ 0 / the ENMI needs to be acked */
 
-	writel(BIT(0), irq_ic_data->irq_base + SUN4I_IRQ_PENDING_REG(0));
+	pete_writel("drivers/irqchip/irq-sun4i.c:56", BIT(0), irq_ic_data->irq_base + SUN4I_IRQ_PENDING_REG(0));
 }
 
 static void sun4i_irq_mask(struct irq_data *irqd)
@@ -63,9 +63,9 @@ static void sun4i_irq_mask(struct irq_data *irqd)
 	int reg = irq / 32;
 	u32 val;
 
-	val = readl(irq_ic_data->irq_base +
+	val = pete_readl("drivers/irqchip/irq-sun4i.c:66", irq_ic_data->irq_base +
 			SUN4I_IRQ_ENABLE_REG(irq_ic_data, reg));
-	writel(val & ~(1 << irq_off),
+	pete_writel("drivers/irqchip/irq-sun4i.c:68", val & ~(1 << irq_off),
 	       irq_ic_data->irq_base + SUN4I_IRQ_ENABLE_REG(irq_ic_data, reg));
 }
 
@@ -76,9 +76,9 @@ static void sun4i_irq_unmask(struct irq_data *irqd)
 	int reg = irq / 32;
 	u32 val;
 
-	val = readl(irq_ic_data->irq_base +
+	val = pete_readl("drivers/irqchip/irq-sun4i.c:79", irq_ic_data->irq_base +
 			SUN4I_IRQ_ENABLE_REG(irq_ic_data, reg));
-	writel(val | (1 << irq_off),
+	pete_writel("drivers/irqchip/irq-sun4i.c:81", val | (1 << irq_off),
 	       irq_ic_data->irq_base + SUN4I_IRQ_ENABLE_REG(irq_ic_data, reg));
 }
 
@@ -113,25 +113,25 @@ static int __init sun4i_of_init(struct device_node *node,
 			node);
 
 	/* Disable all interrupts */
-	writel(0, irq_ic_data->irq_base + SUN4I_IRQ_ENABLE_REG(irq_ic_data, 0));
-	writel(0, irq_ic_data->irq_base + SUN4I_IRQ_ENABLE_REG(irq_ic_data, 1));
-	writel(0, irq_ic_data->irq_base + SUN4I_IRQ_ENABLE_REG(irq_ic_data, 2));
+	pete_writel("drivers/irqchip/irq-sun4i.c:116", 0, irq_ic_data->irq_base + SUN4I_IRQ_ENABLE_REG(irq_ic_data, 0));
+	pete_writel("drivers/irqchip/irq-sun4i.c:117", 0, irq_ic_data->irq_base + SUN4I_IRQ_ENABLE_REG(irq_ic_data, 1));
+	pete_writel("drivers/irqchip/irq-sun4i.c:118", 0, irq_ic_data->irq_base + SUN4I_IRQ_ENABLE_REG(irq_ic_data, 2));
 
 	/* Unmask all the interrupts, ENABLE_REG(x) is used for masking */
-	writel(0, irq_ic_data->irq_base + SUN4I_IRQ_MASK_REG(irq_ic_data, 0));
-	writel(0, irq_ic_data->irq_base + SUN4I_IRQ_MASK_REG(irq_ic_data, 1));
-	writel(0, irq_ic_data->irq_base + SUN4I_IRQ_MASK_REG(irq_ic_data, 2));
+	pete_writel("drivers/irqchip/irq-sun4i.c:121", 0, irq_ic_data->irq_base + SUN4I_IRQ_MASK_REG(irq_ic_data, 0));
+	pete_writel("drivers/irqchip/irq-sun4i.c:122", 0, irq_ic_data->irq_base + SUN4I_IRQ_MASK_REG(irq_ic_data, 1));
+	pete_writel("drivers/irqchip/irq-sun4i.c:123", 0, irq_ic_data->irq_base + SUN4I_IRQ_MASK_REG(irq_ic_data, 2));
 
 	/* Clear all the pending interrupts */
-	writel(0xffffffff, irq_ic_data->irq_base + SUN4I_IRQ_PENDING_REG(0));
-	writel(0xffffffff, irq_ic_data->irq_base + SUN4I_IRQ_PENDING_REG(1));
-	writel(0xffffffff, irq_ic_data->irq_base + SUN4I_IRQ_PENDING_REG(2));
+	pete_writel("drivers/irqchip/irq-sun4i.c:126", 0xffffffff, irq_ic_data->irq_base + SUN4I_IRQ_PENDING_REG(0));
+	pete_writel("drivers/irqchip/irq-sun4i.c:127", 0xffffffff, irq_ic_data->irq_base + SUN4I_IRQ_PENDING_REG(1));
+	pete_writel("drivers/irqchip/irq-sun4i.c:128", 0xffffffff, irq_ic_data->irq_base + SUN4I_IRQ_PENDING_REG(2));
 
 	/* Enable protection mode */
-	writel(0x01, irq_ic_data->irq_base + SUN4I_IRQ_PROTECTION_REG);
+	pete_writel("drivers/irqchip/irq-sun4i.c:131", 0x01, irq_ic_data->irq_base + SUN4I_IRQ_PROTECTION_REG);
 
 	/* Configure the external interrupt source type */
-	writel(0x00, irq_ic_data->irq_base + SUN4I_IRQ_NMI_CTRL_REG);
+	pete_writel("drivers/irqchip/irq-sun4i.c:134", 0x00, irq_ic_data->irq_base + SUN4I_IRQ_NMI_CTRL_REG);
 
 	irq_ic_data->irq_domain = irq_domain_add_linear(node, 3 * 32,
 						 &sun4i_irq_ops, NULL);
@@ -188,15 +188,15 @@ static void __exception_irq_entry sun4i_handle_irq(struct pt_regs *regs)
 	 * the extra check in the common case of 1 happening after having
 	 * read the vector-reg once.
 	 */
-	hwirq = readl(irq_ic_data->irq_base + SUN4I_IRQ_VECTOR_REG) >> 2;
+	hwirq = pete_readl("drivers/irqchip/irq-sun4i.c:191", irq_ic_data->irq_base + SUN4I_IRQ_VECTOR_REG) >> 2;
 	if (hwirq == 0 &&
-		  !(readl(irq_ic_data->irq_base + SUN4I_IRQ_PENDING_REG(0)) &
+		  !(pete_readl("drivers/irqchip/irq-sun4i.c:193", irq_ic_data->irq_base + SUN4I_IRQ_PENDING_REG(0)) &
 			  BIT(0)))
 		return;
 
 	do {
 		handle_domain_irq(irq_ic_data->irq_domain, hwirq, regs);
-		hwirq = readl(irq_ic_data->irq_base +
+		hwirq = pete_readl("drivers/irqchip/irq-sun4i.c:199", irq_ic_data->irq_base +
 				SUN4I_IRQ_VECTOR_REG) >> 2;
 	} while (hwirq != 0);
 }

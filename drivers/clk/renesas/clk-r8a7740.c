@@ -96,20 +96,20 @@ r8a7740_cpg_register_clock(struct device_node *np, struct r8a7740_cpg *cpg,
 		 * clock implementation and we currently have no need to change
 		 * the multiplier value.
 		 */
-		u32 value = readl(cpg->reg + CPG_FRQCRC);
+		u32 value = pete_readl("drivers/clk/renesas/clk-r8a7740.c:99", cpg->reg + CPG_FRQCRC);
 		parent_name = "system";
 		mult = ((value >> 24) & 0x7f) + 1;
 	} else if (!strcmp(name, "pllc1")) {
-		u32 value = readl(cpg->reg + CPG_FRQCRA);
+		u32 value = pete_readl("drivers/clk/renesas/clk-r8a7740.c:103", cpg->reg + CPG_FRQCRA);
 		parent_name = "system";
 		mult = ((value >> 24) & 0x7f) + 1;
 		div = 2;
 	} else if (!strcmp(name, "pllc2")) {
-		u32 value = readl(cpg->reg + CPG_PLLC2CR);
+		u32 value = pete_readl("drivers/clk/renesas/clk-r8a7740.c:108", cpg->reg + CPG_PLLC2CR);
 		parent_name = "system";
 		mult = ((value >> 24) & 0x3f) + 1;
 	} else if (!strcmp(name, "usb24s")) {
-		u32 value = readl(cpg->reg + CPG_USBCKCR);
+		u32 value = pete_readl("drivers/clk/renesas/clk-r8a7740.c:112", cpg->reg + CPG_USBCKCR);
 		if (value & BIT(7))
 			/* extal2 */
 			parent_name = of_clk_get_parent_name(np, 1);

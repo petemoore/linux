@@ -793,19 +793,19 @@ int radeon_uvd_get_create_msg(struct radeon_device *rdev, int ring,
 		return r;
 
 	/* stitch together an UVD create msg */
-	writel((__force u32)cpu_to_le32(0x00000de4), &msg[0]);
-	writel(0x0, (void __iomem *)&msg[1]);
-	writel((__force u32)cpu_to_le32(handle), &msg[2]);
-	writel(0x0, &msg[3]);
-	writel(0x0, &msg[4]);
-	writel(0x0, &msg[5]);
-	writel(0x0, &msg[6]);
-	writel((__force u32)cpu_to_le32(0x00000780), &msg[7]);
-	writel((__force u32)cpu_to_le32(0x00000440), &msg[8]);
-	writel(0x0, &msg[9]);
-	writel((__force u32)cpu_to_le32(0x01b37000), &msg[10]);
+	pete_writel("drivers/gpu/drm/radeon/radeon_uvd.c:796", (__force u32)cpu_to_le32(0x00000de4), &msg[0]);
+	pete_writel("drivers/gpu/drm/radeon/radeon_uvd.c:797", 0x0, (void __iomem *)&msg[1]);
+	pete_writel("drivers/gpu/drm/radeon/radeon_uvd.c:798", (__force u32)cpu_to_le32(handle), &msg[2]);
+	pete_writel("drivers/gpu/drm/radeon/radeon_uvd.c:799", 0x0, &msg[3]);
+	pete_writel("drivers/gpu/drm/radeon/radeon_uvd.c:800", 0x0, &msg[4]);
+	pete_writel("drivers/gpu/drm/radeon/radeon_uvd.c:801", 0x0, &msg[5]);
+	pete_writel("drivers/gpu/drm/radeon/radeon_uvd.c:802", 0x0, &msg[6]);
+	pete_writel("drivers/gpu/drm/radeon/radeon_uvd.c:803", (__force u32)cpu_to_le32(0x00000780), &msg[7]);
+	pete_writel("drivers/gpu/drm/radeon/radeon_uvd.c:804", (__force u32)cpu_to_le32(0x00000440), &msg[8]);
+	pete_writel("drivers/gpu/drm/radeon/radeon_uvd.c:805", 0x0, &msg[9]);
+	pete_writel("drivers/gpu/drm/radeon/radeon_uvd.c:806", (__force u32)cpu_to_le32(0x01b37000), &msg[10]);
 	for (i = 11; i < 1024; ++i)
-		writel(0x0, &msg[i]);
+		pete_writel("drivers/gpu/drm/radeon/radeon_uvd.c:808", 0x0, &msg[i]);
 
 	r = radeon_uvd_send_msg(rdev, ring, addr, fence);
 	radeon_bo_unreserve(rdev->uvd.vcpu_bo);
@@ -829,12 +829,12 @@ int radeon_uvd_get_destroy_msg(struct radeon_device *rdev, int ring,
 		return r;
 
 	/* stitch together an UVD destroy msg */
-	writel((__force u32)cpu_to_le32(0x00000de4), &msg[0]);
-	writel((__force u32)cpu_to_le32(0x00000002), &msg[1]);
-	writel((__force u32)cpu_to_le32(handle), &msg[2]);
-	writel(0x0, &msg[3]);
+	pete_writel("drivers/gpu/drm/radeon/radeon_uvd.c:832", (__force u32)cpu_to_le32(0x00000de4), &msg[0]);
+	pete_writel("drivers/gpu/drm/radeon/radeon_uvd.c:833", (__force u32)cpu_to_le32(0x00000002), &msg[1]);
+	pete_writel("drivers/gpu/drm/radeon/radeon_uvd.c:834", (__force u32)cpu_to_le32(handle), &msg[2]);
+	pete_writel("drivers/gpu/drm/radeon/radeon_uvd.c:835", 0x0, &msg[3]);
 	for (i = 4; i < 1024; ++i)
-		writel(0x0, &msg[i]);
+		pete_writel("drivers/gpu/drm/radeon/radeon_uvd.c:837", 0x0, &msg[i]);
 
 	r = radeon_uvd_send_msg(rdev, ring, addr, fence);
 	radeon_bo_unreserve(rdev->uvd.vcpu_bo);

@@ -154,12 +154,12 @@ struct pic32_sqi {
 
 static inline void pic32_setbits(void __iomem *reg, u32 set)
 {
-	writel(readl(reg) | set, reg);
+	pete_writel("drivers/spi/spi-pic32-sqi.c:157", pete_readl("drivers/spi/spi-pic32-sqi.c:157", reg) | set, reg);
 }
 
 static inline void pic32_clrbits(void __iomem *reg, u32 clr)
 {
-	writel(readl(reg) & ~clr, reg);
+	pete_writel("drivers/spi/spi-pic32-sqi.c:162", pete_readl("drivers/spi/spi-pic32-sqi.c:162", reg) & ~clr, reg);
 }
 
 static int pic32_sqi_set_clk_rate(struct pic32_sqi *sqi, u32 sck)
@@ -170,11 +170,11 @@ static int pic32_sqi_set_clk_rate(struct pic32_sqi *sqi, u32 sck)
 	div = clk_get_rate(sqi->base_clk) / (2 * sck);
 	div &= PESQI_CLKDIV;
 
-	val = readl(sqi->regs + PESQI_CLK_CTRL_REG);
+	val = pete_readl("drivers/spi/spi-pic32-sqi.c:173", sqi->regs + PESQI_CLK_CTRL_REG);
 	/* apply new divider */
 	val &= ~(PESQI_CLK_STABLE | (PESQI_CLKDIV << PESQI_CLKDIV_SHIFT));
 	val |= div << PESQI_CLKDIV_SHIFT;
-	writel(val, sqi->regs + PESQI_CLK_CTRL_REG);
+	pete_writel("drivers/spi/spi-pic32-sqi.c:177", val, sqi->regs + PESQI_CLK_CTRL_REG);
 
 	/* wait for stability */
 	return readl_poll_timeout(sqi->regs + PESQI_CLK_CTRL_REG, val,
@@ -185,15 +185,15 @@ static inline void pic32_sqi_enable_int(struct pic32_sqi *sqi)
 {
 	u32 mask = PESQI_DMAERR | PESQI_BDDONE | PESQI_PKTCOMP;
 
-	writel(mask, sqi->regs + PESQI_INT_ENABLE_REG);
+	pete_writel("drivers/spi/spi-pic32-sqi.c:188", mask, sqi->regs + PESQI_INT_ENABLE_REG);
 	/* INT_SIGEN works as interrupt-gate to INTR line */
-	writel(mask, sqi->regs + PESQI_INT_SIGEN_REG);
+	pete_writel("drivers/spi/spi-pic32-sqi.c:190", mask, sqi->regs + PESQI_INT_SIGEN_REG);
 }
 
 static inline void pic32_sqi_disable_int(struct pic32_sqi *sqi)
 {
-	writel(0, sqi->regs + PESQI_INT_ENABLE_REG);
-	writel(0, sqi->regs + PESQI_INT_SIGEN_REG);
+	pete_writel("drivers/spi/spi-pic32-sqi.c:195", 0, sqi->regs + PESQI_INT_ENABLE_REG);
+	pete_writel("drivers/spi/spi-pic32-sqi.c:196", 0, sqi->regs + PESQI_INT_SIGEN_REG);
 }
 
 static irqreturn_t pic32_sqi_isr(int irq, void *dev_id)
@@ -201,8 +201,8 @@ static irqreturn_t pic32_sqi_isr(int irq, void *dev_id)
 	struct pic32_sqi *sqi = dev_id;
 	u32 enable, status;
 
-	enable = readl(sqi->regs + PESQI_INT_ENABLE_REG);
-	status = readl(sqi->regs + PESQI_INT_STAT_REG);
+	enable = pete_readl("drivers/spi/spi-pic32-sqi.c:204", sqi->regs + PESQI_INT_ENABLE_REG);
+	status = pete_readl("drivers/spi/spi-pic32-sqi.c:205", sqi->regs + PESQI_INT_STAT_REG);
 
 	/* check spurious interrupt */
 	if (!status)
@@ -232,7 +232,7 @@ static irqreturn_t pic32_sqi_isr(int irq, void *dev_id)
 
 irq_done:
 	/* interrupts are sticky, so mask when handled */
-	writel(enable, sqi->regs + PESQI_INT_ENABLE_REG);
+	pete_writel("drivers/spi/spi-pic32-sqi.c:235", enable, sqi->regs + PESQI_INT_ENABLE_REG);
 
 	return IRQ_HANDLED;
 }
@@ -368,14 +368,14 @@ static int pic32_sqi_one_message(struct spi_master *master,
 		/* set spi mode */
 		mode = spi->mode & (SPI_MODE_3 | SPI_LSB_FIRST);
 		if (sqi->cur_mode != mode) {
-			val = readl(sqi->regs + PESQI_CONF_REG);
+			val = pete_readl("drivers/spi/spi-pic32-sqi.c:371", sqi->regs + PESQI_CONF_REG);
 			val &= ~(PESQI_CPOL | PESQI_CPHA | PESQI_LSBF);
 			if (mode & SPI_CPOL)
 				val |= PESQI_CPOL;
 			if (mode & SPI_LSB_FIRST)
 				val |= PESQI_LSBF;
 			val |= PESQI_CPHA;
-			writel(val, sqi->regs + PESQI_CONF_REG);
+			pete_writel("drivers/spi/spi-pic32-sqi.c:378", val, sqi->regs + PESQI_CONF_REG);
 
 			sqi->cur_mode = mode;
 		}
@@ -400,14 +400,14 @@ static int pic32_sqi_one_message(struct spi_master *master,
 
 	/* set base address BD list for DMA engine */
 	rdesc = list_first_entry(&sqi->bd_list_used, struct ring_desc, list);
-	writel(rdesc->bd_dma, sqi->regs + PESQI_BD_BASE_ADDR_REG);
+	pete_writel("drivers/spi/spi-pic32-sqi.c:403", rdesc->bd_dma, sqi->regs + PESQI_BD_BASE_ADDR_REG);
 
 	/* enable interrupt */
 	pic32_sqi_enable_int(sqi);
 
 	/* enable DMA engine */
 	val = PESQI_DMA_EN | PESQI_POLL_EN | PESQI_BDP_START;
-	writel(val, sqi->regs + PESQI_BD_CTRL_REG);
+	pete_writel("drivers/spi/spi-pic32-sqi.c:410", val, sqi->regs + PESQI_BD_CTRL_REG);
 
 	/* wait for xfer completion */
 	timeout = wait_for_completion_timeout(&sqi->xfer_done, 5 * HZ);
@@ -422,7 +422,7 @@ static int pic32_sqi_one_message(struct spi_master *master,
 	}
 
 	/* disable DMA */
-	writel(0, sqi->regs + PESQI_BD_CTRL_REG);
+	pete_writel("drivers/spi/spi-pic32-sqi.c:425", 0, sqi->regs + PESQI_BD_CTRL_REG);
 
 	pic32_sqi_disable_int(sqi);
 
@@ -516,7 +516,7 @@ static void pic32_sqi_hw_init(struct pic32_sqi *sqi)
 	local_irq_save(flags);
 
 	/* assert soft-reset */
-	writel(PESQI_SOFT_RESET, sqi->regs + PESQI_CONF_REG);
+	pete_writel("drivers/spi/spi-pic32-sqi.c:519", PESQI_SOFT_RESET, sqi->regs + PESQI_CONF_REG);
 
 	/* wait until clear */
 	readl_poll_timeout_atomic(sqi->regs + PESQI_CONF_REG, val,
@@ -529,25 +529,25 @@ static void pic32_sqi_hw_init(struct pic32_sqi *sqi)
 	local_irq_restore(flags);
 
 	/* tx and rx fifo interrupt threshold */
-	val = readl(sqi->regs + PESQI_CMD_THRES_REG);
+	val = pete_readl("drivers/spi/spi-pic32-sqi.c:532", sqi->regs + PESQI_CMD_THRES_REG);
 	val &= ~(PESQI_TXTHR_MASK << PESQI_TXTHR_SHIFT);
 	val &= ~(PESQI_RXTHR_MASK << PESQI_RXTHR_SHIFT);
 	val |= (1U << PESQI_TXTHR_SHIFT) | (1U << PESQI_RXTHR_SHIFT);
-	writel(val, sqi->regs + PESQI_CMD_THRES_REG);
+	pete_writel("drivers/spi/spi-pic32-sqi.c:536", val, sqi->regs + PESQI_CMD_THRES_REG);
 
-	val = readl(sqi->regs + PESQI_INT_THRES_REG);
+	val = pete_readl("drivers/spi/spi-pic32-sqi.c:538", sqi->regs + PESQI_INT_THRES_REG);
 	val &= ~(PESQI_TXTHR_MASK << PESQI_TXTHR_SHIFT);
 	val &= ~(PESQI_RXTHR_MASK << PESQI_RXTHR_SHIFT);
 	val |= (1U << PESQI_TXTHR_SHIFT) | (1U << PESQI_RXTHR_SHIFT);
-	writel(val, sqi->regs + PESQI_INT_THRES_REG);
+	pete_writel("drivers/spi/spi-pic32-sqi.c:542", val, sqi->regs + PESQI_INT_THRES_REG);
 
 	/* default configuration */
-	val = readl(sqi->regs + PESQI_CONF_REG);
+	val = pete_readl("drivers/spi/spi-pic32-sqi.c:545", sqi->regs + PESQI_CONF_REG);
 
 	/* set mode: DMA */
 	val &= ~PESQI_MODE;
 	val |= PESQI_MODE_DMA << PESQI_MODE_SHIFT;
-	writel(val, sqi->regs + PESQI_CONF_REG);
+	pete_writel("drivers/spi/spi-pic32-sqi.c:550", val, sqi->regs + PESQI_CONF_REG);
 
 	/* DATAEN - SQIID0-ID3 */
 	val |= PESQI_QUAD_LANE << PESQI_LANES_SHIFT;
@@ -557,10 +557,10 @@ static void pic32_sqi_hw_init(struct pic32_sqi *sqi)
 
 	/* CSEN - all CS */
 	val |= 3U << PESQI_CSEN_SHIFT;
-	writel(val, sqi->regs + PESQI_CONF_REG);
+	pete_writel("drivers/spi/spi-pic32-sqi.c:560", val, sqi->regs + PESQI_CONF_REG);
 
 	/* write poll count */
-	writel(0, sqi->regs + PESQI_BD_POLL_CTRL_REG);
+	pete_writel("drivers/spi/spi-pic32-sqi.c:563", 0, sqi->regs + PESQI_BD_POLL_CTRL_REG);
 
 	sqi->cur_speed = 0;
 	sqi->cur_mode = -1;

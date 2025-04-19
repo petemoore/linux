@@ -249,10 +249,10 @@ static void au1000_enable_mac(struct net_device *dev, int force_reset)
 	spin_lock_irqsave(&aup->lock, flags);
 
 	if (force_reset || (!aup->mac_enabled)) {
-		writel(MAC_EN_CLOCK_ENABLE, aup->enable);
+		pete_writel("drivers/net/ethernet/amd/au1000_eth.c:252", MAC_EN_CLOCK_ENABLE, aup->enable);
 		wmb(); /* drain writebuffer */
 		mdelay(2);
-		writel((MAC_EN_RESET0 | MAC_EN_RESET1 | MAC_EN_RESET2
+		pete_writel("drivers/net/ethernet/amd/au1000_eth.c:255", (MAC_EN_RESET0 | MAC_EN_RESET1 | MAC_EN_RESET2
 				| MAC_EN_CLOCK_ENABLE), aup->enable);
 		wmb(); /* drain writebuffer */
 		mdelay(2);
@@ -274,7 +274,7 @@ static int au1000_mdio_read(struct net_device *dev, int phy_addr, int reg)
 	u32 timedout = 20;
 	u32 mii_control;
 
-	while (readl(mii_control_reg) & MAC_MII_BUSY) {
+	while (pete_readl("drivers/net/ethernet/amd/au1000_eth.c:277", mii_control_reg) & MAC_MII_BUSY) {
 		mdelay(1);
 		if (--timedout == 0) {
 			netdev_err(dev, "read_MII busy timeout!!\n");
@@ -285,17 +285,17 @@ static int au1000_mdio_read(struct net_device *dev, int phy_addr, int reg)
 	mii_control = MAC_SET_MII_SELECT_REG(reg) |
 		MAC_SET_MII_SELECT_PHY(phy_addr) | MAC_MII_READ;
 
-	writel(mii_control, mii_control_reg);
+	pete_writel("drivers/net/ethernet/amd/au1000_eth.c:288", mii_control, mii_control_reg);
 
 	timedout = 20;
-	while (readl(mii_control_reg) & MAC_MII_BUSY) {
+	while (pete_readl("drivers/net/ethernet/amd/au1000_eth.c:291", mii_control_reg) & MAC_MII_BUSY) {
 		mdelay(1);
 		if (--timedout == 0) {
 			netdev_err(dev, "mdio_read busy timeout!!\n");
 			return -1;
 		}
 	}
-	return readl(mii_data_reg);
+	return pete_readl("drivers/net/ethernet/amd/au1000_eth.c:298", mii_data_reg);
 }
 
 static void au1000_mdio_write(struct net_device *dev, int phy_addr,
@@ -307,7 +307,7 @@ static void au1000_mdio_write(struct net_device *dev, int phy_addr,
 	u32 timedout = 20;
 	u32 mii_control;
 
-	while (readl(mii_control_reg) & MAC_MII_BUSY) {
+	while (pete_readl("drivers/net/ethernet/amd/au1000_eth.c:310", mii_control_reg) & MAC_MII_BUSY) {
 		mdelay(1);
 		if (--timedout == 0) {
 			netdev_err(dev, "mdio_write busy timeout!!\n");
@@ -318,8 +318,8 @@ static void au1000_mdio_write(struct net_device *dev, int phy_addr,
 	mii_control = MAC_SET_MII_SELECT_REG(reg) |
 		MAC_SET_MII_SELECT_PHY(phy_addr) | MAC_MII_WRITE;
 
-	writel(value, mii_data_reg);
-	writel(mii_control, mii_control_reg);
+	pete_writel("drivers/net/ethernet/amd/au1000_eth.c:321", value, mii_data_reg);
+	pete_writel("drivers/net/ethernet/amd/au1000_eth.c:322", mii_control, mii_control_reg);
 }
 
 static int au1000_mdiobus_read(struct mii_bus *bus, int phy_addr, int regnum)
@@ -367,9 +367,9 @@ static void au1000_hard_stop(struct net_device *dev)
 
 	netif_dbg(aup, drv, dev, "hard stop\n");
 
-	reg = readl(&aup->mac->control);
+	reg = pete_readl("drivers/net/ethernet/amd/au1000_eth.c:370", &aup->mac->control);
 	reg &= ~(MAC_RX_ENABLE | MAC_TX_ENABLE);
-	writel(reg, &aup->mac->control);
+	pete_writel("drivers/net/ethernet/amd/au1000_eth.c:372", reg, &aup->mac->control);
 	wmb(); /* drain writebuffer */
 	mdelay(10);
 }
@@ -381,9 +381,9 @@ static void au1000_enable_rx_tx(struct net_device *dev)
 
 	netif_dbg(aup, hw, dev, "enable_rx_tx\n");
 
-	reg = readl(&aup->mac->control);
+	reg = pete_readl("drivers/net/ethernet/amd/au1000_eth.c:384", &aup->mac->control);
 	reg |= (MAC_RX_ENABLE | MAC_TX_ENABLE);
-	writel(reg, &aup->mac->control);
+	pete_writel("drivers/net/ethernet/amd/au1000_eth.c:386", reg, &aup->mac->control);
 	wmb(); /* drain writebuffer */
 	mdelay(10);
 }
@@ -426,7 +426,7 @@ au1000_adjust_link(struct net_device *dev)
 		/* switching duplex mode requires to disable rx and tx! */
 		au1000_hard_stop(dev);
 
-		reg = readl(&aup->mac->control);
+		reg = pete_readl("drivers/net/ethernet/amd/au1000_eth.c:429", &aup->mac->control);
 		if (DUPLEX_FULL == phydev->duplex) {
 			reg |= MAC_FULL_DUPLEX;
 			reg &= ~MAC_DISABLE_RX_OWN;
@@ -434,7 +434,7 @@ au1000_adjust_link(struct net_device *dev)
 			reg &= ~MAC_FULL_DUPLEX;
 			reg |= MAC_DISABLE_RX_OWN;
 		}
-		writel(reg, &aup->mac->control);
+		pete_writel("drivers/net/ethernet/amd/au1000_eth.c:437", reg, &aup->mac->control);
 		wmb(); /* drain writebuffer */
 		mdelay(1);
 
@@ -586,10 +586,10 @@ static void au1000_reset_mac_unlocked(struct net_device *dev)
 
 	au1000_hard_stop(dev);
 
-	writel(MAC_EN_CLOCK_ENABLE, aup->enable);
+	pete_writel("drivers/net/ethernet/amd/au1000_eth.c:589", MAC_EN_CLOCK_ENABLE, aup->enable);
 	wmb(); /* drain writebuffer */
 	mdelay(2);
-	writel(0, aup->enable);
+	pete_writel("drivers/net/ethernet/amd/au1000_eth.c:592", 0, aup->enable);
 	wmb(); /* drain writebuffer */
 	mdelay(2);
 
@@ -699,14 +699,14 @@ static int au1000_init(struct net_device *dev)
 
 	spin_lock_irqsave(&aup->lock, flags);
 
-	writel(0, &aup->mac->control);
+	pete_writel("drivers/net/ethernet/amd/au1000_eth.c:702", 0, &aup->mac->control);
 	aup->tx_head = (aup->tx_dma_ring[0]->buff_stat & 0xC) >> 2;
 	aup->tx_tail = aup->tx_head;
 	aup->rx_head = (aup->rx_dma_ring[0]->buff_stat & 0xC) >> 2;
 
-	writel(dev->dev_addr[5]<<8 | dev->dev_addr[4],
+	pete_writel("drivers/net/ethernet/amd/au1000_eth.c:707", dev->dev_addr[5]<<8 | dev->dev_addr[4],
 					&aup->mac->mac_addr_high);
-	writel(dev->dev_addr[3]<<24 | dev->dev_addr[2]<<16 |
+	pete_writel("drivers/net/ethernet/amd/au1000_eth.c:709", dev->dev_addr[3]<<24 | dev->dev_addr[2]<<16 |
 		dev->dev_addr[1]<<8 | dev->dev_addr[0],
 					&aup->mac->mac_addr_low);
 
@@ -729,8 +729,8 @@ static int au1000_init(struct net_device *dev)
 		control |= MAC_FULL_DUPLEX;
 	}
 
-	writel(control, &aup->mac->control);
-	writel(0x8100, &aup->mac->vlan1_tag); /* activate vlan support */
+	pete_writel("drivers/net/ethernet/amd/au1000_eth.c:732", control, &aup->mac->control);
+	pete_writel("drivers/net/ethernet/amd/au1000_eth.c:733", 0x8100, &aup->mac->vlan1_tag); /* activate vlan support */
 	wmb(); /* drain writebuffer */
 
 	spin_unlock_irqrestore(&aup->lock, flags);
@@ -1022,7 +1022,7 @@ static void au1000_multicast_list(struct net_device *dev)
 	u32 reg;
 
 	netif_dbg(aup, drv, dev, "%s: flags=%x\n", __func__, dev->flags);
-	reg = readl(&aup->mac->control);
+	reg = pete_readl("drivers/net/ethernet/amd/au1000_eth.c:1025", &aup->mac->control);
 	if (dev->flags & IFF_PROMISC) {			/* Set promiscuous. */
 		reg |= MAC_PROMISCUOUS;
 	} else if ((dev->flags & IFF_ALLMULTI)  ||
@@ -1038,12 +1038,12 @@ static void au1000_multicast_list(struct net_device *dev)
 		netdev_for_each_mc_addr(ha, dev)
 			set_bit(ether_crc(ETH_ALEN, ha->addr)>>26,
 					(long *)mc_filter);
-		writel(mc_filter[1], &aup->mac->multi_hash_high);
-		writel(mc_filter[0], &aup->mac->multi_hash_low);
+		pete_writel("drivers/net/ethernet/amd/au1000_eth.c:1041", mc_filter[1], &aup->mac->multi_hash_high);
+		pete_writel("drivers/net/ethernet/amd/au1000_eth.c:1042", mc_filter[0], &aup->mac->multi_hash_low);
 		reg &= ~MAC_PROMISCUOUS;
 		reg |= MAC_HASH_MODE;
 	}
-	writel(reg, &aup->mac->control);
+	pete_writel("drivers/net/ethernet/amd/au1000_eth.c:1046", reg, &aup->mac->control);
 }
 
 static const struct net_device_ops au1000_netdev_ops = {
@@ -1168,7 +1168,7 @@ static int au1000_probe(struct platform_device *pdev)
 
 	au1000_setup_hw_rings(aup, aup->macdma);
 
-	writel(0, aup->enable);
+	pete_writel("drivers/net/ethernet/amd/au1000_eth.c:1171", 0, aup->enable);
 	aup->mac_enabled = 0;
 
 	pd = dev_get_platdata(&pdev->dev);

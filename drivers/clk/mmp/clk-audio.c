@@ -120,7 +120,7 @@ static unsigned long audio_pll_recalc_rate(struct clk_hw *hw,
 	u32 aud_pll_ctrl0;
 	u32 aud_pll_ctrl1;
 
-	aud_pll_ctrl0 = readl(priv->mmio_base + SSPA_AUD_PLL_CTRL0);
+	aud_pll_ctrl0 = pete_readl("drivers/clk/mmp/clk-audio.c:123", priv->mmio_base + SSPA_AUD_PLL_CTRL0);
 	aud_pll_ctrl0 &= SSPA_AUD_PLL_CTRL0_DIV_OCLK_MODULO_MASK |
 			 SSPA_AUD_PLL_CTRL0_FRACT_MASK |
 			 SSPA_AUD_PLL_CTRL0_ENA_DITHER |
@@ -128,7 +128,7 @@ static unsigned long audio_pll_recalc_rate(struct clk_hw *hw,
 			 SSPA_AUD_PLL_CTRL0_DIV_MCLK_MASK |
 			 SSPA_AUD_PLL_CTRL0_PU;
 
-	aud_pll_ctrl1 = readl(priv->mmio_base + SSPA_AUD_PLL_CTRL1);
+	aud_pll_ctrl1 = pete_readl("drivers/clk/mmp/clk-audio.c:131", priv->mmio_base + SSPA_AUD_PLL_CTRL1);
 	aud_pll_ctrl1 &= SSPA_AUD_PLL_CTRL1_CLK_SEL_MASK |
 			 SSPA_AUD_PLL_CTRL1_DIV_OCLK_PATTERN_MASK;
 
@@ -211,11 +211,11 @@ static int audio_pll_set_rate(struct clk_hw *hw, unsigned long rate,
 			val |= SSPA_AUD_PLL_CTRL0_FRACT(predivs[prediv].fract);
 			val |= SSPA_AUD_PLL_CTRL0_DIV_FBCCLK(predivs[prediv].fbcclk);
 			val |= SSPA_AUD_PLL_CTRL0_DIV_MCLK(predivs[prediv].mclk);
-			writel(val, priv->mmio_base + SSPA_AUD_PLL_CTRL0);
+			pete_writel("drivers/clk/mmp/clk-audio.c:214", val, priv->mmio_base + SSPA_AUD_PLL_CTRL0);
 
 			val = SSPA_AUD_PLL_CTRL1_CLK_SEL_AUDIO_PLL;
 			val |= SSPA_AUD_PLL_CTRL1_DIV_OCLK_PATTERN(postdivs[postdiv].pattern);
-			writel(val, priv->mmio_base + SSPA_AUD_PLL_CTRL1);
+			pete_writel("drivers/clk/mmp/clk-audio.c:218", val, priv->mmio_base + SSPA_AUD_PLL_CTRL1);
 
 			return 0;
 		}
@@ -397,9 +397,9 @@ static int mmp2_audio_clk_suspend(struct device *dev)
 {
 	struct mmp2_audio_clk *priv = dev_get_drvdata(dev);
 
-	priv->aud_ctrl = readl(priv->mmio_base + SSPA_AUD_CTRL);
-	priv->aud_pll_ctrl0 = readl(priv->mmio_base + SSPA_AUD_PLL_CTRL0);
-	priv->aud_pll_ctrl1 = readl(priv->mmio_base + SSPA_AUD_PLL_CTRL1);
+	priv->aud_ctrl = pete_readl("drivers/clk/mmp/clk-audio.c:400", priv->mmio_base + SSPA_AUD_CTRL);
+	priv->aud_pll_ctrl0 = pete_readl("drivers/clk/mmp/clk-audio.c:401", priv->mmio_base + SSPA_AUD_PLL_CTRL0);
+	priv->aud_pll_ctrl1 = pete_readl("drivers/clk/mmp/clk-audio.c:402", priv->mmio_base + SSPA_AUD_PLL_CTRL1);
 	pm_clk_suspend(dev);
 
 	return 0;
@@ -410,9 +410,9 @@ static int mmp2_audio_clk_resume(struct device *dev)
 	struct mmp2_audio_clk *priv = dev_get_drvdata(dev);
 
 	pm_clk_resume(dev);
-	writel(priv->aud_ctrl, priv->mmio_base + SSPA_AUD_CTRL);
-	writel(priv->aud_pll_ctrl0, priv->mmio_base + SSPA_AUD_PLL_CTRL0);
-	writel(priv->aud_pll_ctrl1, priv->mmio_base + SSPA_AUD_PLL_CTRL1);
+	pete_writel("drivers/clk/mmp/clk-audio.c:413", priv->aud_ctrl, priv->mmio_base + SSPA_AUD_CTRL);
+	pete_writel("drivers/clk/mmp/clk-audio.c:414", priv->aud_pll_ctrl0, priv->mmio_base + SSPA_AUD_PLL_CTRL0);
+	pete_writel("drivers/clk/mmp/clk-audio.c:415", priv->aud_pll_ctrl1, priv->mmio_base + SSPA_AUD_PLL_CTRL1);
 
 	return 0;
 }

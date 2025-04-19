@@ -148,7 +148,7 @@ static void __bcm_kona_smc(void *info)
 	writel_relaxed(data->arg0, args++);
 	writel_relaxed(data->arg1, args++);
 	writel_relaxed(data->arg2, args++);
-	writel(data->arg3, args);
+	pete_writel("arch/arm/mach-bcm/bcm_kona_smc.c:151", data->arg3, args);
 
 	/* Flush caches for input data passed to Secure Monitor */
 	flush_cache_all();

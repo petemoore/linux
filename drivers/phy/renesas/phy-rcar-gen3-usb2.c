@@ -157,20 +157,20 @@ static void rcar_gen3_phy_usb2_work(struct work_struct *work)
 static void rcar_gen3_set_host_mode(struct rcar_gen3_chan *ch, int host)
 {
 	void __iomem *usb2_base = ch->base;
-	u32 val = readl(usb2_base + USB2_COMMCTRL);
+	u32 val = pete_readl("drivers/phy/renesas/phy-rcar-gen3-usb2.c:160", usb2_base + USB2_COMMCTRL);
 
 	dev_vdbg(ch->dev, "%s: %08x, %d\n", __func__, val, host);
 	if (host)
 		val &= ~USB2_COMMCTRL_OTG_PERI;
 	else
 		val |= USB2_COMMCTRL_OTG_PERI;
-	writel(val, usb2_base + USB2_COMMCTRL);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:167", val, usb2_base + USB2_COMMCTRL);
 }
 
 static void rcar_gen3_set_linectrl(struct rcar_gen3_chan *ch, int dp, int dm)
 {
 	void __iomem *usb2_base = ch->base;
-	u32 val = readl(usb2_base + USB2_LINECTRL1);
+	u32 val = pete_readl("drivers/phy/renesas/phy-rcar-gen3-usb2.c:173", usb2_base + USB2_LINECTRL1);
 
 	dev_vdbg(ch->dev, "%s: %08x, %d, %d\n", __func__, val, dp, dm);
 	val &= ~(USB2_LINECTRL1_DP_RPD | USB2_LINECTRL1_DM_RPD);
@@ -178,7 +178,7 @@ static void rcar_gen3_set_linectrl(struct rcar_gen3_chan *ch, int dp, int dm)
 		val |= USB2_LINECTRL1_DP_RPD;
 	if (dm)
 		val |= USB2_LINECTRL1_DM_RPD;
-	writel(val, usb2_base + USB2_LINECTRL1);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:181", val, usb2_base + USB2_LINECTRL1);
 }
 
 static void rcar_gen3_enable_vbus_ctrl(struct rcar_gen3_chan *ch, int vbus)
@@ -194,24 +194,24 @@ static void rcar_gen3_enable_vbus_ctrl(struct rcar_gen3_chan *ch, int vbus)
 		vbus_ctrl_val = USB2_VBCTRL_VBOUT;
 	}
 
-	val = readl(usb2_base + vbus_ctrl_reg);
+	val = pete_readl("drivers/phy/renesas/phy-rcar-gen3-usb2.c:197", usb2_base + vbus_ctrl_reg);
 	if (vbus)
 		val |= vbus_ctrl_val;
 	else
 		val &= ~vbus_ctrl_val;
-	writel(val, usb2_base + vbus_ctrl_reg);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:202", val, usb2_base + vbus_ctrl_reg);
 }
 
 static void rcar_gen3_control_otg_irq(struct rcar_gen3_chan *ch, int enable)
 {
 	void __iomem *usb2_base = ch->base;
-	u32 val = readl(usb2_base + USB2_OBINTEN);
+	u32 val = pete_readl("drivers/phy/renesas/phy-rcar-gen3-usb2.c:208", usb2_base + USB2_OBINTEN);
 
 	if (ch->uses_otg_pins && enable)
 		val |= ch->obint_enable_bits;
 	else
 		val &= ~ch->obint_enable_bits;
-	writel(val, usb2_base + USB2_OBINTEN);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:214", val, usb2_base + USB2_OBINTEN);
 }
 
 static void rcar_gen3_init_for_host(struct rcar_gen3_chan *ch)
@@ -239,15 +239,15 @@ static void rcar_gen3_init_for_b_host(struct rcar_gen3_chan *ch)
 	void __iomem *usb2_base = ch->base;
 	u32 val;
 
-	val = readl(usb2_base + USB2_LINECTRL1);
-	writel(val | USB2_LINECTRL1_OPMODE_NODRV, usb2_base + USB2_LINECTRL1);
+	val = pete_readl("drivers/phy/renesas/phy-rcar-gen3-usb2.c:242", usb2_base + USB2_LINECTRL1);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:243", val | USB2_LINECTRL1_OPMODE_NODRV, usb2_base + USB2_LINECTRL1);
 
 	rcar_gen3_set_linectrl(ch, 1, 1);
 	rcar_gen3_set_host_mode(ch, 1);
 	rcar_gen3_enable_vbus_ctrl(ch, 0);
 
-	val = readl(usb2_base + USB2_LINECTRL1);
-	writel(val & ~USB2_LINECTRL1_OPMODE_NODRV, usb2_base + USB2_LINECTRL1);
+	val = pete_readl("drivers/phy/renesas/phy-rcar-gen3-usb2.c:249", usb2_base + USB2_LINECTRL1);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:250", val & ~USB2_LINECTRL1_OPMODE_NODRV, usb2_base + USB2_LINECTRL1);
 }
 
 static void rcar_gen3_init_for_a_peri(struct rcar_gen3_chan *ch)
@@ -273,9 +273,9 @@ static bool rcar_gen3_check_id(struct rcar_gen3_chan *ch)
 		return (ch->dr_mode == USB_DR_MODE_HOST) ? false : true;
 
 	if (ch->soc_no_adp_ctrl)
-		return !!(readl(ch->base + USB2_LINECTRL1) & USB2_LINECTRL1_USB2_IDMON);
+		return !!(pete_readl("drivers/phy/renesas/phy-rcar-gen3-usb2.c:276", ch->base + USB2_LINECTRL1) & USB2_LINECTRL1_USB2_IDMON);
 
-	return !!(readl(ch->base + USB2_ADPCTRL) & USB2_ADPCTRL_IDDIG);
+	return !!(pete_readl("drivers/phy/renesas/phy-rcar-gen3-usb2.c:278", ch->base + USB2_ADPCTRL) & USB2_ADPCTRL_IDDIG);
 }
 
 static void rcar_gen3_device_recognition(struct rcar_gen3_chan *ch)
@@ -288,7 +288,7 @@ static void rcar_gen3_device_recognition(struct rcar_gen3_chan *ch)
 
 static bool rcar_gen3_is_host(struct rcar_gen3_chan *ch)
 {
-	return !(readl(ch->base + USB2_COMMCTRL) & USB2_COMMCTRL_OTG_PERI);
+	return !(pete_readl("drivers/phy/renesas/phy-rcar-gen3-usb2.c:291", ch->base + USB2_COMMCTRL) & USB2_COMMCTRL_OTG_PERI);
 }
 
 static enum phy_mode rcar_gen3_get_phy_mode(struct rcar_gen3_chan *ch)
@@ -394,22 +394,22 @@ static void rcar_gen3_init_otg(struct rcar_gen3_chan *ch)
 	u32 val;
 
 	/* Should not use functions of read-modify-write a register */
-	val = readl(usb2_base + USB2_LINECTRL1);
+	val = pete_readl("drivers/phy/renesas/phy-rcar-gen3-usb2.c:397", usb2_base + USB2_LINECTRL1);
 	val = (val & ~USB2_LINECTRL1_DP_RPD) | USB2_LINECTRL1_DPRPD_EN |
 	      USB2_LINECTRL1_DMRPD_EN | USB2_LINECTRL1_DM_RPD;
-	writel(val, usb2_base + USB2_LINECTRL1);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:400", val, usb2_base + USB2_LINECTRL1);
 
 	if (!ch->soc_no_adp_ctrl) {
-		val = readl(usb2_base + USB2_VBCTRL);
+		val = pete_readl("drivers/phy/renesas/phy-rcar-gen3-usb2.c:403", usb2_base + USB2_VBCTRL);
 		val &= ~USB2_VBCTRL_OCCLREN;
-		writel(val | USB2_VBCTRL_DRVVBUSSEL, usb2_base + USB2_VBCTRL);
-		val = readl(usb2_base + USB2_ADPCTRL);
-		writel(val | USB2_ADPCTRL_IDPULLUP, usb2_base + USB2_ADPCTRL);
+		pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:405", val | USB2_VBCTRL_DRVVBUSSEL, usb2_base + USB2_VBCTRL);
+		val = pete_readl("drivers/phy/renesas/phy-rcar-gen3-usb2.c:406", usb2_base + USB2_ADPCTRL);
+		pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:407", val | USB2_ADPCTRL_IDPULLUP, usb2_base + USB2_ADPCTRL);
 	}
 	msleep(20);
 
-	writel(0xffffffff, usb2_base + USB2_OBINTSTA);
-	writel(ch->obint_enable_bits, usb2_base + USB2_OBINTEN);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:411", 0xffffffff, usb2_base + USB2_OBINTSTA);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:412", ch->obint_enable_bits, usb2_base + USB2_OBINTEN);
 
 	rcar_gen3_device_recognition(ch);
 }
@@ -418,12 +418,12 @@ static irqreturn_t rcar_gen3_phy_usb2_irq(int irq, void *_ch)
 {
 	struct rcar_gen3_chan *ch = _ch;
 	void __iomem *usb2_base = ch->base;
-	u32 status = readl(usb2_base + USB2_OBINTSTA);
+	u32 status = pete_readl("drivers/phy/renesas/phy-rcar-gen3-usb2.c:421", usb2_base + USB2_OBINTSTA);
 	irqreturn_t ret = IRQ_NONE;
 
 	if (status & ch->obint_enable_bits) {
 		dev_vdbg(ch->dev, "%s: %08x\n", __func__, status);
-		writel(ch->obint_enable_bits, usb2_base + USB2_OBINTSTA);
+		pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:426", ch->obint_enable_bits, usb2_base + USB2_OBINTSTA);
 		rcar_gen3_device_recognition(ch);
 		ret = IRQ_HANDLED;
 	}
@@ -450,11 +450,11 @@ static int rcar_gen3_phy_usb2_init(struct phy *p)
 	}
 
 	/* Initialize USB2 part */
-	val = readl(usb2_base + USB2_INT_ENABLE);
+	val = pete_readl("drivers/phy/renesas/phy-rcar-gen3-usb2.c:453", usb2_base + USB2_INT_ENABLE);
 	val |= USB2_INT_ENABLE_UCOM_INTEN | rphy->int_enable_bits;
-	writel(val, usb2_base + USB2_INT_ENABLE);
-	writel(USB2_SPD_RSM_TIMSET_INIT, usb2_base + USB2_SPD_RSM_TIMSET);
-	writel(USB2_OC_TIMSET_INIT, usb2_base + USB2_OC_TIMSET);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:455", val, usb2_base + USB2_INT_ENABLE);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:456", USB2_SPD_RSM_TIMSET_INIT, usb2_base + USB2_SPD_RSM_TIMSET);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:457", USB2_OC_TIMSET_INIT, usb2_base + USB2_OC_TIMSET);
 
 	/* Initialize otg part */
 	if (channel->is_otg_channel) {
@@ -480,11 +480,11 @@ static int rcar_gen3_phy_usb2_exit(struct phy *p)
 	if (channel->is_otg_channel)
 		rphy->otg_initialized = false;
 
-	val = readl(usb2_base + USB2_INT_ENABLE);
+	val = pete_readl("drivers/phy/renesas/phy-rcar-gen3-usb2.c:483", usb2_base + USB2_INT_ENABLE);
 	val &= ~rphy->int_enable_bits;
 	if (!rcar_gen3_is_any_rphy_initialized(channel))
 		val &= ~USB2_INT_ENABLE_UCOM_INTEN;
-	writel(val, usb2_base + USB2_INT_ENABLE);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:487", val, usb2_base + USB2_INT_ENABLE);
 
 	if (channel->irq >= 0 && !rcar_gen3_is_any_rphy_initialized(channel))
 		free_irq(channel->irq, channel);
@@ -510,11 +510,11 @@ static int rcar_gen3_phy_usb2_power_on(struct phy *p)
 			goto out;
 	}
 
-	val = readl(usb2_base + USB2_USBCTR);
+	val = pete_readl("drivers/phy/renesas/phy-rcar-gen3-usb2.c:513", usb2_base + USB2_USBCTR);
 	val |= USB2_USBCTR_PLL_RST;
-	writel(val, usb2_base + USB2_USBCTR);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:515", val, usb2_base + USB2_USBCTR);
 	val &= ~USB2_USBCTR_PLL_RST;
-	writel(val, usb2_base + USB2_USBCTR);
+	pete_writel("drivers/phy/renesas/phy-rcar-gen3-usb2.c:517", val, usb2_base + USB2_USBCTR);
 
 out:
 	/* The powered flag should be set for any other phys anyway */

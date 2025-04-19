@@ -1371,9 +1371,9 @@ enum suni_pm7345 {
 
 #define	CFG_AND(val) { \
 		u32 t; \
-		t = readl(iadev->reg+IPHASE5575_EEPROM_ACCESS); \
+		t = pete_readl("drivers/atm/iphase.h:1374", iadev->reg+IPHASE5575_EEPROM_ACCESS); \
 		t &= (val); \
-		writel(t, iadev->reg+IPHASE5575_EEPROM_ACCESS); \
+		pete_writel("drivers/atm/iphase.h:1376", t, iadev->reg+IPHASE5575_EEPROM_ACCESS); \
 	}
 
 /***********************
@@ -1385,9 +1385,9 @@ enum suni_pm7345 {
 
 #define	CFG_OR(val) { \
 		u32 t; \
-		t =  readl(iadev->reg+IPHASE5575_EEPROM_ACCESS); \
+		t =  pete_readl("drivers/atm/iphase.h:1388", iadev->reg+IPHASE5575_EEPROM_ACCESS); \
 		t |= (val); \
-		writel(t, iadev->reg+IPHASE5575_EEPROM_ACCESS); \
+		pete_writel("drivers/atm/iphase.h:1390", t, iadev->reg+IPHASE5575_EEPROM_ACCESS); \
 	}
 
 /***********************
@@ -1444,7 +1444,7 @@ enum suni_pm7345 {
 		u32 _t; \
 		CFG_OR(NVSK); \
 		CFG_AND(~NVSK); \
-		_t = readl(iadev->reg+IPHASE5575_EEPROM_ACCESS); \
+		_t = pete_readl("drivers/atm/iphase.h:1447", iadev->reg+IPHASE5575_EEPROM_ACCESS); \
 		value = (_t & NVDO) ? 1 : 0; \
 	}
 

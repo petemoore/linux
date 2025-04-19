@@ -52,7 +52,7 @@ static int get_hclk(void)
 	/*
 	 * HCLK tick rate is configured by DEV_D[7:5] pins.
 	 */
-	switch ((readl(SAMPLE_AT_RESET_LOW) >> 5) & 7) {
+	switch ((pete_readl("arch/arm/mach-mv78xx0/common.c:55", SAMPLE_AT_RESET_LOW) >> 5) & 7) {
 	case 0:
 		hclk = 166666667;
 		break;
@@ -70,7 +70,7 @@ static int get_hclk(void)
 		break;
 	default:
 		panic("unknown HCLK PLL setting: %.8x\n",
-			readl(SAMPLE_AT_RESET_LOW));
+			pete_readl("arch/arm/mach-mv78xx0/common.c:73", SAMPLE_AT_RESET_LOW));
 	}
 
 	return hclk;
@@ -85,9 +85,9 @@ static void get_pclk_l2clk(int hclk, int core_index, int *pclk, int *l2clk)
 	 * PCLK/L2CLK by bits [19:14].
 	 */
 	if (core_index == 0) {
-		cfg = (readl(SAMPLE_AT_RESET_LOW) >> 8) & 0x3f;
+		cfg = (pete_readl("arch/arm/mach-mv78xx0/common.c:88", SAMPLE_AT_RESET_LOW) >> 8) & 0x3f;
 	} else {
-		cfg = (readl(SAMPLE_AT_RESET_LOW) >> 14) & 0x3f;
+		cfg = (pete_readl("arch/arm/mach-mv78xx0/common.c:90", SAMPLE_AT_RESET_LOW) >> 14) & 0x3f;
 	}
 
 	/*
@@ -110,7 +110,7 @@ static int get_tclk(void)
 	/*
 	 * TCLK tick rate is configured by DEV_A[2:0] strap pins.
 	 */
-	switch ((readl(SAMPLE_AT_RESET_HIGH) >> 6) & 7) {
+	switch ((pete_readl("arch/arm/mach-mv78xx0/common.c:113", SAMPLE_AT_RESET_HIGH) >> 6) & 7) {
 	case 1:
 		tclk_freq = 166666667;
 		break;
@@ -119,7 +119,7 @@ static int get_tclk(void)
 		break;
 	default:
 		panic("unknown TCLK PLL setting: %.8x\n",
-			readl(SAMPLE_AT_RESET_HIGH));
+			pete_readl("arch/arm/mach-mv78xx0/common.c:122", SAMPLE_AT_RESET_HIGH));
 	}
 
 	return tclk_freq;
@@ -379,7 +379,7 @@ static char * __init mv78xx0_id(void)
 
 static int __init is_l2_writethrough(void)
 {
-	return !!(readl(CPU_CONTROL) & L2_WRITETHROUGH);
+	return !!(pete_readl("arch/arm/mach-mv78xx0/common.c:382", CPU_CONTROL) & L2_WRITETHROUGH);
 }
 
 void __init mv78xx0_init(void)
@@ -412,12 +412,12 @@ void mv78xx0_restart(enum reboot_mode mode, const char *cmd)
 	/*
 	 * Enable soft reset to assert RSTOUTn.
 	 */
-	writel(SOFT_RESET_OUT_EN, RSTOUTn_MASK);
+	pete_writel("arch/arm/mach-mv78xx0/common.c:415", SOFT_RESET_OUT_EN, RSTOUTn_MASK);
 
 	/*
 	 * Assert soft reset.
 	 */
-	writel(SOFT_RESET, SYSTEM_SOFT_RESET);
+	pete_writel("arch/arm/mach-mv78xx0/common.c:420", SOFT_RESET, SYSTEM_SOFT_RESET);
 
 	while (1)
 		;

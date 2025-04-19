@@ -247,7 +247,7 @@ u8 get_input_report(u8 current_index, int sensor_idx, int report_id, struct amd_
 		/* For ALS ,V2 Platforms uses C2P_MSG5 register instead of DRAM access method */
 		if (supported_input == V2_STATUS)
 			als_input.illuminance_value =
-				readl(privdata->mmio + AMD_C2P_MSG(5)) & ILLUMINANCE_MASK;
+				pete_readl("drivers/hid/amd-sfh-hid/hid_descriptor/amd_sfh_hid_desc.c:250", privdata->mmio + AMD_C2P_MSG(5)) & ILLUMINANCE_MASK;
 		else
 			als_input.illuminance_value =
 				(int)sensor_virt_addr[0] / AMD_SFH_FW_MULTIPLIER;
@@ -256,7 +256,7 @@ u8 get_input_report(u8 current_index, int sensor_idx, int report_id, struct amd_
 		break;
 	case HPD_IDX: /* hpd */
 		get_common_inputs(&hpd_input.common_property, report_id);
-		hpdstatus.val = readl(privdata->mmio + AMD_C2P_MSG(4));
+		hpdstatus.val = pete_readl("drivers/hid/amd-sfh-hid/hid_descriptor/amd_sfh_hid_desc.c:259", privdata->mmio + AMD_C2P_MSG(4));
 		hpd_input.human_presence = hpdstatus.shpd.human_presence_actual;
 		report_size = sizeof(hpd_input);
 		memcpy(input_report, &hpd_input, sizeof(hpd_input));

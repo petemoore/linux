@@ -109,17 +109,17 @@ static void xgene_rng_start_timer(struct xgene_rng_dev *ctx)
  */
 static void xgene_rng_init_fro(struct xgene_rng_dev *ctx, u32 fro_val)
 {
-	writel(fro_val, ctx->csr_base + RNG_FRODETUNE);
-	writel(0x00000000, ctx->csr_base + RNG_ALARMMASK);
-	writel(0x00000000, ctx->csr_base + RNG_ALARMSTOP);
-	writel(0xFFFFFFFF, ctx->csr_base + RNG_FROENABLE);
+	pete_writel("drivers/char/hw_random/xgene-rng.c:112", fro_val, ctx->csr_base + RNG_FRODETUNE);
+	pete_writel("drivers/char/hw_random/xgene-rng.c:113", 0x00000000, ctx->csr_base + RNG_ALARMMASK);
+	pete_writel("drivers/char/hw_random/xgene-rng.c:114", 0x00000000, ctx->csr_base + RNG_ALARMSTOP);
+	pete_writel("drivers/char/hw_random/xgene-rng.c:115", 0xFFFFFFFF, ctx->csr_base + RNG_FROENABLE);
 }
 
 static void xgene_rng_chk_overflow(struct xgene_rng_dev *ctx)
 {
 	u32 val;
 
-	val = readl(ctx->csr_base + RNG_INTR_STS_ACK);
+	val = pete_readl("drivers/char/hw_random/xgene-rng.c:122", ctx->csr_base + RNG_INTR_STS_ACK);
 	if (val & MONOBIT_FAIL_MASK)
 		/*
 		 * LFSR detected an out-of-bounds number of 1s after
@@ -165,7 +165,7 @@ static void xgene_rng_chk_overflow(struct xgene_rng_dev *ctx)
 		if (++ctx->failure_cnt == 1) {
 			/* 1st time, just recover */
 			ctx->failure_ts = jiffies;
-			frostopped = readl(ctx->csr_base + RNG_ALARMSTOP);
+			frostopped = pete_readl("drivers/char/hw_random/xgene-rng.c:168", ctx->csr_base + RNG_ALARMSTOP);
 			xgene_rng_init_fro(ctx, frostopped);
 
 			/*
@@ -190,12 +190,12 @@ static void xgene_rng_chk_overflow(struct xgene_rng_dev *ctx)
 				 */
 				xgene_rng_start_timer(ctx);
 			}
-			frostopped = readl(ctx->csr_base + RNG_ALARMSTOP);
+			frostopped = pete_readl("drivers/char/hw_random/xgene-rng.c:193", ctx->csr_base + RNG_ALARMSTOP);
 			xgene_rng_init_fro(ctx, frostopped);
 		}
 	}
 	/* Clear them all */
-	writel(val, ctx->csr_base + RNG_INTR_STS_ACK);
+	pete_writel("drivers/char/hw_random/xgene-rng.c:198", val, ctx->csr_base + RNG_INTR_STS_ACK);
 }
 
 static irqreturn_t xgene_rng_irq_handler(int irq, void *id)
@@ -214,7 +214,7 @@ static int xgene_rng_data_present(struct hwrng *rng, int wait)
 	u32 i, val = 0;
 
 	for (i = 0; i < XGENE_RNG_RETRY_COUNT; i++) {
-		val = readl(ctx->csr_base + RNG_INTR_STS_ACK);
+		val = pete_readl("drivers/char/hw_random/xgene-rng.c:217", ctx->csr_base + RNG_INTR_STS_ACK);
 		if ((val & READY_MASK) || !wait)
 			break;
 		udelay(XGENE_RNG_RETRY_INTERVAL);
@@ -229,10 +229,10 @@ static int xgene_rng_data_read(struct hwrng *rng, u32 *data)
 	int i;
 
 	for (i = 0; i < ctx->datum_size; i++)
-		data[i] = readl(ctx->csr_base + RNG_INOUT_0 + i * 4);
+		data[i] = pete_readl("drivers/char/hw_random/xgene-rng.c:232", ctx->csr_base + RNG_INOUT_0 + i * 4);
 
 	/* Clear ready bit to start next transaction */
-	writel(READY_MASK, ctx->csr_base + RNG_INTR_STS_ACK);
+	pete_writel("drivers/char/hw_random/xgene-rng.c:235", READY_MASK, ctx->csr_base + RNG_INTR_STS_ACK);
 
 	return ctx->datum_size << 2;
 }
@@ -241,18 +241,18 @@ static void xgene_rng_init_internal(struct xgene_rng_dev *ctx)
 {
 	u32 val;
 
-	writel(0x00000000, ctx->csr_base + RNG_CONTROL);
+	pete_writel("drivers/char/hw_random/xgene-rng.c:244", 0x00000000, ctx->csr_base + RNG_CONTROL);
 
 	val = MAX_REFILL_CYCLES_SET(0, 10);
 	val = MIN_REFILL_CYCLES_SET(val, 10);
-	writel(val, ctx->csr_base + RNG_CONFIG);
+	pete_writel("drivers/char/hw_random/xgene-rng.c:248", val, ctx->csr_base + RNG_CONFIG);
 
 	val = ALARM_THRESHOLD_SET(0, 0xFF);
-	writel(val, ctx->csr_base + RNG_ALARMCNT);
+	pete_writel("drivers/char/hw_random/xgene-rng.c:251", val, ctx->csr_base + RNG_ALARMCNT);
 
 	xgene_rng_init_fro(ctx, 0);
 
-	writel(MONOBIT_FAIL_MASK |
+	pete_writel("drivers/char/hw_random/xgene-rng.c:255", MONOBIT_FAIL_MASK |
 		POKER_FAIL_MASK	|
 		LONG_RUN_FAIL_MASK |
 		RUN_FAIL_MASK |
@@ -269,7 +269,7 @@ static void xgene_rng_init_internal(struct xgene_rng_dev *ctx)
 	val = NOISE_FAIL_MASK_SET(val, 1);
 	val = STUCK_OUT_MASK_SET(val, 1);
 	val = SHUTDOWN_OFLO_MASK_SET(val, 1);
-	writel(val, ctx->csr_base + RNG_CONTROL);
+	pete_writel("drivers/char/hw_random/xgene-rng.c:272", val, ctx->csr_base + RNG_CONTROL);
 }
 
 static int xgene_rng_init(struct hwrng *rng)
@@ -279,7 +279,7 @@ static int xgene_rng_init(struct hwrng *rng)
 	ctx->failure_cnt = 0;
 	timer_setup(&ctx->failure_timer, xgene_rng_expired_timer, 0);
 
-	ctx->revision = readl(ctx->csr_base + RNG_EIP_REV);
+	ctx->revision = pete_readl("drivers/char/hw_random/xgene-rng.c:282", ctx->csr_base + RNG_EIP_REV);
 
 	dev_dbg(ctx->dev, "Rev %d.%d.%d\n",
 		MAJOR_HW_REV_RD(ctx->revision),
@@ -287,7 +287,7 @@ static int xgene_rng_init(struct hwrng *rng)
 		HW_PATCH_LEVEL_RD(ctx->revision));
 
 	dev_dbg(ctx->dev, "Options 0x%08X",
-		readl(ctx->csr_base + RNG_OPTIONS));
+		pete_readl("drivers/char/hw_random/xgene-rng.c:290", ctx->csr_base + RNG_OPTIONS));
 
 	xgene_rng_init_internal(ctx);
 

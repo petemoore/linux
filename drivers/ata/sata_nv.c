@@ -602,24 +602,24 @@ static void nv_adma_register_mode(struct ata_port *ap)
 	if (pp->flags & NV_ADMA_PORT_REGISTER_MODE)
 		return;
 
-	status = readw(mmio + NV_ADMA_STAT);
+	status = pete_readw("drivers/ata/sata_nv.c:605", mmio + NV_ADMA_STAT);
 	while (!(status & NV_ADMA_STAT_IDLE) && count < 20) {
 		ndelay(50);
-		status = readw(mmio + NV_ADMA_STAT);
+		status = pete_readw("drivers/ata/sata_nv.c:608", mmio + NV_ADMA_STAT);
 		count++;
 	}
 	if (count == 20)
 		ata_port_warn(ap, "timeout waiting for ADMA IDLE, stat=0x%hx\n",
 			      status);
 
-	tmp = readw(mmio + NV_ADMA_CTL);
-	writew(tmp & ~NV_ADMA_CTL_GO, mmio + NV_ADMA_CTL);
+	tmp = pete_readw("drivers/ata/sata_nv.c:615", mmio + NV_ADMA_CTL);
+	pete_writew("drivers/ata/sata_nv.c:616", tmp & ~NV_ADMA_CTL_GO, mmio + NV_ADMA_CTL);
 
 	count = 0;
-	status = readw(mmio + NV_ADMA_STAT);
+	status = pete_readw("drivers/ata/sata_nv.c:619", mmio + NV_ADMA_STAT);
 	while (!(status & NV_ADMA_STAT_LEGACY) && count < 20) {
 		ndelay(50);
-		status = readw(mmio + NV_ADMA_STAT);
+		status = pete_readw("drivers/ata/sata_nv.c:622", mmio + NV_ADMA_STAT);
 		count++;
 	}
 	if (count == 20)
@@ -642,14 +642,14 @@ static void nv_adma_mode(struct ata_port *ap)
 
 	WARN_ON(pp->flags & NV_ADMA_ATAPI_SETUP_COMPLETE);
 
-	tmp = readw(mmio + NV_ADMA_CTL);
-	writew(tmp | NV_ADMA_CTL_GO, mmio + NV_ADMA_CTL);
+	tmp = pete_readw("drivers/ata/sata_nv.c:645", mmio + NV_ADMA_CTL);
+	pete_writew("drivers/ata/sata_nv.c:646", tmp | NV_ADMA_CTL_GO, mmio + NV_ADMA_CTL);
 
-	status = readw(mmio + NV_ADMA_STAT);
+	status = pete_readw("drivers/ata/sata_nv.c:648", mmio + NV_ADMA_STAT);
 	while (((status & NV_ADMA_STAT_LEGACY) ||
 	      !(status & NV_ADMA_STAT_IDLE)) && count < 20) {
 		ndelay(50);
-		status = readw(mmio + NV_ADMA_STAT);
+		status = pete_readw("drivers/ata/sata_nv.c:652", mmio + NV_ADMA_STAT);
 		count++;
 	}
 	if (count == 20)
@@ -892,7 +892,7 @@ static irqreturn_t nv_adma_interrupt(int irq, void *dev_instance)
 
 		/* if ADMA is disabled, use standard ata interrupt handler */
 		if (pp->flags & NV_ADMA_ATAPI_SETUP_COMPLETE) {
-			u8 irq_stat = readb(host->iomap[NV_MMIO_BAR] + NV_INT_STATUS_CK804)
+			u8 irq_stat = pete_readb("drivers/ata/sata_nv.c:895", host->iomap[NV_MMIO_BAR] + NV_INT_STATUS_CK804)
 				>> (NV_INT_PORT_SHIFT * i);
 			handled += nv_host_intr(ap, irq_stat);
 			continue;
@@ -900,7 +900,7 @@ static irqreturn_t nv_adma_interrupt(int irq, void *dev_instance)
 
 		/* if in ATA register mode, check for standard interrupts */
 		if (pp->flags & NV_ADMA_PORT_REGISTER_MODE) {
-			u8 irq_stat = readb(host->iomap[NV_MMIO_BAR] + NV_INT_STATUS_CK804)
+			u8 irq_stat = pete_readb("drivers/ata/sata_nv.c:903", host->iomap[NV_MMIO_BAR] + NV_INT_STATUS_CK804)
 				>> (NV_INT_PORT_SHIFT * i);
 			if (ata_tag_valid(ap->link.active_tag))
 				/** NV_INT_DEV indication seems unreliable
@@ -911,18 +911,18 @@ static irqreturn_t nv_adma_interrupt(int irq, void *dev_instance)
 			handled += nv_host_intr(ap, irq_stat);
 		}
 
-		notifier = readl(mmio + NV_ADMA_NOTIFIER);
-		notifier_error = readl(mmio + NV_ADMA_NOTIFIER_ERROR);
+		notifier = pete_readl("drivers/ata/sata_nv.c:914", mmio + NV_ADMA_NOTIFIER);
+		notifier_error = pete_readl("drivers/ata/sata_nv.c:915", mmio + NV_ADMA_NOTIFIER_ERROR);
 		notifier_clears[i] = notifier | notifier_error;
 
-		gen_ctl = readl(pp->gen_block + NV_ADMA_GEN_CTL);
+		gen_ctl = pete_readl("drivers/ata/sata_nv.c:918", pp->gen_block + NV_ADMA_GEN_CTL);
 
 		if (!NV_ADMA_CHECK_INTR(gen_ctl, ap->port_no) && !notifier &&
 		    !notifier_error)
 			/* Nothing to do */
 			continue;
 
-		status = readw(mmio + NV_ADMA_STAT);
+		status = pete_readw("drivers/ata/sata_nv.c:925", mmio + NV_ADMA_STAT);
 
 		/*
 		 * Clear status. Ensure the controller sees the
@@ -930,8 +930,8 @@ static irqreturn_t nv_adma_interrupt(int irq, void *dev_instance)
 		 * statuses, so that any CPB completions after this
 		 * point in the handler will raise another interrupt.
 		 */
-		writew(status, mmio + NV_ADMA_STAT);
-		readw(mmio + NV_ADMA_STAT); /* flush posted write */
+		pete_writew("drivers/ata/sata_nv.c:933", status, mmio + NV_ADMA_STAT);
+		pete_readw("drivers/ata/sata_nv.c:934", mmio + NV_ADMA_STAT); /* flush posted write */
 		rmb();
 
 		handled++; /* irq handled if we got here */
@@ -998,9 +998,9 @@ static irqreturn_t nv_adma_interrupt(int irq, void *dev_instance)
 		/* Note: Both notifier clear registers must be written
 		   if either is set, even if one is zero, according to NVIDIA. */
 		struct nv_adma_port_priv *pp = host->ports[0]->private_data;
-		writel(notifier_clears[0], pp->notifier_clear_block);
+		pete_writel("drivers/ata/sata_nv.c:1001", notifier_clears[0], pp->notifier_clear_block);
 		pp = host->ports[1]->private_data;
-		writel(notifier_clears[1], pp->notifier_clear_block);
+		pete_writel("drivers/ata/sata_nv.c:1003", notifier_clears[1], pp->notifier_clear_block);
 	}
 
 	spin_unlock(&host->lock);
@@ -1020,14 +1020,14 @@ static void nv_adma_freeze(struct ata_port *ap)
 		return;
 
 	/* clear any outstanding CK804 notifications */
-	writeb(NV_INT_ALL << (ap->port_no * NV_INT_PORT_SHIFT),
+	pete_writeb("drivers/ata/sata_nv.c:1023", NV_INT_ALL << (ap->port_no * NV_INT_PORT_SHIFT),
 		ap->host->iomap[NV_MMIO_BAR] + NV_INT_STATUS_CK804);
 
 	/* Disable interrupt */
-	tmp = readw(mmio + NV_ADMA_CTL);
-	writew(tmp & ~(NV_ADMA_CTL_AIEN | NV_ADMA_CTL_HOTPLUG_IEN),
+	tmp = pete_readw("drivers/ata/sata_nv.c:1027", mmio + NV_ADMA_CTL);
+	pete_writew("drivers/ata/sata_nv.c:1028", tmp & ~(NV_ADMA_CTL_AIEN | NV_ADMA_CTL_HOTPLUG_IEN),
 		mmio + NV_ADMA_CTL);
-	readw(mmio + NV_ADMA_CTL);	/* flush posted write */
+	pete_readw("drivers/ata/sata_nv.c:1030", mmio + NV_ADMA_CTL);	/* flush posted write */
 }
 
 static void nv_adma_thaw(struct ata_port *ap)
@@ -1042,10 +1042,10 @@ static void nv_adma_thaw(struct ata_port *ap)
 		return;
 
 	/* Enable interrupt */
-	tmp = readw(mmio + NV_ADMA_CTL);
-	writew(tmp | (NV_ADMA_CTL_AIEN | NV_ADMA_CTL_HOTPLUG_IEN),
+	tmp = pete_readw("drivers/ata/sata_nv.c:1045", mmio + NV_ADMA_CTL);
+	pete_writew("drivers/ata/sata_nv.c:1046", tmp | (NV_ADMA_CTL_AIEN | NV_ADMA_CTL_HOTPLUG_IEN),
 		mmio + NV_ADMA_CTL);
-	readw(mmio + NV_ADMA_CTL);	/* flush posted write */
+	pete_readw("drivers/ata/sata_nv.c:1048", mmio + NV_ADMA_CTL);	/* flush posted write */
 }
 
 static void nv_adma_irq_clear(struct ata_port *ap)
@@ -1060,11 +1060,11 @@ static void nv_adma_irq_clear(struct ata_port *ap)
 	}
 
 	/* clear any outstanding CK804 notifications */
-	writeb(NV_INT_ALL << (ap->port_no * NV_INT_PORT_SHIFT),
+	pete_writeb("drivers/ata/sata_nv.c:1063", NV_INT_ALL << (ap->port_no * NV_INT_PORT_SHIFT),
 		ap->host->iomap[NV_MMIO_BAR] + NV_INT_STATUS_CK804);
 
 	/* clear ADMA status */
-	writew(0xffff, mmio + NV_ADMA_STAT);
+	pete_writew("drivers/ata/sata_nv.c:1067", 0xffff, mmio + NV_ADMA_STAT);
 
 	/* clear notifiers - note both ports need to be written with
 	   something even though we are only clearing on one */
@@ -1076,9 +1076,9 @@ static void nv_adma_irq_clear(struct ata_port *ap)
 		notifier_clears[1] = 0xFFFFFFFF;
 	}
 	pp = ap->host->ports[0]->private_data;
-	writel(notifier_clears[0], pp->notifier_clear_block);
+	pete_writel("drivers/ata/sata_nv.c:1079", notifier_clears[0], pp->notifier_clear_block);
 	pp = ap->host->ports[1]->private_data;
-	writel(notifier_clears[1], pp->notifier_clear_block);
+	pete_writel("drivers/ata/sata_nv.c:1081", notifier_clears[1], pp->notifier_clear_block);
 }
 
 static void nv_adma_post_internal_cmd(struct ata_queued_cmd *qc)
@@ -1147,8 +1147,8 @@ static int nv_adma_port_start(struct ata_port *ap)
 	pp->cpb     = mem;
 	pp->cpb_dma = mem_dma;
 
-	writel(mem_dma & 0xFFFFFFFF, 	mmio + NV_ADMA_CPB_BASE_LOW);
-	writel((mem_dma >> 16) >> 16,	mmio + NV_ADMA_CPB_BASE_HIGH);
+	pete_writel("drivers/ata/sata_nv.c:1150", mem_dma & 0xFFFFFFFF, 	mmio + NV_ADMA_CPB_BASE_LOW);
+	pete_writel("drivers/ata/sata_nv.c:1151", (mem_dma >> 16) >> 16,	mmio + NV_ADMA_CPB_BASE_HIGH);
 
 	mem     += NV_ADMA_MAX_CPBS * NV_ADMA_CPB_SZ;
 	mem_dma += NV_ADMA_MAX_CPBS * NV_ADMA_CPB_SZ;
@@ -1162,25 +1162,25 @@ static int nv_adma_port_start(struct ata_port *ap)
 	ap->private_data = pp;
 
 	/* clear any outstanding interrupt conditions */
-	writew(0xffff, mmio + NV_ADMA_STAT);
+	pete_writew("drivers/ata/sata_nv.c:1165", 0xffff, mmio + NV_ADMA_STAT);
 
 	/* initialize port variables */
 	pp->flags = NV_ADMA_PORT_REGISTER_MODE;
 
 	/* clear CPB fetch count */
-	writew(0, mmio + NV_ADMA_CPB_COUNT);
+	pete_writew("drivers/ata/sata_nv.c:1171", 0, mmio + NV_ADMA_CPB_COUNT);
 
 	/* clear GO for register mode, enable interrupt */
-	tmp = readw(mmio + NV_ADMA_CTL);
-	writew((tmp & ~NV_ADMA_CTL_GO) | NV_ADMA_CTL_AIEN |
+	tmp = pete_readw("drivers/ata/sata_nv.c:1174", mmio + NV_ADMA_CTL);
+	pete_writew("drivers/ata/sata_nv.c:1175", (tmp & ~NV_ADMA_CTL_GO) | NV_ADMA_CTL_AIEN |
 		NV_ADMA_CTL_HOTPLUG_IEN, mmio + NV_ADMA_CTL);
 
-	tmp = readw(mmio + NV_ADMA_CTL);
-	writew(tmp | NV_ADMA_CTL_CHANNEL_RESET, mmio + NV_ADMA_CTL);
-	readw(mmio + NV_ADMA_CTL);	/* flush posted write */
+	tmp = pete_readw("drivers/ata/sata_nv.c:1178", mmio + NV_ADMA_CTL);
+	pete_writew("drivers/ata/sata_nv.c:1179", tmp | NV_ADMA_CTL_CHANNEL_RESET, mmio + NV_ADMA_CTL);
+	pete_readw("drivers/ata/sata_nv.c:1180", mmio + NV_ADMA_CTL);	/* flush posted write */
 	udelay(1);
-	writew(tmp & ~NV_ADMA_CTL_CHANNEL_RESET, mmio + NV_ADMA_CTL);
-	readw(mmio + NV_ADMA_CTL);	/* flush posted write */
+	pete_writew("drivers/ata/sata_nv.c:1182", tmp & ~NV_ADMA_CTL_CHANNEL_RESET, mmio + NV_ADMA_CTL);
+	pete_readw("drivers/ata/sata_nv.c:1183", mmio + NV_ADMA_CTL);	/* flush posted write */
 
 	return 0;
 }
@@ -1191,7 +1191,7 @@ static void nv_adma_port_stop(struct ata_port *ap)
 	void __iomem *mmio = pp->ctl_block;
 
 	VPRINTK("ENTER\n");
-	writew(0, mmio + NV_ADMA_CTL);
+	pete_writew("drivers/ata/sata_nv.c:1194", 0, mmio + NV_ADMA_CTL);
 }
 
 #ifdef CONFIG_PM
@@ -1204,10 +1204,10 @@ static int nv_adma_port_suspend(struct ata_port *ap, pm_message_t mesg)
 	nv_adma_register_mode(ap);
 
 	/* clear CPB fetch count */
-	writew(0, mmio + NV_ADMA_CPB_COUNT);
+	pete_writew("drivers/ata/sata_nv.c:1207", 0, mmio + NV_ADMA_CPB_COUNT);
 
 	/* disable interrupt, shut down port */
-	writew(0, mmio + NV_ADMA_CTL);
+	pete_writew("drivers/ata/sata_nv.c:1210", 0, mmio + NV_ADMA_CTL);
 
 	return 0;
 }
@@ -1219,29 +1219,29 @@ static int nv_adma_port_resume(struct ata_port *ap)
 	u16 tmp;
 
 	/* set CPB block location */
-	writel(pp->cpb_dma & 0xFFFFFFFF, 	mmio + NV_ADMA_CPB_BASE_LOW);
-	writel((pp->cpb_dma >> 16) >> 16,	mmio + NV_ADMA_CPB_BASE_HIGH);
+	pete_writel("drivers/ata/sata_nv.c:1222", pp->cpb_dma & 0xFFFFFFFF, 	mmio + NV_ADMA_CPB_BASE_LOW);
+	pete_writel("drivers/ata/sata_nv.c:1223", (pp->cpb_dma >> 16) >> 16,	mmio + NV_ADMA_CPB_BASE_HIGH);
 
 	/* clear any outstanding interrupt conditions */
-	writew(0xffff, mmio + NV_ADMA_STAT);
+	pete_writew("drivers/ata/sata_nv.c:1226", 0xffff, mmio + NV_ADMA_STAT);
 
 	/* initialize port variables */
 	pp->flags |= NV_ADMA_PORT_REGISTER_MODE;
 
 	/* clear CPB fetch count */
-	writew(0, mmio + NV_ADMA_CPB_COUNT);
+	pete_writew("drivers/ata/sata_nv.c:1232", 0, mmio + NV_ADMA_CPB_COUNT);
 
 	/* clear GO for register mode, enable interrupt */
-	tmp = readw(mmio + NV_ADMA_CTL);
-	writew((tmp & ~NV_ADMA_CTL_GO) | NV_ADMA_CTL_AIEN |
+	tmp = pete_readw("drivers/ata/sata_nv.c:1235", mmio + NV_ADMA_CTL);
+	pete_writew("drivers/ata/sata_nv.c:1236", (tmp & ~NV_ADMA_CTL_GO) | NV_ADMA_CTL_AIEN |
 		NV_ADMA_CTL_HOTPLUG_IEN, mmio + NV_ADMA_CTL);
 
-	tmp = readw(mmio + NV_ADMA_CTL);
-	writew(tmp | NV_ADMA_CTL_CHANNEL_RESET, mmio + NV_ADMA_CTL);
-	readw(mmio + NV_ADMA_CTL);	/* flush posted write */
+	tmp = pete_readw("drivers/ata/sata_nv.c:1239", mmio + NV_ADMA_CTL);
+	pete_writew("drivers/ata/sata_nv.c:1240", tmp | NV_ADMA_CTL_CHANNEL_RESET, mmio + NV_ADMA_CTL);
+	pete_readw("drivers/ata/sata_nv.c:1241", mmio + NV_ADMA_CTL);	/* flush posted write */
 	udelay(1);
-	writew(tmp & ~NV_ADMA_CTL_CHANNEL_RESET, mmio + NV_ADMA_CTL);
-	readw(mmio + NV_ADMA_CTL);	/* flush posted write */
+	pete_writew("drivers/ata/sata_nv.c:1243", tmp & ~NV_ADMA_CTL_CHANNEL_RESET, mmio + NV_ADMA_CTL);
+	pete_readw("drivers/ata/sata_nv.c:1244", mmio + NV_ADMA_CTL);	/* flush posted write */
 
 	return 0;
 }
@@ -1436,7 +1436,7 @@ static unsigned int nv_adma_qc_issue(struct ata_queued_cmd *qc)
 		pp->last_issue_ncq = curr_ncq;
 	}
 
-	writew(qc->hw_tag, mmio + NV_ADMA_APPEND);
+	pete_writew("drivers/ata/sata_nv.c:1439", qc->hw_tag, mmio + NV_ADMA_APPEND);
 
 	DPRINTK("Issued tag %u\n", qc->hw_tag);
 
@@ -1506,7 +1506,7 @@ static irqreturn_t nv_ck804_interrupt(int irq, void *dev_instance)
 	irqreturn_t ret;
 
 	spin_lock(&host->lock);
-	irq_stat = readb(host->iomap[NV_MMIO_BAR] + NV_INT_STATUS_CK804);
+	irq_stat = pete_readb("drivers/ata/sata_nv.c:1509", host->iomap[NV_MMIO_BAR] + NV_INT_STATUS_CK804);
 	ret = nv_do_interrupt(host, irq_stat);
 	spin_unlock(&host->lock);
 
@@ -1593,9 +1593,9 @@ static void nv_ck804_freeze(struct ata_port *ap)
 	int shift = ap->port_no * NV_INT_PORT_SHIFT;
 	u8 mask;
 
-	mask = readb(mmio_base + NV_INT_ENABLE_CK804);
+	mask = pete_readb("drivers/ata/sata_nv.c:1596", mmio_base + NV_INT_ENABLE_CK804);
 	mask &= ~(NV_INT_ALL << shift);
-	writeb(mask, mmio_base + NV_INT_ENABLE_CK804);
+	pete_writeb("drivers/ata/sata_nv.c:1598", mask, mmio_base + NV_INT_ENABLE_CK804);
 }
 
 static void nv_ck804_thaw(struct ata_port *ap)
@@ -1604,11 +1604,11 @@ static void nv_ck804_thaw(struct ata_port *ap)
 	int shift = ap->port_no * NV_INT_PORT_SHIFT;
 	u8 mask;
 
-	writeb(NV_INT_ALL << shift, mmio_base + NV_INT_STATUS_CK804);
+	pete_writeb("drivers/ata/sata_nv.c:1607", NV_INT_ALL << shift, mmio_base + NV_INT_STATUS_CK804);
 
-	mask = readb(mmio_base + NV_INT_ENABLE_CK804);
+	mask = pete_readb("drivers/ata/sata_nv.c:1609", mmio_base + NV_INT_ENABLE_CK804);
 	mask |= (NV_INT_MASK << shift);
-	writeb(mask, mmio_base + NV_INT_ENABLE_CK804);
+	pete_writeb("drivers/ata/sata_nv.c:1611", mask, mmio_base + NV_INT_ENABLE_CK804);
 }
 
 static void nv_mcp55_freeze(struct ata_port *ap)
@@ -1617,11 +1617,11 @@ static void nv_mcp55_freeze(struct ata_port *ap)
 	int shift = ap->port_no * NV_INT_PORT_SHIFT_MCP55;
 	u32 mask;
 
-	writel(NV_INT_ALL_MCP55 << shift, mmio_base + NV_INT_STATUS_MCP55);
+	pete_writel("drivers/ata/sata_nv.c:1620", NV_INT_ALL_MCP55 << shift, mmio_base + NV_INT_STATUS_MCP55);
 
-	mask = readl(mmio_base + NV_INT_ENABLE_MCP55);
+	mask = pete_readl("drivers/ata/sata_nv.c:1622", mmio_base + NV_INT_ENABLE_MCP55);
 	mask &= ~(NV_INT_ALL_MCP55 << shift);
-	writel(mask, mmio_base + NV_INT_ENABLE_MCP55);
+	pete_writel("drivers/ata/sata_nv.c:1624", mask, mmio_base + NV_INT_ENABLE_MCP55);
 }
 
 static void nv_mcp55_thaw(struct ata_port *ap)
@@ -1630,11 +1630,11 @@ static void nv_mcp55_thaw(struct ata_port *ap)
 	int shift = ap->port_no * NV_INT_PORT_SHIFT_MCP55;
 	u32 mask;
 
-	writel(NV_INT_ALL_MCP55 << shift, mmio_base + NV_INT_STATUS_MCP55);
+	pete_writel("drivers/ata/sata_nv.c:1633", NV_INT_ALL_MCP55 << shift, mmio_base + NV_INT_STATUS_MCP55);
 
-	mask = readl(mmio_base + NV_INT_ENABLE_MCP55);
+	mask = pete_readl("drivers/ata/sata_nv.c:1635", mmio_base + NV_INT_ENABLE_MCP55);
 	mask |= (NV_INT_MASK_MCP55 << shift);
-	writel(mask, mmio_base + NV_INT_ENABLE_MCP55);
+	pete_writel("drivers/ata/sata_nv.c:1637", mask, mmio_base + NV_INT_ENABLE_MCP55);
 }
 
 static void nv_adma_error_handler(struct ata_port *ap)
@@ -1646,12 +1646,12 @@ static void nv_adma_error_handler(struct ata_port *ap)
 		u16 tmp;
 
 		if (ata_tag_valid(ap->link.active_tag) || ap->link.sactive) {
-			u32 notifier = readl(mmio + NV_ADMA_NOTIFIER);
-			u32 notifier_error = readl(mmio + NV_ADMA_NOTIFIER_ERROR);
-			u32 gen_ctl = readl(pp->gen_block + NV_ADMA_GEN_CTL);
-			u32 status = readw(mmio + NV_ADMA_STAT);
-			u8 cpb_count = readb(mmio + NV_ADMA_CPB_COUNT);
-			u8 next_cpb_idx = readb(mmio + NV_ADMA_NEXT_CPB_IDX);
+			u32 notifier = pete_readl("drivers/ata/sata_nv.c:1649", mmio + NV_ADMA_NOTIFIER);
+			u32 notifier_error = pete_readl("drivers/ata/sata_nv.c:1650", mmio + NV_ADMA_NOTIFIER_ERROR);
+			u32 gen_ctl = pete_readl("drivers/ata/sata_nv.c:1651", pp->gen_block + NV_ADMA_GEN_CTL);
+			u32 status = pete_readw("drivers/ata/sata_nv.c:1652", mmio + NV_ADMA_STAT);
+			u8 cpb_count = pete_readb("drivers/ata/sata_nv.c:1653", mmio + NV_ADMA_CPB_COUNT);
+			u8 next_cpb_idx = pete_readb("drivers/ata/sata_nv.c:1654", mmio + NV_ADMA_NEXT_CPB_IDX);
 
 			ata_port_err(ap,
 				"EH in ADMA mode, notifier 0x%X "
@@ -1679,15 +1679,15 @@ static void nv_adma_error_handler(struct ata_port *ap)
 			pp->cpb[i].ctl_flags &= ~NV_CPB_CTL_CPB_VALID;
 
 		/* clear CPB fetch count */
-		writew(0, mmio + NV_ADMA_CPB_COUNT);
+		pete_writew("drivers/ata/sata_nv.c:1682", 0, mmio + NV_ADMA_CPB_COUNT);
 
 		/* Reset channel */
-		tmp = readw(mmio + NV_ADMA_CTL);
-		writew(tmp | NV_ADMA_CTL_CHANNEL_RESET, mmio + NV_ADMA_CTL);
-		readw(mmio + NV_ADMA_CTL);	/* flush posted write */
+		tmp = pete_readw("drivers/ata/sata_nv.c:1685", mmio + NV_ADMA_CTL);
+		pete_writew("drivers/ata/sata_nv.c:1686", tmp | NV_ADMA_CTL_CHANNEL_RESET, mmio + NV_ADMA_CTL);
+		pete_readw("drivers/ata/sata_nv.c:1687", mmio + NV_ADMA_CTL);	/* flush posted write */
 		udelay(1);
-		writew(tmp & ~NV_ADMA_CTL_CHANNEL_RESET, mmio + NV_ADMA_CTL);
-		readw(mmio + NV_ADMA_CTL);	/* flush posted write */
+		pete_writew("drivers/ata/sata_nv.c:1689", tmp & ~NV_ADMA_CTL_CHANNEL_RESET, mmio + NV_ADMA_CTL);
+		pete_readw("drivers/ata/sata_nv.c:1690", mmio + NV_ADMA_CTL);	/* flush posted write */
 	}
 
 	ata_bmdma_error_handler(ap);
@@ -1748,7 +1748,7 @@ static void nv_swncq_irq_clear(struct ata_port *ap, u16 fis)
 {
 	struct nv_swncq_port_priv *pp = ap->private_data;
 
-	writew(fis, pp->irq_block);
+	pete_writew("drivers/ata/sata_nv.c:1751", fis, pp->irq_block);
 }
 
 static void __ata_bmdma_stop(struct ata_port *ap)
@@ -1778,7 +1778,7 @@ static void nv_swncq_ncq_stop(struct ata_port *ap)
 		     ap->ops->sff_check_status(ap),
 		     ioread8(ap->ioaddr.error_addr));
 
-	sactive = readl(pp->sactive_block);
+	sactive = pete_readl("drivers/ata/sata_nv.c:1781", pp->sactive_block);
 	done_mask = pp->qc_active ^ sactive;
 
 	ata_port_err(ap, "tag : dhfis dmafis sdbfis sactive\n");
@@ -1825,15 +1825,15 @@ static int nv_swncq_port_suspend(struct ata_port *ap, pm_message_t mesg)
 	u32 tmp;
 
 	/* clear irq */
-	writel(~0, mmio + NV_INT_STATUS_MCP55);
+	pete_writel("drivers/ata/sata_nv.c:1828", ~0, mmio + NV_INT_STATUS_MCP55);
 
 	/* disable irq */
-	writel(0, mmio + NV_INT_ENABLE_MCP55);
+	pete_writel("drivers/ata/sata_nv.c:1831", 0, mmio + NV_INT_ENABLE_MCP55);
 
 	/* disable swncq */
-	tmp = readl(mmio + NV_CTL_MCP55);
+	tmp = pete_readl("drivers/ata/sata_nv.c:1834", mmio + NV_CTL_MCP55);
 	tmp &= ~(NV_CTL_PRI_SWNCQ | NV_CTL_SEC_SWNCQ);
-	writel(tmp, mmio + NV_CTL_MCP55);
+	pete_writel("drivers/ata/sata_nv.c:1836", tmp, mmio + NV_CTL_MCP55);
 
 	return 0;
 }
@@ -1844,14 +1844,14 @@ static int nv_swncq_port_resume(struct ata_port *ap)
 	u32 tmp;
 
 	/* clear irq */
-	writel(~0, mmio + NV_INT_STATUS_MCP55);
+	pete_writel("drivers/ata/sata_nv.c:1847", ~0, mmio + NV_INT_STATUS_MCP55);
 
 	/* enable irq */
-	writel(0x00fd00fd, mmio + NV_INT_ENABLE_MCP55);
+	pete_writel("drivers/ata/sata_nv.c:1850", 0x00fd00fd, mmio + NV_INT_ENABLE_MCP55);
 
 	/* enable swncq */
-	tmp = readl(mmio + NV_CTL_MCP55);
-	writel(tmp | NV_CTL_PRI_SWNCQ | NV_CTL_SEC_SWNCQ, mmio + NV_CTL_MCP55);
+	tmp = pete_readl("drivers/ata/sata_nv.c:1853", mmio + NV_CTL_MCP55);
+	pete_writel("drivers/ata/sata_nv.c:1854", tmp | NV_CTL_PRI_SWNCQ | NV_CTL_SEC_SWNCQ, mmio + NV_CTL_MCP55);
 
 	return 0;
 }
@@ -1870,17 +1870,17 @@ static void nv_swncq_host_init(struct ata_host *host)
 	pci_write_config_byte(pdev, 0x7f, regval);
 
 	/* enable swncq */
-	tmp = readl(mmio + NV_CTL_MCP55);
+	tmp = pete_readl("drivers/ata/sata_nv.c:1873", mmio + NV_CTL_MCP55);
 	VPRINTK("HOST_CTL:0x%X\n", tmp);
-	writel(tmp | NV_CTL_PRI_SWNCQ | NV_CTL_SEC_SWNCQ, mmio + NV_CTL_MCP55);
+	pete_writel("drivers/ata/sata_nv.c:1875", tmp | NV_CTL_PRI_SWNCQ | NV_CTL_SEC_SWNCQ, mmio + NV_CTL_MCP55);
 
 	/* enable irq intr */
-	tmp = readl(mmio + NV_INT_ENABLE_MCP55);
+	tmp = pete_readl("drivers/ata/sata_nv.c:1878", mmio + NV_INT_ENABLE_MCP55);
 	VPRINTK("HOST_ENABLE:0x%X\n", tmp);
-	writel(tmp | 0x00fd00fd, mmio + NV_INT_ENABLE_MCP55);
+	pete_writel("drivers/ata/sata_nv.c:1880", tmp | 0x00fd00fd, mmio + NV_INT_ENABLE_MCP55);
 
 	/*  clear port irq */
-	writel(~0x0, mmio + NV_INT_STATUS_MCP55);
+	pete_writel("drivers/ata/sata_nv.c:1883", ~0x0, mmio + NV_INT_STATUS_MCP55);
 }
 
 static int nv_swncq_slave_config(struct scsi_device *sdev)
@@ -2019,7 +2019,7 @@ static unsigned int nv_swncq_issue_atacmd(struct ata_port *ap,
 
 	DPRINTK("Enter\n");
 
-	writel((1 << qc->hw_tag), pp->sactive_block);
+	pete_writel("drivers/ata/sata_nv.c:2022", (1 << qc->hw_tag), pp->sactive_block);
 	pp->last_issue_tag = qc->hw_tag;
 	pp->dhfis_bits &= ~(1 << qc->hw_tag);
 	pp->dmafis_bits &= ~(1 << qc->hw_tag);
@@ -2099,7 +2099,7 @@ static int nv_swncq_sdbfis(struct ata_port *ap)
 	ap->ops->sff_irq_clear(ap);
 	__ata_bmdma_stop(ap);
 
-	sactive = readl(pp->sactive_block);
+	sactive = pete_readl("drivers/ata/sata_nv.c:2102", pp->sactive_block);
 	done_mask = pp->qc_active ^ sactive;
 
 	pp->qc_active &= ~done_mask;
@@ -2154,7 +2154,7 @@ static inline u32 nv_swncq_tag(struct ata_port *ap)
 	struct nv_swncq_port_priv *pp = ap->private_data;
 	u32 tag;
 
-	tag = readb(pp->tag_block) >> 2;
+	tag = pete_readb("drivers/ata/sata_nv.c:2157", pp->tag_block) >> 2;
 	return (tag & 0x1f);
 }
 
@@ -2240,7 +2240,7 @@ static void nv_swncq_host_interrupt(struct ata_port *ap, u16 fis)
 		DPRINTK("id 0x%x SWNCQ: qc_active 0x%X "
 			"dhfis 0x%X dmafis 0x%X sactive 0x%X\n",
 			ap->print_id, pp->qc_active, pp->dhfis_bits,
-			pp->dmafis_bits, readl(pp->sactive_block));
+			pp->dmafis_bits, pete_readl("drivers/ata/sata_nv.c:2243", pp->sactive_block));
 		if (nv_swncq_sdbfis(ap) < 0)
 			goto irq_error;
 	}
@@ -2299,7 +2299,7 @@ static irqreturn_t nv_swncq_interrupt(int irq, void *dev_instance)
 
 	spin_lock_irqsave(&host->lock, flags);
 
-	irq_stat = readl(host->iomap[NV_MMIO_BAR] + NV_INT_STATUS_MCP55);
+	irq_stat = pete_readl("drivers/ata/sata_nv.c:2302", host->iomap[NV_MMIO_BAR] + NV_INT_STATUS_MCP55);
 
 	for (i = 0; i < host->n_ports; i++) {
 		struct ata_port *ap = host->ports[i];

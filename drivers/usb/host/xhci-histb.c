@@ -53,11 +53,11 @@ static int xhci_histb_config(struct xhci_hcd_histb *histb)
 
 	if (of_property_match_string(np, "phys-names", "inno") >= 0) {
 		/* USB2 PHY chose ulpi 8bit interface */
-		regval = readl(histb->ctrl + REG_GUSB2PHYCFG0);
+		regval = pete_readl("drivers/usb/host/xhci-histb.c:56", histb->ctrl + REG_GUSB2PHYCFG0);
 		regval &= ~BIT_UTMI_ULPI;
 		regval &= ~(BIT_UTMI_8_16);
 		regval &= ~BIT_FREECLK_EXIST;
-		writel(regval, histb->ctrl + REG_GUSB2PHYCFG0);
+		pete_writel("drivers/usb/host/xhci-histb.c:60", regval, histb->ctrl + REG_GUSB2PHYCFG0);
 	}
 
 	if (of_property_match_string(np, "phys-names", "combo") >= 0) {
@@ -68,15 +68,15 @@ static int xhci_histb_config(struct xhci_hcd_histb *histb)
 		 * GUSB3PIPECTL0[2:1] = 01 : Tx Deemphasis = -3.5dB,
 		 * refer to xHCI spec
 		 */
-		regval = readl(histb->ctrl + REG_GUSB3PIPECTL0);
+		regval = pete_readl("drivers/usb/host/xhci-histb.c:71", histb->ctrl + REG_GUSB3PIPECTL0);
 		regval &= ~USB3_DEEMPHASIS_MASK;
 		regval |= USB3_DEEMPHASIS0;
 		regval |= USB3_TX_MARGIN1;
-		writel(regval, histb->ctrl + REG_GUSB3PIPECTL0);
+		pete_writel("drivers/usb/host/xhci-histb.c:75", regval, histb->ctrl + REG_GUSB3PIPECTL0);
 	}
 
-	writel(0x23100000, histb->ctrl + GTXTHRCFG);
-	writel(0x23100000, histb->ctrl + GRXTHRCFG);
+	pete_writel("drivers/usb/host/xhci-histb.c:78", 0x23100000, histb->ctrl + GTXTHRCFG);
+	pete_writel("drivers/usb/host/xhci-histb.c:79", 0x23100000, histb->ctrl + GRXTHRCFG);
 
 	return 0;
 }

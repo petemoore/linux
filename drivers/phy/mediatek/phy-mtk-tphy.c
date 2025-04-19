@@ -401,45 +401,45 @@ static void hs_slew_rate_calibrate(struct mtk_tphy *tphy,
 		return;
 
 	/* enable USB ring oscillator */
-	tmp = readl(com + U3P_USBPHYACR5);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:404", com + U3P_USBPHYACR5);
 	tmp |= PA5_RG_U2_HSTX_SRCAL_EN;
-	writel(tmp, com + U3P_USBPHYACR5);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:406", tmp, com + U3P_USBPHYACR5);
 	udelay(1);
 
 	/*enable free run clock */
-	tmp = readl(fmreg + U3P_U2FREQ_FMMONR1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:410", fmreg + U3P_U2FREQ_FMMONR1);
 	tmp |= P2F_RG_FRCK_EN;
-	writel(tmp, fmreg + U3P_U2FREQ_FMMONR1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:412", tmp, fmreg + U3P_U2FREQ_FMMONR1);
 
 	/* set cycle count as 1024, and select u2 channel */
-	tmp = readl(fmreg + U3P_U2FREQ_FMCR0);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:415", fmreg + U3P_U2FREQ_FMCR0);
 	tmp &= ~(P2F_RG_CYCLECNT | P2F_RG_MONCLK_SEL);
 	tmp |= P2F_RG_CYCLECNT_VAL(U3P_FM_DET_CYCLE_CNT);
 	if (tphy->pdata->version == MTK_PHY_V1)
 		tmp |= P2F_RG_MONCLK_SEL_VAL(instance->index >> 1);
 
-	writel(tmp, fmreg + U3P_U2FREQ_FMCR0);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:421", tmp, fmreg + U3P_U2FREQ_FMCR0);
 
 	/* enable frequency meter */
-	tmp = readl(fmreg + U3P_U2FREQ_FMCR0);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:424", fmreg + U3P_U2FREQ_FMCR0);
 	tmp |= P2F_RG_FREQDET_EN;
-	writel(tmp, fmreg + U3P_U2FREQ_FMCR0);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:426", tmp, fmreg + U3P_U2FREQ_FMCR0);
 
 	/* ignore return value */
 	readl_poll_timeout(fmreg + U3P_U2FREQ_FMMONR1, tmp,
 			   (tmp & P2F_USB_FM_VALID), 10, 200);
 
-	fm_out = readl(fmreg + U3P_U2FREQ_VALUE);
+	fm_out = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:432", fmreg + U3P_U2FREQ_VALUE);
 
 	/* disable frequency meter */
-	tmp = readl(fmreg + U3P_U2FREQ_FMCR0);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:435", fmreg + U3P_U2FREQ_FMCR0);
 	tmp &= ~P2F_RG_FREQDET_EN;
-	writel(tmp, fmreg + U3P_U2FREQ_FMCR0);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:437", tmp, fmreg + U3P_U2FREQ_FMCR0);
 
 	/*disable free run clock */
-	tmp = readl(fmreg + U3P_U2FREQ_FMMONR1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:440", fmreg + U3P_U2FREQ_FMMONR1);
 	tmp &= ~P2F_RG_FRCK_EN;
-	writel(tmp, fmreg + U3P_U2FREQ_FMMONR1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:442", tmp, fmreg + U3P_U2FREQ_FMMONR1);
 
 	if (fm_out) {
 		/* ( 1024 / FM_OUT ) x reference clock frequency x coef */
@@ -455,15 +455,15 @@ static void hs_slew_rate_calibrate(struct mtk_tphy *tphy,
 		tphy->src_ref_clk, tphy->src_coef);
 
 	/* set HS slew rate */
-	tmp = readl(com + U3P_USBPHYACR5);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:458", com + U3P_USBPHYACR5);
 	tmp &= ~PA5_RG_U2_HSTX_SRCTRL;
 	tmp |= PA5_RG_U2_HSTX_SRCTRL_VAL(calibration_val);
-	writel(tmp, com + U3P_USBPHYACR5);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:461", tmp, com + U3P_USBPHYACR5);
 
 	/* disable USB ring oscillator */
-	tmp = readl(com + U3P_USBPHYACR5);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:464", com + U3P_USBPHYACR5);
 	tmp &= ~PA5_RG_U2_HSTX_SRCAL_EN;
-	writel(tmp, com + U3P_USBPHYACR5);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:466", tmp, com + U3P_USBPHYACR5);
 }
 
 static void u3_phy_instance_init(struct mtk_tphy *tphy,
@@ -473,45 +473,45 @@ static void u3_phy_instance_init(struct mtk_tphy *tphy,
 	u32 tmp;
 
 	/* gating PCIe Analog XTAL clock */
-	tmp = readl(u3_banks->spllc + U3P_SPLLC_XTALCTL3);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:476", u3_banks->spllc + U3P_SPLLC_XTALCTL3);
 	tmp |= XC3_RG_U3_XTAL_RX_PWD | XC3_RG_U3_FRC_XTAL_RX_PWD;
-	writel(tmp, u3_banks->spllc + U3P_SPLLC_XTALCTL3);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:478", tmp, u3_banks->spllc + U3P_SPLLC_XTALCTL3);
 
 	/* gating XSQ */
-	tmp = readl(u3_banks->phya + U3P_U3_PHYA_DA_REG0);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:481", u3_banks->phya + U3P_U3_PHYA_DA_REG0);
 	tmp &= ~P3A_RG_XTAL_EXT_EN_U3;
 	tmp |= P3A_RG_XTAL_EXT_EN_U3_VAL(2);
-	writel(tmp, u3_banks->phya + U3P_U3_PHYA_DA_REG0);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:484", tmp, u3_banks->phya + U3P_U3_PHYA_DA_REG0);
 
-	tmp = readl(u3_banks->phya + U3P_U3_PHYA_REG9);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:486", u3_banks->phya + U3P_U3_PHYA_REG9);
 	tmp &= ~P3A_RG_RX_DAC_MUX;
 	tmp |= P3A_RG_RX_DAC_MUX_VAL(4);
-	writel(tmp, u3_banks->phya + U3P_U3_PHYA_REG9);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:489", tmp, u3_banks->phya + U3P_U3_PHYA_REG9);
 
-	tmp = readl(u3_banks->phya + U3P_U3_PHYA_REG6);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:491", u3_banks->phya + U3P_U3_PHYA_REG6);
 	tmp &= ~P3A_RG_TX_EIDLE_CM;
 	tmp |= P3A_RG_TX_EIDLE_CM_VAL(0xe);
-	writel(tmp, u3_banks->phya + U3P_U3_PHYA_REG6);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:494", tmp, u3_banks->phya + U3P_U3_PHYA_REG6);
 
-	tmp = readl(u3_banks->phyd + U3P_U3_PHYD_CDR1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:496", u3_banks->phyd + U3P_U3_PHYD_CDR1);
 	tmp &= ~(P3D_RG_CDR_BIR_LTD0 | P3D_RG_CDR_BIR_LTD1);
 	tmp |= P3D_RG_CDR_BIR_LTD0_VAL(0xc) | P3D_RG_CDR_BIR_LTD1_VAL(0x3);
-	writel(tmp, u3_banks->phyd + U3P_U3_PHYD_CDR1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:499", tmp, u3_banks->phyd + U3P_U3_PHYD_CDR1);
 
-	tmp = readl(u3_banks->phyd + U3P_U3_PHYD_LFPS1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:501", u3_banks->phyd + U3P_U3_PHYD_LFPS1);
 	tmp &= ~P3D_RG_FWAKE_TH;
 	tmp |= P3D_RG_FWAKE_TH_VAL(0x34);
-	writel(tmp, u3_banks->phyd + U3P_U3_PHYD_LFPS1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:504", tmp, u3_banks->phyd + U3P_U3_PHYD_LFPS1);
 
-	tmp = readl(u3_banks->phyd + U3P_U3_PHYD_RXDET1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:506", u3_banks->phyd + U3P_U3_PHYD_RXDET1);
 	tmp &= ~P3D_RG_RXDET_STB2_SET;
 	tmp |= P3D_RG_RXDET_STB2_SET_VAL(0x10);
-	writel(tmp, u3_banks->phyd + U3P_U3_PHYD_RXDET1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:509", tmp, u3_banks->phyd + U3P_U3_PHYD_RXDET1);
 
-	tmp = readl(u3_banks->phyd + U3P_U3_PHYD_RXDET2);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:511", u3_banks->phyd + U3P_U3_PHYD_RXDET2);
 	tmp &= ~P3D_RG_RXDET_STB2_SET_P3;
 	tmp |= P3D_RG_RXDET_STB2_SET_P3_VAL(0x10);
-	writel(tmp, u3_banks->phyd + U3P_U3_PHYD_RXDET2);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:514", tmp, u3_banks->phyd + U3P_U3_PHYD_RXDET2);
 
 	dev_dbg(tphy->dev, "%s(%d)\n", __func__, instance->index);
 }
@@ -526,21 +526,21 @@ static void u2_phy_pll_26m_set(struct mtk_tphy *tphy,
 	if (!tphy->pdata->sw_pll_48m_to_26m)
 		return;
 
-	tmp = readl(com + U3P_USBPHYACR0);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:529", com + U3P_USBPHYACR0);
 	tmp &= ~PA0_USB20_PLL_PREDIV;
 	tmp |= PA0_USB20_PLL_PREDIV_VAL(0);
-	writel(tmp, com + U3P_USBPHYACR0);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:532", tmp, com + U3P_USBPHYACR0);
 
-	tmp = readl(com + U3P_USBPHYACR2);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:534", com + U3P_USBPHYACR2);
 	tmp &= ~PA2_RG_U2PLL_BW;
 	tmp |= PA2_RG_U2PLL_BW_VAL(3);
-	writel(tmp, com + U3P_USBPHYACR2);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:537", tmp, com + U3P_USBPHYACR2);
 
-	writel(P2R_RG_U2PLL_FBDIV_26M, com + U3P_U2PHYA_RESV);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:539", P2R_RG_U2PLL_FBDIV_26M, com + U3P_U2PHYA_RESV);
 
-	tmp = readl(com + U3P_U2PHYA_RESV1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:541", com + U3P_U2PHYA_RESV1);
 	tmp |= P2R_RG_U2PLL_FRA_EN | P2R_RG_U2PLL_REFCLK_SEL;
-	writel(tmp, com + U3P_U2PHYA_RESV1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:543", tmp, com + U3P_U2PHYA_RESV1);
 }
 
 static void u2_phy_instance_init(struct mtk_tphy *tphy,
@@ -552,55 +552,55 @@ static void u2_phy_instance_init(struct mtk_tphy *tphy,
 	u32 tmp;
 
 	/* switch to USB function, and enable usb pll */
-	tmp = readl(com + U3P_U2PHYDTM0);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:555", com + U3P_U2PHYDTM0);
 	tmp &= ~(P2C_FORCE_UART_EN | P2C_FORCE_SUSPENDM);
 	tmp |= P2C_RG_XCVRSEL_VAL(1) | P2C_RG_DATAIN_VAL(0);
-	writel(tmp, com + U3P_U2PHYDTM0);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:558", tmp, com + U3P_U2PHYDTM0);
 
-	tmp = readl(com + U3P_U2PHYDTM1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:560", com + U3P_U2PHYDTM1);
 	tmp &= ~P2C_RG_UART_EN;
-	writel(tmp, com + U3P_U2PHYDTM1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:562", tmp, com + U3P_U2PHYDTM1);
 
-	tmp = readl(com + U3P_USBPHYACR0);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:564", com + U3P_USBPHYACR0);
 	tmp |= PA0_RG_USB20_INTR_EN;
-	writel(tmp, com + U3P_USBPHYACR0);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:566", tmp, com + U3P_USBPHYACR0);
 
 	/* disable switch 100uA current to SSUSB */
-	tmp = readl(com + U3P_USBPHYACR5);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:569", com + U3P_USBPHYACR5);
 	tmp &= ~PA5_RG_U2_HS_100U_U3_EN;
-	writel(tmp, com + U3P_USBPHYACR5);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:571", tmp, com + U3P_USBPHYACR5);
 
 	if (!index) {
-		tmp = readl(com + U3P_U2PHYACR4);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:574", com + U3P_U2PHYACR4);
 		tmp &= ~P2C_U2_GPIO_CTR_MSK;
-		writel(tmp, com + U3P_U2PHYACR4);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:576", tmp, com + U3P_U2PHYACR4);
 	}
 
 	if (tphy->pdata->avoid_rx_sen_degradation) {
 		if (!index) {
-			tmp = readl(com + U3P_USBPHYACR2);
+			tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:581", com + U3P_USBPHYACR2);
 			tmp |= PA2_RG_SIF_U2PLL_FORCE_EN;
-			writel(tmp, com + U3P_USBPHYACR2);
+			pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:583", tmp, com + U3P_USBPHYACR2);
 
-			tmp = readl(com + U3D_U2PHYDCR0);
+			tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:585", com + U3D_U2PHYDCR0);
 			tmp &= ~P2C_RG_SIF_U2PLL_FORCE_ON;
-			writel(tmp, com + U3D_U2PHYDCR0);
+			pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:587", tmp, com + U3D_U2PHYDCR0);
 		} else {
-			tmp = readl(com + U3D_U2PHYDCR0);
+			tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:589", com + U3D_U2PHYDCR0);
 			tmp |= P2C_RG_SIF_U2PLL_FORCE_ON;
-			writel(tmp, com + U3D_U2PHYDCR0);
+			pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:591", tmp, com + U3D_U2PHYDCR0);
 
-			tmp = readl(com + U3P_U2PHYDTM0);
+			tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:593", com + U3P_U2PHYDTM0);
 			tmp |= P2C_RG_SUSPENDM | P2C_FORCE_SUSPENDM;
-			writel(tmp, com + U3P_U2PHYDTM0);
+			pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:595", tmp, com + U3P_U2PHYDTM0);
 		}
 	}
 
-	tmp = readl(com + U3P_USBPHYACR6);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:599", com + U3P_USBPHYACR6);
 	tmp &= ~PA6_RG_U2_BC11_SW_EN;	/* DP/DM BC1.1 path Disable */
 	tmp &= ~PA6_RG_U2_SQTH;
 	tmp |= PA6_RG_U2_SQTH_VAL(2);
-	writel(tmp, com + U3P_USBPHYACR6);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:603", tmp, com + U3P_USBPHYACR6);
 
 	/* Workaround only for mt8195, HW fix it for others (V3) */
 	u2_phy_pll_26m_set(tphy, instance);
@@ -616,28 +616,28 @@ static void u2_phy_instance_power_on(struct mtk_tphy *tphy,
 	u32 index = instance->index;
 	u32 tmp;
 
-	tmp = readl(com + U3P_U2PHYDTM0);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:619", com + U3P_U2PHYDTM0);
 	tmp &= ~(P2C_RG_XCVRSEL | P2C_RG_DATAIN | P2C_DTM0_PART_MASK);
-	writel(tmp, com + U3P_U2PHYDTM0);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:621", tmp, com + U3P_U2PHYDTM0);
 
 	/* OTG Enable */
-	tmp = readl(com + U3P_USBPHYACR6);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:624", com + U3P_USBPHYACR6);
 	tmp |= PA6_RG_U2_OTG_VBUSCMP_EN;
-	writel(tmp, com + U3P_USBPHYACR6);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:626", tmp, com + U3P_USBPHYACR6);
 
-	tmp = readl(com + U3P_U2PHYDTM1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:628", com + U3P_U2PHYDTM1);
 	tmp |= P2C_RG_VBUSVALID | P2C_RG_AVALID;
 	tmp &= ~P2C_RG_SESSEND;
-	writel(tmp, com + U3P_U2PHYDTM1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:631", tmp, com + U3P_U2PHYDTM1);
 
 	if (tphy->pdata->avoid_rx_sen_degradation && index) {
-		tmp = readl(com + U3D_U2PHYDCR0);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:634", com + U3D_U2PHYDCR0);
 		tmp |= P2C_RG_SIF_U2PLL_FORCE_ON;
-		writel(tmp, com + U3D_U2PHYDCR0);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:636", tmp, com + U3D_U2PHYDCR0);
 
-		tmp = readl(com + U3P_U2PHYDTM0);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:638", com + U3P_U2PHYDTM0);
 		tmp |= P2C_RG_SUSPENDM | P2C_FORCE_SUSPENDM;
-		writel(tmp, com + U3P_U2PHYDTM0);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:640", tmp, com + U3P_U2PHYDTM0);
 	}
 	dev_dbg(tphy->dev, "%s(%d)\n", __func__, index);
 }
@@ -650,28 +650,28 @@ static void u2_phy_instance_power_off(struct mtk_tphy *tphy,
 	u32 index = instance->index;
 	u32 tmp;
 
-	tmp = readl(com + U3P_U2PHYDTM0);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:653", com + U3P_U2PHYDTM0);
 	tmp &= ~(P2C_RG_XCVRSEL | P2C_RG_DATAIN);
-	writel(tmp, com + U3P_U2PHYDTM0);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:655", tmp, com + U3P_U2PHYDTM0);
 
 	/* OTG Disable */
-	tmp = readl(com + U3P_USBPHYACR6);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:658", com + U3P_USBPHYACR6);
 	tmp &= ~PA6_RG_U2_OTG_VBUSCMP_EN;
-	writel(tmp, com + U3P_USBPHYACR6);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:660", tmp, com + U3P_USBPHYACR6);
 
-	tmp = readl(com + U3P_U2PHYDTM1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:662", com + U3P_U2PHYDTM1);
 	tmp &= ~(P2C_RG_VBUSVALID | P2C_RG_AVALID);
 	tmp |= P2C_RG_SESSEND;
-	writel(tmp, com + U3P_U2PHYDTM1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:665", tmp, com + U3P_U2PHYDTM1);
 
 	if (tphy->pdata->avoid_rx_sen_degradation && index) {
-		tmp = readl(com + U3P_U2PHYDTM0);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:668", com + U3P_U2PHYDTM0);
 		tmp &= ~(P2C_RG_SUSPENDM | P2C_FORCE_SUSPENDM);
-		writel(tmp, com + U3P_U2PHYDTM0);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:670", tmp, com + U3P_U2PHYDTM0);
 
-		tmp = readl(com + U3D_U2PHYDCR0);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:672", com + U3D_U2PHYDCR0);
 		tmp &= ~P2C_RG_SIF_U2PLL_FORCE_ON;
-		writel(tmp, com + U3D_U2PHYDCR0);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:674", tmp, com + U3D_U2PHYDCR0);
 	}
 
 	dev_dbg(tphy->dev, "%s(%d)\n", __func__, index);
@@ -686,13 +686,13 @@ static void u2_phy_instance_exit(struct mtk_tphy *tphy,
 	u32 tmp;
 
 	if (tphy->pdata->avoid_rx_sen_degradation && index) {
-		tmp = readl(com + U3D_U2PHYDCR0);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:689", com + U3D_U2PHYDCR0);
 		tmp &= ~P2C_RG_SIF_U2PLL_FORCE_ON;
-		writel(tmp, com + U3D_U2PHYDCR0);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:691", tmp, com + U3D_U2PHYDCR0);
 
-		tmp = readl(com + U3P_U2PHYDTM0);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:693", com + U3P_U2PHYDTM0);
 		tmp &= ~P2C_FORCE_SUSPENDM;
-		writel(tmp, com + U3P_U2PHYDTM0);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:695", tmp, com + U3P_U2PHYDTM0);
 	}
 }
 
@@ -703,7 +703,7 @@ static void u2_phy_instance_set_mode(struct mtk_tphy *tphy,
 	struct u2phy_banks *u2_banks = &instance->u2_banks;
 	u32 tmp;
 
-	tmp = readl(u2_banks->com + U3P_U2PHYDTM1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:706", u2_banks->com + U3P_U2PHYDTM1);
 	switch (mode) {
 	case PHY_MODE_USB_DEVICE:
 		tmp |= P2C_FORCE_IDDIG | P2C_RG_IDDIG;
@@ -718,7 +718,7 @@ static void u2_phy_instance_set_mode(struct mtk_tphy *tphy,
 	default:
 		return;
 	}
-	writel(tmp, u2_banks->com + U3P_U2PHYDTM1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:721", tmp, u2_banks->com + U3P_U2PHYDTM1);
 }
 
 static void pcie_phy_instance_init(struct mtk_tphy *tphy,
@@ -730,64 +730,64 @@ static void pcie_phy_instance_init(struct mtk_tphy *tphy,
 	if (tphy->pdata->version != MTK_PHY_V1)
 		return;
 
-	tmp = readl(u3_banks->phya + U3P_U3_PHYA_DA_REG0);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:733", u3_banks->phya + U3P_U3_PHYA_DA_REG0);
 	tmp &= ~(P3A_RG_XTAL_EXT_PE1H | P3A_RG_XTAL_EXT_PE2H);
 	tmp |= P3A_RG_XTAL_EXT_PE1H_VAL(0x2) | P3A_RG_XTAL_EXT_PE2H_VAL(0x2);
-	writel(tmp, u3_banks->phya + U3P_U3_PHYA_DA_REG0);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:736", tmp, u3_banks->phya + U3P_U3_PHYA_DA_REG0);
 
 	/* ref clk drive */
-	tmp = readl(u3_banks->phya + U3P_U3_PHYA_REG1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:739", u3_banks->phya + U3P_U3_PHYA_REG1);
 	tmp &= ~P3A_RG_CLKDRV_AMP;
 	tmp |= P3A_RG_CLKDRV_AMP_VAL(0x4);
-	writel(tmp, u3_banks->phya + U3P_U3_PHYA_REG1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:742", tmp, u3_banks->phya + U3P_U3_PHYA_REG1);
 
-	tmp = readl(u3_banks->phya + U3P_U3_PHYA_REG0);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:744", u3_banks->phya + U3P_U3_PHYA_REG0);
 	tmp &= ~P3A_RG_CLKDRV_OFF;
 	tmp |= P3A_RG_CLKDRV_OFF_VAL(0x1);
-	writel(tmp, u3_banks->phya + U3P_U3_PHYA_REG0);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:747", tmp, u3_banks->phya + U3P_U3_PHYA_REG0);
 
 	/* SSC delta -5000ppm */
-	tmp = readl(u3_banks->phya + U3P_U3_PHYA_DA_REG20);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:750", u3_banks->phya + U3P_U3_PHYA_DA_REG20);
 	tmp &= ~P3A_RG_PLL_DELTA1_PE2H;
 	tmp |= P3A_RG_PLL_DELTA1_PE2H_VAL(0x3c);
-	writel(tmp, u3_banks->phya + U3P_U3_PHYA_DA_REG20);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:753", tmp, u3_banks->phya + U3P_U3_PHYA_DA_REG20);
 
-	tmp = readl(u3_banks->phya + U3P_U3_PHYA_DA_REG25);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:755", u3_banks->phya + U3P_U3_PHYA_DA_REG25);
 	tmp &= ~P3A_RG_PLL_DELTA_PE2H;
 	tmp |= P3A_RG_PLL_DELTA_PE2H_VAL(0x36);
-	writel(tmp, u3_banks->phya + U3P_U3_PHYA_DA_REG25);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:758", tmp, u3_banks->phya + U3P_U3_PHYA_DA_REG25);
 
 	/* change pll BW 0.6M */
-	tmp = readl(u3_banks->phya + U3P_U3_PHYA_DA_REG5);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:761", u3_banks->phya + U3P_U3_PHYA_DA_REG5);
 	tmp &= ~(P3A_RG_PLL_BR_PE2H | P3A_RG_PLL_IC_PE2H);
 	tmp |= P3A_RG_PLL_BR_PE2H_VAL(0x1) | P3A_RG_PLL_IC_PE2H_VAL(0x1);
-	writel(tmp, u3_banks->phya + U3P_U3_PHYA_DA_REG5);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:764", tmp, u3_banks->phya + U3P_U3_PHYA_DA_REG5);
 
-	tmp = readl(u3_banks->phya + U3P_U3_PHYA_DA_REG4);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:766", u3_banks->phya + U3P_U3_PHYA_DA_REG4);
 	tmp &= ~(P3A_RG_PLL_DIVEN_PE2H | P3A_RG_PLL_BC_PE2H);
 	tmp |= P3A_RG_PLL_BC_PE2H_VAL(0x3);
-	writel(tmp, u3_banks->phya + U3P_U3_PHYA_DA_REG4);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:769", tmp, u3_banks->phya + U3P_U3_PHYA_DA_REG4);
 
-	tmp = readl(u3_banks->phya + U3P_U3_PHYA_DA_REG6);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:771", u3_banks->phya + U3P_U3_PHYA_DA_REG6);
 	tmp &= ~P3A_RG_PLL_IR_PE2H;
 	tmp |= P3A_RG_PLL_IR_PE2H_VAL(0x2);
-	writel(tmp, u3_banks->phya + U3P_U3_PHYA_DA_REG6);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:774", tmp, u3_banks->phya + U3P_U3_PHYA_DA_REG6);
 
-	tmp = readl(u3_banks->phya + U3P_U3_PHYA_DA_REG7);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:776", u3_banks->phya + U3P_U3_PHYA_DA_REG7);
 	tmp &= ~P3A_RG_PLL_BP_PE2H;
 	tmp |= P3A_RG_PLL_BP_PE2H_VAL(0xa);
-	writel(tmp, u3_banks->phya + U3P_U3_PHYA_DA_REG7);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:779", tmp, u3_banks->phya + U3P_U3_PHYA_DA_REG7);
 
 	/* Tx Detect Rx Timing: 10us -> 5us */
-	tmp = readl(u3_banks->phyd + U3P_U3_PHYD_RXDET1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:782", u3_banks->phyd + U3P_U3_PHYD_RXDET1);
 	tmp &= ~P3D_RG_RXDET_STB2_SET;
 	tmp |= P3D_RG_RXDET_STB2_SET_VAL(0x10);
-	writel(tmp, u3_banks->phyd + U3P_U3_PHYD_RXDET1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:785", tmp, u3_banks->phyd + U3P_U3_PHYD_RXDET1);
 
-	tmp = readl(u3_banks->phyd + U3P_U3_PHYD_RXDET2);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:787", u3_banks->phyd + U3P_U3_PHYD_RXDET2);
 	tmp &= ~P3D_RG_RXDET_STB2_SET_P3;
 	tmp |= P3D_RG_RXDET_STB2_SET_P3_VAL(0x10);
-	writel(tmp, u3_banks->phyd + U3P_U3_PHYD_RXDET2);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:790", tmp, u3_banks->phyd + U3P_U3_PHYD_RXDET2);
 
 	/* wait for PCIe subsys register to active */
 	usleep_range(2500, 3000);
@@ -800,13 +800,13 @@ static void pcie_phy_instance_power_on(struct mtk_tphy *tphy,
 	struct u3phy_banks *bank = &instance->u3_banks;
 	u32 tmp;
 
-	tmp = readl(bank->chip + U3P_U3_CHIP_GPIO_CTLD);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:803", bank->chip + U3P_U3_CHIP_GPIO_CTLD);
 	tmp &= ~(P3C_FORCE_IP_SW_RST | P3C_REG_IP_SW_RST);
-	writel(tmp, bank->chip + U3P_U3_CHIP_GPIO_CTLD);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:805", tmp, bank->chip + U3P_U3_CHIP_GPIO_CTLD);
 
-	tmp = readl(bank->chip + U3P_U3_CHIP_GPIO_CTLE);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:807", bank->chip + U3P_U3_CHIP_GPIO_CTLE);
 	tmp &= ~(P3C_RG_SWRST_U3_PHYD_FORCE_EN | P3C_RG_SWRST_U3_PHYD);
-	writel(tmp, bank->chip + U3P_U3_CHIP_GPIO_CTLE);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:809", tmp, bank->chip + U3P_U3_CHIP_GPIO_CTLE);
 }
 
 static void pcie_phy_instance_power_off(struct mtk_tphy *tphy,
@@ -816,13 +816,13 @@ static void pcie_phy_instance_power_off(struct mtk_tphy *tphy,
 	struct u3phy_banks *bank = &instance->u3_banks;
 	u32 tmp;
 
-	tmp = readl(bank->chip + U3P_U3_CHIP_GPIO_CTLD);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:819", bank->chip + U3P_U3_CHIP_GPIO_CTLD);
 	tmp |= P3C_FORCE_IP_SW_RST | P3C_REG_IP_SW_RST;
-	writel(tmp, bank->chip + U3P_U3_CHIP_GPIO_CTLD);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:821", tmp, bank->chip + U3P_U3_CHIP_GPIO_CTLD);
 
-	tmp = readl(bank->chip + U3P_U3_CHIP_GPIO_CTLE);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:823", bank->chip + U3P_U3_CHIP_GPIO_CTLE);
 	tmp |= P3C_RG_SWRST_U3_PHYD_FORCE_EN | P3C_RG_SWRST_U3_PHYD;
-	writel(tmp, bank->chip + U3P_U3_CHIP_GPIO_CTLE);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:825", tmp, bank->chip + U3P_U3_CHIP_GPIO_CTLE);
 }
 
 static void sata_phy_instance_init(struct mtk_tphy *tphy,
@@ -833,52 +833,52 @@ static void sata_phy_instance_init(struct mtk_tphy *tphy,
 	u32 tmp;
 
 	/* charge current adjustment */
-	tmp = readl(phyd + ANA_RG_CTRL_SIGNAL6);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:836", phyd + ANA_RG_CTRL_SIGNAL6);
 	tmp &= ~(RG_CDR_BIRLTR_GEN1_MSK | RG_CDR_BC_GEN1_MSK);
 	tmp |= RG_CDR_BIRLTR_GEN1_VAL(0x6) | RG_CDR_BC_GEN1_VAL(0x1a);
-	writel(tmp, phyd + ANA_RG_CTRL_SIGNAL6);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:839", tmp, phyd + ANA_RG_CTRL_SIGNAL6);
 
-	tmp = readl(phyd + ANA_EQ_EYE_CTRL_SIGNAL4);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:841", phyd + ANA_EQ_EYE_CTRL_SIGNAL4);
 	tmp &= ~RG_CDR_BIRLTD0_GEN1_MSK;
 	tmp |= RG_CDR_BIRLTD0_GEN1_VAL(0x18);
-	writel(tmp, phyd + ANA_EQ_EYE_CTRL_SIGNAL4);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:844", tmp, phyd + ANA_EQ_EYE_CTRL_SIGNAL4);
 
-	tmp = readl(phyd + ANA_EQ_EYE_CTRL_SIGNAL5);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:846", phyd + ANA_EQ_EYE_CTRL_SIGNAL5);
 	tmp &= ~RG_CDR_BIRLTD0_GEN3_MSK;
 	tmp |= RG_CDR_BIRLTD0_GEN3_VAL(0x06);
-	writel(tmp, phyd + ANA_EQ_EYE_CTRL_SIGNAL5);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:849", tmp, phyd + ANA_EQ_EYE_CTRL_SIGNAL5);
 
-	tmp = readl(phyd + ANA_RG_CTRL_SIGNAL4);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:851", phyd + ANA_RG_CTRL_SIGNAL4);
 	tmp &= ~(RG_CDR_BICLTR_GEN1_MSK | RG_CDR_BR_GEN2_MSK);
 	tmp |= RG_CDR_BICLTR_GEN1_VAL(0x0c) | RG_CDR_BR_GEN2_VAL(0x07);
-	writel(tmp, phyd + ANA_RG_CTRL_SIGNAL4);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:854", tmp, phyd + ANA_RG_CTRL_SIGNAL4);
 
-	tmp = readl(phyd + PHYD_CTRL_SIGNAL_MODE4);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:856", phyd + PHYD_CTRL_SIGNAL_MODE4);
 	tmp &= ~(RG_CDR_BICLTD0_GEN1_MSK | RG_CDR_BICLTD1_GEN1_MSK);
 	tmp |= RG_CDR_BICLTD0_GEN1_VAL(0x08) | RG_CDR_BICLTD1_GEN1_VAL(0x02);
-	writel(tmp, phyd + PHYD_CTRL_SIGNAL_MODE4);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:859", tmp, phyd + PHYD_CTRL_SIGNAL_MODE4);
 
-	tmp = readl(phyd + PHYD_DESIGN_OPTION2);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:861", phyd + PHYD_DESIGN_OPTION2);
 	tmp &= ~RG_LOCK_CNT_SEL_MSK;
 	tmp |= RG_LOCK_CNT_SEL_VAL(0x02);
-	writel(tmp, phyd + PHYD_DESIGN_OPTION2);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:864", tmp, phyd + PHYD_DESIGN_OPTION2);
 
-	tmp = readl(phyd + PHYD_DESIGN_OPTION9);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:866", phyd + PHYD_DESIGN_OPTION9);
 	tmp &= ~(RG_T2_MIN_MSK | RG_TG_MIN_MSK |
 		 RG_T2_MAX_MSK | RG_TG_MAX_MSK);
 	tmp |= RG_T2_MIN_VAL(0x12) | RG_TG_MIN_VAL(0x04) |
 	       RG_T2_MAX_VAL(0x31) | RG_TG_MAX_VAL(0x0e);
-	writel(tmp, phyd + PHYD_DESIGN_OPTION9);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:871", tmp, phyd + PHYD_DESIGN_OPTION9);
 
-	tmp = readl(phyd + ANA_RG_CTRL_SIGNAL1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:873", phyd + ANA_RG_CTRL_SIGNAL1);
 	tmp &= ~RG_IDRV_0DB_GEN1_MSK;
 	tmp |= RG_IDRV_0DB_GEN1_VAL(0x20);
-	writel(tmp, phyd + ANA_RG_CTRL_SIGNAL1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:876", tmp, phyd + ANA_RG_CTRL_SIGNAL1);
 
-	tmp = readl(phyd + ANA_EQ_EYE_CTRL_SIGNAL1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:878", phyd + ANA_EQ_EYE_CTRL_SIGNAL1);
 	tmp &= ~RG_EQ_DLEQ_LFI_GEN1_MSK;
 	tmp |= RG_EQ_DLEQ_LFI_GEN1_VAL(0x03);
-	writel(tmp, phyd + ANA_EQ_EYE_CTRL_SIGNAL1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:881", tmp, phyd + ANA_EQ_EYE_CTRL_SIGNAL1);
 
 	dev_dbg(tphy->dev, "%s(%d)\n", __func__, instance->index);
 }
@@ -969,44 +969,44 @@ static void u2_phy_props_set(struct mtk_tphy *tphy,
 	u32 tmp;
 
 	if (instance->bc12_en) {
-		tmp = readl(com + U3P_U2PHYBC12C);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:972", com + U3P_U2PHYBC12C);
 		tmp |= P2C_RG_CHGDT_EN;	/* BC1.2 path Enable */
-		writel(tmp, com + U3P_U2PHYBC12C);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:974", tmp, com + U3P_U2PHYBC12C);
 	}
 
 	if (tphy->pdata->version < MTK_PHY_V3 && instance->eye_src) {
-		tmp = readl(com + U3P_USBPHYACR5);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:978", com + U3P_USBPHYACR5);
 		tmp &= ~PA5_RG_U2_HSTX_SRCTRL;
 		tmp |= PA5_RG_U2_HSTX_SRCTRL_VAL(instance->eye_src);
-		writel(tmp, com + U3P_USBPHYACR5);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:981", tmp, com + U3P_USBPHYACR5);
 	}
 
 	if (instance->eye_vrt) {
-		tmp = readl(com + U3P_USBPHYACR1);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:985", com + U3P_USBPHYACR1);
 		tmp &= ~PA1_RG_VRT_SEL;
 		tmp |= PA1_RG_VRT_SEL_VAL(instance->eye_vrt);
-		writel(tmp, com + U3P_USBPHYACR1);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:988", tmp, com + U3P_USBPHYACR1);
 	}
 
 	if (instance->eye_term) {
-		tmp = readl(com + U3P_USBPHYACR1);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:992", com + U3P_USBPHYACR1);
 		tmp &= ~PA1_RG_TERM_SEL;
 		tmp |= PA1_RG_TERM_SEL_VAL(instance->eye_term);
-		writel(tmp, com + U3P_USBPHYACR1);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:995", tmp, com + U3P_USBPHYACR1);
 	}
 
 	if (instance->intr) {
-		tmp = readl(com + U3P_USBPHYACR1);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:999", com + U3P_USBPHYACR1);
 		tmp &= ~PA1_RG_INTR_CAL;
 		tmp |= PA1_RG_INTR_CAL_VAL(instance->intr);
-		writel(tmp, com + U3P_USBPHYACR1);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:1002", tmp, com + U3P_USBPHYACR1);
 	}
 
 	if (instance->discth) {
-		tmp = readl(com + U3P_USBPHYACR6);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:1006", com + U3P_USBPHYACR6);
 		tmp &= ~PA6_RG_U2_DISCTH;
 		tmp |= PA6_RG_U2_DISCTH_VAL(instance->discth);
-		writel(tmp, com + U3P_USBPHYACR6);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:1009", tmp, com + U3P_USBPHYACR6);
 	}
 }
 
@@ -1155,37 +1155,37 @@ static void phy_efuse_set(struct mtk_phy_instance *instance)
 
 	switch (instance->type) {
 	case PHY_TYPE_USB2:
-		tmp = readl(u2_banks->misc + U3P_MISC_REG1);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:1158", u2_banks->misc + U3P_MISC_REG1);
 		tmp |= MR1_EFUSE_AUTO_LOAD_DIS;
-		writel(tmp, u2_banks->misc + U3P_MISC_REG1);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:1160", tmp, u2_banks->misc + U3P_MISC_REG1);
 
-		tmp = readl(u2_banks->com + U3P_USBPHYACR1);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:1162", u2_banks->com + U3P_USBPHYACR1);
 		tmp &= ~PA1_RG_INTR_CAL;
 		tmp |= PA1_RG_INTR_CAL_VAL(instance->efuse_intr);
-		writel(tmp, u2_banks->com + U3P_USBPHYACR1);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:1165", tmp, u2_banks->com + U3P_USBPHYACR1);
 		break;
 	case PHY_TYPE_USB3:
 	case PHY_TYPE_PCIE:
-		tmp = readl(u3_banks->phyd + U3P_U3_PHYD_RSV);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:1169", u3_banks->phyd + U3P_U3_PHYD_RSV);
 		tmp |= P3D_RG_EFUSE_AUTO_LOAD_DIS;
-		writel(tmp, u3_banks->phyd + U3P_U3_PHYD_RSV);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:1171", tmp, u3_banks->phyd + U3P_U3_PHYD_RSV);
 
-		tmp = readl(u3_banks->phyd + U3P_U3_PHYD_IMPCAL0);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:1173", u3_banks->phyd + U3P_U3_PHYD_IMPCAL0);
 		tmp &= ~P3D_RG_TX_IMPEL;
 		tmp |= P3D_RG_TX_IMPEL_VAL(instance->efuse_tx_imp);
 		tmp |= P3D_RG_FORCE_TX_IMPEL;
-		writel(tmp, u3_banks->phyd + U3P_U3_PHYD_IMPCAL0);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:1177", tmp, u3_banks->phyd + U3P_U3_PHYD_IMPCAL0);
 
-		tmp = readl(u3_banks->phyd + U3P_U3_PHYD_IMPCAL1);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:1179", u3_banks->phyd + U3P_U3_PHYD_IMPCAL1);
 		tmp &= ~P3D_RG_RX_IMPEL;
 		tmp |= P3D_RG_RX_IMPEL_VAL(instance->efuse_rx_imp);
 		tmp |= P3D_RG_FORCE_RX_IMPEL;
-		writel(tmp, u3_banks->phyd + U3P_U3_PHYD_IMPCAL1);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:1183", tmp, u3_banks->phyd + U3P_U3_PHYD_IMPCAL1);
 
-		tmp = readl(u3_banks->phya + U3P_U3_PHYA_REG0);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-tphy.c:1185", u3_banks->phya + U3P_U3_PHYA_REG0);
 		tmp &= ~P3A_RG_IEXT_INTR;
 		tmp |= P3A_RG_IEXT_INTR_VAL(instance->efuse_intr);
-		writel(tmp, u3_banks->phya + U3P_U3_PHYA_REG0);
+		pete_writel("drivers/phy/mediatek/phy-mtk-tphy.c:1188", tmp, u3_banks->phya + U3P_U3_PHYA_REG0);
 		break;
 	default:
 		dev_warn(dev, "no sw efuse for type %d\n", instance->type);

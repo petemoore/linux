@@ -70,11 +70,11 @@ static int pl172_timing_prop(struct amba_device *adev,
 			return -EINVAL;
 		}
 
-		writel(cycles, pl172->base + reg_offset);
+		pete_writel("drivers/memory/pl172.c:73", cycles, pl172->base + reg_offset);
 	}
 
 	dev_dbg(&adev->dev, "%s: %u cycle(s)\n", name, start +
-				readl(pl172->base + reg_offset));
+				pete_readl("drivers/memory/pl172.c:77", pl172->base + reg_offset));
 
 	return 0;
 }
@@ -122,7 +122,7 @@ static int pl172_setup_static(struct amba_device *adev,
 	if (of_property_read_bool(np, "mpmc,write-protect"))
 		cfg |= MPMC_STATIC_CFG_P;
 
-	writel(cfg, pl172->base + MPMC_STATIC_CFG(cs));
+	pete_writel("drivers/memory/pl172.c:125", cfg, pl172->base + MPMC_STATIC_CFG(cs));
 	dev_dbg(&adev->dev, "mpmc static config cs%u: 0x%08x\n", cs, cfg);
 
 	/* MPMC static memory timing */

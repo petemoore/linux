@@ -983,15 +983,15 @@ lpfc_work_done(struct lpfc_hba *phba)
 		 */
 		if (phba->sli_rev <= LPFC_SLI_REV3) {
 			spin_lock_irq(&phba->hbalock);
-			control = readl(phba->HCregaddr);
+			control = pete_readl("drivers/scsi/lpfc/lpfc_hbadisc.c:986", phba->HCregaddr);
 			if (!(control & (HC_R0INT_ENA << LPFC_ELS_RING))) {
 				lpfc_debugfs_slow_ring_trc(phba,
 					"WRK Enable ring: cntl:x%x hacopy:x%x",
 					control, ha_copy, 0);
 
 				control |= (HC_R0INT_ENA << LPFC_ELS_RING);
-				writel(control, phba->HCregaddr);
-				readl(phba->HCregaddr); /* flush */
+				pete_writel("drivers/scsi/lpfc/lpfc_hbadisc.c:993", control, phba->HCregaddr);
+				pete_readl("drivers/scsi/lpfc/lpfc_hbadisc.c:994", phba->HCregaddr); /* flush */
 			} else {
 				lpfc_debugfs_slow_ring_trc(phba,
 					"WRK Ring ok:     cntl:x%x hacopy:x%x",
@@ -1369,10 +1369,10 @@ lpfc_mbx_cmpl_clear_la(struct lpfc_hba *phba, LPFC_MBOXQ_t *pmb)
 
 	spin_lock_irq(&phba->hbalock);
 	psli->sli_flag |= LPFC_PROCESS_LA;
-	control = readl(phba->HCregaddr);
+	control = pete_readl("drivers/scsi/lpfc/lpfc_hbadisc.c:1372", phba->HCregaddr);
 	control |= HC_LAINT_ENA;
-	writel(control, phba->HCregaddr);
-	readl(phba->HCregaddr); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_hbadisc.c:1374", control, phba->HCregaddr);
+	pete_readl("drivers/scsi/lpfc/lpfc_hbadisc.c:1375", phba->HCregaddr); /* flush */
 	spin_unlock_irq(&phba->hbalock);
 	mempool_free(pmb, phba->mbox_mem_pool);
 	return;
@@ -1393,10 +1393,10 @@ out:
 
 	spin_lock_irq(&phba->hbalock);
 	psli->sli_flag |= LPFC_PROCESS_LA;
-	control = readl(phba->HCregaddr);
+	control = pete_readl("drivers/scsi/lpfc/lpfc_hbadisc.c:1396", phba->HCregaddr);
 	control |= HC_LAINT_ENA;
-	writel(control, phba->HCregaddr);
-	readl(phba->HCregaddr); /* flush */
+	pete_writel("drivers/scsi/lpfc/lpfc_hbadisc.c:1398", control, phba->HCregaddr);
+	pete_readl("drivers/scsi/lpfc/lpfc_hbadisc.c:1399", phba->HCregaddr); /* flush */
 	spin_unlock_irq(&phba->hbalock);
 
 	return;
@@ -3650,10 +3650,10 @@ lpfc_enable_la(struct lpfc_hba *phba)
 	spin_lock_irq(&phba->hbalock);
 	psli->sli_flag |= LPFC_PROCESS_LA;
 	if (phba->sli_rev <= LPFC_SLI_REV3) {
-		control = readl(phba->HCregaddr);
+		control = pete_readl("drivers/scsi/lpfc/lpfc_hbadisc.c:3653", phba->HCregaddr);
 		control |= HC_LAINT_ENA;
-		writel(control, phba->HCregaddr);
-		readl(phba->HCregaddr); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_hbadisc.c:3655", control, phba->HCregaddr);
+		pete_readl("drivers/scsi/lpfc/lpfc_hbadisc.c:3656", phba->HCregaddr); /* flush */
 	}
 	spin_unlock_irq(&phba->hbalock);
 }

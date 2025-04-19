@@ -57,13 +57,13 @@ static irqreturn_t xlnx_spdifrx_irq_handler(int irq, void *arg)
 	u32 val;
 	struct spdif_dev_data *ctx = arg;
 
-	val = readl(ctx->base + XSPDIF_IRQ_STS_REG);
+	val = pete_readl("sound/soc/xilinx/xlnx_spdif.c:60", ctx->base + XSPDIF_IRQ_STS_REG);
 	if (val & XSPDIF_CH_STS_MASK) {
-		writel(val & XSPDIF_CH_STS_MASK,
+		pete_writel("sound/soc/xilinx/xlnx_spdif.c:62", val & XSPDIF_CH_STS_MASK,
 		       ctx->base + XSPDIF_IRQ_STS_REG);
-		val = readl(ctx->base +
+		val = pete_readl("sound/soc/xilinx/xlnx_spdif.c:64", ctx->base +
 			    XSPDIF_IRQ_ENABLE_REG);
-		writel(val & ~XSPDIF_CH_STS_MASK,
+		pete_writel("sound/soc/xilinx/xlnx_spdif.c:66", val & ~XSPDIF_CH_STS_MASK,
 		       ctx->base + XSPDIF_IRQ_ENABLE_REG);
 
 		ctx->rx_chsts_updated = true;
@@ -80,14 +80,14 @@ static int xlnx_spdif_startup(struct snd_pcm_substream *substream,
 	u32 val;
 	struct spdif_dev_data *ctx = dev_get_drvdata(dai->dev);
 
-	val = readl(ctx->base + XSPDIF_CONTROL_REG);
+	val = pete_readl("sound/soc/xilinx/xlnx_spdif.c:83", ctx->base + XSPDIF_CONTROL_REG);
 	val |= XSPDIF_FIFO_FLUSH_MASK;
-	writel(val, ctx->base + XSPDIF_CONTROL_REG);
+	pete_writel("sound/soc/xilinx/xlnx_spdif.c:85", val, ctx->base + XSPDIF_CONTROL_REG);
 
 	if (substream->stream == SNDRV_PCM_STREAM_CAPTURE) {
-		writel(XSPDIF_CH_STS_MASK,
+		pete_writel("sound/soc/xilinx/xlnx_spdif.c:88", XSPDIF_CH_STS_MASK,
 		       ctx->base + XSPDIF_IRQ_ENABLE_REG);
-		writel(XSPDIF_GLOBAL_IRQ_ENABLE,
+		pete_writel("sound/soc/xilinx/xlnx_spdif.c:90", XSPDIF_GLOBAL_IRQ_ENABLE,
 		       ctx->base + XSPDIF_GLOBAL_IRQ_ENABLE_REG);
 	}
 
@@ -99,7 +99,7 @@ static void xlnx_spdif_shutdown(struct snd_pcm_substream *substream,
 {
 	struct spdif_dev_data *ctx = dev_get_drvdata(dai->dev);
 
-	writel(XSPDIF_SOFT_RESET_VALUE, ctx->base + XSPDIF_SOFT_RESET_REG);
+	pete_writel("sound/soc/xilinx/xlnx_spdif.c:102", XSPDIF_SOFT_RESET_VALUE, ctx->base + XSPDIF_SOFT_RESET_REG);
 }
 
 static int xlnx_spdif_hw_params(struct snd_pcm_substream *substream,
@@ -138,10 +138,10 @@ static int xlnx_spdif_hw_params(struct snd_pcm_substream *substream,
 		return -EINVAL;
 	}
 
-	val = readl(ctx->base + XSPDIF_CONTROL_REG);
+	val = pete_readl("sound/soc/xilinx/xlnx_spdif.c:141", ctx->base + XSPDIF_CONTROL_REG);
 	val &= ~XSPDIF_CLOCK_CONFIG_BITS_MASK;
 	val |= clk_cfg << XSPDIF_CLOCK_CONFIG_BITS_SHIFT;
-	writel(val, ctx->base + XSPDIF_CONTROL_REG);
+	pete_writel("sound/soc/xilinx/xlnx_spdif.c:144", val, ctx->base + XSPDIF_CONTROL_REG);
 
 	return 0;
 }
@@ -172,13 +172,13 @@ static int xlnx_spdif_trigger(struct snd_pcm_substream *substream, int cmd,
 	int ret = 0;
 	struct spdif_dev_data *ctx = dev_get_drvdata(dai->dev);
 
-	val = readl(ctx->base + XSPDIF_CONTROL_REG);
+	val = pete_readl("sound/soc/xilinx/xlnx_spdif.c:175", ctx->base + XSPDIF_CONTROL_REG);
 	switch (cmd) {
 	case SNDRV_PCM_TRIGGER_START:
 	case SNDRV_PCM_TRIGGER_RESUME:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
 		val |= XSPDIF_CORE_ENABLE_MASK;
-		writel(val, ctx->base + XSPDIF_CONTROL_REG);
+		pete_writel("sound/soc/xilinx/xlnx_spdif.c:181", val, ctx->base + XSPDIF_CONTROL_REG);
 		if (substream->stream == SNDRV_PCM_STREAM_CAPTURE)
 			ret = rx_stream_detect(dai);
 		break;
@@ -186,7 +186,7 @@ static int xlnx_spdif_trigger(struct snd_pcm_substream *substream, int cmd,
 	case SNDRV_PCM_TRIGGER_SUSPEND:
 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
 		val &= ~XSPDIF_CORE_ENABLE_MASK;
-		writel(val, ctx->base + XSPDIF_CONTROL_REG);
+		pete_writel("sound/soc/xilinx/xlnx_spdif.c:189", val, ctx->base + XSPDIF_CONTROL_REG);
 		break;
 	default:
 		ret = -EINVAL;
@@ -307,7 +307,7 @@ static int xlnx_spdif_probe(struct platform_device *pdev)
 		goto clk_err;
 	}
 
-	writel(XSPDIF_SOFT_RESET_VALUE, ctx->base + XSPDIF_SOFT_RESET_REG);
+	pete_writel("sound/soc/xilinx/xlnx_spdif.c:310", XSPDIF_SOFT_RESET_VALUE, ctx->base + XSPDIF_SOFT_RESET_REG);
 	dev_info(dev, "%s DAI registered\n", dai_drv->name);
 
 clk_err:

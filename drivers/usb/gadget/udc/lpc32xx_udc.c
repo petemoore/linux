@@ -696,16 +696,16 @@ static void udc_protocol_cmd_w(struct lpc32xx_udc *udc, u32 cmd)
 	int to;
 
 	/* EP may lock on CLRI if this read isn't done */
-	u32 tmp = readl(USBD_DEVINTST(udc->udp_baseaddr));
+	u32 tmp = pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:699", USBD_DEVINTST(udc->udp_baseaddr));
 	(void) tmp;
 
 	while (pass == 0) {
-		writel(USBD_CCEMPTY, USBD_DEVINTCLR(udc->udp_baseaddr));
+		pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:703", USBD_CCEMPTY, USBD_DEVINTCLR(udc->udp_baseaddr));
 
 		/* Write command code */
-		writel(cmd, USBD_CMDCODE(udc->udp_baseaddr));
+		pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:706", cmd, USBD_CMDCODE(udc->udp_baseaddr));
 		to = 10000;
-		while (((readl(USBD_DEVINTST(udc->udp_baseaddr)) &
+		while (((pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:708", USBD_DEVINTST(udc->udp_baseaddr)) &
 			 USBD_CCEMPTY) == 0) && (to > 0)) {
 			to--;
 		}
@@ -732,20 +732,20 @@ static u32 udc_protocol_cmd_r(struct lpc32xx_udc *udc, u32 cmd)
 	int to = 1000;
 
 	/* Write a command and read data from the protocol engine */
-	writel((USBD_CDFULL | USBD_CCEMPTY),
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:735", (USBD_CDFULL | USBD_CCEMPTY),
 		     USBD_DEVINTCLR(udc->udp_baseaddr));
 
 	/* Write command code */
 	udc_protocol_cmd_w(udc, cmd);
 
-	while ((!(readl(USBD_DEVINTST(udc->udp_baseaddr)) & USBD_CDFULL))
+	while ((!(pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:741", USBD_DEVINTST(udc->udp_baseaddr)) & USBD_CDFULL))
 	       && (to > 0))
 		to--;
 	if (!to)
 		dev_dbg(udc->dev,
 			"Protocol engine didn't receive response (CDFULL)\n");
 
-	return readl(USBD_CMDDATA(udc->udp_baseaddr));
+	return pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:748", USBD_CMDDATA(udc->udp_baseaddr));
 }
 
 /*
@@ -757,20 +757,20 @@ static u32 udc_protocol_cmd_r(struct lpc32xx_udc *udc, u32 cmd)
 static inline void uda_enable_devint(struct lpc32xx_udc *udc, u32 devmask)
 {
 	udc->enabled_devints |= devmask;
-	writel(udc->enabled_devints, USBD_DEVINTEN(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:760", udc->enabled_devints, USBD_DEVINTEN(udc->udp_baseaddr));
 }
 
 /* Disable one or more USB device interrupts */
 static inline void uda_disable_devint(struct lpc32xx_udc *udc, u32 mask)
 {
 	udc->enabled_devints &= ~mask;
-	writel(udc->enabled_devints, USBD_DEVINTEN(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:767", udc->enabled_devints, USBD_DEVINTEN(udc->udp_baseaddr));
 }
 
 /* Clear one or more USB device interrupts */
 static inline void uda_clear_devint(struct lpc32xx_udc *udc, u32 mask)
 {
-	writel(mask, USBD_DEVINTCLR(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:773", mask, USBD_DEVINTCLR(udc->udp_baseaddr));
 }
 
 /*
@@ -782,32 +782,32 @@ static inline void uda_clear_devint(struct lpc32xx_udc *udc, u32 mask)
 static void uda_enable_hwepint(struct lpc32xx_udc *udc, u32 hwep)
 {
 	udc->enabled_hwepints |= (1 << hwep);
-	writel(udc->enabled_hwepints, USBD_EPINTEN(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:785", udc->enabled_hwepints, USBD_EPINTEN(udc->udp_baseaddr));
 }
 
 /* Disable one or more USB endpoint interrupts */
 static void uda_disable_hwepint(struct lpc32xx_udc *udc, u32 hwep)
 {
 	udc->enabled_hwepints &= ~(1 << hwep);
-	writel(udc->enabled_hwepints, USBD_EPINTEN(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:792", udc->enabled_hwepints, USBD_EPINTEN(udc->udp_baseaddr));
 }
 
 /* Clear one or more USB endpoint interrupts */
 static inline void uda_clear_hwepint(struct lpc32xx_udc *udc, u32 hwep)
 {
-	writel((1 << hwep), USBD_EPINTCLR(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:798", (1 << hwep), USBD_EPINTCLR(udc->udp_baseaddr));
 }
 
 /* Enable DMA for the HW channel */
 static inline void udc_ep_dma_enable(struct lpc32xx_udc *udc, u32 hwep)
 {
-	writel((1 << hwep), USBD_EPDMAEN(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:804", (1 << hwep), USBD_EPDMAEN(udc->udp_baseaddr));
 }
 
 /* Disable DMA for the HW channel */
 static inline void udc_ep_dma_disable(struct lpc32xx_udc *udc, u32 hwep)
 {
-	writel((1 << hwep), USBD_EPDMADIS(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:810", (1 << hwep), USBD_EPDMADIS(udc->udp_baseaddr));
 }
 
 /*
@@ -823,27 +823,27 @@ static void udc_realize_hwep(struct lpc32xx_udc *udc, u32 hwep,
 {
 	int to = 1000;
 
-	writel(USBD_EP_RLZED, USBD_DEVINTCLR(udc->udp_baseaddr));
-	writel(hwep, USBD_EPIND(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:826", USBD_EP_RLZED, USBD_DEVINTCLR(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:827", hwep, USBD_EPIND(udc->udp_baseaddr));
 	udc->realized_eps |= (1 << hwep);
-	writel(udc->realized_eps, USBD_REEP(udc->udp_baseaddr));
-	writel(maxpacket, USBD_EPMAXPSIZE(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:829", udc->realized_eps, USBD_REEP(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:830", maxpacket, USBD_EPMAXPSIZE(udc->udp_baseaddr));
 
 	/* Wait until endpoint is realized in hardware */
-	while ((!(readl(USBD_DEVINTST(udc->udp_baseaddr)) &
+	while ((!(pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:833", USBD_DEVINTST(udc->udp_baseaddr)) &
 		  USBD_EP_RLZED)) && (to > 0))
 		to--;
 	if (!to)
 		dev_dbg(udc->dev, "EP not correctly realized in hardware\n");
 
-	writel(USBD_EP_RLZED, USBD_DEVINTCLR(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:839", USBD_EP_RLZED, USBD_DEVINTCLR(udc->udp_baseaddr));
 }
 
 /* Unrealize an EP */
 static void udc_unrealize_hwep(struct lpc32xx_udc *udc, u32 hwep)
 {
 	udc->realized_eps &= ~(1 << hwep);
-	writel(udc->realized_eps, USBD_REEP(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:846", udc->realized_eps, USBD_REEP(udc->udp_baseaddr));
 }
 
 /*
@@ -1037,16 +1037,16 @@ static void udc_disable(struct lpc32xx_udc *udc)
 
 		/* Disable and clear all interrupts and DMA */
 		udc_ep_dma_disable(udc, i);
-		writel((1 << i), USBD_EOTINTCLR(udc->udp_baseaddr));
-		writel((1 << i), USBD_NDDRTINTCLR(udc->udp_baseaddr));
-		writel((1 << i), USBD_SYSERRTINTCLR(udc->udp_baseaddr));
-		writel((1 << i), USBD_DMARCLR(udc->udp_baseaddr));
+		pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1040", (1 << i), USBD_EOTINTCLR(udc->udp_baseaddr));
+		pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1041", (1 << i), USBD_NDDRTINTCLR(udc->udp_baseaddr));
+		pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1042", (1 << i), USBD_SYSERRTINTCLR(udc->udp_baseaddr));
+		pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1043", (1 << i), USBD_DMARCLR(udc->udp_baseaddr));
 	}
 
 	/* Disable DMA interrupts */
-	writel(0, USBD_DMAINTEN(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1047", 0, USBD_DMAINTEN(udc->udp_baseaddr));
 
-	writel(0, USBD_UDCAH(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1049", 0, USBD_UDCAH(udc->udp_baseaddr));
 }
 
 static void udc_enable(struct lpc32xx_udc *udc)
@@ -1061,14 +1061,14 @@ static void udc_enable(struct lpc32xx_udc *udc)
 	udc_protocol_cmd_data_w(udc, CMD_SET_DEV_STAT, DAT_WR_BYTE(DEV_CON));
 
 	/* EP interrupts on high priority, FRAME interrupt on low priority */
-	writel(USBD_EP_FAST, USBD_DEVINTPRI(udc->udp_baseaddr));
-	writel(0xFFFF, USBD_EPINTPRI(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1064", USBD_EP_FAST, USBD_DEVINTPRI(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1065", 0xFFFF, USBD_EPINTPRI(udc->udp_baseaddr));
 
 	/* Clear any pending device interrupts */
-	writel(0x3FF, USBD_DEVINTCLR(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1068", 0x3FF, USBD_DEVINTCLR(udc->udp_baseaddr));
 
 	/* Setup UDCA - not yet used (DMA) */
-	writel(udc->udca_p_base, USBD_UDCAH(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1071", udc->udca_p_base, USBD_UDCAH(udc->udp_baseaddr));
 
 	/* Only enable EP0 in and out for now, EP0 only works in FIFO mode */
 	for (i = 0; i <= 1; i++) {
@@ -1091,7 +1091,7 @@ static void udc_enable(struct lpc32xx_udc *udc)
 	udc_set_address(udc, 0);
 
 	/* Enable master DMA interrupts */
-	writel((USBD_SYS_ERR_INT | USBD_EOT_INT),
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1094", (USBD_SYS_ERR_INT | USBD_EOT_INT),
 		     USBD_DMAINTEN(udc->udp_baseaddr));
 
 	udc->dev_status = 0;
@@ -1146,12 +1146,12 @@ static void udc_pop_fifo(struct lpc32xx_udc *udc, u8 *data, u32 bytes)
 
 		/* Copy 32-bit aligned data first */
 		for (n = 0; n < cbytes; n += 4)
-			*p32++ = readl(USBD_RXDATA(udc->udp_baseaddr));
+			*p32++ = pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:1149", USBD_RXDATA(udc->udp_baseaddr));
 
 		/* Handle any remaining bytes */
 		bl = bytes - cbytes;
 		if (bl) {
-			tmp = readl(USBD_RXDATA(udc->udp_baseaddr));
+			tmp = pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:1154", USBD_RXDATA(udc->udp_baseaddr));
 			for (n = 0; n < bl; n++)
 				data[cbytes + n] = ((tmp >> (n * 8)) & 0xFF);
 
@@ -1162,7 +1162,7 @@ static void udc_pop_fifo(struct lpc32xx_udc *udc, u8 *data, u32 bytes)
 	case 3:
 		/* Each byte has to be handled independently */
 		for (n = 0; n < bytes; n += 4) {
-			tmp = readl(USBD_RXDATA(udc->udp_baseaddr));
+			tmp = pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:1165", USBD_RXDATA(udc->udp_baseaddr));
 
 			bl = bytes - n;
 			if (bl > 4)
@@ -1179,7 +1179,7 @@ static void udc_pop_fifo(struct lpc32xx_udc *udc, u8 *data, u32 bytes)
 
 		/* Copy 32-bit sized objects first with 16-bit alignment */
 		for (n = 0; n < cbytes; n += 4) {
-			tmp = readl(USBD_RXDATA(udc->udp_baseaddr));
+			tmp = pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:1182", USBD_RXDATA(udc->udp_baseaddr));
 			*p16++ = (u16)(tmp & 0xFFFF);
 			*p16++ = (u16)((tmp >> 16) & 0xFFFF);
 		}
@@ -1187,7 +1187,7 @@ static void udc_pop_fifo(struct lpc32xx_udc *udc, u8 *data, u32 bytes)
 		/* Handle any remaining bytes */
 		bl = bytes - cbytes;
 		if (bl) {
-			tmp = readl(USBD_RXDATA(udc->udp_baseaddr));
+			tmp = pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:1190", USBD_RXDATA(udc->udp_baseaddr));
 			for (n = 0; n < bl; n++)
 				data[cbytes + n] = ((tmp >> (n * 8)) & 0xFF);
 		}
@@ -1207,10 +1207,10 @@ static u32 udc_read_hwep(struct lpc32xx_udc *udc, u32 hwep, u32 *data,
 	u32 tmp, hwrep = ((hwep & 0x1E) << 1) | CTRL_RD_EN;
 
 	/* Setup read of endpoint */
-	writel(hwrep, USBD_CTRL(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1210", hwrep, USBD_CTRL(udc->udp_baseaddr));
 
 	/* Wait until packet is ready */
-	while ((((tmpv = readl(USBD_RXPLEN(udc->udp_baseaddr))) &
+	while ((((tmpv = pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:1213", USBD_RXPLEN(udc->udp_baseaddr))) &
 		 PKT_RDY) == 0)	&& (to > 0))
 		to--;
 	if (!to)
@@ -1224,7 +1224,7 @@ static u32 udc_read_hwep(struct lpc32xx_udc *udc, u32 hwep, u32 *data,
 	if ((tmp > 0) && (data != NULL))
 		udc_pop_fifo(udc, (u8 *) data, tmp);
 
-	writel(((hwep & 0x1E) << 1), USBD_CTRL(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1227", ((hwep & 0x1E) << 1), USBD_CTRL(udc->udp_baseaddr));
 
 	/* Clear the buffer */
 	udc_clr_buffer_hwep(udc, hwep);
@@ -1247,7 +1247,7 @@ static void udc_stuff_fifo(struct lpc32xx_udc *udc, u8 *data, u32 bytes)
 
 		/* Copy 32-bit aligned data first */
 		for (n = 0; n < cbytes; n += 4)
-			writel(*p32++, USBD_TXDATA(udc->udp_baseaddr));
+			pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1250", *p32++, USBD_TXDATA(udc->udp_baseaddr));
 
 		/* Handle any remaining bytes */
 		bl = bytes - cbytes;
@@ -1256,7 +1256,7 @@ static void udc_stuff_fifo(struct lpc32xx_udc *udc, u8 *data, u32 bytes)
 			for (n = 0; n < bl; n++)
 				tmp |= data[cbytes + n] << (n * 8);
 
-			writel(tmp, USBD_TXDATA(udc->udp_baseaddr));
+			pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1259", tmp, USBD_TXDATA(udc->udp_baseaddr));
 		}
 		break;
 
@@ -1272,7 +1272,7 @@ static void udc_stuff_fifo(struct lpc32xx_udc *udc, u8 *data, u32 bytes)
 			for (i = 0; i < bl; i++)
 				tmp |= data[n + i] << (i * 8);
 
-			writel(tmp, USBD_TXDATA(udc->udp_baseaddr));
+			pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1275", tmp, USBD_TXDATA(udc->udp_baseaddr));
 		}
 		break;
 
@@ -1284,7 +1284,7 @@ static void udc_stuff_fifo(struct lpc32xx_udc *udc, u8 *data, u32 bytes)
 		for (n = 0; n < cbytes; n += 4) {
 			tmp = *p16++ & 0xFFFF;
 			tmp |= (*p16++ & 0xFFFF) << 16;
-			writel(tmp, USBD_TXDATA(udc->udp_baseaddr));
+			pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1287", tmp, USBD_TXDATA(udc->udp_baseaddr));
 		}
 
 		/* Handle any remaining bytes */
@@ -1294,7 +1294,7 @@ static void udc_stuff_fifo(struct lpc32xx_udc *udc, u8 *data, u32 bytes)
 			for (n = 0; n < bl; n++)
 				tmp |= data[cbytes + n] << (n * 8);
 
-			writel(tmp, USBD_TXDATA(udc->udp_baseaddr));
+			pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1297", tmp, USBD_TXDATA(udc->udp_baseaddr));
 		}
 		break;
 	}
@@ -1312,17 +1312,17 @@ static void udc_write_hwep(struct lpc32xx_udc *udc, u32 hwep, u32 *data,
 		return;
 
 	/* Setup write of endpoint */
-	writel(hwwep, USBD_CTRL(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1315", hwwep, USBD_CTRL(udc->udp_baseaddr));
 
-	writel(bytes, USBD_TXPLEN(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1317", bytes, USBD_TXPLEN(udc->udp_baseaddr));
 
 	/* Need at least 1 byte to trigger TX */
 	if (bytes == 0)
-		writel(0, USBD_TXDATA(udc->udp_baseaddr));
+		pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1321", 0, USBD_TXDATA(udc->udp_baseaddr));
 	else
 		udc_stuff_fifo(udc, (u8 *) data, bytes);
 
-	writel(((hwep & 0x1E) << 1), USBD_CTRL(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1325", ((hwep & 0x1E) << 1), USBD_CTRL(udc->udp_baseaddr));
 
 	udc_val_buffer_hwep(udc, hwep);
 }
@@ -1575,10 +1575,10 @@ static int lpc32xx_ep_disable(struct usb_ep *_ep)
 
 	/* Clear all DMA statuses for this EP */
 	udc_ep_dma_disable(udc, ep->hwep_num);
-	writel(1 << ep->hwep_num, USBD_EOTINTCLR(udc->udp_baseaddr));
-	writel(1 << ep->hwep_num, USBD_NDDRTINTCLR(udc->udp_baseaddr));
-	writel(1 << ep->hwep_num, USBD_SYSERRTINTCLR(udc->udp_baseaddr));
-	writel(1 << ep->hwep_num, USBD_DMARCLR(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1578", 1 << ep->hwep_num, USBD_EOTINTCLR(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1579", 1 << ep->hwep_num, USBD_NDDRTINTCLR(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1580", 1 << ep->hwep_num, USBD_SYSERRTINTCLR(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1581", 1 << ep->hwep_num, USBD_DMARCLR(udc->udp_baseaddr));
 
 	/* Remove the DD pointer in the UDCA */
 	udc->udca_v_base[ep->hwep_num] = 0;
@@ -1687,10 +1687,10 @@ static int lpc32xx_ep_enable(struct usb_ep *_ep,
 
 	/* Clear all DMA statuses for this EP */
 	udc_ep_dma_disable(udc, ep->hwep_num);
-	writel(1 << ep->hwep_num, USBD_EOTINTCLR(udc->udp_baseaddr));
-	writel(1 << ep->hwep_num, USBD_NDDRTINTCLR(udc->udp_baseaddr));
-	writel(1 << ep->hwep_num, USBD_SYSERRTINTCLR(udc->udp_baseaddr));
-	writel(1 << ep->hwep_num, USBD_DMARCLR(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1690", 1 << ep->hwep_num, USBD_EOTINTCLR(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1691", 1 << ep->hwep_num, USBD_NDDRTINTCLR(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1692", 1 << ep->hwep_num, USBD_SYSERRTINTCLR(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:1693", 1 << ep->hwep_num, USBD_DMARCLR(udc->udp_baseaddr));
 
 	spin_unlock_irqrestore(&udc->lock, flags);
 
@@ -1999,13 +1999,13 @@ static void udc_handle_dma_ep(struct lpc32xx_udc *udc, struct lpc32xx_ep *ep)
 
 	/* Disable DMA */
 	udc_ep_dma_disable(udc, ep->hwep_num);
-	writel((1 << ep->hwep_num), USBD_EOTINTCLR(udc->udp_baseaddr));
-	writel((1 << ep->hwep_num), USBD_NDDRTINTCLR(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:2002", (1 << ep->hwep_num), USBD_EOTINTCLR(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:2003", (1 << ep->hwep_num), USBD_NDDRTINTCLR(udc->udp_baseaddr));
 
 	/* System error? */
-	if (readl(USBD_SYSERRTINTST(udc->udp_baseaddr)) &
+	if (pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:2006", USBD_SYSERRTINTST(udc->udp_baseaddr)) &
 	    (1 << ep->hwep_num)) {
-		writel((1 << ep->hwep_num),
+		pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:2008", (1 << ep->hwep_num),
 			     USBD_SYSERRTINTCLR(udc->udp_baseaddr));
 		ep_err(ep, "AHB critical error!\n");
 		ep->req_pending = 0;
@@ -2729,10 +2729,10 @@ static irqreturn_t lpc32xx_usb_lp_irq(int irq, void *_udc)
 	spin_lock(&udc->lock);
 
 	/* Read the device status register */
-	devstat = readl(USBD_DEVINTST(udc->udp_baseaddr));
+	devstat = pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:2732", USBD_DEVINTST(udc->udp_baseaddr));
 
 	devstat &= ~USBD_EP_FAST;
-	writel(devstat, USBD_DEVINTCLR(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:2735", devstat, USBD_DEVINTCLR(udc->udp_baseaddr));
 	devstat = devstat & udc->enabled_devints;
 
 	/* Device specific handling needed? */
@@ -2768,10 +2768,10 @@ static irqreturn_t lpc32xx_usb_hp_irq(int irq, void *_udc)
 	spin_lock(&udc->lock);
 
 	/* Read the device status register */
-	writel(USBD_EP_FAST, USBD_DEVINTCLR(udc->udp_baseaddr));
+	pete_writel("drivers/usb/gadget/udc/lpc32xx_udc.c:2771", USBD_EP_FAST, USBD_DEVINTCLR(udc->udp_baseaddr));
 
 	/* Endpoints */
-	tmp = readl(USBD_EPINTST(udc->udp_baseaddr));
+	tmp = pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:2774", USBD_EPINTST(udc->udp_baseaddr));
 
 	/* Special handling for EP0 */
 	if (tmp & (EP_MASK_SEL(0, EP_OUT) | EP_MASK_SEL(0, EP_IN))) {
@@ -2810,10 +2810,10 @@ static irqreturn_t lpc32xx_usb_devdma_irq(int irq, void *_udc)
 	spin_lock(&udc->lock);
 
 	/* Handle EP DMA EOT interrupts */
-	tmp = readl(USBD_EOTINTST(udc->udp_baseaddr)) |
-		(readl(USBD_EPDMAST(udc->udp_baseaddr)) &
-		 readl(USBD_NDDRTINTST(udc->udp_baseaddr))) |
-		readl(USBD_SYSERRTINTST(udc->udp_baseaddr));
+	tmp = pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:2813", USBD_EOTINTST(udc->udp_baseaddr)) |
+		(pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:2814", USBD_EPDMAST(udc->udp_baseaddr)) &
+		 pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:2815", USBD_NDDRTINTST(udc->udp_baseaddr))) |
+		pete_readl("drivers/usb/gadget/udc/lpc32xx_udc.c:2816", USBD_SYSERRTINTST(udc->udp_baseaddr));
 	for (i = 1; i < NUM_ENDPOINTS; i++) {
 		if (tmp & (1 << udc->ep[i].hwep_num))
 			udc_handle_dma_ep(udc, &udc->ep[i]);

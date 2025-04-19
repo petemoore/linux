@@ -68,7 +68,7 @@ static u64 rng_get_coprocessor_clkrate(void)
 		goto error_put_pdev;
 
 	/* RST: PNR_MUL * 50Mhz gives clockrate */
-	ret = CLOCK_BASE_RATE * ((readq(base + RST_BOOT_REG) >> 33) & 0x3F);
+	ret = CLOCK_BASE_RATE * ((pete_readq("drivers/char/hw_random/cavium-rng-vf.c:71", base + RST_BOOT_REG) >> 33) & 0x3F);
 
 	iounmap(base);
 
@@ -90,7 +90,7 @@ static int check_rng_health(struct cavium_rng *rng)
 	if (!rng->pf_regbase)
 		return 0;
 
-	status = readq(rng->pf_regbase + HEALTH_STATUS_REG);
+	status = pete_readq("drivers/char/hw_random/cavium-rng-vf.c:93", rng->pf_regbase + HEALTH_STATUS_REG);
 	if (status & BIT_ULL(0)) {
 		dev_err(&rng->pdev->dev, "HWRNG: Startup health test failed\n");
 		return -EIO;
@@ -154,12 +154,12 @@ static int cavium_rng_read(struct hwrng *rng, void *dat, size_t max, bool wait)
 		return err;
 
 	while (size >= 8) {
-		*((u64 *)dat) = readq(p->result);
+		*((u64 *)dat) = pete_readq("drivers/char/hw_random/cavium-rng-vf.c:157", p->result);
 		size -= 8;
 		dat += 8;
 	}
 	while (size > 0) {
-		*((u8 *)dat) = readb(p->result);
+		*((u8 *)dat) = pete_readb("drivers/char/hw_random/cavium-rng-vf.c:162", p->result);
 		size--;
 		dat++;
 	}

@@ -146,8 +146,8 @@ static int tnetd7300_dsp_clock(void)
 {
 	u32 didr1, didr2;
 	u8 rev = ar7_chip_rev();
-	didr1 = readl((void *)KSEG1ADDR(AR7_REGS_GPIO + 0x18));
-	didr2 = readl((void *)KSEG1ADDR(AR7_REGS_GPIO + 0x1c));
+	didr1 = pete_readl("arch/mips/ar7/clock.c:149", (void *)KSEG1ADDR(AR7_REGS_GPIO + 0x18));
+	didr2 = pete_readl("arch/mips/ar7/clock.c:150", (void *)KSEG1ADDR(AR7_REGS_GPIO + 0x1c));
 	if (didr2 & (1 << 23))
 		return 0;
 	if ((rev >= 0x23) && (rev != 0x57))
@@ -163,8 +163,8 @@ static int tnetd7300_get_clock(u32 shift, struct tnetd7300_clock *clock,
 {
 	int product;
 	int base_clock = AR7_REF_CLOCK;
-	u32 ctrl = readl(&clock->ctrl);
-	u32 pll = readl(&clock->pll);
+	u32 ctrl = pete_readl("arch/mips/ar7/clock.c:166", &clock->ctrl);
+	u32 pll = pete_readl("arch/mips/ar7/clock.c:167", &clock->pll);
 	int prediv = ((ctrl & PREDIV_MASK) >> PREDIV_SHIFT) + 1;
 	int postdiv = (ctrl & POSTDIV_MASK) + 1;
 	int divisor = prediv * postdiv;
@@ -227,12 +227,12 @@ static void tnetd7300_set_clock(u32 shift, struct tnetd7300_clock *clock,
 
 	calculate(base_clock, frequency, &prediv, &postdiv, &mul);
 
-	writel(((prediv - 1) << PREDIV_SHIFT) | (postdiv - 1), &clock->ctrl);
+	pete_writel("arch/mips/ar7/clock.c:230", ((prediv - 1) << PREDIV_SHIFT) | (postdiv - 1), &clock->ctrl);
 	mdelay(1);
-	writel(4, &clock->pll);
-	while (readl(&clock->pll) & PLL_STATUS)
+	pete_writel("arch/mips/ar7/clock.c:232", 4, &clock->pll);
+	while (pete_readl("arch/mips/ar7/clock.c:233", &clock->pll) & PLL_STATUS)
 		;
-	writel(((mul - 1) << MUL_SHIFT) | (0xff << 3) | 0x0e, &clock->pll);
+	pete_writel("arch/mips/ar7/clock.c:235", ((mul - 1) << MUL_SHIFT) | (0xff << 3) | 0x0e, &clock->pll);
 	mdelay(75);
 }
 
@@ -276,30 +276,30 @@ static void tnetd7200_set_clock(int base, struct tnetd7200_clock *clock,
 		"postdiv = %d, postdiv2 = %d, mul = %d\n",
 		base, frequency, prediv, postdiv, postdiv2, mul);
 
-	writel(0, &clock->ctrl);
-	writel(DIVISOR_ENABLE_MASK | ((prediv - 1) & 0x1F), &clock->prediv);
-	writel((mul - 1) & 0xF, &clock->mul);
+	pete_writel("arch/mips/ar7/clock.c:279", 0, &clock->ctrl);
+	pete_writel("arch/mips/ar7/clock.c:280", DIVISOR_ENABLE_MASK | ((prediv - 1) & 0x1F), &clock->prediv);
+	pete_writel("arch/mips/ar7/clock.c:281", (mul - 1) & 0xF, &clock->mul);
 
-	while (readl(&clock->status) & 0x1)
+	while (pete_readl("arch/mips/ar7/clock.c:283", &clock->status) & 0x1)
 		; /* nop */
 
-	writel(DIVISOR_ENABLE_MASK | ((postdiv - 1) & 0x1F), &clock->postdiv);
+	pete_writel("arch/mips/ar7/clock.c:286", DIVISOR_ENABLE_MASK | ((postdiv - 1) & 0x1F), &clock->postdiv);
 
-	writel(readl(&clock->cmden) | 1, &clock->cmden);
-	writel(readl(&clock->cmd) | 1, &clock->cmd);
+	pete_writel("arch/mips/ar7/clock.c:288", pete_readl("arch/mips/ar7/clock.c:288", &clock->cmden) | 1, &clock->cmden);
+	pete_writel("arch/mips/ar7/clock.c:289", pete_readl("arch/mips/ar7/clock.c:289", &clock->cmd) | 1, &clock->cmd);
 
-	while (readl(&clock->status) & 0x1)
+	while (pete_readl("arch/mips/ar7/clock.c:291", &clock->status) & 0x1)
 		; /* nop */
 
-	writel(DIVISOR_ENABLE_MASK | ((postdiv2 - 1) & 0x1F), &clock->postdiv2);
+	pete_writel("arch/mips/ar7/clock.c:294", DIVISOR_ENABLE_MASK | ((postdiv2 - 1) & 0x1F), &clock->postdiv2);
 
-	writel(readl(&clock->cmden) | 1, &clock->cmden);
-	writel(readl(&clock->cmd) | 1, &clock->cmd);
+	pete_writel("arch/mips/ar7/clock.c:296", pete_readl("arch/mips/ar7/clock.c:296", &clock->cmden) | 1, &clock->cmden);
+	pete_writel("arch/mips/ar7/clock.c:297", pete_readl("arch/mips/ar7/clock.c:297", &clock->cmd) | 1, &clock->cmd);
 
-	while (readl(&clock->status) & 0x1)
+	while (pete_readl("arch/mips/ar7/clock.c:299", &clock->status) & 0x1)
 		; /* nop */
 
-	writel(readl(&clock->ctrl) | 1, &clock->ctrl);
+	pete_writel("arch/mips/ar7/clock.c:302", pete_readl("arch/mips/ar7/clock.c:302", &clock->ctrl) | 1, &clock->ctrl);
 }
 
 static int tnetd7200_get_clock_base(int clock_id, u32 *bootcr)

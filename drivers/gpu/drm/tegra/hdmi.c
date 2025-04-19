@@ -103,7 +103,7 @@ enum {
 static inline u32 tegra_hdmi_readl(struct tegra_hdmi *hdmi,
 				   unsigned int offset)
 {
-	u32 value = readl(hdmi->regs + (offset << 2));
+	u32 value = pete_readl("drivers/gpu/drm/tegra/hdmi.c:106", hdmi->regs + (offset << 2));
 
 	trace_hdmi_readl(hdmi->dev, offset, value);
 
@@ -114,7 +114,7 @@ static inline void tegra_hdmi_writel(struct tegra_hdmi *hdmi, u32 value,
 				     unsigned int offset)
 {
 	trace_hdmi_writel(hdmi->dev, offset, value);
-	writel(value, hdmi->regs + (offset << 2));
+	pete_writel("drivers/gpu/drm/tegra/hdmi.c:117", value, hdmi->regs + (offset << 2));
 }
 
 struct tegra_hdmi_audio_config {

@@ -22,8 +22,8 @@ void vexpress_flags_set(u32 data)
 	if (WARN_ON(!base))
 		return;
 
-	writel(~0, base + SYS_FLAGSCLR);
-	writel(data, base + SYS_FLAGSSET);
+	pete_writel("arch/arm/mach-vexpress/v2m.c:25", ~0, base + SYS_FLAGSCLR);
+	pete_writel("arch/arm/mach-vexpress/v2m.c:26", data, base + SYS_FLAGSSET);
 }
 
 static const char * const v2m_dt_match[] __initconst = {

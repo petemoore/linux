@@ -299,7 +299,7 @@ static int ath11k_mhi_op_read_reg(struct mhi_controller *mhi_cntrl,
 				  void __iomem *addr,
 				  u32 *out)
 {
-	*out = readl(addr);
+	*out = pete_readl("drivers/net/wireless/ath/ath11k/mhi.c:302", addr);
 
 	return 0;
 }
@@ -308,7 +308,7 @@ static void ath11k_mhi_op_write_reg(struct mhi_controller *mhi_cntrl,
 				    void __iomem *addr,
 				    u32 val)
 {
-	writel(val, addr);
+	pete_writel("drivers/net/wireless/ath/ath11k/mhi.c:311", val, addr);
 }
 
 int ath11k_mhi_register(struct ath11k_pci *ab_pci)

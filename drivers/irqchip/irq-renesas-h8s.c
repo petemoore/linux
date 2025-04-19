@@ -41,8 +41,8 @@ static void h8s_disable_irq(struct irq_data *data)
 	addr = IPRA + ((ipr_table[irq - 16] & 0xf0) >> 3);
 	pos = (ipr_table[irq - 16] & 0x0f) * 4;
 	pri = ~(0x000f << pos);
-	pri &= readw(addr);
-	writew(pri, addr);
+	pri &= pete_readw("drivers/irqchip/irq-renesas-h8s.c:44", addr);
+	pete_writew("drivers/irqchip/irq-renesas-h8s.c:45", pri, addr);
 }
 
 static void h8s_enable_irq(struct irq_data *data)
@@ -55,9 +55,9 @@ static void h8s_enable_irq(struct irq_data *data)
 	addr = IPRA + ((ipr_table[irq - 16] & 0xf0) >> 3);
 	pos = (ipr_table[irq - 16] & 0x0f) * 4;
 	pri = ~(0x000f << pos);
-	pri &= readw(addr);
+	pri &= pete_readw("drivers/irqchip/irq-renesas-h8s.c:58", addr);
 	pri |= 1 << pos;
-	writew(pri, addr);
+	pete_writew("drivers/irqchip/irq-renesas-h8s.c:60", pri, addr);
 }
 
 struct irq_chip h8s_irq_chip = {
@@ -91,7 +91,7 @@ static int __init h8s_intc_of_init(struct device_node *intc,
 	/* All interrupt priority is 0 (disable) */
 	/* IPRA to IPRK */
 	for (n = 0; n <= 'k' - 'a'; n++)
-		writew(0x0000, IPRA + (n * 2));
+		pete_writew("drivers/irqchip/irq-renesas-h8s.c:94", 0x0000, IPRA + (n * 2));
 
 	domain = irq_domain_add_linear(intc, NR_IRQS, &irq_ops, NULL);
 	BUG_ON(!domain);

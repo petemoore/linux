@@ -829,10 +829,10 @@ static int i740fb_set_par(struct fb_info *info)
 	i740outreg_mask(par, XRX, PIXPIPE_CONFIG_1,
 			par->pixelpipe_cfg1, DISPLAY_COLOR_MODE);
 
-	itemp = readl(par->regs + FWATER_BLC);
+	itemp = pete_readl("drivers/video/fbdev/i740fb.c:832", par->regs + FWATER_BLC);
 	itemp &= ~(LMI_BURST_LENGTH | LMI_FIFO_WATERMARK);
 	itemp |= par->lmi_fifo_watermark;
-	writel(itemp, par->regs + FWATER_BLC);
+	pete_writel("drivers/video/fbdev/i740fb.c:835", itemp, par->regs + FWATER_BLC);
 
 	i740outreg(par, XRX, DRAM_EXT_CNTL, DRAM_REFRESH_60HZ);
 

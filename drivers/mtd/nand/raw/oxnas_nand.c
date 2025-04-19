@@ -39,7 +39,7 @@ static uint8_t oxnas_nand_read_byte(struct nand_chip *chip)
 {
 	struct oxnas_nand_ctrl *oxnas = nand_get_controller_data(chip);
 
-	return readb(oxnas->io_base);
+	return pete_readb("drivers/mtd/nand/raw/oxnas_nand.c:42", oxnas->io_base);
 }
 
 static void oxnas_nand_read_buf(struct nand_chip *chip, u8 *buf, int len)
@@ -64,9 +64,9 @@ static void oxnas_nand_cmd_ctrl(struct nand_chip *chip, int cmd,
 	struct oxnas_nand_ctrl *oxnas = nand_get_controller_data(chip);
 
 	if (ctrl & NAND_CLE)
-		writeb(cmd, oxnas->io_base + OXNAS_NAND_CMD_CLE);
+		pete_writeb("drivers/mtd/nand/raw/oxnas_nand.c:67", cmd, oxnas->io_base + OXNAS_NAND_CMD_CLE);
 	else if (ctrl & NAND_ALE)
-		writeb(cmd, oxnas->io_base + OXNAS_NAND_CMD_ALE);
+		pete_writeb("drivers/mtd/nand/raw/oxnas_nand.c:69", cmd, oxnas->io_base + OXNAS_NAND_CMD_ALE);
 }
 
 /*

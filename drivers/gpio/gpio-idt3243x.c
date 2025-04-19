@@ -34,7 +34,7 @@ static void idt_gpio_dispatch(struct irq_desc *desc)
 
 	chained_irq_enter(host_chip, desc);
 
-	pending = readl(ctrl->pic + IDT_PIC_IRQ_PEND);
+	pending = pete_readl("drivers/gpio/gpio-idt3243x.c:37", ctrl->pic + IDT_PIC_IRQ_PEND);
 	pending &= ~ctrl->mask_cache;
 	for_each_set_bit(bit, &pending, gc->ngpio) {
 		virq = irq_linear_revmap(gc->irq.domain, bit);
@@ -59,13 +59,13 @@ static int idt_gpio_irq_set_type(struct irq_data *d, unsigned int flow_type)
 
 	raw_spin_lock_irqsave(&gc->bgpio_lock, flags);
 
-	ilevel = readl(ctrl->gpio + IDT_GPIO_ILEVEL);
+	ilevel = pete_readl("drivers/gpio/gpio-idt3243x.c:62", ctrl->gpio + IDT_GPIO_ILEVEL);
 	if (sense & IRQ_TYPE_LEVEL_HIGH)
 		ilevel |= BIT(d->hwirq);
 	else if (sense & IRQ_TYPE_LEVEL_LOW)
 		ilevel &= ~BIT(d->hwirq);
 
-	writel(ilevel, ctrl->gpio + IDT_GPIO_ILEVEL);
+	pete_writel("drivers/gpio/gpio-idt3243x.c:68", ilevel, ctrl->gpio + IDT_GPIO_ILEVEL);
 	irq_set_handler_locked(d, handle_level_irq);
 
 	raw_spin_unlock_irqrestore(&gc->bgpio_lock, flags);
@@ -77,7 +77,7 @@ static void idt_gpio_ack(struct irq_data *d)
 	struct gpio_chip *gc = irq_data_get_irq_chip_data(d);
 	struct idt_gpio_ctrl *ctrl = gpiochip_get_data(gc);
 
-	writel(~BIT(d->hwirq), ctrl->gpio + IDT_GPIO_ISTAT);
+	pete_writel("drivers/gpio/gpio-idt3243x.c:80", ~BIT(d->hwirq), ctrl->gpio + IDT_GPIO_ISTAT);
 }
 
 static void idt_gpio_mask(struct irq_data *d)
@@ -89,7 +89,7 @@ static void idt_gpio_mask(struct irq_data *d)
 	raw_spin_lock_irqsave(&gc->bgpio_lock, flags);
 
 	ctrl->mask_cache |= BIT(d->hwirq);
-	writel(ctrl->mask_cache, ctrl->pic + IDT_PIC_IRQ_MASK);
+	pete_writel("drivers/gpio/gpio-idt3243x.c:92", ctrl->mask_cache, ctrl->pic + IDT_PIC_IRQ_MASK);
 
 	raw_spin_unlock_irqrestore(&gc->bgpio_lock, flags);
 }
@@ -103,7 +103,7 @@ static void idt_gpio_unmask(struct irq_data *d)
 	raw_spin_lock_irqsave(&gc->bgpio_lock, flags);
 
 	ctrl->mask_cache &= ~BIT(d->hwirq);
-	writel(ctrl->mask_cache, ctrl->pic + IDT_PIC_IRQ_MASK);
+	pete_writel("drivers/gpio/gpio-idt3243x.c:106", ctrl->mask_cache, ctrl->pic + IDT_PIC_IRQ_MASK);
 
 	raw_spin_unlock_irqrestore(&gc->bgpio_lock, flags);
 }
@@ -114,7 +114,7 @@ static int idt_gpio_irq_init_hw(struct gpio_chip *gc)
 
 	/* Mask interrupts. */
 	ctrl->mask_cache = 0xffffffff;
-	writel(ctrl->mask_cache, ctrl->pic + IDT_PIC_IRQ_MASK);
+	pete_writel("drivers/gpio/gpio-idt3243x.c:117", ctrl->mask_cache, ctrl->pic + IDT_PIC_IRQ_MASK);
 
 	return 0;
 }

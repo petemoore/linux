@@ -161,14 +161,14 @@ void ast_vhub_ep0_handle_setup(struct ast_vhub_ep *ep)
 
  stall:
 	EPDBG(ep, "stalling\n");
-	writel(VHUB_EP0_CTRL_STALL, ep->ep0.ctlstat);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/ep0.c:164", VHUB_EP0_CTRL_STALL, ep->ep0.ctlstat);
 	ep->ep0.state = ep0_state_stall;
 	ep->ep0.dir_in = false;
 	return;
 
  complete:
 	EPVDBG(ep, "sending [in] status with no data\n");
-	writel(VHUB_EP0_TX_BUFF_RDY, ep->ep0.ctlstat);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/ep0.c:171", VHUB_EP0_TX_BUFF_RDY, ep->ep0.ctlstat);
 	ep->ep0.state = ep0_state_status;
 	ep->ep0.dir_in = false;
 }
@@ -191,7 +191,7 @@ static void ast_vhub_ep0_do_send(struct ast_vhub_ep *ep,
 		EPVDBG(ep, "complete send %d/%d\n",
 		       req->req.actual, req->req.length);
 		ep->ep0.state = ep0_state_status;
-		writel(VHUB_EP0_RX_BUFF_RDY, ep->ep0.ctlstat);
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/ep0.c:194", VHUB_EP0_RX_BUFF_RDY, ep->ep0.ctlstat);
 		ast_vhub_done(ep, req, 0);
 		return;
 	}
@@ -220,8 +220,8 @@ static void ast_vhub_ep0_do_send(struct ast_vhub_ep *ep,
 
 	/* Remember chunk size and trigger send */
 	reg = VHUB_EP0_SET_TX_LEN(chunk);
-	writel(reg, ep->ep0.ctlstat);
-	writel(reg | VHUB_EP0_TX_BUFF_RDY, ep->ep0.ctlstat);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/ep0.c:223", reg, ep->ep0.ctlstat);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/ep0.c:224", reg | VHUB_EP0_TX_BUFF_RDY, ep->ep0.ctlstat);
 	req->req.actual += chunk;
 }
 
@@ -230,7 +230,7 @@ static void ast_vhub_ep0_rx_prime(struct ast_vhub_ep *ep)
 	EPVDBG(ep, "rx prime\n");
 
 	/* Prime endpoint for receiving data */
-	writel(VHUB_EP0_RX_BUFF_RDY, ep->ep0.ctlstat);
+	pete_writel("drivers/usb/gadget/udc/aspeed-vhub/ep0.c:233", VHUB_EP0_RX_BUFF_RDY, ep->ep0.ctlstat);
 }
 
 static void ast_vhub_ep0_do_receive(struct ast_vhub_ep *ep, struct ast_vhub_req *req,
@@ -258,7 +258,7 @@ static void ast_vhub_ep0_do_receive(struct ast_vhub_ep *ep, struct ast_vhub_req 
 	/* Done ? */
 	if (len < ep->ep.maxpacket || len == remain) {
 		ep->ep0.state = ep0_state_status;
-		writel(VHUB_EP0_TX_BUFF_RDY, ep->ep0.ctlstat);
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/ep0.c:261", VHUB_EP0_TX_BUFF_RDY, ep->ep0.ctlstat);
 		ast_vhub_done(ep, req, rc);
 	} else
 		ast_vhub_ep0_rx_prime(ep);
@@ -273,7 +273,7 @@ void ast_vhub_ep0_handle_ack(struct ast_vhub_ep *ep, bool in_ack)
 	u32 stat;
 
 	/* Read EP0 status */
-	stat = readl(ep->ep0.ctlstat);
+	stat = pete_readl("drivers/usb/gadget/udc/aspeed-vhub/ep0.c:276", ep->ep0.ctlstat);
 
 	/* Grab current request if any */
 	req = list_first_entry_or_null(&ep->queue, struct ast_vhub_req, queue);
@@ -344,7 +344,7 @@ void ast_vhub_ep0_handle_ack(struct ast_vhub_ep *ep, bool in_ack)
 
 	/* Reset to token state or stall */
 	if (stall) {
-		writel(VHUB_EP0_CTRL_STALL, ep->ep0.ctlstat);
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/ep0.c:347", VHUB_EP0_CTRL_STALL, ep->ep0.ctlstat);
 		ep->ep0.state = ep0_state_stall;
 	} else
 		ep->ep0.state = ep0_state_token;
@@ -417,7 +417,7 @@ static int ast_vhub_ep0_queue(struct usb_ep* u_ep, struct usb_request *u_req,
 		/* 0-len request, send completion as rx */
 		EPVDBG(ep, "0-length rx completion\n");
 		ep->ep0.state = ep0_state_status;
-		writel(VHUB_EP0_TX_BUFF_RDY, ep->ep0.ctlstat);
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/ep0.c:420", VHUB_EP0_TX_BUFF_RDY, ep->ep0.ctlstat);
 		ast_vhub_done(ep, req, 0);
 	} else {
 		/* OUT request, start receiver */
@@ -453,7 +453,7 @@ static int ast_vhub_ep0_dequeue(struct usb_ep* u_ep, struct usb_request *u_req)
 		ast_vhub_done(ep, req, -ECONNRESET);
 
 		/* We do stall the EP to clean things up in HW */
-		writel(VHUB_EP0_CTRL_STALL, ep->ep0.ctlstat);
+		pete_writel("drivers/usb/gadget/udc/aspeed-vhub/ep0.c:456", VHUB_EP0_CTRL_STALL, ep->ep0.ctlstat);
 		ep->ep0.state = ep0_state_status;
 		ep->ep0.dir_in = false;
 		rc = 0;

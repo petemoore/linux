@@ -57,7 +57,7 @@ static ssize_t l2_write(struct file *file, const char __user *data,
 	if (kstrtouint_from_user(data, count, 0, &val))
 		return -EINVAL;
 	if ((val < 0xFF) || (val >= 0x10000 && val < 0x100FF))
-		writel(val, l2_base + SIFIVE_L2_ECCINJECTERR);
+		pete_writel("drivers/soc/sifive/sifive_l2_cache.c:60", val, l2_base + SIFIVE_L2_ECCINJECTERR);
 	else
 		return -EINVAL;
 	return count;
@@ -82,7 +82,7 @@ static void l2_config_read(void)
 {
 	u32 regval, val;
 
-	regval = readl(l2_base + SIFIVE_L2_CONFIG);
+	regval = pete_readl("drivers/soc/sifive/sifive_l2_cache.c:85", l2_base + SIFIVE_L2_CONFIG);
 	val = regval & 0xFF;
 	pr_info("L2CACHE: No. of Banks in the cache: %d\n", val);
 	val = (regval & 0xFF00) >> 8;
@@ -92,7 +92,7 @@ static void l2_config_read(void)
 	val = (regval & 0xFF000000) >> 24;
 	pr_info("L2CACHE: Bytes per cache block: %llu\n", (uint64_t)1 << val);
 
-	regval = readl(l2_base + SIFIVE_L2_WAYENABLE);
+	regval = pete_readl("drivers/soc/sifive/sifive_l2_cache.c:95", l2_base + SIFIVE_L2_WAYENABLE);
 	pr_info("L2CACHE: Index of the largest way enabled: %d\n", regval);
 }
 
@@ -118,7 +118,7 @@ EXPORT_SYMBOL_GPL(unregister_sifive_l2_error_notifier);
 
 static int l2_largest_wayenabled(void)
 {
-	return readl(l2_base + SIFIVE_L2_WAYENABLE) & 0xFF;
+	return pete_readl("drivers/soc/sifive/sifive_l2_cache.c:121", l2_base + SIFIVE_L2_WAYENABLE) & 0xFF;
 }
 
 static ssize_t number_of_ways_enabled_show(struct device *dev,
@@ -153,38 +153,38 @@ static irqreturn_t l2_int_handler(int irq, void *device)
 	unsigned int add_h, add_l;
 
 	if (irq == g_irq[DIR_CORR]) {
-		add_h = readl(l2_base + SIFIVE_L2_DIRECCFIX_HIGH);
-		add_l = readl(l2_base + SIFIVE_L2_DIRECCFIX_LOW);
+		add_h = pete_readl("drivers/soc/sifive/sifive_l2_cache.c:156", l2_base + SIFIVE_L2_DIRECCFIX_HIGH);
+		add_l = pete_readl("drivers/soc/sifive/sifive_l2_cache.c:157", l2_base + SIFIVE_L2_DIRECCFIX_LOW);
 		pr_err("L2CACHE: DirError @ 0x%08X.%08X\n", add_h, add_l);
 		/* Reading this register clears the DirError interrupt sig */
-		readl(l2_base + SIFIVE_L2_DIRECCFIX_COUNT);
+		pete_readl("drivers/soc/sifive/sifive_l2_cache.c:160", l2_base + SIFIVE_L2_DIRECCFIX_COUNT);
 		atomic_notifier_call_chain(&l2_err_chain, SIFIVE_L2_ERR_TYPE_CE,
 					   "DirECCFix");
 	}
 	if (irq == g_irq[DIR_UNCORR]) {
-		add_h = readl(l2_base + SIFIVE_L2_DIRECCFAIL_HIGH);
-		add_l = readl(l2_base + SIFIVE_L2_DIRECCFAIL_LOW);
+		add_h = pete_readl("drivers/soc/sifive/sifive_l2_cache.c:165", l2_base + SIFIVE_L2_DIRECCFAIL_HIGH);
+		add_l = pete_readl("drivers/soc/sifive/sifive_l2_cache.c:166", l2_base + SIFIVE_L2_DIRECCFAIL_LOW);
 		/* Reading this register clears the DirFail interrupt sig */
-		readl(l2_base + SIFIVE_L2_DIRECCFAIL_COUNT);
+		pete_readl("drivers/soc/sifive/sifive_l2_cache.c:168", l2_base + SIFIVE_L2_DIRECCFAIL_COUNT);
 		atomic_notifier_call_chain(&l2_err_chain, SIFIVE_L2_ERR_TYPE_UE,
 					   "DirECCFail");
 		panic("L2CACHE: DirFail @ 0x%08X.%08X\n", add_h, add_l);
 	}
 	if (irq == g_irq[DATA_CORR]) {
-		add_h = readl(l2_base + SIFIVE_L2_DATECCFIX_HIGH);
-		add_l = readl(l2_base + SIFIVE_L2_DATECCFIX_LOW);
+		add_h = pete_readl("drivers/soc/sifive/sifive_l2_cache.c:174", l2_base + SIFIVE_L2_DATECCFIX_HIGH);
+		add_l = pete_readl("drivers/soc/sifive/sifive_l2_cache.c:175", l2_base + SIFIVE_L2_DATECCFIX_LOW);
 		pr_err("L2CACHE: DataError @ 0x%08X.%08X\n", add_h, add_l);
 		/* Reading this register clears the DataError interrupt sig */
-		readl(l2_base + SIFIVE_L2_DATECCFIX_COUNT);
+		pete_readl("drivers/soc/sifive/sifive_l2_cache.c:178", l2_base + SIFIVE_L2_DATECCFIX_COUNT);
 		atomic_notifier_call_chain(&l2_err_chain, SIFIVE_L2_ERR_TYPE_CE,
 					   "DatECCFix");
 	}
 	if (irq == g_irq[DATA_UNCORR]) {
-		add_h = readl(l2_base + SIFIVE_L2_DATECCFAIL_HIGH);
-		add_l = readl(l2_base + SIFIVE_L2_DATECCFAIL_LOW);
+		add_h = pete_readl("drivers/soc/sifive/sifive_l2_cache.c:183", l2_base + SIFIVE_L2_DATECCFAIL_HIGH);
+		add_l = pete_readl("drivers/soc/sifive/sifive_l2_cache.c:184", l2_base + SIFIVE_L2_DATECCFAIL_LOW);
 		pr_err("L2CACHE: DataFail @ 0x%08X.%08X\n", add_h, add_l);
 		/* Reading this register clears the DataFail interrupt sig */
-		readl(l2_base + SIFIVE_L2_DATECCFAIL_COUNT);
+		pete_readl("drivers/soc/sifive/sifive_l2_cache.c:187", l2_base + SIFIVE_L2_DATECCFAIL_COUNT);
 		atomic_notifier_call_chain(&l2_err_chain, SIFIVE_L2_ERR_TYPE_UE,
 					   "DatECCFail");
 	}

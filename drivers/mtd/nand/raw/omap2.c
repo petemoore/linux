@@ -199,11 +199,11 @@ static int omap_prefetch_enable(int cs, int fifo_th, int dma_mode,
 	if (fifo_th > PREFETCH_FIFOTHRESHOLD_MAX)
 		return -1;
 
-	if (readl(info->reg.gpmc_prefetch_control))
+	if (pete_readl("drivers/mtd/nand/raw/omap2.c:202", info->reg.gpmc_prefetch_control))
 		return -EBUSY;
 
 	/* Set the amount of bytes to be prefetched */
-	writel(u32_count, info->reg.gpmc_prefetch_config2);
+	pete_writel("drivers/mtd/nand/raw/omap2.c:206", u32_count, info->reg.gpmc_prefetch_config2);
 
 	/* Set dma/mpu mode, the prefetch read / post write and
 	 * enable the engine. Set which cs is has requested for.
@@ -211,10 +211,10 @@ static int omap_prefetch_enable(int cs, int fifo_th, int dma_mode,
 	val = ((cs << PREFETCH_CONFIG1_CS_SHIFT) |
 		PREFETCH_FIFOTHRESHOLD(fifo_th) | ENABLE_PREFETCH |
 		(dma_mode << DMA_MPU_MODE_SHIFT) | (is_write & 0x1));
-	writel(val, info->reg.gpmc_prefetch_config1);
+	pete_writel("drivers/mtd/nand/raw/omap2.c:214", val, info->reg.gpmc_prefetch_config1);
 
 	/*  Start the prefetch engine */
-	writel(0x1, info->reg.gpmc_prefetch_control);
+	pete_writel("drivers/mtd/nand/raw/omap2.c:217", 0x1, info->reg.gpmc_prefetch_control);
 
 	return 0;
 }
@@ -227,15 +227,15 @@ static int omap_prefetch_reset(int cs, struct omap_nand_info *info)
 	u32 config1;
 
 	/* check if the same module/cs is trying to reset */
-	config1 = readl(info->reg.gpmc_prefetch_config1);
+	config1 = pete_readl("drivers/mtd/nand/raw/omap2.c:230", info->reg.gpmc_prefetch_config1);
 	if (((config1 >> PREFETCH_CONFIG1_CS_SHIFT) & CS_MASK) != cs)
 		return -EINVAL;
 
 	/* Stop the PFPW engine */
-	writel(0x0, info->reg.gpmc_prefetch_control);
+	pete_writel("drivers/mtd/nand/raw/omap2.c:235", 0x0, info->reg.gpmc_prefetch_control);
 
 	/* Reset/disable the PFPW engine */
-	writel(0x0, info->reg.gpmc_prefetch_config1);
+	pete_writel("drivers/mtd/nand/raw/omap2.c:238", 0x0, info->reg.gpmc_prefetch_config1);
 
 	return 0;
 }
@@ -257,13 +257,13 @@ static void omap_hwcontrol(struct nand_chip *chip, int cmd, unsigned int ctrl)
 
 	if (cmd != NAND_CMD_NONE) {
 		if (ctrl & NAND_CLE)
-			writeb(cmd, info->reg.gpmc_nand_command);
+			pete_writeb("drivers/mtd/nand/raw/omap2.c:260", cmd, info->reg.gpmc_nand_command);
 
 		else if (ctrl & NAND_ALE)
-			writeb(cmd, info->reg.gpmc_nand_address);
+			pete_writeb("drivers/mtd/nand/raw/omap2.c:263", cmd, info->reg.gpmc_nand_address);
 
 		else /* NAND_NCE */
-			writeb(cmd, info->reg.gpmc_nand_data);
+			pete_writeb("drivers/mtd/nand/raw/omap2.c:266", cmd, info->reg.gpmc_nand_data);
 	}
 }
 
@@ -372,7 +372,7 @@ static void omap_read_buf_pref(struct nand_chip *chip, u_char *buf, int len)
 			omap_read_buf8(mtd, (u_char *)p, len);
 	} else {
 		do {
-			r_count = readl(info->reg.gpmc_prefetch_status);
+			r_count = pete_readl("drivers/mtd/nand/raw/omap2.c:375", info->reg.gpmc_prefetch_status);
 			r_count = PREFETCH_STATUS_FIFO_CNT(r_count);
 			r_count = r_count >> 2;
 			ioread32_rep(info->nand.legacy.IO_ADDR_R, p, r_count);
@@ -403,7 +403,7 @@ static void omap_write_buf_pref(struct nand_chip *chip, const u_char *buf,
 
 	/* take care of subpage writes */
 	if (len % 2 != 0) {
-		writeb(*buf, info->nand.legacy.IO_ADDR_W);
+		pete_writeb("drivers/mtd/nand/raw/omap2.c:406", *buf, info->nand.legacy.IO_ADDR_W);
 		p = (u16 *)(buf + 1);
 		len--;
 	}
@@ -419,7 +419,7 @@ static void omap_write_buf_pref(struct nand_chip *chip, const u_char *buf,
 			omap_write_buf8(mtd, (u_char *)p, len);
 	} else {
 		while (len) {
-			w_count = readl(info->reg.gpmc_prefetch_status);
+			w_count = pete_readl("drivers/mtd/nand/raw/omap2.c:422", info->reg.gpmc_prefetch_status);
 			w_count = PREFETCH_STATUS_FIFO_CNT(w_count);
 			w_count = w_count >> 1;
 			for (i = 0; (i < w_count) && len; i++, len -= 2)
@@ -431,7 +431,7 @@ static void omap_write_buf_pref(struct nand_chip *chip, const u_char *buf,
 					msecs_to_jiffies(OMAP_NAND_TIMEOUT_MS));
 		do {
 			cpu_relax();
-			val = readl(info->reg.gpmc_prefetch_status);
+			val = pete_readl("drivers/mtd/nand/raw/omap2.c:434", info->reg.gpmc_prefetch_status);
 			val = PREFETCH_STATUS_COUNT(val);
 		} while (val && (tim++ < limit));
 
@@ -508,7 +508,7 @@ static inline int omap_nand_dma_transfer(struct mtd_info *mtd, void *addr,
 
 	do {
 		cpu_relax();
-		val = readl(info->reg.gpmc_prefetch_status);
+		val = pete_readl("drivers/mtd/nand/raw/omap2.c:511", info->reg.gpmc_prefetch_status);
 		val = PREFETCH_STATUS_COUNT(val);
 	} while (val && (tim++ < limit));
 
@@ -576,7 +576,7 @@ static irqreturn_t omap_nand_irq(int this_irq, void *dev)
 	struct omap_nand_info *info = (struct omap_nand_info *) dev;
 	u32 bytes;
 
-	bytes = readl(info->reg.gpmc_prefetch_status);
+	bytes = pete_readl("drivers/mtd/nand/raw/omap2.c:579", info->reg.gpmc_prefetch_status);
 	bytes = PREFETCH_STATUS_FIFO_CNT(bytes);
 	bytes = bytes  & 0xFFFC; /* io in multiple of 4 bytes */
 	if (info->iomode == OMAP_NAND_IO_WRITE) { /* checks for write io */
@@ -703,7 +703,7 @@ static void omap_write_buf_irq_pref(struct nand_chip *chip, const u_char *buf,
 	tim = 0;
 	limit = (loops_per_jiffy *  msecs_to_jiffies(OMAP_NAND_TIMEOUT_MS));
 	do {
-		val = readl(info->reg.gpmc_prefetch_status);
+		val = pete_readl("drivers/mtd/nand/raw/omap2.c:706", info->reg.gpmc_prefetch_status);
 		val = PREFETCH_STATUS_COUNT(val);
 		cpu_relax();
 	} while (val && (tim++ < limit));
@@ -928,12 +928,12 @@ static int omap_calculate_ecc(struct nand_chip *chip, const u_char *dat,
 	struct omap_nand_info *info = mtd_to_omap(nand_to_mtd(chip));
 	u32 val;
 
-	val = readl(info->reg.gpmc_ecc_config);
+	val = pete_readl("drivers/mtd/nand/raw/omap2.c:931", info->reg.gpmc_ecc_config);
 	if (((val >> ECC_CONFIG_CS_SHIFT) & CS_MASK) != info->gpmc_cs)
 		return -EINVAL;
 
 	/* read ecc result */
-	val = readl(info->reg.gpmc_ecc1_result);
+	val = pete_readl("drivers/mtd/nand/raw/omap2.c:936", info->reg.gpmc_ecc1_result);
 	*ecc_code++ = val;          /* P128e, ..., P1e */
 	*ecc_code++ = val >> 16;    /* P128o, ..., P1o */
 	/* P2048o, P1024o, P512o, P256o, P2048e, P1024e, P512e, P256e */
@@ -955,20 +955,20 @@ static void omap_enable_hwecc(struct nand_chip *chip, int mode)
 
 	/* clear ecc and enable bits */
 	val = ECCCLEAR | ECC1;
-	writel(val, info->reg.gpmc_ecc_control);
+	pete_writel("drivers/mtd/nand/raw/omap2.c:958", val, info->reg.gpmc_ecc_control);
 
 	/* program ecc and result sizes */
 	val = ((((info->nand.ecc.size >> 1) - 1) << ECCSIZE1_SHIFT) |
 			 ECC1RESULTSIZE);
-	writel(val, info->reg.gpmc_ecc_size_config);
+	pete_writel("drivers/mtd/nand/raw/omap2.c:963", val, info->reg.gpmc_ecc_size_config);
 
 	switch (mode) {
 	case NAND_ECC_READ:
 	case NAND_ECC_WRITE:
-		writel(ECCCLEAR | ECC1, info->reg.gpmc_ecc_control);
+		pete_writel("drivers/mtd/nand/raw/omap2.c:968", ECCCLEAR | ECC1, info->reg.gpmc_ecc_control);
 		break;
 	case NAND_ECC_READSYN:
-		writel(ECCCLEAR, info->reg.gpmc_ecc_control);
+		pete_writel("drivers/mtd/nand/raw/omap2.c:971", ECCCLEAR, info->reg.gpmc_ecc_control);
 		break;
 	default:
 		dev_info(&info->pdev->dev,
@@ -978,7 +978,7 @@ static void omap_enable_hwecc(struct nand_chip *chip, int mode)
 
 	/* (ECC 16 or 8 bit col) | ( CS  )  | ECC Enable */
 	val = (dev_width << 7) | (info->gpmc_cs << 1) | (0x1);
-	writel(val, info->reg.gpmc_ecc_config);
+	pete_writel("drivers/mtd/nand/raw/omap2.c:981", val, info->reg.gpmc_ecc_config);
 }
 
 /**
@@ -1000,15 +1000,15 @@ static int omap_wait(struct nand_chip *this)
 
 	timeo += msecs_to_jiffies(400);
 
-	writeb(NAND_CMD_STATUS & 0xFF, info->reg.gpmc_nand_command);
+	pete_writeb("drivers/mtd/nand/raw/omap2.c:1003", NAND_CMD_STATUS & 0xFF, info->reg.gpmc_nand_command);
 	while (time_before(jiffies, timeo)) {
-		status = readb(info->reg.gpmc_nand_data);
+		status = pete_readb("drivers/mtd/nand/raw/omap2.c:1005", info->reg.gpmc_nand_data);
 		if (status & NAND_STATUS_READY)
 			break;
 		cond_resched();
 	}
 
-	status = readb(info->reg.gpmc_nand_data);
+	status = pete_readb("drivers/mtd/nand/raw/omap2.c:1011", info->reg.gpmc_nand_data);
 	return status;
 }
 
@@ -1105,11 +1105,11 @@ static void __maybe_unused omap_enable_hwecc_bch(struct nand_chip *chip,
 		return;
 	}
 
-	writel(ECC1, info->reg.gpmc_ecc_control);
+	pete_writel("drivers/mtd/nand/raw/omap2.c:1108", ECC1, info->reg.gpmc_ecc_control);
 
 	/* Configure ecc size for BCH */
 	val = (ecc_size1 << ECCSIZE1_SHIFT) | (ecc_size0 << ECCSIZE0_SHIFT);
-	writel(val, info->reg.gpmc_ecc_size_config);
+	pete_writel("drivers/mtd/nand/raw/omap2.c:1112", val, info->reg.gpmc_ecc_size_config);
 
 	dev_width = (chip->options & NAND_BUSWIDTH_16) ? 1 : 0;
 
@@ -1122,10 +1122,10 @@ static void __maybe_unused omap_enable_hwecc_bch(struct nand_chip *chip,
 	       (info->gpmc_cs            <<  1) | /* ECC CS */
 	       (0x1));                            /* enable ECC */
 
-	writel(val, info->reg.gpmc_ecc_config);
+	pete_writel("drivers/mtd/nand/raw/omap2.c:1125", val, info->reg.gpmc_ecc_config);
 
 	/* Clear ecc and enable bits */
-	writel(ECCCLEAR | ECC1, info->reg.gpmc_ecc_control);
+	pete_writel("drivers/mtd/nand/raw/omap2.c:1128", ECCCLEAR | ECC1, info->reg.gpmc_ecc_control);
 }
 
 static u8  bch4_polynomial[] = {0x28, 0x13, 0xcc, 0x39, 0x96, 0xac, 0x7f};
@@ -1157,10 +1157,10 @@ static int _omap_calculate_ecc_bch(struct mtd_info *mtd,
 	switch (info->ecc_opt) {
 	case OMAP_ECC_BCH8_CODE_HW_DETECTION_SW:
 	case OMAP_ECC_BCH8_CODE_HW:
-		bch_val1 = readl(gpmc_regs->gpmc_bch_result0[i]);
-		bch_val2 = readl(gpmc_regs->gpmc_bch_result1[i]);
-		bch_val3 = readl(gpmc_regs->gpmc_bch_result2[i]);
-		bch_val4 = readl(gpmc_regs->gpmc_bch_result3[i]);
+		bch_val1 = pete_readl("drivers/mtd/nand/raw/omap2.c:1160", gpmc_regs->gpmc_bch_result0[i]);
+		bch_val2 = pete_readl("drivers/mtd/nand/raw/omap2.c:1161", gpmc_regs->gpmc_bch_result1[i]);
+		bch_val3 = pete_readl("drivers/mtd/nand/raw/omap2.c:1162", gpmc_regs->gpmc_bch_result2[i]);
+		bch_val4 = pete_readl("drivers/mtd/nand/raw/omap2.c:1163", gpmc_regs->gpmc_bch_result3[i]);
 		*ecc_code++ = (bch_val4 & 0xFF);
 		*ecc_code++ = ((bch_val3 >> 24) & 0xFF);
 		*ecc_code++ = ((bch_val3 >> 16) & 0xFF);
@@ -1177,8 +1177,8 @@ static int _omap_calculate_ecc_bch(struct mtd_info *mtd,
 		break;
 	case OMAP_ECC_BCH4_CODE_HW_DETECTION_SW:
 	case OMAP_ECC_BCH4_CODE_HW:
-		bch_val1 = readl(gpmc_regs->gpmc_bch_result0[i]);
-		bch_val2 = readl(gpmc_regs->gpmc_bch_result1[i]);
+		bch_val1 = pete_readl("drivers/mtd/nand/raw/omap2.c:1180", gpmc_regs->gpmc_bch_result0[i]);
+		bch_val2 = pete_readl("drivers/mtd/nand/raw/omap2.c:1181", gpmc_regs->gpmc_bch_result1[i]);
 		*ecc_code++ = ((bch_val2 >> 12) & 0xFF);
 		*ecc_code++ = ((bch_val2 >> 4) & 0xFF);
 		*ecc_code++ = ((bch_val2 & 0xF) << 4) |
@@ -1189,35 +1189,35 @@ static int _omap_calculate_ecc_bch(struct mtd_info *mtd,
 		*ecc_code++ = ((bch_val1 & 0xF) << 4);
 		break;
 	case OMAP_ECC_BCH16_CODE_HW:
-		val = readl(gpmc_regs->gpmc_bch_result6[i]);
+		val = pete_readl("drivers/mtd/nand/raw/omap2.c:1192", gpmc_regs->gpmc_bch_result6[i]);
 		ecc_code[0]  = ((val >>  8) & 0xFF);
 		ecc_code[1]  = ((val >>  0) & 0xFF);
-		val = readl(gpmc_regs->gpmc_bch_result5[i]);
+		val = pete_readl("drivers/mtd/nand/raw/omap2.c:1195", gpmc_regs->gpmc_bch_result5[i]);
 		ecc_code[2]  = ((val >> 24) & 0xFF);
 		ecc_code[3]  = ((val >> 16) & 0xFF);
 		ecc_code[4]  = ((val >>  8) & 0xFF);
 		ecc_code[5]  = ((val >>  0) & 0xFF);
-		val = readl(gpmc_regs->gpmc_bch_result4[i]);
+		val = pete_readl("drivers/mtd/nand/raw/omap2.c:1200", gpmc_regs->gpmc_bch_result4[i]);
 		ecc_code[6]  = ((val >> 24) & 0xFF);
 		ecc_code[7]  = ((val >> 16) & 0xFF);
 		ecc_code[8]  = ((val >>  8) & 0xFF);
 		ecc_code[9]  = ((val >>  0) & 0xFF);
-		val = readl(gpmc_regs->gpmc_bch_result3[i]);
+		val = pete_readl("drivers/mtd/nand/raw/omap2.c:1205", gpmc_regs->gpmc_bch_result3[i]);
 		ecc_code[10] = ((val >> 24) & 0xFF);
 		ecc_code[11] = ((val >> 16) & 0xFF);
 		ecc_code[12] = ((val >>  8) & 0xFF);
 		ecc_code[13] = ((val >>  0) & 0xFF);
-		val = readl(gpmc_regs->gpmc_bch_result2[i]);
+		val = pete_readl("drivers/mtd/nand/raw/omap2.c:1210", gpmc_regs->gpmc_bch_result2[i]);
 		ecc_code[14] = ((val >> 24) & 0xFF);
 		ecc_code[15] = ((val >> 16) & 0xFF);
 		ecc_code[16] = ((val >>  8) & 0xFF);
 		ecc_code[17] = ((val >>  0) & 0xFF);
-		val = readl(gpmc_regs->gpmc_bch_result1[i]);
+		val = pete_readl("drivers/mtd/nand/raw/omap2.c:1215", gpmc_regs->gpmc_bch_result1[i]);
 		ecc_code[18] = ((val >> 24) & 0xFF);
 		ecc_code[19] = ((val >> 16) & 0xFF);
 		ecc_code[20] = ((val >>  8) & 0xFF);
 		ecc_code[21] = ((val >>  0) & 0xFF);
-		val = readl(gpmc_regs->gpmc_bch_result0[i]);
+		val = pete_readl("drivers/mtd/nand/raw/omap2.c:1220", gpmc_regs->gpmc_bch_result0[i]);
 		ecc_code[22] = ((val >> 24) & 0xFF);
 		ecc_code[23] = ((val >> 16) & 0xFF);
 		ecc_code[24] = ((val >>  8) & 0xFF);
@@ -1292,7 +1292,7 @@ static int omap_calculate_ecc_bch_multi(struct mtd_info *mtd,
 	unsigned long nsectors;
 	int i, ret;
 
-	nsectors = ((readl(info->reg.gpmc_ecc_config) >> 4) & 0x7) + 1;
+	nsectors = ((pete_readl("drivers/mtd/nand/raw/omap2.c:1295", info->reg.gpmc_ecc_config) >> 4) & 0x7) + 1;
 	for (i = 0; i < nsectors; i++) {
 		ret = _omap_calculate_ecc_bch(mtd, dat, ecc_calc, i);
 		if (ret)

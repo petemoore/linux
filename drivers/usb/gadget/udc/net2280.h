@@ -23,16 +23,16 @@
 
 static inline u32 get_idx_reg(struct net2280_regs __iomem *regs, u32 index)
 {
-	writel(index, &regs->idxaddr);
+	pete_writel("drivers/usb/gadget/udc/net2280.h:26", index, &regs->idxaddr);
 	/* NOTE:  synchs device/cpu memory views */
-	return readl(&regs->idxdata);
+	return pete_readl("drivers/usb/gadget/udc/net2280.h:28", &regs->idxdata);
 }
 
 static inline void
 set_idx_reg(struct net2280_regs __iomem *regs, u32 index, u32 value)
 {
-	writel(index, &regs->idxaddr);
-	writel(value, &regs->idxdata);
+	pete_writel("drivers/usb/gadget/udc/net2280.h:34", index, &regs->idxaddr);
+	pete_writel("drivers/usb/gadget/udc/net2280.h:35", value, &regs->idxdata);
 	/* posted, may not be visible yet */
 }
 
@@ -114,7 +114,7 @@ struct net2280_ep {
 static inline void allow_status(struct net2280_ep *ep)
 {
 	/* ep0 only */
-	writel(BIT(CLEAR_CONTROL_STATUS_PHASE_HANDSHAKE) |
+	pete_writel("drivers/usb/gadget/udc/net2280.h:117", BIT(CLEAR_CONTROL_STATUS_PHASE_HANDSHAKE) |
 		BIT(CLEAR_NAK_OUT_PACKETS) |
 		BIT(CLEAR_NAK_OUT_PACKETS_MODE),
 		&ep->regs->ep_rsp);
@@ -128,7 +128,7 @@ static inline void allow_status_338x(struct net2280_ep *ep)
 	 * packet arrived. While set, the chip automatically NAKs the host's
 	 * Status Phase tokens.
 	 */
-	writel(BIT(CLEAR_CONTROL_STATUS_PHASE_HANDSHAKE), &ep->regs->ep_rsp);
+	pete_writel("drivers/usb/gadget/udc/net2280.h:131", BIT(CLEAR_CONTROL_STATUS_PHASE_HANDSHAKE), &ep->regs->ep_rsp);
 
 	ep->stopped = 1;
 
@@ -189,7 +189,7 @@ struct net2280 {
 static inline void set_halt(struct net2280_ep *ep)
 {
 	/* ep0 and bulk/intr endpoints */
-	writel(BIT(CLEAR_CONTROL_STATUS_PHASE_HANDSHAKE) |
+	pete_writel("drivers/usb/gadget/udc/net2280.h:192", BIT(CLEAR_CONTROL_STATUS_PHASE_HANDSHAKE) |
 		/* set NAK_OUT for erratum 0114 */
 		((ep->dev->chiprev == CHIPREV_1) << SET_NAK_OUT_PACKETS) |
 		BIT(SET_ENDPOINT_HALT),
@@ -199,7 +199,7 @@ static inline void set_halt(struct net2280_ep *ep)
 static inline void clear_halt(struct net2280_ep *ep)
 {
 	/* ep0 and bulk/intr endpoints */
-	writel(BIT(CLEAR_ENDPOINT_HALT) |
+	pete_writel("drivers/usb/gadget/udc/net2280.h:202", BIT(CLEAR_ENDPOINT_HALT) |
 		BIT(CLEAR_ENDPOINT_TOGGLE) |
 		    /*
 		     * unless the gadget driver left a short packet in the
@@ -251,7 +251,7 @@ static inline void clear_halt(struct net2280_ep *ep)
 static inline void net2280_led_init(struct net2280 *dev)
 {
 	/* LED3 (green) is on during USB activity. note erratum 0113. */
-	writel(BIT(GPIO3_LED_SELECT) |
+	pete_writel("drivers/usb/gadget/udc/net2280.h:254", BIT(GPIO3_LED_SELECT) |
 		BIT(GPIO3_OUTPUT_ENABLE) |
 		BIT(GPIO2_OUTPUT_ENABLE) |
 		BIT(GPIO1_OUTPUT_ENABLE) |
@@ -263,7 +263,7 @@ static inline void net2280_led_init(struct net2280 *dev)
 static inline
 void net2280_led_speed(struct net2280 *dev, enum usb_device_speed speed)
 {
-	u32	val = readl(&dev->regs->gpioctl);
+	u32	val = pete_readl("drivers/usb/gadget/udc/net2280.h:266", &dev->regs->gpioctl);
 	switch (speed) {
 	case USB_SPEED_SUPER:		/* green + red */
 		val |= BIT(GPIO0_DATA) | BIT(GPIO1_DATA);
@@ -280,26 +280,26 @@ void net2280_led_speed(struct net2280 *dev, enum usb_device_speed speed)
 		val &= ~(BIT(GPIO1_DATA) | BIT(GPIO0_DATA));
 		break;
 	}
-	writel(val, &dev->regs->gpioctl);
+	pete_writel("drivers/usb/gadget/udc/net2280.h:283", val, &dev->regs->gpioctl);
 }
 
 /* indicate power with LED 2 */
 static inline void net2280_led_active(struct net2280 *dev, int is_active)
 {
-	u32	val = readl(&dev->regs->gpioctl);
+	u32	val = pete_readl("drivers/usb/gadget/udc/net2280.h:289", &dev->regs->gpioctl);
 
 	/* FIXME this LED never seems to turn on.*/
 	if (is_active)
 		val |= GPIO2_DATA;
 	else
 		val &= ~GPIO2_DATA;
-	writel(val, &dev->regs->gpioctl);
+	pete_writel("drivers/usb/gadget/udc/net2280.h:296", val, &dev->regs->gpioctl);
 }
 
 static inline void net2280_led_shutdown(struct net2280 *dev)
 {
 	/* turn off all four GPIO*_DATA bits */
-	writel(readl(&dev->regs->gpioctl) & ~0x0f,
+	pete_writel("drivers/usb/gadget/udc/net2280.h:302", pete_readl("drivers/usb/gadget/udc/net2280.h:302", &dev->regs->gpioctl) & ~0x0f,
 			&dev->regs->gpioctl);
 }
 
@@ -333,29 +333,29 @@ static inline void net2280_led_shutdown(struct net2280 *dev)
 static inline void set_fifo_bytecount(struct net2280_ep *ep, unsigned count)
 {
 	if (ep->dev->pdev->vendor == 0x17cc)
-		writeb(count, 2 + (u8 __iomem *) &ep->regs->ep_cfg);
+		pete_writeb("drivers/usb/gadget/udc/net2280.h:336", count, 2 + (u8 __iomem *) &ep->regs->ep_cfg);
 	else{
-		u32 tmp = readl(&ep->cfg->ep_cfg) &
+		u32 tmp = pete_readl("drivers/usb/gadget/udc/net2280.h:338", &ep->cfg->ep_cfg) &
 					(~(0x07 << EP_FIFO_BYTE_COUNT));
-		writel(tmp | (count << EP_FIFO_BYTE_COUNT), &ep->cfg->ep_cfg);
+		pete_writel("drivers/usb/gadget/udc/net2280.h:340", tmp | (count << EP_FIFO_BYTE_COUNT), &ep->cfg->ep_cfg);
 	}
 }
 
 static inline void start_out_naking(struct net2280_ep *ep)
 {
 	/* NOTE:  hardware races lurk here, and PING protocol issues */
-	writel(BIT(SET_NAK_OUT_PACKETS), &ep->regs->ep_rsp);
+	pete_writel("drivers/usb/gadget/udc/net2280.h:347", BIT(SET_NAK_OUT_PACKETS), &ep->regs->ep_rsp);
 	/* synch with device */
-	readl(&ep->regs->ep_rsp);
+	pete_readl("drivers/usb/gadget/udc/net2280.h:349", &ep->regs->ep_rsp);
 }
 
 static inline void stop_out_naking(struct net2280_ep *ep)
 {
 	u32	tmp;
 
-	tmp = readl(&ep->regs->ep_stat);
+	tmp = pete_readl("drivers/usb/gadget/udc/net2280.h:356", &ep->regs->ep_stat);
 	if ((tmp & BIT(NAK_OUT_PACKETS)) != 0)
-		writel(BIT(CLEAR_NAK_OUT_PACKETS), &ep->regs->ep_rsp);
+		pete_writel("drivers/usb/gadget/udc/net2280.h:358", BIT(CLEAR_NAK_OUT_PACKETS), &ep->regs->ep_rsp);
 }
 
 

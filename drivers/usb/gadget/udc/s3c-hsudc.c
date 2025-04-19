@@ -176,12 +176,12 @@ static inline struct s3c_hsudc *to_hsudc(struct usb_gadget *gadget)
 static inline void set_index(struct s3c_hsudc *hsudc, int ep_addr)
 {
 	ep_addr &= USB_ENDPOINT_NUMBER_MASK;
-	writel(ep_addr, hsudc->regs + S3C_IR);
+	pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:179", ep_addr, hsudc->regs + S3C_IR);
 }
 
 static inline void __orr32(void __iomem *ptr, u32 val)
 {
-	writel(readl(ptr) | val, ptr);
+	pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:184", pete_readl("drivers/usb/gadget/udc/s3c-hsudc.c:184", ptr) | val, ptr);
 }
 
 /**
@@ -261,11 +261,11 @@ static void s3c_hsudc_read_setup_pkt(struct s3c_hsudc *hsudc, u16 *buf)
 {
 	int count;
 
-	count = readl(hsudc->regs + S3C_BRCR);
+	count = pete_readl("drivers/usb/gadget/udc/s3c-hsudc.c:264", hsudc->regs + S3C_BRCR);
 	while (count--)
-		*buf++ = (u16)readl(hsudc->regs + S3C_BR(0));
+		*buf++ = (u16)pete_readl("drivers/usb/gadget/udc/s3c-hsudc.c:266", hsudc->regs + S3C_BR(0));
 
-	writel(S3C_EP0SR_RX_SUCCESS, hsudc->regs + S3C_EP0SR);
+	pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:268", S3C_EP0SR_RX_SUCCESS, hsudc->regs + S3C_EP0SR);
 }
 
 /**
@@ -292,9 +292,9 @@ static int s3c_hsudc_write_fifo(struct s3c_hsudc_ep *hsep,
 	length = min(length, max);
 	hsreq->req.actual += length;
 
-	writel(length, hsep->dev->regs + S3C_BWCR);
+	pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:295", length, hsep->dev->regs + S3C_BWCR);
 	for (count = 0; count < length; count += 2)
-		writel(*buf++, fifo);
+		pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:297", *buf++, fifo);
 
 	if (count != max) {
 		is_last = true;
@@ -333,7 +333,7 @@ static int s3c_hsudc_read_fifo(struct s3c_hsudc_ep *hsep,
 	u32 is_short = 0;
 
 	offset = (ep_index(hsep)) ? S3C_ESR : S3C_EP0SR;
-	csr = readl(hsudc->regs + offset);
+	csr = pete_readl("drivers/usb/gadget/udc/s3c-hsudc.c:336", hsudc->regs + offset);
 	if (!(csr & S3C_ESR_RX_SUCCESS))
 		return -EINVAL;
 
@@ -341,14 +341,14 @@ static int s3c_hsudc_read_fifo(struct s3c_hsudc_ep *hsep,
 	prefetchw(buf);
 	buflen = hsreq->req.length - hsreq->req.actual;
 
-	rcnt = readl(hsudc->regs + S3C_BRCR);
+	rcnt = pete_readl("drivers/usb/gadget/udc/s3c-hsudc.c:344", hsudc->regs + S3C_BRCR);
 	rlen = (csr & S3C_ESR_LWO) ? (rcnt * 2 - 1) : (rcnt * 2);
 
 	hsreq->req.actual += min(rlen, buflen);
 	is_short = (rlen < hsep->ep.maxpacket);
 
 	while (rcnt-- != 0) {
-		word = (u16)readl(fifo);
+		word = (u16)pete_readl("drivers/usb/gadget/udc/s3c-hsudc.c:351", fifo);
 		if (buflen) {
 			*buf++ = word;
 			buflen--;
@@ -357,7 +357,7 @@ static int s3c_hsudc_read_fifo(struct s3c_hsudc_ep *hsep,
 		}
 	}
 
-	writel(S3C_ESR_RX_SUCCESS, hsudc->regs + offset);
+	pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:360", S3C_ESR_RX_SUCCESS, hsudc->regs + offset);
 
 	if (is_short || hsreq->req.actual == hsreq->req.length) {
 		s3c_hsudc_complete_request(hsep, hsreq, 0);
@@ -381,14 +381,14 @@ static void s3c_hsudc_epin_intr(struct s3c_hsudc *hsudc, u32 ep_idx)
 	struct s3c_hsudc_req *hsreq;
 	u32 csr;
 
-	csr = readl(hsudc->regs + S3C_ESR);
+	csr = pete_readl("drivers/usb/gadget/udc/s3c-hsudc.c:384", hsudc->regs + S3C_ESR);
 	if (csr & S3C_ESR_STALL) {
-		writel(S3C_ESR_STALL, hsudc->regs + S3C_ESR);
+		pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:386", S3C_ESR_STALL, hsudc->regs + S3C_ESR);
 		return;
 	}
 
 	if (csr & S3C_ESR_TX_SUCCESS) {
-		writel(S3C_ESR_TX_SUCCESS, hsudc->regs + S3C_ESR);
+		pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:391", S3C_ESR_TX_SUCCESS, hsudc->regs + S3C_ESR);
 		if (list_empty(&hsep->queue))
 			return;
 
@@ -414,9 +414,9 @@ static void s3c_hsudc_epout_intr(struct s3c_hsudc *hsudc, u32 ep_idx)
 	struct s3c_hsudc_req *hsreq;
 	u32 csr;
 
-	csr = readl(hsudc->regs + S3C_ESR);
+	csr = pete_readl("drivers/usb/gadget/udc/s3c-hsudc.c:417", hsudc->regs + S3C_ESR);
 	if (csr & S3C_ESR_STALL) {
-		writel(S3C_ESR_STALL, hsudc->regs + S3C_ESR);
+		pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:419", S3C_ESR_STALL, hsudc->regs + S3C_ESR);
 		return;
 	}
 
@@ -460,7 +460,7 @@ static int s3c_hsudc_set_halt(struct usb_ep *_ep, int value)
 	spin_lock_irqsave(&hsudc->lock, irqflags);
 	set_index(hsudc, ep_index(hsep));
 	offset = (ep_index(hsep)) ? S3C_ECR : S3C_EP0CR;
-	ecr = readl(hsudc->regs + offset);
+	ecr = pete_readl("drivers/usb/gadget/udc/s3c-hsudc.c:463", hsudc->regs + offset);
 
 	if (value) {
 		ecr |= S3C_ECR_STALL;
@@ -471,7 +471,7 @@ static int s3c_hsudc_set_halt(struct usb_ep *_ep, int value)
 		ecr &= ~S3C_ECR_STALL;
 		hsep->stopped = hsep->wedge = 0;
 	}
-	writel(ecr, hsudc->regs + offset);
+	pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:474", ecr, hsudc->regs + offset);
 
 	if (ep_is_in(hsep) && !list_empty(&hsep->queue) && !value) {
 		hsreq = list_entry(hsep->queue.next,
@@ -643,15 +643,15 @@ static void s3c_hsudc_handle_ep0_intr(struct s3c_hsudc *hsudc)
 {
 	struct s3c_hsudc_ep *hsep = &hsudc->ep[0];
 	struct s3c_hsudc_req *hsreq;
-	u32 csr = readl(hsudc->regs + S3C_EP0SR);
+	u32 csr = pete_readl("drivers/usb/gadget/udc/s3c-hsudc.c:646", hsudc->regs + S3C_EP0SR);
 	u32 ecr;
 
 	if (csr & S3C_EP0SR_STALL) {
-		ecr = readl(hsudc->regs + S3C_EP0CR);
+		ecr = pete_readl("drivers/usb/gadget/udc/s3c-hsudc.c:650", hsudc->regs + S3C_EP0CR);
 		ecr &= ~(S3C_ECR_STALL | S3C_ECR_FLUSH);
-		writel(ecr, hsudc->regs + S3C_EP0CR);
+		pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:652", ecr, hsudc->regs + S3C_EP0CR);
 
-		writel(S3C_EP0SR_STALL, hsudc->regs + S3C_EP0SR);
+		pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:654", S3C_EP0SR_STALL, hsudc->regs + S3C_EP0SR);
 		hsep->stopped = 0;
 
 		s3c_hsudc_nuke_ep(hsep, -ECONNABORTED);
@@ -661,7 +661,7 @@ static void s3c_hsudc_handle_ep0_intr(struct s3c_hsudc *hsudc)
 	}
 
 	if (csr & S3C_EP0SR_TX_SUCCESS) {
-		writel(S3C_EP0SR_TX_SUCCESS, hsudc->regs + S3C_EP0SR);
+		pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:664", S3C_EP0SR_TX_SUCCESS, hsudc->regs + S3C_EP0SR);
 		if (ep_is_in(hsep)) {
 			if (list_empty(&hsep->queue))
 				return;
@@ -724,7 +724,7 @@ static int s3c_hsudc_ep_enable(struct usb_ep *_ep,
 
 	set_index(hsudc, hsep->bEndpointAddress);
 	ecr |= ((usb_endpoint_xfer_int(desc)) ? S3C_ECR_IEMS : S3C_ECR_DUEN);
-	writel(ecr, hsudc->regs + S3C_ECR);
+	pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:727", ecr, hsudc->regs + S3C_ECR);
 
 	hsep->stopped = hsep->wedge = 0;
 	hsep->ep.desc = desc;
@@ -847,12 +847,12 @@ static int s3c_hsudc_queue(struct usb_ep *_ep, struct usb_request *_req,
 	if (list_empty(&hsep->queue) && !hsep->stopped) {
 		offset = (ep_index(hsep)) ? S3C_ESR : S3C_EP0SR;
 		if (ep_is_in(hsep)) {
-			csr = readl(hsudc->regs + offset);
+			csr = pete_readl("drivers/usb/gadget/udc/s3c-hsudc.c:850", hsudc->regs + offset);
 			if (!(csr & S3C_ESR_TX_SUCCESS) &&
 				(s3c_hsudc_write_fifo(hsep, hsreq) == 1))
 				hsreq = NULL;
 		} else {
-			csr = readl(hsudc->regs + offset);
+			csr = pete_readl("drivers/usb/gadget/udc/s3c-hsudc.c:855", hsudc->regs + offset);
 			if ((csr & S3C_ESR_RX_SUCCESS)
 				   && (s3c_hsudc_read_fifo(hsep, hsreq) == 1))
 				hsreq = NULL;
@@ -969,7 +969,7 @@ static void s3c_hsudc_initep(struct s3c_hsudc *hsudc,
 		hsep->ep.caps.dir_out = true;
 
 	set_index(hsudc, epnum);
-	writel(hsep->ep.maxpacket, hsudc->regs + S3C_MPR);
+	pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:972", hsep->ep.maxpacket, hsudc->regs + S3C_MPR);
 }
 
 /**
@@ -996,12 +996,12 @@ static void s3c_hsudc_setup_ep(struct s3c_hsudc *hsudc)
  */
 static void s3c_hsudc_reconfig(struct s3c_hsudc *hsudc)
 {
-	writel(0xAA, hsudc->regs + S3C_EDR);
-	writel(1, hsudc->regs + S3C_EIER);
-	writel(0, hsudc->regs + S3C_TR);
-	writel(S3C_SCR_DTZIEN_EN | S3C_SCR_RRD_EN | S3C_SCR_SUS_EN |
+	pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:999", 0xAA, hsudc->regs + S3C_EDR);
+	pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:1000", 1, hsudc->regs + S3C_EIER);
+	pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:1001", 0, hsudc->regs + S3C_TR);
+	pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:1002", S3C_SCR_DTZIEN_EN | S3C_SCR_RRD_EN | S3C_SCR_SUS_EN |
 			S3C_SCR_RST_EN, hsudc->regs + S3C_SCR);
-	writel(0, hsudc->regs + S3C_EP0CR);
+	pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:1004", 0, hsudc->regs + S3C_EP0CR);
 
 	s3c_hsudc_setup_ep(hsudc);
 }
@@ -1024,8 +1024,8 @@ static irqreturn_t s3c_hsudc_irq(int irq, void *_dev)
 
 	spin_lock(&hsudc->lock);
 
-	sys_status = readl(hsudc->regs + S3C_SSR);
-	ep_intr = readl(hsudc->regs + S3C_EIR) & 0x3FF;
+	sys_status = pete_readl("drivers/usb/gadget/udc/s3c-hsudc.c:1027", hsudc->regs + S3C_SSR);
+	ep_intr = pete_readl("drivers/usb/gadget/udc/s3c-hsudc.c:1028", hsudc->regs + S3C_EIR) & 0x3FF;
 
 	if (!ep_intr && !(sys_status & S3C_SSR_DTZIEN_EN)) {
 		spin_unlock(&hsudc->lock);
@@ -1034,33 +1034,33 @@ static irqreturn_t s3c_hsudc_irq(int irq, void *_dev)
 
 	if (sys_status) {
 		if (sys_status & S3C_SSR_VBUSON)
-			writel(S3C_SSR_VBUSON, hsudc->regs + S3C_SSR);
+			pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:1037", S3C_SSR_VBUSON, hsudc->regs + S3C_SSR);
 
 		if (sys_status & S3C_SSR_ERR)
-			writel(S3C_SSR_ERR, hsudc->regs + S3C_SSR);
+			pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:1040", S3C_SSR_ERR, hsudc->regs + S3C_SSR);
 
 		if (sys_status & S3C_SSR_SDE) {
-			writel(S3C_SSR_SDE, hsudc->regs + S3C_SSR);
+			pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:1043", S3C_SSR_SDE, hsudc->regs + S3C_SSR);
 			hsudc->gadget.speed = (sys_status & S3C_SSR_HSP) ?
 				USB_SPEED_HIGH : USB_SPEED_FULL;
 		}
 
 		if (sys_status & S3C_SSR_SUSPEND) {
-			writel(S3C_SSR_SUSPEND, hsudc->regs + S3C_SSR);
+			pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:1049", S3C_SSR_SUSPEND, hsudc->regs + S3C_SSR);
 			if (hsudc->gadget.speed != USB_SPEED_UNKNOWN
 				&& hsudc->driver && hsudc->driver->suspend)
 				hsudc->driver->suspend(&hsudc->gadget);
 		}
 
 		if (sys_status & S3C_SSR_RESUME) {
-			writel(S3C_SSR_RESUME, hsudc->regs + S3C_SSR);
+			pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:1056", S3C_SSR_RESUME, hsudc->regs + S3C_SSR);
 			if (hsudc->gadget.speed != USB_SPEED_UNKNOWN
 				&& hsudc->driver && hsudc->driver->resume)
 				hsudc->driver->resume(&hsudc->gadget);
 		}
 
 		if (sys_status & S3C_SSR_RESET) {
-			writel(S3C_SSR_RESET, hsudc->regs + S3C_SSR);
+			pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:1063", S3C_SSR_RESET, hsudc->regs + S3C_SSR);
 			for (ep_idx = 0; ep_idx < hsudc->pd->epnum; ep_idx++) {
 				hsep = &hsudc->ep[ep_idx];
 				hsep->stopped = 1;
@@ -1072,7 +1072,7 @@ static irqreturn_t s3c_hsudc_irq(int irq, void *_dev)
 	}
 
 	if (ep_intr & S3C_EIR_EP0) {
-		writel(S3C_EIR_EP0, hsudc->regs + S3C_EIR);
+		pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:1075", S3C_EIR_EP0, hsudc->regs + S3C_EIR);
 		set_index(hsudc, 0);
 		s3c_hsudc_handle_ep0_intr(hsudc);
 	}
@@ -1083,7 +1083,7 @@ static irqreturn_t s3c_hsudc_irq(int irq, void *_dev)
 		if (ep_intr & 1)  {
 			hsep = &hsudc->ep[ep_idx];
 			set_index(hsudc, ep_idx);
-			writel(1 << ep_idx, hsudc->regs + S3C_EIR);
+			pete_writel("drivers/usb/gadget/udc/s3c-hsudc.c:1086", 1 << ep_idx, hsudc->regs + S3C_EIR);
 			if (ep_is_in(hsep))
 				s3c_hsudc_epin_intr(hsudc, ep_idx);
 			else
@@ -1185,7 +1185,7 @@ static int s3c_hsudc_stop(struct usb_gadget *gadget)
 
 static inline u32 s3c_hsudc_read_frameno(struct s3c_hsudc *hsudc)
 {
-	return readl(hsudc->regs + S3C_FNR) & 0x3FF;
+	return pete_readl("drivers/usb/gadget/udc/s3c-hsudc.c:1188", hsudc->regs + S3C_FNR) & 0x3FF;
 }
 
 static int s3c_hsudc_gadget_getframe(struct usb_gadget *gadget)

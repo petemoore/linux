@@ -489,7 +489,7 @@ static u32 mlxbf_smbus_poll(void __iomem *io, u32 addr, u32 mask,
 	timeout = (timeout / MLXBF_I2C_POLL_FREQ_IN_USEC) + 1;
 
 	do {
-		bits = readl(io + addr) & mask;
+		bits = pete_readl("drivers/i2c/busses/i2c-mlxbf.c:492", io + addr) & mask;
 		if (eq_zero ? bits == 0 : bits != 0)
 			return eq_zero ? 1 : bits;
 		udelay(MLXBF_I2C_POLL_FREQ_IN_USEC);
@@ -531,7 +531,7 @@ static bool mlxbf_i2c_smbus_master_lock(struct mlxbf_i2c_priv *priv)
 static void mlxbf_i2c_smbus_master_unlock(struct mlxbf_i2c_priv *priv)
 {
 	/* Clear the gw to clear the lock */
-	writel(0, priv->smbus->io + MLXBF_I2C_SMBUS_MASTER_GW);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:534", 0, priv->smbus->io + MLXBF_I2C_SMBUS_MASTER_GW);
 }
 
 static bool mlxbf_i2c_smbus_transaction_success(u32 master_status,
@@ -576,7 +576,7 @@ static int mlxbf_i2c_smbus_check_status(struct mlxbf_i2c_priv *priv)
 			 MLXBF_I2C_SMBUS_TIMEOUT);
 
 	/* Read cause status bits. */
-	cause_status_bits = readl(priv->mst_cause->io +
+	cause_status_bits = pete_readl("drivers/i2c/busses/i2c-mlxbf.c:579", priv->mst_cause->io +
 					MLXBF_I2C_CAUSE_ARBITER);
 	cause_status_bits &= MLXBF_I2C_CAUSE_MASTER_ARBITER_BITS_MASK;
 
@@ -584,7 +584,7 @@ static int mlxbf_i2c_smbus_check_status(struct mlxbf_i2c_priv *priv)
 	 * Parse both Cause and Master GW bits, then return transaction status.
 	 */
 
-	master_status_bits = readl(priv->smbus->io +
+	master_status_bits = pete_readl("drivers/i2c/busses/i2c-mlxbf.c:587", priv->smbus->io +
 					MLXBF_I2C_SMBUS_MASTER_STATUS);
 	master_status_bits &= MLXBF_I2C_SMBUS_MASTER_STATUS_MASK;
 
@@ -680,16 +680,16 @@ static int mlxbf_i2c_smbus_enable(struct mlxbf_i2c_priv *priv, u8 slave,
 	command |= rol32(pec_en, MLXBF_I2C_MASTER_SEND_PEC_SHIFT);
 
 	/* Clear status bits. */
-	writel(0x0, priv->smbus->io + MLXBF_I2C_SMBUS_MASTER_STATUS);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:683", 0x0, priv->smbus->io + MLXBF_I2C_SMBUS_MASTER_STATUS);
 	/* Set the cause data. */
-	writel(~0x0, priv->mst_cause->io + MLXBF_I2C_CAUSE_OR_CLEAR);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:685", ~0x0, priv->mst_cause->io + MLXBF_I2C_CAUSE_OR_CLEAR);
 	/* Zero PEC byte. */
-	writel(0x0, priv->smbus->io + MLXBF_I2C_SMBUS_MASTER_PEC);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:687", 0x0, priv->smbus->io + MLXBF_I2C_SMBUS_MASTER_PEC);
 	/* Zero byte count. */
-	writel(0x0, priv->smbus->io + MLXBF_I2C_SMBUS_RS_BYTES);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:689", 0x0, priv->smbus->io + MLXBF_I2C_SMBUS_RS_BYTES);
 
 	/* GW activation. */
-	writel(command, priv->smbus->io + MLXBF_I2C_SMBUS_MASTER_GW);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:692", command, priv->smbus->io + MLXBF_I2C_SMBUS_MASTER_GW);
 
 	/*
 	 * Poll master status and check status bits. An ACK is sent when
@@ -819,7 +819,7 @@ mlxbf_i2c_smbus_start_transaction(struct mlxbf_i2c_priv *priv,
 		 * needs to be 'manually' reset. This should be removed in
 		 * next tag integration.
 		 */
-		writel(MLXBF_I2C_SMBUS_MASTER_FSM_PS_STATE_MASK,
+		pete_writel("drivers/i2c/busses/i2c-mlxbf.c:822", MLXBF_I2C_SMBUS_MASTER_FSM_PS_STATE_MASK,
 			priv->smbus->io + MLXBF_I2C_SMBUS_MASTER_FSM);
 	}
 
@@ -1112,7 +1112,7 @@ static void mlxbf_i2c_set_timings(struct mlxbf_i2c_priv *priv,
 	timer |= mlxbf_i2c_set_timer(priv, timings->scl_low,
 				     false, MLXBF_I2C_MASK_16,
 				     MLXBF_I2C_SHIFT_16);
-	writel(timer, priv->smbus->io +
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1115", timer, priv->smbus->io +
 		MLXBF_I2C_SMBUS_TIMER_SCL_LOW_SCL_HIGH);
 
 	timer = mlxbf_i2c_set_timer(priv, timings->sda_rise, false,
@@ -1123,34 +1123,34 @@ static void mlxbf_i2c_set_timings(struct mlxbf_i2c_priv *priv,
 				     MLXBF_I2C_MASK_8, MLXBF_I2C_SHIFT_16);
 	timer |= mlxbf_i2c_set_timer(priv, timings->scl_fall, false,
 				     MLXBF_I2C_MASK_8, MLXBF_I2C_SHIFT_24);
-	writel(timer, priv->smbus->io +
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1126", timer, priv->smbus->io +
 		MLXBF_I2C_SMBUS_TIMER_FALL_RISE_SPIKE);
 
 	timer = mlxbf_i2c_set_timer(priv, timings->hold_start, true,
 				    MLXBF_I2C_MASK_16, MLXBF_I2C_SHIFT_0);
 	timer |= mlxbf_i2c_set_timer(priv, timings->hold_data, true,
 				     MLXBF_I2C_MASK_16, MLXBF_I2C_SHIFT_16);
-	writel(timer, priv->smbus->io + MLXBF_I2C_SMBUS_TIMER_THOLD);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1133", timer, priv->smbus->io + MLXBF_I2C_SMBUS_TIMER_THOLD);
 
 	timer = mlxbf_i2c_set_timer(priv, timings->setup_start, true,
 				    MLXBF_I2C_MASK_16, MLXBF_I2C_SHIFT_0);
 	timer |= mlxbf_i2c_set_timer(priv, timings->setup_stop, true,
 				     MLXBF_I2C_MASK_16, MLXBF_I2C_SHIFT_16);
-	writel(timer, priv->smbus->io +
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1139", timer, priv->smbus->io +
 		MLXBF_I2C_SMBUS_TIMER_TSETUP_START_STOP);
 
 	timer = mlxbf_i2c_set_timer(priv, timings->setup_data, true,
 				    MLXBF_I2C_MASK_16, MLXBF_I2C_SHIFT_0);
-	writel(timer, priv->smbus->io + MLXBF_I2C_SMBUS_TIMER_TSETUP_DATA);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1144", timer, priv->smbus->io + MLXBF_I2C_SMBUS_TIMER_TSETUP_DATA);
 
 	timer = mlxbf_i2c_set_timer(priv, timings->buf, false,
 				    MLXBF_I2C_MASK_16, MLXBF_I2C_SHIFT_0);
 	timer |= mlxbf_i2c_set_timer(priv, timings->thigh_max, false,
 				     MLXBF_I2C_MASK_16, MLXBF_I2C_SHIFT_16);
-	writel(timer, priv->smbus->io + MLXBF_I2C_SMBUS_THIGH_MAX_TBUF);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1150", timer, priv->smbus->io + MLXBF_I2C_SMBUS_THIGH_MAX_TBUF);
 
 	timer = timings->timeout;
-	writel(timer, priv->smbus->io + MLXBF_I2C_SMBUS_SCL_LOW_TIMEOUT);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1153", timer, priv->smbus->io + MLXBF_I2C_SMBUS_SCL_LOW_TIMEOUT);
 }
 
 enum mlxbf_i2c_timings_config {
@@ -1422,15 +1422,15 @@ static int mlxbf_i2c_init_master(struct platform_device *pdev,
 	 * platform firmware; disabling the bus might compromise the system
 	 * functionality.
 	 */
-	config_reg = readl(gpio_res->io + MLXBF_I2C_GPIO_0_FUNC_EN_0);
+	config_reg = pete_readl("drivers/i2c/busses/i2c-mlxbf.c:1425", gpio_res->io + MLXBF_I2C_GPIO_0_FUNC_EN_0);
 	config_reg = MLXBF_I2C_GPIO_SMBUS_GW_ASSERT_PINS(priv->bus,
 							 config_reg);
-	writel(config_reg, gpio_res->io + MLXBF_I2C_GPIO_0_FUNC_EN_0);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1428", config_reg, gpio_res->io + MLXBF_I2C_GPIO_0_FUNC_EN_0);
 
-	config_reg = readl(gpio_res->io + MLXBF_I2C_GPIO_0_FORCE_OE_EN);
+	config_reg = pete_readl("drivers/i2c/busses/i2c-mlxbf.c:1430", gpio_res->io + MLXBF_I2C_GPIO_0_FORCE_OE_EN);
 	config_reg = MLXBF_I2C_GPIO_SMBUS_GW_RESET_PINS(priv->bus,
 							config_reg);
-	writel(config_reg, gpio_res->io + MLXBF_I2C_GPIO_0_FORCE_OE_EN);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1433", config_reg, gpio_res->io + MLXBF_I2C_GPIO_0_FORCE_OE_EN);
 
 	mutex_unlock(gpio_res->lock);
 
@@ -1444,7 +1444,7 @@ static u64 mlxbf_i2c_calculate_freq_from_tyu(struct mlxbf_i2c_resource *corepll_
 	u32 corepll_val;
 	u16 core_f;
 
-	corepll_val = readl(corepll_res->io + MLXBF_I2C_CORE_PLL_REG1);
+	corepll_val = pete_readl("drivers/i2c/busses/i2c-mlxbf.c:1447", corepll_res->io + MLXBF_I2C_CORE_PLL_REG1);
 
 	/* Get Core PLL configuration bits. */
 	core_f = FIELD_GET(MLXBF_I2C_COREPLL_CORE_F_TYU_MASK, corepll_val);
@@ -1474,8 +1474,8 @@ static u64 mlxbf_i2c_calculate_freq_from_yu(struct mlxbf_i2c_resource *corepll_r
 	u8 core_od, core_r;
 	u32 core_f;
 
-	corepll_reg1_val = readl(corepll_res->io + MLXBF_I2C_CORE_PLL_REG1);
-	corepll_reg2_val = readl(corepll_res->io + MLXBF_I2C_CORE_PLL_REG2);
+	corepll_reg1_val = pete_readl("drivers/i2c/busses/i2c-mlxbf.c:1477", corepll_res->io + MLXBF_I2C_CORE_PLL_REG1);
+	corepll_reg2_val = pete_readl("drivers/i2c/busses/i2c-mlxbf.c:1478", corepll_res->io + MLXBF_I2C_CORE_PLL_REG2);
 
 	/* Get Core PLL configuration bits */
 	core_f = FIELD_GET(MLXBF_I2C_COREPLL_CORE_F_YU_MASK, corepll_reg1_val);
@@ -1564,7 +1564,7 @@ static int mlxbf_slave_enable(struct mlxbf_i2c_priv *priv, u8 addr)
 	 * (7-bit address, 1 status bit (1 if enabled, 0 if not)).
 	 */
 	for (reg = 0; reg < reg_cnt; reg++) {
-		slave_reg = readl(priv->smbus->io +
+		slave_reg = pete_readl("drivers/i2c/busses/i2c-mlxbf.c:1567", priv->smbus->io +
 				MLXBF_I2C_SMBUS_SLAVE_ADDR_CFG + reg * 0x4);
 		/*
 		 * Each register holds 4 slave addresses. So, we have to keep
@@ -1622,7 +1622,7 @@ static int mlxbf_slave_enable(struct mlxbf_i2c_priv *priv, u8 addr)
 
 	/* Enable the slave address and update the register. */
 	slave_reg |= (1 << MLXBF_I2C_SMBUS_SLAVE_ADDR_EN_BIT) << (byte * 8);
-	writel(slave_reg, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_ADDR_CFG +
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1625", slave_reg, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_ADDR_CFG +
 		reg * 0x4);
 
 	return 0;
@@ -1647,7 +1647,7 @@ static int mlxbf_slave_disable(struct mlxbf_i2c_priv *priv)
 	 * (7-bit address, 1 status bit (1 if enabled, 0 if not)).
 	 */
 	for (reg = 0; reg < reg_cnt; reg++) {
-		slave_reg = readl(priv->smbus->io +
+		slave_reg = pete_readl("drivers/i2c/busses/i2c-mlxbf.c:1650", priv->smbus->io +
 				MLXBF_I2C_SMBUS_SLAVE_ADDR_CFG + reg * 0x4);
 
 		/* Check whether the address slots are empty. */
@@ -1687,7 +1687,7 @@ static int mlxbf_slave_disable(struct mlxbf_i2c_priv *priv)
 
 	/* Cleanup the slave address slot. */
 	slave_reg &= ~(GENMASK(7, 0) << (slave_byte * 8));
-	writel(slave_reg, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_ADDR_CFG +
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1690", slave_reg, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_ADDR_CFG +
 		reg * 0x4);
 
 	return 0;
@@ -1780,7 +1780,7 @@ static int mlxbf_i2c_init_slave(struct platform_device *pdev,
 	int ret;
 
 	/* Reset FSM. */
-	writel(0, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_FSM);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1783", 0, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_FSM);
 
 	/*
 	 * Enable slave cause interrupt bits. Drive
@@ -1789,13 +1789,13 @@ static int mlxbf_i2c_init_slave(struct platform_device *pdev,
 	 * masters issue a Read and Write, respectively. But, clear all
 	 * interrupts first.
 	 */
-	writel(~0, priv->slv_cause->io + MLXBF_I2C_CAUSE_OR_CLEAR);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1792", ~0, priv->slv_cause->io + MLXBF_I2C_CAUSE_OR_CLEAR);
 	int_reg = MLXBF_I2C_CAUSE_READ_WAIT_FW_RESPONSE;
 	int_reg |= MLXBF_I2C_CAUSE_WRITE_SUCCESS;
-	writel(int_reg, priv->slv_cause->io + MLXBF_I2C_CAUSE_OR_EVTEN0);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1795", int_reg, priv->slv_cause->io + MLXBF_I2C_CAUSE_OR_EVTEN0);
 
 	/* Finally, set the 'ready' bit to start handling transactions. */
-	writel(0x1, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_READY);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1798", 0x1, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_READY);
 
 	/* Initialize the cause coalesce resource. */
 	ret = mlxbf_i2c_init_coalesce(pdev, priv);
@@ -1821,21 +1821,21 @@ static bool mlxbf_i2c_has_coalesce(struct mlxbf_i2c_priv *priv, bool *read,
 				MLXBF_I2C_CAUSE_YU_SLAVE_BIT :
 				priv->bus + MLXBF_I2C_CAUSE_TYU_SLAVE_BIT;
 
-	coalesce0_reg = readl(priv->coalesce->io + MLXBF_I2C_CAUSE_COALESCE_0);
+	coalesce0_reg = pete_readl("drivers/i2c/busses/i2c-mlxbf.c:1824", priv->coalesce->io + MLXBF_I2C_CAUSE_COALESCE_0);
 	is_set = coalesce0_reg & (1 << slave_shift);
 
 	if (!is_set)
 		return false;
 
 	/* Check the source of the interrupt, i.e. whether a Read or Write. */
-	cause_reg = readl(priv->slv_cause->io + MLXBF_I2C_CAUSE_ARBITER);
+	cause_reg = pete_readl("drivers/i2c/busses/i2c-mlxbf.c:1831", priv->slv_cause->io + MLXBF_I2C_CAUSE_ARBITER);
 	if (cause_reg & MLXBF_I2C_CAUSE_READ_WAIT_FW_RESPONSE)
 		*read = true;
 	else if (cause_reg & MLXBF_I2C_CAUSE_WRITE_SUCCESS)
 		*write = true;
 
 	/* Clear cause bits. */
-	writel(~0x0, priv->slv_cause->io + MLXBF_I2C_CAUSE_OR_CLEAR);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1838", ~0x0, priv->slv_cause->io + MLXBF_I2C_CAUSE_OR_CLEAR);
 
 	return true;
 }
@@ -1941,7 +1941,7 @@ static int mlxbf_smbus_irq_send(struct mlxbf_i2c_priv *priv, u8 recv_bytes)
 	control32 |= rol32(write_size, MLXBF_I2C_SLAVE_WRITE_BYTES_SHIFT);
 	control32 |= rol32(pec_en, MLXBF_I2C_SLAVE_SEND_PEC_SHIFT);
 
-	writel(control32, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_GW);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1944", control32, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_GW);
 
 	/*
 	 * Wait until the transfer is completed; the driver will wait
@@ -1950,9 +1950,9 @@ static int mlxbf_smbus_irq_send(struct mlxbf_i2c_priv *priv, u8 recv_bytes)
 	mlxbf_smbus_slave_wait_for_idle(priv, MLXBF_I2C_SMBUS_TIMEOUT);
 
 	/* Release the Slave GW. */
-	writel(0x0, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_RS_MASTER_BYTES);
-	writel(0x0, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_PEC);
-	writel(0x1, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_READY);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1953", 0x0, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_RS_MASTER_BYTES);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1954", 0x0, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_PEC);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:1955", 0x1, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_READY);
 
 	return 0;
 }
@@ -1997,9 +1997,9 @@ static int mlxbf_smbus_irq_recv(struct mlxbf_i2c_priv *priv, u8 recv_bytes)
 	i2c_slave_event(slave, I2C_SLAVE_STOP, &value);
 
 	/* Release the Slave GW. */
-	writel(0x0, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_RS_MASTER_BYTES);
-	writel(0x0, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_PEC);
-	writel(0x1, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_READY);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:2000", 0x0, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_RS_MASTER_BYTES);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:2001", 0x0, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_PEC);
+	pete_writel("drivers/i2c/busses/i2c-mlxbf.c:2002", 0x1, priv->smbus->io + MLXBF_I2C_SMBUS_SLAVE_READY);
 
 	return ret;
 }
@@ -2034,7 +2034,7 @@ static irqreturn_t mlxbf_smbus_irq(int irq, void *ptr)
 	 * slave, if the higher 8 bits are sent then the slave expect N bytes
 	 * from the master.
 	 */
-	rw_bytes_reg = readl(priv->smbus->io +
+	rw_bytes_reg = pete_readl("drivers/i2c/busses/i2c-mlxbf.c:2037", priv->smbus->io +
 				MLXBF_I2C_SMBUS_SLAVE_RS_MASTER_BYTES);
 	recv_bytes = (rw_bytes_reg >> 8) & GENMASK(7, 0);
 

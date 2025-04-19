@@ -124,7 +124,7 @@ void rv370_pcie_gart_set_page(struct radeon_device *rdev, unsigned i,
 	/* on x86 we want this to be CPU endian, on powerpc
 	 * on powerpc without HW swappers, it'll get swapped on way
 	 * into VRAM - so no need for cpu_to_le32 on VRAM tables */
-	writel(entry, ((void __iomem *)ptr) + (i * 4));
+	pete_writel("drivers/gpu/drm/radeon/r300.c:127", entry, ((void __iomem *)ptr) + (i * 4));
 }
 
 int rv370_pcie_gart_init(struct radeon_device *rdev)

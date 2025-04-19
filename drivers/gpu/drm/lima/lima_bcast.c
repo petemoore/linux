@@ -8,8 +8,8 @@
 #include "lima_bcast.h"
 #include "lima_regs.h"
 
-#define bcast_write(reg, data) writel(data, ip->iomem + reg)
-#define bcast_read(reg) readl(ip->iomem + reg)
+#define bcast_write(reg, data) pete_writel("drivers/gpu/drm/lima/lima_bcast.c:11", data, ip->iomem + reg)
+#define bcast_read(reg) pete_readl("drivers/gpu/drm/lima/lima_bcast.c:12", ip->iomem + reg)
 
 void lima_bcast_enable(struct lima_device *dev, int num_pp)
 {

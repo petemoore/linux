@@ -56,7 +56,7 @@ static void pxav2_reset(struct sdhci_host *host, u8 mask)
 		 * no performance impact
 		 */
 		if (pdata && pdata->clk_delay_sel == 1) {
-			tmp = readw(host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
+			tmp = pete_readw("drivers/mmc/host/sdhci-pxav2.c:59", host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
 
 			tmp &= ~(SDCLK_DELAY_MASK << SDCLK_DELAY_SHIFT);
 			tmp |= (pdata->clk_delay_cycles & SDCLK_DELAY_MASK)
@@ -64,18 +64,18 @@ static void pxav2_reset(struct sdhci_host *host, u8 mask)
 			tmp &= ~(SDCLK_SEL_MASK << SDCLK_SEL_SHIFT);
 			tmp |= (1 & SDCLK_SEL_MASK) << SDCLK_SEL_SHIFT;
 
-			writew(tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
+			pete_writew("drivers/mmc/host/sdhci-pxav2.c:67", tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
 		}
 
 		if (pdata && (pdata->flags & PXA_FLAG_ENABLE_CLOCK_GATING)) {
-			tmp = readw(host->ioaddr + SD_FIFO_PARAM);
+			tmp = pete_readw("drivers/mmc/host/sdhci-pxav2.c:71", host->ioaddr + SD_FIFO_PARAM);
 			tmp &= ~CLK_GATE_SETTING_BITS;
-			writew(tmp, host->ioaddr + SD_FIFO_PARAM);
+			pete_writew("drivers/mmc/host/sdhci-pxav2.c:73", tmp, host->ioaddr + SD_FIFO_PARAM);
 		} else {
-			tmp = readw(host->ioaddr + SD_FIFO_PARAM);
+			tmp = pete_readw("drivers/mmc/host/sdhci-pxav2.c:75", host->ioaddr + SD_FIFO_PARAM);
 			tmp &= ~CLK_GATE_SETTING_BITS;
 			tmp |= CLK_GATE_SETTING_BITS;
-			writew(tmp, host->ioaddr + SD_FIFO_PARAM);
+			pete_writew("drivers/mmc/host/sdhci-pxav2.c:78", tmp, host->ioaddr + SD_FIFO_PARAM);
 		}
 	}
 }
@@ -85,8 +85,8 @@ static void pxav2_mmc_set_bus_width(struct sdhci_host *host, int width)
 	u8 ctrl;
 	u16 tmp;
 
-	ctrl = readb(host->ioaddr + SDHCI_HOST_CONTROL);
-	tmp = readw(host->ioaddr + SD_CE_ATA_2);
+	ctrl = pete_readb("drivers/mmc/host/sdhci-pxav2.c:88", host->ioaddr + SDHCI_HOST_CONTROL);
+	tmp = pete_readw("drivers/mmc/host/sdhci-pxav2.c:89", host->ioaddr + SD_CE_ATA_2);
 	if (width == MMC_BUS_WIDTH_8) {
 		ctrl &= ~SDHCI_CTRL_4BITBUS;
 		tmp |= MMC_CARD | MMC_WIDTH;
@@ -97,8 +97,8 @@ static void pxav2_mmc_set_bus_width(struct sdhci_host *host, int width)
 		else
 			ctrl &= ~SDHCI_CTRL_4BITBUS;
 	}
-	writew(tmp, host->ioaddr + SD_CE_ATA_2);
-	writeb(ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
+	pete_writew("drivers/mmc/host/sdhci-pxav2.c:100", tmp, host->ioaddr + SD_CE_ATA_2);
+	pete_writeb("drivers/mmc/host/sdhci-pxav2.c:101", ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
 }
 
 static const struct sdhci_ops pxav2_sdhci_ops = {

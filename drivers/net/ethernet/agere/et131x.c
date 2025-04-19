@@ -753,12 +753,12 @@ static void et131x_rx_dma_enable(struct et131x_adapter *adapter)
 		csr |= ET_RXDMA_CSR_FBR0_SIZE_HI;
 	else if (rx_ring->fbr[0]->buffsize == 1024)
 		csr |= ET_RXDMA_CSR_FBR0_SIZE_LO | ET_RXDMA_CSR_FBR0_SIZE_HI;
-	writel(csr, &adapter->regs->rxdma.csr);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:756", csr, &adapter->regs->rxdma.csr);
 
-	csr = readl(&adapter->regs->rxdma.csr);
+	csr = pete_readl("drivers/net/ethernet/agere/et131x.c:758", &adapter->regs->rxdma.csr);
 	if (csr & ET_RXDMA_CSR_HALT_STATUS) {
 		udelay(5);
-		csr = readl(&adapter->regs->rxdma.csr);
+		csr = pete_readl("drivers/net/ethernet/agere/et131x.c:761", &adapter->regs->rxdma.csr);
 		if (csr & ET_RXDMA_CSR_HALT_STATUS) {
 			dev_err(&adapter->pdev->dev,
 				"RX Dma failed to exit halt state. CSR 0x%08x\n",
@@ -771,12 +771,12 @@ static void et131x_rx_dma_disable(struct et131x_adapter *adapter)
 {
 	u32 csr;
 	/* Setup the receive dma configuration register */
-	writel(ET_RXDMA_CSR_HALT | ET_RXDMA_CSR_FBR1_ENABLE,
+	pete_writel("drivers/net/ethernet/agere/et131x.c:774", ET_RXDMA_CSR_HALT | ET_RXDMA_CSR_FBR1_ENABLE,
 	       &adapter->regs->rxdma.csr);
-	csr = readl(&adapter->regs->rxdma.csr);
+	csr = pete_readl("drivers/net/ethernet/agere/et131x.c:776", &adapter->regs->rxdma.csr);
 	if (!(csr & ET_RXDMA_CSR_HALT_STATUS)) {
 		udelay(5);
-		csr = readl(&adapter->regs->rxdma.csr);
+		csr = pete_readl("drivers/net/ethernet/agere/et131x.c:779", &adapter->regs->rxdma.csr);
 		if (!(csr & ET_RXDMA_CSR_HALT_STATUS))
 			dev_err(&adapter->pdev->dev,
 				"RX Dma failed to enter halt state. CSR 0x%08x\n",
@@ -789,7 +789,7 @@ static void et131x_tx_dma_enable(struct et131x_adapter *adapter)
 	/* Setup the transmit dma configuration register for normal
 	 * operation
 	 */
-	writel(ET_TXDMA_SNGL_EPKT | (PARM_DMA_CACHE_DEF << ET_TXDMA_CACHE_SHIFT),
+	pete_writel("drivers/net/ethernet/agere/et131x.c:792", ET_TXDMA_SNGL_EPKT | (PARM_DMA_CACHE_DEF << ET_TXDMA_CACHE_SHIFT),
 	       &adapter->regs->txdma.csr);
 }
 
@@ -813,7 +813,7 @@ static void et1310_config_mac_regs1(struct et131x_adapter *adapter)
 	/* First we need to reset everything.  Write to MAC configuration
 	 * register 1 to perform reset.
 	 */
-	writel(ET_MAC_CFG1_SOFT_RESET | ET_MAC_CFG1_SIM_RESET  |
+	pete_writel("drivers/net/ethernet/agere/et131x.c:816", ET_MAC_CFG1_SOFT_RESET | ET_MAC_CFG1_SIM_RESET  |
 	       ET_MAC_CFG1_RESET_RXMC | ET_MAC_CFG1_RESET_TXMC |
 	       ET_MAC_CFG1_RESET_RXFUNC | ET_MAC_CFG1_RESET_TXFUNC,
 	       &macregs->cfg1);
@@ -821,16 +821,16 @@ static void et1310_config_mac_regs1(struct et131x_adapter *adapter)
 	/* Next lets configure the MAC Inter-packet gap register */
 	ipg = 0x38005860;		/* IPG1 0x38 IPG2 0x58 B2B 0x60 */
 	ipg |= 0x50 << 8;		/* ifg enforce 0x50 */
-	writel(ipg, &macregs->ipg);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:824", ipg, &macregs->ipg);
 
 	/* Next lets configure the MAC Half Duplex register */
 	/* BEB trunc 0xA, Ex Defer, Rexmit 0xF Coll 0x37 */
-	writel(0x00A1F037, &macregs->hfdp);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:828", 0x00A1F037, &macregs->hfdp);
 
 	/* Next lets configure the MAC Interface Control register */
-	writel(0, &macregs->if_ctrl);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:831", 0, &macregs->if_ctrl);
 
-	writel(ET_MAC_MIIMGMT_CLK_RST, &macregs->mii_mgmt_cfg);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:833", ET_MAC_MIIMGMT_CLK_RST, &macregs->mii_mgmt_cfg);
 
 	/* Next lets configure the MAC Station Address register.  These
 	 * values are read from the EEPROM during initialization and stored
@@ -845,8 +845,8 @@ static void et1310_config_mac_regs1(struct et131x_adapter *adapter)
 		   (adapter->addr[4] << ET_MAC_STATION_ADDR1_OC5_SHIFT) |
 		   (adapter->addr[3] << ET_MAC_STATION_ADDR1_OC4_SHIFT) |
 		    adapter->addr[2];
-	writel(station1, &macregs->station_addr_1);
-	writel(station2, &macregs->station_addr_2);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:848", station1, &macregs->station_addr_1);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:849", station2, &macregs->station_addr_2);
 
 	/* Max ethernet packet in bytes that will be passed by the mac without
 	 * being truncated.  Allow the MAC to pass 4 more than our max packet
@@ -855,10 +855,10 @@ static void et1310_config_mac_regs1(struct et131x_adapter *adapter)
 	 * Packets larger than (registry_jumbo_packet) that do not contain a
 	 * VLAN ID will be dropped by the Rx function.
 	 */
-	writel(adapter->registry_jumbo_packet + 4, &macregs->max_fm_len);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:858", adapter->registry_jumbo_packet + 4, &macregs->max_fm_len);
 
 	/* clear out MAC config reset */
-	writel(0, &macregs->cfg1);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:861", 0, &macregs->cfg1);
 }
 
 static void et1310_config_mac_regs2(struct et131x_adapter *adapter)
@@ -871,10 +871,10 @@ static void et1310_config_mac_regs2(struct et131x_adapter *adapter)
 	u32 ifctrl;
 	u32 ctl;
 
-	ctl = readl(&adapter->regs->txmac.ctl);
-	cfg1 = readl(&mac->cfg1);
-	cfg2 = readl(&mac->cfg2);
-	ifctrl = readl(&mac->if_ctrl);
+	ctl = pete_readl("drivers/net/ethernet/agere/et131x.c:874", &adapter->regs->txmac.ctl);
+	cfg1 = pete_readl("drivers/net/ethernet/agere/et131x.c:875", &mac->cfg1);
+	cfg2 = pete_readl("drivers/net/ethernet/agere/et131x.c:876", &mac->cfg2);
+	ifctrl = pete_readl("drivers/net/ethernet/agere/et131x.c:877", &mac->if_ctrl);
 
 	/* Set up the if mode bits */
 	cfg2 &= ~ET_MAC_CFG2_IFMODE_MASK;
@@ -892,7 +892,7 @@ static void et1310_config_mac_regs2(struct et131x_adapter *adapter)
 	cfg1 &= ~(ET_MAC_CFG1_LOOPBACK | ET_MAC_CFG1_RX_FLOW);
 	if (adapter->flow == FLOW_RXONLY || adapter->flow == FLOW_BOTH)
 		cfg1 |= ET_MAC_CFG1_RX_FLOW;
-	writel(cfg1, &mac->cfg1);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:895", cfg1, &mac->cfg1);
 
 	/* Now we need to initialize the MAC Configuration 2 register */
 	/* preamble 7, check length, huge frame off, pad crc, crc enable
@@ -912,13 +912,13 @@ static void et1310_config_mac_regs2(struct et131x_adapter *adapter)
 	if (phydev->duplex == DUPLEX_HALF)
 		ifctrl |= ET_MAC_IFCTRL_GHDMODE;
 
-	writel(ifctrl, &mac->if_ctrl);
-	writel(cfg2, &mac->cfg2);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:915", ifctrl, &mac->if_ctrl);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:916", cfg2, &mac->cfg2);
 
 	do {
 		udelay(10);
 		delay++;
-		cfg1 = readl(&mac->cfg1);
+		cfg1 = pete_readl("drivers/net/ethernet/agere/et131x.c:921", &mac->cfg1);
 	} while ((cfg1 & ET_MAC_CFG1_WAIT) != ET_MAC_CFG1_WAIT && delay < 100);
 
 	if (delay == 100) {
@@ -928,7 +928,7 @@ static void et1310_config_mac_regs2(struct et131x_adapter *adapter)
 	}
 
 	ctl |= ET_TX_CTRL_TXMAC_ENABLE | ET_TX_CTRL_FC_DISABLE;
-	writel(ctl, &adapter->regs->txmac.ctl);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:931", ctl, &adapter->regs->txmac.ctl);
 
 	if (adapter->flags & FMP_ADAPTER_LOWER_POWER) {
 		et131x_rx_dma_enable(adapter);
@@ -938,7 +938,7 @@ static void et1310_config_mac_regs2(struct et131x_adapter *adapter)
 
 static int et1310_in_phy_coma(struct et131x_adapter *adapter)
 {
-	u32 pmcsr = readl(&adapter->regs->global.pm_csr);
+	u32 pmcsr = pete_readl("drivers/net/ethernet/agere/et131x.c:941", &adapter->regs->global.pm_csr);
 
 	return ET_PM_PHY_SW_COMA & pmcsr ? 1 : 0;
 }
@@ -984,10 +984,10 @@ static void et1310_setup_device_for_multicast(struct et131x_adapter *adapter)
 
 	/* Write out the new hash to the device */
 	if (!et1310_in_phy_coma(adapter)) {
-		writel(hash1, &rxmac->multi_hash1);
-		writel(hash2, &rxmac->multi_hash2);
-		writel(hash3, &rxmac->multi_hash3);
-		writel(hash4, &rxmac->multi_hash4);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:987", hash1, &rxmac->multi_hash1);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:988", hash2, &rxmac->multi_hash2);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:989", hash3, &rxmac->multi_hash3);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:990", hash4, &rxmac->multi_hash4);
 	}
 }
 
@@ -1023,9 +1023,9 @@ static void et1310_setup_device_for_unicast(struct et131x_adapter *adapter)
 		   adapter->addr[5];
 
 	if (!et1310_in_phy_coma(adapter)) {
-		writel(uni_pf1, &rxmac->uni_pf_addr1);
-		writel(uni_pf2, &rxmac->uni_pf_addr2);
-		writel(uni_pf3, &rxmac->uni_pf_addr3);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1026", uni_pf1, &rxmac->uni_pf_addr1);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1027", uni_pf2, &rxmac->uni_pf_addr2);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1028", uni_pf3, &rxmac->uni_pf_addr3);
 	}
 }
 
@@ -1039,42 +1039,42 @@ static void et1310_config_rxmac_regs(struct et131x_adapter *adapter)
 	u32 __iomem *wolw;
 
 	/* Disable the MAC while it is being configured (also disable WOL) */
-	writel(0x8, &rxmac->ctrl);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1042", 0x8, &rxmac->ctrl);
 
 	/* Initialize WOL to disabled. */
-	writel(0, &rxmac->crc0);
-	writel(0, &rxmac->crc12);
-	writel(0, &rxmac->crc34);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1045", 0, &rxmac->crc0);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1046", 0, &rxmac->crc12);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1047", 0, &rxmac->crc34);
 
 	/* We need to set the WOL mask0 - mask4 next.  We initialize it to
 	 * its default Values of 0x00000000 because there are not WOL masks
 	 * as of this time.
 	 */
 	for (wolw = &rxmac->mask0_word0; wolw <= &rxmac->mask4_word3; wolw++)
-		writel(0, wolw);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1054", 0, wolw);
 
 	/* Lets setup the WOL Source Address */
 	sa_lo = (adapter->addr[2] << ET_RX_WOL_LO_SA3_SHIFT) |
 		(adapter->addr[3] << ET_RX_WOL_LO_SA4_SHIFT) |
 		(adapter->addr[4] << ET_RX_WOL_LO_SA5_SHIFT) |
 		 adapter->addr[5];
-	writel(sa_lo, &rxmac->sa_lo);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1061", sa_lo, &rxmac->sa_lo);
 
 	sa_hi = (u32)(adapter->addr[0] << ET_RX_WOL_HI_SA1_SHIFT) |
 		       adapter->addr[1];
-	writel(sa_hi, &rxmac->sa_hi);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1065", sa_hi, &rxmac->sa_hi);
 
 	/* Disable all Packet Filtering */
-	writel(0, &rxmac->pf_ctrl);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1068", 0, &rxmac->pf_ctrl);
 
 	/* Let's initialize the Unicast Packet filtering address */
 	if (adapter->packet_filter & ET131X_PACKET_TYPE_DIRECTED) {
 		et1310_setup_device_for_unicast(adapter);
 		pf_ctrl |= ET_RX_PFCTRL_UNICST_FILTER_ENABLE;
 	} else {
-		writel(0, &rxmac->uni_pf_addr1);
-		writel(0, &rxmac->uni_pf_addr2);
-		writel(0, &rxmac->uni_pf_addr3);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1075", 0, &rxmac->uni_pf_addr1);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1076", 0, &rxmac->uni_pf_addr2);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1077", 0, &rxmac->uni_pf_addr3);
 	}
 
 	/* Let's initialize the Multicast hash */
@@ -1098,13 +1098,13 @@ static void et1310_config_rxmac_regs(struct et131x_adapter *adapter)
 		 *
 		 * seg_en on, fc_en off, size 0x10
 		 */
-		writel(0x41, &rxmac->mcif_ctrl_max_seg);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1101", 0x41, &rxmac->mcif_ctrl_max_seg);
 	else
-		writel(0, &rxmac->mcif_ctrl_max_seg);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1103", 0, &rxmac->mcif_ctrl_max_seg);
 
-	writel(0, &rxmac->mcif_water_mark);
-	writel(0, &rxmac->mif_ctrl);
-	writel(0, &rxmac->space_avail);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1105", 0, &rxmac->mcif_water_mark);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1106", 0, &rxmac->mif_ctrl);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1107", 0, &rxmac->space_avail);
 
 	/* Initialize the the mif_ctrl register
 	 * bit 3:  Receive code error. One or more nibbles were signaled as
@@ -1120,9 +1120,9 @@ static void et1310_config_rxmac_regs(struct et131x_adapter *adapter)
 	 * bit 17: Drop packet enable
 	 */
 	if (phydev && phydev->speed == SPEED_100)
-		writel(0x30038, &rxmac->mif_ctrl);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1123", 0x30038, &rxmac->mif_ctrl);
 	else
-		writel(0x30030, &rxmac->mif_ctrl);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1125", 0x30030, &rxmac->mif_ctrl);
 
 	/* Finally we initialize RxMac to be enabled & WOL disabled.  Packet
 	 * filter is always enabled since it is where the runt packets are
@@ -1130,8 +1130,8 @@ static void et1310_config_rxmac_regs(struct et131x_adapter *adapter)
 	 * dropping doesn't work, so it is disabled in the pf_ctrl register,
 	 * but we still leave the packet filter on.
 	 */
-	writel(pf_ctrl, &rxmac->pf_ctrl);
-	writel(ET_RX_CTRL_RXMAC_ENABLE | ET_RX_CTRL_WOL_DISABLE, &rxmac->ctrl);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1133", pf_ctrl, &rxmac->pf_ctrl);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1134", ET_RX_CTRL_RXMAC_ENABLE | ET_RX_CTRL_WOL_DISABLE, &rxmac->ctrl);
 }
 
 static void et1310_config_txmac_regs(struct et131x_adapter *adapter)
@@ -1143,9 +1143,9 @@ static void et1310_config_txmac_regs(struct et131x_adapter *adapter)
 	 * cfep - control frame extended pause timer set to 0x0
 	 */
 	if (adapter->flow == FLOW_NONE)
-		writel(0, &txmac->cf_param);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1146", 0, &txmac->cf_param);
 	else
-		writel(0x40, &txmac->cf_param);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1148", 0x40, &txmac->cf_param);
 }
 
 static void et1310_config_macstat_regs(struct et131x_adapter *adapter)
@@ -1156,14 +1156,14 @@ static void et1310_config_macstat_regs(struct et131x_adapter *adapter)
 	/* initialize all the macstat registers to zero on the device  */
 	for (reg = &macstat->txrx_0_64_byte_frames;
 	     reg <= &macstat->carry_reg2; reg++)
-		writel(0, reg);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1159", 0, reg);
 
 	/* Unmask any counters that we want to track the overflow of.
 	 * Initially this will be all counters.  It may become clear later
 	 * that we do not need to track all counters.
 	 */
-	writel(0xFFFFBE32, &macstat->carry_reg1_mask);
-	writel(0xFFFE7E8B, &macstat->carry_reg2_mask);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1165", 0xFFFFBE32, &macstat->carry_reg1_mask);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1166", 0xFFFE7E8B, &macstat->carry_reg2_mask);
 }
 
 static int et131x_phy_mii_read(struct et131x_adapter *adapter, u8 addr,
@@ -1179,21 +1179,21 @@ static int et131x_phy_mii_read(struct et131x_adapter *adapter, u8 addr,
 	/* Save a local copy of the registers we are dealing with so we can
 	 * set them back
 	 */
-	mii_addr = readl(&mac->mii_mgmt_addr);
-	mii_cmd = readl(&mac->mii_mgmt_cmd);
+	mii_addr = pete_readl("drivers/net/ethernet/agere/et131x.c:1182", &mac->mii_mgmt_addr);
+	mii_cmd = pete_readl("drivers/net/ethernet/agere/et131x.c:1183", &mac->mii_mgmt_cmd);
 
 	/* Stop the current operation */
-	writel(0, &mac->mii_mgmt_cmd);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1186", 0, &mac->mii_mgmt_cmd);
 
 	/* Set up the register we need to read from on the correct PHY */
-	writel(ET_MAC_MII_ADDR(addr, reg), &mac->mii_mgmt_addr);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1189", ET_MAC_MII_ADDR(addr, reg), &mac->mii_mgmt_addr);
 
-	writel(0x1, &mac->mii_mgmt_cmd);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1191", 0x1, &mac->mii_mgmt_cmd);
 
 	do {
 		udelay(50);
 		delay++;
-		mii_indicator = readl(&mac->mii_mgmt_indicator);
+		mii_indicator = pete_readl("drivers/net/ethernet/agere/et131x.c:1196", &mac->mii_mgmt_indicator);
 	} while ((mii_indicator & ET_MAC_MGMT_WAIT) && delay < 50);
 
 	/* If we hit the max delay, we could not read the register */
@@ -1210,17 +1210,17 @@ static int et131x_phy_mii_read(struct et131x_adapter *adapter, u8 addr,
 	/* If we hit here we were able to read the register and we need to
 	 * return the value to the caller
 	 */
-	*value = readl(&mac->mii_mgmt_stat) & ET_MAC_MIIMGMT_STAT_PHYCRTL_MASK;
+	*value = pete_readl("drivers/net/ethernet/agere/et131x.c:1213", &mac->mii_mgmt_stat) & ET_MAC_MIIMGMT_STAT_PHYCRTL_MASK;
 
 out:
 	/* Stop the read operation */
-	writel(0, &mac->mii_mgmt_cmd);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1217", 0, &mac->mii_mgmt_cmd);
 
 	/* set the registers we touched back to the state at which we entered
 	 * this function
 	 */
-	writel(mii_addr, &mac->mii_mgmt_addr);
-	writel(mii_cmd, &mac->mii_mgmt_cmd);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1222", mii_addr, &mac->mii_mgmt_addr);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1223", mii_cmd, &mac->mii_mgmt_cmd);
 
 	return status;
 }
@@ -1248,22 +1248,22 @@ static int et131x_mii_write(struct et131x_adapter *adapter, u8 addr, u8 reg,
 	/* Save a local copy of the registers we are dealing with so we can
 	 * set them back
 	 */
-	mii_addr = readl(&mac->mii_mgmt_addr);
-	mii_cmd = readl(&mac->mii_mgmt_cmd);
+	mii_addr = pete_readl("drivers/net/ethernet/agere/et131x.c:1251", &mac->mii_mgmt_addr);
+	mii_cmd = pete_readl("drivers/net/ethernet/agere/et131x.c:1252", &mac->mii_mgmt_cmd);
 
 	/* Stop the current operation */
-	writel(0, &mac->mii_mgmt_cmd);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1255", 0, &mac->mii_mgmt_cmd);
 
 	/* Set up the register we need to write to on the correct PHY */
-	writel(ET_MAC_MII_ADDR(addr, reg), &mac->mii_mgmt_addr);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1258", ET_MAC_MII_ADDR(addr, reg), &mac->mii_mgmt_addr);
 
 	/* Add the value to write to the registers to the mac */
-	writel(value, &mac->mii_mgmt_ctrl);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1261", value, &mac->mii_mgmt_ctrl);
 
 	do {
 		udelay(50);
 		delay++;
-		mii_indicator = readl(&mac->mii_mgmt_indicator);
+		mii_indicator = pete_readl("drivers/net/ethernet/agere/et131x.c:1266", &mac->mii_mgmt_indicator);
 	} while ((mii_indicator & ET_MAC_MGMT_BUSY) && delay < 100);
 
 	/* If we hit the max delay, we could not write the register */
@@ -1275,20 +1275,20 @@ static int et131x_mii_write(struct et131x_adapter *adapter, u8 addr, u8 reg,
 		dev_warn(&adapter->pdev->dev, "status is  0x%08x\n",
 			 mii_indicator);
 		dev_warn(&adapter->pdev->dev, "command is  0x%08x\n",
-			 readl(&mac->mii_mgmt_cmd));
+			 pete_readl("drivers/net/ethernet/agere/et131x.c:1278", &mac->mii_mgmt_cmd));
 
 		et131x_mii_read(adapter, reg, &tmp);
 
 		status = -EIO;
 	}
 	/* Stop the write operation */
-	writel(0, &mac->mii_mgmt_cmd);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1285", 0, &mac->mii_mgmt_cmd);
 
 	/* set the registers we touched back to the state at which we entered
 	 * this function
 	 */
-	writel(mii_addr, &mac->mii_mgmt_addr);
-	writel(mii_cmd, &mac->mii_mgmt_cmd);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1290", mii_addr, &mac->mii_mgmt_addr);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1291", mii_cmd, &mac->mii_mgmt_cmd);
 
 	return status;
 }
@@ -1343,22 +1343,22 @@ static void et1310_update_macstat_host_counters(struct et131x_adapter *adapter)
 	struct macstat_regs __iomem *macstat =
 		&adapter->regs->macstat;
 
-	stats->tx_collisions	       += readl(&macstat->tx_total_collisions);
-	stats->tx_first_collisions     += readl(&macstat->tx_single_collisions);
-	stats->tx_deferred	       += readl(&macstat->tx_deferred);
+	stats->tx_collisions	       += pete_readl("drivers/net/ethernet/agere/et131x.c:1346", &macstat->tx_total_collisions);
+	stats->tx_first_collisions     += pete_readl("drivers/net/ethernet/agere/et131x.c:1347", &macstat->tx_single_collisions);
+	stats->tx_deferred	       += pete_readl("drivers/net/ethernet/agere/et131x.c:1348", &macstat->tx_deferred);
 	stats->tx_excessive_collisions +=
-				readl(&macstat->tx_multiple_collisions);
-	stats->tx_late_collisions      += readl(&macstat->tx_late_collisions);
-	stats->tx_underflows	       += readl(&macstat->tx_undersize_frames);
-	stats->tx_max_pkt_errs	       += readl(&macstat->tx_oversize_frames);
+				pete_readl("drivers/net/ethernet/agere/et131x.c:1350", &macstat->tx_multiple_collisions);
+	stats->tx_late_collisions      += pete_readl("drivers/net/ethernet/agere/et131x.c:1351", &macstat->tx_late_collisions);
+	stats->tx_underflows	       += pete_readl("drivers/net/ethernet/agere/et131x.c:1352", &macstat->tx_undersize_frames);
+	stats->tx_max_pkt_errs	       += pete_readl("drivers/net/ethernet/agere/et131x.c:1353", &macstat->tx_oversize_frames);
 
-	stats->rx_align_errs        += readl(&macstat->rx_align_errs);
-	stats->rx_crc_errs          += readl(&macstat->rx_code_errs);
-	stats->rcvd_pkts_dropped    += readl(&macstat->rx_drops);
-	stats->rx_overflows         += readl(&macstat->rx_oversize_packets);
-	stats->rx_code_violations   += readl(&macstat->rx_fcs_errs);
-	stats->rx_length_errs       += readl(&macstat->rx_frame_len_errs);
-	stats->rx_other_errs        += readl(&macstat->rx_fragment_packets);
+	stats->rx_align_errs        += pete_readl("drivers/net/ethernet/agere/et131x.c:1355", &macstat->rx_align_errs);
+	stats->rx_crc_errs          += pete_readl("drivers/net/ethernet/agere/et131x.c:1356", &macstat->rx_code_errs);
+	stats->rcvd_pkts_dropped    += pete_readl("drivers/net/ethernet/agere/et131x.c:1357", &macstat->rx_drops);
+	stats->rx_overflows         += pete_readl("drivers/net/ethernet/agere/et131x.c:1358", &macstat->rx_oversize_packets);
+	stats->rx_code_violations   += pete_readl("drivers/net/ethernet/agere/et131x.c:1359", &macstat->rx_fcs_errs);
+	stats->rx_length_errs       += pete_readl("drivers/net/ethernet/agere/et131x.c:1360", &macstat->rx_frame_len_errs);
+	stats->rx_other_errs        += pete_readl("drivers/net/ethernet/agere/et131x.c:1361", &macstat->rx_fragment_packets);
 }
 
 /* et1310_handle_macstat_interrupt
@@ -1375,11 +1375,11 @@ static void et1310_handle_macstat_interrupt(struct et131x_adapter *adapter)
 	/* Read the interrupt bits from the register(s).  These are Clear On
 	 * Write.
 	 */
-	carry_reg1 = readl(&adapter->regs->macstat.carry_reg1);
-	carry_reg2 = readl(&adapter->regs->macstat.carry_reg2);
+	carry_reg1 = pete_readl("drivers/net/ethernet/agere/et131x.c:1378", &adapter->regs->macstat.carry_reg1);
+	carry_reg2 = pete_readl("drivers/net/ethernet/agere/et131x.c:1379", &adapter->regs->macstat.carry_reg2);
 
-	writel(carry_reg1, &adapter->regs->macstat.carry_reg1);
-	writel(carry_reg2, &adapter->regs->macstat.carry_reg2);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1381", carry_reg1, &adapter->regs->macstat.carry_reg1);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1382", carry_reg2, &adapter->regs->macstat.carry_reg2);
 
 	/* We need to do update the host copy of all the MAC_STAT counters.
 	 * For each counter, check it's overflow bit.  If the overflow bit is
@@ -1496,8 +1496,8 @@ static void et131x_configure_global_regs(struct et131x_adapter *adapter)
 {
 	struct global_regs __iomem *regs = &adapter->regs->global;
 
-	writel(0, &regs->rxq_start_addr);
-	writel(INTERNAL_MEM_SIZE - 1, &regs->txq_end_addr);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1499", 0, &regs->rxq_start_addr);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1500", INTERNAL_MEM_SIZE - 1, &regs->txq_end_addr);
 
 	if (adapter->registry_jumbo_packet < 2048) {
 		/* Tx / RxDMA and Tx/Rx MAC interfaces have a 1k word
@@ -1505,31 +1505,31 @@ static void et131x_configure_global_regs(struct et131x_adapter *adapter)
 		 * and Rx as it desires.  Our default is to split it
 		 * 50/50:
 		 */
-		writel(PARM_RX_MEM_END_DEF, &regs->rxq_end_addr);
-		writel(PARM_RX_MEM_END_DEF + 1, &regs->txq_start_addr);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1508", PARM_RX_MEM_END_DEF, &regs->rxq_end_addr);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1509", PARM_RX_MEM_END_DEF + 1, &regs->txq_start_addr);
 	} else if (adapter->registry_jumbo_packet < 8192) {
 		/* For jumbo packets > 2k but < 8k, split 50-50. */
-		writel(INTERNAL_MEM_RX_OFFSET, &regs->rxq_end_addr);
-		writel(INTERNAL_MEM_RX_OFFSET + 1, &regs->txq_start_addr);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1512", INTERNAL_MEM_RX_OFFSET, &regs->rxq_end_addr);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1513", INTERNAL_MEM_RX_OFFSET + 1, &regs->txq_start_addr);
 	} else {
 		/* 9216 is the only packet size greater than 8k that
 		 * is available. The Tx buffer has to be big enough
 		 * for one whole packet on the Tx side. We'll make
 		 * the Tx 9408, and give the rest to Rx
 		 */
-		writel(0x01b3, &regs->rxq_end_addr);
-		writel(0x01b4, &regs->txq_start_addr);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1520", 0x01b3, &regs->rxq_end_addr);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1521", 0x01b4, &regs->txq_start_addr);
 	}
 
 	/* Initialize the loopback register. Disable all loopbacks. */
-	writel(0, &regs->loopback);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1525", 0, &regs->loopback);
 
-	writel(0, &regs->msi_config);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1527", 0, &regs->msi_config);
 
 	/* By default, disable the watchdog timer.  It will be enabled when
 	 * a packet is queued.
 	 */
-	writel(0, &regs->watchdog_timer);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1532", 0, &regs->watchdog_timer);
 }
 
 /* et131x_config_rx_dma_regs - Start of Rx_DMA init sequence */
@@ -1546,19 +1546,19 @@ static void et131x_config_rx_dma_regs(struct et131x_adapter *adapter)
 	et131x_rx_dma_disable(adapter);
 
 	/* Load the completion writeback physical address */
-	writel(upper_32_bits(rx_local->rx_status_bus), &rx_dma->dma_wb_base_hi);
-	writel(lower_32_bits(rx_local->rx_status_bus), &rx_dma->dma_wb_base_lo);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1549", upper_32_bits(rx_local->rx_status_bus), &rx_dma->dma_wb_base_hi);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1550", lower_32_bits(rx_local->rx_status_bus), &rx_dma->dma_wb_base_lo);
 
 	memset(rx_local->rx_status_block, 0, sizeof(struct rx_status_block));
 
 	/* Set the address and parameters of the packet status ring */
-	writel(upper_32_bits(rx_local->ps_ring_physaddr), &rx_dma->psr_base_hi);
-	writel(lower_32_bits(rx_local->ps_ring_physaddr), &rx_dma->psr_base_lo);
-	writel(rx_local->psr_entries - 1, &rx_dma->psr_num_des);
-	writel(0, &rx_dma->psr_full_offset);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1555", upper_32_bits(rx_local->ps_ring_physaddr), &rx_dma->psr_base_hi);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1556", lower_32_bits(rx_local->ps_ring_physaddr), &rx_dma->psr_base_lo);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1557", rx_local->psr_entries - 1, &rx_dma->psr_num_des);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1558", 0, &rx_dma->psr_full_offset);
 
-	psr_num_des = readl(&rx_dma->psr_num_des) & ET_RXDMA_PSR_NUM_DES_MASK;
-	writel((psr_num_des * LO_MARK_PERCENT_FOR_PSR) / 100,
+	psr_num_des = pete_readl("drivers/net/ethernet/agere/et131x.c:1560", &rx_dma->psr_num_des) & ET_RXDMA_PSR_NUM_DES_MASK;
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1561", (psr_num_des * LO_MARK_PERCENT_FOR_PSR) / 100,
 	       &rx_dma->psr_min_des);
 
 	spin_lock_irqsave(&adapter->rcv_lock, flags);
@@ -1598,16 +1598,16 @@ static void et131x_config_rx_dma_regs(struct et131x_adapter *adapter)
 		}
 
 		/* Set the address and parameters of Free buffer ring 1 and 0 */
-		writel(upper_32_bits(fbr->ring_physaddr), base_hi);
-		writel(lower_32_bits(fbr->ring_physaddr), base_lo);
-		writel(fbr->num_entries - 1, num_des);
-		writel(ET_DMA10_WRAP, full_offset);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1601", upper_32_bits(fbr->ring_physaddr), base_hi);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1602", lower_32_bits(fbr->ring_physaddr), base_lo);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1603", fbr->num_entries - 1, num_des);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1604", ET_DMA10_WRAP, full_offset);
 
 		/* This variable tracks the free buffer ring 1 full position,
 		 * so it has to match the above.
 		 */
 		fbr->local_full = ET_DMA10_WRAP;
-		writel(((fbr->num_entries * LO_MARK_PERCENT_FOR_RX) / 100) - 1,
+		pete_writel("drivers/net/ethernet/agere/et131x.c:1610", ((fbr->num_entries * LO_MARK_PERCENT_FOR_RX) / 100) - 1,
 		       min_des);
 	}
 
@@ -1616,14 +1616,14 @@ static void et131x_config_rx_dma_regs(struct et131x_adapter *adapter)
 	 * For version B silicon, this value gets updated once autoneg is
 	 *complete.
 	 */
-	writel(PARM_RX_NUM_BUFS_DEF, &rx_dma->num_pkt_done);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1619", PARM_RX_NUM_BUFS_DEF, &rx_dma->num_pkt_done);
 
 	/* The "time_done" is not working correctly to coalesce interrupts
 	 * after a given time period, but rather is giving us an interrupt
 	 * regardless of whether we have received packets.
 	 * This value gets updated once autoneg is complete.
 	 */
-	writel(PARM_RX_TIME_INT_DEF, &rx_dma->max_pkt_time);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1626", PARM_RX_TIME_INT_DEF, &rx_dma->max_pkt_time);
 
 	spin_unlock_irqrestore(&adapter->rcv_lock, flags);
 }
@@ -1639,19 +1639,19 @@ static void et131x_config_tx_dma_regs(struct et131x_adapter *adapter)
 	struct tx_ring *tx_ring = &adapter->tx_ring;
 
 	/* Load the hardware with the start of the transmit descriptor ring. */
-	writel(upper_32_bits(tx_ring->tx_desc_ring_pa), &txdma->pr_base_hi);
-	writel(lower_32_bits(tx_ring->tx_desc_ring_pa), &txdma->pr_base_lo);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1642", upper_32_bits(tx_ring->tx_desc_ring_pa), &txdma->pr_base_hi);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1643", lower_32_bits(tx_ring->tx_desc_ring_pa), &txdma->pr_base_lo);
 
 	/* Initialise the transmit DMA engine */
-	writel(NUM_DESC_PER_RING_TX - 1, &txdma->pr_num_des);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1646", NUM_DESC_PER_RING_TX - 1, &txdma->pr_num_des);
 
 	/* Load the completion writeback physical address */
-	writel(upper_32_bits(tx_ring->tx_status_pa), &txdma->dma_wb_base_hi);
-	writel(lower_32_bits(tx_ring->tx_status_pa), &txdma->dma_wb_base_lo);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1649", upper_32_bits(tx_ring->tx_status_pa), &txdma->dma_wb_base_hi);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1650", lower_32_bits(tx_ring->tx_status_pa), &txdma->dma_wb_base_lo);
 
 	*tx_ring->tx_status = 0;
 
-	writel(0, &txdma->service_request);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1654", 0, &txdma->service_request);
 	tx_ring->send_idx = 0;
 }
 
@@ -1663,7 +1663,7 @@ static void et131x_adapter_setup(struct et131x_adapter *adapter)
 
 	/* Configure the MMC registers */
 	/* All we need to do is initialize the Memory Control Register */
-	writel(ET_MMC_ENABLE, &adapter->regs->mmc.mmc_ctrl);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1666", ET_MMC_ENABLE, &adapter->regs->mmc.mmc_ctrl);
 
 	et1310_config_rxmac_regs(adapter);
 	et1310_config_txmac_regs(adapter);
@@ -1686,15 +1686,15 @@ static void et131x_soft_reset(struct et131x_adapter *adapter)
 	reg = ET_MAC_CFG1_SOFT_RESET | ET_MAC_CFG1_SIM_RESET |
 	      ET_MAC_CFG1_RESET_RXMC | ET_MAC_CFG1_RESET_TXMC |
 	      ET_MAC_CFG1_RESET_RXFUNC | ET_MAC_CFG1_RESET_TXFUNC;
-	writel(reg, &adapter->regs->mac.cfg1);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1689", reg, &adapter->regs->mac.cfg1);
 
 	reg = ET_RESET_ALL;
-	writel(reg, &adapter->regs->global.sw_reset);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1692", reg, &adapter->regs->global.sw_reset);
 
 	reg = ET_MAC_CFG1_RESET_RXMC | ET_MAC_CFG1_RESET_TXMC |
 	      ET_MAC_CFG1_RESET_RXFUNC | ET_MAC_CFG1_RESET_TXFUNC;
-	writel(reg, &adapter->regs->mac.cfg1);
-	writel(0, &adapter->regs->mac.cfg1);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1696", reg, &adapter->regs->mac.cfg1);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1697", 0, &adapter->regs->mac.cfg1);
 }
 
 static void et131x_enable_interrupts(struct et131x_adapter *adapter)
@@ -1706,18 +1706,18 @@ static void et131x_enable_interrupts(struct et131x_adapter *adapter)
 	else
 		mask = INT_MASK_ENABLE_NO_FLOW;
 
-	writel(mask, &adapter->regs->global.int_mask);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1709", mask, &adapter->regs->global.int_mask);
 }
 
 static void et131x_disable_interrupts(struct et131x_adapter *adapter)
 {
-	writel(INT_MASK_DISABLE, &adapter->regs->global.int_mask);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1714", INT_MASK_DISABLE, &adapter->regs->global.int_mask);
 }
 
 static void et131x_tx_dma_disable(struct et131x_adapter *adapter)
 {
 	/* Setup the transmit dma configuration register */
-	writel(ET_TXDMA_CSR_HALT | ET_TXDMA_SNGL_EPKT,
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1720", ET_TXDMA_CSR_HALT | ET_TXDMA_SNGL_EPKT,
 	       &adapter->regs->txdma.csr);
 }
 
@@ -1781,7 +1781,7 @@ static void et131x_init_send(struct et131x_adapter *adapter)
  */
 static void et1310_enable_phy_coma(struct et131x_adapter *adapter)
 {
-	u32 pmcsr = readl(&adapter->regs->global.pm_csr);
+	u32 pmcsr = pete_readl("drivers/net/ethernet/agere/et131x.c:1784", &adapter->regs->global.pm_csr);
 
 	/* Stop sending packets. */
 	adapter->flags |= FMP_ADAPTER_LOWER_POWER;
@@ -1791,23 +1791,23 @@ static void et1310_enable_phy_coma(struct et131x_adapter *adapter)
 
 	/* Gate off JAGCore 3 clock domains */
 	pmcsr &= ~ET_PMCSR_INIT;
-	writel(pmcsr, &adapter->regs->global.pm_csr);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1794", pmcsr, &adapter->regs->global.pm_csr);
 
 	/* Program gigE PHY in to Coma mode */
 	pmcsr |= ET_PM_PHY_SW_COMA;
-	writel(pmcsr, &adapter->regs->global.pm_csr);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1798", pmcsr, &adapter->regs->global.pm_csr);
 }
 
 static void et1310_disable_phy_coma(struct et131x_adapter *adapter)
 {
 	u32 pmcsr;
 
-	pmcsr = readl(&adapter->regs->global.pm_csr);
+	pmcsr = pete_readl("drivers/net/ethernet/agere/et131x.c:1805", &adapter->regs->global.pm_csr);
 
 	/* Disable phy_sw_coma register and re-enable JAGCore clocks */
 	pmcsr |= ET_PMCSR_INIT;
 	pmcsr &= ~ET_PM_PHY_SW_COMA;
-	writel(pmcsr, &adapter->regs->global.pm_csr);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:1810", pmcsr, &adapter->regs->global.pm_csr);
 
 	/* Restore the GbE PHY speed and duplex modes;
 	 * Reset JAGCore; re-configure and initialize JAGCore and gigE PHY
@@ -2114,8 +2114,8 @@ static void et131x_set_rx_dma_timer(struct et131x_adapter *adapter)
 	 * Mbits/s line rates. We do not enable and RxDMA interrupt coalescing.
 	 */
 	if ((phydev->speed == SPEED_100) || (phydev->speed == SPEED_10)) {
-		writel(0, &adapter->regs->rxdma.max_pkt_time);
-		writel(1, &adapter->regs->rxdma.num_pkt_done);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:2117", 0, &adapter->regs->rxdma.max_pkt_time);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:2118", 1, &adapter->regs->rxdma.num_pkt_done);
 	}
 }
 
@@ -2155,7 +2155,7 @@ static void nic_return_rfd(struct et131x_adapter *adapter, struct rfd *rfd)
 
 		free_buff_ring = bump_free_buff_ring(&fbr->local_full,
 						     fbr->num_entries - 1);
-		writel(free_buff_ring, offset);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:2158", free_buff_ring, offset);
 	} else {
 		dev_err(&adapter->pdev->dev,
 			"%s illegal Buffer Index returned\n", __func__);
@@ -2228,7 +2228,7 @@ static struct rfd *nic_rx_pkts(struct et131x_adapter *adapter)
 		rx_local->local_psr_full ^= 0x1000;
 	}
 
-	writel(rx_local->local_psr_full, &adapter->regs->rxdma.psr_full_offset);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:2231", rx_local->local_psr_full, &adapter->regs->rxdma.psr_full_offset);
 
 	if (ring_index > 1 || buff_index > fbr->num_entries - 1) {
 		/* Illegal buffer or ring index cannot be used by S/W*/
@@ -2333,7 +2333,7 @@ static int et131x_handle_recv_pkts(struct et131x_adapter *adapter, int budget)
 
 	if (count == limit || !done) {
 		rx_ring->unfinished_receives = true;
-		writel(PARM_TX_TIME_INT_DEF * NANO_IN_A_MICRO,
+		pete_writel("drivers/net/ethernet/agere/et131x.c:2336", PARM_TX_TIME_INT_DEF * NANO_IN_A_MICRO,
 		       &adapter->regs->global.watchdog_timer);
 	} else {
 		/* Watchdog timer will disable itself if appropriate. */
@@ -2569,13 +2569,13 @@ static int nic_send_packet(struct et131x_adapter *adapter, struct tcb *tcb)
 	spin_unlock(&adapter->tcb_send_qlock);
 
 	/* Write the new write pointer back to the device. */
-	writel(tx_ring->send_idx, &adapter->regs->txdma.service_request);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:2572", tx_ring->send_idx, &adapter->regs->txdma.service_request);
 
 	/* For Gig only, we use Tx Interrupt coalescing.  Enable the software
 	 * timer to wake us up if this packet isn't followed by N more.
 	 */
 	if (phydev && phydev->speed == SPEED_1000) {
-		writel(PARM_TX_TIME_INT_DEF * NANO_IN_A_MICRO,
+		pete_writel("drivers/net/ethernet/agere/et131x.c:2578", PARM_TX_TIME_INT_DEF * NANO_IN_A_MICRO,
 		       &adapter->regs->global.watchdog_timer);
 	}
 	return 0;
@@ -2740,7 +2740,7 @@ static void et131x_handle_send_pkts(struct et131x_adapter *adapter)
 	u32 index;
 	struct tx_ring *tx_ring = &adapter->tx_ring;
 
-	serviced = readl(&adapter->regs->txdma.new_service_complete);
+	serviced = pete_readl("drivers/net/ethernet/agere/et131x.c:2743", &adapter->regs->txdma.new_service_complete);
 	index = INDEX10(serviced);
 
 	/* Has the ring wrapped?  Process any descriptors that do not have
@@ -2873,79 +2873,79 @@ static void et131x_get_regs(struct net_device *netdev,
 	regs_buff[num++] = tmp;
 
 	/* Global regs */
-	regs_buff[num++] = readl(&aregs->global.txq_start_addr);
-	regs_buff[num++] = readl(&aregs->global.txq_end_addr);
-	regs_buff[num++] = readl(&aregs->global.rxq_start_addr);
-	regs_buff[num++] = readl(&aregs->global.rxq_end_addr);
-	regs_buff[num++] = readl(&aregs->global.pm_csr);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2876", &aregs->global.txq_start_addr);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2877", &aregs->global.txq_end_addr);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2878", &aregs->global.rxq_start_addr);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2879", &aregs->global.rxq_end_addr);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2880", &aregs->global.pm_csr);
 	regs_buff[num++] = adapter->stats.interrupt_status;
-	regs_buff[num++] = readl(&aregs->global.int_mask);
-	regs_buff[num++] = readl(&aregs->global.int_alias_clr_en);
-	regs_buff[num++] = readl(&aregs->global.int_status_alias);
-	regs_buff[num++] = readl(&aregs->global.sw_reset);
-	regs_buff[num++] = readl(&aregs->global.slv_timer);
-	regs_buff[num++] = readl(&aregs->global.msi_config);
-	regs_buff[num++] = readl(&aregs->global.loopback);
-	regs_buff[num++] = readl(&aregs->global.watchdog_timer);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2882", &aregs->global.int_mask);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2883", &aregs->global.int_alias_clr_en);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2884", &aregs->global.int_status_alias);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2885", &aregs->global.sw_reset);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2886", &aregs->global.slv_timer);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2887", &aregs->global.msi_config);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2888", &aregs->global.loopback);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2889", &aregs->global.watchdog_timer);
 
 	/* TXDMA regs */
-	regs_buff[num++] = readl(&aregs->txdma.csr);
-	regs_buff[num++] = readl(&aregs->txdma.pr_base_hi);
-	regs_buff[num++] = readl(&aregs->txdma.pr_base_lo);
-	regs_buff[num++] = readl(&aregs->txdma.pr_num_des);
-	regs_buff[num++] = readl(&aregs->txdma.txq_wr_addr);
-	regs_buff[num++] = readl(&aregs->txdma.txq_wr_addr_ext);
-	regs_buff[num++] = readl(&aregs->txdma.txq_rd_addr);
-	regs_buff[num++] = readl(&aregs->txdma.dma_wb_base_hi);
-	regs_buff[num++] = readl(&aregs->txdma.dma_wb_base_lo);
-	regs_buff[num++] = readl(&aregs->txdma.service_request);
-	regs_buff[num++] = readl(&aregs->txdma.service_complete);
-	regs_buff[num++] = readl(&aregs->txdma.cache_rd_index);
-	regs_buff[num++] = readl(&aregs->txdma.cache_wr_index);
-	regs_buff[num++] = readl(&aregs->txdma.tx_dma_error);
-	regs_buff[num++] = readl(&aregs->txdma.desc_abort_cnt);
-	regs_buff[num++] = readl(&aregs->txdma.payload_abort_cnt);
-	regs_buff[num++] = readl(&aregs->txdma.writeback_abort_cnt);
-	regs_buff[num++] = readl(&aregs->txdma.desc_timeout_cnt);
-	regs_buff[num++] = readl(&aregs->txdma.payload_timeout_cnt);
-	regs_buff[num++] = readl(&aregs->txdma.writeback_timeout_cnt);
-	regs_buff[num++] = readl(&aregs->txdma.desc_error_cnt);
-	regs_buff[num++] = readl(&aregs->txdma.payload_error_cnt);
-	regs_buff[num++] = readl(&aregs->txdma.writeback_error_cnt);
-	regs_buff[num++] = readl(&aregs->txdma.dropped_tlp_cnt);
-	regs_buff[num++] = readl(&aregs->txdma.new_service_complete);
-	regs_buff[num++] = readl(&aregs->txdma.ethernet_packet_cnt);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2892", &aregs->txdma.csr);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2893", &aregs->txdma.pr_base_hi);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2894", &aregs->txdma.pr_base_lo);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2895", &aregs->txdma.pr_num_des);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2896", &aregs->txdma.txq_wr_addr);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2897", &aregs->txdma.txq_wr_addr_ext);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2898", &aregs->txdma.txq_rd_addr);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2899", &aregs->txdma.dma_wb_base_hi);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2900", &aregs->txdma.dma_wb_base_lo);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2901", &aregs->txdma.service_request);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2902", &aregs->txdma.service_complete);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2903", &aregs->txdma.cache_rd_index);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2904", &aregs->txdma.cache_wr_index);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2905", &aregs->txdma.tx_dma_error);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2906", &aregs->txdma.desc_abort_cnt);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2907", &aregs->txdma.payload_abort_cnt);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2908", &aregs->txdma.writeback_abort_cnt);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2909", &aregs->txdma.desc_timeout_cnt);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2910", &aregs->txdma.payload_timeout_cnt);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2911", &aregs->txdma.writeback_timeout_cnt);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2912", &aregs->txdma.desc_error_cnt);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2913", &aregs->txdma.payload_error_cnt);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2914", &aregs->txdma.writeback_error_cnt);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2915", &aregs->txdma.dropped_tlp_cnt);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2916", &aregs->txdma.new_service_complete);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2917", &aregs->txdma.ethernet_packet_cnt);
 
 	/* RXDMA regs */
-	regs_buff[num++] = readl(&aregs->rxdma.csr);
-	regs_buff[num++] = readl(&aregs->rxdma.dma_wb_base_hi);
-	regs_buff[num++] = readl(&aregs->rxdma.dma_wb_base_lo);
-	regs_buff[num++] = readl(&aregs->rxdma.num_pkt_done);
-	regs_buff[num++] = readl(&aregs->rxdma.max_pkt_time);
-	regs_buff[num++] = readl(&aregs->rxdma.rxq_rd_addr);
-	regs_buff[num++] = readl(&aregs->rxdma.rxq_rd_addr_ext);
-	regs_buff[num++] = readl(&aregs->rxdma.rxq_wr_addr);
-	regs_buff[num++] = readl(&aregs->rxdma.psr_base_hi);
-	regs_buff[num++] = readl(&aregs->rxdma.psr_base_lo);
-	regs_buff[num++] = readl(&aregs->rxdma.psr_num_des);
-	regs_buff[num++] = readl(&aregs->rxdma.psr_avail_offset);
-	regs_buff[num++] = readl(&aregs->rxdma.psr_full_offset);
-	regs_buff[num++] = readl(&aregs->rxdma.psr_access_index);
-	regs_buff[num++] = readl(&aregs->rxdma.psr_min_des);
-	regs_buff[num++] = readl(&aregs->rxdma.fbr0_base_lo);
-	regs_buff[num++] = readl(&aregs->rxdma.fbr0_base_hi);
-	regs_buff[num++] = readl(&aregs->rxdma.fbr0_num_des);
-	regs_buff[num++] = readl(&aregs->rxdma.fbr0_avail_offset);
-	regs_buff[num++] = readl(&aregs->rxdma.fbr0_full_offset);
-	regs_buff[num++] = readl(&aregs->rxdma.fbr0_rd_index);
-	regs_buff[num++] = readl(&aregs->rxdma.fbr0_min_des);
-	regs_buff[num++] = readl(&aregs->rxdma.fbr1_base_lo);
-	regs_buff[num++] = readl(&aregs->rxdma.fbr1_base_hi);
-	regs_buff[num++] = readl(&aregs->rxdma.fbr1_num_des);
-	regs_buff[num++] = readl(&aregs->rxdma.fbr1_avail_offset);
-	regs_buff[num++] = readl(&aregs->rxdma.fbr1_full_offset);
-	regs_buff[num++] = readl(&aregs->rxdma.fbr1_rd_index);
-	regs_buff[num++] = readl(&aregs->rxdma.fbr1_min_des);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2920", &aregs->rxdma.csr);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2921", &aregs->rxdma.dma_wb_base_hi);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2922", &aregs->rxdma.dma_wb_base_lo);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2923", &aregs->rxdma.num_pkt_done);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2924", &aregs->rxdma.max_pkt_time);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2925", &aregs->rxdma.rxq_rd_addr);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2926", &aregs->rxdma.rxq_rd_addr_ext);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2927", &aregs->rxdma.rxq_wr_addr);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2928", &aregs->rxdma.psr_base_hi);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2929", &aregs->rxdma.psr_base_lo);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2930", &aregs->rxdma.psr_num_des);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2931", &aregs->rxdma.psr_avail_offset);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2932", &aregs->rxdma.psr_full_offset);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2933", &aregs->rxdma.psr_access_index);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2934", &aregs->rxdma.psr_min_des);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2935", &aregs->rxdma.fbr0_base_lo);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2936", &aregs->rxdma.fbr0_base_hi);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2937", &aregs->rxdma.fbr0_num_des);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2938", &aregs->rxdma.fbr0_avail_offset);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2939", &aregs->rxdma.fbr0_full_offset);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2940", &aregs->rxdma.fbr0_rd_index);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2941", &aregs->rxdma.fbr0_min_des);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2942", &aregs->rxdma.fbr1_base_lo);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2943", &aregs->rxdma.fbr1_base_hi);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2944", &aregs->rxdma.fbr1_num_des);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2945", &aregs->rxdma.fbr1_avail_offset);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2946", &aregs->rxdma.fbr1_full_offset);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2947", &aregs->rxdma.fbr1_rd_index);
+	regs_buff[num++] = pete_readl("drivers/net/ethernet/agere/et131x.c:2948", &aregs->rxdma.fbr1_min_des);
 }
 
 static void et131x_get_drvinfo(struct net_device *netdev,
@@ -3373,7 +3373,7 @@ static irqreturn_t et131x_isr(int irq, void *dev_id)
 
 	et131x_disable_interrupts(adapter);
 
-	status = readl(&adapter->regs->global.int_status);
+	status = pete_readl("drivers/net/ethernet/agere/et131x.c:3376", &adapter->regs->global.int_status);
 
 	if (adapter->flow == FLOW_TXONLY || adapter->flow == FLOW_BOTH)
 		status &= ~INT_MASK_ENABLE;
@@ -3398,7 +3398,7 @@ static irqreturn_t et131x_isr(int irq, void *dev_id)
 		if (rx_ring->unfinished_receives)
 			status |= ET_INTR_RXDMA_XFR_DONE;
 		else if (tcb == NULL)
-			writel(0, &adapter->regs->global.watchdog_timer);
+			pete_writel("drivers/net/ethernet/agere/et131x.c:3401", 0, &adapter->regs->global.watchdog_timer);
 
 		status &= ~ET_INTR_WATCHDOG;
 	}
@@ -3415,7 +3415,7 @@ static irqreturn_t et131x_isr(int irq, void *dev_id)
 
 	if (status & ET_INTR_TXDMA_ERR) {
 		/* Following read also clears the register (COR) */
-		u32 txdma_err = readl(&iomem->txdma.tx_dma_error);
+		u32 txdma_err = pete_readl("drivers/net/ethernet/agere/et131x.c:3418", &iomem->txdma.tx_dma_error);
 
 		dev_warn(&adapter->pdev->dev,
 			 "TXDMA_ERR interrupt, error = %d\n",
@@ -3443,7 +3443,7 @@ static irqreturn_t et131x_isr(int irq, void *dev_id)
 			 * pressure register (bp req and bp xon/xoff)
 			 */
 			if (!et1310_in_phy_coma(adapter))
-				writel(3, &iomem->txmac.bp_ctrl);
+				pete_writel("drivers/net/ethernet/agere/et131x.c:3446", 3, &iomem->txmac.bp_ctrl);
 		}
 	}
 
@@ -3476,7 +3476,7 @@ static irqreturn_t et131x_isr(int irq, void *dev_id)
 		/* TRAP();*/
 
 		dev_warn(&adapter->pdev->dev, "RxDMA_ERR interrupt, error %x\n",
-			 readl(&iomem->txmac.tx_test));
+			 pete_readl("drivers/net/ethernet/agere/et131x.c:3479", &iomem->txmac.tx_test));
 	}
 
 	/* Handle the Wake on LAN Event */
@@ -3489,7 +3489,7 @@ static irqreturn_t et131x_isr(int irq, void *dev_id)
 	}
 
 	if (status & ET_INTR_TXMAC) {
-		u32 err = readl(&iomem->txmac.err);
+		u32 err = pete_readl("drivers/net/ethernet/agere/et131x.c:3492", &iomem->txmac.err);
 
 		/* When any of the errors occur and TXMAC generates an
 		 * interrupt to report these errors, it usually means that
@@ -3514,12 +3514,12 @@ static irqreturn_t et131x_isr(int irq, void *dev_id)
 		 */
 		dev_warn(&adapter->pdev->dev,
 			 "RXMAC interrupt, error 0x%08x.  Requesting reset\n",
-			 readl(&iomem->rxmac.err_reg));
+			 pete_readl("drivers/net/ethernet/agere/et131x.c:3517", &iomem->rxmac.err_reg));
 
 		dev_warn(&adapter->pdev->dev,
 			 "Enable 0x%08x, Diag 0x%08x\n",
-			 readl(&iomem->rxmac.ctrl),
-			 readl(&iomem->rxmac.rxq_diag));
+			 pete_readl("drivers/net/ethernet/agere/et131x.c:3521", &iomem->rxmac.ctrl),
+			 pete_readl("drivers/net/ethernet/agere/et131x.c:3522", &iomem->rxmac.rxq_diag));
 
 		/* If we are debugging, we want to see this error, otherwise we
 		 * just want the device to be reset and continue
@@ -3650,8 +3650,8 @@ static int et131x_set_packet_filter(struct et131x_adapter *adapter)
 	u32 ctrl;
 	u32 pf_ctrl;
 
-	ctrl = readl(&adapter->regs->rxmac.ctrl);
-	pf_ctrl = readl(&adapter->regs->rxmac.pf_ctrl);
+	ctrl = pete_readl("drivers/net/ethernet/agere/et131x.c:3653", &adapter->regs->rxmac.ctrl);
+	pf_ctrl = pete_readl("drivers/net/ethernet/agere/et131x.c:3654", &adapter->regs->rxmac.pf_ctrl);
 
 	/* Default to disabled packet filtering */
 	ctrl |= 0x04;
@@ -3693,8 +3693,8 @@ static int et131x_set_packet_filter(struct et131x_adapter *adapter)
 		 * Filter control + the enable / disable for packet filter
 		 * in the control reg.
 		 */
-		writel(pf_ctrl, &adapter->regs->rxmac.pf_ctrl);
-		writel(ctrl, &adapter->regs->rxmac.ctrl);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:3696", pf_ctrl, &adapter->regs->rxmac.pf_ctrl);
+		pete_writel("drivers/net/ethernet/agere/et131x.c:3697", ctrl, &adapter->regs->rxmac.ctrl);
 	}
 	return 0;
 }
@@ -3951,7 +3951,7 @@ static int et131x_pci_setup(struct pci_dev *pdev,
 	}
 
 	/* If Phy COMA mode was enabled when we went down, disable it here. */
-	writel(ET_PMCSR_INIT,  &adapter->regs->global.pm_csr);
+	pete_writel("drivers/net/ethernet/agere/et131x.c:3954", ET_PMCSR_INIT,  &adapter->regs->global.pm_csr);
 
 	et131x_soft_reset(adapter);
 	et131x_disable_interrupts(adapter);

@@ -328,7 +328,7 @@ static unsigned int get_div(void __iomem *reg, int shift)
 {
 	u32 val;
 
-	val = (readl(reg) >> shift) & 0x7;
+	val = (pete_readl("drivers/clk/mvebu/armada-37xx-periph.c:331", reg) >> shift) & 0x7;
 	if (val > 6)
 		return 0;
 	return val;
@@ -434,7 +434,7 @@ static u8 clk_pm_cpu_get_parent(struct clk_hw *hw)
 	if (armada_3700_pm_dvfs_is_enabled(pm_cpu->nb_pm_base)) {
 		val = armada_3700_pm_dvfs_get_cpu_parent(pm_cpu->nb_pm_base);
 	} else {
-		val = readl(pm_cpu->reg_mux) >> pm_cpu->shift_mux;
+		val = pete_readl("drivers/clk/mvebu/armada-37xx-periph.c:437", pm_cpu->reg_mux) >> pm_cpu->shift_mux;
 		val &= pm_cpu->mask_mux;
 	}
 
@@ -695,12 +695,12 @@ static int __maybe_unused armada_3700_periph_clock_suspend(struct device *dev)
 {
 	struct clk_periph_driver_data *data = dev_get_drvdata(dev);
 
-	data->tbg_sel = readl(data->reg + TBG_SEL);
-	data->div_sel0 = readl(data->reg + DIV_SEL0);
-	data->div_sel1 = readl(data->reg + DIV_SEL1);
-	data->div_sel2 = readl(data->reg + DIV_SEL2);
-	data->clk_sel = readl(data->reg + CLK_SEL);
-	data->clk_dis = readl(data->reg + CLK_DIS);
+	data->tbg_sel = pete_readl("drivers/clk/mvebu/armada-37xx-periph.c:698", data->reg + TBG_SEL);
+	data->div_sel0 = pete_readl("drivers/clk/mvebu/armada-37xx-periph.c:699", data->reg + DIV_SEL0);
+	data->div_sel1 = pete_readl("drivers/clk/mvebu/armada-37xx-periph.c:700", data->reg + DIV_SEL1);
+	data->div_sel2 = pete_readl("drivers/clk/mvebu/armada-37xx-periph.c:701", data->reg + DIV_SEL2);
+	data->clk_sel = pete_readl("drivers/clk/mvebu/armada-37xx-periph.c:702", data->reg + CLK_SEL);
+	data->clk_dis = pete_readl("drivers/clk/mvebu/armada-37xx-periph.c:703", data->reg + CLK_DIS);
 
 	return 0;
 }
@@ -710,12 +710,12 @@ static int __maybe_unused armada_3700_periph_clock_resume(struct device *dev)
 	struct clk_periph_driver_data *data = dev_get_drvdata(dev);
 
 	/* Follow the same order than what the Cortex-M3 does (ATF code) */
-	writel(data->clk_dis, data->reg + CLK_DIS);
-	writel(data->div_sel0, data->reg + DIV_SEL0);
-	writel(data->div_sel1, data->reg + DIV_SEL1);
-	writel(data->div_sel2, data->reg + DIV_SEL2);
-	writel(data->tbg_sel, data->reg + TBG_SEL);
-	writel(data->clk_sel, data->reg + CLK_SEL);
+	pete_writel("drivers/clk/mvebu/armada-37xx-periph.c:713", data->clk_dis, data->reg + CLK_DIS);
+	pete_writel("drivers/clk/mvebu/armada-37xx-periph.c:714", data->div_sel0, data->reg + DIV_SEL0);
+	pete_writel("drivers/clk/mvebu/armada-37xx-periph.c:715", data->div_sel1, data->reg + DIV_SEL1);
+	pete_writel("drivers/clk/mvebu/armada-37xx-periph.c:716", data->div_sel2, data->reg + DIV_SEL2);
+	pete_writel("drivers/clk/mvebu/armada-37xx-periph.c:717", data->tbg_sel, data->reg + TBG_SEL);
+	pete_writel("drivers/clk/mvebu/armada-37xx-periph.c:718", data->clk_sel, data->reg + CLK_SEL);
 
 	return 0;
 }

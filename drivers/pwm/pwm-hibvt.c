@@ -74,10 +74,10 @@ static void hibvt_pwm_set_bits(void __iomem *base, u32 offset,
 	void __iomem *address = base + offset;
 	u32 value;
 
-	value = readl(address);
+	value = pete_readl("drivers/pwm/pwm-hibvt.c:77", address);
 	value &= ~mask;
 	value |= (data & mask);
-	writel(value, address);
+	pete_writel("drivers/pwm/pwm-hibvt.c:80", value, address);
 }
 
 static void hibvt_pwm_enable(struct pwm_chip *chip, struct pwm_device *pwm)
@@ -138,13 +138,13 @@ static void hibvt_pwm_get_state(struct pwm_chip *chip, struct pwm_device *pwm,
 	freq = div_u64(clk_get_rate(hi_pwm_chip->clk), 1000000);
 	base = hi_pwm_chip->base;
 
-	value = readl(base + PWM_CFG0_ADDR(pwm->hwpwm));
+	value = pete_readl("drivers/pwm/pwm-hibvt.c:141", base + PWM_CFG0_ADDR(pwm->hwpwm));
 	state->period = div_u64(value * 1000, freq);
 
-	value = readl(base + PWM_CFG1_ADDR(pwm->hwpwm));
+	value = pete_readl("drivers/pwm/pwm-hibvt.c:144", base + PWM_CFG1_ADDR(pwm->hwpwm));
 	state->duty_cycle = div_u64(value * 1000, freq);
 
-	value = readl(base + PWM_CTRL_ADDR(pwm->hwpwm));
+	value = pete_readl("drivers/pwm/pwm-hibvt.c:147", base + PWM_CTRL_ADDR(pwm->hwpwm));
 	state->enabled = (PWM_ENABLE_MASK & value);
 }
 

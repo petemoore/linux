@@ -124,10 +124,10 @@ static u16 __sungem_phy_read(struct gem *gp, int phy_addr, int reg)
 	cmd |= (phy_addr << 23) & MIF_FRAME_PHYAD;
 	cmd |= (reg << 18) & MIF_FRAME_REGAD;
 	cmd |= (MIF_FRAME_TAMSB);
-	writel(cmd, gp->regs + MIF_FRAME);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:127", cmd, gp->regs + MIF_FRAME);
 
 	while (--limit) {
-		cmd = readl(gp->regs + MIF_FRAME);
+		cmd = pete_readl("drivers/net/ethernet/sun/sungem.c:130", gp->regs + MIF_FRAME);
 		if (cmd & MIF_FRAME_TALSB)
 			break;
 
@@ -162,10 +162,10 @@ static void __sungem_phy_write(struct gem *gp, int phy_addr, int reg, u16 val)
 	cmd |= (reg << 18) & MIF_FRAME_REGAD;
 	cmd |= (MIF_FRAME_TAMSB);
 	cmd |= (val & MIF_FRAME_DATA);
-	writel(cmd, gp->regs + MIF_FRAME);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:165", cmd, gp->regs + MIF_FRAME);
 
 	while (limit--) {
-		cmd = readl(gp->regs + MIF_FRAME);
+		cmd = pete_readl("drivers/net/ethernet/sun/sungem.c:168", gp->regs + MIF_FRAME);
 		if (cmd & MIF_FRAME_TALSB)
 			break;
 
@@ -187,14 +187,14 @@ static inline void sungem_phy_write(struct gem *gp, int reg, u16 val)
 static inline void gem_enable_ints(struct gem *gp)
 {
 	/* Enable all interrupts but TXDONE */
-	writel(GREG_STAT_TXDONE, gp->regs + GREG_IMASK);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:190", GREG_STAT_TXDONE, gp->regs + GREG_IMASK);
 }
 
 static inline void gem_disable_ints(struct gem *gp)
 {
 	/* Disable all interrupts, including TXDONE */
-	writel(GREG_STAT_NAPI | GREG_STAT_TXDONE, gp->regs + GREG_IMASK);
-	(void)readl(gp->regs + GREG_IMASK); /* write posting */
+	pete_writel("drivers/net/ethernet/sun/sungem.c:196", GREG_STAT_NAPI | GREG_STAT_TXDONE, gp->regs + GREG_IMASK);
+	(void)pete_readl("drivers/net/ethernet/sun/sungem.c:197", gp->regs + GREG_IMASK); /* write posting */
 }
 
 static void gem_get_cell(struct gem *gp)
@@ -255,7 +255,7 @@ static void gem_handle_mif_event(struct gem *gp, u32 reg_val, u32 changed_bits)
 
 static int gem_pcs_interrupt(struct net_device *dev, struct gem *gp, u32 gem_status)
 {
-	u32 pcs_istat = readl(gp->regs + PCS_ISTAT);
+	u32 pcs_istat = pete_readl("drivers/net/ethernet/sun/sungem.c:258", gp->regs + PCS_ISTAT);
 	u32 pcs_miistat;
 
 	if (netif_msg_intr(gp))
@@ -271,10 +271,10 @@ static int gem_pcs_interrupt(struct net_device *dev, struct gem *gp, u32 gem_sta
 	 * read it twice in such a case to see a transition
 	 * to the link being up.
 	 */
-	pcs_miistat = readl(gp->regs + PCS_MIISTAT);
+	pcs_miistat = pete_readl("drivers/net/ethernet/sun/sungem.c:274", gp->regs + PCS_MIISTAT);
 	if (!(pcs_miistat & PCS_MIISTAT_LS))
 		pcs_miistat |=
-			(readl(gp->regs + PCS_MIISTAT) &
+			(pete_readl("drivers/net/ethernet/sun/sungem.c:277", gp->regs + PCS_MIISTAT) &
 			 PCS_MIISTAT_LS);
 
 	if (pcs_miistat & PCS_MIISTAT_ANC) {
@@ -305,7 +305,7 @@ static int gem_pcs_interrupt(struct net_device *dev, struct gem *gp, u32 gem_sta
 
 static int gem_txmac_interrupt(struct net_device *dev, struct gem *gp, u32 gem_status)
 {
-	u32 txmac_stat = readl(gp->regs + MAC_TXSTAT);
+	u32 txmac_stat = pete_readl("drivers/net/ethernet/sun/sungem.c:308", gp->regs + MAC_TXSTAT);
 
 	if (netif_msg_intr(gp))
 		printk(KERN_DEBUG "%s: txmac interrupt, txmac_stat: 0x%x\n",
@@ -364,9 +364,9 @@ static int gem_rxmac_reset(struct gem *gp)
 	u32 val;
 
 	/* First, reset & disable MAC RX. */
-	writel(MAC_RXRST_CMD, gp->regs + MAC_RXRST);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:367", MAC_RXRST_CMD, gp->regs + MAC_RXRST);
 	for (limit = 0; limit < 5000; limit++) {
-		if (!(readl(gp->regs + MAC_RXRST) & MAC_RXRST_CMD))
+		if (!(pete_readl("drivers/net/ethernet/sun/sungem.c:369", gp->regs + MAC_RXRST) & MAC_RXRST_CMD))
 			break;
 		udelay(10);
 	}
@@ -375,10 +375,10 @@ static int gem_rxmac_reset(struct gem *gp)
 		return 1;
 	}
 
-	writel(gp->mac_rx_cfg & ~MAC_RXCFG_ENAB,
+	pete_writel("drivers/net/ethernet/sun/sungem.c:378", gp->mac_rx_cfg & ~MAC_RXCFG_ENAB,
 	       gp->regs + MAC_RXCFG);
 	for (limit = 0; limit < 5000; limit++) {
-		if (!(readl(gp->regs + MAC_RXCFG) & MAC_RXCFG_ENAB))
+		if (!(pete_readl("drivers/net/ethernet/sun/sungem.c:381", gp->regs + MAC_RXCFG) & MAC_RXCFG_ENAB))
 			break;
 		udelay(10);
 	}
@@ -388,9 +388,9 @@ static int gem_rxmac_reset(struct gem *gp)
 	}
 
 	/* Second, disable RX DMA. */
-	writel(0, gp->regs + RXDMA_CFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:391", 0, gp->regs + RXDMA_CFG);
 	for (limit = 0; limit < 5000; limit++) {
-		if (!(readl(gp->regs + RXDMA_CFG) & RXDMA_CFG_ENABLE))
+		if (!(pete_readl("drivers/net/ethernet/sun/sungem.c:393", gp->regs + RXDMA_CFG) & RXDMA_CFG_ENABLE))
 			break;
 		udelay(10);
 	}
@@ -402,10 +402,10 @@ static int gem_rxmac_reset(struct gem *gp)
 	mdelay(5);
 
 	/* Execute RX reset command. */
-	writel(gp->swrst_base | GREG_SWRST_RXRST,
+	pete_writel("drivers/net/ethernet/sun/sungem.c:405", gp->swrst_base | GREG_SWRST_RXRST,
 	       gp->regs + GREG_SWRST);
 	for (limit = 0; limit < 5000; limit++) {
-		if (!(readl(gp->regs + GREG_SWRST) & GREG_SWRST_RXRST))
+		if (!(pete_readl("drivers/net/ethernet/sun/sungem.c:408", gp->regs + GREG_SWRST) & GREG_SWRST_RXRST))
 			break;
 		udelay(10);
 	}
@@ -430,35 +430,35 @@ static int gem_rxmac_reset(struct gem *gp)
 	/* Now we must reprogram the rest of RX unit. */
 	desc_dma = (u64) gp->gblock_dvma;
 	desc_dma += (INIT_BLOCK_TX_RING_SIZE * sizeof(struct gem_txd));
-	writel(desc_dma >> 32, gp->regs + RXDMA_DBHI);
-	writel(desc_dma & 0xffffffff, gp->regs + RXDMA_DBLOW);
-	writel(RX_RING_SIZE - 4, gp->regs + RXDMA_KICK);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:433", desc_dma >> 32, gp->regs + RXDMA_DBHI);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:434", desc_dma & 0xffffffff, gp->regs + RXDMA_DBLOW);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:435", RX_RING_SIZE - 4, gp->regs + RXDMA_KICK);
 	val = (RXDMA_CFG_BASE | (RX_OFFSET << 10) |
 	       (ETH_HLEN << 13) | RXDMA_CFG_FTHRESH_128);
-	writel(val, gp->regs + RXDMA_CFG);
-	if (readl(gp->regs + GREG_BIFCFG) & GREG_BIFCFG_M66EN)
-		writel(((5 & RXDMA_BLANK_IPKTS) |
+	pete_writel("drivers/net/ethernet/sun/sungem.c:438", val, gp->regs + RXDMA_CFG);
+	if (pete_readl("drivers/net/ethernet/sun/sungem.c:439", gp->regs + GREG_BIFCFG) & GREG_BIFCFG_M66EN)
+		pete_writel("drivers/net/ethernet/sun/sungem.c:440", ((5 & RXDMA_BLANK_IPKTS) |
 			((8 << 12) & RXDMA_BLANK_ITIME)),
 		       gp->regs + RXDMA_BLANK);
 	else
-		writel(((5 & RXDMA_BLANK_IPKTS) |
+		pete_writel("drivers/net/ethernet/sun/sungem.c:444", ((5 & RXDMA_BLANK_IPKTS) |
 			((4 << 12) & RXDMA_BLANK_ITIME)),
 		       gp->regs + RXDMA_BLANK);
 	val  = (((gp->rx_pause_off / 64) << 0) & RXDMA_PTHRESH_OFF);
 	val |= (((gp->rx_pause_on / 64) << 12) & RXDMA_PTHRESH_ON);
-	writel(val, gp->regs + RXDMA_PTHRESH);
-	val = readl(gp->regs + RXDMA_CFG);
-	writel(val | RXDMA_CFG_ENABLE, gp->regs + RXDMA_CFG);
-	writel(MAC_RXSTAT_RCV, gp->regs + MAC_RXMASK);
-	val = readl(gp->regs + MAC_RXCFG);
-	writel(val | MAC_RXCFG_ENAB, gp->regs + MAC_RXCFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:449", val, gp->regs + RXDMA_PTHRESH);
+	val = pete_readl("drivers/net/ethernet/sun/sungem.c:450", gp->regs + RXDMA_CFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:451", val | RXDMA_CFG_ENABLE, gp->regs + RXDMA_CFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:452", MAC_RXSTAT_RCV, gp->regs + MAC_RXMASK);
+	val = pete_readl("drivers/net/ethernet/sun/sungem.c:453", gp->regs + MAC_RXCFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:454", val | MAC_RXCFG_ENAB, gp->regs + MAC_RXCFG);
 
 	return 0;
 }
 
 static int gem_rxmac_interrupt(struct net_device *dev, struct gem *gp, u32 gem_status)
 {
-	u32 rxmac_stat = readl(gp->regs + MAC_RXSTAT);
+	u32 rxmac_stat = pete_readl("drivers/net/ethernet/sun/sungem.c:461", gp->regs + MAC_RXSTAT);
 	int ret = 0;
 
 	if (netif_msg_intr(gp))
@@ -466,7 +466,7 @@ static int gem_rxmac_interrupt(struct net_device *dev, struct gem *gp, u32 gem_s
 			gp->dev->name, rxmac_stat);
 
 	if (rxmac_stat & MAC_RXSTAT_OFLW) {
-		u32 smac = readl(gp->regs + MAC_SMACHINE);
+		u32 smac = pete_readl("drivers/net/ethernet/sun/sungem.c:469", gp->regs + MAC_SMACHINE);
 
 		netdev_err(dev, "RX MAC fifo overflow smac[%08x]\n", smac);
 		dev->stats.rx_over_errors++;
@@ -492,7 +492,7 @@ static int gem_rxmac_interrupt(struct net_device *dev, struct gem *gp, u32 gem_s
 
 static int gem_mac_interrupt(struct net_device *dev, struct gem *gp, u32 gem_status)
 {
-	u32 mac_cstat = readl(gp->regs + MAC_CSTAT);
+	u32 mac_cstat = pete_readl("drivers/net/ethernet/sun/sungem.c:495", gp->regs + MAC_CSTAT);
 
 	if (netif_msg_intr(gp))
 		printk(KERN_DEBUG "%s: mac interrupt, mac_cstat: 0x%x\n",
@@ -513,7 +513,7 @@ static int gem_mac_interrupt(struct net_device *dev, struct gem *gp, u32 gem_sta
 
 static int gem_mif_interrupt(struct net_device *dev, struct gem *gp, u32 gem_status)
 {
-	u32 mif_status = readl(gp->regs + MIF_STATUS);
+	u32 mif_status = pete_readl("drivers/net/ethernet/sun/sungem.c:516", gp->regs + MIF_STATUS);
 	u32 reg_val, changed_bits;
 
 	reg_val = (mif_status & MIF_STATUS_DATA) >> 16;
@@ -526,7 +526,7 @@ static int gem_mif_interrupt(struct net_device *dev, struct gem *gp, u32 gem_sta
 
 static int gem_pci_interrupt(struct net_device *dev, struct gem *gp, u32 gem_status)
 {
-	u32 pci_estat = readl(gp->regs + GREG_PCIESTAT);
+	u32 pci_estat = pete_readl("drivers/net/ethernet/sun/sungem.c:529", gp->regs + GREG_PCIESTAT);
 
 	if (gp->pdev->vendor == PCI_VENDOR_ID_SUN &&
 	    gp->pdev->device == PCI_DEVICE_ID_SUN_GEM) {
@@ -725,7 +725,7 @@ static __inline__ void gem_post_rxds(struct gem *gp, int limit)
 	}
 	if (kick >= 0) {
 		mb();
-		writel(kick, gp->regs + RXDMA_KICK);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:728", kick, gp->regs + RXDMA_KICK);
 	}
 }
 
@@ -751,11 +751,11 @@ static int gem_rx(struct gem *gp, int work_to_do)
 
 	if (netif_msg_rx_status(gp))
 		printk(KERN_DEBUG "%s: rx interrupt, done: %d, rx_new: %d\n",
-			gp->dev->name, readl(gp->regs + RXDMA_DONE), gp->rx_new);
+			gp->dev->name, pete_readl("drivers/net/ethernet/sun/sungem.c:754", gp->regs + RXDMA_DONE), gp->rx_new);
 
 	entry = gp->rx_new;
 	drops = 0;
-	done = readl(gp->regs + RXDMA_DONE);
+	done = pete_readl("drivers/net/ethernet/sun/sungem.c:758", gp->regs + RXDMA_DONE);
 	for (;;) {
 		struct gem_rxd *rxd = &gp->init_block->rxd[entry];
 		struct sk_buff *skb;
@@ -777,7 +777,7 @@ static int gem_rx(struct gem *gp, int work_to_do)
 		 * register to prevent this from happening.
 		 */
 		if (entry == done) {
-			done = readl(gp->regs + RXDMA_DONE);
+			done = pete_readl("drivers/net/ethernet/sun/sungem.c:780", gp->regs + RXDMA_DONE);
 			if (entry == done)
 				break;
 		}
@@ -912,7 +912,7 @@ static int gem_poll(struct napi_struct *napi, int budget)
 		if (work_done >= budget)
 			return work_done;
 
-		gp->status = readl(gp->regs + GREG_STAT);
+		gp->status = pete_readl("drivers/net/ethernet/sun/sungem.c:915", gp->regs + GREG_STAT);
 	} while (gp->status & GREG_STAT_NAPI);
 
 	napi_complete_done(napi, work_done);
@@ -927,7 +927,7 @@ static irqreturn_t gem_interrupt(int irq, void *dev_id)
 	struct gem *gp = netdev_priv(dev);
 
 	if (napi_schedule_prep(&gp->napi)) {
-		u32 gem_status = readl(gp->regs + GREG_STAT);
+		u32 gem_status = pete_readl("drivers/net/ethernet/sun/sungem.c:930", gp->regs + GREG_STAT);
 
 		if (unlikely(gem_status == 0)) {
 			napi_enable(&gp->napi);
@@ -967,13 +967,13 @@ static void gem_tx_timeout(struct net_device *dev, unsigned int txqueue)
 	netdev_err(dev, "transmit timed out, resetting\n");
 
 	netdev_err(dev, "TX_STATE[%08x:%08x:%08x]\n",
-		   readl(gp->regs + TXDMA_CFG),
-		   readl(gp->regs + MAC_TXSTAT),
-		   readl(gp->regs + MAC_TXCFG));
+		   pete_readl("drivers/net/ethernet/sun/sungem.c:970", gp->regs + TXDMA_CFG),
+		   pete_readl("drivers/net/ethernet/sun/sungem.c:971", gp->regs + MAC_TXSTAT),
+		   pete_readl("drivers/net/ethernet/sun/sungem.c:972", gp->regs + MAC_TXCFG));
 	netdev_err(dev, "RX_STATE[%08x:%08x:%08x]\n",
-		   readl(gp->regs + RXDMA_CFG),
-		   readl(gp->regs + MAC_RXSTAT),
-		   readl(gp->regs + MAC_RXCFG));
+		   pete_readl("drivers/net/ethernet/sun/sungem.c:974", gp->regs + RXDMA_CFG),
+		   pete_readl("drivers/net/ethernet/sun/sungem.c:975", gp->regs + MAC_RXSTAT),
+		   pete_readl("drivers/net/ethernet/sun/sungem.c:976", gp->regs + MAC_RXCFG));
 
 	gem_schedule_reset(gp);
 }
@@ -1101,7 +1101,7 @@ static netdev_tx_t gem_start_xmit(struct sk_buff *skb,
 		printk(KERN_DEBUG "%s: tx queued, slot %d, skblen %d\n",
 		       dev->name, entry, skb->len);
 	mb();
-	writel(gp->tx_new, gp->regs + TXDMA_KICK);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1104", gp->tx_new, gp->regs + TXDMA_KICK);
 
 	return NETDEV_TX_OK;
 }
@@ -1112,12 +1112,12 @@ static void gem_pcs_reset(struct gem *gp)
 	u32 val;
 
 	/* Reset PCS unit. */
-	val = readl(gp->regs + PCS_MIICTRL);
+	val = pete_readl("drivers/net/ethernet/sun/sungem.c:1115", gp->regs + PCS_MIICTRL);
 	val |= PCS_MIICTRL_RST;
-	writel(val, gp->regs + PCS_MIICTRL);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1117", val, gp->regs + PCS_MIICTRL);
 
 	limit = 32;
-	while (readl(gp->regs + PCS_MIICTRL) & PCS_MIICTRL_RST) {
+	while (pete_readl("drivers/net/ethernet/sun/sungem.c:1120", gp->regs + PCS_MIICTRL) & PCS_MIICTRL_RST) {
 		udelay(100);
 		if (limit-- <= 0)
 			break;
@@ -1133,40 +1133,40 @@ static void gem_pcs_reinit_adv(struct gem *gp)
 	/* Make sure PCS is disabled while changing advertisement
 	 * configuration.
 	 */
-	val = readl(gp->regs + PCS_CFG);
+	val = pete_readl("drivers/net/ethernet/sun/sungem.c:1136", gp->regs + PCS_CFG);
 	val &= ~(PCS_CFG_ENABLE | PCS_CFG_TO);
-	writel(val, gp->regs + PCS_CFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1138", val, gp->regs + PCS_CFG);
 
 	/* Advertise all capabilities except asymmetric
 	 * pause.
 	 */
-	val = readl(gp->regs + PCS_MIIADV);
+	val = pete_readl("drivers/net/ethernet/sun/sungem.c:1143", gp->regs + PCS_MIIADV);
 	val |= (PCS_MIIADV_FD | PCS_MIIADV_HD |
 		PCS_MIIADV_SP | PCS_MIIADV_AP);
-	writel(val, gp->regs + PCS_MIIADV);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1146", val, gp->regs + PCS_MIIADV);
 
 	/* Enable and restart auto-negotiation, disable wrapback/loopback,
 	 * and re-enable PCS.
 	 */
-	val = readl(gp->regs + PCS_MIICTRL);
+	val = pete_readl("drivers/net/ethernet/sun/sungem.c:1151", gp->regs + PCS_MIICTRL);
 	val |= (PCS_MIICTRL_RAN | PCS_MIICTRL_ANE);
 	val &= ~PCS_MIICTRL_WB;
-	writel(val, gp->regs + PCS_MIICTRL);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1154", val, gp->regs + PCS_MIICTRL);
 
-	val = readl(gp->regs + PCS_CFG);
+	val = pete_readl("drivers/net/ethernet/sun/sungem.c:1156", gp->regs + PCS_CFG);
 	val |= PCS_CFG_ENABLE;
-	writel(val, gp->regs + PCS_CFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1158", val, gp->regs + PCS_CFG);
 
 	/* Make sure serialink loopback is off.  The meaning
 	 * of this bit is logically inverted based upon whether
 	 * you are in Serialink or SERDES mode.
 	 */
-	val = readl(gp->regs + PCS_SCTRL);
+	val = pete_readl("drivers/net/ethernet/sun/sungem.c:1164", gp->regs + PCS_SCTRL);
 	if (gp->phy_type == phy_serialink)
 		val &= ~PCS_SCTRL_LOOP;
 	else
 		val |= PCS_SCTRL_LOOP;
-	writel(val, gp->regs + PCS_SCTRL);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1169", val, gp->regs + PCS_SCTRL);
 }
 
 #define STOP_TRIES 32
@@ -1177,17 +1177,17 @@ static void gem_reset(struct gem *gp)
 	u32 val;
 
 	/* Make sure we won't get any more interrupts */
-	writel(0xffffffff, gp->regs + GREG_IMASK);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1180", 0xffffffff, gp->regs + GREG_IMASK);
 
 	/* Reset the chip */
-	writel(gp->swrst_base | GREG_SWRST_TXRST | GREG_SWRST_RXRST,
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1183", gp->swrst_base | GREG_SWRST_TXRST | GREG_SWRST_RXRST,
 	       gp->regs + GREG_SWRST);
 
 	limit = STOP_TRIES;
 
 	do {
 		udelay(20);
-		val = readl(gp->regs + GREG_SWRST);
+		val = pete_readl("drivers/net/ethernet/sun/sungem.c:1190", gp->regs + GREG_SWRST);
 		if (limit-- <= 0)
 			break;
 	} while (val & (GREG_SWRST_TXRST | GREG_SWRST_RXRST));
@@ -1204,21 +1204,21 @@ static void gem_start_dma(struct gem *gp)
 	u32 val;
 
 	/* We are ready to rock, turn everything on. */
-	val = readl(gp->regs + TXDMA_CFG);
-	writel(val | TXDMA_CFG_ENABLE, gp->regs + TXDMA_CFG);
-	val = readl(gp->regs + RXDMA_CFG);
-	writel(val | RXDMA_CFG_ENABLE, gp->regs + RXDMA_CFG);
-	val = readl(gp->regs + MAC_TXCFG);
-	writel(val | MAC_TXCFG_ENAB, gp->regs + MAC_TXCFG);
-	val = readl(gp->regs + MAC_RXCFG);
-	writel(val | MAC_RXCFG_ENAB, gp->regs + MAC_RXCFG);
+	val = pete_readl("drivers/net/ethernet/sun/sungem.c:1207", gp->regs + TXDMA_CFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1208", val | TXDMA_CFG_ENABLE, gp->regs + TXDMA_CFG);
+	val = pete_readl("drivers/net/ethernet/sun/sungem.c:1209", gp->regs + RXDMA_CFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1210", val | RXDMA_CFG_ENABLE, gp->regs + RXDMA_CFG);
+	val = pete_readl("drivers/net/ethernet/sun/sungem.c:1211", gp->regs + MAC_TXCFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1212", val | MAC_TXCFG_ENAB, gp->regs + MAC_TXCFG);
+	val = pete_readl("drivers/net/ethernet/sun/sungem.c:1213", gp->regs + MAC_RXCFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1214", val | MAC_RXCFG_ENAB, gp->regs + MAC_RXCFG);
 
-	(void) readl(gp->regs + MAC_RXCFG);
+	(void) pete_readl("drivers/net/ethernet/sun/sungem.c:1216", gp->regs + MAC_RXCFG);
 	udelay(100);
 
 	gem_enable_ints(gp);
 
-	writel(RX_RING_SIZE - 4, gp->regs + RXDMA_KICK);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1221", RX_RING_SIZE - 4, gp->regs + RXDMA_KICK);
 }
 
 /* DMA won't be actually stopped before about 4ms tho ...
@@ -1228,16 +1228,16 @@ static void gem_stop_dma(struct gem *gp)
 	u32 val;
 
 	/* We are done rocking, turn everything off. */
-	val = readl(gp->regs + TXDMA_CFG);
-	writel(val & ~TXDMA_CFG_ENABLE, gp->regs + TXDMA_CFG);
-	val = readl(gp->regs + RXDMA_CFG);
-	writel(val & ~RXDMA_CFG_ENABLE, gp->regs + RXDMA_CFG);
-	val = readl(gp->regs + MAC_TXCFG);
-	writel(val & ~MAC_TXCFG_ENAB, gp->regs + MAC_TXCFG);
-	val = readl(gp->regs + MAC_RXCFG);
-	writel(val & ~MAC_RXCFG_ENAB, gp->regs + MAC_RXCFG);
+	val = pete_readl("drivers/net/ethernet/sun/sungem.c:1231", gp->regs + TXDMA_CFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1232", val & ~TXDMA_CFG_ENABLE, gp->regs + TXDMA_CFG);
+	val = pete_readl("drivers/net/ethernet/sun/sungem.c:1233", gp->regs + RXDMA_CFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1234", val & ~RXDMA_CFG_ENABLE, gp->regs + RXDMA_CFG);
+	val = pete_readl("drivers/net/ethernet/sun/sungem.c:1235", gp->regs + MAC_TXCFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1236", val & ~MAC_TXCFG_ENAB, gp->regs + MAC_TXCFG);
+	val = pete_readl("drivers/net/ethernet/sun/sungem.c:1237", gp->regs + MAC_RXCFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1238", val & ~MAC_RXCFG_ENAB, gp->regs + MAC_RXCFG);
 
-	(void) readl(gp->regs + MAC_RXCFG);
+	(void) pete_readl("drivers/net/ethernet/sun/sungem.c:1240", gp->regs + MAC_RXCFG);
 
 	/* Need to wait a bit ... done by the caller */
 }
@@ -1353,7 +1353,7 @@ static int gem_set_link_modes(struct gem *gp)
 		pause = gp->phy_mii.pause;
 	} else if (gp->phy_type == phy_serialink ||
 	    	   gp->phy_type == phy_serdes) {
-		u32 pcs_lpa = readl(gp->regs + PCS_MIILP);
+		u32 pcs_lpa = pete_readl("drivers/net/ethernet/sun/sungem.c:1356", gp->regs + PCS_MIILP);
 
 		if ((pcs_lpa & PCS_MIIADV_FD) || gp->phy_type == phy_serdes)
 			full_duplex = 1;
@@ -1375,7 +1375,7 @@ static int gem_set_link_modes(struct gem *gp)
 	} else {
 		/* MAC_TXCFG_NBO must be zero. */
 	}
-	writel(val, gp->regs + MAC_TXCFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1378", val, gp->regs + MAC_TXCFG);
 
 	val = (MAC_XIFCFG_OE | MAC_XIFCFG_LLED);
 	if (!full_duplex &&
@@ -1389,43 +1389,43 @@ static int gem_set_link_modes(struct gem *gp)
 	if (speed == SPEED_1000)
 		val |= (MAC_XIFCFG_GMII);
 
-	writel(val, gp->regs + MAC_XIFCFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1392", val, gp->regs + MAC_XIFCFG);
 
 	/* If gigabit and half-duplex, enable carrier extension
 	 * mode.  Else, disable it.
 	 */
 	if (speed == SPEED_1000 && !full_duplex) {
-		val = readl(gp->regs + MAC_TXCFG);
-		writel(val | MAC_TXCFG_TCE, gp->regs + MAC_TXCFG);
+		val = pete_readl("drivers/net/ethernet/sun/sungem.c:1398", gp->regs + MAC_TXCFG);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:1399", val | MAC_TXCFG_TCE, gp->regs + MAC_TXCFG);
 
-		val = readl(gp->regs + MAC_RXCFG);
-		writel(val | MAC_RXCFG_RCE, gp->regs + MAC_RXCFG);
+		val = pete_readl("drivers/net/ethernet/sun/sungem.c:1401", gp->regs + MAC_RXCFG);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:1402", val | MAC_RXCFG_RCE, gp->regs + MAC_RXCFG);
 	} else {
-		val = readl(gp->regs + MAC_TXCFG);
-		writel(val & ~MAC_TXCFG_TCE, gp->regs + MAC_TXCFG);
+		val = pete_readl("drivers/net/ethernet/sun/sungem.c:1404", gp->regs + MAC_TXCFG);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:1405", val & ~MAC_TXCFG_TCE, gp->regs + MAC_TXCFG);
 
-		val = readl(gp->regs + MAC_RXCFG);
-		writel(val & ~MAC_RXCFG_RCE, gp->regs + MAC_RXCFG);
+		val = pete_readl("drivers/net/ethernet/sun/sungem.c:1407", gp->regs + MAC_RXCFG);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:1408", val & ~MAC_RXCFG_RCE, gp->regs + MAC_RXCFG);
 	}
 
 	if (gp->phy_type == phy_serialink ||
 	    gp->phy_type == phy_serdes) {
-		u32 pcs_lpa = readl(gp->regs + PCS_MIILP);
+		u32 pcs_lpa = pete_readl("drivers/net/ethernet/sun/sungem.c:1413", gp->regs + PCS_MIILP);
 
 		if (pcs_lpa & (PCS_MIIADV_SP | PCS_MIIADV_AP))
 			pause = 1;
 	}
 
 	if (!full_duplex)
-		writel(512, gp->regs + MAC_STIME);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:1420", 512, gp->regs + MAC_STIME);
 	else
-		writel(64, gp->regs + MAC_STIME);
-	val = readl(gp->regs + MAC_MCCFG);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:1422", 64, gp->regs + MAC_STIME);
+	val = pete_readl("drivers/net/ethernet/sun/sungem.c:1423", gp->regs + MAC_MCCFG);
 	if (pause)
 		val |= (MAC_MCCFG_SPE | MAC_MCCFG_RPE);
 	else
 		val &= ~(MAC_MCCFG_SPE | MAC_MCCFG_RPE);
-	writel(val, gp->regs + MAC_MCCFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1428", val, gp->regs + MAC_MCCFG);
 
 	gem_start_dma(gp);
 
@@ -1502,10 +1502,10 @@ static void gem_link_timer(struct timer_list *t)
 
 	if (gp->phy_type == phy_serialink ||
 	    gp->phy_type == phy_serdes) {
-		u32 val = readl(gp->regs + PCS_MIISTAT);
+		u32 val = pete_readl("drivers/net/ethernet/sun/sungem.c:1505", gp->regs + PCS_MIISTAT);
 
 		if (!(val & PCS_MIISTAT_LS))
-			val = readl(gp->regs + PCS_MIISTAT);
+			val = pete_readl("drivers/net/ethernet/sun/sungem.c:1508", gp->regs + PCS_MIISTAT);
 
 		if ((val & PCS_MIISTAT_LS) != 0) {
 			if (gp->lstate == link_up)
@@ -1667,9 +1667,9 @@ static void gem_init_phy(struct gem *gp)
 	u32 mifcfg;
 
 	/* Revert MIF CFG setting done on stop_phy */
-	mifcfg = readl(gp->regs + MIF_CFG);
+	mifcfg = pete_readl("drivers/net/ethernet/sun/sungem.c:1670", gp->regs + MIF_CFG);
 	mifcfg &= ~MIF_CFG_BBMODE;
-	writel(mifcfg, gp->regs + MIF_CFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1672", mifcfg, gp->regs + MIF_CFG);
 
 	if (gp->pdev->vendor == PCI_VENDOR_ID_APPLE) {
 		int i;
@@ -1709,7 +1709,7 @@ static void gem_init_phy(struct gem *gp)
 			val = PCS_DMODE_ESM;
 		}
 
-		writel(val, gp->regs + PCS_DMODE);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:1712", val, gp->regs + PCS_DMODE);
 	}
 
 	if (gp->phy_type == phy_mii_mdio0 ||
@@ -1745,33 +1745,33 @@ static void gem_init_dma(struct gem *gp)
 	u32 val;
 
 	val = (TXDMA_CFG_BASE | (0x7ff << 10) | TXDMA_CFG_PMODE);
-	writel(val, gp->regs + TXDMA_CFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1748", val, gp->regs + TXDMA_CFG);
 
-	writel(desc_dma >> 32, gp->regs + TXDMA_DBHI);
-	writel(desc_dma & 0xffffffff, gp->regs + TXDMA_DBLOW);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1750", desc_dma >> 32, gp->regs + TXDMA_DBHI);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1751", desc_dma & 0xffffffff, gp->regs + TXDMA_DBLOW);
 	desc_dma += (INIT_BLOCK_TX_RING_SIZE * sizeof(struct gem_txd));
 
-	writel(0, gp->regs + TXDMA_KICK);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1754", 0, gp->regs + TXDMA_KICK);
 
 	val = (RXDMA_CFG_BASE | (RX_OFFSET << 10) |
 	       (ETH_HLEN << 13) | RXDMA_CFG_FTHRESH_128);
-	writel(val, gp->regs + RXDMA_CFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1758", val, gp->regs + RXDMA_CFG);
 
-	writel(desc_dma >> 32, gp->regs + RXDMA_DBHI);
-	writel(desc_dma & 0xffffffff, gp->regs + RXDMA_DBLOW);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1760", desc_dma >> 32, gp->regs + RXDMA_DBHI);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1761", desc_dma & 0xffffffff, gp->regs + RXDMA_DBLOW);
 
-	writel(RX_RING_SIZE - 4, gp->regs + RXDMA_KICK);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1763", RX_RING_SIZE - 4, gp->regs + RXDMA_KICK);
 
 	val  = (((gp->rx_pause_off / 64) << 0) & RXDMA_PTHRESH_OFF);
 	val |= (((gp->rx_pause_on / 64) << 12) & RXDMA_PTHRESH_ON);
-	writel(val, gp->regs + RXDMA_PTHRESH);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1767", val, gp->regs + RXDMA_PTHRESH);
 
-	if (readl(gp->regs + GREG_BIFCFG) & GREG_BIFCFG_M66EN)
-		writel(((5 & RXDMA_BLANK_IPKTS) |
+	if (pete_readl("drivers/net/ethernet/sun/sungem.c:1769", gp->regs + GREG_BIFCFG) & GREG_BIFCFG_M66EN)
+		pete_writel("drivers/net/ethernet/sun/sungem.c:1770", ((5 & RXDMA_BLANK_IPKTS) |
 			((8 << 12) & RXDMA_BLANK_ITIME)),
 		       gp->regs + RXDMA_BLANK);
 	else
-		writel(((5 & RXDMA_BLANK_IPKTS) |
+		pete_writel("drivers/net/ethernet/sun/sungem.c:1774", ((5 & RXDMA_BLANK_IPKTS) |
 			((4 << 12) & RXDMA_BLANK_ITIME)),
 		       gp->regs + RXDMA_BLANK);
 }
@@ -1784,7 +1784,7 @@ static u32 gem_setup_multicast(struct gem *gp)
 	if ((gp->dev->flags & IFF_ALLMULTI) ||
 	    (netdev_mc_count(gp->dev) > 256)) {
 	    	for (i=0; i<16; i++)
-			writel(0xffff, gp->regs + MAC_HASH0 + (i << 2));
+			pete_writel("drivers/net/ethernet/sun/sungem.c:1787", 0xffff, gp->regs + MAC_HASH0 + (i << 2));
 		rxcfg |= MAC_RXCFG_HFE;
 	} else if (gp->dev->flags & IFF_PROMISC) {
 		rxcfg |= MAC_RXCFG_PROM;
@@ -1801,7 +1801,7 @@ static u32 gem_setup_multicast(struct gem *gp)
 			hash_table[crc >> 4] |= 1 << (15 - (crc & 0xf));
 		}
 	    	for (i=0; i<16; i++)
-			writel(hash_table[i], gp->regs + MAC_HASH0 + (i << 2));
+			pete_writel("drivers/net/ethernet/sun/sungem.c:1804", hash_table[i], gp->regs + MAC_HASH0 + (i << 2));
 		rxcfg |= MAC_RXCFG_HFE;
 	}
 
@@ -1812,82 +1812,82 @@ static void gem_init_mac(struct gem *gp)
 {
 	unsigned char *e = &gp->dev->dev_addr[0];
 
-	writel(0x1bf0, gp->regs + MAC_SNDPAUSE);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1815", 0x1bf0, gp->regs + MAC_SNDPAUSE);
 
-	writel(0x00, gp->regs + MAC_IPG0);
-	writel(0x08, gp->regs + MAC_IPG1);
-	writel(0x04, gp->regs + MAC_IPG2);
-	writel(0x40, gp->regs + MAC_STIME);
-	writel(0x40, gp->regs + MAC_MINFSZ);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1817", 0x00, gp->regs + MAC_IPG0);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1818", 0x08, gp->regs + MAC_IPG1);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1819", 0x04, gp->regs + MAC_IPG2);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1820", 0x40, gp->regs + MAC_STIME);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1821", 0x40, gp->regs + MAC_MINFSZ);
 
 	/* Ethernet payload + header + FCS + optional VLAN tag. */
-	writel(0x20000000 | (gp->rx_buf_sz + 4), gp->regs + MAC_MAXFSZ);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1824", 0x20000000 | (gp->rx_buf_sz + 4), gp->regs + MAC_MAXFSZ);
 
-	writel(0x07, gp->regs + MAC_PASIZE);
-	writel(0x04, gp->regs + MAC_JAMSIZE);
-	writel(0x10, gp->regs + MAC_ATTLIM);
-	writel(0x8808, gp->regs + MAC_MCTYPE);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1826", 0x07, gp->regs + MAC_PASIZE);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1827", 0x04, gp->regs + MAC_JAMSIZE);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1828", 0x10, gp->regs + MAC_ATTLIM);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1829", 0x8808, gp->regs + MAC_MCTYPE);
 
-	writel((e[5] | (e[4] << 8)) & 0x3ff, gp->regs + MAC_RANDSEED);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1831", (e[5] | (e[4] << 8)) & 0x3ff, gp->regs + MAC_RANDSEED);
 
-	writel((e[4] << 8) | e[5], gp->regs + MAC_ADDR0);
-	writel((e[2] << 8) | e[3], gp->regs + MAC_ADDR1);
-	writel((e[0] << 8) | e[1], gp->regs + MAC_ADDR2);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1833", (e[4] << 8) | e[5], gp->regs + MAC_ADDR0);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1834", (e[2] << 8) | e[3], gp->regs + MAC_ADDR1);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1835", (e[0] << 8) | e[1], gp->regs + MAC_ADDR2);
 
-	writel(0, gp->regs + MAC_ADDR3);
-	writel(0, gp->regs + MAC_ADDR4);
-	writel(0, gp->regs + MAC_ADDR5);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1837", 0, gp->regs + MAC_ADDR3);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1838", 0, gp->regs + MAC_ADDR4);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1839", 0, gp->regs + MAC_ADDR5);
 
-	writel(0x0001, gp->regs + MAC_ADDR6);
-	writel(0xc200, gp->regs + MAC_ADDR7);
-	writel(0x0180, gp->regs + MAC_ADDR8);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1841", 0x0001, gp->regs + MAC_ADDR6);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1842", 0xc200, gp->regs + MAC_ADDR7);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1843", 0x0180, gp->regs + MAC_ADDR8);
 
-	writel(0, gp->regs + MAC_AFILT0);
-	writel(0, gp->regs + MAC_AFILT1);
-	writel(0, gp->regs + MAC_AFILT2);
-	writel(0, gp->regs + MAC_AF21MSK);
-	writel(0, gp->regs + MAC_AF0MSK);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1845", 0, gp->regs + MAC_AFILT0);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1846", 0, gp->regs + MAC_AFILT1);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1847", 0, gp->regs + MAC_AFILT2);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1848", 0, gp->regs + MAC_AF21MSK);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1849", 0, gp->regs + MAC_AF0MSK);
 
 	gp->mac_rx_cfg = gem_setup_multicast(gp);
 #ifdef STRIP_FCS
 	gp->mac_rx_cfg |= MAC_RXCFG_SFCS;
 #endif
-	writel(0, gp->regs + MAC_NCOLL);
-	writel(0, gp->regs + MAC_FASUCC);
-	writel(0, gp->regs + MAC_ECOLL);
-	writel(0, gp->regs + MAC_LCOLL);
-	writel(0, gp->regs + MAC_DTIMER);
-	writel(0, gp->regs + MAC_PATMPS);
-	writel(0, gp->regs + MAC_RFCTR);
-	writel(0, gp->regs + MAC_LERR);
-	writel(0, gp->regs + MAC_AERR);
-	writel(0, gp->regs + MAC_FCSERR);
-	writel(0, gp->regs + MAC_RXCVERR);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1855", 0, gp->regs + MAC_NCOLL);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1856", 0, gp->regs + MAC_FASUCC);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1857", 0, gp->regs + MAC_ECOLL);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1858", 0, gp->regs + MAC_LCOLL);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1859", 0, gp->regs + MAC_DTIMER);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1860", 0, gp->regs + MAC_PATMPS);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1861", 0, gp->regs + MAC_RFCTR);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1862", 0, gp->regs + MAC_LERR);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1863", 0, gp->regs + MAC_AERR);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1864", 0, gp->regs + MAC_FCSERR);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1865", 0, gp->regs + MAC_RXCVERR);
 
 	/* Clear RX/TX/MAC/XIF config, we will set these up and enable
 	 * them once a link is established.
 	 */
-	writel(0, gp->regs + MAC_TXCFG);
-	writel(gp->mac_rx_cfg, gp->regs + MAC_RXCFG);
-	writel(0, gp->regs + MAC_MCCFG);
-	writel(0, gp->regs + MAC_XIFCFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1870", 0, gp->regs + MAC_TXCFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1871", gp->mac_rx_cfg, gp->regs + MAC_RXCFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1872", 0, gp->regs + MAC_MCCFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1873", 0, gp->regs + MAC_XIFCFG);
 
 	/* Setup MAC interrupts.  We want to get all of the interesting
 	 * counter expiration events, but we do not want to hear about
 	 * normal rx/tx as the DMA engine tells us that.
 	 */
-	writel(MAC_TXSTAT_XMIT, gp->regs + MAC_TXMASK);
-	writel(MAC_RXSTAT_RCV, gp->regs + MAC_RXMASK);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1879", MAC_TXSTAT_XMIT, gp->regs + MAC_TXMASK);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1880", MAC_RXSTAT_RCV, gp->regs + MAC_RXMASK);
 
 	/* Don't enable even the PAUSE interrupts for now, we
 	 * make no use of those events other than to record them.
 	 */
-	writel(0xffffffff, gp->regs + MAC_MCMASK);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1885", 0xffffffff, gp->regs + MAC_MCMASK);
 
 	/* Don't enable GEM's WOL in normal operations
 	 */
 	if (gp->has_wol)
-		writel(0, gp->regs + WOL_WAKECSR);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:1890", 0, gp->regs + WOL_WAKECSR);
 }
 
 static void gem_init_pause_thresholds(struct gem *gp)
@@ -1922,15 +1922,15 @@ static void gem_init_pause_thresholds(struct gem *gp)
 #endif
 	cfg |= ((31 << 1) & GREG_CFG_TXDMALIM);
 	cfg |= ((31 << 6) & GREG_CFG_RXDMALIM);
-	writel(cfg, gp->regs + GREG_CFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:1925", cfg, gp->regs + GREG_CFG);
 
 	/* If Infinite Burst didn't stick, then use different
 	 * thresholds (and Apple bug fixes don't exist)
 	 */
-	if (!(readl(gp->regs + GREG_CFG) & GREG_CFG_IBURST)) {
+	if (!(pete_readl("drivers/net/ethernet/sun/sungem.c:1930", gp->regs + GREG_CFG) & GREG_CFG_IBURST)) {
 		cfg = ((2 << 1) & GREG_CFG_TXDMALIM);
 		cfg |= ((8 << 6) & GREG_CFG_RXDMALIM);
-		writel(cfg, gp->regs + GREG_CFG);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:1933", cfg, gp->regs + GREG_CFG);
 	}
 }
 
@@ -1945,16 +1945,16 @@ static int gem_check_invariants(struct gem *gp)
 	 */
 	if (pdev->vendor == PCI_VENDOR_ID_APPLE) {
 		gp->phy_type = phy_mii_mdio0;
-		gp->tx_fifo_sz = readl(gp->regs + TXDMA_FSZ) * 64;
-		gp->rx_fifo_sz = readl(gp->regs + RXDMA_FSZ) * 64;
+		gp->tx_fifo_sz = pete_readl("drivers/net/ethernet/sun/sungem.c:1948", gp->regs + TXDMA_FSZ) * 64;
+		gp->rx_fifo_sz = pete_readl("drivers/net/ethernet/sun/sungem.c:1949", gp->regs + RXDMA_FSZ) * 64;
 		gp->swrst_base = 0;
 
-		mif_cfg = readl(gp->regs + MIF_CFG);
+		mif_cfg = pete_readl("drivers/net/ethernet/sun/sungem.c:1952", gp->regs + MIF_CFG);
 		mif_cfg &= ~(MIF_CFG_PSELECT|MIF_CFG_POLL|MIF_CFG_BBMODE|MIF_CFG_MDI1);
 		mif_cfg |= MIF_CFG_MDI0;
-		writel(mif_cfg, gp->regs + MIF_CFG);
-		writel(PCS_DMODE_MGM, gp->regs + PCS_DMODE);
-		writel(MAC_XIFCFG_OE, gp->regs + MAC_XIFCFG);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:1955", mif_cfg, gp->regs + MIF_CFG);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:1956", PCS_DMODE_MGM, gp->regs + PCS_DMODE);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:1957", MAC_XIFCFG_OE, gp->regs + MAC_XIFCFG);
 
 		/* We hard-code the PHY address so we can properly bring it out of
 		 * reset later on, we can't really probe it at this point, though
@@ -1968,7 +1968,7 @@ static int gem_check_invariants(struct gem *gp)
 		return 0;
 	}
 
-	mif_cfg = readl(gp->regs + MIF_CFG);
+	mif_cfg = pete_readl("drivers/net/ethernet/sun/sungem.c:1971", gp->regs + MIF_CFG);
 
 	if (pdev->vendor == PCI_VENDOR_ID_SUN &&
 	    pdev->device == PCI_DEVICE_ID_SUN_RIO_GEM) {
@@ -1989,11 +1989,11 @@ static int gem_check_invariants(struct gem *gp)
 	if (mif_cfg & MIF_CFG_MDI1) {
 		gp->phy_type = phy_mii_mdio1;
 		mif_cfg |= MIF_CFG_PSELECT;
-		writel(mif_cfg, gp->regs + MIF_CFG);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:1992", mif_cfg, gp->regs + MIF_CFG);
 	} else if (mif_cfg & MIF_CFG_MDI0) {
 		gp->phy_type = phy_mii_mdio0;
 		mif_cfg &= ~MIF_CFG_PSELECT;
-		writel(mif_cfg, gp->regs + MIF_CFG);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:1996", mif_cfg, gp->regs + MIF_CFG);
 	} else {
 #ifdef CONFIG_SPARC
 		const char *p;
@@ -2024,8 +2024,8 @@ static int gem_check_invariants(struct gem *gp)
 	}
 
 	/* Fetch the FIFO configurations now too. */
-	gp->tx_fifo_sz = readl(gp->regs + TXDMA_FSZ) * 64;
-	gp->rx_fifo_sz = readl(gp->regs + RXDMA_FSZ) * 64;
+	gp->tx_fifo_sz = pete_readl("drivers/net/ethernet/sun/sungem.c:2027", gp->regs + TXDMA_FSZ) * 64;
+	gp->rx_fifo_sz = pete_readl("drivers/net/ethernet/sun/sungem.c:2028", gp->regs + RXDMA_FSZ) * 64;
 
 	if (pdev->vendor == PCI_VENDOR_ID_SUN) {
 		if (pdev->device == PCI_DEVICE_ID_SUN_GEM) {
@@ -2082,29 +2082,29 @@ static void gem_stop_phy(struct gem *gp, int wol)
 	/* Make sure we aren't polling PHY status change. We
 	 * don't currently use that feature though
 	 */
-	mifcfg = readl(gp->regs + MIF_CFG);
+	mifcfg = pete_readl("drivers/net/ethernet/sun/sungem.c:2085", gp->regs + MIF_CFG);
 	mifcfg &= ~MIF_CFG_POLL;
-	writel(mifcfg, gp->regs + MIF_CFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:2087", mifcfg, gp->regs + MIF_CFG);
 
 	if (wol && gp->has_wol) {
 		unsigned char *e = &gp->dev->dev_addr[0];
 		u32 csr;
 
 		/* Setup wake-on-lan for MAGIC packet */
-		writel(MAC_RXCFG_HFE | MAC_RXCFG_SFCS | MAC_RXCFG_ENAB,
+		pete_writel("drivers/net/ethernet/sun/sungem.c:2094", MAC_RXCFG_HFE | MAC_RXCFG_SFCS | MAC_RXCFG_ENAB,
 		       gp->regs + MAC_RXCFG);
-		writel((e[4] << 8) | e[5], gp->regs + WOL_MATCH0);
-		writel((e[2] << 8) | e[3], gp->regs + WOL_MATCH1);
-		writel((e[0] << 8) | e[1], gp->regs + WOL_MATCH2);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:2096", (e[4] << 8) | e[5], gp->regs + WOL_MATCH0);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:2097", (e[2] << 8) | e[3], gp->regs + WOL_MATCH1);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:2098", (e[0] << 8) | e[1], gp->regs + WOL_MATCH2);
 
-		writel(WOL_MCOUNT_N | WOL_MCOUNT_M, gp->regs + WOL_MCOUNT);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:2100", WOL_MCOUNT_N | WOL_MCOUNT_M, gp->regs + WOL_MCOUNT);
 		csr = WOL_WAKECSR_ENABLE;
-		if ((readl(gp->regs + MAC_XIFCFG) & MAC_XIFCFG_GMII) == 0)
+		if ((pete_readl("drivers/net/ethernet/sun/sungem.c:2102", gp->regs + MAC_XIFCFG) & MAC_XIFCFG_GMII) == 0)
 			csr |= WOL_WAKECSR_MII;
-		writel(csr, gp->regs + WOL_WAKECSR);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:2104", csr, gp->regs + WOL_WAKECSR);
 	} else {
-		writel(0, gp->regs + MAC_RXCFG);
-		(void)readl(gp->regs + MAC_RXCFG);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:2106", 0, gp->regs + MAC_RXCFG);
+		(void)pete_readl("drivers/net/ethernet/sun/sungem.c:2107", gp->regs + MAC_RXCFG);
 		/* Machine sleep will die in strange ways if we
 		 * dont wait a bit here, looks like the chip takes
 		 * some time to really shut down
@@ -2112,15 +2112,15 @@ static void gem_stop_phy(struct gem *gp, int wol)
 		msleep(10);
 	}
 
-	writel(0, gp->regs + MAC_TXCFG);
-	writel(0, gp->regs + MAC_XIFCFG);
-	writel(0, gp->regs + TXDMA_CFG);
-	writel(0, gp->regs + RXDMA_CFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:2115", 0, gp->regs + MAC_TXCFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:2116", 0, gp->regs + MAC_XIFCFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:2117", 0, gp->regs + TXDMA_CFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:2118", 0, gp->regs + RXDMA_CFG);
 
 	if (!wol) {
 		gem_reset(gp);
-		writel(MAC_TXRST_CMD, gp->regs + MAC_TXRST);
-		writel(MAC_RXRST_CMD, gp->regs + MAC_RXRST);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:2122", MAC_TXRST_CMD, gp->regs + MAC_TXRST);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:2123", MAC_RXRST_CMD, gp->regs + MAC_RXRST);
 
 		if (found_mii_phy(gp) && gp->phy_mii.def->ops->suspend)
 			gp->phy_mii.def->ops->suspend(&gp->phy_mii);
@@ -2128,12 +2128,12 @@ static void gem_stop_phy(struct gem *gp, int wol)
 		/* According to Apple, we must set the MDIO pins to this begnign
 		 * state or we may 1) eat more current, 2) damage some PHYs
 		 */
-		writel(mifcfg | MIF_CFG_BBMODE, gp->regs + MIF_CFG);
-		writel(0, gp->regs + MIF_BBCLK);
-		writel(0, gp->regs + MIF_BBDATA);
-		writel(0, gp->regs + MIF_BBOENAB);
-		writel(MAC_XIFCFG_GMII | MAC_XIFCFG_LBCK, gp->regs + MAC_XIFCFG);
-		(void) readl(gp->regs + MAC_XIFCFG);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:2131", mifcfg | MIF_CFG_BBMODE, gp->regs + MIF_CFG);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:2132", 0, gp->regs + MIF_BBCLK);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:2133", 0, gp->regs + MIF_BBDATA);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:2134", 0, gp->regs + MIF_BBOENAB);
+		pete_writel("drivers/net/ethernet/sun/sungem.c:2135", MAC_XIFCFG_GMII | MAC_XIFCFG_LBCK, gp->regs + MAC_XIFCFG);
+		(void) pete_readl("drivers/net/ethernet/sun/sungem.c:2136", gp->regs + MAC_XIFCFG);
 	}
 }
 
@@ -2410,20 +2410,20 @@ static struct net_device_stats *gem_get_stats(struct net_device *dev)
 	if (WARN_ON(!gp->cell_enabled))
 		goto bail;
 
-	dev->stats.rx_crc_errors += readl(gp->regs + MAC_FCSERR);
-	writel(0, gp->regs + MAC_FCSERR);
+	dev->stats.rx_crc_errors += pete_readl("drivers/net/ethernet/sun/sungem.c:2413", gp->regs + MAC_FCSERR);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:2414", 0, gp->regs + MAC_FCSERR);
 
-	dev->stats.rx_frame_errors += readl(gp->regs + MAC_AERR);
-	writel(0, gp->regs + MAC_AERR);
+	dev->stats.rx_frame_errors += pete_readl("drivers/net/ethernet/sun/sungem.c:2416", gp->regs + MAC_AERR);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:2417", 0, gp->regs + MAC_AERR);
 
-	dev->stats.rx_length_errors += readl(gp->regs + MAC_LERR);
-	writel(0, gp->regs + MAC_LERR);
+	dev->stats.rx_length_errors += pete_readl("drivers/net/ethernet/sun/sungem.c:2419", gp->regs + MAC_LERR);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:2420", 0, gp->regs + MAC_LERR);
 
-	dev->stats.tx_aborted_errors += readl(gp->regs + MAC_ECOLL);
+	dev->stats.tx_aborted_errors += pete_readl("drivers/net/ethernet/sun/sungem.c:2422", gp->regs + MAC_ECOLL);
 	dev->stats.collisions +=
-		(readl(gp->regs + MAC_ECOLL) + readl(gp->regs + MAC_LCOLL));
-	writel(0, gp->regs + MAC_ECOLL);
-	writel(0, gp->regs + MAC_LCOLL);
+		(pete_readl("drivers/net/ethernet/sun/sungem.c:2424", gp->regs + MAC_ECOLL) + pete_readl("drivers/net/ethernet/sun/sungem.c:2424", gp->regs + MAC_LCOLL));
+	pete_writel("drivers/net/ethernet/sun/sungem.c:2425", 0, gp->regs + MAC_ECOLL);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:2426", 0, gp->regs + MAC_LCOLL);
  bail:
 	return &dev->stats;
 }
@@ -2447,9 +2447,9 @@ static int gem_set_mac_address(struct net_device *dev, void *addr)
 	if (WARN_ON(!gp->cell_enabled))
 		return 0;
 
-	writel((e[4] << 8) | e[5], gp->regs + MAC_ADDR0);
-	writel((e[2] << 8) | e[3], gp->regs + MAC_ADDR1);
-	writel((e[0] << 8) | e[1], gp->regs + MAC_ADDR2);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:2450", (e[4] << 8) | e[5], gp->regs + MAC_ADDR0);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:2451", (e[2] << 8) | e[3], gp->regs + MAC_ADDR1);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:2452", (e[0] << 8) | e[1], gp->regs + MAC_ADDR2);
 
 	return 0;
 }
@@ -2467,15 +2467,15 @@ static void gem_set_multicast(struct net_device *dev)
 	if (gp->reset_task_pending || WARN_ON(!gp->cell_enabled))
 		return;
 
-	rxcfg = readl(gp->regs + MAC_RXCFG);
+	rxcfg = pete_readl("drivers/net/ethernet/sun/sungem.c:2470", gp->regs + MAC_RXCFG);
 	rxcfg_new = gem_setup_multicast(gp);
 #ifdef STRIP_FCS
 	rxcfg_new |= MAC_RXCFG_SFCS;
 #endif
 	gp->mac_rx_cfg = rxcfg_new;
 
-	writel(rxcfg & ~MAC_RXCFG_ENAB, gp->regs + MAC_RXCFG);
-	while (readl(gp->regs + MAC_RXCFG) & MAC_RXCFG_ENAB) {
+	pete_writel("drivers/net/ethernet/sun/sungem.c:2477", rxcfg & ~MAC_RXCFG_ENAB, gp->regs + MAC_RXCFG);
+	while (pete_readl("drivers/net/ethernet/sun/sungem.c:2478", gp->regs + MAC_RXCFG) & MAC_RXCFG_ENAB) {
 		if (!limit--)
 			break;
 		udelay(10);
@@ -2484,7 +2484,7 @@ static void gem_set_multicast(struct net_device *dev)
 	rxcfg &= ~(MAC_RXCFG_PROM | MAC_RXCFG_HFE);
 	rxcfg |= rxcfg_new;
 
-	writel(rxcfg, gp->regs + MAC_RXCFG);
+	pete_writel("drivers/net/ethernet/sun/sungem.c:2487", rxcfg, gp->regs + MAC_RXCFG);
 }
 
 /* Jumbo-grams don't seem to work :-( */
@@ -2739,19 +2739,19 @@ static int find_eth_addr_in_vpd(void __iomem *rom_base, int len, unsigned char *
 		void __iomem *p = rom_base + this_offset;
 		int i;
 
-		if (readb(p + 0) != 0x90 ||
-		    readb(p + 1) != 0x00 ||
-		    readb(p + 2) != 0x09 ||
-		    readb(p + 3) != 0x4e ||
-		    readb(p + 4) != 0x41 ||
-		    readb(p + 5) != 0x06)
+		if (pete_readb("drivers/net/ethernet/sun/sungem.c:2742", p + 0) != 0x90 ||
+		    pete_readb("drivers/net/ethernet/sun/sungem.c:2743", p + 1) != 0x00 ||
+		    pete_readb("drivers/net/ethernet/sun/sungem.c:2744", p + 2) != 0x09 ||
+		    pete_readb("drivers/net/ethernet/sun/sungem.c:2745", p + 3) != 0x4e ||
+		    pete_readb("drivers/net/ethernet/sun/sungem.c:2746", p + 4) != 0x41 ||
+		    pete_readb("drivers/net/ethernet/sun/sungem.c:2747", p + 5) != 0x06)
 			continue;
 
 		this_offset += 6;
 		p += 6;
 
 		for (i = 0; i < 6; i++)
-			dev_addr[i] = readb(p + i);
+			dev_addr[i] = pete_readb("drivers/net/ethernet/sun/sungem.c:2754", p + i);
 		return 1;
 	}
 	return 0;
@@ -2765,8 +2765,8 @@ static void get_gem_mac_nonobp(struct pci_dev *pdev, unsigned char *dev_addr)
 	if (p) {
 		int found;
 
-		found = readb(p) == 0x55 &&
-			readb(p + 1) == 0xaa &&
+		found = pete_readb("drivers/net/ethernet/sun/sungem.c:2768", p) == 0x55 &&
+			pete_readb("drivers/net/ethernet/sun/sungem.c:2769", p + 1) == 0xaa &&
 			find_eth_addr_in_vpd(p, (64 * 1024), dev_addr);
 		pci_unmap_rom(pdev, p);
 		if (found)

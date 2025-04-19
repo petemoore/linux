@@ -84,12 +84,12 @@ struct joydata {
 
 static void n64joy_write_reg(u32 __iomem *reg_base, const u8 reg, const u32 value)
 {
-	writel(value, reg_base + reg);
+	pete_writel("drivers/input/joystick/n64joy.c:87", value, reg_base + reg);
 }
 
 static u32 n64joy_read_reg(u32 __iomem *reg_base, const u8 reg)
 {
-	return readl(reg_base + reg);
+	return pete_readl("drivers/input/joystick/n64joy.c:92", reg_base + reg);
 }
 
 static void n64joy_wait_si_dma(u32 __iomem *reg_base)

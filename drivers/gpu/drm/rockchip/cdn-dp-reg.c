@@ -23,7 +23,7 @@
 
 void cdn_dp_set_fw_clk(struct cdn_dp_device *dp, unsigned long clk)
 {
-	writel(clk / 1000000, dp->regs + SW_CLK_H);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:26", clk / 1000000, dp->regs + SW_CLK_H);
 }
 
 void cdn_dp_clock_reset(struct cdn_dp_device *dp)
@@ -42,16 +42,16 @@ void cdn_dp_clock_reset(struct cdn_dp_device *dp)
 	      DPTX_SYS_CLK_EN |
 	      CFG_DPTX_VIF_CLK_RSTN_EN |
 	      CFG_DPTX_VIF_CLK_EN;
-	writel(val, dp->regs + SOURCE_DPTX_CAR);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:45", val, dp->regs + SOURCE_DPTX_CAR);
 
 	val = SOURCE_PHY_RSTN_EN | SOURCE_PHY_CLK_EN;
-	writel(val, dp->regs + SOURCE_PHY_CAR);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:48", val, dp->regs + SOURCE_PHY_CAR);
 
 	val = SOURCE_PKT_SYS_RSTN_EN |
 	      SOURCE_PKT_SYS_CLK_EN |
 	      SOURCE_PKT_DATA_RSTN_EN |
 	      SOURCE_PKT_DATA_CLK_EN;
-	writel(val, dp->regs + SOURCE_PKT_CAR);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:54", val, dp->regs + SOURCE_PKT_CAR);
 
 	val = SPDIF_CDR_CLK_RSTN_EN |
 	      SPDIF_CDR_CLK_EN |
@@ -59,20 +59,20 @@ void cdn_dp_clock_reset(struct cdn_dp_device *dp)
 	      SOURCE_AIF_SYS_CLK_EN |
 	      SOURCE_AIF_CLK_RSTN_EN |
 	      SOURCE_AIF_CLK_EN;
-	writel(val, dp->regs + SOURCE_AIF_CAR);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:62", val, dp->regs + SOURCE_AIF_CAR);
 
 	val = SOURCE_CIPHER_SYSTEM_CLK_RSTN_EN |
 	      SOURCE_CIPHER_SYS_CLK_EN |
 	      SOURCE_CIPHER_CHAR_CLK_RSTN_EN |
 	      SOURCE_CIPHER_CHAR_CLK_EN;
-	writel(val, dp->regs + SOURCE_CIPHER_CAR);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:68", val, dp->regs + SOURCE_CIPHER_CAR);
 
 	val = SOURCE_CRYPTO_SYS_CLK_RSTN_EN |
 	      SOURCE_CRYPTO_SYS_CLK_EN;
-	writel(val, dp->regs + SOURCE_CRYPTO_CAR);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:72", val, dp->regs + SOURCE_CRYPTO_CAR);
 
 	/* enable Mailbox and PIF interrupt */
-	writel(0, dp->regs + APB_INT_MASK);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:75", 0, dp->regs + APB_INT_MASK);
 }
 
 static int cdn_dp_mailbox_read(struct cdn_dp_device *dp)
@@ -85,7 +85,7 @@ static int cdn_dp_mailbox_read(struct cdn_dp_device *dp)
 	if (ret < 0)
 		return ret;
 
-	return readl(dp->regs + MAILBOX0_RD_DATA) & 0xff;
+	return pete_readl("drivers/gpu/drm/rockchip/cdn-dp-reg.c:88", dp->regs + MAILBOX0_RD_DATA) & 0xff;
 }
 
 static int cdp_dp_mailbox_write(struct cdn_dp_device *dp, u8 val)
@@ -98,7 +98,7 @@ static int cdp_dp_mailbox_write(struct cdn_dp_device *dp, u8 val)
 	if (ret < 0)
 		return ret;
 
-	writel(val, dp->regs + MAILBOX0_WR_DATA);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:101", val, dp->regs + MAILBOX0_WR_DATA);
 
 	return 0;
 }
@@ -285,17 +285,17 @@ int cdn_dp_load_firmware(struct cdn_dp_device *dp, const u32 *i_mem,
 	int i, ret;
 
 	/* reset ucpu before load firmware*/
-	writel(APB_IRAM_PATH | APB_DRAM_PATH | APB_XT_RESET,
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:288", APB_IRAM_PATH | APB_DRAM_PATH | APB_XT_RESET,
 	       dp->regs + APB_CTRL);
 
 	for (i = 0; i < i_size; i += 4)
-		writel(*i_mem++, dp->regs + ADDR_IMEM + i);
+		pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:292", *i_mem++, dp->regs + ADDR_IMEM + i);
 
 	for (i = 0; i < d_size; i += 4)
-		writel(*d_mem++, dp->regs + ADDR_DMEM + i);
+		pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:295", *d_mem++, dp->regs + ADDR_DMEM + i);
 
 	/* un-reset ucpu */
-	writel(0, dp->regs + APB_CTRL);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:298", 0, dp->regs + APB_CTRL);
 
 	/* check the keep alive register to make sure fw working */
 	ret = readx_poll_timeout(readl, dp->regs + KEEP_ALIVE,
@@ -306,13 +306,13 @@ int cdn_dp_load_firmware(struct cdn_dp_device *dp, const u32 *i_mem,
 		return -EINVAL;
 	}
 
-	reg = readl(dp->regs + VER_L) & 0xff;
+	reg = pete_readl("drivers/gpu/drm/rockchip/cdn-dp-reg.c:309", dp->regs + VER_L) & 0xff;
 	dp->fw_version = reg;
-	reg = readl(dp->regs + VER_H) & 0xff;
+	reg = pete_readl("drivers/gpu/drm/rockchip/cdn-dp-reg.c:311", dp->regs + VER_H) & 0xff;
 	dp->fw_version |= reg << 8;
-	reg = readl(dp->regs + VER_LIB_L_ADDR) & 0xff;
+	reg = pete_readl("drivers/gpu/drm/rockchip/cdn-dp-reg.c:313", dp->regs + VER_LIB_L_ADDR) & 0xff;
 	dp->fw_version |= reg << 16;
-	reg = readl(dp->regs + VER_LIB_H_ADDR) & 0xff;
+	reg = pete_readl("drivers/gpu/drm/rockchip/cdn-dp-reg.c:315", dp->regs + VER_LIB_H_ADDR) & 0xff;
 	dp->fw_version |= reg << 24;
 
 	DRM_DEV_DEBUG(dp->dev, "firmware version: %x\n", dp->fw_version);
@@ -402,7 +402,7 @@ int cdn_dp_event_config(struct cdn_dp_device *dp)
 
 u32 cdn_dp_get_event(struct cdn_dp_device *dp)
 {
-	return readl(dp->regs + SW_EVENTS0);
+	return pete_readl("drivers/gpu/drm/rockchip/cdn-dp-reg.c:405", dp->regs + SW_EVENTS0);
 }
 
 int cdn_dp_get_hpd_status(struct cdn_dp_device *dp)
@@ -791,22 +791,22 @@ int cdn_dp_audio_stop(struct cdn_dp_device *dp, struct audio_info *audio)
 		return ret;
 	}
 
-	writel(0, dp->regs + SPDIF_CTRL_ADDR);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:794", 0, dp->regs + SPDIF_CTRL_ADDR);
 
 	/* clearn the audio config and reset */
-	writel(0, dp->regs + AUDIO_SRC_CNTL);
-	writel(0, dp->regs + AUDIO_SRC_CNFG);
-	writel(AUDIO_SW_RST, dp->regs + AUDIO_SRC_CNTL);
-	writel(0, dp->regs + AUDIO_SRC_CNTL);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:797", 0, dp->regs + AUDIO_SRC_CNTL);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:798", 0, dp->regs + AUDIO_SRC_CNFG);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:799", AUDIO_SW_RST, dp->regs + AUDIO_SRC_CNTL);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:800", 0, dp->regs + AUDIO_SRC_CNTL);
 
 	/* reset smpl2pckt component  */
-	writel(0, dp->regs + SMPL2PKT_CNTL);
-	writel(AUDIO_SW_RST, dp->regs + SMPL2PKT_CNTL);
-	writel(0, dp->regs + SMPL2PKT_CNTL);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:803", 0, dp->regs + SMPL2PKT_CNTL);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:804", AUDIO_SW_RST, dp->regs + SMPL2PKT_CNTL);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:805", 0, dp->regs + SMPL2PKT_CNTL);
 
 	/* reset FIFO */
-	writel(AUDIO_SW_RST, dp->regs + FIFO_CNTL);
-	writel(0, dp->regs + FIFO_CNTL);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:808", AUDIO_SW_RST, dp->regs + FIFO_CNTL);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:809", 0, dp->regs + FIFO_CNTL);
 
 	if (audio->format == AFMT_SPDIF)
 		clk_disable_unprepare(dp->spdif_clk);
@@ -842,15 +842,15 @@ static void cdn_dp_audio_config_i2s(struct cdn_dp_device *dp,
 		i2s_port_en_val = 3;
 	}
 
-	writel(0x0, dp->regs + SPDIF_CTRL_ADDR);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:845", 0x0, dp->regs + SPDIF_CTRL_ADDR);
 
-	writel(SYNC_WR_TO_CH_ZERO, dp->regs + FIFO_CNTL);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:847", SYNC_WR_TO_CH_ZERO, dp->regs + FIFO_CNTL);
 
 	val = MAX_NUM_CH(audio->channels);
 	val |= NUM_OF_I2S_PORTS(audio->channels);
 	val |= AUDIO_TYPE_LPCM;
 	val |= CFG_SUB_PCKT_NUM(sub_pckt_num);
-	writel(val, dp->regs + SMPL2PKT_CNFG);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:853", val, dp->regs + SMPL2PKT_CNFG);
 
 	if (audio->sample_width == 16)
 		val = 0;
@@ -862,7 +862,7 @@ static void cdn_dp_audio_config_i2s(struct cdn_dp_device *dp,
 	val |= AUDIO_CH_NUM(audio->channels);
 	val |= I2S_DEC_PORT_EN(i2s_port_en_val);
 	val |= TRANS_SMPL_WIDTH_32;
-	writel(val, dp->regs + AUDIO_SRC_CNFG);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:865", val, dp->regs + AUDIO_SRC_CNFG);
 
 	for (i = 0; i < (audio->channels + 1) / 2; i++) {
 		if (audio->sample_width == 16)
@@ -871,7 +871,7 @@ static void cdn_dp_audio_config_i2s(struct cdn_dp_device *dp,
 			val = (0x0b << 8) | (0x0b << 20);
 
 		val |= ((2 * i) << 4) | ((2 * i + 1) << 16);
-		writel(val, dp->regs + STTS_BIT_CH(i));
+		pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:874", val, dp->regs + STTS_BIT_CH(i));
 	}
 
 	switch (audio->sample_rate) {
@@ -905,24 +905,24 @@ static void cdn_dp_audio_config_i2s(struct cdn_dp_device *dp,
 		break;
 	}
 	val |= 4;
-	writel(val, dp->regs + COM_CH_STTS_BITS);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:908", val, dp->regs + COM_CH_STTS_BITS);
 
-	writel(SMPL2PKT_EN, dp->regs + SMPL2PKT_CNTL);
-	writel(I2S_DEC_START, dp->regs + AUDIO_SRC_CNTL);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:910", SMPL2PKT_EN, dp->regs + SMPL2PKT_CNTL);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:911", I2S_DEC_START, dp->regs + AUDIO_SRC_CNTL);
 }
 
 static void cdn_dp_audio_config_spdif(struct cdn_dp_device *dp)
 {
 	u32 val;
 
-	writel(SYNC_WR_TO_CH_ZERO, dp->regs + FIFO_CNTL);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:918", SYNC_WR_TO_CH_ZERO, dp->regs + FIFO_CNTL);
 
 	val = MAX_NUM_CH(2) | AUDIO_TYPE_LPCM | CFG_SUB_PCKT_NUM(4);
-	writel(val, dp->regs + SMPL2PKT_CNFG);
-	writel(SMPL2PKT_EN, dp->regs + SMPL2PKT_CNTL);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:921", val, dp->regs + SMPL2PKT_CNFG);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:922", SMPL2PKT_EN, dp->regs + SMPL2PKT_CNTL);
 
 	val = SPDIF_ENABLE | SPDIF_AVG_SEL | SPDIF_JITTER_BYPASS;
-	writel(val, dp->regs + SPDIF_CTRL_ADDR);
+	pete_writel("drivers/gpu/drm/rockchip/cdn-dp-reg.c:925", val, dp->regs + SPDIF_CTRL_ADDR);
 
 	clk_prepare_enable(dp->spdif_clk);
 	clk_set_rate(dp->spdif_clk, CDN_DP_SPDIF_CLK);

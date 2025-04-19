@@ -146,8 +146,8 @@ static int nfp_netvf_pci_probe(struct pci_dev *pdev,
 	}
 
 	/* Find out how many rings are supported */
-	max_tx_rings = readl(ctrl_bar + NFP_NET_CFG_MAX_TXRINGS);
-	max_rx_rings = readl(ctrl_bar + NFP_NET_CFG_MAX_RXRINGS);
+	max_tx_rings = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_netvf_main.c:149", ctrl_bar + NFP_NET_CFG_MAX_TXRINGS);
+	max_rx_rings = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_netvf_main.c:150", ctrl_bar + NFP_NET_CFG_MAX_RXRINGS);
 
 	tx_bar_sz = NFP_QCP_QUEUE_ADDR_SZ * max_tx_rings * stride;
 	rx_bar_sz = NFP_QCP_QUEUE_ADDR_SZ * max_rx_rings * stride;
@@ -166,9 +166,9 @@ static int nfp_netvf_pci_probe(struct pci_dev *pdev,
 		max_rx_rings = (rx_bar_sz / NFP_QCP_QUEUE_ADDR_SZ) / 2;
 	}
 
-	startq = readl(ctrl_bar + NFP_NET_CFG_START_TXQ);
+	startq = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_netvf_main.c:169", ctrl_bar + NFP_NET_CFG_START_TXQ);
 	tx_bar_off = NFP_PCIE_QUEUE(startq);
-	startq = readl(ctrl_bar + NFP_NET_CFG_START_RXQ);
+	startq = pete_readl("drivers/net/ethernet/netronome/nfp/nfp_netvf_main.c:171", ctrl_bar + NFP_NET_CFG_START_RXQ);
 	rx_bar_off = NFP_PCIE_QUEUE(startq);
 
 	/* Allocate and initialise the netdev */

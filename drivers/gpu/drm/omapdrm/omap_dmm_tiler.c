@@ -117,7 +117,7 @@ static u32 dmm_read_wa(struct dmm *dmm, u32 reg)
 	r = dmm_dma_copy(dmm, src, dst);
 	if (r) {
 		dev_err(dmm->dev, "sDMA read transfer timeout\n");
-		return readl(dmm->base + reg);
+		return pete_readl("drivers/gpu/drm/omapdrm/omap_dmm_tiler.c:120", dmm->base + reg);
 	}
 
 	/*
@@ -126,7 +126,7 @@ static u32 dmm_read_wa(struct dmm *dmm, u32 reg)
 	 * earlier than the DMA finished writing the value to memory.
 	 */
 	rmb();
-	return readl(dmm->wa_dma_data);
+	return pete_readl("drivers/gpu/drm/omapdrm/omap_dmm_tiler.c:129", dmm->wa_dma_data);
 }
 
 static void dmm_write_wa(struct dmm *dmm, u32 val, u32 reg)
@@ -134,7 +134,7 @@ static void dmm_write_wa(struct dmm *dmm, u32 val, u32 reg)
 	dma_addr_t src, dst;
 	int r;
 
-	writel(val, dmm->wa_dma_data);
+	pete_writel("drivers/gpu/drm/omapdrm/omap_dmm_tiler.c:137", val, dmm->wa_dma_data);
 	/*
 	 * As per i878 workaround, the DMA is used to access the DMM registers.
 	 * Make sure that the writel is not moved by the compiler or the CPU, so
@@ -149,7 +149,7 @@ static void dmm_write_wa(struct dmm *dmm, u32 val, u32 reg)
 	r = dmm_dma_copy(dmm, src, dst);
 	if (r) {
 		dev_err(dmm->dev, "sDMA write transfer timeout\n");
-		writel(val, dmm->base + reg);
+		pete_writel("drivers/gpu/drm/omapdrm/omap_dmm_tiler.c:152", val, dmm->base + reg);
 	}
 }
 
@@ -165,7 +165,7 @@ static u32 dmm_read(struct dmm *dmm, u32 reg)
 
 		return v;
 	} else {
-		return readl(dmm->base + reg);
+		return pete_readl("drivers/gpu/drm/omapdrm/omap_dmm_tiler.c:168", dmm->base + reg);
 	}
 }
 
@@ -178,7 +178,7 @@ static void dmm_write(struct dmm *dmm, u32 val, u32 reg)
 		dmm_write_wa(dmm, val, reg);
 		spin_unlock_irqrestore(&dmm->wa_lock, flags);
 	} else {
-		writel(val, dmm->base + reg);
+		pete_writel("drivers/gpu/drm/omapdrm/omap_dmm_tiler.c:181", val, dmm->base + reg);
 	}
 }
 
@@ -418,7 +418,7 @@ static int dmm_txn_commit(struct dmm_txn *txn, bool wait)
 	 */
 
 	/* read back to ensure the data is in RAM */
-	readl(&txn->last_pat->next_pa);
+	pete_readl("drivers/gpu/drm/omapdrm/omap_dmm_tiler.c:421", &txn->last_pat->next_pa);
 
 	/* write to PAT_DESCR to clear out any pending transaction */
 	dmm_write(dmm, 0x0, reg[PAT_DESCR][engine->id]);

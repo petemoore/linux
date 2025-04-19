@@ -53,22 +53,22 @@
 
 static inline void lcd_write_control(struct fb_info *info, u8 control)
 {
-	writel((u32)control << 24, info->screen_base);
+	pete_writel("drivers/video/fbdev/cobalt_lcdfb.c:56", (u32)control << 24, info->screen_base);
 }
 
 static inline u8 lcd_read_control(struct fb_info *info)
 {
-	return readl(info->screen_base) >> 24;
+	return pete_readl("drivers/video/fbdev/cobalt_lcdfb.c:61", info->screen_base) >> 24;
 }
 
 static inline void lcd_write_data(struct fb_info *info, u8 data)
 {
-	writel((u32)data << 24, info->screen_base + LCD_DATA_REG_OFFSET);
+	pete_writel("drivers/video/fbdev/cobalt_lcdfb.c:66", (u32)data << 24, info->screen_base + LCD_DATA_REG_OFFSET);
 }
 
 static inline u8 lcd_read_data(struct fb_info *info)
 {
-	return readl(info->screen_base + LCD_DATA_REG_OFFSET) >> 24;
+	return pete_readl("drivers/video/fbdev/cobalt_lcdfb.c:71", info->screen_base + LCD_DATA_REG_OFFSET) >> 24;
 }
 
 static int lcd_busy_wait(struct fb_info *info)

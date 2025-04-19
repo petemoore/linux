@@ -91,10 +91,10 @@ struct xgene_ahci_context {
 static int xgene_ahci_init_memram(struct xgene_ahci_context *ctx)
 {
 	dev_dbg(ctx->dev, "Release memory from shutdown\n");
-	writel(0x0, ctx->csr_diag + CFG_MEM_RAM_SHUTDOWN);
-	readl(ctx->csr_diag + CFG_MEM_RAM_SHUTDOWN); /* Force a barrier */
+	pete_writel("drivers/ata/ahci_xgene.c:94", 0x0, ctx->csr_diag + CFG_MEM_RAM_SHUTDOWN);
+	pete_readl("drivers/ata/ahci_xgene.c:95", ctx->csr_diag + CFG_MEM_RAM_SHUTDOWN); /* Force a barrier */
 	msleep(1);	/* reset may take up to 1ms */
-	if (readl(ctx->csr_diag + BLOCK_MEM_RDY) != 0xFFFFFFFF) {
+	if (pete_readl("drivers/ata/ahci_xgene.c:97", ctx->csr_diag + BLOCK_MEM_RDY) != 0xFFFFFFFF) {
 		dev_err(ctx->dev, "failed to release memory from shutdown\n");
 		return -ENODEV;
 	}
@@ -160,9 +160,9 @@ static int xgene_ahci_restart_engine(struct ata_port *ap)
 	 * gets cleared due to stopping the engine.
 	 */
 	if (pp->fbs_supported) {
-		fbs = readl(port_mmio + PORT_FBS);
-		writel(fbs | PORT_FBS_EN, port_mmio + PORT_FBS);
-		fbs = readl(port_mmio + PORT_FBS);
+		fbs = pete_readl("drivers/ata/ahci_xgene.c:163", port_mmio + PORT_FBS);
+		pete_writel("drivers/ata/ahci_xgene.c:164", fbs | PORT_FBS_EN, port_mmio + PORT_FBS);
+		fbs = pete_readl("drivers/ata/ahci_xgene.c:165", port_mmio + PORT_FBS);
 	}
 
 	hpriv->start_engine(ap);
@@ -200,10 +200,10 @@ static unsigned int xgene_ahci_qc_issue(struct ata_queued_cmd *qc)
 	 * for case of Port Mulitplier.
 	 */
 	if (ctx->class[ap->port_no] == ATA_DEV_PMP) {
-		port_fbs = readl(port_mmio + PORT_FBS);
+		port_fbs = pete_readl("drivers/ata/ahci_xgene.c:203", port_mmio + PORT_FBS);
 		port_fbs &= ~PORT_FBS_DEV_MASK;
 		port_fbs |= qc->dev->link->pmp << PORT_FBS_DEV_OFFSET;
-		writel(port_fbs, port_mmio + PORT_FBS);
+		pete_writel("drivers/ata/ahci_xgene.c:206", port_fbs, port_mmio + PORT_FBS);
 	}
 
 	if (unlikely((ctx->last_cmd[ap->port_no] == ATA_CMD_ID_ATA) ||
@@ -223,8 +223,8 @@ static bool xgene_ahci_is_memram_inited(struct xgene_ahci_context *ctx)
 {
 	void __iomem *diagcsr = ctx->csr_diag;
 
-	return (readl(diagcsr + CFG_MEM_RAM_SHUTDOWN) == 0 &&
-	        readl(diagcsr + BLOCK_MEM_RDY) == 0xFFFFFFFF);
+	return (pete_readl("drivers/ata/ahci_xgene.c:226", diagcsr + CFG_MEM_RAM_SHUTDOWN) == 0 &&
+	        pete_readl("drivers/ata/ahci_xgene.c:227", diagcsr + BLOCK_MEM_RDY) == 0xFFFFFFFF);
 }
 
 /**
@@ -271,33 +271,33 @@ static void xgene_ahci_set_phy_cfg(struct xgene_ahci_context *ctx, int channel)
 
 	dev_dbg(ctx->dev, "port configure mmio 0x%p channel %d\n",
 		mmio, channel);
-	val = readl(mmio + PORTCFG);
+	val = pete_readl("drivers/ata/ahci_xgene.c:274", mmio + PORTCFG);
 	val = PORTADDR_SET(val, channel == 0 ? 2 : 3);
-	writel(val, mmio + PORTCFG);
-	readl(mmio + PORTCFG);  /* Force a barrier */
+	pete_writel("drivers/ata/ahci_xgene.c:276", val, mmio + PORTCFG);
+	pete_readl("drivers/ata/ahci_xgene.c:277", mmio + PORTCFG);  /* Force a barrier */
 	/* Disable fix rate */
-	writel(0x0001fffe, mmio + PORTPHY1CFG);
-	readl(mmio + PORTPHY1CFG); /* Force a barrier */
-	writel(0x28183219, mmio + PORTPHY2CFG);
-	readl(mmio + PORTPHY2CFG); /* Force a barrier */
-	writel(0x13081008, mmio + PORTPHY3CFG);
-	readl(mmio + PORTPHY3CFG); /* Force a barrier */
-	writel(0x00480815, mmio + PORTPHY4CFG);
-	readl(mmio + PORTPHY4CFG); /* Force a barrier */
+	pete_writel("drivers/ata/ahci_xgene.c:279", 0x0001fffe, mmio + PORTPHY1CFG);
+	pete_readl("drivers/ata/ahci_xgene.c:280", mmio + PORTPHY1CFG); /* Force a barrier */
+	pete_writel("drivers/ata/ahci_xgene.c:281", 0x28183219, mmio + PORTPHY2CFG);
+	pete_readl("drivers/ata/ahci_xgene.c:282", mmio + PORTPHY2CFG); /* Force a barrier */
+	pete_writel("drivers/ata/ahci_xgene.c:283", 0x13081008, mmio + PORTPHY3CFG);
+	pete_readl("drivers/ata/ahci_xgene.c:284", mmio + PORTPHY3CFG); /* Force a barrier */
+	pete_writel("drivers/ata/ahci_xgene.c:285", 0x00480815, mmio + PORTPHY4CFG);
+	pete_readl("drivers/ata/ahci_xgene.c:286", mmio + PORTPHY4CFG); /* Force a barrier */
 	/* Set window negotiation */
-	val = readl(mmio + PORTPHY5CFG);
+	val = pete_readl("drivers/ata/ahci_xgene.c:288", mmio + PORTPHY5CFG);
 	val = PORTPHY5CFG_RTCHG_SET(val, 0x300);
-	writel(val, mmio + PORTPHY5CFG);
-	readl(mmio + PORTPHY5CFG); /* Force a barrier */
-	val = readl(mmio + PORTAXICFG);
+	pete_writel("drivers/ata/ahci_xgene.c:290", val, mmio + PORTPHY5CFG);
+	pete_readl("drivers/ata/ahci_xgene.c:291", mmio + PORTPHY5CFG); /* Force a barrier */
+	val = pete_readl("drivers/ata/ahci_xgene.c:292", mmio + PORTAXICFG);
 	val = PORTAXICFG_EN_CONTEXT_SET(val, 0x1); /* Enable context mgmt */
 	val = PORTAXICFG_OUTTRANS_SET(val, 0xe); /* Set outstanding */
-	writel(val, mmio + PORTAXICFG);
-	readl(mmio + PORTAXICFG); /* Force a barrier */
+	pete_writel("drivers/ata/ahci_xgene.c:295", val, mmio + PORTAXICFG);
+	pete_readl("drivers/ata/ahci_xgene.c:296", mmio + PORTAXICFG); /* Force a barrier */
 	/* Set the watermark threshold of the receive FIFO */
-	val = readl(mmio + PORTRANSCFG);
+	val = pete_readl("drivers/ata/ahci_xgene.c:298", mmio + PORTRANSCFG);
 	val = PORTRANSCFG_RXWM_SET(val, 0x30);
-	writel(val, mmio + PORTRANSCFG);
+	pete_writel("drivers/ata/ahci_xgene.c:300", val, mmio + PORTRANSCFG);
 }
 
 /**
@@ -370,7 +370,7 @@ static int xgene_ahci_do_hardreset(struct ata_link *link,
 		rc = sata_link_hardreset(link, timing, deadline, online,
 				 ahci_check_ready);
 		if (*online) {
-			val = readl(port_mmio + PORT_SCR_ERR);
+			val = pete_readl("drivers/ata/ahci_xgene.c:373", port_mmio + PORT_SCR_ERR);
 			if (val & (SERR_DISPARITY | SERR_10B_8B_ERR))
 				dev_warn(ctx->dev, "link has error\n");
 			break;
@@ -381,8 +381,8 @@ static int xgene_ahci_do_hardreset(struct ata_link *link,
 		 (sstatus & 0xff) == 0x1);
 
 	/* clear all errors if any pending */
-	val = readl(port_mmio + PORT_SCR_ERR);
-	writel(val, port_mmio + PORT_SCR_ERR);
+	val = pete_readl("drivers/ata/ahci_xgene.c:384", port_mmio + PORT_SCR_ERR);
+	pete_writel("drivers/ata/ahci_xgene.c:385", val, port_mmio + PORT_SCR_ERR);
 
 	return rc;
 }
@@ -402,22 +402,22 @@ static int xgene_ahci_hardreset(struct ata_link *link, unsigned int *class,
 	u32 portrxfishi_saved;
 
 	/* As hardreset resets these CSR, save it to restore later */
-	portcmd_saved = readl(port_mmio + PORT_CMD);
-	portclb_saved = readl(port_mmio + PORT_LST_ADDR);
-	portclbhi_saved = readl(port_mmio + PORT_LST_ADDR_HI);
-	portrxfis_saved = readl(port_mmio + PORT_FIS_ADDR);
-	portrxfishi_saved = readl(port_mmio + PORT_FIS_ADDR_HI);
+	portcmd_saved = pete_readl("drivers/ata/ahci_xgene.c:405", port_mmio + PORT_CMD);
+	portclb_saved = pete_readl("drivers/ata/ahci_xgene.c:406", port_mmio + PORT_LST_ADDR);
+	portclbhi_saved = pete_readl("drivers/ata/ahci_xgene.c:407", port_mmio + PORT_LST_ADDR_HI);
+	portrxfis_saved = pete_readl("drivers/ata/ahci_xgene.c:408", port_mmio + PORT_FIS_ADDR);
+	portrxfishi_saved = pete_readl("drivers/ata/ahci_xgene.c:409", port_mmio + PORT_FIS_ADDR_HI);
 
 	hpriv->stop_engine(ap);
 
 	rc = xgene_ahci_do_hardreset(link, deadline, &online);
 
 	/* As controller hardreset clears them, restore them */
-	writel(portcmd_saved, port_mmio + PORT_CMD);
-	writel(portclb_saved, port_mmio + PORT_LST_ADDR);
-	writel(portclbhi_saved, port_mmio + PORT_LST_ADDR_HI);
-	writel(portrxfis_saved, port_mmio + PORT_FIS_ADDR);
-	writel(portrxfishi_saved, port_mmio + PORT_FIS_ADDR_HI);
+	pete_writel("drivers/ata/ahci_xgene.c:416", portcmd_saved, port_mmio + PORT_CMD);
+	pete_writel("drivers/ata/ahci_xgene.c:417", portclb_saved, port_mmio + PORT_LST_ADDR);
+	pete_writel("drivers/ata/ahci_xgene.c:418", portclbhi_saved, port_mmio + PORT_LST_ADDR_HI);
+	pete_writel("drivers/ata/ahci_xgene.c:419", portrxfis_saved, port_mmio + PORT_FIS_ADDR);
+	pete_writel("drivers/ata/ahci_xgene.c:420", portrxfishi_saved, port_mmio + PORT_FIS_ADDR_HI);
 
 	hpriv->start_engine(ap);
 
@@ -461,10 +461,10 @@ static int xgene_ahci_pmp_softreset(struct ata_link *link, unsigned int *class,
 	 * Set PxFBS.DEV field with pmp
 	 * value.
 	 */
-	port_fbs = readl(port_mmio + PORT_FBS);
+	port_fbs = pete_readl("drivers/ata/ahci_xgene.c:464", port_mmio + PORT_FBS);
 	port_fbs &= ~PORT_FBS_DEV_MASK;
 	port_fbs |= pmp << PORT_FBS_DEV_OFFSET;
-	writel(port_fbs, port_mmio + PORT_FBS);
+	pete_writel("drivers/ata/ahci_xgene.c:467", port_fbs, port_mmio + PORT_FBS);
 
 	rc = ahci_do_softreset(link, class, pmp, deadline, ahci_check_ready);
 
@@ -505,16 +505,16 @@ static int xgene_ahci_softreset(struct ata_link *link, unsigned int *class,
 	u32 retry = 1;
 	u32 rc;
 
-	port_fbs_save = readl(port_mmio + PORT_FBS);
+	port_fbs_save = pete_readl("drivers/ata/ahci_xgene.c:508", port_mmio + PORT_FBS);
 
 	/*
 	 * Set PxFBS.DEV field with pmp
 	 * value.
 	 */
-	port_fbs = readl(port_mmio + PORT_FBS);
+	port_fbs = pete_readl("drivers/ata/ahci_xgene.c:514", port_mmio + PORT_FBS);
 	port_fbs &= ~PORT_FBS_DEV_MASK;
 	port_fbs |= pmp << PORT_FBS_DEV_OFFSET;
-	writel(port_fbs, port_mmio + PORT_FBS);
+	pete_writel("drivers/ata/ahci_xgene.c:517", port_fbs, port_mmio + PORT_FBS);
 
 softreset_retry:
 	rc = ahci_do_softreset(link, class, pmp,
@@ -527,7 +527,7 @@ softreset_retry:
 		 * setting PxFBS.DEV field with pmp value.
 		 */
 		if (retry--) {
-			writel(port_fbs_save, port_mmio + PORT_FBS);
+			pete_writel("drivers/ata/ahci_xgene.c:530", port_fbs_save, port_mmio + PORT_FBS);
 			goto softreset_retry;
 		}
 	}
@@ -566,13 +566,13 @@ static int xgene_ahci_handle_broken_edge_irq(struct ata_host *host,
 	void __iomem *port_mmio;
 	int i;
 
-	if (!readl(hpriv->mmio + HOST_IRQ_STAT)) {
+	if (!pete_readl("drivers/ata/ahci_xgene.c:569", hpriv->mmio + HOST_IRQ_STAT)) {
 		for (i = 0; i < host->n_ports; i++) {
 			if (irq_masked & (1 << i))
 				continue;
 
 			port_mmio = ahci_port_base(host->ports[i]);
-			if (readl(port_mmio + PORT_IRQ_STAT))
+			if (pete_readl("drivers/ata/ahci_xgene.c:575", port_mmio + PORT_IRQ_STAT))
 				irq_masked |= (1 << i);
 		}
 	}
@@ -594,7 +594,7 @@ static irqreturn_t xgene_ahci_irq_intr(int irq, void *dev_instance)
 	mmio = hpriv->mmio;
 
 	/* sigh.  0xffffffff is a valid return from h/w */
-	irq_stat = readl(mmio + HOST_IRQ_STAT);
+	irq_stat = pete_readl("drivers/ata/ahci_xgene.c:597", mmio + HOST_IRQ_STAT);
 	if (!irq_stat)
 		return IRQ_NONE;
 
@@ -606,7 +606,7 @@ static irqreturn_t xgene_ahci_irq_intr(int irq, void *dev_instance)
 	 * HOST_IRQ_STAT behaves as edge triggered latch meaning that
 	 * it should be cleared before all the port events are cleared.
 	 */
-	writel(irq_stat, mmio + HOST_IRQ_STAT);
+	pete_writel("drivers/ata/ahci_xgene.c:609", irq_stat, mmio + HOST_IRQ_STAT);
 
 	rc = xgene_ahci_handle_broken_edge_irq(host, irq_masked);
 
@@ -664,35 +664,35 @@ static int xgene_ahci_hw_init(struct ahci_host_priv *hpriv)
 		xgene_ahci_set_phy_cfg(ctx, i);
 
 	/* AXI disable Mask */
-	writel(0xffffffff, hpriv->mmio + HOST_IRQ_STAT);
-	readl(hpriv->mmio + HOST_IRQ_STAT); /* Force a barrier */
-	writel(0, ctx->csr_core + INTSTATUSMASK);
-	val = readl(ctx->csr_core + INTSTATUSMASK); /* Force a barrier */
+	pete_writel("drivers/ata/ahci_xgene.c:667", 0xffffffff, hpriv->mmio + HOST_IRQ_STAT);
+	pete_readl("drivers/ata/ahci_xgene.c:668", hpriv->mmio + HOST_IRQ_STAT); /* Force a barrier */
+	pete_writel("drivers/ata/ahci_xgene.c:669", 0, ctx->csr_core + INTSTATUSMASK);
+	val = pete_readl("drivers/ata/ahci_xgene.c:670", ctx->csr_core + INTSTATUSMASK); /* Force a barrier */
 	dev_dbg(ctx->dev, "top level interrupt mask 0x%X value 0x%08X\n",
 		INTSTATUSMASK, val);
 
-	writel(0x0, ctx->csr_core + ERRINTSTATUSMASK);
-	readl(ctx->csr_core + ERRINTSTATUSMASK); /* Force a barrier */
-	writel(0x0, ctx->csr_axi + INT_SLV_TMOMASK);
-	readl(ctx->csr_axi + INT_SLV_TMOMASK);
+	pete_writel("drivers/ata/ahci_xgene.c:674", 0x0, ctx->csr_core + ERRINTSTATUSMASK);
+	pete_readl("drivers/ata/ahci_xgene.c:675", ctx->csr_core + ERRINTSTATUSMASK); /* Force a barrier */
+	pete_writel("drivers/ata/ahci_xgene.c:676", 0x0, ctx->csr_axi + INT_SLV_TMOMASK);
+	pete_readl("drivers/ata/ahci_xgene.c:677", ctx->csr_axi + INT_SLV_TMOMASK);
 
 	/* Enable AXI Interrupt */
-	writel(0xffffffff, ctx->csr_core + SLVRDERRATTRIBUTES);
-	writel(0xffffffff, ctx->csr_core + SLVWRERRATTRIBUTES);
-	writel(0xffffffff, ctx->csr_core + MSTRDERRATTRIBUTES);
-	writel(0xffffffff, ctx->csr_core + MSTWRERRATTRIBUTES);
+	pete_writel("drivers/ata/ahci_xgene.c:680", 0xffffffff, ctx->csr_core + SLVRDERRATTRIBUTES);
+	pete_writel("drivers/ata/ahci_xgene.c:681", 0xffffffff, ctx->csr_core + SLVWRERRATTRIBUTES);
+	pete_writel("drivers/ata/ahci_xgene.c:682", 0xffffffff, ctx->csr_core + MSTRDERRATTRIBUTES);
+	pete_writel("drivers/ata/ahci_xgene.c:683", 0xffffffff, ctx->csr_core + MSTWRERRATTRIBUTES);
 
 	/* Enable coherency */
-	val = readl(ctx->csr_core + BUSCTLREG);
+	val = pete_readl("drivers/ata/ahci_xgene.c:686", ctx->csr_core + BUSCTLREG);
 	val &= ~0x00000002;     /* Enable write coherency */
 	val &= ~0x00000001;     /* Enable read coherency */
-	writel(val, ctx->csr_core + BUSCTLREG);
+	pete_writel("drivers/ata/ahci_xgene.c:689", val, ctx->csr_core + BUSCTLREG);
 
-	val = readl(ctx->csr_core + IOFMSTRWAUX);
+	val = pete_readl("drivers/ata/ahci_xgene.c:691", ctx->csr_core + IOFMSTRWAUX);
 	val |= (1 << 3);        /* Enable read coherency */
 	val |= (1 << 9);        /* Enable write coherency */
-	writel(val, ctx->csr_core + IOFMSTRWAUX);
-	val = readl(ctx->csr_core + IOFMSTRWAUX);
+	pete_writel("drivers/ata/ahci_xgene.c:694", val, ctx->csr_core + IOFMSTRWAUX);
+	val = pete_readl("drivers/ata/ahci_xgene.c:695", ctx->csr_core + IOFMSTRWAUX);
 	dev_dbg(ctx->dev, "coherency 0x%X value 0x%08X\n",
 		IOFMSTRWAUX, val);
 
@@ -707,10 +707,10 @@ static int xgene_ahci_mux_select(struct xgene_ahci_context *ctx)
 	if (!ctx->csr_mux)
 		return 0;
 
-	val = readl(ctx->csr_mux + SATA_ENET_CONFIG_REG);
+	val = pete_readl("drivers/ata/ahci_xgene.c:710", ctx->csr_mux + SATA_ENET_CONFIG_REG);
 	val &= ~CFG_SATA_ENET_SELECT_MASK;
-	writel(val, ctx->csr_mux + SATA_ENET_CONFIG_REG);
-	val = readl(ctx->csr_mux + SATA_ENET_CONFIG_REG);
+	pete_writel("drivers/ata/ahci_xgene.c:712", val, ctx->csr_mux + SATA_ENET_CONFIG_REG);
+	val = pete_readl("drivers/ata/ahci_xgene.c:713", ctx->csr_mux + SATA_ENET_CONFIG_REG);
 	return val & CFG_SATA_ENET_SELECT_MASK ? -1 : 0;
 }
 

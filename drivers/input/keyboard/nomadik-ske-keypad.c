@@ -79,10 +79,10 @@ static void ske_keypad_set_bits(struct ske_keypad *keypad, u16 addr,
 
 	spin_lock(&keypad->ske_keypad_lock);
 
-	ret = readl(keypad->reg_base + addr);
+	ret = pete_readl("drivers/input/keyboard/nomadik-ske-keypad.c:82", keypad->reg_base + addr);
 	ret &= ~mask;
 	ret |= data;
-	writel(ret, keypad->reg_base + addr);
+	pete_writel("drivers/input/keyboard/nomadik-ske-keypad.c:85", ret, keypad->reg_base + addr);
 
 	spin_unlock(&keypad->ske_keypad_lock);
 }
@@ -98,7 +98,7 @@ static int __init ske_keypad_chip_init(struct ske_keypad *keypad)
 	int timeout = keypad->board->debounce_ms;
 
 	/* check SKE_RIS to be 0 */
-	while ((readl(keypad->reg_base + SKE_RIS) != 0x00000000) && timeout--)
+	while ((pete_readl("drivers/input/keyboard/nomadik-ske-keypad.c:101", keypad->reg_base + SKE_RIS) != 0x00000000) && timeout--)
 		cpu_relax();
 
 	if (timeout == -1)
@@ -110,10 +110,10 @@ static int __init ske_keypad_chip_init(struct ske_keypad *keypad)
 	 * dbounce value in steps of 32/32.768 ms
 	 */
 	spin_lock(&keypad->ske_keypad_lock);
-	value = readl(keypad->reg_base + SKE_DBCR);
+	value = pete_readl("drivers/input/keyboard/nomadik-ske-keypad.c:113", keypad->reg_base + SKE_DBCR);
 	value = value & 0xff;
 	value |= ((keypad->board->debounce_ms * 32000)/32768) << 8;
-	writel(value, keypad->reg_base + SKE_DBCR);
+	pete_writel("drivers/input/keyboard/nomadik-ske-keypad.c:116", value, keypad->reg_base + SKE_DBCR);
 	spin_unlock(&keypad->ske_keypad_lock);
 
 	/* enable multi key detection */
@@ -154,7 +154,7 @@ static void ske_keypad_report(struct ske_keypad *keypad, u8 status, int col)
 		status &= ~(1 << pos);
 
 		code = MATRIX_SCAN_CODE(row, col, SKE_KEYPAD_ROW_SHIFT);
-		ske_ris = readl(keypad->reg_base + SKE_RIS);
+		ske_ris = pete_readl("drivers/input/keyboard/nomadik-ske-keypad.c:157", keypad->reg_base + SKE_RIS);
 		key_pressed = ske_ris & SKE_KPRISA;
 
 		input_event(input, EV_MSC, MSC_SCAN, code);
@@ -178,7 +178,7 @@ static void ske_keypad_read_data(struct ske_keypad *keypad)
 	 * upper byte contains row value for column 2*x + 1
 	 */
 	for (i = 0; i < SKE_NUM_ASRX_REGISTERS; i++) {
-		ske_asr = readl(keypad->reg_base + SKE_ASR0 + (4 * i));
+		ske_asr = pete_readl("drivers/input/keyboard/nomadik-ske-keypad.c:181", keypad->reg_base + SKE_ASR0 + (4 * i));
 		if (!ske_asr)
 			continue;
 
@@ -205,14 +205,14 @@ static irqreturn_t ske_keypad_irq(int irq, void *dev_id)
 	ske_keypad_set_bits(keypad, SKE_IMSC, ~SKE_KPIMA, 0x0);
 	ske_keypad_set_bits(keypad, SKE_ICR, 0x0, SKE_KPICA);
 
-	while ((readl(keypad->reg_base + SKE_CR) & SKE_KPASON) && --timeout)
+	while ((pete_readl("drivers/input/keyboard/nomadik-ske-keypad.c:208", keypad->reg_base + SKE_CR) & SKE_KPASON) && --timeout)
 		cpu_relax();
 
 	/* SKEx registers are stable and can be read */
 	ske_keypad_read_data(keypad);
 
 	/* wait until raw interrupt is clear */
-	while ((readl(keypad->reg_base + SKE_RIS)) && --timeout)
+	while ((pete_readl("drivers/input/keyboard/nomadik-ske-keypad.c:215", keypad->reg_base + SKE_RIS)) && --timeout)
 		msleep(KEY_PRESSED_DELAY);
 
 	/* enable auto scan interrupts */

@@ -258,7 +258,7 @@ static void sa1111_mask_irq(struct irq_data *d)
 
 	ie = readl_relaxed(mapbase + SA1111_INTEN0);
 	ie &= ~sa1111_irqmask(d);
-	writel(ie, mapbase + SA1111_INTEN0);
+	pete_writel("arch/arm/common/sa1111.c:261", ie, mapbase + SA1111_INTEN0);
 }
 
 static void sa1111_unmask_irq(struct irq_data *d)

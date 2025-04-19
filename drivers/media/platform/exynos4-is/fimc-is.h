@@ -331,22 +331,22 @@ static inline void fimc_is_set_param_ctrl_cmd(struct fimc_is *is, int cmd)
 
 static inline void mcuctl_write(u32 v, struct fimc_is *is, unsigned int offset)
 {
-	writel(v, is->regs + offset);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-is.h:334", v, is->regs + offset);
 }
 
 static inline u32 mcuctl_read(struct fimc_is *is, unsigned int offset)
 {
-	return readl(is->regs + offset);
+	return pete_readl("drivers/media/platform/exynos4-is/fimc-is.h:339", is->regs + offset);
 }
 
 static inline void pmuisp_write(u32 v, struct fimc_is *is, unsigned int offset)
 {
-	writel(v, is->pmu_regs + offset);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-is.h:344", v, is->pmu_regs + offset);
 }
 
 static inline u32 pmuisp_read(struct fimc_is *is, unsigned int offset)
 {
-	return readl(is->pmu_regs + offset);
+	return pete_readl("drivers/media/platform/exynos4-is/fimc-is.h:349", is->pmu_regs + offset);
 }
 
 int fimc_is_wait_event(struct fimc_is *is, unsigned long bit,

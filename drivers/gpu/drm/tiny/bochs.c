@@ -99,7 +99,7 @@ static void bochs_vga_writeb(struct bochs_device *bochs, u16 ioport, u8 val)
 	if (bochs->mmio) {
 		int offset = ioport - 0x3c0 + 0x400;
 
-		writeb(val, bochs->mmio + offset);
+		pete_writeb("drivers/gpu/drm/tiny/bochs.c:102", val, bochs->mmio + offset);
 	} else {
 		outb(val, ioport);
 	}
@@ -113,7 +113,7 @@ static u8 bochs_vga_readb(struct bochs_device *bochs, u16 ioport)
 	if (bochs->mmio) {
 		int offset = ioport - 0x3c0 + 0x400;
 
-		return readb(bochs->mmio + offset);
+		return pete_readb("drivers/gpu/drm/tiny/bochs.c:116", bochs->mmio + offset);
 	} else {
 		return inb(ioport);
 	}
@@ -126,7 +126,7 @@ static u16 bochs_dispi_read(struct bochs_device *bochs, u16 reg)
 	if (bochs->mmio) {
 		int offset = 0x500 + (reg << 1);
 
-		ret = readw(bochs->mmio + offset);
+		ret = pete_readw("drivers/gpu/drm/tiny/bochs.c:129", bochs->mmio + offset);
 	} else {
 		outw(reg, VBE_DISPI_IOPORT_INDEX);
 		ret = inw(VBE_DISPI_IOPORT_DATA);
@@ -139,7 +139,7 @@ static void bochs_dispi_write(struct bochs_device *bochs, u16 reg, u16 val)
 	if (bochs->mmio) {
 		int offset = 0x500 + (reg << 1);
 
-		writew(val, bochs->mmio + offset);
+		pete_writew("drivers/gpu/drm/tiny/bochs.c:142", val, bochs->mmio + offset);
 	} else {
 		outw(reg, VBE_DISPI_IOPORT_INDEX);
 		outw(val, VBE_DISPI_IOPORT_DATA);
@@ -151,7 +151,7 @@ static void bochs_hw_set_big_endian(struct bochs_device *bochs)
 	if (bochs->qext_size < 8)
 		return;
 
-	writel(0xbebebebe, bochs->mmio + 0x604);
+	pete_writel("drivers/gpu/drm/tiny/bochs.c:154", 0xbebebebe, bochs->mmio + 0x604);
 }
 
 static void bochs_hw_set_little_endian(struct bochs_device *bochs)
@@ -159,7 +159,7 @@ static void bochs_hw_set_little_endian(struct bochs_device *bochs)
 	if (bochs->qext_size < 8)
 		return;
 
-	writel(0x1e1e1e1e, bochs->mmio + 0x604);
+	pete_writel("drivers/gpu/drm/tiny/bochs.c:162", 0x1e1e1e1e, bochs->mmio + 0x604);
 }
 
 #ifdef __BIG_ENDIAN
@@ -178,7 +178,7 @@ static int bochs_get_edid_block(void *data, u8 *buf,
 		return -1;
 
 	for (i = 0; i < len; i++)
-		buf[i] = readb(bochs->mmio + start + i);
+		buf[i] = pete_readb("drivers/gpu/drm/tiny/bochs.c:181", bochs->mmio + start + i);
 
 	return 0;
 }
@@ -272,7 +272,7 @@ static int bochs_hw_init(struct drm_device *dev)
 		 ioaddr);
 
 	if (bochs->mmio && pdev->revision >= 2) {
-		bochs->qext_size = readl(bochs->mmio + 0x600);
+		bochs->qext_size = pete_readl("drivers/gpu/drm/tiny/bochs.c:275", bochs->mmio + 0x600);
 		if (bochs->qext_size < 4 || bochs->qext_size > iosize) {
 			bochs->qext_size = 0;
 			goto noext;

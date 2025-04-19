@@ -140,7 +140,7 @@ struct synquacer_spi {
 
 static int read_fifo(struct synquacer_spi *sspi)
 {
-	u32 len = readl(sspi->regs + SYNQUACER_HSSPI_REG_DMSTATUS);
+	u32 len = pete_readl("drivers/spi/spi-synquacer.c:143", sspi->regs + SYNQUACER_HSSPI_REG_DMSTATUS);
 
 	len = (len >> SYNQUACER_HSSPI_DMSTATUS_RX_DATA_SHIFT) &
 	       SYNQUACER_HSSPI_DMSTATUS_RX_DATA_MASK;
@@ -183,7 +183,7 @@ static int read_fifo(struct synquacer_spi *sspi)
 
 static int write_fifo(struct synquacer_spi *sspi)
 {
-	u32 len = readl(sspi->regs + SYNQUACER_HSSPI_REG_DMSTATUS);
+	u32 len = pete_readl("drivers/spi/spi-synquacer.c:186", sspi->regs + SYNQUACER_HSSPI_REG_DMSTATUS);
 
 	len = (len >> SYNQUACER_HSSPI_DMSTATUS_TX_DATA_SHIFT) &
 	       SYNQUACER_HSSPI_DMSTATUS_TX_DATA_MASK;
@@ -272,7 +272,7 @@ static int synquacer_spi_config(struct spi_master *master,
 		return -EINVAL;
 	}
 
-	val = readl(sspi->regs + SYNQUACER_HSSPI_REG_PCC(cs));
+	val = pete_readl("drivers/spi/spi-synquacer.c:275", sspi->regs + SYNQUACER_HSSPI_REG_PCC(cs));
 	val &= ~SYNQUACER_HSSPI_PCC_SAFESYNC;
 	if (bpw == 8 &&	(mode & (SPI_TX_DUAL | SPI_RX_DUAL)) && div < 3)
 		val |= SYNQUACER_HSSPI_PCC_SAFESYNC;
@@ -318,15 +318,15 @@ static int synquacer_spi_config(struct spi_master *master,
 		 SYNQUACER_HSSPI_PCC_CDRS_SHIFT);
 	val |= ((div >> 1) << SYNQUACER_HSSPI_PCC_CDRS_SHIFT);
 
-	writel(val, sspi->regs + SYNQUACER_HSSPI_REG_PCC(cs));
+	pete_writel("drivers/spi/spi-synquacer.c:321", val, sspi->regs + SYNQUACER_HSSPI_REG_PCC(cs));
 
-	val = readl(sspi->regs + SYNQUACER_HSSPI_REG_FIFOCFG);
+	val = pete_readl("drivers/spi/spi-synquacer.c:323", sspi->regs + SYNQUACER_HSSPI_REG_FIFOCFG);
 	val &= ~(SYNQUACER_HSSPI_FIFOCFG_FIFO_WIDTH_MASK <<
 		 SYNQUACER_HSSPI_FIFOCFG_FIFO_WIDTH_SHIFT);
 	val |= ((bpw / 8 - 1) << SYNQUACER_HSSPI_FIFOCFG_FIFO_WIDTH_SHIFT);
-	writel(val, sspi->regs + SYNQUACER_HSSPI_REG_FIFOCFG);
+	pete_writel("drivers/spi/spi-synquacer.c:327", val, sspi->regs + SYNQUACER_HSSPI_REG_FIFOCFG);
 
-	val = readl(sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
+	val = pete_readl("drivers/spi/spi-synquacer.c:329", sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
 	val &= ~(SYNQUACER_HSSPI_DMTRP_DATA_MASK <<
 		 SYNQUACER_HSSPI_DMTRP_DATA_SHIFT);
 
@@ -339,7 +339,7 @@ static int synquacer_spi_config(struct spi_master *master,
 
 	val &= ~(3 << SYNQUACER_HSSPI_DMTRP_BUS_WIDTH_SHIFT);
 	val |= ((bus_width >> 1) << SYNQUACER_HSSPI_DMTRP_BUS_WIDTH_SHIFT);
-	writel(val, sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
+	pete_writel("drivers/spi/spi-synquacer.c:342", val, sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
 
 	sspi->bpw = bpw;
 	sspi->mode = mode;
@@ -361,14 +361,14 @@ static int synquacer_spi_transfer_one(struct spi_master *master,
 	u8 bpw;
 	u32 val;
 
-	val = readl(sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
+	val = pete_readl("drivers/spi/spi-synquacer.c:364", sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
 	val &= ~SYNQUACER_HSSPI_DMSTOP_STOP;
-	writel(val, sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
+	pete_writel("drivers/spi/spi-synquacer.c:366", val, sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
 
-	val = readl(sspi->regs + SYNQUACER_HSSPI_REG_FIFOCFG);
+	val = pete_readl("drivers/spi/spi-synquacer.c:368", sspi->regs + SYNQUACER_HSSPI_REG_FIFOCFG);
 	val |= SYNQUACER_HSSPI_FIFOCFG_RX_FLUSH;
 	val |= SYNQUACER_HSSPI_FIFOCFG_TX_FLUSH;
-	writel(val, sspi->regs + SYNQUACER_HSSPI_REG_FIFOCFG);
+	pete_writel("drivers/spi/spi-synquacer.c:371", val, sspi->regs + SYNQUACER_HSSPI_REG_FIFOCFG);
 
 	/*
 	 * See if we can transfer 4-bytes as 1 word
@@ -428,29 +428,29 @@ static int synquacer_spi_transfer_one(struct spi_master *master,
 	}
 
 	if (xfer->rx_buf) {
-		val = readl(sspi->regs + SYNQUACER_HSSPI_REG_FIFOCFG);
+		val = pete_readl("drivers/spi/spi-synquacer.c:431", sspi->regs + SYNQUACER_HSSPI_REG_FIFOCFG);
 		val &= ~(SYNQUACER_HSSPI_FIFOCFG_RX_THRESHOLD_MASK <<
 			 SYNQUACER_HSSPI_FIFOCFG_RX_THRESHOLD_SHIFT);
 		val |= ((sspi->rx_words > SYNQUACER_HSSPI_FIFO_DEPTH ?
 			SYNQUACER_HSSPI_FIFO_RX_THRESHOLD : sspi->rx_words) <<
 			SYNQUACER_HSSPI_FIFOCFG_RX_THRESHOLD_SHIFT);
-		writel(val, sspi->regs + SYNQUACER_HSSPI_REG_FIFOCFG);
+		pete_writel("drivers/spi/spi-synquacer.c:437", val, sspi->regs + SYNQUACER_HSSPI_REG_FIFOCFG);
 	}
 
-	writel(~0, sspi->regs + SYNQUACER_HSSPI_REG_TXC);
-	writel(~0, sspi->regs + SYNQUACER_HSSPI_REG_RXC);
+	pete_writel("drivers/spi/spi-synquacer.c:440", ~0, sspi->regs + SYNQUACER_HSSPI_REG_TXC);
+	pete_writel("drivers/spi/spi-synquacer.c:441", ~0, sspi->regs + SYNQUACER_HSSPI_REG_RXC);
 
 	/* Trigger */
-	val = readl(sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
+	val = pete_readl("drivers/spi/spi-synquacer.c:444", sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
 	val |= SYNQUACER_HSSPI_DMSTART_START;
-	writel(val, sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
+	pete_writel("drivers/spi/spi-synquacer.c:446", val, sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
 
 	if (xfer->tx_buf) {
 		val = SYNQUACER_HSSPI_TXE_FIFO_EMPTY;
-		writel(val, sspi->regs + SYNQUACER_HSSPI_REG_TXE);
+		pete_writel("drivers/spi/spi-synquacer.c:450", val, sspi->regs + SYNQUACER_HSSPI_REG_TXE);
 		status = wait_for_completion_timeout(&sspi->transfer_done,
 			msecs_to_jiffies(SYNQUACER_HSSPI_TRANSFER_TMOUT_MSEC));
-		writel(0, sspi->regs + SYNQUACER_HSSPI_REG_TXE);
+		pete_writel("drivers/spi/spi-synquacer.c:453", 0, sspi->regs + SYNQUACER_HSSPI_REG_TXE);
 	}
 
 	if (xfer->rx_buf) {
@@ -458,15 +458,15 @@ static int synquacer_spi_transfer_one(struct spi_master *master,
 
 		val = SYNQUACER_HSSPI_RXE_FIFO_MORE_THAN_THRESHOLD |
 		      SYNQUACER_HSSPI_RXE_SLAVE_RELEASED;
-		writel(val, sspi->regs + SYNQUACER_HSSPI_REG_RXE);
+		pete_writel("drivers/spi/spi-synquacer.c:461", val, sspi->regs + SYNQUACER_HSSPI_REG_RXE);
 		status = wait_for_completion_timeout(&sspi->transfer_done,
 			msecs_to_jiffies(SYNQUACER_HSSPI_TRANSFER_TMOUT_MSEC));
-		writel(0, sspi->regs + SYNQUACER_HSSPI_REG_RXE);
+		pete_writel("drivers/spi/spi-synquacer.c:464", 0, sspi->regs + SYNQUACER_HSSPI_REG_RXE);
 
 		/* stop RX and clean RXFIFO */
-		val = readl(sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
+		val = pete_readl("drivers/spi/spi-synquacer.c:467", sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
 		val |= SYNQUACER_HSSPI_DMSTOP_STOP;
-		writel(val, sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
+		pete_writel("drivers/spi/spi-synquacer.c:469", val, sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
 		sspi->rx_buf = buf;
 		sspi->rx_words = SYNQUACER_HSSPI_FIFO_DEPTH;
 		read_fifo(sspi);
@@ -486,7 +486,7 @@ static void synquacer_spi_set_cs(struct spi_device *spi, bool enable)
 	struct synquacer_spi *sspi = spi_master_get_devdata(spi->master);
 	u32 val;
 
-	val = readl(sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
+	val = pete_readl("drivers/spi/spi-synquacer.c:489", sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
 	val &= ~(SYNQUACER_HSSPI_DMPSEL_CS_MASK <<
 		 SYNQUACER_HSSPI_DMPSEL_CS_SHIFT);
 	val |= spi->chip_select << SYNQUACER_HSSPI_DMPSEL_CS_SHIFT;
@@ -494,7 +494,7 @@ static void synquacer_spi_set_cs(struct spi_device *spi, bool enable)
 	if (!enable)
 		val |= SYNQUACER_HSSPI_DMSTOP_STOP;
 
-	writel(val, sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
+	pete_writel("drivers/spi/spi-synquacer.c:497", val, sspi->regs + SYNQUACER_HSSPI_REG_DMSTART);
 }
 
 static int synquacer_spi_wait_status_update(struct synquacer_spi *sspi,
@@ -506,7 +506,7 @@ static int synquacer_spi_wait_status_update(struct synquacer_spi *sspi,
 
 	/* wait MES(Module Enable Status) is updated */
 	do {
-		val = readl(sspi->regs + SYNQUACER_HSSPI_REG_MCTRL) &
+		val = pete_readl("drivers/spi/spi-synquacer.c:509", sspi->regs + SYNQUACER_HSSPI_REG_MCTRL) &
 		      SYNQUACER_HSSPI_MCTRL_MES;
 		if (enable && val)
 			return 0;
@@ -525,23 +525,23 @@ static int synquacer_spi_enable(struct spi_master *master)
 	struct synquacer_spi *sspi = spi_master_get_devdata(master);
 
 	/* Disable module */
-	writel(0, sspi->regs + SYNQUACER_HSSPI_REG_MCTRL);
+	pete_writel("drivers/spi/spi-synquacer.c:528", 0, sspi->regs + SYNQUACER_HSSPI_REG_MCTRL);
 	status = synquacer_spi_wait_status_update(sspi, false);
 	if (status < 0)
 		return status;
 
-	writel(0, sspi->regs + SYNQUACER_HSSPI_REG_TXE);
-	writel(0, sspi->regs + SYNQUACER_HSSPI_REG_RXE);
-	writel(~0, sspi->regs + SYNQUACER_HSSPI_REG_TXC);
-	writel(~0, sspi->regs + SYNQUACER_HSSPI_REG_RXC);
-	writel(~0, sspi->regs + SYNQUACER_HSSPI_REG_FAULTC);
+	pete_writel("drivers/spi/spi-synquacer.c:533", 0, sspi->regs + SYNQUACER_HSSPI_REG_TXE);
+	pete_writel("drivers/spi/spi-synquacer.c:534", 0, sspi->regs + SYNQUACER_HSSPI_REG_RXE);
+	pete_writel("drivers/spi/spi-synquacer.c:535", ~0, sspi->regs + SYNQUACER_HSSPI_REG_TXC);
+	pete_writel("drivers/spi/spi-synquacer.c:536", ~0, sspi->regs + SYNQUACER_HSSPI_REG_RXC);
+	pete_writel("drivers/spi/spi-synquacer.c:537", ~0, sspi->regs + SYNQUACER_HSSPI_REG_FAULTC);
 
-	val = readl(sspi->regs + SYNQUACER_HSSPI_REG_DMCFG);
+	val = pete_readl("drivers/spi/spi-synquacer.c:539", sspi->regs + SYNQUACER_HSSPI_REG_DMCFG);
 	val &= ~SYNQUACER_HSSPI_DMCFG_SSDC;
 	val &= ~SYNQUACER_HSSPI_DMCFG_MSTARTEN;
-	writel(val, sspi->regs + SYNQUACER_HSSPI_REG_DMCFG);
+	pete_writel("drivers/spi/spi-synquacer.c:542", val, sspi->regs + SYNQUACER_HSSPI_REG_DMCFG);
 
-	val = readl(sspi->regs + SYNQUACER_HSSPI_REG_MCTRL);
+	val = pete_readl("drivers/spi/spi-synquacer.c:544", sspi->regs + SYNQUACER_HSSPI_REG_MCTRL);
 	if (sspi->clk_src_type == SYNQUACER_HSSPI_CLOCK_SRC_IPCLK)
 		val |= SYNQUACER_HSSPI_MCTRL_CDSS;
 	else
@@ -552,7 +552,7 @@ static int synquacer_spi_enable(struct spi_master *master)
 	val |= SYNQUACER_HSSPI_MCTRL_SYNCON;
 
 	/* Enable module */
-	writel(val, sspi->regs + SYNQUACER_HSSPI_REG_MCTRL);
+	pete_writel("drivers/spi/spi-synquacer.c:555", val, sspi->regs + SYNQUACER_HSSPI_REG_MCTRL);
 	status = synquacer_spi_wait_status_update(sspi, true);
 	if (status < 0)
 		return status;
@@ -565,13 +565,13 @@ static irqreturn_t sq_spi_rx_handler(int irq, void *priv)
 	uint32_t val;
 	struct synquacer_spi *sspi = priv;
 
-	val = readl(sspi->regs + SYNQUACER_HSSPI_REG_RXF);
+	val = pete_readl("drivers/spi/spi-synquacer.c:568", sspi->regs + SYNQUACER_HSSPI_REG_RXF);
 	if ((val & SYNQUACER_HSSPI_RXF_SLAVE_RELEASED) ||
 	    (val & SYNQUACER_HSSPI_RXF_FIFO_MORE_THAN_THRESHOLD)) {
 		read_fifo(sspi);
 
 		if (sspi->rx_words == 0) {
-			writel(0, sspi->regs + SYNQUACER_HSSPI_REG_RXE);
+			pete_writel("drivers/spi/spi-synquacer.c:574", 0, sspi->regs + SYNQUACER_HSSPI_REG_RXE);
 			complete(&sspi->transfer_done);
 		}
 		return IRQ_HANDLED;
@@ -585,10 +585,10 @@ static irqreturn_t sq_spi_tx_handler(int irq, void *priv)
 	uint32_t val;
 	struct synquacer_spi *sspi = priv;
 
-	val = readl(sspi->regs + SYNQUACER_HSSPI_REG_TXF);
+	val = pete_readl("drivers/spi/spi-synquacer.c:588", sspi->regs + SYNQUACER_HSSPI_REG_TXF);
 	if (val & SYNQUACER_HSSPI_TXF_FIFO_EMPTY) {
 		if (sspi->tx_words == 0) {
-			writel(0, sspi->regs + SYNQUACER_HSSPI_REG_TXE);
+			pete_writel("drivers/spi/spi-synquacer.c:591", 0, sspi->regs + SYNQUACER_HSSPI_REG_TXE);
 			complete(&sspi->transfer_done);
 		} else {
 			write_fifo(sspi);

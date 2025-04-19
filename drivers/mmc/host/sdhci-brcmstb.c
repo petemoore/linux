@@ -69,12 +69,12 @@ static void sdhci_brcmstb_hs400es(struct mmc_host *mmc, struct mmc_ios *ios)
 
 	dev_dbg(mmc_dev(mmc), "%s(): Setting HS400-Enhanced-Strobe mode\n",
 		__func__);
-	reg = readl(host->ioaddr + SDHCI_VENDOR);
+	reg = pete_readl("drivers/mmc/host/sdhci-brcmstb.c:72", host->ioaddr + SDHCI_VENDOR);
 	if (ios->enhanced_strobe)
 		reg |= SDHCI_VENDOR_ENHANCED_STRB;
 	else
 		reg &= ~SDHCI_VENDOR_ENHANCED_STRB;
-	writel(reg, host->ioaddr + SDHCI_VENDOR);
+	pete_writel("drivers/mmc/host/sdhci-brcmstb.c:77", reg, host->ioaddr + SDHCI_VENDOR);
 }
 
 static void sdhci_brcmstb_set_clock(struct sdhci_host *host, unsigned int clock)

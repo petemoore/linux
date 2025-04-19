@@ -61,8 +61,8 @@
 #define GSC_AUTOSUSPEND_DELAY		2000
 
 #define get_gsc_context(dev)	dev_get_drvdata(dev)
-#define gsc_read(offset)		readl(ctx->regs + (offset))
-#define gsc_write(cfg, offset)	writel(cfg, ctx->regs + (offset))
+#define gsc_read(offset)		pete_readl("drivers/gpu/drm/exynos/exynos_drm_gsc.c:64", ctx->regs + (offset))
+#define gsc_write(cfg, offset)	pete_writel("drivers/gpu/drm/exynos/exynos_drm_gsc.c:65", cfg, ctx->regs + (offset))
 
 /*
  * A structure of scaler.

@@ -350,7 +350,7 @@ static int tosh_get_machine_id(void __iomem *bios)
 	unsigned short bx,cx;
 	unsigned long address;
 
-	id = (0x100*(int) readb(bios+0xfffe))+((int) readb(bios+0xfffa));
+	id = (0x100*(int) pete_readb("drivers/char/toshiba.c:353", bios+0xfffe))+((int) pete_readb("drivers/char/toshiba.c:353", bios+0xfffa));
 
 	/* do we have a SCTTable machine identication number on our hands */
 
@@ -377,11 +377,11 @@ static int tosh_get_machine_id(void __iomem *bios)
 		/* now twiddle with our pointer a bit */
 
 		address = bx;
-		cx = readw(bios + address);
+		cx = pete_readw("drivers/char/toshiba.c:380", bios + address);
 		address = 9+bx+cx;
-		cx = readw(bios + address);
+		cx = pete_readw("drivers/char/toshiba.c:382", bios + address);
 		address = 0xa+cx;
-		cx = readw(bios + address);
+		cx = pete_readw("drivers/char/toshiba.c:384", bios + address);
 
 		/* now construct our machine identification number */
 
@@ -413,7 +413,7 @@ static int tosh_probe(void)
 	   some machines that are not Toshiba's pass the next test */
 
 	for (i=0;i<7;i++) {
-		if (readb(bios+0xe010+i)!=signature[i]) {
+		if (pete_readb("drivers/char/toshiba.c:416", bios+0xe010+i)!=signature[i]) {
 			pr_err("toshiba: not a supported Toshiba laptop\n");
 			iounmap(bios);
 			return -ENODEV;
@@ -445,15 +445,15 @@ static int tosh_probe(void)
 
 	/* get the BIOS version */
 
-	major = readb(bios+0xe009)-'0';
-	minor = ((readb(bios+0xe00b)-'0')*10)+(readb(bios+0xe00c)-'0');
+	major = pete_readb("drivers/char/toshiba.c:448", bios+0xe009)-'0';
+	minor = ((pete_readb("drivers/char/toshiba.c:449", bios+0xe00b)-'0')*10)+(pete_readb("drivers/char/toshiba.c:449", bios+0xe00c)-'0');
 	tosh_bios = (major*0x100)+minor;
 
 	/* get the BIOS date */
 
-	day = ((readb(bios+0xfff5)-'0')*10)+(readb(bios+0xfff6)-'0');
-	month = ((readb(bios+0xfff8)-'0')*10)+(readb(bios+0xfff9)-'0');
-	year = ((readb(bios+0xfffb)-'0')*10)+(readb(bios+0xfffc)-'0');
+	day = ((pete_readb("drivers/char/toshiba.c:454", bios+0xfff5)-'0')*10)+(pete_readb("drivers/char/toshiba.c:454", bios+0xfff6)-'0');
+	month = ((pete_readb("drivers/char/toshiba.c:455", bios+0xfff8)-'0')*10)+(pete_readb("drivers/char/toshiba.c:455", bios+0xfff9)-'0');
+	year = ((pete_readb("drivers/char/toshiba.c:456", bios+0xfffb)-'0')*10)+(pete_readb("drivers/char/toshiba.c:456", bios+0xfffc)-'0');
 	tosh_date = (((year-90) & 0x1f)<<10) | ((month & 0xf)<<6)
 		| ((day & 0x1f)<<1);
 

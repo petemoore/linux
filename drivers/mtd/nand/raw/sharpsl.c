@@ -68,33 +68,33 @@ static void sharpsl_nand_hwcontrol(struct nand_chip *chip, int cmd,
 
 		bits ^= 0x11;
 
-		writeb((readb(sharpsl->io + FLASHCTL) & ~0x17) | bits, sharpsl->io + FLASHCTL);
+		pete_writeb("drivers/mtd/nand/raw/sharpsl.c:71", (pete_readb("drivers/mtd/nand/raw/sharpsl.c:71", sharpsl->io + FLASHCTL) & ~0x17) | bits, sharpsl->io + FLASHCTL);
 	}
 
 	if (cmd != NAND_CMD_NONE)
-		writeb(cmd, chip->legacy.IO_ADDR_W);
+		pete_writeb("drivers/mtd/nand/raw/sharpsl.c:75", cmd, chip->legacy.IO_ADDR_W);
 }
 
 static int sharpsl_nand_dev_ready(struct nand_chip *chip)
 {
 	struct sharpsl_nand *sharpsl = mtd_to_sharpsl(nand_to_mtd(chip));
-	return !((readb(sharpsl->io + FLASHCTL) & FLRYBY) == 0);
+	return !((pete_readb("drivers/mtd/nand/raw/sharpsl.c:81", sharpsl->io + FLASHCTL) & FLRYBY) == 0);
 }
 
 static void sharpsl_nand_enable_hwecc(struct nand_chip *chip, int mode)
 {
 	struct sharpsl_nand *sharpsl = mtd_to_sharpsl(nand_to_mtd(chip));
-	writeb(0, sharpsl->io + ECCCLRR);
+	pete_writeb("drivers/mtd/nand/raw/sharpsl.c:87", 0, sharpsl->io + ECCCLRR);
 }
 
 static int sharpsl_nand_calculate_ecc(struct nand_chip *chip,
 				      const u_char * dat, u_char * ecc_code)
 {
 	struct sharpsl_nand *sharpsl = mtd_to_sharpsl(nand_to_mtd(chip));
-	ecc_code[0] = ~readb(sharpsl->io + ECCLPUB);
-	ecc_code[1] = ~readb(sharpsl->io + ECCLPLB);
-	ecc_code[2] = (~readb(sharpsl->io + ECCCP) << 2) | 0x03;
-	return readb(sharpsl->io + ECCCNTR) != 0;
+	ecc_code[0] = ~pete_readb("drivers/mtd/nand/raw/sharpsl.c:94", sharpsl->io + ECCLPUB);
+	ecc_code[1] = ~pete_readb("drivers/mtd/nand/raw/sharpsl.c:95", sharpsl->io + ECCLPLB);
+	ecc_code[2] = (~pete_readb("drivers/mtd/nand/raw/sharpsl.c:96", sharpsl->io + ECCCP) << 2) | 0x03;
+	return pete_readb("drivers/mtd/nand/raw/sharpsl.c:97", sharpsl->io + ECCCNTR) != 0;
 }
 
 static int sharpsl_nand_correct_ecc(struct nand_chip *chip,
@@ -179,7 +179,7 @@ static int sharpsl_nand_probe(struct platform_device *pdev)
 	/*
 	 * PXA initialize
 	 */
-	writeb(readb(sharpsl->io + FLASHCTL) | FLWP, sharpsl->io + FLASHCTL);
+	pete_writeb("drivers/mtd/nand/raw/sharpsl.c:182", pete_readb("drivers/mtd/nand/raw/sharpsl.c:182", sharpsl->io + FLASHCTL) | FLWP, sharpsl->io + FLASHCTL);
 
 	/* Set address of NAND IO lines */
 	this->legacy.IO_ADDR_R = sharpsl->io + FLASHIO;

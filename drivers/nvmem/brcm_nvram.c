@@ -21,7 +21,7 @@ static int brcm_nvram_read(void *context, unsigned int offset, void *val,
 	u8 *dst = val;
 
 	while (bytes--)
-		*dst++ = readb(priv->base + offset++);
+		*dst++ = pete_readb("drivers/nvmem/brcm_nvram.c:24", priv->base + offset++);
 
 	return 0;
 }

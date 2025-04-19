@@ -28,7 +28,7 @@ static irqreturn_t opencores_kbd_isr(int irq, void *dev_id)
 	struct input_dev *input = opencores_kbd->input;
 	unsigned char c;
 
-	c = readb(opencores_kbd->addr);
+	c = pete_readb("drivers/input/keyboard/opencores-kbd.c:31", opencores_kbd->addr);
 	input_report_key(input, c & 0x7f, c & 0x80 ? 0 : 1);
 	input_sync(input);
 

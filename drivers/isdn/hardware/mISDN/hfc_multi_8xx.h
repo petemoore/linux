@@ -23,9 +23,9 @@ HFC_outb_embsd(struct hfc_multi *hc, u_char reg, u_char val,
 #endif
 {
 	hc->immap->im_ioport.iop_padat |= PA_XHFC_A0;
-	writeb(reg, hc->xhfc_memaddr);
+	pete_writeb("drivers/isdn/hardware/mISDN/hfc_multi_8xx.h:26", reg, hc->xhfc_memaddr);
 	hc->immap->im_ioport.iop_padat &= ~(PA_XHFC_A0);
-	writeb(val, hc->xhfc_memdata);
+	pete_writeb("drivers/isdn/hardware/mISDN/hfc_multi_8xx.h:28", val, hc->xhfc_memdata);
 }
 static u_char
 #ifdef HFC_REGISTER_DEBUG
@@ -35,9 +35,9 @@ HFC_inb_embsd(struct hfc_multi *hc, u_char reg, const char *function, int line)
 #endif
 {
 	hc->immap->im_ioport.iop_padat |= PA_XHFC_A0;
-	writeb(reg, hc->xhfc_memaddr);
+	pete_writeb("drivers/isdn/hardware/mISDN/hfc_multi_8xx.h:38", reg, hc->xhfc_memaddr);
 	hc->immap->im_ioport.iop_padat &= ~(PA_XHFC_A0);
-	return readb(hc->xhfc_memdata);
+	return pete_readb("drivers/isdn/hardware/mISDN/hfc_multi_8xx.h:40", hc->xhfc_memdata);
 }
 static u_short
 #ifdef HFC_REGISTER_DEBUG
@@ -47,9 +47,9 @@ HFC_inw_embsd(struct hfc_multi *hc, u_char reg, const char *function, int line)
 #endif
 {
 	hc->immap->im_ioport.iop_padat |= PA_XHFC_A0;
-	writeb(reg, hc->xhfc_memaddr);
+	pete_writeb("drivers/isdn/hardware/mISDN/hfc_multi_8xx.h:50", reg, hc->xhfc_memaddr);
 	hc->immap->im_ioport.iop_padat &= ~(PA_XHFC_A0);
-	return readb(hc->xhfc_memdata);
+	return pete_readb("drivers/isdn/hardware/mISDN/hfc_multi_8xx.h:52", hc->xhfc_memdata);
 }
 static void
 #ifdef HFC_REGISTER_DEBUG
@@ -59,9 +59,9 @@ HFC_wait_embsd(struct hfc_multi *hc, const char *function, int line)
 #endif
 {
 	hc->immap->im_ioport.iop_padat |= PA_XHFC_A0;
-	writeb(R_STATUS, hc->xhfc_memaddr);
+	pete_writeb("drivers/isdn/hardware/mISDN/hfc_multi_8xx.h:62", R_STATUS, hc->xhfc_memaddr);
 	hc->immap->im_ioport.iop_padat &= ~(PA_XHFC_A0);
-	while (readb(hc->xhfc_memdata) & V_BUSY)
+	while (pete_readb("drivers/isdn/hardware/mISDN/hfc_multi_8xx.h:64", hc->xhfc_memdata) & V_BUSY)
 		cpu_relax();
 }
 

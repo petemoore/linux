@@ -82,8 +82,8 @@ static int __init h8300h_intc_of_init(struct device_node *intc,
 	BUG_ON(!intc_baseaddr);
 
 	/* All interrupt priority low */
-	writeb(0x00, IPR + 0);
-	writeb(0x00, IPR + 1);
+	pete_writeb("drivers/irqchip/irq-renesas-h8300h.c:85", 0x00, IPR + 0);
+	pete_writeb("drivers/irqchip/irq-renesas-h8300h.c:86", 0x00, IPR + 1);
 
 	domain = irq_domain_add_linear(intc, NR_IRQS, &irq_ops, NULL);
 	BUG_ON(!domain);

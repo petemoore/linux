@@ -515,32 +515,32 @@ static inline bool alx_hw_giga(struct alx_hw *hw)
 
 static inline void alx_write_mem8(struct alx_hw *hw, u32 reg, u8 val)
 {
-	writeb(val, hw->hw_addr + reg);
+	pete_writeb("drivers/net/ethernet/atheros/alx/hw.h:518", val, hw->hw_addr + reg);
 }
 
 static inline void alx_write_mem16(struct alx_hw *hw, u32 reg, u16 val)
 {
-	writew(val, hw->hw_addr + reg);
+	pete_writew("drivers/net/ethernet/atheros/alx/hw.h:523", val, hw->hw_addr + reg);
 }
 
 static inline u16 alx_read_mem16(struct alx_hw *hw, u32 reg)
 {
-	return readw(hw->hw_addr + reg);
+	return pete_readw("drivers/net/ethernet/atheros/alx/hw.h:528", hw->hw_addr + reg);
 }
 
 static inline void alx_write_mem32(struct alx_hw *hw, u32 reg, u32 val)
 {
-	writel(val, hw->hw_addr + reg);
+	pete_writel("drivers/net/ethernet/atheros/alx/hw.h:533", val, hw->hw_addr + reg);
 }
 
 static inline u32 alx_read_mem32(struct alx_hw *hw, u32 reg)
 {
-	return readl(hw->hw_addr + reg);
+	return pete_readl("drivers/net/ethernet/atheros/alx/hw.h:538", hw->hw_addr + reg);
 }
 
 static inline void alx_post_write(struct alx_hw *hw)
 {
-	readl(hw->hw_addr);
+	pete_readl("drivers/net/ethernet/atheros/alx/hw.h:543", hw->hw_addr);
 }
 
 int alx_get_perm_macaddr(struct alx_hw *hw, u8 *addr);

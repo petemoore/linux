@@ -102,14 +102,14 @@ static int amd8111e_read_phy(struct amd8111e_priv *lp,
 	unsigned int reg_val;
 	unsigned int repeat = REPEAT_CNT;
 
-	reg_val = readl(mmio + PHY_ACCESS);
+	reg_val = pete_readl("drivers/net/ethernet/amd/amd8111e.c:105", mmio + PHY_ACCESS);
 	while (reg_val & PHY_CMD_ACTIVE)
-		reg_val = readl(mmio + PHY_ACCESS);
+		reg_val = pete_readl("drivers/net/ethernet/amd/amd8111e.c:107", mmio + PHY_ACCESS);
 
-	writel(PHY_RD_CMD | ((phy_id & 0x1f) << 21) |
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:109", PHY_RD_CMD | ((phy_id & 0x1f) << 21) |
 			   ((reg & 0x1f) << 16), mmio + PHY_ACCESS);
 	do {
-		reg_val = readl(mmio + PHY_ACCESS);
+		reg_val = pete_readl("drivers/net/ethernet/amd/amd8111e.c:112", mmio + PHY_ACCESS);
 		udelay(30);  /* It takes 30 us to read/write data */
 	} while (--repeat && (reg_val & PHY_CMD_ACTIVE));
 	if (reg_val & PHY_RD_ERR)
@@ -131,15 +131,15 @@ static int amd8111e_write_phy(struct amd8111e_priv *lp,
 	void __iomem *mmio = lp->mmio;
 	unsigned int reg_val;
 
-	reg_val = readl(mmio + PHY_ACCESS);
+	reg_val = pete_readl("drivers/net/ethernet/amd/amd8111e.c:134", mmio + PHY_ACCESS);
 	while (reg_val & PHY_CMD_ACTIVE)
-		reg_val = readl(mmio + PHY_ACCESS);
+		reg_val = pete_readl("drivers/net/ethernet/amd/amd8111e.c:136", mmio + PHY_ACCESS);
 
-	writel(PHY_WR_CMD | ((phy_id & 0x1f) << 21) |
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:138", PHY_WR_CMD | ((phy_id & 0x1f) << 21) |
 			   ((reg & 0x1f) << 16)|val, mmio + PHY_ACCESS);
 
 	do {
-		reg_val = readl(mmio + PHY_ACCESS);
+		reg_val = pete_readl("drivers/net/ethernet/amd/amd8111e.c:142", mmio + PHY_ACCESS);
 		udelay(30);  /* It takes 30 us to read/write the data */
 	} while (--repeat && (reg_val & PHY_CMD_ACTIVE));
 
@@ -380,8 +380,8 @@ static int amd8111e_set_coalesce(struct net_device *dev, enum coal_mode cmod)
 				return -EINVAL;
 
 			timeout = timeout * DELAY_TIMER_CONV;
-			writel(VAL0|STINTEN, mmio+INTEN0);
-			writel((u32)DLY_INT_A_R0 | (event_count << 16) |
+			pete_writel("drivers/net/ethernet/amd/amd8111e.c:383", VAL0|STINTEN, mmio+INTEN0);
+			pete_writel("drivers/net/ethernet/amd/amd8111e.c:384", (u32)DLY_INT_A_R0 | (event_count << 16) |
 				timeout, mmio + DLY_INT_A);
 			break;
 
@@ -394,21 +394,21 @@ static int amd8111e_set_coalesce(struct net_device *dev, enum coal_mode cmod)
 
 
 			timeout = timeout * DELAY_TIMER_CONV;
-			writel(VAL0 | STINTEN, mmio + INTEN0);
-			writel((u32)DLY_INT_B_T0 | (event_count << 16) |
+			pete_writel("drivers/net/ethernet/amd/amd8111e.c:397", VAL0 | STINTEN, mmio + INTEN0);
+			pete_writel("drivers/net/ethernet/amd/amd8111e.c:398", (u32)DLY_INT_B_T0 | (event_count << 16) |
 				timeout, mmio + DLY_INT_B);
 			break;
 
 		case DISABLE_COAL:
-			writel(0, mmio + STVAL);
-			writel(STINTEN, mmio + INTEN0);
-			writel(0, mmio + DLY_INT_B);
-			writel(0, mmio + DLY_INT_A);
+			pete_writel("drivers/net/ethernet/amd/amd8111e.c:403", 0, mmio + STVAL);
+			pete_writel("drivers/net/ethernet/amd/amd8111e.c:404", STINTEN, mmio + INTEN0);
+			pete_writel("drivers/net/ethernet/amd/amd8111e.c:405", 0, mmio + DLY_INT_B);
+			pete_writel("drivers/net/ethernet/amd/amd8111e.c:406", 0, mmio + DLY_INT_A);
 			break;
 		 case ENABLE_COAL:
 		       /* Start the timer */
-			writel((u32)SOFT_TIMER_FREQ, mmio + STVAL); /* 0.5 sec */
-			writel(VAL0 | STINTEN, mmio + INTEN0);
+			pete_writel("drivers/net/ethernet/amd/amd8111e.c:410", (u32)SOFT_TIMER_FREQ, mmio + STVAL); /* 0.5 sec */
+			pete_writel("drivers/net/ethernet/amd/amd8111e.c:411", VAL0 | STINTEN, mmio + INTEN0);
 			break;
 		default:
 			break;
@@ -426,59 +426,59 @@ static int amd8111e_restart(struct net_device *dev)
 	int i, reg_val;
 
 	/* stop the chip */
-	writel(RUN, mmio + CMD0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:429", RUN, mmio + CMD0);
 
 	if (amd8111e_init_ring(dev))
 		return -ENOMEM;
 
 	/* enable the port manager and set auto negotiation always */
-	writel((u32)VAL1 | EN_PMGR, mmio + CMD3);
-	writel((u32)XPHYANE | XPHYRST, mmio + CTRL2);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:435", (u32)VAL1 | EN_PMGR, mmio + CMD3);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:436", (u32)XPHYANE | XPHYRST, mmio + CTRL2);
 
 	amd8111e_set_ext_phy(dev);
 
 	/* set control registers */
-	reg_val = readl(mmio + CTRL1);
+	reg_val = pete_readl("drivers/net/ethernet/amd/amd8111e.c:441", mmio + CTRL1);
 	reg_val &= ~XMTSP_MASK;
-	writel(reg_val | XMTSP_128 | CACHE_ALIGN, mmio + CTRL1);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:443", reg_val | XMTSP_128 | CACHE_ALIGN, mmio + CTRL1);
 
 	/* enable interrupt */
-	writel(APINT5EN | APINT4EN | APINT3EN | APINT2EN | APINT1EN |
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:446", APINT5EN | APINT4EN | APINT3EN | APINT2EN | APINT1EN |
 		APINT0EN | MIIPDTINTEN | MCCIINTEN | MCCINTEN | MREINTEN |
 		SPNDINTEN | MPINTEN | SINTEN | STINTEN, mmio + INTEN0);
 
-	writel(VAL3 | LCINTEN | VAL1 | TINTEN0 | VAL0 | RINTEN0, mmio + INTEN0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:450", VAL3 | LCINTEN | VAL1 | TINTEN0 | VAL0 | RINTEN0, mmio + INTEN0);
 
 	/* initialize tx and rx ring base addresses */
-	writel((u32)lp->tx_ring_dma_addr, mmio + XMT_RING_BASE_ADDR0);
-	writel((u32)lp->rx_ring_dma_addr, mmio + RCV_RING_BASE_ADDR0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:453", (u32)lp->tx_ring_dma_addr, mmio + XMT_RING_BASE_ADDR0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:454", (u32)lp->rx_ring_dma_addr, mmio + RCV_RING_BASE_ADDR0);
 
-	writew((u32)NUM_TX_RING_DR, mmio + XMT_RING_LEN0);
-	writew((u16)NUM_RX_RING_DR, mmio + RCV_RING_LEN0);
+	pete_writew("drivers/net/ethernet/amd/amd8111e.c:456", (u32)NUM_TX_RING_DR, mmio + XMT_RING_LEN0);
+	pete_writew("drivers/net/ethernet/amd/amd8111e.c:457", (u16)NUM_RX_RING_DR, mmio + RCV_RING_LEN0);
 
 	/* set default IPG to 96 */
-	writew((u32)DEFAULT_IPG, mmio + IPG);
-	writew((u32)(DEFAULT_IPG-IFS1_DELTA), mmio + IFS1);
+	pete_writew("drivers/net/ethernet/amd/amd8111e.c:460", (u32)DEFAULT_IPG, mmio + IPG);
+	pete_writew("drivers/net/ethernet/amd/amd8111e.c:461", (u32)(DEFAULT_IPG-IFS1_DELTA), mmio + IFS1);
 
 	if (lp->options & OPTION_JUMBO_ENABLE) {
-		writel((u32)VAL2|JUMBO, mmio + CMD3);
+		pete_writel("drivers/net/ethernet/amd/amd8111e.c:464", (u32)VAL2|JUMBO, mmio + CMD3);
 		/* Reset REX_UFLO */
-		writel(REX_UFLO, mmio + CMD2);
+		pete_writel("drivers/net/ethernet/amd/amd8111e.c:466", REX_UFLO, mmio + CMD2);
 		/* Should not set REX_UFLO for jumbo frames */
-		writel(VAL0 | APAD_XMT | REX_RTRY, mmio + CMD2);
+		pete_writel("drivers/net/ethernet/amd/amd8111e.c:468", VAL0 | APAD_XMT | REX_RTRY, mmio + CMD2);
 	} else {
-		writel(VAL0 | APAD_XMT | REX_RTRY | REX_UFLO, mmio + CMD2);
-		writel((u32)JUMBO, mmio + CMD3);
+		pete_writel("drivers/net/ethernet/amd/amd8111e.c:470", VAL0 | APAD_XMT | REX_RTRY | REX_UFLO, mmio + CMD2);
+		pete_writel("drivers/net/ethernet/amd/amd8111e.c:471", (u32)JUMBO, mmio + CMD3);
 	}
 
 #if AMD8111E_VLAN_TAG_USED
-	writel((u32)VAL2 | VSIZE | VL_TAG_DEL, mmio + CMD3);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:475", (u32)VAL2 | VSIZE | VL_TAG_DEL, mmio + CMD3);
 #endif
-	writel(VAL0 | APAD_XMT | REX_RTRY, mmio + CMD2);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:477", VAL0 | APAD_XMT | REX_RTRY, mmio + CMD2);
 
 	/* Setting the MAC address to the device */
 	for (i = 0; i < ETH_ALEN; i++)
-		writeb(dev->dev_addr[i], mmio + PADR + i);
+		pete_writeb("drivers/net/ethernet/amd/amd8111e.c:481", dev->dev_addr[i], mmio + PADR + i);
 
 	/* Enable interrupt coalesce */
 	if (lp->options & OPTION_INTR_COAL_ENABLE) {
@@ -487,11 +487,11 @@ static int amd8111e_restart(struct net_device *dev)
 	}
 
 	/* set RUN bit to start the chip */
-	writel(VAL2 | RDMD0, mmio + CMD0);
-	writel(VAL0 | INTREN | RUN, mmio + CMD0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:490", VAL2 | RDMD0, mmio + CMD0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:491", VAL0 | INTREN | RUN, mmio + CMD0);
 
 	/* To avoid PCI posting bug */
-	readl(mmio+CMD0);
+	pete_readl("drivers/net/ethernet/amd/amd8111e.c:494", mmio+CMD0);
 	return 0;
 }
 
@@ -504,83 +504,83 @@ static void amd8111e_init_hw_default(struct amd8111e_priv *lp)
 
 
 	/* stop the chip */
-	writel(RUN, mmio + CMD0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:507", RUN, mmio + CMD0);
 
 	/* AUTOPOLL0 Register *//*TBD default value is 8100 in FPS */
-	writew( 0x8100 | lp->ext_phy_addr, mmio + AUTOPOLL0);
+	pete_writew("drivers/net/ethernet/amd/amd8111e.c:510",  0x8100 | lp->ext_phy_addr, mmio + AUTOPOLL0);
 
 	/* Clear RCV_RING_BASE_ADDR */
-	writel(0, mmio + RCV_RING_BASE_ADDR0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:513", 0, mmio + RCV_RING_BASE_ADDR0);
 
 	/* Clear XMT_RING_BASE_ADDR */
-	writel(0, mmio + XMT_RING_BASE_ADDR0);
-	writel(0, mmio + XMT_RING_BASE_ADDR1);
-	writel(0, mmio + XMT_RING_BASE_ADDR2);
-	writel(0, mmio + XMT_RING_BASE_ADDR3);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:516", 0, mmio + XMT_RING_BASE_ADDR0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:517", 0, mmio + XMT_RING_BASE_ADDR1);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:518", 0, mmio + XMT_RING_BASE_ADDR2);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:519", 0, mmio + XMT_RING_BASE_ADDR3);
 
 	/* Clear CMD0  */
-	writel(CMD0_CLEAR, mmio + CMD0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:522", CMD0_CLEAR, mmio + CMD0);
 
 	/* Clear CMD2 */
-	writel(CMD2_CLEAR, mmio + CMD2);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:525", CMD2_CLEAR, mmio + CMD2);
 
 	/* Clear CMD7 */
-	writel(CMD7_CLEAR, mmio + CMD7);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:528", CMD7_CLEAR, mmio + CMD7);
 
 	/* Clear DLY_INT_A and DLY_INT_B */
-	writel(0x0, mmio + DLY_INT_A);
-	writel(0x0, mmio + DLY_INT_B);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:531", 0x0, mmio + DLY_INT_A);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:532", 0x0, mmio + DLY_INT_B);
 
 	/* Clear FLOW_CONTROL */
-	writel(0x0, mmio + FLOW_CONTROL);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:535", 0x0, mmio + FLOW_CONTROL);
 
 	/* Clear INT0  write 1 to clear register */
-	reg_val = readl(mmio + INT0);
-	writel(reg_val, mmio + INT0);
+	reg_val = pete_readl("drivers/net/ethernet/amd/amd8111e.c:538", mmio + INT0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:539", reg_val, mmio + INT0);
 
 	/* Clear STVAL */
-	writel(0x0, mmio + STVAL);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:542", 0x0, mmio + STVAL);
 
 	/* Clear INTEN0 */
-	writel(INTEN0_CLEAR, mmio + INTEN0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:545", INTEN0_CLEAR, mmio + INTEN0);
 
 	/* Clear LADRF */
-	writel(0x0, mmio + LADRF);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:548", 0x0, mmio + LADRF);
 
 	/* Set SRAM_SIZE & SRAM_BOUNDARY registers  */
-	writel(0x80010, mmio + SRAM_SIZE);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:551", 0x80010, mmio + SRAM_SIZE);
 
 	/* Clear RCV_RING0_LEN */
-	writel(0x0, mmio + RCV_RING_LEN0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:554", 0x0, mmio + RCV_RING_LEN0);
 
 	/* Clear XMT_RING0/1/2/3_LEN */
-	writel(0x0, mmio +  XMT_RING_LEN0);
-	writel(0x0, mmio +  XMT_RING_LEN1);
-	writel(0x0, mmio +  XMT_RING_LEN2);
-	writel(0x0, mmio +  XMT_RING_LEN3);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:557", 0x0, mmio +  XMT_RING_LEN0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:558", 0x0, mmio +  XMT_RING_LEN1);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:559", 0x0, mmio +  XMT_RING_LEN2);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:560", 0x0, mmio +  XMT_RING_LEN3);
 
 	/* Clear XMT_RING_LIMIT */
-	writel(0x0, mmio + XMT_RING_LIMIT);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:563", 0x0, mmio + XMT_RING_LIMIT);
 
 	/* Clear MIB */
-	writew(MIB_CLEAR, mmio + MIB_ADDR);
+	pete_writew("drivers/net/ethernet/amd/amd8111e.c:566", MIB_CLEAR, mmio + MIB_ADDR);
 
 	/* Clear LARF */
 	amd8111e_writeq(*(u64 *)logic_filter, mmio + LADRF);
 
 	/* SRAM_SIZE register */
-	reg_val = readl(mmio + SRAM_SIZE);
+	reg_val = pete_readl("drivers/net/ethernet/amd/amd8111e.c:572", mmio + SRAM_SIZE);
 
 	if (lp->options & OPTION_JUMBO_ENABLE)
-		writel(VAL2 | JUMBO, mmio + CMD3);
+		pete_writel("drivers/net/ethernet/amd/amd8111e.c:575", VAL2 | JUMBO, mmio + CMD3);
 #if AMD8111E_VLAN_TAG_USED
-	writel(VAL2 | VSIZE | VL_TAG_DEL, mmio + CMD3);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:577", VAL2 | VSIZE | VL_TAG_DEL, mmio + CMD3);
 #endif
 	/* Set default value to CTRL1 Register */
-	writel(CTRL1_DEFAULT, mmio + CTRL1);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:580", CTRL1_DEFAULT, mmio + CTRL1);
 
 	/* To avoid PCI posting bug */
-	readl(mmio + CMD2);
+	pete_readl("drivers/net/ethernet/amd/amd8111e.c:583", mmio + CMD2);
 
 }
 
@@ -592,24 +592,24 @@ static void amd8111e_disable_interrupt(struct amd8111e_priv *lp)
 	u32 intr0;
 
 	/* Disable interrupt */
-	writel(INTREN, lp->mmio + CMD0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:595", INTREN, lp->mmio + CMD0);
 
 	/* Clear INT0 */
-	intr0 = readl(lp->mmio + INT0);
-	writel(intr0, lp->mmio + INT0);
+	intr0 = pete_readl("drivers/net/ethernet/amd/amd8111e.c:598", lp->mmio + INT0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:599", intr0, lp->mmio + INT0);
 
 	/* To avoid PCI posting bug */
-	readl(lp->mmio + INT0);
+	pete_readl("drivers/net/ethernet/amd/amd8111e.c:602", lp->mmio + INT0);
 
 }
 
 /* This function stops the chip. */
 static void amd8111e_stop_chip(struct amd8111e_priv *lp)
 {
-	writel(RUN, lp->mmio + CMD0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:609", RUN, lp->mmio + CMD0);
 
 	/* To avoid PCI posting bug */
-	readl(lp->mmio + CMD0);
+	pete_readl("drivers/net/ethernet/amd/amd8111e.c:612", lp->mmio + CMD0);
 }
 
 /* This function frees the  transmiter and receiver descriptor rings. */
@@ -781,8 +781,8 @@ err_next_pkt:
 
 		/* Receive descriptor is empty now */
 		spin_lock_irqsave(&lp->lock, flags);
-		writel(VAL0|RINTEN0, mmio + INTEN0);
-		writel(VAL2 | RDMD0, mmio + CMD0);
+		pete_writel("drivers/net/ethernet/amd/amd8111e.c:784", VAL0|RINTEN0, mmio + INTEN0);
+		pete_writel("drivers/net/ethernet/amd/amd8111e.c:785", VAL2 | RDMD0, mmio + CMD0);
 		spin_unlock_irqrestore(&lp->lock, flags);
 	}
 
@@ -796,7 +796,7 @@ static int amd8111e_link_change(struct net_device *dev)
 	int status0, speed;
 
 	/* read the link change */
-	status0 = readl(lp->mmio + STAT0);
+	status0 = pete_readl("drivers/net/ethernet/amd/amd8111e.c:799", lp->mmio + STAT0);
 
 	if (status0 & LINK_STATS) {
 		if (status0 & AUTONEG_COMPLETE)
@@ -839,14 +839,14 @@ static int amd8111e_read_mib(void __iomem *mmio, u8 MIB_COUNTER)
 	unsigned  int data;
 	unsigned int repeat = REPEAT_CNT;
 
-	writew(MIB_RD_CMD | MIB_COUNTER, mmio + MIB_ADDR);
+	pete_writew("drivers/net/ethernet/amd/amd8111e.c:842", MIB_RD_CMD | MIB_COUNTER, mmio + MIB_ADDR);
 	do {
-		status = readw(mmio + MIB_ADDR);
+		status = pete_readw("drivers/net/ethernet/amd/amd8111e.c:844", mmio + MIB_ADDR);
 		udelay(2);	/* controller takes MAX 2 us to get mib data */
 	}
 	while (--repeat && (status & MIB_CMD_ACTIVE));
 
-	data = readl(mmio + MIB_DATA);
+	data = pete_readl("drivers/net/ethernet/amd/amd8111e.c:849", mmio + MIB_DATA);
 	return data;
 }
 
@@ -940,7 +940,7 @@ static struct net_device_stats *amd8111e_get_stats(struct net_device *dev)
 		amd8111e_read_mib(mmio, xmt_late_collision);
 
 	/* Reset the mibs for collecting new statistics */
-	/* writew(MIB_CLEAR, mmio + MIB_ADDR);*/
+	/* pete_writew("drivers/net/ethernet/amd/amd8111e.c:943", MIB_CLEAR, mmio + MIB_ADDR);*/
 
 	spin_unlock_irqrestore(&lp->lock, flags);
 
@@ -1090,11 +1090,11 @@ static irqreturn_t amd8111e_interrupt(int irq, void *dev_id)
 	spin_lock(&lp->lock);
 
 	/* disabling interrupt */
-	writel(INTREN, mmio + CMD0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:1093", INTREN, mmio + CMD0);
 
 	/* Read interrupt status */
-	intr0 = readl(mmio + INT0);
-	intren0 = readl(mmio + INTEN0);
+	intr0 = pete_readl("drivers/net/ethernet/amd/amd8111e.c:1096", mmio + INT0);
+	intren0 = pete_readl("drivers/net/ethernet/amd/amd8111e.c:1097", mmio + INTEN0);
 
 	/* Process all the INT event until INTR bit is clear. */
 
@@ -1104,19 +1104,19 @@ static irqreturn_t amd8111e_interrupt(int irq, void *dev_id)
 	}
 
 	/* Current driver processes 4 interrupts : RINT,TINT,LCINT,STINT */
-	writel(intr0, mmio + INT0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:1107", intr0, mmio + INT0);
 
 	/* Check if Receive Interrupt has occurred. */
 	if (intr0 & RINT0) {
 		if (napi_schedule_prep(&lp->napi)) {
 			/* Disable receive interupts */
-			writel(RINTEN0, mmio + INTEN0);
+			pete_writel("drivers/net/ethernet/amd/amd8111e.c:1113", RINTEN0, mmio + INTEN0);
 			/* Schedule a polling routine */
 			__napi_schedule(&lp->napi);
 		} else if (intren0 & RINTEN0) {
 			netdev_dbg(dev, "************Driver bug! interrupt while in poll\n");
 			/* Fix by disable receive interrupts */
-			writel(RINTEN0, mmio + INTEN0);
+			pete_writel("drivers/net/ethernet/amd/amd8111e.c:1119", RINTEN0, mmio + INTEN0);
 		}
 	}
 
@@ -1133,7 +1133,7 @@ static irqreturn_t amd8111e_interrupt(int irq, void *dev_id)
 		amd8111e_calc_coalesce(dev);
 
 err_no_interrupt:
-	writel(VAL0 | INTREN, mmio + CMD0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:1136", VAL0 | INTREN, mmio + CMD0);
 
 	spin_unlock(&lp->lock);
 
@@ -1282,8 +1282,8 @@ static netdev_tx_t amd8111e_start_xmit(struct sk_buff *skb,
 	lp->tx_idx++;
 
 	/* Trigger an immediate send poll. */
-	writel(VAL1 | TDMD0, lp->mmio + CMD0);
-	writel(VAL2 | RDMD0, lp->mmio + CMD0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:1285", VAL1 | TDMD0, lp->mmio + CMD0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:1286", VAL2 | RDMD0, lp->mmio + CMD0);
 
 	if (amd8111e_tx_queue_avail(lp) < 0) {
 		netif_stop_queue(dev);
@@ -1296,19 +1296,19 @@ static void amd8111e_read_regs(struct amd8111e_priv *lp, u32 *buf)
 {
 	void __iomem *mmio = lp->mmio;
 	/* Read only necessary registers */
-	buf[0] = readl(mmio + XMT_RING_BASE_ADDR0);
-	buf[1] = readl(mmio + XMT_RING_LEN0);
-	buf[2] = readl(mmio + RCV_RING_BASE_ADDR0);
-	buf[3] = readl(mmio + RCV_RING_LEN0);
-	buf[4] = readl(mmio + CMD0);
-	buf[5] = readl(mmio + CMD2);
-	buf[6] = readl(mmio + CMD3);
-	buf[7] = readl(mmio + CMD7);
-	buf[8] = readl(mmio + INT0);
-	buf[9] = readl(mmio + INTEN0);
-	buf[10] = readl(mmio + LADRF);
-	buf[11] = readl(mmio + LADRF+4);
-	buf[12] = readl(mmio + STAT0);
+	buf[0] = pete_readl("drivers/net/ethernet/amd/amd8111e.c:1299", mmio + XMT_RING_BASE_ADDR0);
+	buf[1] = pete_readl("drivers/net/ethernet/amd/amd8111e.c:1300", mmio + XMT_RING_LEN0);
+	buf[2] = pete_readl("drivers/net/ethernet/amd/amd8111e.c:1301", mmio + RCV_RING_BASE_ADDR0);
+	buf[3] = pete_readl("drivers/net/ethernet/amd/amd8111e.c:1302", mmio + RCV_RING_LEN0);
+	buf[4] = pete_readl("drivers/net/ethernet/amd/amd8111e.c:1303", mmio + CMD0);
+	buf[5] = pete_readl("drivers/net/ethernet/amd/amd8111e.c:1304", mmio + CMD2);
+	buf[6] = pete_readl("drivers/net/ethernet/amd/amd8111e.c:1305", mmio + CMD3);
+	buf[7] = pete_readl("drivers/net/ethernet/amd/amd8111e.c:1306", mmio + CMD7);
+	buf[8] = pete_readl("drivers/net/ethernet/amd/amd8111e.c:1307", mmio + INT0);
+	buf[9] = pete_readl("drivers/net/ethernet/amd/amd8111e.c:1308", mmio + INTEN0);
+	buf[10] = pete_readl("drivers/net/ethernet/amd/amd8111e.c:1309", mmio + LADRF);
+	buf[11] = pete_readl("drivers/net/ethernet/amd/amd8111e.c:1310", mmio + LADRF+4);
+	buf[12] = pete_readl("drivers/net/ethernet/amd/amd8111e.c:1311", mmio + STAT0);
 }
 
 
@@ -1323,11 +1323,11 @@ static void amd8111e_set_multicast_list(struct net_device *dev)
 	int bit_num;
 
 	if (dev->flags & IFF_PROMISC) {
-		writel(VAL2 | PROM, lp->mmio + CMD2);
+		pete_writel("drivers/net/ethernet/amd/amd8111e.c:1326", VAL2 | PROM, lp->mmio + CMD2);
 		return;
 	}
 	else
-		writel(PROM, lp->mmio + CMD2);
+		pete_writel("drivers/net/ethernet/amd/amd8111e.c:1330", PROM, lp->mmio + CMD2);
 	if (dev->flags & IFF_ALLMULTI ||
 	    netdev_mc_count(dev) > MAX_FILTER_SIZE) {
 		/* get all multicast packet */
@@ -1342,7 +1342,7 @@ static void amd8111e_set_multicast_list(struct net_device *dev)
 		lp->options &= ~OPTION_MULTICAST_ENABLE;
 		amd8111e_writeq(*(u64 *)mc_filter, lp->mmio + LADRF);
 		/* disable promiscuous mode */
-		writel(PROM, lp->mmio + CMD2);
+		pete_writel("drivers/net/ethernet/amd/amd8111e.c:1345", PROM, lp->mmio + CMD2);
 		return;
 	}
 	/* load all the multicast addresses in the logic filter */
@@ -1355,7 +1355,7 @@ static void amd8111e_set_multicast_list(struct net_device *dev)
 	amd8111e_writeq(*(u64 *)mc_filter, lp->mmio + LADRF);
 
 	/* To eliminate PCI posting bug */
-	readl(lp->mmio + CMD2);
+	pete_readl("drivers/net/ethernet/amd/amd8111e.c:1358", lp->mmio + CMD2);
 
 }
 
@@ -1504,7 +1504,7 @@ static int amd8111e_set_mac_address(struct net_device *dev, void *p)
 	spin_lock_irq(&lp->lock);
 	/* Setting the MAC address to the device */
 	for (i = 0; i < ETH_ALEN; i++)
-		writeb(dev->dev_addr[i], lp->mmio + PADR + i);
+		pete_writeb("drivers/net/ethernet/amd/amd8111e.c:1507", dev->dev_addr[i], lp->mmio + PADR + i);
 
 	spin_unlock_irq(&lp->lock);
 
@@ -1530,7 +1530,7 @@ static int amd8111e_change_mtu(struct net_device *dev, int new_mtu)
 	spin_lock_irq(&lp->lock);
 
 	/* stop the chip */
-	writel(RUN, lp->mmio + CMD0);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:1533", RUN, lp->mmio + CMD0);
 
 	dev->mtu = new_mtu;
 
@@ -1543,11 +1543,11 @@ static int amd8111e_change_mtu(struct net_device *dev, int new_mtu)
 
 static int amd8111e_enable_magicpkt(struct amd8111e_priv *lp)
 {
-	writel(VAL1 | MPPLBA, lp->mmio + CMD3);
-	writel(VAL0 | MPEN_SW, lp->mmio + CMD7);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:1546", VAL1 | MPPLBA, lp->mmio + CMD3);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:1547", VAL0 | MPEN_SW, lp->mmio + CMD7);
 
 	/* To eliminate PCI posting bug */
-	readl(lp->mmio + CMD7);
+	pete_readl("drivers/net/ethernet/amd/amd8111e.c:1550", lp->mmio + CMD7);
 	return 0;
 }
 
@@ -1555,10 +1555,10 @@ static int amd8111e_enable_link_change(struct amd8111e_priv *lp)
 {
 
 	/* Adapter is already stoped/suspended/interrupt-disabled */
-	writel(VAL0 | LCMODE_SW, lp->mmio + CMD7);
+	pete_writel("drivers/net/ethernet/amd/amd8111e.c:1558", VAL0 | LCMODE_SW, lp->mmio + CMD7);
 
 	/* To eliminate PCI posting bug */
-	readl(lp->mmio + CMD7);
+	pete_readl("drivers/net/ethernet/amd/amd8111e.c:1561", lp->mmio + CMD7);
 	return 0;
 }
 
@@ -1692,8 +1692,8 @@ static void amd8111e_config_ipg(struct timer_list *t)
 			tmp_ipg = ipg_data->ipg;
 			ipg_data->ipg_state = SSTATE;
 		}
-		writew((u32)tmp_ipg, mmio + IPG);
-		writew((u32)(tmp_ipg - IFS1_DELTA), mmio + IFS1);
+		pete_writew("drivers/net/ethernet/amd/amd8111e.c:1695", (u32)tmp_ipg, mmio + IPG);
+		pete_writew("drivers/net/ethernet/amd/amd8111e.c:1696", (u32)(tmp_ipg - IFS1_DELTA), mmio + IFS1);
 	}
 	mod_timer(&lp->ipg_data.ipg_timer, jiffies + IPG_CONVERGE_JIFFIES);
 	return;
@@ -1809,7 +1809,7 @@ static int amd8111e_probe_one(struct pci_dev *pdev,
 
 	/* Initializing MAC address */
 	for (i = 0; i < ETH_ALEN; i++)
-		dev->dev_addr[i] = readb(lp->mmio + PADR + i);
+		dev->dev_addr[i] = pete_readb("drivers/net/ethernet/amd/amd8111e.c:1812", lp->mmio + PADR + i);
 
 	/* Setting user defined parametrs */
 	lp->ext_phy_option = speed_duplex[card_idx];
@@ -1862,7 +1862,7 @@ static int amd8111e_probe_one(struct pci_dev *pdev,
 	}
 
 	/*  display driver and device information */
-	chip_version = (readl(lp->mmio + CHIPID) & 0xf0000000) >> 28;
+	chip_version = (pete_readl("drivers/net/ethernet/amd/amd8111e.c:1865", lp->mmio + CHIPID) & 0xf0000000) >> 28;
 	dev_info(&pdev->dev, "[ Rev %x ] PCI 10/100BaseT Ethernet %pM\n",
 		 chip_version, dev->dev_addr);
 	if (lp->ext_phy_id)

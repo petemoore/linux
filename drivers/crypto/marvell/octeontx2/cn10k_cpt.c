@@ -52,7 +52,7 @@ int cn10k_cptpf_lmtst_init(struct otx2_cptpf_dev *cptpf)
 	}
 
 	cptpf->lfs.ops = &cn10k_hw_ops;
-	lmt_base = readq(cptpf->reg_base + RVU_PF_LMTLINE_ADDR);
+	lmt_base = pete_readq("drivers/crypto/marvell/octeontx2/cn10k_cpt.c:55", cptpf->reg_base + RVU_PF_LMTLINE_ADDR);
 	if (!lmt_base) {
 		dev_err(&pdev->dev, "PF LMTLINE address not configured\n");
 		return -ENOMEM;

@@ -149,15 +149,15 @@ struct pxad_device {
 		u32 _v;							\
 		_v = readl_relaxed((phy)->base + _reg((phy)->idx));	\
 		dev_vdbg(&phy->vchan->vc.chan.dev->device,		\
-			 "%s(): readl(%s): 0x%08x\n", __func__, #_reg,	\
+			 "%s(): pete_readl("drivers/dma/pxa_dma.c:152", %s): 0x%08x\n", __func__, #_reg,	\
 			  _v);						\
 		_v;							\
 	})
 #define phy_writel(phy, val, _reg)					\
 	do {								\
-		writel((val), (phy)->base + _reg((phy)->idx));		\
+		pete_writel("drivers/dma/pxa_dma.c:158", (val), (phy)->base + _reg((phy)->idx));		\
 		dev_vdbg(&phy->vchan->vc.chan.dev->device,		\
-			 "%s(): writel(0x%08x, %s)\n",			\
+			 "%s(): pete_writel("drivers/dma/pxa_dma.c:160", 0x%08x, %s)\n",			\
 			 __func__, (u32)(val), #_reg);			\
 	} while (0)
 #define phy_writel_relaxed(phy, val, _reg)				\
@@ -584,7 +584,7 @@ static bool pxad_try_hotchain(struct virt_dma_chan *vc,
 static unsigned int clear_chan_irq(struct pxad_phy *phy)
 {
 	u32 dcsr;
-	u32 dint = readl(phy->base + DINT);
+	u32 dint = pete_readl("drivers/dma/pxa_dma.c:587", phy->base + DINT);
 
 	if (!(dint & BIT(phy->idx)))
 		return PXA_DCSR_RUN;
@@ -667,7 +667,7 @@ static irqreturn_t pxad_int_handler(int irq, void *dev_id)
 {
 	struct pxad_device *pdev = dev_id;
 	struct pxad_phy *phy;
-	u32 dint = readl(pdev->base + DINT);
+	u32 dint = pete_readl("drivers/dma/pxa_dma.c:670", pdev->base + DINT);
 	int i, ret = IRQ_NONE;
 
 	while (dint) {

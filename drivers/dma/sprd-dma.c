@@ -241,21 +241,21 @@ static inline struct sprd_dma_desc *to_sprd_dma_desc(struct virt_dma_desc *vd)
 static void sprd_dma_glb_update(struct sprd_dma_dev *sdev, u32 reg,
 				u32 mask, u32 val)
 {
-	u32 orig = readl(sdev->glb_base + reg);
+	u32 orig = pete_readl("drivers/dma/sprd-dma.c:244", sdev->glb_base + reg);
 	u32 tmp;
 
 	tmp = (orig & ~mask) | val;
-	writel(tmp, sdev->glb_base + reg);
+	pete_writel("drivers/dma/sprd-dma.c:248", tmp, sdev->glb_base + reg);
 }
 
 static void sprd_dma_chn_update(struct sprd_dma_chn *schan, u32 reg,
 				u32 mask, u32 val)
 {
-	u32 orig = readl(schan->chn_base + reg);
+	u32 orig = pete_readl("drivers/dma/sprd-dma.c:254", schan->chn_base + reg);
 	u32 tmp;
 
 	tmp = (orig & ~mask) | val;
-	writel(tmp, schan->chn_base + reg);
+	pete_writel("drivers/dma/sprd-dma.c:258", tmp, schan->chn_base + reg);
 }
 
 static int sprd_dma_enable(struct sprd_dma_dev *sdev)
@@ -296,7 +296,7 @@ static void sprd_dma_set_uid(struct sprd_dma_chn *schan)
 		u32 uid_offset = SPRD_DMA_GLB_REQ_UID_OFFSET +
 				 SPRD_DMA_GLB_REQ_UID(dev_id);
 
-		writel(schan->chn_num + 1, sdev->glb_base + uid_offset);
+		pete_writel("drivers/dma/sprd-dma.c:299", schan->chn_num + 1, sdev->glb_base + uid_offset);
 	}
 }
 
@@ -309,7 +309,7 @@ static void sprd_dma_unset_uid(struct sprd_dma_chn *schan)
 		u32 uid_offset = SPRD_DMA_GLB_REQ_UID_OFFSET +
 				 SPRD_DMA_GLB_REQ_UID(dev_id);
 
-		writel(0, sdev->glb_base + uid_offset);
+		pete_writel("drivers/dma/sprd-dma.c:312", 0, sdev->glb_base + uid_offset);
 	}
 }
 
@@ -347,7 +347,7 @@ static void sprd_dma_pause_resume(struct sprd_dma_chn *schan, bool enable)
 				    SPRD_DMA_PAUSE_EN, SPRD_DMA_PAUSE_EN);
 
 		do {
-			pause = readl(schan->chn_base + SPRD_DMA_CHN_PAUSE);
+			pause = pete_readl("drivers/dma/sprd-dma.c:350", schan->chn_base + SPRD_DMA_CHN_PAUSE);
 			if (pause & SPRD_DMA_PAUSE_STS)
 				break;
 
@@ -365,7 +365,7 @@ static void sprd_dma_pause_resume(struct sprd_dma_chn *schan, bool enable)
 
 static void sprd_dma_stop_and_disable(struct sprd_dma_chn *schan)
 {
-	u32 cfg = readl(schan->chn_base + SPRD_DMA_CHN_CFG);
+	u32 cfg = pete_readl("drivers/dma/sprd-dma.c:368", schan->chn_base + SPRD_DMA_CHN_CFG);
 
 	if (!(cfg & SPRD_DMA_CHN_EN))
 		return;
@@ -378,8 +378,8 @@ static unsigned long sprd_dma_get_src_addr(struct sprd_dma_chn *schan)
 {
 	unsigned long addr, addr_high;
 
-	addr = readl(schan->chn_base + SPRD_DMA_CHN_SRC_ADDR);
-	addr_high = readl(schan->chn_base + SPRD_DMA_CHN_WARP_PTR) &
+	addr = pete_readl("drivers/dma/sprd-dma.c:381", schan->chn_base + SPRD_DMA_CHN_SRC_ADDR);
+	addr_high = pete_readl("drivers/dma/sprd-dma.c:382", schan->chn_base + SPRD_DMA_CHN_WARP_PTR) &
 		    SPRD_DMA_HIGH_ADDR_MASK;
 
 	return addr | (addr_high << SPRD_DMA_HIGH_ADDR_OFFSET);
@@ -389,8 +389,8 @@ static unsigned long sprd_dma_get_dst_addr(struct sprd_dma_chn *schan)
 {
 	unsigned long addr, addr_high;
 
-	addr = readl(schan->chn_base + SPRD_DMA_CHN_DES_ADDR);
-	addr_high = readl(schan->chn_base + SPRD_DMA_CHN_WARP_TO) &
+	addr = pete_readl("drivers/dma/sprd-dma.c:392", schan->chn_base + SPRD_DMA_CHN_DES_ADDR);
+	addr_high = pete_readl("drivers/dma/sprd-dma.c:393", schan->chn_base + SPRD_DMA_CHN_WARP_TO) &
 		    SPRD_DMA_HIGH_ADDR_MASK;
 
 	return addr | (addr_high << SPRD_DMA_HIGH_ADDR_OFFSET);
@@ -399,7 +399,7 @@ static unsigned long sprd_dma_get_dst_addr(struct sprd_dma_chn *schan)
 static enum sprd_dma_int_type sprd_dma_get_int_type(struct sprd_dma_chn *schan)
 {
 	struct sprd_dma_dev *sdev = to_sprd_dma_dev(&schan->vc.chan);
-	u32 intc_sts = readl(schan->chn_base + SPRD_DMA_CHN_INTC) &
+	u32 intc_sts = pete_readl("drivers/dma/sprd-dma.c:402", schan->chn_base + SPRD_DMA_CHN_INTC) &
 		       SPRD_DMA_CHN_INT_STS;
 
 	switch (intc_sts) {
@@ -426,7 +426,7 @@ static enum sprd_dma_int_type sprd_dma_get_int_type(struct sprd_dma_chn *schan)
 
 static enum sprd_dma_req_mode sprd_dma_get_req_type(struct sprd_dma_chn *schan)
 {
-	u32 frag_reg = readl(schan->chn_base + SPRD_DMA_CHN_FRG_LEN);
+	u32 frag_reg = pete_readl("drivers/dma/sprd-dma.c:429", schan->chn_base + SPRD_DMA_CHN_FRG_LEN);
 
 	return (frag_reg >> SPRD_DMA_REQ_MODE_OFFSET) & SPRD_DMA_REQ_MODE_MASK;
 }
@@ -513,22 +513,22 @@ static void sprd_dma_set_chn_config(struct sprd_dma_chn *schan,
 {
 	struct sprd_dma_chn_hw *cfg = &sdesc->chn_hw;
 
-	writel(cfg->pause, schan->chn_base + SPRD_DMA_CHN_PAUSE);
-	writel(cfg->cfg, schan->chn_base + SPRD_DMA_CHN_CFG);
-	writel(cfg->intc, schan->chn_base + SPRD_DMA_CHN_INTC);
-	writel(cfg->src_addr, schan->chn_base + SPRD_DMA_CHN_SRC_ADDR);
-	writel(cfg->des_addr, schan->chn_base + SPRD_DMA_CHN_DES_ADDR);
-	writel(cfg->frg_len, schan->chn_base + SPRD_DMA_CHN_FRG_LEN);
-	writel(cfg->blk_len, schan->chn_base + SPRD_DMA_CHN_BLK_LEN);
-	writel(cfg->trsc_len, schan->chn_base + SPRD_DMA_CHN_TRSC_LEN);
-	writel(cfg->trsf_step, schan->chn_base + SPRD_DMA_CHN_TRSF_STEP);
-	writel(cfg->wrap_ptr, schan->chn_base + SPRD_DMA_CHN_WARP_PTR);
-	writel(cfg->wrap_to, schan->chn_base + SPRD_DMA_CHN_WARP_TO);
-	writel(cfg->llist_ptr, schan->chn_base + SPRD_DMA_CHN_LLIST_PTR);
-	writel(cfg->frg_step, schan->chn_base + SPRD_DMA_CHN_FRAG_STEP);
-	writel(cfg->src_blk_step, schan->chn_base + SPRD_DMA_CHN_SRC_BLK_STEP);
-	writel(cfg->des_blk_step, schan->chn_base + SPRD_DMA_CHN_DES_BLK_STEP);
-	writel(cfg->req, schan->chn_base + SPRD_DMA_CHN_REQ);
+	pete_writel("drivers/dma/sprd-dma.c:516", cfg->pause, schan->chn_base + SPRD_DMA_CHN_PAUSE);
+	pete_writel("drivers/dma/sprd-dma.c:517", cfg->cfg, schan->chn_base + SPRD_DMA_CHN_CFG);
+	pete_writel("drivers/dma/sprd-dma.c:518", cfg->intc, schan->chn_base + SPRD_DMA_CHN_INTC);
+	pete_writel("drivers/dma/sprd-dma.c:519", cfg->src_addr, schan->chn_base + SPRD_DMA_CHN_SRC_ADDR);
+	pete_writel("drivers/dma/sprd-dma.c:520", cfg->des_addr, schan->chn_base + SPRD_DMA_CHN_DES_ADDR);
+	pete_writel("drivers/dma/sprd-dma.c:521", cfg->frg_len, schan->chn_base + SPRD_DMA_CHN_FRG_LEN);
+	pete_writel("drivers/dma/sprd-dma.c:522", cfg->blk_len, schan->chn_base + SPRD_DMA_CHN_BLK_LEN);
+	pete_writel("drivers/dma/sprd-dma.c:523", cfg->trsc_len, schan->chn_base + SPRD_DMA_CHN_TRSC_LEN);
+	pete_writel("drivers/dma/sprd-dma.c:524", cfg->trsf_step, schan->chn_base + SPRD_DMA_CHN_TRSF_STEP);
+	pete_writel("drivers/dma/sprd-dma.c:525", cfg->wrap_ptr, schan->chn_base + SPRD_DMA_CHN_WARP_PTR);
+	pete_writel("drivers/dma/sprd-dma.c:526", cfg->wrap_to, schan->chn_base + SPRD_DMA_CHN_WARP_TO);
+	pete_writel("drivers/dma/sprd-dma.c:527", cfg->llist_ptr, schan->chn_base + SPRD_DMA_CHN_LLIST_PTR);
+	pete_writel("drivers/dma/sprd-dma.c:528", cfg->frg_step, schan->chn_base + SPRD_DMA_CHN_FRAG_STEP);
+	pete_writel("drivers/dma/sprd-dma.c:529", cfg->src_blk_step, schan->chn_base + SPRD_DMA_CHN_SRC_BLK_STEP);
+	pete_writel("drivers/dma/sprd-dma.c:530", cfg->des_blk_step, schan->chn_base + SPRD_DMA_CHN_DES_BLK_STEP);
+	pete_writel("drivers/dma/sprd-dma.c:531", cfg->req, schan->chn_base + SPRD_DMA_CHN_REQ);
 }
 
 static void sprd_dma_start(struct sprd_dma_chn *schan)
@@ -588,7 +588,7 @@ static bool sprd_dma_check_trans_done(struct sprd_dma_desc *sdesc,
 static irqreturn_t dma_irq_handle(int irq, void *dev_id)
 {
 	struct sprd_dma_dev *sdev = (struct sprd_dma_dev *)dev_id;
-	u32 irq_status = readl(sdev->glb_base + SPRD_DMA_GLB_INT_MSK_STS);
+	u32 irq_status = pete_readl("drivers/dma/sprd-dma.c:591", sdev->glb_base + SPRD_DMA_GLB_INT_MSK_STS);
 	struct sprd_dma_chn *schan;
 	struct sprd_dma_desc *sdesc;
 	enum sprd_dma_req_mode req_type;

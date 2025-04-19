@@ -139,25 +139,25 @@ static int carmine_find_mode(const struct fb_var_screeninfo *var)
 static void c_set_disp_reg(const struct carmine_fb *par,
 		u32 offset, u32 val)
 {
-	writel(val, par->display_reg + offset);
+	pete_writel("drivers/video/fbdev/carminefb.c:142", val, par->display_reg + offset);
 }
 
 static u32 c_get_disp_reg(const struct carmine_fb *par,
 		u32 offset)
 {
-	return readl(par->display_reg + offset);
+	return pete_readl("drivers/video/fbdev/carminefb.c:148", par->display_reg + offset);
 }
 
 static void c_set_hw_reg(const struct carmine_hw *hw,
 		u32 offset, u32 val)
 {
-	writel(val, hw->v_regs + offset);
+	pete_writel("drivers/video/fbdev/carminefb.c:154", val, hw->v_regs + offset);
 }
 
 static u32 c_get_hw_reg(const struct carmine_hw *hw,
 		u32 offset)
 {
-	return readl(hw->v_regs + offset);
+	return pete_readl("drivers/video/fbdev/carminefb.c:160", hw->v_regs + offset);
 }
 
 static int carmine_setcolreg(unsigned regno, unsigned red, unsigned green,

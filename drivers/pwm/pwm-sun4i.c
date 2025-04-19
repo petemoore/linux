@@ -100,13 +100,13 @@ static inline struct sun4i_pwm_chip *to_sun4i_pwm_chip(struct pwm_chip *chip)
 static inline u32 sun4i_pwm_readl(struct sun4i_pwm_chip *chip,
 				  unsigned long offset)
 {
-	return readl(chip->base + offset);
+	return pete_readl("drivers/pwm/pwm-sun4i.c:103", chip->base + offset);
 }
 
 static inline void sun4i_pwm_writel(struct sun4i_pwm_chip *chip,
 				    u32 val, unsigned long offset)
 {
-	writel(val, chip->base + offset);
+	pete_writel("drivers/pwm/pwm-sun4i.c:109", val, chip->base + offset);
 }
 
 static void sun4i_pwm_get_state(struct pwm_chip *chip,

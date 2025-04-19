@@ -36,7 +36,7 @@ static void aspeed_i2c_ic_irq_handler(struct irq_desc *desc)
 	unsigned long bit, status;
 
 	chained_irq_enter(chip, desc);
-	status = readl(i2c_ic->base);
+	status = pete_readl("drivers/irqchip/irq-aspeed-i2c-ic.c:39", i2c_ic->base);
 	for_each_set_bit(bit, &status, ASPEED_I2C_IC_NUM_BUS)
 		generic_handle_domain_irq(i2c_ic->irq_domain, bit);
 

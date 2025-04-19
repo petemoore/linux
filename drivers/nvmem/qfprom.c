@@ -141,8 +141,8 @@ static void qfprom_disable_fuse_blowing(const struct qfprom_priv *priv,
 {
 	int ret;
 
-	writel(old->timer_val, priv->qfpconf + QFPROM_BLOW_TIMER_OFFSET);
-	writel(old->accel_val, priv->qfpconf + QFPROM_ACCEL_OFFSET);
+	pete_writel("drivers/nvmem/qfprom.c:144", old->timer_val, priv->qfpconf + QFPROM_BLOW_TIMER_OFFSET);
+	pete_writel("drivers/nvmem/qfprom.c:145", old->accel_val, priv->qfpconf + QFPROM_ACCEL_OFFSET);
 
 	dev_pm_genpd_set_performance_state(priv->dev, 0);
 	pm_runtime_put(priv->dev);
@@ -225,11 +225,11 @@ static int qfprom_enable_fuse_blowing(const struct qfprom_priv *priv,
 	}
 	dev_pm_genpd_set_performance_state(priv->dev, INT_MAX);
 
-	old->timer_val = readl(priv->qfpconf + QFPROM_BLOW_TIMER_OFFSET);
-	old->accel_val = readl(priv->qfpconf + QFPROM_ACCEL_OFFSET);
-	writel(priv->soc_data->qfprom_blow_timer_value,
+	old->timer_val = pete_readl("drivers/nvmem/qfprom.c:228", priv->qfpconf + QFPROM_BLOW_TIMER_OFFSET);
+	old->accel_val = pete_readl("drivers/nvmem/qfprom.c:229", priv->qfpconf + QFPROM_ACCEL_OFFSET);
+	pete_writel("drivers/nvmem/qfprom.c:230", priv->soc_data->qfprom_blow_timer_value,
 	       priv->qfpconf + QFPROM_BLOW_TIMER_OFFSET);
-	writel(priv->soc_data->accel_value,
+	pete_writel("drivers/nvmem/qfprom.c:232", priv->soc_data->accel_value,
 	       priv->qfpconf + QFPROM_ACCEL_OFFSET);
 
 	return 0;
@@ -301,7 +301,7 @@ static int qfprom_reg_write(void *context, unsigned int reg, void *_val,
 	}
 
 	for (i = 0; i < words; i++)
-		writel(value[i], priv->qfpraw + reg + (i * 4));
+		pete_writel("drivers/nvmem/qfprom.c:304", value[i], priv->qfpraw + reg + (i * 4));
 
 	ret = readl_relaxed_poll_timeout(
 		priv->qfpconf + QFPROM_BLOW_STATUS_OFFSET,
@@ -330,7 +330,7 @@ static int qfprom_reg_read(void *context,
 		base = priv->qfpraw;
 
 	while (words--)
-		*val++ = readb(base + reg + i++);
+		*val++ = pete_readb("drivers/nvmem/qfprom.c:333", base + reg + i++);
 
 	return 0;
 }
@@ -412,7 +412,7 @@ static int qfprom_probe(struct platform_device *pdev)
 		if (IS_ERR(priv->qfpsecurity))
 			return PTR_ERR(priv->qfpsecurity);
 
-		version = readl(priv->qfpsecurity + QFPROM_VERSION_OFFSET);
+		version = pete_readl("drivers/nvmem/qfprom.c:415", priv->qfpsecurity + QFPROM_VERSION_OFFSET);
 		major_version = (version & QFPROM_MAJOR_VERSION_MASK) >>
 				QFPROM_MAJOR_VERSION_SHIFT;
 		minor_version = (version & QFPROM_MINOR_VERSION_MASK) >>

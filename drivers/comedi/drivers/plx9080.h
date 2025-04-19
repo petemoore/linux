@@ -627,25 +627,25 @@ static inline int plx9080_abort_dma(void __iomem *iobase, unsigned int channel)
 	dma_cs_addr = iobase + PLX_REG_DMACSR(channel);
 
 	/* abort dma transfer if necessary */
-	dma_status = readb(dma_cs_addr);
+	dma_status = pete_readb("drivers/comedi/drivers/plx9080.h:630", dma_cs_addr);
 	if ((dma_status & PLX_DMACSR_ENABLE) == 0)
 		return 0;
 
 	/* wait to make sure done bit is zero */
 	for (i = 0; (dma_status & PLX_DMACSR_DONE) && i < timeout; i++) {
 		udelay(1);
-		dma_status = readb(dma_cs_addr);
+		dma_status = pete_readb("drivers/comedi/drivers/plx9080.h:637", dma_cs_addr);
 	}
 	if (i == timeout)
 		return -ETIMEDOUT;
 
 	/* disable and abort channel */
-	writeb(PLX_DMACSR_ABORT, dma_cs_addr);
+	pete_writeb("drivers/comedi/drivers/plx9080.h:643", PLX_DMACSR_ABORT, dma_cs_addr);
 	/* wait for dma done bit */
-	dma_status = readb(dma_cs_addr);
+	dma_status = pete_readb("drivers/comedi/drivers/plx9080.h:645", dma_cs_addr);
 	for (i = 0; (dma_status & PLX_DMACSR_DONE) == 0 && i < timeout; i++) {
 		udelay(1);
-		dma_status = readb(dma_cs_addr);
+		dma_status = pete_readb("drivers/comedi/drivers/plx9080.h:648", dma_cs_addr);
 	}
 	if (i == timeout)
 		return -ETIMEDOUT;

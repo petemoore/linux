@@ -53,7 +53,7 @@ parport_ax88796_read_data(struct parport *p)
 {
 	struct ax_drvdata *dd = pp_to_drv(p);
 
-	return readb(dd->spp_data);
+	return pete_readb("drivers/parport/parport_ax88796.c:56", dd->spp_data);
 }
 
 static void
@@ -61,14 +61,14 @@ parport_ax88796_write_data(struct parport *p, unsigned char data)
 {
 	struct ax_drvdata *dd = pp_to_drv(p);
 
-	writeb(data, dd->spp_data);
+	pete_writeb("drivers/parport/parport_ax88796.c:64", data, dd->spp_data);
 }
 
 static unsigned char
 parport_ax88796_read_control(struct parport *p)
 {
 	struct ax_drvdata *dd = pp_to_drv(p);
-	unsigned int cpr = readb(dd->spp_cpr);
+	unsigned int cpr = pete_readb("drivers/parport/parport_ax88796.c:71", dd->spp_cpr);
 	unsigned int ret = 0;
 
 	if (!(cpr & AX_CPR_STRB))
@@ -90,7 +90,7 @@ static void
 parport_ax88796_write_control(struct parport *p, unsigned char control)
 {
 	struct ax_drvdata *dd = pp_to_drv(p);
-	unsigned int cpr = readb(dd->spp_cpr);
+	unsigned int cpr = pete_readb("drivers/parport/parport_ax88796.c:93", dd->spp_cpr);
 
 	cpr &= AX_CPR_nDOE;
 
@@ -107,7 +107,7 @@ parport_ax88796_write_control(struct parport *p, unsigned char control)
 		cpr |= AX_CPR_SLCTIN;
 
 	dev_dbg(dd->dev, "write_control: ctrl=%02x, cpr=%02x\n", control, cpr);
-	writeb(cpr, dd->spp_cpr);
+	pete_writeb("drivers/parport/parport_ax88796.c:110", cpr, dd->spp_cpr);
 
 	if (parport_ax88796_read_control(p) != control) {
 		dev_err(dd->dev, "write_control: read != set (%02x, %02x)\n",
@@ -119,7 +119,7 @@ static unsigned char
 parport_ax88796_read_status(struct parport *p)
 {
 	struct ax_drvdata *dd = pp_to_drv(p);
-	unsigned int status = readb(dd->spp_spr);
+	unsigned int status = pete_readb("drivers/parport/parport_ax88796.c:122", dd->spp_spr);
 	unsigned int ret = 0;
 
 	if (status & AX_SPR_BUSY)
@@ -188,7 +188,7 @@ parport_ax88796_data_forward(struct parport *p)
 	struct ax_drvdata *dd = pp_to_drv(p);
 	void __iomem *cpr = dd->spp_cpr;
 
-	writeb((readb(cpr) & ~AX_CPR_nDOE), cpr);
+	pete_writeb("drivers/parport/parport_ax88796.c:191", (pete_readb("drivers/parport/parport_ax88796.c:191", cpr) & ~AX_CPR_nDOE), cpr);
 }
 
 static void
@@ -197,7 +197,7 @@ parport_ax88796_data_reverse(struct parport *p)
 	struct ax_drvdata *dd = pp_to_drv(p);
 	void __iomem *cpr = dd->spp_cpr;
 
-	writeb(readb(cpr) | AX_CPR_nDOE, cpr);
+	pete_writeb("drivers/parport/parport_ax88796.c:200", pete_readb("drivers/parport/parport_ax88796.c:200", cpr) | AX_CPR_nDOE, cpr);
 }
 
 static void
@@ -208,7 +208,7 @@ parport_ax88796_init_state(struct pardevice *d, struct parport_state *s)
 	memset(s, 0, sizeof(struct parport_state));
 
 	dev_dbg(dd->dev, "init_state: %p: state=%p\n", d, s);
-	s->u.ax88796.cpr = readb(dd->spp_cpr);
+	s->u.ax88796.cpr = pete_readb("drivers/parport/parport_ax88796.c:211", dd->spp_cpr);
 }
 
 static void
@@ -217,7 +217,7 @@ parport_ax88796_save_state(struct parport *p, struct parport_state *s)
 	struct ax_drvdata *dd = pp_to_drv(p);
 
 	dev_dbg(dd->dev, "save_state: %p: state=%p\n", p, s);
-	s->u.ax88796.cpr = readb(dd->spp_cpr);
+	s->u.ax88796.cpr = pete_readb("drivers/parport/parport_ax88796.c:220", dd->spp_cpr);
 }
 
 static void
@@ -226,7 +226,7 @@ parport_ax88796_restore_state(struct parport *p, struct parport_state *s)
 	struct ax_drvdata *dd = pp_to_drv(p);
 
 	dev_dbg(dd->dev, "restore_state: %p: state=%p\n", p, s);
-	writeb(s->u.ax88796.cpr, dd->spp_cpr);
+	pete_writeb("drivers/parport/parport_ax88796.c:229", s->u.ax88796.cpr, dd->spp_cpr);
 }
 
 static struct parport_operations parport_ax88796_ops = {
@@ -327,7 +327,7 @@ static int parport_ax88796_probe(struct platform_device *pdev)
 	dd->spp_cpr  = dd->base + (spacing * 2);
 
 	/* initialise the port controls */
-	writeb(AX_CPR_STRB, dd->spp_cpr);
+	pete_writeb("drivers/parport/parport_ax88796.c:330", AX_CPR_STRB, dd->spp_cpr);
 
 	if (irq >= 0) {
 		/* request irq */
@@ -381,7 +381,7 @@ static int parport_ax88796_suspend(struct platform_device *dev,
 	struct ax_drvdata *dd = pp_to_drv(p);
 
 	parport_ax88796_save_state(p, &dd->suspend);
-	writeb(AX_CPR_nDOE | AX_CPR_STRB, dd->spp_cpr);
+	pete_writeb("drivers/parport/parport_ax88796.c:384", AX_CPR_nDOE | AX_CPR_STRB, dd->spp_cpr);
 	return 0;
 }
 

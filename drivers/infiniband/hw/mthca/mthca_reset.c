@@ -151,7 +151,7 @@ int mthca_reset(struct mthca_dev *mdev)
 			goto free_bh;
 		}
 
-		writel(MTHCA_RESET_VALUE, reset);
+		pete_writel("drivers/infiniband/hw/mthca/mthca_reset.c:154", MTHCA_RESET_VALUE, reset);
 		iounmap(reset);
 	}
 

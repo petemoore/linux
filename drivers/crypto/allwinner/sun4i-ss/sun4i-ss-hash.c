@@ -232,10 +232,10 @@ static int sun4i_hash(struct ahash_request *areq)
 	if (op->byte_count) {
 		ivmode = SS_IV_ARBITRARY;
 		for (i = 0; i < crypto_ahash_digestsize(tfm) / 4; i++)
-			writel(op->hash[i], ss->base + SS_IV0 + i * 4);
+			pete_writel("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-hash.c:235", op->hash[i], ss->base + SS_IV0 + i * 4);
 	}
 	/* Enable the device */
-	writel(op->mode | SS_ENABLED | ivmode, ss->base + SS_CTL);
+	pete_writel("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-hash.c:238", op->mode | SS_ENABLED | ivmode, ss->base + SS_CTL);
 
 	if (!(op->flags & SS_HASH_UPDATE))
 		goto hash_final;
@@ -319,7 +319,7 @@ static int sun4i_hash(struct ahash_request *areq)
 			in_i += todo * 4;
 			rx_cnt -= todo;
 			if (!rx_cnt) {
-				spaces = readl(ss->base + SS_FCSR);
+				spaces = pete_readl("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-hash.c:322", ss->base + SS_FCSR);
 				rx_cnt = SS_RXFIFO_SPACES(spaces);
 			}
 			if (in_i == mi.length) {
@@ -359,10 +359,10 @@ static int sun4i_hash(struct ahash_request *areq)
 	if (op->flags & SS_HASH_FINAL)
 		goto hash_final;
 
-	writel(op->mode | SS_ENABLED | SS_DATA_END, ss->base + SS_CTL);
+	pete_writel("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-hash.c:362", op->mode | SS_ENABLED | SS_DATA_END, ss->base + SS_CTL);
 	i = 0;
 	do {
-		v = readl(ss->base + SS_CTL);
+		v = pete_readl("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-hash.c:365", ss->base + SS_CTL);
 		i++;
 	} while (i < SS_TIMEOUT && (v & SS_DATA_END));
 	if (unlikely(i >= SS_TIMEOUT)) {
@@ -383,7 +383,7 @@ static int sun4i_hash(struct ahash_request *areq)
 	ndelay(1);
 
 	for (i = 0; i < crypto_ahash_digestsize(tfm) / 4; i++)
-		op->hash[i] = readl(ss->base + SS_MD0 + i * 4);
+		op->hash[i] = pete_readl("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-hash.c:386", ss->base + SS_MD0 + i * 4);
 
 	goto release_ss;
 
@@ -454,7 +454,7 @@ hash_final:
 	writesl(ss->base + SS_RXFIFO, bf, j);
 
 	/* Tell the SS to stop the hashing */
-	writel(op->mode | SS_ENABLED | SS_DATA_END, ss->base + SS_CTL);
+	pete_writel("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-hash.c:457", op->mode | SS_ENABLED | SS_DATA_END, ss->base + SS_CTL);
 
 	/*
 	 * Wait for SS to finish the hash.
@@ -463,7 +463,7 @@ hash_final:
 	 */
 	i = 0;
 	do {
-		v = readl(ss->base + SS_CTL);
+		v = pete_readl("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-hash.c:466", ss->base + SS_CTL);
 		i++;
 	} while (i < SS_TIMEOUT && (v & SS_DATA_END));
 	if (unlikely(i >= SS_TIMEOUT)) {
@@ -486,7 +486,7 @@ hash_final:
 	/* Get the hash from the device */
 	if (op->mode == SS_OP_SHA1) {
 		for (i = 0; i < 5; i++) {
-			v = readl(ss->base + SS_MD0 + i * 4);
+			v = pete_readl("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-hash.c:489", ss->base + SS_MD0 + i * 4);
 			if (ss->variant->sha1_in_be)
 				put_unaligned_le32(v, areq->result + i * 4);
 			else
@@ -494,13 +494,13 @@ hash_final:
 		}
 	} else {
 		for (i = 0; i < 4; i++) {
-			v = readl(ss->base + SS_MD0 + i * 4);
+			v = pete_readl("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-hash.c:497", ss->base + SS_MD0 + i * 4);
 			put_unaligned_le32(v, areq->result + i * 4);
 		}
 	}
 
 release_ss:
-	writel(0, ss->base + SS_CTL);
+	pete_writel("drivers/crypto/allwinner/sun4i-ss/sun4i-ss-hash.c:503", 0, ss->base + SS_CTL);
 	spin_unlock_bh(&ss->slock);
 	return err;
 }

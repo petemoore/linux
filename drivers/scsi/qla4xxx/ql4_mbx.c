@@ -18,20 +18,20 @@ void qla4xxx_queue_mbox_cmd(struct scsi_qla_host *ha, uint32_t *mbx_cmd,
 
 	/* Load all mailbox registers, except mailbox 0. */
 	for (i = 1; i < in_count; i++)
-		writel(mbx_cmd[i], &ha->reg->mailbox[i]);
+		pete_writel("drivers/scsi/qla4xxx/ql4_mbx.c:21", mbx_cmd[i], &ha->reg->mailbox[i]);
 
 	/* Wakeup firmware  */
-	writel(mbx_cmd[0], &ha->reg->mailbox[0]);
-	readl(&ha->reg->mailbox[0]);
-	writel(set_rmask(CSR_INTR_RISC), &ha->reg->ctrl_status);
-	readl(&ha->reg->ctrl_status);
+	pete_writel("drivers/scsi/qla4xxx/ql4_mbx.c:24", mbx_cmd[0], &ha->reg->mailbox[0]);
+	pete_readl("drivers/scsi/qla4xxx/ql4_mbx.c:25", &ha->reg->mailbox[0]);
+	pete_writel("drivers/scsi/qla4xxx/ql4_mbx.c:26", set_rmask(CSR_INTR_RISC), &ha->reg->ctrl_status);
+	pete_readl("drivers/scsi/qla4xxx/ql4_mbx.c:27", &ha->reg->ctrl_status);
 }
 
 void qla4xxx_process_mbox_intr(struct scsi_qla_host *ha, int out_count)
 {
 	int intr_status;
 
-	intr_status = readl(&ha->reg->ctrl_status);
+	intr_status = pete_readl("drivers/scsi/qla4xxx/ql4_mbx.c:34", &ha->reg->ctrl_status);
 	if (intr_status & INTR_PENDING) {
 		/*
 		 * Service the interrupt.

@@ -2153,7 +2153,7 @@ static void hclgevf_set_def_reset_request(struct hnae3_ae_dev *ae_dev,
 
 static void hclgevf_enable_vector(struct hclgevf_misc_vector *vector, bool en)
 {
-	writel(en ? 1 : 0, vector->addr);
+	pete_writel("drivers/net/ethernet/hisilicon/hns3/hns3vf/hclgevf_main.c:2156", en ? 1 : 0, vector->addr);
 }
 
 static void hclgevf_reset_prepare_general(struct hnae3_ae_dev *ae_dev,

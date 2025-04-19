@@ -172,7 +172,7 @@ static int ohci_omap_reset(struct usb_hcd *hcd)
 
 	if (config->otg || config->rwc) {
 		ohci->hc_control = OHCI_CTRL_RWC;
-		writel(OHCI_CTRL_RWC, &ohci->regs->control);
+		pete_writel("drivers/usb/host/ohci-omap.c:175", OHCI_CTRL_RWC, &ohci->regs->control);
 	}
 
 	/* board-specific power switching and overcurrent support */

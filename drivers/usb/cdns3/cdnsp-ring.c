@@ -266,7 +266,7 @@ static void cdnsp_force_l0_go(struct cdnsp_device *pdev)
 /* Ring the doorbell after placing a command on the ring. */
 void cdnsp_ring_cmd_db(struct cdnsp_device *pdev)
 {
-	writel(DB_VALUE_CMD, &pdev->dba->cmd_db);
+	pete_writel("drivers/usb/cdns3/cdnsp-ring.c:269", DB_VALUE_CMD, &pdev->dba->cmd_db);
 }
 
 /*
@@ -306,7 +306,7 @@ static bool cdnsp_ring_ep_doorbell(struct cdnsp_device *pdev,
 
 	trace_cdnsp_tr_drbl(pep, stream_id);
 
-	writel(db_value, reg_addr);
+	pete_writel("drivers/usb/cdns3/cdnsp-ring.c:309", db_value, reg_addr);
 
 	cdnsp_force_l0_go(pdev);
 
@@ -777,7 +777,7 @@ static int cdnsp_update_port_id(struct cdnsp_device *pdev, u32 port_id)
 	if (port_id == pdev->usb2_port.port_num)
 		cdnsp_set_usb2_hardware_lpm(pdev, NULL, 1);
 	else
-		writel(PORT_U1_TIMEOUT(1) | PORT_U2_TIMEOUT(1),
+		pete_writel("drivers/usb/cdns3/cdnsp-ring.c:780", PORT_U1_TIMEOUT(1) | PORT_U2_TIMEOUT(1),
 		       &pdev->usb3_port.regs->portpmsc);
 
 	return 0;
@@ -807,8 +807,8 @@ static void cdnsp_handle_port_status(struct cdnsp_device *pdev,
 		port2 = true;
 
 new_event:
-	portsc = readl(&port_regs->portsc);
-	writel(cdnsp_port_state_to_neutral(portsc) |
+	portsc = pete_readl("drivers/usb/cdns3/cdnsp-ring.c:810", &port_regs->portsc);
+	pete_writel("drivers/usb/cdns3/cdnsp-ring.c:811", cdnsp_port_state_to_neutral(portsc) |
 	       (portsc & PORT_CHANGE_BITS), &port_regs->portsc);
 
 	trace_cdnsp_handle_port_status(pdev->active_port->port_num, portsc);
@@ -820,7 +820,7 @@ new_event:
 	if ((portsc & PORT_PLC)) {
 		if (!(pdev->cdnsp_state & CDNSP_WAKEUP_PENDING)  &&
 		    link_state == XDEV_RESUME) {
-			cmd_regs = readl(&pdev->op_regs->command);
+			cmd_regs = pete_readl("drivers/usb/cdns3/cdnsp-ring.c:823", &pdev->op_regs->command);
 			if (!(cmd_regs & CMD_R_S))
 				goto cleanup;
 
@@ -879,7 +879,7 @@ new_event:
 	if (portsc & PORT_CEC)
 		dev_err(pdev->dev, "Port Configure Error detected\n");
 
-	if (readl(&port_regs->portsc) & PORT_CHANGE_BITS)
+	if (pete_readl("drivers/usb/cdns3/cdnsp-ring.c:882", &port_regs->portsc) & PORT_CHANGE_BITS)
 		goto new_event;
 
 cleanup:
@@ -1560,7 +1560,7 @@ irqreturn_t cdnsp_irq_handler(int irq, void *priv)
 	u32 irq_pending;
 	u32 status;
 
-	status = readl(&pdev->op_regs->status);
+	status = pete_readl("drivers/usb/cdns3/cdnsp-ring.c:1563", &pdev->op_regs->status);
 
 	if (status == ~(u32)0) {
 		cdnsp_died(pdev);
@@ -1570,10 +1570,10 @@ irqreturn_t cdnsp_irq_handler(int irq, void *priv)
 	if (!(status & STS_EINT))
 		return IRQ_NONE;
 
-	writel(status | STS_EINT, &pdev->op_regs->status);
-	irq_pending = readl(&pdev->ir_set->irq_pending);
+	pete_writel("drivers/usb/cdns3/cdnsp-ring.c:1573", status | STS_EINT, &pdev->op_regs->status);
+	irq_pending = pete_readl("drivers/usb/cdns3/cdnsp-ring.c:1574", &pdev->ir_set->irq_pending);
 	irq_pending |= IMAN_IP;
-	writel(irq_pending, &pdev->ir_set->irq_pending);
+	pete_writel("drivers/usb/cdns3/cdnsp-ring.c:1576", irq_pending, &pdev->ir_set->irq_pending);
 
 	if (status & STS_FATAL) {
 		cdnsp_died(pdev);

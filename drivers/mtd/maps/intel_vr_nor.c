@@ -100,9 +100,9 @@ static void vr_nor_destroy_maps(struct vr_nor_mtd *p)
 	unsigned int exp_timing_cs0;
 
 	/* write-protect the flash bank */
-	exp_timing_cs0 = readl(p->csr_base + EXP_TIMING_CS0);
+	exp_timing_cs0 = pete_readl("drivers/mtd/maps/intel_vr_nor.c:103", p->csr_base + EXP_TIMING_CS0);
 	exp_timing_cs0 &= ~TIMING_WR_EN;
-	writel(exp_timing_cs0, p->csr_base + EXP_TIMING_CS0);
+	pete_writel("drivers/mtd/maps/intel_vr_nor.c:105", exp_timing_cs0, p->csr_base + EXP_TIMING_CS0);
 
 	/* unmap the flash window */
 	iounmap(p->map.virt);
@@ -137,7 +137,7 @@ static int vr_nor_init_maps(struct vr_nor_mtd *p)
 	if (!p->csr_base)
 		return -ENOMEM;
 
-	exp_timing_cs0 = readl(p->csr_base + EXP_TIMING_CS0);
+	exp_timing_cs0 = pete_readl("drivers/mtd/maps/intel_vr_nor.c:140", p->csr_base + EXP_TIMING_CS0);
 	if (!(exp_timing_cs0 & TIMING_CS_EN)) {
 		dev_warn(&p->dev->dev, "Expansion Bus Chip Select 0 "
 		       "is disabled.\n");
@@ -161,7 +161,7 @@ static int vr_nor_init_maps(struct vr_nor_mtd *p)
 
 	/* Enable writes to flash bank */
 	exp_timing_cs0 |= TIMING_BOOT_ACCEL_DIS | TIMING_WR_EN;
-	writel(exp_timing_cs0, p->csr_base + EXP_TIMING_CS0);
+	pete_writel("drivers/mtd/maps/intel_vr_nor.c:164", exp_timing_cs0, p->csr_base + EXP_TIMING_CS0);
 
 	return 0;
 
@@ -229,9 +229,9 @@ static int vr_nor_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 
       destroy_maps:
 	/* write-protect the flash bank */
-	exp_timing_cs0 = readl(p->csr_base + EXP_TIMING_CS0);
+	exp_timing_cs0 = pete_readl("drivers/mtd/maps/intel_vr_nor.c:232", p->csr_base + EXP_TIMING_CS0);
 	exp_timing_cs0 &= ~TIMING_WR_EN;
-	writel(exp_timing_cs0, p->csr_base + EXP_TIMING_CS0);
+	pete_writel("drivers/mtd/maps/intel_vr_nor.c:234", exp_timing_cs0, p->csr_base + EXP_TIMING_CS0);
 
 	/* unmap the flash window */
 	iounmap(p->map.virt);

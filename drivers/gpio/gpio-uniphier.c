@@ -63,10 +63,10 @@ static void uniphier_gpio_reg_update(struct uniphier_gpio_priv *priv,
 	u32 tmp;
 
 	spin_lock_irqsave(&priv->lock, flags);
-	tmp = readl(priv->regs + reg);
+	tmp = pete_readl("drivers/gpio/gpio-uniphier.c:66", priv->regs + reg);
 	tmp &= ~mask;
 	tmp |= mask & val;
-	writel(tmp, priv->regs + reg);
+	pete_writel("drivers/gpio/gpio-uniphier.c:69", tmp, priv->regs + reg);
 	spin_unlock_irqrestore(&priv->lock, flags);
 }
 
@@ -104,7 +104,7 @@ static int uniphier_gpio_offset_read(struct gpio_chip *chip,
 	uniphier_gpio_get_bank_and_mask(offset, &bank, &mask);
 	reg_offset = uniphier_gpio_bank_to_reg(bank) + reg;
 
-	return !!(readl(priv->regs + reg_offset) & mask);
+	return !!(pete_readl("drivers/gpio/gpio-uniphier.c:107", priv->regs + reg_offset) & mask);
 }
 
 static int uniphier_gpio_get_direction(struct gpio_chip *chip,
@@ -326,7 +326,7 @@ static void uniphier_gpio_hw_init(struct uniphier_gpio_priv *priv)
 	 * debounce is not supported.  Unfortunately, the filter period is
 	 * shared among all irq lines.  Just choose a sensible period here.
 	 */
-	writel(0xff, priv->regs + UNIPHIER_GPIO_IRQ_FLT_CYC);
+	pete_writel("drivers/gpio/gpio-uniphier.c:329", 0xff, priv->regs + UNIPHIER_GPIO_IRQ_FLT_CYC);
 }
 
 static unsigned int uniphier_gpio_get_nbanks(unsigned int ngpio)
@@ -433,13 +433,13 @@ static int __maybe_unused uniphier_gpio_suspend(struct device *dev)
 	for (i = 0; i < nbanks; i++) {
 		reg = uniphier_gpio_bank_to_reg(i);
 
-		*val++ = readl(priv->regs + reg + UNIPHIER_GPIO_PORT_DATA);
-		*val++ = readl(priv->regs + reg + UNIPHIER_GPIO_PORT_DIR);
+		*val++ = pete_readl("drivers/gpio/gpio-uniphier.c:436", priv->regs + reg + UNIPHIER_GPIO_PORT_DATA);
+		*val++ = pete_readl("drivers/gpio/gpio-uniphier.c:437", priv->regs + reg + UNIPHIER_GPIO_PORT_DIR);
 	}
 
-	*val++ = readl(priv->regs + UNIPHIER_GPIO_IRQ_EN);
-	*val++ = readl(priv->regs + UNIPHIER_GPIO_IRQ_MODE);
-	*val++ = readl(priv->regs + UNIPHIER_GPIO_IRQ_FLT_EN);
+	*val++ = pete_readl("drivers/gpio/gpio-uniphier.c:440", priv->regs + UNIPHIER_GPIO_IRQ_EN);
+	*val++ = pete_readl("drivers/gpio/gpio-uniphier.c:441", priv->regs + UNIPHIER_GPIO_IRQ_MODE);
+	*val++ = pete_readl("drivers/gpio/gpio-uniphier.c:442", priv->regs + UNIPHIER_GPIO_IRQ_FLT_EN);
 
 	return 0;
 }
@@ -455,13 +455,13 @@ static int __maybe_unused uniphier_gpio_resume(struct device *dev)
 	for (i = 0; i < nbanks; i++) {
 		reg = uniphier_gpio_bank_to_reg(i);
 
-		writel(*val++, priv->regs + reg + UNIPHIER_GPIO_PORT_DATA);
-		writel(*val++, priv->regs + reg + UNIPHIER_GPIO_PORT_DIR);
+		pete_writel("drivers/gpio/gpio-uniphier.c:458", *val++, priv->regs + reg + UNIPHIER_GPIO_PORT_DATA);
+		pete_writel("drivers/gpio/gpio-uniphier.c:459", *val++, priv->regs + reg + UNIPHIER_GPIO_PORT_DIR);
 	}
 
-	writel(*val++, priv->regs + UNIPHIER_GPIO_IRQ_EN);
-	writel(*val++, priv->regs + UNIPHIER_GPIO_IRQ_MODE);
-	writel(*val++, priv->regs + UNIPHIER_GPIO_IRQ_FLT_EN);
+	pete_writel("drivers/gpio/gpio-uniphier.c:462", *val++, priv->regs + UNIPHIER_GPIO_IRQ_EN);
+	pete_writel("drivers/gpio/gpio-uniphier.c:463", *val++, priv->regs + UNIPHIER_GPIO_IRQ_MODE);
+	pete_writel("drivers/gpio/gpio-uniphier.c:464", *val++, priv->regs + UNIPHIER_GPIO_IRQ_FLT_EN);
 
 	uniphier_gpio_hw_init(priv);
 

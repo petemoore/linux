@@ -683,7 +683,7 @@ void qib_send_rc_ack(struct rvt_qp *qp)
 	 * We have to flush after the PBC for correctness
 	 * on some cpus or WC buffer can be written out of order.
 	 */
-	writeq(pbc, piobuf);
+	pete_writeq("drivers/infiniband/hw/qib/qib_rc.c:686", pbc, piobuf);
 
 	if (dd->flags & QIB_PIO_FLUSH_WC) {
 		u32 *hdrp = (u32 *) &hdr;

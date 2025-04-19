@@ -83,7 +83,7 @@ MODULE_PARM_DESC(override_bios, "yenta ignore bios resource allocation");
  */
 static inline u32 cb_readl(struct yenta_socket *socket, unsigned reg)
 {
-	u32 val = readl(socket->base + reg);
+	u32 val = pete_readl("drivers/pcmcia/yenta_socket.c:86", socket->base + reg);
 	debug("%04x %08x\n", socket, reg, val);
 	return val;
 }
@@ -91,8 +91,8 @@ static inline u32 cb_readl(struct yenta_socket *socket, unsigned reg)
 static inline void cb_writel(struct yenta_socket *socket, unsigned reg, u32 val)
 {
 	debug("%04x %08x\n", socket, reg, val);
-	writel(val, socket->base + reg);
-	readl(socket->base + reg); /* avoid problems with PCI write posting */
+	pete_writel("drivers/pcmcia/yenta_socket.c:94", val, socket->base + reg);
+	pete_readl("drivers/pcmcia/yenta_socket.c:95", socket->base + reg); /* avoid problems with PCI write posting */
 }
 
 static inline u8 config_readb(struct yenta_socket *socket, unsigned offset)
@@ -139,7 +139,7 @@ static inline void config_writel(struct yenta_socket *socket, unsigned offset, u
 
 static inline u8 exca_readb(struct yenta_socket *socket, unsigned reg)
 {
-	u8 val = readb(socket->base + 0x800 + reg);
+	u8 val = pete_readb("drivers/pcmcia/yenta_socket.c:142", socket->base + 0x800 + reg);
 	debug("%04x %02x\n", socket, reg, val);
 	return val;
 }
@@ -147,8 +147,8 @@ static inline u8 exca_readb(struct yenta_socket *socket, unsigned reg)
 static inline u8 exca_readw(struct yenta_socket *socket, unsigned reg)
 {
 	u16 val;
-	val = readb(socket->base + 0x800 + reg);
-	val |= readb(socket->base + 0x800 + reg + 1) << 8;
+	val = pete_readb("drivers/pcmcia/yenta_socket.c:150", socket->base + 0x800 + reg);
+	val |= pete_readb("drivers/pcmcia/yenta_socket.c:151", socket->base + 0x800 + reg + 1) << 8;
 	debug("%04x %04x\n", socket, reg, val);
 	return val;
 }
@@ -156,19 +156,19 @@ static inline u8 exca_readw(struct yenta_socket *socket, unsigned reg)
 static inline void exca_writeb(struct yenta_socket *socket, unsigned reg, u8 val)
 {
 	debug("%04x %02x\n", socket, reg, val);
-	writeb(val, socket->base + 0x800 + reg);
-	readb(socket->base + 0x800 + reg); /* PCI write posting... */
+	pete_writeb("drivers/pcmcia/yenta_socket.c:159", val, socket->base + 0x800 + reg);
+	pete_readb("drivers/pcmcia/yenta_socket.c:160", socket->base + 0x800 + reg); /* PCI write posting... */
 }
 
 static void exca_writew(struct yenta_socket *socket, unsigned reg, u16 val)
 {
 	debug("%04x %04x\n", socket, reg, val);
-	writeb(val, socket->base + 0x800 + reg);
-	writeb(val >> 8, socket->base + 0x800 + reg + 1);
+	pete_writeb("drivers/pcmcia/yenta_socket.c:166", val, socket->base + 0x800 + reg);
+	pete_writeb("drivers/pcmcia/yenta_socket.c:167", val >> 8, socket->base + 0x800 + reg + 1);
 
 	/* PCI write posting... */
-	readb(socket->base + 0x800 + reg);
-	readb(socket->base + 0x800 + reg + 1);
+	pete_readb("drivers/pcmcia/yenta_socket.c:170", socket->base + 0x800 + reg);
+	pete_readb("drivers/pcmcia/yenta_socket.c:171", socket->base + 0x800 + reg + 1);
 }
 
 static ssize_t show_yenta_registers(struct device *yentadev, struct device_attribute *attr, char *buf)

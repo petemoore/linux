@@ -165,8 +165,8 @@ static inline u32 dma_low(dma_addr_t addr)
 static u8 adpt_read_blink_led(adpt_hba* host)
 {
 	if (host->FwDebugBLEDflag_P) {
-		if( readb(host->FwDebugBLEDflag_P) == 0xbc ){
-			return readb(host->FwDebugBLEDvalue_P);
+		if( pete_readb("drivers/scsi/dpt_i2o.c:168", host->FwDebugBLEDflag_P) == 0xbc ){
+			return pete_readb("drivers/scsi/dpt_i2o.c:169", host->FwDebugBLEDvalue_P);
 		}
 	}
 	return 0;
@@ -1235,7 +1235,7 @@ static s32 adpt_i2o_post_this(adpt_hba* pHba, u32* data, int len)
 	ulong timeout = jiffies + 30*HZ;
 	do {
 		rmb();
-		m = readl(pHba->post_port);
+		m = pete_readl("drivers/scsi/dpt_i2o.c:1238", pHba->post_port);
 		if (m != EMPTY_QUEUE) {
 			break;
 		}
@@ -1251,7 +1251,7 @@ static s32 adpt_i2o_post_this(adpt_hba* pHba, u32* data, int len)
 	wmb();
 
 	//post message
-	writel(m, pHba->post_port);
+	pete_writel("drivers/scsi/dpt_i2o.c:1254", m, pHba->post_port);
 	wmb();
 
 	return 0;
@@ -1311,7 +1311,7 @@ static s32 adpt_i2o_reset_hba(adpt_hba* pHba)
 
 	do {
 		rmb();
-		m = readl(pHba->post_port);
+		m = pete_readl("drivers/scsi/dpt_i2o.c:1314", pHba->post_port);
 		if (m != EMPTY_QUEUE) {
 			break;
 		}
@@ -1340,7 +1340,7 @@ static s32 adpt_i2o_reset_hba(adpt_hba* pHba)
 
 	memcpy_toio(pHba->msg_addr_virt+m, msg, sizeof(msg));
 	wmb();
-	writel(m, pHba->post_port);
+	pete_writel("drivers/scsi/dpt_i2o.c:1343", m, pHba->post_port);
 	wmb();
 
 	while(*status == 0){
@@ -1362,7 +1362,7 @@ static s32 adpt_i2o_reset_hba(adpt_hba* pHba)
 		// indicated that reset has finished
 		do {
 			rmb();
-			m = readl(pHba->post_port);
+			m = pete_readl("drivers/scsi/dpt_i2o.c:1365", pHba->post_port);
 			if (m != EMPTY_QUEUE) {
 				break;
 			}
@@ -2094,12 +2094,12 @@ static irqreturn_t adpt_isr(int irq, void *dev_id)
 	if(pHba->host)
 		spin_lock_irqsave(pHba->host->host_lock, flags);
 
-	while( readl(pHba->irq_mask) & I2O_INTERRUPT_PENDING_B) {
-		m = readl(pHba->reply_port);
+	while( pete_readl("drivers/scsi/dpt_i2o.c:2097", pHba->irq_mask) & I2O_INTERRUPT_PENDING_B) {
+		m = pete_readl("drivers/scsi/dpt_i2o.c:2098", pHba->reply_port);
 		if(m == EMPTY_QUEUE){
 			// Try twice then give up
 			rmb();
-			m = readl(pHba->reply_port);
+			m = pete_readl("drivers/scsi/dpt_i2o.c:2102", pHba->reply_port);
 			if(m == EMPTY_QUEUE){ 
 				// This really should not happen
 				printk(KERN_ERR"dpti: Could not get reply frame\n");
@@ -2117,32 +2117,32 @@ static irqreturn_t adpt_isr(int irq, void *dev_id)
 			reply = (u8 *)bus_to_virt(m);
 		}
 
-		if (readl(reply) & MSG_FAIL) {
-			u32 old_m = readl(reply+28); 
+		if (pete_readl("drivers/scsi/dpt_i2o.c:2120", reply) & MSG_FAIL) {
+			u32 old_m = pete_readl("drivers/scsi/dpt_i2o.c:2121", reply+28); 
 			void __iomem *msg;
 			u32 old_context;
 			PDEBUG("%s: Failed message\n",pHba->name);
 			if(old_m >= 0x100000){
 				printk(KERN_ERR"%s: Bad preserved MFA (%x)- dropping frame\n",pHba->name,old_m);
-				writel(m,pHba->reply_port);
+				pete_writel("drivers/scsi/dpt_i2o.c:2127", m,pHba->reply_port);
 				continue;
 			}
 			// Transaction context is 0 in failed reply frame
 			msg = pHba->msg_addr_virt + old_m;
-			old_context = readl(msg+12);
-			writel(old_context, reply+12);
+			old_context = pete_readl("drivers/scsi/dpt_i2o.c:2132", msg+12);
+			pete_writel("drivers/scsi/dpt_i2o.c:2133", old_context, reply+12);
 			adpt_send_nop(pHba, old_m);
 		} 
-		context = readl(reply+8);
+		context = pete_readl("drivers/scsi/dpt_i2o.c:2136", reply+8);
 		if(context & 0x40000000){ // IOCTL
-			void *p = adpt_ioctl_from_context(pHba, readl(reply+12));
+			void *p = adpt_ioctl_from_context(pHba, pete_readl("drivers/scsi/dpt_i2o.c:2138", reply+12));
 			if( p != NULL) {
 				memcpy_fromio(p, reply, REPLY_FRAME_SIZE * 4);
 			}
 			// All IOCTLs will also be post wait
 		}
 		if(context & 0x80000000){ // Post wait message
-			status = readl(reply+16);
+			status = pete_readl("drivers/scsi/dpt_i2o.c:2145", reply+16);
 			if(status  >> 24){
 				status &=  0xffff; /* Get detail status */
 			} else {
@@ -2154,7 +2154,7 @@ static irqreturn_t adpt_isr(int irq, void *dev_id)
 				 * as the firmware might treat a 0 tag as invalid
 				 */
 				cmd = scsi_host_find_tag(pHba->host,
-							 readl(reply + 12) - 1);
+							 pete_readl("drivers/scsi/dpt_i2o.c:2157", reply + 12) - 1);
 				if(cmd != NULL) {
 					printk(KERN_WARNING"%s: Apparent SCSI cmd in Post Wait Context - cmd=%p context=%x\n", pHba->name, cmd, context);
 				}
@@ -2166,13 +2166,13 @@ static irqreturn_t adpt_isr(int irq, void *dev_id)
 			 * as the firmware might treat a 0 tag as invalid
 			 */
 			cmd = scsi_host_find_tag(pHba->host,
-						 readl(reply + 12) - 1);
+						 pete_readl("drivers/scsi/dpt_i2o.c:2169", reply + 12) - 1);
 			if(cmd != NULL){
 				scsi_dma_unmap(cmd);
 				adpt_i2o_scsi_complete(reply, cmd);
 			}
 		}
-		writel(m, pHba->reply_port);
+		pete_writel("drivers/scsi/dpt_i2o.c:2175", m, pHba->reply_port);
 		wmb();
 		rmb();
 	}
@@ -2341,16 +2341,16 @@ static void adpt_i2o_scsi_complete(void __iomem *reply, struct scsi_cmnd *cmd)
 	adpt_hba* pHba;
 	u32 hba_status;
 	u32 dev_status;
-	u32 reply_flags = readl(reply) & 0xff00; // Leave it shifted up 8 bits 
+	u32 reply_flags = pete_readl("drivers/scsi/dpt_i2o.c:2344", reply) & 0xff00; // Leave it shifted up 8 bits 
 	// I know this would look cleaner if I just read bytes
 	// but the model I have been using for all the rest of the
 	// io is in 4 byte words - so I keep that model
-	u16 detailed_status = readl(reply+16) &0xffff;
+	u16 detailed_status = pete_readl("drivers/scsi/dpt_i2o.c:2348", reply+16) &0xffff;
 	dev_status = (detailed_status & 0xff);
 	hba_status = detailed_status >> 8;
 
 	// calculate resid for sg 
-	scsi_set_resid(cmd, scsi_bufflen(cmd) - readl(reply+20));
+	scsi_set_resid(cmd, scsi_bufflen(cmd) - pete_readl("drivers/scsi/dpt_i2o.c:2353", reply+20));
 
 	pHba = (adpt_hba*) cmd->device->host->hostdata[0];
 
@@ -2361,7 +2361,7 @@ static void adpt_i2o_scsi_complete(void __iomem *reply, struct scsi_cmnd *cmd)
 		case I2O_SCSI_DSC_SUCCESS:
 			cmd->result = (DID_OK << 16);
 			// handle underflow
-			if (readl(reply+20) < cmd->underflow) {
+			if (pete_readl("drivers/scsi/dpt_i2o.c:2364", reply+20) < cmd->underflow) {
 				cmd->result = (DID_ERROR <<16);
 				printk(KERN_WARNING"%s: SCSI CMD underflow\n",pHba->name);
 			}
@@ -2727,7 +2727,7 @@ static s32 adpt_send_nop(adpt_hba*pHba,u32 m)
 
 	while(m == EMPTY_QUEUE){
 		rmb();
-		m = readl(pHba->post_port);
+		m = pete_readl("drivers/scsi/dpt_i2o.c:2730", pHba->post_port);
 		if(m != EMPTY_QUEUE){
 			break;
 		}
@@ -2738,12 +2738,12 @@ static s32 adpt_send_nop(adpt_hba*pHba,u32 m)
 		schedule_timeout_uninterruptible(1);
 	}
 	msg = (u32 __iomem *)(pHba->msg_addr_virt + m);
-	writel( THREE_WORD_MSG_SIZE | SGL_OFFSET_0,&msg[0]);
-	writel( I2O_CMD_UTIL_NOP << 24 | HOST_TID << 12 | 0,&msg[1]);
-	writel( 0,&msg[2]);
+	pete_writel("drivers/scsi/dpt_i2o.c:2741",  THREE_WORD_MSG_SIZE | SGL_OFFSET_0,&msg[0]);
+	pete_writel("drivers/scsi/dpt_i2o.c:2742",  I2O_CMD_UTIL_NOP << 24 | HOST_TID << 12 | 0,&msg[1]);
+	pete_writel("drivers/scsi/dpt_i2o.c:2743",  0,&msg[2]);
 	wmb();
 
-	writel(m, pHba->post_port);
+	pete_writel("drivers/scsi/dpt_i2o.c:2746", m, pHba->post_port);
 	wmb();
 	return 0;
 }
@@ -2759,7 +2759,7 @@ static s32 adpt_i2o_init_outbound_q(adpt_hba* pHba)
 
 	do {
 		rmb();
-		m = readl(pHba->post_port);
+		m = pete_readl("drivers/scsi/dpt_i2o.c:2762", pHba->post_port);
 		if (m != EMPTY_QUEUE) {
 			break;
 		}
@@ -2781,16 +2781,16 @@ static s32 adpt_i2o_init_outbound_q(adpt_hba* pHba)
 		return -ENOMEM;
 	}
 
-	writel(EIGHT_WORD_MSG_SIZE| SGL_OFFSET_6, &msg[0]);
-	writel(I2O_CMD_OUTBOUND_INIT<<24 | HOST_TID<<12 | ADAPTER_TID, &msg[1]);
-	writel(0, &msg[2]);
-	writel(0x0106, &msg[3]);	/* Transaction context */
-	writel(4096, &msg[4]);		/* Host page frame size */
-	writel((REPLY_FRAME_SIZE)<<16|0x80, &msg[5]);	/* Outbound msg frame size and Initcode */
-	writel(0xD0000004, &msg[6]);		/* Simple SG LE, EOB */
-	writel((u32)addr, &msg[7]);
+	pete_writel("drivers/scsi/dpt_i2o.c:2784", EIGHT_WORD_MSG_SIZE| SGL_OFFSET_6, &msg[0]);
+	pete_writel("drivers/scsi/dpt_i2o.c:2785", I2O_CMD_OUTBOUND_INIT<<24 | HOST_TID<<12 | ADAPTER_TID, &msg[1]);
+	pete_writel("drivers/scsi/dpt_i2o.c:2786", 0, &msg[2]);
+	pete_writel("drivers/scsi/dpt_i2o.c:2787", 0x0106, &msg[3]);	/* Transaction context */
+	pete_writel("drivers/scsi/dpt_i2o.c:2788", 4096, &msg[4]);		/* Host page frame size */
+	pete_writel("drivers/scsi/dpt_i2o.c:2789", (REPLY_FRAME_SIZE)<<16|0x80, &msg[5]);	/* Outbound msg frame size and Initcode */
+	pete_writel("drivers/scsi/dpt_i2o.c:2790", 0xD0000004, &msg[6]);		/* Simple SG LE, EOB */
+	pete_writel("drivers/scsi/dpt_i2o.c:2791", (u32)addr, &msg[7]);
 
-	writel(m, pHba->post_port);
+	pete_writel("drivers/scsi/dpt_i2o.c:2793", m, pHba->post_port);
 	wmb();
 
 	// Wait for the reply status to come back
@@ -2835,7 +2835,7 @@ static s32 adpt_i2o_init_outbound_q(adpt_hba* pHba)
 	}
 
 	for(i = 0; i < pHba->reply_fifo_size; i++) {
-		writel(pHba->reply_pool_pa + (i * REPLY_FRAME_SIZE * 4),
+		pete_writel("drivers/scsi/dpt_i2o.c:2838", pHba->reply_pool_pa + (i * REPLY_FRAME_SIZE * 4),
 			pHba->reply_port);
 		wmb();
 	}
@@ -2878,7 +2878,7 @@ static s32 adpt_i2o_status_get(adpt_hba* pHba)
 	timeout = jiffies+TMOUT_GETSTATUS*HZ;
 	do {
 		rmb();
-		m = readl(pHba->post_port);
+		m = pete_readl("drivers/scsi/dpt_i2o.c:2881", pHba->post_port);
 		if (m != EMPTY_QUEUE) {
 			break;
 		}
@@ -2893,18 +2893,18 @@ static s32 adpt_i2o_status_get(adpt_hba* pHba)
 	
 	msg=(u32 __iomem *)(pHba->msg_addr_virt+m);
 
-	writel(NINE_WORD_MSG_SIZE|SGL_OFFSET_0, &msg[0]);
-	writel(I2O_CMD_STATUS_GET<<24|HOST_TID<<12|ADAPTER_TID, &msg[1]);
-	writel(1, &msg[2]);
-	writel(0, &msg[3]);
-	writel(0, &msg[4]);
-	writel(0, &msg[5]);
-	writel( dma_low(pHba->status_block_pa), &msg[6]);
-	writel( dma_high(pHba->status_block_pa), &msg[7]);
-	writel(sizeof(i2o_status_block), &msg[8]); // 88 bytes
+	pete_writel("drivers/scsi/dpt_i2o.c:2896", NINE_WORD_MSG_SIZE|SGL_OFFSET_0, &msg[0]);
+	pete_writel("drivers/scsi/dpt_i2o.c:2897", I2O_CMD_STATUS_GET<<24|HOST_TID<<12|ADAPTER_TID, &msg[1]);
+	pete_writel("drivers/scsi/dpt_i2o.c:2898", 1, &msg[2]);
+	pete_writel("drivers/scsi/dpt_i2o.c:2899", 0, &msg[3]);
+	pete_writel("drivers/scsi/dpt_i2o.c:2900", 0, &msg[4]);
+	pete_writel("drivers/scsi/dpt_i2o.c:2901", 0, &msg[5]);
+	pete_writel("drivers/scsi/dpt_i2o.c:2902",  dma_low(pHba->status_block_pa), &msg[6]);
+	pete_writel("drivers/scsi/dpt_i2o.c:2903",  dma_high(pHba->status_block_pa), &msg[7]);
+	pete_writel("drivers/scsi/dpt_i2o.c:2904", sizeof(i2o_status_block), &msg[8]); // 88 bytes
 
 	//post message
-	writel(m, pHba->post_port);
+	pete_writel("drivers/scsi/dpt_i2o.c:2907", m, pHba->post_port);
 	wmb();
 
 	while(status_block[87]!=0xff){

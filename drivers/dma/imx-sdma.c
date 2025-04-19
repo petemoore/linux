@@ -703,7 +703,7 @@ static int sdma_config_ownership(struct sdma_channel *sdmac,
 
 static void sdma_enable_channel(struct sdma_engine *sdma, int channel)
 {
-	writel(BIT(channel), sdma->regs + SDMA_H_START);
+	pete_writel("drivers/dma/imx-sdma.c:706", BIT(channel), sdma->regs + SDMA_H_START);
 }
 
 /*
@@ -722,7 +722,7 @@ static int sdma_run_channel0(struct sdma_engine *sdma)
 		dev_err(sdma->dev, "Timeout waiting for CH0 ready\n");
 
 	/* Set bits of CONFIG register with dynamic context switching */
-	reg = readl(sdma->regs + SDMA_H_CONFIG);
+	reg = pete_readl("drivers/dma/imx-sdma.c:725", sdma->regs + SDMA_H_CONFIG);
 	if ((reg & SDMA_H_CONFIG_CSM) == 0) {
 		reg |= SDMA_H_CONFIG_CSM;
 		writel_relaxed(reg, sdma->regs + SDMA_H_CONFIG);

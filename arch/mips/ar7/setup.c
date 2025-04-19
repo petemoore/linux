@@ -16,7 +16,7 @@ static void ar7_machine_restart(char *command)
 {
 	u32 *softres_reg = ioremap(AR7_REGS_RESET + AR7_RESET_SOFTWARE, 1);
 
-	writel(1, softres_reg);
+	pete_writel("arch/mips/ar7/setup.c:19", 1, softres_reg);
 }
 
 static void ar7_machine_halt(void)
@@ -28,9 +28,9 @@ static void ar7_machine_halt(void)
 static void ar7_machine_power_off(void)
 {
 	u32 *power_reg = (u32 *)ioremap(AR7_REGS_POWER, 1);
-	u32 power_state = readl(power_reg) | (3 << 30);
+	u32 power_state = pete_readl("arch/mips/ar7/setup.c:31", power_reg) | (3 << 30);
 
-	writel(power_state, power_reg);
+	pete_writel("arch/mips/ar7/setup.c:33", power_state, power_reg);
 	ar7_machine_halt();
 }
 

@@ -50,7 +50,7 @@ static struct gpio_chip cs3_gpio;
 
 long simpad_get_cs3_ro(void)
 {
-	return readl(CS3_BASE);
+	return pete_readl("arch/arm/mach-sa1100/simpad.c:53", CS3_BASE);
 }
 EXPORT_SYMBOL(simpad_get_cs3_ro);
 
@@ -62,7 +62,7 @@ EXPORT_SYMBOL(simpad_get_cs3_shadow);
 
 static void __simpad_write_cs3(void)
 {
-	writel(cs3_shadow, CS3_BASE);
+	pete_writel("arch/arm/mach-sa1100/simpad.c:65", cs3_shadow, CS3_BASE);
 }
 
 void simpad_set_cs3_bit(int value)

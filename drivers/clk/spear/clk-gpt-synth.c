@@ -91,7 +91,7 @@ static int clk_gpt_set_rate(struct clk_hw *hw, unsigned long drate,
 	if (gpt->lock)
 		spin_lock_irqsave(gpt->lock, flags);
 
-	val = readl(gpt->reg) & ~GPT_MSCALE_MASK;
+	val = pete_readl("drivers/clk/spear/clk-gpt-synth.c:94", gpt->reg) & ~GPT_MSCALE_MASK;
 	val &= ~(GPT_NSCALE_MASK << GPT_NSCALE_SHIFT);
 
 	val |= rtbl[i].mscale & GPT_MSCALE_MASK;

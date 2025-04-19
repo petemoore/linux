@@ -775,10 +775,10 @@ lpfc_debugfs_dumpHostSlim_data(struct lpfc_hba *phba, char *buf, int size)
 					 pring->sli.sli3.numRiocb);
 		}
 
-		word0 = readl(phba->HAregaddr);
-		word1 = readl(phba->CAregaddr);
-		word2 = readl(phba->HSregaddr);
-		word3 = readl(phba->HCregaddr);
+		word0 = pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:778", phba->HAregaddr);
+		word1 = pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:779", phba->CAregaddr);
+		word2 = pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:780", phba->HSregaddr);
+		word3 = pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:781", phba->HCregaddr);
 		len +=  scnprintf(buf+len, size-len, "HA:%08x CA:%08x HS:%08x "
 				 "HC:%08x\n", word0, word1, word2, word3);
 	}
@@ -3641,7 +3641,7 @@ lpfc_idiag_baracc_read(struct file *file, char __user *buf, size_t nbytes,
 	/* Read single PCI bar space register */
 	if (acc_range == SINGLE_WORD) {
 		offset_run = offset;
-		u32val = readl(mem_mapped_bar + offset_run);
+		u32val = pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:3644", mem_mapped_bar + offset_run);
 		len += scnprintf(pbuffer+len, LPFC_PCI_BAR_RD_BUF_SIZE-len,
 				"%05x: %08x\n", offset_run, u32val);
 	} else
@@ -3660,7 +3660,7 @@ baracc_browse:
 			"%05x: ", offset_label);
 	index = LPFC_PCI_BAR_RD_SIZE;
 	while (index > 0) {
-		u32val = readl(mem_mapped_bar + offset_run);
+		u32val = pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:3663", mem_mapped_bar + offset_run);
 		len += scnprintf(pbuffer+len, LPFC_PCI_BAR_RD_BUF_SIZE-len,
 				"%08x ", u32val);
 		offset_run += sizeof(uint32_t);
@@ -3825,20 +3825,20 @@ lpfc_idiag_baracc_write(struct file *file, const char __user *buf,
 		acc_range = SINGLE_WORD;
 		value = idiag.cmd.data[IDIAG_BARACC_REG_VAL_INDX];
 		if (idiag.cmd.opcode == LPFC_IDIAG_CMD_BARACC_WR) {
-			writel(value, mem_mapped_bar + offset);
-			readl(mem_mapped_bar + offset);
+			pete_writel("drivers/scsi/lpfc/lpfc_debugfs.c:3828", value, mem_mapped_bar + offset);
+			pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:3829", mem_mapped_bar + offset);
 		}
 		if (idiag.cmd.opcode == LPFC_IDIAG_CMD_BARACC_ST) {
-			u32val = readl(mem_mapped_bar + offset);
+			u32val = pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:3832", mem_mapped_bar + offset);
 			u32val |= value;
-			writel(u32val, mem_mapped_bar + offset);
-			readl(mem_mapped_bar + offset);
+			pete_writel("drivers/scsi/lpfc/lpfc_debugfs.c:3834", u32val, mem_mapped_bar + offset);
+			pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:3835", mem_mapped_bar + offset);
 		}
 		if (idiag.cmd.opcode == LPFC_IDIAG_CMD_BARACC_CL) {
-			u32val = readl(mem_mapped_bar + offset);
+			u32val = pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:3838", mem_mapped_bar + offset);
 			u32val &= ~value;
-			writel(u32val, mem_mapped_bar + offset);
-			readl(mem_mapped_bar + offset);
+			pete_writel("drivers/scsi/lpfc/lpfc_debugfs.c:3840", u32val, mem_mapped_bar + offset);
+			pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:3841", mem_mapped_bar + offset);
 		}
 	} else
 		/* All other opecodes are illegal for now */
@@ -4572,27 +4572,27 @@ lpfc_idiag_drbacc_read_reg(struct lpfc_hba *phba, char *pbuffer,
 	case LPFC_DRB_EQ:
 		len += scnprintf(pbuffer + len, LPFC_DRB_ACC_BUF_SIZE-len,
 				"EQ-DRB-REG: 0x%08x\n",
-				readl(phba->sli4_hba.EQDBregaddr));
+				pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:4575", phba->sli4_hba.EQDBregaddr));
 		break;
 	case LPFC_DRB_CQ:
 		len += scnprintf(pbuffer + len, LPFC_DRB_ACC_BUF_SIZE - len,
 				"CQ-DRB-REG: 0x%08x\n",
-				readl(phba->sli4_hba.CQDBregaddr));
+				pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:4580", phba->sli4_hba.CQDBregaddr));
 		break;
 	case LPFC_DRB_MQ:
 		len += scnprintf(pbuffer+len, LPFC_DRB_ACC_BUF_SIZE-len,
 				"MQ-DRB-REG:   0x%08x\n",
-				readl(phba->sli4_hba.MQDBregaddr));
+				pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:4585", phba->sli4_hba.MQDBregaddr));
 		break;
 	case LPFC_DRB_WQ:
 		len += scnprintf(pbuffer+len, LPFC_DRB_ACC_BUF_SIZE-len,
 				"WQ-DRB-REG:   0x%08x\n",
-				readl(phba->sli4_hba.WQDBregaddr));
+				pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:4590", phba->sli4_hba.WQDBregaddr));
 		break;
 	case LPFC_DRB_RQ:
 		len += scnprintf(pbuffer+len, LPFC_DRB_ACC_BUF_SIZE-len,
 				"RQ-DRB-REG:   0x%08x\n",
-				readl(phba->sli4_hba.RQDBregaddr));
+				pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:4595", phba->sli4_hba.RQDBregaddr));
 		break;
 	default:
 		break;
@@ -4738,15 +4738,15 @@ lpfc_idiag_drbacc_write(struct file *file, const char __user *buf,
 		if (idiag.cmd.opcode == LPFC_IDIAG_CMD_DRBACC_WR)
 			reg_val = value;
 		if (idiag.cmd.opcode == LPFC_IDIAG_CMD_DRBACC_ST) {
-			reg_val = readl(drb_reg);
+			reg_val = pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:4741", drb_reg);
 			reg_val |= value;
 		}
 		if (idiag.cmd.opcode == LPFC_IDIAG_CMD_DRBACC_CL) {
-			reg_val = readl(drb_reg);
+			reg_val = pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:4745", drb_reg);
 			reg_val &= ~value;
 		}
-		writel(reg_val, drb_reg);
-		readl(drb_reg); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_debugfs.c:4748", reg_val, drb_reg);
+		pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:4749", drb_reg); /* flush */
 	}
 	return nbytes;
 
@@ -4782,37 +4782,37 @@ lpfc_idiag_ctlacc_read_reg(struct lpfc_hba *phba, char *pbuffer,
 	case LPFC_CTL_PORT_SEM:
 		len += scnprintf(pbuffer+len, LPFC_CTL_ACC_BUF_SIZE-len,
 				"Port SemReg:   0x%08x\n",
-				readl(phba->sli4_hba.conf_regs_memmap_p +
+				pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:4785", phba->sli4_hba.conf_regs_memmap_p +
 				      LPFC_CTL_PORT_SEM_OFFSET));
 		break;
 	case LPFC_CTL_PORT_STA:
 		len += scnprintf(pbuffer+len, LPFC_CTL_ACC_BUF_SIZE-len,
 				"Port StaReg:   0x%08x\n",
-				readl(phba->sli4_hba.conf_regs_memmap_p +
+				pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:4791", phba->sli4_hba.conf_regs_memmap_p +
 				      LPFC_CTL_PORT_STA_OFFSET));
 		break;
 	case LPFC_CTL_PORT_CTL:
 		len += scnprintf(pbuffer+len, LPFC_CTL_ACC_BUF_SIZE-len,
 				"Port CtlReg:   0x%08x\n",
-				readl(phba->sli4_hba.conf_regs_memmap_p +
+				pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:4797", phba->sli4_hba.conf_regs_memmap_p +
 				      LPFC_CTL_PORT_CTL_OFFSET));
 		break;
 	case LPFC_CTL_PORT_ER1:
 		len += scnprintf(pbuffer+len, LPFC_CTL_ACC_BUF_SIZE-len,
 				"Port Er1Reg:   0x%08x\n",
-				readl(phba->sli4_hba.conf_regs_memmap_p +
+				pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:4803", phba->sli4_hba.conf_regs_memmap_p +
 				      LPFC_CTL_PORT_ER1_OFFSET));
 		break;
 	case LPFC_CTL_PORT_ER2:
 		len += scnprintf(pbuffer+len, LPFC_CTL_ACC_BUF_SIZE-len,
 				"Port Er2Reg:   0x%08x\n",
-				readl(phba->sli4_hba.conf_regs_memmap_p +
+				pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:4809", phba->sli4_hba.conf_regs_memmap_p +
 				      LPFC_CTL_PORT_ER2_OFFSET));
 		break;
 	case LPFC_CTL_PDEV_CTL:
 		len += scnprintf(pbuffer+len, LPFC_CTL_ACC_BUF_SIZE-len,
 				"PDev CtlReg:   0x%08x\n",
-				readl(phba->sli4_hba.conf_regs_memmap_p +
+				pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:4815", phba->sli4_hba.conf_regs_memmap_p +
 				      LPFC_CTL_PDEV_CTL_OFFSET));
 		break;
 	default:
@@ -4962,15 +4962,15 @@ lpfc_idiag_ctlacc_write(struct file *file, const char __user *buf,
 		if (idiag.cmd.opcode == LPFC_IDIAG_CMD_CTLACC_WR)
 			reg_val = value;
 		if (idiag.cmd.opcode == LPFC_IDIAG_CMD_CTLACC_ST) {
-			reg_val = readl(ctl_reg);
+			reg_val = pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:4965", ctl_reg);
 			reg_val |= value;
 		}
 		if (idiag.cmd.opcode == LPFC_IDIAG_CMD_CTLACC_CL) {
-			reg_val = readl(ctl_reg);
+			reg_val = pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:4969", ctl_reg);
 			reg_val &= ~value;
 		}
-		writel(reg_val, ctl_reg);
-		readl(ctl_reg); /* flush */
+		pete_writel("drivers/scsi/lpfc/lpfc_debugfs.c:4972", reg_val, ctl_reg);
+		pete_readl("drivers/scsi/lpfc/lpfc_debugfs.c:4973", ctl_reg); /* flush */
 	}
 	return nbytes;
 

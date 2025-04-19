@@ -283,18 +283,18 @@ static struct exynos_iommu_domain *to_exynos_domain(struct iommu_domain *dom)
 
 static void sysmmu_unblock(struct sysmmu_drvdata *data)
 {
-	writel(CTRL_ENABLE, data->sfrbase + REG_MMU_CTRL);
+	pete_writel("drivers/iommu/exynos-iommu.c:286", CTRL_ENABLE, data->sfrbase + REG_MMU_CTRL);
 }
 
 static bool sysmmu_block(struct sysmmu_drvdata *data)
 {
 	int i = 120;
 
-	writel(CTRL_BLOCK, data->sfrbase + REG_MMU_CTRL);
-	while ((i > 0) && !(readl(data->sfrbase + REG_MMU_STATUS) & 1))
+	pete_writel("drivers/iommu/exynos-iommu.c:293", CTRL_BLOCK, data->sfrbase + REG_MMU_CTRL);
+	while ((i > 0) && !(pete_readl("drivers/iommu/exynos-iommu.c:294", data->sfrbase + REG_MMU_STATUS) & 1))
 		--i;
 
-	if (!(readl(data->sfrbase + REG_MMU_STATUS) & 1)) {
+	if (!(pete_readl("drivers/iommu/exynos-iommu.c:297", data->sfrbase + REG_MMU_STATUS) & 1)) {
 		sysmmu_unblock(data);
 		return false;
 	}
@@ -305,9 +305,9 @@ static bool sysmmu_block(struct sysmmu_drvdata *data)
 static void __sysmmu_tlb_invalidate(struct sysmmu_drvdata *data)
 {
 	if (MMU_MAJ_VER(data->version) < 5)
-		writel(0x1, data->sfrbase + REG_MMU_FLUSH);
+		pete_writel("drivers/iommu/exynos-iommu.c:308", 0x1, data->sfrbase + REG_MMU_FLUSH);
 	else
-		writel(0x1, data->sfrbase + REG_V5_MMU_FLUSH_ALL);
+		pete_writel("drivers/iommu/exynos-iommu.c:310", 0x1, data->sfrbase + REG_V5_MMU_FLUSH_ALL);
 }
 
 static void __sysmmu_tlb_invalidate_entry(struct sysmmu_drvdata *data,
@@ -317,20 +317,20 @@ static void __sysmmu_tlb_invalidate_entry(struct sysmmu_drvdata *data,
 
 	if (MMU_MAJ_VER(data->version) < 5) {
 		for (i = 0; i < num_inv; i++) {
-			writel((iova & SPAGE_MASK) | 1,
+			pete_writel("drivers/iommu/exynos-iommu.c:320", (iova & SPAGE_MASK) | 1,
 				     data->sfrbase + REG_MMU_FLUSH_ENTRY);
 			iova += SPAGE_SIZE;
 		}
 	} else {
 		if (num_inv == 1) {
-			writel((iova & SPAGE_MASK) | 1,
+			pete_writel("drivers/iommu/exynos-iommu.c:326", (iova & SPAGE_MASK) | 1,
 				     data->sfrbase + REG_V5_MMU_FLUSH_ENTRY);
 		} else {
-			writel((iova & SPAGE_MASK),
+			pete_writel("drivers/iommu/exynos-iommu.c:329", (iova & SPAGE_MASK),
 				     data->sfrbase + REG_V5_MMU_FLUSH_START);
-			writel((iova & SPAGE_MASK) + (num_inv - 1) * SPAGE_SIZE,
+			pete_writel("drivers/iommu/exynos-iommu.c:331", (iova & SPAGE_MASK) + (num_inv - 1) * SPAGE_SIZE,
 				     data->sfrbase + REG_V5_MMU_FLUSH_END);
-			writel(1, data->sfrbase + REG_V5_MMU_FLUSH_RANGE);
+			pete_writel("drivers/iommu/exynos-iommu.c:333", 1, data->sfrbase + REG_V5_MMU_FLUSH_RANGE);
 		}
 	}
 }
@@ -338,9 +338,9 @@ static void __sysmmu_tlb_invalidate_entry(struct sysmmu_drvdata *data,
 static void __sysmmu_set_ptbase(struct sysmmu_drvdata *data, phys_addr_t pgd)
 {
 	if (MMU_MAJ_VER(data->version) < 5)
-		writel(pgd, data->sfrbase + REG_PT_BASE_ADDR);
+		pete_writel("drivers/iommu/exynos-iommu.c:341", pgd, data->sfrbase + REG_PT_BASE_ADDR);
 	else
-		writel(pgd >> PAGE_SHIFT,
+		pete_writel("drivers/iommu/exynos-iommu.c:343", pgd >> PAGE_SHIFT,
 			     data->sfrbase + REG_V5_PT_BASE_PFN);
 
 	__sysmmu_tlb_invalidate(data);
@@ -368,7 +368,7 @@ static void __sysmmu_get_version(struct sysmmu_drvdata *data)
 
 	__sysmmu_enable_clocks(data);
 
-	ver = readl(data->sfrbase + REG_MMU_VERSION);
+	ver = pete_readl("drivers/iommu/exynos-iommu.c:371", data->sfrbase + REG_MMU_VERSION);
 
 	/* controllers on some SoCs don't report proper version */
 	if (ver == 0x80000001u)
@@ -427,7 +427,7 @@ static irqreturn_t exynos_sysmmu_irq(int irq, void *dev_id)
 
 	clk_enable(data->clk_master);
 
-	itype = __ffs(readl(data->sfrbase + reg_status));
+	itype = __ffs(pete_readl("drivers/iommu/exynos-iommu.c:430", data->sfrbase + reg_status));
 	for (i = 0; i < n; i++, finfo++)
 		if (finfo->bit == itype)
 			break;
@@ -435,7 +435,7 @@ static irqreturn_t exynos_sysmmu_irq(int irq, void *dev_id)
 	BUG_ON(i == n);
 
 	/* print debug message */
-	fault_addr = readl(data->sfrbase + finfo->addr_reg);
+	fault_addr = pete_readl("drivers/iommu/exynos-iommu.c:438", data->sfrbase + finfo->addr_reg);
 	show_fault_information(data, finfo, fault_addr);
 
 	if (data->domain)
@@ -444,7 +444,7 @@ static irqreturn_t exynos_sysmmu_irq(int irq, void *dev_id)
 	/* fault is not recovered by fault handler */
 	BUG_ON(ret != 0);
 
-	writel(1 << itype, data->sfrbase + reg_clear);
+	pete_writel("drivers/iommu/exynos-iommu.c:447", 1 << itype, data->sfrbase + reg_clear);
 
 	sysmmu_unblock(data);
 
@@ -462,8 +462,8 @@ static void __sysmmu_disable(struct sysmmu_drvdata *data)
 	clk_enable(data->clk_master);
 
 	spin_lock_irqsave(&data->lock, flags);
-	writel(CTRL_DISABLE, data->sfrbase + REG_MMU_CTRL);
-	writel(0, data->sfrbase + REG_MMU_CFG);
+	pete_writel("drivers/iommu/exynos-iommu.c:465", CTRL_DISABLE, data->sfrbase + REG_MMU_CTRL);
+	pete_writel("drivers/iommu/exynos-iommu.c:466", 0, data->sfrbase + REG_MMU_CFG);
 	data->active = false;
 	spin_unlock_irqrestore(&data->lock, flags);
 
@@ -483,7 +483,7 @@ static void __sysmmu_init_config(struct sysmmu_drvdata *data)
 
 	cfg |= CFG_EAP; /* enable access protection bits check */
 
-	writel(cfg, data->sfrbase + REG_MMU_CFG);
+	pete_writel("drivers/iommu/exynos-iommu.c:486", cfg, data->sfrbase + REG_MMU_CFG);
 }
 
 static void __sysmmu_enable(struct sysmmu_drvdata *data)
@@ -493,10 +493,10 @@ static void __sysmmu_enable(struct sysmmu_drvdata *data)
 	__sysmmu_enable_clocks(data);
 
 	spin_lock_irqsave(&data->lock, flags);
-	writel(CTRL_BLOCK, data->sfrbase + REG_MMU_CTRL);
+	pete_writel("drivers/iommu/exynos-iommu.c:496", CTRL_BLOCK, data->sfrbase + REG_MMU_CTRL);
 	__sysmmu_init_config(data);
 	__sysmmu_set_ptbase(data, data->pgtable);
-	writel(CTRL_ENABLE, data->sfrbase + REG_MMU_CTRL);
+	pete_writel("drivers/iommu/exynos-iommu.c:499", CTRL_ENABLE, data->sfrbase + REG_MMU_CTRL);
 	data->active = true;
 	spin_unlock_irqrestore(&data->lock, flags);
 

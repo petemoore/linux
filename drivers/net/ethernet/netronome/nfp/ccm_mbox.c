@@ -226,7 +226,7 @@ static void nfp_ccm_mbox_copy_out(struct nfp_net *nn, struct sk_buff *last)
 		struct nfp_ccm_hdr hdr;
 		u32 tlv_hdr;
 
-		tlv_hdr = readl(data);
+		tlv_hdr = pete_readl("drivers/net/ethernet/netronome/nfp/ccm_mbox.c:229", data);
 		type = FIELD_GET(NFP_NET_MBOX_TLV_TYPE, tlv_hdr);
 		length = FIELD_GET(NFP_NET_MBOX_TLV_LEN, tlv_hdr);
 		offset = data - nn->dp.ctrl_bar;
@@ -257,7 +257,7 @@ static void nfp_ccm_mbox_copy_out(struct nfp_net *nn, struct sk_buff *last)
 			break;
 		}
 
-		hdr.raw = cpu_to_be32(readl(data));
+		hdr.raw = cpu_to_be32(pete_readl("drivers/net/ethernet/netronome/nfp/ccm_mbox.c:260", data));
 
 		skb = nfp_ccm_mbox_find_req(nn, hdr.tag, last);
 		if (!skb) {
@@ -313,7 +313,7 @@ static void nfp_ccm_mbox_copy_out(struct nfp_net *nn, struct sk_buff *last)
 
 			cnt = DIV_ROUND_UP(length, 4);
 			for (i = 1 ; i < cnt; i++)
-				skb_data[i] = cpu_to_be32(readl(data + i * 4));
+				skb_data[i] = cpu_to_be32(pete_readl("drivers/net/ethernet/netronome/nfp/ccm_mbox.c:316", data + i * 4));
 		}
 
 		cb->state = NFP_NET_MBOX_CMSG_STATE_REPLY_FOUND;

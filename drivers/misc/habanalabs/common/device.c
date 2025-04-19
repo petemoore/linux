@@ -1666,7 +1666,7 @@ void hl_device_fini(struct hl_device *hdev)
  */
 inline u32 hl_rreg(struct hl_device *hdev, u32 reg)
 {
-	return readl(hdev->rmmio + reg);
+	return pete_readl("drivers/misc/habanalabs/common/device.c:1669", hdev->rmmio + reg);
 }
 
 /*
@@ -1681,5 +1681,5 @@ inline u32 hl_rreg(struct hl_device *hdev, u32 reg)
  */
 inline void hl_wreg(struct hl_device *hdev, u32 reg, u32 val)
 {
-	writel(val, hdev->rmmio + reg);
+	pete_writel("drivers/misc/habanalabs/common/device.c:1684", val, hdev->rmmio + reg);
 }

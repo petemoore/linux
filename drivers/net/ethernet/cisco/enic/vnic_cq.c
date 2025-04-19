@@ -57,7 +57,7 @@ void vnic_cq_init(struct vnic_cq *cq, unsigned int flow_control_enable,
 	u64 paddr;
 
 	paddr = (u64)cq->ring.base_addr | VNIC_PADDR_TARGET;
-	writeq(paddr, &cq->ctrl->ring_base);
+	pete_writeq("drivers/net/ethernet/cisco/enic/vnic_cq.c:60", paddr, &cq->ctrl->ring_base);
 	iowrite32(cq->ring.desc_count, &cq->ctrl->ring_size);
 	iowrite32(flow_control_enable, &cq->ctrl->flow_control_enable);
 	iowrite32(color_enable, &cq->ctrl->color_enable);
@@ -68,7 +68,7 @@ void vnic_cq_init(struct vnic_cq *cq, unsigned int flow_control_enable,
 	iowrite32(cq_entry_enable, &cq->ctrl->cq_entry_enable);
 	iowrite32(cq_message_enable, &cq->ctrl->cq_message_enable);
 	iowrite32(interrupt_offset, &cq->ctrl->interrupt_offset);
-	writeq(cq_message_addr, &cq->ctrl->cq_message_addr);
+	pete_writeq("drivers/net/ethernet/cisco/enic/vnic_cq.c:71", cq_message_addr, &cq->ctrl->cq_message_addr);
 
 	cq->interrupt_offset = interrupt_offset;
 }

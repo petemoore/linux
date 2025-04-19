@@ -137,13 +137,13 @@ struct zynq_fpga_priv {
 static inline void zynq_fpga_write(struct zynq_fpga_priv *priv, u32 offset,
 				   u32 val)
 {
-	writel(val, priv->io_base + offset);
+	pete_writel("drivers/fpga/zynq-fpga.c:140", val, priv->io_base + offset);
 }
 
 static inline u32 zynq_fpga_read(const struct zynq_fpga_priv *priv,
 				 u32 offset)
 {
-	return readl(priv->io_base + offset);
+	return pete_readl("drivers/fpga/zynq-fpga.c:146", priv->io_base + offset);
 }
 
 #define zynq_fpga_poll_timeout(priv, addr, val, cond, sleep_us, timeout_us) \

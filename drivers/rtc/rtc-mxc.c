@@ -94,14 +94,14 @@ static time64_t get_alarm_or_time(struct device *dev, int time_alarm)
 
 	switch (time_alarm) {
 	case MXC_RTC_TIME:
-		day = readw(ioaddr + RTC_DAYR);
-		hr_min = readw(ioaddr + RTC_HOURMIN);
-		sec = readw(ioaddr + RTC_SECOND);
+		day = pete_readw("drivers/rtc/rtc-mxc.c:97", ioaddr + RTC_DAYR);
+		hr_min = pete_readw("drivers/rtc/rtc-mxc.c:98", ioaddr + RTC_HOURMIN);
+		sec = pete_readw("drivers/rtc/rtc-mxc.c:99", ioaddr + RTC_SECOND);
 		break;
 	case MXC_RTC_ALARM:
-		day = readw(ioaddr + RTC_DAYALARM);
-		hr_min = readw(ioaddr + RTC_ALRM_HM) & 0xffff;
-		sec = readw(ioaddr + RTC_ALRM_SEC);
+		day = pete_readw("drivers/rtc/rtc-mxc.c:102", ioaddr + RTC_DAYALARM);
+		hr_min = pete_readw("drivers/rtc/rtc-mxc.c:103", ioaddr + RTC_ALRM_HM) & 0xffff;
+		sec = pete_readw("drivers/rtc/rtc-mxc.c:104", ioaddr + RTC_ALRM_SEC);
 		break;
 	}
 
@@ -134,14 +134,14 @@ static void set_alarm_or_time(struct device *dev, int time_alarm, time64_t time)
 
 	switch (time_alarm) {
 	case MXC_RTC_TIME:
-		writew(day, ioaddr + RTC_DAYR);
-		writew(sec, ioaddr + RTC_SECOND);
-		writew(temp, ioaddr + RTC_HOURMIN);
+		pete_writew("drivers/rtc/rtc-mxc.c:137", day, ioaddr + RTC_DAYR);
+		pete_writew("drivers/rtc/rtc-mxc.c:138", sec, ioaddr + RTC_SECOND);
+		pete_writew("drivers/rtc/rtc-mxc.c:139", temp, ioaddr + RTC_HOURMIN);
 		break;
 	case MXC_RTC_ALARM:
-		writew(day, ioaddr + RTC_DAYALARM);
-		writew(sec, ioaddr + RTC_ALRM_SEC);
-		writew(temp, ioaddr + RTC_ALRM_HM);
+		pete_writew("drivers/rtc/rtc-mxc.c:142", day, ioaddr + RTC_DAYALARM);
+		pete_writew("drivers/rtc/rtc-mxc.c:143", sec, ioaddr + RTC_ALRM_SEC);
+		pete_writew("drivers/rtc/rtc-mxc.c:144", temp, ioaddr + RTC_ALRM_HM);
 		break;
 	}
 }
@@ -159,7 +159,7 @@ static void rtc_update_alarm(struct device *dev, struct rtc_time *alrm)
 	time = rtc_tm_to_time64(alrm);
 
 	/* clear all the interrupt status bits */
-	writew(readw(ioaddr + RTC_RTCISR), ioaddr + RTC_RTCISR);
+	pete_writew("drivers/rtc/rtc-mxc.c:162", pete_readw("drivers/rtc/rtc-mxc.c:162", ioaddr + RTC_RTCISR), ioaddr + RTC_RTCISR);
 	set_alarm_or_time(dev, MXC_RTC_ALARM, time);
 }
 
@@ -172,14 +172,14 @@ static void mxc_rtc_irq_enable(struct device *dev, unsigned int bit,
 	unsigned long flags;
 
 	spin_lock_irqsave(&pdata->rtc->irq_lock, flags);
-	reg = readw(ioaddr + RTC_RTCIENR);
+	reg = pete_readw("drivers/rtc/rtc-mxc.c:175", ioaddr + RTC_RTCIENR);
 
 	if (enabled)
 		reg |= bit;
 	else
 		reg &= ~bit;
 
-	writew(reg, ioaddr + RTC_RTCIENR);
+	pete_writew("drivers/rtc/rtc-mxc.c:182", reg, ioaddr + RTC_RTCIENR);
 	spin_unlock_irqrestore(&pdata->rtc->irq_lock, flags);
 }
 
@@ -193,9 +193,9 @@ static irqreturn_t mxc_rtc_interrupt(int irq, void *dev_id)
 	u32 events = 0;
 
 	spin_lock(&pdata->rtc->irq_lock);
-	status = readw(ioaddr + RTC_RTCISR) & readw(ioaddr + RTC_RTCIENR);
+	status = pete_readw("drivers/rtc/rtc-mxc.c:196", ioaddr + RTC_RTCISR) & pete_readw("drivers/rtc/rtc-mxc.c:196", ioaddr + RTC_RTCIENR);
 	/* clear interrupt sources */
-	writew(status, ioaddr + RTC_RTCISR);
+	pete_writew("drivers/rtc/rtc-mxc.c:198", status, ioaddr + RTC_RTCISR);
 
 	/* update irq data & counter */
 	if (status & RTC_ALM_BIT) {
@@ -262,7 +262,7 @@ static int mxc_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 	void __iomem *ioaddr = pdata->ioaddr;
 
 	rtc_time64_to_tm(get_alarm_or_time(dev, MXC_RTC_ALARM), &alrm->time);
-	alrm->pending = ((readw(ioaddr + RTC_RTCISR) & RTC_ALM_BIT)) ? 1 : 0;
+	alrm->pending = ((pete_readw("drivers/rtc/rtc-mxc.c:265", ioaddr + RTC_RTCISR) & RTC_ALM_BIT)) ? 1 : 0;
 
 	return 0;
 }
@@ -382,8 +382,8 @@ static int mxc_rtc_probe(struct platform_device *pdev)
 	}
 
 	reg |= RTC_ENABLE_BIT;
-	writew(reg, (pdata->ioaddr + RTC_RTCCTL));
-	if (((readw(pdata->ioaddr + RTC_RTCCTL)) & RTC_ENABLE_BIT) == 0) {
+	pete_writew("drivers/rtc/rtc-mxc.c:385", reg, (pdata->ioaddr + RTC_RTCCTL));
+	if (((pete_readw("drivers/rtc/rtc-mxc.c:386", pdata->ioaddr + RTC_RTCCTL)) & RTC_ENABLE_BIT) == 0) {
 		dev_err(&pdev->dev, "hardware module can't be enabled!\n");
 		return -EIO;
 	}

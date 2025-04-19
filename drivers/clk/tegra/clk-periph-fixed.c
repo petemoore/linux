@@ -19,9 +19,9 @@ static int tegra_clk_periph_fixed_is_enabled(struct clk_hw *hw)
 	struct tegra_clk_periph_fixed *fixed = to_tegra_clk_periph_fixed(hw);
 	u32 mask = 1 << (fixed->num % 32), value;
 
-	value = readl(fixed->base + fixed->regs->enb_reg);
+	value = pete_readl("drivers/clk/tegra/clk-periph-fixed.c:22", fixed->base + fixed->regs->enb_reg);
 	if (value & mask) {
-		value = readl(fixed->base + fixed->regs->rst_reg);
+		value = pete_readl("drivers/clk/tegra/clk-periph-fixed.c:24", fixed->base + fixed->regs->rst_reg);
 		if ((value & mask) == 0)
 			return 1;
 	}
@@ -34,7 +34,7 @@ static int tegra_clk_periph_fixed_enable(struct clk_hw *hw)
 	struct tegra_clk_periph_fixed *fixed = to_tegra_clk_periph_fixed(hw);
 	u32 mask = 1 << (fixed->num % 32);
 
-	writel(mask, fixed->base + fixed->regs->enb_set_reg);
+	pete_writel("drivers/clk/tegra/clk-periph-fixed.c:37", mask, fixed->base + fixed->regs->enb_set_reg);
 
 	return 0;
 }
@@ -44,7 +44,7 @@ static void tegra_clk_periph_fixed_disable(struct clk_hw *hw)
 	struct tegra_clk_periph_fixed *fixed = to_tegra_clk_periph_fixed(hw);
 	u32 mask = 1 << (fixed->num % 32);
 
-	writel(mask, fixed->base + fixed->regs->enb_clr_reg);
+	pete_writel("drivers/clk/tegra/clk-periph-fixed.c:47", mask, fixed->base + fixed->regs->enb_clr_reg);
 }
 
 static unsigned long

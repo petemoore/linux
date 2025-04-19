@@ -295,14 +295,14 @@ snd_rme96_getinputtype(struct rme96 *rme96);
 static inline unsigned int
 snd_rme96_playback_ptr(struct rme96 *rme96)
 {
-	return (readl(rme96->iobase + RME96_IO_GET_PLAY_POS)
+	return (pete_readl("sound/pci/rme96.c:298", rme96->iobase + RME96_IO_GET_PLAY_POS)
 		& RME96_RCR_AUDIO_ADDR_MASK) >> rme96->playback_frlog;
 }
 
 static inline unsigned int
 snd_rme96_capture_ptr(struct rme96 *rme96)
 {
-	return (readl(rme96->iobase + RME96_IO_GET_REC_POS)
+	return (pete_readl("sound/pci/rme96.c:305", rme96->iobase + RME96_IO_GET_REC_POS)
 		& RME96_RCR_AUDIO_ADDR_MASK) >> rme96->capture_frlog;
 }
 
@@ -502,19 +502,19 @@ snd_rme96_write_SPI(struct rme96 *rme96, u16 val)
 			rme96->areg &= ~RME96_AR_CDATA;
 		}
 		rme96->areg &= ~(RME96_AR_CCLK | RME96_AR_CLATCH);
-		writel(rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
+		pete_writel("sound/pci/rme96.c:505", rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
 		udelay(10);
 		rme96->areg |= RME96_AR_CCLK;
-		writel(rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
+		pete_writel("sound/pci/rme96.c:508", rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
 		udelay(10);
 		val <<= 1;
 	}
 	rme96->areg &= ~(RME96_AR_CCLK | RME96_AR_CDATA);
 	rme96->areg |= RME96_AR_CLATCH;
-	writel(rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
+	pete_writel("sound/pci/rme96.c:514", rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
 	udelay(10);
 	rme96->areg &= ~RME96_AR_CLATCH;
-	writel(rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
+	pete_writel("sound/pci/rme96.c:517", rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
 }
 
 static void
@@ -532,9 +532,9 @@ snd_rme96_apply_dac_volume(struct rme96 *rme96)
 static void
 snd_rme96_reset_dac(struct rme96 *rme96)
 {
-	writel(rme96->wcreg | RME96_WCR_PD,
+	pete_writel("sound/pci/rme96.c:535", rme96->wcreg | RME96_WCR_PD,
 	       rme96->iobase + RME96_IO_CONTROL_REGISTER);
-	writel(rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme96.c:537", rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
 }
 
 static int
@@ -558,7 +558,7 @@ snd_rme96_setmontracks(struct rme96 *rme96,
 	} else {
 		rme96->wcreg &= ~RME96_WCR_MONITOR_1;
 	}
-	writel(rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme96.c:561", rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
 	return 0;
 }
 
@@ -593,7 +593,7 @@ snd_rme96_setattenuation(struct rme96 *rme96,
 	default:
 		return -EINVAL;
 	}
-	writel(rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme96.c:596", rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
 	return 0;
 }
 
@@ -624,7 +624,7 @@ snd_rme96_capture_getrate(struct rme96 *rme96,
 		return (rme96->areg & RME96_AR_BITPOS_F2) ? rate << 1 : rate;
 	}
 
-	rme96->rcreg = readl(rme96->iobase + RME96_IO_CONTROL_REGISTER);
+	rme96->rcreg = pete_readl("sound/pci/rme96.c:627", rme96->iobase + RME96_IO_CONTROL_REGISTER);
 	if (rme96->rcreg & RME96_RCR_LOCK) {
 		/* ADAT rate */
 		*is_adat = 1;
@@ -740,7 +740,7 @@ snd_rme96_playback_setrate(struct rme96 *rme96,
 		snd_rme96_reset_dac(rme96);
 		return 1; /* need to restore volume */
 	} else {
-		writel(rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
+		pete_writel("sound/pci/rme96.c:743", rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
 		return 0;
 	}
 }
@@ -783,7 +783,7 @@ snd_rme96_capture_analog_setrate(struct rme96 *rme96,
 	default:
 		return -EINVAL;
 	}
-	writel(rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
+	pete_writel("sound/pci/rme96.c:786", rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
 	return 0;
 }
 
@@ -810,8 +810,8 @@ snd_rme96_setclockmode(struct rme96 *rme96,
 	default:
 		return -EINVAL;
 	}
-	writel(rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
-	writel(rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
+	pete_writel("sound/pci/rme96.c:813", rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme96.c:814", rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
 	return 0;
 }
 
@@ -861,7 +861,7 @@ snd_rme96_setinputtype(struct rme96 *rme96,
 			return -EINVAL;
 		}
 		rme96->areg |= RME96_AR_ANALOG;
-		writel(rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
+		pete_writel("sound/pci/rme96.c:864", rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
 		if (rme96->rev < 4) {
 			/*
 			 * Revision less than 004 does not support 64 and
@@ -880,9 +880,9 @@ snd_rme96_setinputtype(struct rme96 *rme96,
 	}
 	if (type != RME96_INPUT_ANALOG && RME96_HAS_ANALOG_IN(rme96)) {
 		rme96->areg &= ~RME96_AR_ANALOG;
-		writel(rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
+		pete_writel("sound/pci/rme96.c:883", rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
 	}
-	writel(rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme96.c:885", rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
 	return 0;
 }
 
@@ -931,7 +931,7 @@ snd_rme96_playback_setformat(struct rme96 *rme96, snd_pcm_format_t format)
 	default:
 		return -EINVAL;
 	}
-	writel(rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme96.c:934", rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
 	return 0;
 }
 
@@ -948,7 +948,7 @@ snd_rme96_capture_setformat(struct rme96 *rme96, snd_pcm_format_t format)
 	default:
 		return -EINVAL;
 	}
-	writel(rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme96.c:951", rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
 	return 0;
 }
 
@@ -968,7 +968,7 @@ snd_rme96_set_period_properties(struct rme96 *rme96,
 		break;
 	}
 	rme96->wcreg &= ~RME96_WCR_IDIS;
-	writel(rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme96.c:971", rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
 }
 
 static int
@@ -1021,7 +1021,7 @@ snd_rme96_playback_hw_params(struct snd_pcm_substream *substream,
 	/* S/PDIF setup */
 	if ((rme96->wcreg & RME96_WCR_ADAT) == 0) {
 		rme96->wcreg &= ~(RME96_WCR_PRO | RME96_WCR_DOLBY | RME96_WCR_EMP);
-		writel(rme96->wcreg |= rme96->wcreg_spdif_stream, rme96->iobase + RME96_IO_CONTROL_REGISTER);
+		pete_writel("sound/pci/rme96.c:1024", rme96->wcreg |= rme96->wcreg_spdif_stream, rme96->iobase + RME96_IO_CONTROL_REGISTER);
 	}
 
 	err = 0;
@@ -1096,18 +1096,18 @@ snd_rme96_trigger(struct rme96 *rme96,
 		  int op)
 {
 	if (op & RME96_TB_RESET_PLAYPOS)
-		writel(0, rme96->iobase + RME96_IO_RESET_PLAY_POS);
+		pete_writel("sound/pci/rme96.c:1099", 0, rme96->iobase + RME96_IO_RESET_PLAY_POS);
 	if (op & RME96_TB_RESET_CAPTUREPOS)
-		writel(0, rme96->iobase + RME96_IO_RESET_REC_POS);
+		pete_writel("sound/pci/rme96.c:1101", 0, rme96->iobase + RME96_IO_RESET_REC_POS);
 	if (op & RME96_TB_CLEAR_PLAYBACK_IRQ) {
-		rme96->rcreg = readl(rme96->iobase + RME96_IO_CONTROL_REGISTER);
+		rme96->rcreg = pete_readl("sound/pci/rme96.c:1103", rme96->iobase + RME96_IO_CONTROL_REGISTER);
 		if (rme96->rcreg & RME96_RCR_IRQ)
-			writel(0, rme96->iobase + RME96_IO_CONFIRM_PLAY_IRQ);
+			pete_writel("sound/pci/rme96.c:1105", 0, rme96->iobase + RME96_IO_CONFIRM_PLAY_IRQ);
 	}
 	if (op & RME96_TB_CLEAR_CAPTURE_IRQ) {
-		rme96->rcreg = readl(rme96->iobase + RME96_IO_CONTROL_REGISTER);
+		rme96->rcreg = pete_readl("sound/pci/rme96.c:1108", rme96->iobase + RME96_IO_CONTROL_REGISTER);
 		if (rme96->rcreg & RME96_RCR_IRQ_2)
-			writel(0, rme96->iobase + RME96_IO_CONFIRM_REC_IRQ);
+			pete_writel("sound/pci/rme96.c:1110", 0, rme96->iobase + RME96_IO_CONFIRM_REC_IRQ);
 	}
 	if (op & RME96_TB_START_PLAYBACK)
 		rme96->wcreg |= RME96_WCR_START;
@@ -1117,7 +1117,7 @@ snd_rme96_trigger(struct rme96 *rme96,
 		rme96->wcreg |= RME96_WCR_START_2;
 	if (op & RME96_TB_STOP_CAPTURE)
 		rme96->wcreg &= ~RME96_WCR_START_2;
-	writel(rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme96.c:1120", rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
 }
 
 
@@ -1128,7 +1128,7 @@ snd_rme96_interrupt(int irq,
 {
 	struct rme96 *rme96 = (struct rme96 *)dev_id;
 
-	rme96->rcreg = readl(rme96->iobase + RME96_IO_CONTROL_REGISTER);
+	rme96->rcreg = pete_readl("sound/pci/rme96.c:1131", rme96->iobase + RME96_IO_CONTROL_REGISTER);
 	/* fastpath out, to ease interrupt sharing */
 	if (!((rme96->rcreg & RME96_RCR_IRQ) ||
 	      (rme96->rcreg & RME96_RCR_IRQ_2)))
@@ -1139,12 +1139,12 @@ snd_rme96_interrupt(int irq,
 	if (rme96->rcreg & RME96_RCR_IRQ) {
 		/* playback */
                 snd_pcm_period_elapsed(rme96->playback_substream);
-		writel(0, rme96->iobase + RME96_IO_CONFIRM_PLAY_IRQ);
+		pete_writel("sound/pci/rme96.c:1142", 0, rme96->iobase + RME96_IO_CONFIRM_PLAY_IRQ);
 	}
 	if (rme96->rcreg & RME96_RCR_IRQ_2) {
 		/* capture */
 		snd_pcm_period_elapsed(rme96->capture_substream);		
-		writel(0, rme96->iobase + RME96_IO_CONFIRM_REC_IRQ);
+		pete_writel("sound/pci/rme96.c:1147", 0, rme96->iobase + RME96_IO_CONFIRM_REC_IRQ);
 	}
 	return IRQ_HANDLED;
 }
@@ -1192,7 +1192,7 @@ snd_rme96_playback_spdif_open(struct snd_pcm_substream *substream)
                 return -EBUSY;
         }
 	rme96->wcreg &= ~RME96_WCR_ADAT;
-	writel(rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme96.c:1195", rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
 	rme96->playback_substream = substream;
 	spin_unlock_irq(&rme96->lock);
 
@@ -1262,7 +1262,7 @@ snd_rme96_playback_adat_open(struct snd_pcm_substream *substream)
                 return -EBUSY;
         }
 	rme96->wcreg |= RME96_WCR_ADAT;
-	writel(rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme96.c:1265", rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
 	rme96->playback_substream = substream;
 	spin_unlock_irq(&rme96->lock);
 	
@@ -1364,7 +1364,7 @@ snd_rme96_playback_prepare(struct snd_pcm_substream *substream)
 	if (RME96_ISPLAYING(rme96)) {
 		snd_rme96_trigger(rme96, RME96_STOP_PLAYBACK);
 	}
-	writel(0, rme96->iobase + RME96_IO_RESET_PLAY_POS);
+	pete_writel("sound/pci/rme96.c:1367", 0, rme96->iobase + RME96_IO_RESET_PLAY_POS);
 	spin_unlock_irq(&rme96->lock);
 	return 0;
 }
@@ -1378,7 +1378,7 @@ snd_rme96_capture_prepare(struct snd_pcm_substream *substream)
 	if (RME96_ISRECORDING(rme96)) {
 		snd_rme96_trigger(rme96, RME96_STOP_CAPTURE);
 	}
-	writel(0, rme96->iobase + RME96_IO_RESET_REC_POS);
+	pete_writel("sound/pci/rme96.c:1381", 0, rme96->iobase + RME96_IO_RESET_REC_POS);
 	spin_unlock_irq(&rme96->lock);
 	return 0;
 }
@@ -1567,7 +1567,7 @@ snd_rme96_free(struct rme96 *rme96)
 	if (rme96->irq >= 0) {
 		snd_rme96_trigger(rme96, RME96_STOP_BOTH);
 		rme96->areg &= ~RME96_AR_DAC_EN;
-		writel(rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
+		pete_writel("sound/pci/rme96.c:1570", rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
 	}
 #ifdef CONFIG_PM_SLEEP
 	vfree(rme96->playback_suspend_buffer);
@@ -1673,22 +1673,22 @@ snd_rme96_create(struct rme96 *rme96)
 
 	rme96->areg = RME96_AR_FREQPAD_1; /* set 44.1 kHz analog capture */
 
-	writel(rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
-	writel(rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
+	pete_writel("sound/pci/rme96.c:1676", rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme96.c:1677", rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
 	
 	/* reset the ADC */
-	writel(rme96->areg | RME96_AR_PD2,
+	pete_writel("sound/pci/rme96.c:1680", rme96->areg | RME96_AR_PD2,
 	       rme96->iobase + RME96_IO_ADDITIONAL_REG);
-	writel(rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);	
+	pete_writel("sound/pci/rme96.c:1682", rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);	
 
 	/* reset and enable the DAC (order is important). */
 	snd_rme96_reset_dac(rme96);
 	rme96->areg |= RME96_AR_DAC_EN;
-	writel(rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
+	pete_writel("sound/pci/rme96.c:1687", rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
 
 	/* reset playback and record buffer pointers */
-	writel(0, rme96->iobase + RME96_IO_RESET_PLAY_POS);
-	writel(0, rme96->iobase + RME96_IO_RESET_REC_POS);
+	pete_writel("sound/pci/rme96.c:1690", 0, rme96->iobase + RME96_IO_RESET_PLAY_POS);
+	pete_writel("sound/pci/rme96.c:1691", 0, rme96->iobase + RME96_IO_RESET_REC_POS);
 
 	/* reset volume */
 	rme96->vol[0] = rme96->vol[1] = 0;
@@ -1717,7 +1717,7 @@ snd_rme96_proc_read(struct snd_info_entry *entry, struct snd_info_buffer *buffer
 	int n;
 	struct rme96 *rme96 = entry->private_data;
 	
-	rme96->rcreg = readl(rme96->iobase + RME96_IO_CONTROL_REGISTER);
+	rme96->rcreg = pete_readl("sound/pci/rme96.c:1720", rme96->iobase + RME96_IO_CONTROL_REGISTER);
 
 	snd_iprintf(buffer, rme96->card->longname);
 	snd_iprintf(buffer, " (index #%d)\n", rme96->card->number + 1);
@@ -1873,7 +1873,7 @@ snd_rme96_put_loopback_control(struct snd_kcontrol *kcontrol, struct snd_ctl_ele
 	val = (rme96->wcreg & ~RME96_WCR_SEL) | val;
 	change = val != rme96->wcreg;
 	rme96->wcreg = val;
-	writel(val, rme96->iobase + RME96_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme96.c:1876", val, rme96->iobase + RME96_IO_CONTROL_REGISTER);
 	spin_unlock_irq(&rme96->lock);
 	return change;
 }
@@ -2172,7 +2172,7 @@ static int snd_rme96_control_spdif_stream_put(struct snd_kcontrol *kcontrol, str
 	rme96->wcreg_spdif_stream = val;
 	rme96->wcreg &= ~(RME96_WCR_PRO | RME96_WCR_DOLBY | RME96_WCR_EMP);
 	rme96->wcreg |= val;
-	writel(rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme96.c:2175", rme96->wcreg, rme96->iobase + RME96_IO_CONTROL_REGISTER);
 	spin_unlock_irq(&rme96->lock);
 	return change;
 }
@@ -2365,9 +2365,9 @@ static int rme96_suspend(struct device *dev)
 	snd_power_change_state(card, SNDRV_CTL_POWER_D3hot);
 
 	/* save capture & playback pointers */
-	rme96->playback_pointer = readl(rme96->iobase + RME96_IO_GET_PLAY_POS)
+	rme96->playback_pointer = pete_readl("sound/pci/rme96.c:2368", rme96->iobase + RME96_IO_GET_PLAY_POS)
 				  & RME96_RCR_AUDIO_ADDR_MASK;
-	rme96->capture_pointer = readl(rme96->iobase + RME96_IO_GET_REC_POS)
+	rme96->capture_pointer = pete_readl("sound/pci/rme96.c:2370", rme96->iobase + RME96_IO_GET_REC_POS)
 				 & RME96_RCR_AUDIO_ADDR_MASK;
 
 	/* save playback and capture buffers */
@@ -2378,7 +2378,7 @@ static int rme96_suspend(struct device *dev)
 
 	/* disable the DAC  */
 	rme96->areg &= ~RME96_AR_DAC_EN;
-	writel(rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
+	pete_writel("sound/pci/rme96.c:2381", rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
 	return 0;
 }
 
@@ -2388,9 +2388,9 @@ static int rme96_resume(struct device *dev)
 	struct rme96 *rme96 = card->private_data;
 
 	/* reset playback and record buffer pointers */
-	writel(0, rme96->iobase + RME96_IO_SET_PLAY_POS
+	pete_writel("sound/pci/rme96.c:2391", 0, rme96->iobase + RME96_IO_SET_PLAY_POS
 		  + rme96->playback_pointer);
-	writel(0, rme96->iobase + RME96_IO_SET_REC_POS
+	pete_writel("sound/pci/rme96.c:2393", 0, rme96->iobase + RME96_IO_SET_REC_POS
 		  + rme96->capture_pointer);
 
 	/* restore playback and capture buffers */
@@ -2400,14 +2400,14 @@ static int rme96_resume(struct device *dev)
 		    rme96->capture_suspend_buffer, RME96_BUFFER_SIZE);
 
 	/* reset the ADC */
-	writel(rme96->areg | RME96_AR_PD2,
+	pete_writel("sound/pci/rme96.c:2403", rme96->areg | RME96_AR_PD2,
 	       rme96->iobase + RME96_IO_ADDITIONAL_REG);
-	writel(rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
+	pete_writel("sound/pci/rme96.c:2405", rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
 
 	/* reset and enable DAC, restore analog volume */
 	snd_rme96_reset_dac(rme96);
 	rme96->areg |= RME96_AR_DAC_EN;
-	writel(rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
+	pete_writel("sound/pci/rme96.c:2410", rme96->areg, rme96->iobase + RME96_IO_ADDITIONAL_REG);
 	if (RME96_HAS_ANALOG_OUT(rme96)) {
 		usleep_range(3000, 10000);
 		snd_rme96_apply_dac_volume(rme96);

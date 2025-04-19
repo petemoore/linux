@@ -40,7 +40,7 @@ int octeon_mbox_read(struct octeon_mbox *mbox)
 
 	spin_lock(&mbox->lock);
 
-	msg.u64 = readq(mbox->mbox_read_reg);
+	msg.u64 = pete_readq("drivers/net/ethernet/cavium/liquidio/octeon_mailbox.c:43", mbox->mbox_read_reg);
 
 	if ((msg.u64 == OCTEON_PFVFACK) || (msg.u64 == OCTEON_PFVFSIG)) {
 		spin_unlock(&mbox->lock);
@@ -77,7 +77,7 @@ int octeon_mbox_read(struct octeon_mbox *mbox)
 					mbox->mbox_resp.q_no = mbox->q_no;
 					mbox->mbox_resp.recv_len = 1;
 				} else {
-					writeq(OCTEON_PFVFERR,
+					pete_writeq("drivers/net/ethernet/cavium/liquidio/octeon_mailbox.c:80", OCTEON_PFVFERR,
 					       mbox->mbox_read_reg);
 					mbox->state |= OCTEON_MBOX_STATE_ERROR;
 					spin_unlock(&mbox->lock);
@@ -112,7 +112,7 @@ int octeon_mbox_read(struct octeon_mbox *mbox)
 		}
 	}
 
-	writeq(OCTEON_PFVFACK, mbox->mbox_read_reg);
+	pete_writeq("drivers/net/ethernet/cavium/liquidio/octeon_mailbox.c:115", OCTEON_PFVFACK, mbox->mbox_read_reg);
 
 	spin_unlock(&mbox->lock);
 
@@ -160,7 +160,7 @@ int octeon_mbox_write(struct octeon_device *oct,
 
 	count = 0;
 
-	while (readq(mbox->mbox_write_reg) != OCTEON_PFVFSIG) {
+	while (pete_readq("drivers/net/ethernet/cavium/liquidio/octeon_mailbox.c:163", mbox->mbox_write_reg) != OCTEON_PFVFSIG) {
 		schedule_timeout_uninterruptible(timeout);
 		if (count++ == LIO_MBOX_WRITE_WAIT_CNT) {
 			ret = OCTEON_MBOX_STATUS_FAILED;
@@ -169,10 +169,10 @@ int octeon_mbox_write(struct octeon_device *oct,
 	}
 
 	if (ret == OCTEON_MBOX_STATUS_SUCCESS) {
-		writeq(mbox_cmd->msg.u64, mbox->mbox_write_reg);
+		pete_writeq("drivers/net/ethernet/cavium/liquidio/octeon_mailbox.c:172", mbox_cmd->msg.u64, mbox->mbox_write_reg);
 		for (i = 0; i < (u32)(mbox_cmd->msg.s.len - 1); i++) {
 			count = 0;
-			while (readq(mbox->mbox_write_reg) !=
+			while (pete_readq("drivers/net/ethernet/cavium/liquidio/octeon_mailbox.c:175", mbox->mbox_write_reg) !=
 			       OCTEON_PFVFACK) {
 				schedule_timeout_uninterruptible(timeout);
 				if (count++ == LIO_MBOX_WRITE_WAIT_CNT) {
@@ -181,7 +181,7 @@ int octeon_mbox_write(struct octeon_device *oct,
 				}
 			}
 			if (ret == OCTEON_MBOX_STATUS_SUCCESS)
-				writeq(mbox_cmd->data[i], mbox->mbox_write_reg);
+				pete_writeq("drivers/net/ethernet/cavium/liquidio/octeon_mailbox.c:184", mbox_cmd->data[i], mbox->mbox_write_reg);
 			else
 				break;
 		}
@@ -190,7 +190,7 @@ int octeon_mbox_write(struct octeon_device *oct,
 	spin_lock_irqsave(&mbox->lock, flags);
 	if (mbox_cmd->msg.s.type == OCTEON_MBOX_RESPONSE) {
 		mbox->state = OCTEON_MBOX_STATE_IDLE;
-		writeq(OCTEON_PFVFSIG, mbox->mbox_read_reg);
+		pete_writeq("drivers/net/ethernet/cavium/liquidio/octeon_mailbox.c:193", OCTEON_PFVFSIG, mbox->mbox_read_reg);
 	} else {
 		if ((!mbox_cmd->msg.s.resp_needed) ||
 		    (ret == OCTEON_MBOX_STATUS_FAILED)) {
@@ -303,7 +303,7 @@ int octeon_mbox_process_message(struct octeon_mbox *mbox)
 			memcpy(&mbox_cmd, &mbox->mbox_resp,
 			       sizeof(struct octeon_mbox_cmd));
 			mbox->state = OCTEON_MBOX_STATE_IDLE;
-			writeq(OCTEON_PFVFSIG, mbox->mbox_read_reg);
+			pete_writeq("drivers/net/ethernet/cavium/liquidio/octeon_mailbox.c:306", OCTEON_PFVFSIG, mbox->mbox_read_reg);
 			spin_unlock_irqrestore(&mbox->lock, flags);
 			mbox_cmd.recv_status = 1;
 			if (mbox_cmd.fn)
@@ -313,7 +313,7 @@ int octeon_mbox_process_message(struct octeon_mbox *mbox)
 		}
 
 		mbox->state = OCTEON_MBOX_STATE_IDLE;
-		writeq(OCTEON_PFVFSIG, mbox->mbox_read_reg);
+		pete_writeq("drivers/net/ethernet/cavium/liquidio/octeon_mailbox.c:316", OCTEON_PFVFSIG, mbox->mbox_read_reg);
 		spin_unlock_irqrestore(&mbox->lock, flags);
 		return 0;
 	}
@@ -322,7 +322,7 @@ int octeon_mbox_process_message(struct octeon_mbox *mbox)
 		memcpy(&mbox_cmd, &mbox->mbox_resp,
 		       sizeof(struct octeon_mbox_cmd));
 		mbox->state = OCTEON_MBOX_STATE_IDLE;
-		writeq(OCTEON_PFVFSIG, mbox->mbox_read_reg);
+		pete_writeq("drivers/net/ethernet/cavium/liquidio/octeon_mailbox.c:325", OCTEON_PFVFSIG, mbox->mbox_read_reg);
 		spin_unlock_irqrestore(&mbox->lock, flags);
 		mbox_cmd.recv_status = 0;
 		if (mbox_cmd.fn)
@@ -338,7 +338,7 @@ int octeon_mbox_process_message(struct octeon_mbox *mbox)
 			if (!(mbox->state &
 			      OCTEON_MBOX_STATE_RESPONSE_PENDING))
 				mbox->state = OCTEON_MBOX_STATE_IDLE;
-			writeq(OCTEON_PFVFSIG, mbox->mbox_read_reg);
+			pete_writeq("drivers/net/ethernet/cavium/liquidio/octeon_mailbox.c:341", OCTEON_PFVFSIG, mbox->mbox_read_reg);
 		}
 
 		spin_unlock_irqrestore(&mbox->lock, flags);
@@ -368,7 +368,7 @@ int octeon_mbox_cancel(struct octeon_device *oct, int q_no)
 
 	mbox->state = OCTEON_MBOX_STATE_IDLE;
 	memset(mbox_cmd, 0, sizeof(*mbox_cmd));
-	writeq(OCTEON_PFVFSIG, mbox->mbox_read_reg);
+	pete_writeq("drivers/net/ethernet/cavium/liquidio/octeon_mailbox.c:371", OCTEON_PFVFSIG, mbox->mbox_read_reg);
 	spin_unlock_irqrestore(&mbox->lock, flags);
 
 	return 0;

@@ -556,12 +556,12 @@ static void sds_wr(void __iomem *csr_base, u32 indirect_cmd_reg,
 
 	cmd = CFG_IND_WR_CMD_MASK | CFG_IND_CMD_DONE_MASK;
 	cmd = CFG_IND_ADDR_SET(cmd, addr);
-	writel(data, csr_base + indirect_data_reg);
-	readl(csr_base + indirect_data_reg); /* Force a barrier */
-	writel(cmd, csr_base + indirect_cmd_reg);
-	readl(csr_base + indirect_cmd_reg); /* Force a barrier */
+	pete_writel("drivers/phy/phy-xgene.c:559", data, csr_base + indirect_data_reg);
+	pete_readl("drivers/phy/phy-xgene.c:560", csr_base + indirect_data_reg); /* Force a barrier */
+	pete_writel("drivers/phy/phy-xgene.c:561", cmd, csr_base + indirect_cmd_reg);
+	pete_readl("drivers/phy/phy-xgene.c:562", csr_base + indirect_cmd_reg); /* Force a barrier */
 	do {
-		val = readl(csr_base + indirect_cmd_reg);
+		val = pete_readl("drivers/phy/phy-xgene.c:564", csr_base + indirect_cmd_reg);
 	} while (!(val & CFG_IND_CMD_DONE_MASK) &&
 		 time_before(jiffies, deadline));
 	if (!(val & CFG_IND_CMD_DONE_MASK))
@@ -578,13 +578,13 @@ static void sds_rd(void __iomem *csr_base, u32 indirect_cmd_reg,
 
 	cmd = CFG_IND_RD_CMD_MASK | CFG_IND_CMD_DONE_MASK;
 	cmd = CFG_IND_ADDR_SET(cmd, addr);
-	writel(cmd, csr_base + indirect_cmd_reg);
-	readl(csr_base + indirect_cmd_reg); /* Force a barrier */
+	pete_writel("drivers/phy/phy-xgene.c:581", cmd, csr_base + indirect_cmd_reg);
+	pete_readl("drivers/phy/phy-xgene.c:582", csr_base + indirect_cmd_reg); /* Force a barrier */
 	do {
-		val = readl(csr_base + indirect_cmd_reg);
+		val = pete_readl("drivers/phy/phy-xgene.c:584", csr_base + indirect_cmd_reg);
 	} while (!(val & CFG_IND_CMD_DONE_MASK) &&
 		 time_before(jiffies, deadline));
-	*data = readl(csr_base + indirect_data_reg);
+	*data = pete_readl("drivers/phy/phy-xgene.c:587", csr_base + indirect_data_reg);
 	if (!(val & CFG_IND_CMD_DONE_MASK))
 		pr_err("SDS WR timeout at 0x%p offset 0x%08X value 0x%08X\n",
 		       csr_base + indirect_cmd_reg, addr, *data);
@@ -1140,8 +1140,8 @@ static int xgene_phy_cal_rdy_chk(struct xgene_phy_ctx *ctx,
 	u32 val;
 
 	/* Release PHY main reset */
-	writel(0xdf, csr_serdes + SATA_ENET_SDS_RST_CTL);
-	readl(csr_serdes + SATA_ENET_SDS_RST_CTL); /* Force a barrier */
+	pete_writel("drivers/phy/phy-xgene.c:1143", 0xdf, csr_serdes + SATA_ENET_SDS_RST_CTL);
+	pete_readl("drivers/phy/phy-xgene.c:1144", csr_serdes + SATA_ENET_SDS_RST_CTL); /* Force a barrier */
 
 	if (cmu_type != REF_CMU) {
 		cmu_setbits(ctx, cmu_type, CMU_REG5, CMU_REG5_PLL_RESETB_MASK);
@@ -1259,25 +1259,25 @@ static int xgene_phy_hw_init_sata(struct xgene_phy_ctx *ctx,
 	/* Configure the PHY for operation */
 	dev_dbg(ctx->dev, "Reset PHY\n");
 	/* Place PHY into reset */
-	writel(0x0, sds_base + SATA_ENET_SDS_RST_CTL);
-	val = readl(sds_base + SATA_ENET_SDS_RST_CTL);	/* Force a barrier */
+	pete_writel("drivers/phy/phy-xgene.c:1262", 0x0, sds_base + SATA_ENET_SDS_RST_CTL);
+	val = pete_readl("drivers/phy/phy-xgene.c:1263", sds_base + SATA_ENET_SDS_RST_CTL);	/* Force a barrier */
 	/* Release PHY lane from reset (active high) */
-	writel(0x20, sds_base + SATA_ENET_SDS_RST_CTL);
-	readl(sds_base + SATA_ENET_SDS_RST_CTL);	/* Force a barrier */
+	pete_writel("drivers/phy/phy-xgene.c:1265", 0x20, sds_base + SATA_ENET_SDS_RST_CTL);
+	pete_readl("drivers/phy/phy-xgene.c:1266", sds_base + SATA_ENET_SDS_RST_CTL);	/* Force a barrier */
 	/* Release all PHY module out of reset except PHY main reset */
-	writel(0xde, sds_base + SATA_ENET_SDS_RST_CTL);
-	readl(sds_base + SATA_ENET_SDS_RST_CTL);	/* Force a barrier */
+	pete_writel("drivers/phy/phy-xgene.c:1268", 0xde, sds_base + SATA_ENET_SDS_RST_CTL);
+	pete_readl("drivers/phy/phy-xgene.c:1269", sds_base + SATA_ENET_SDS_RST_CTL);	/* Force a barrier */
 
 	/* Set the operation speed */
-	val = readl(sds_base + SATA_ENET_SDS_CTL1);
+	val = pete_readl("drivers/phy/phy-xgene.c:1272", sds_base + SATA_ENET_SDS_CTL1);
 	val = CFG_I_SPD_SEL_CDR_OVR1_SET(val,
 		ctx->sata_param.txspeed[ctx->sata_param.speed[0]]);
-	writel(val, sds_base + SATA_ENET_SDS_CTL1);
+	pete_writel("drivers/phy/phy-xgene.c:1275", val, sds_base + SATA_ENET_SDS_CTL1);
 
 	dev_dbg(ctx->dev, "Set the customer pin mode to SATA\n");
-	val = readl(sds_base + SATA_ENET_SDS_CTL0);
+	val = pete_readl("drivers/phy/phy-xgene.c:1278", sds_base + SATA_ENET_SDS_CTL0);
 	val = REGSPEC_CFG_I_CUSTOMER_PIN_MODE0_SET(val, 0x4421);
-	writel(val, sds_base + SATA_ENET_SDS_CTL0);
+	pete_writel("drivers/phy/phy-xgene.c:1280", val, sds_base + SATA_ENET_SDS_CTL0);
 
 	/* Configure the clock macro unit (CMU) clock type */
 	xgene_phy_cfg_cmu_clk_type(ctx, PHY_CMU, clk_type);
@@ -1293,10 +1293,10 @@ static int xgene_phy_hw_init_sata(struct xgene_phy_ctx *ctx,
 	xgene_phy_sata_cfg_lanes(ctx);
 
 	/* Set Rx/Tx 20-bit */
-	val = readl(sds_base + SATA_ENET_SDS_PCS_CTL0);
+	val = pete_readl("drivers/phy/phy-xgene.c:1296", sds_base + SATA_ENET_SDS_PCS_CTL0);
 	val = REGSPEC_CFG_I_RX_WORDMODE0_SET(val, 0x3);
 	val = REGSPEC_CFG_I_TX_WORDMODE0_SET(val, 0x3);
-	writel(val, sds_base + SATA_ENET_SDS_PCS_CTL0);
+	pete_writel("drivers/phy/phy-xgene.c:1299", val, sds_base + SATA_ENET_SDS_PCS_CTL0);
 
 	/* Start PLL calibration and try for three times */
 	i = 10;

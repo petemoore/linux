@@ -77,7 +77,7 @@ static void fsl_ep_fifo_flush(struct usb_ep *_ep);
  * depending on the version of the chip. In order to be able to run the
  * same kernel binary on 2 different versions of an SoC, the BE/LE decision
  * must be made at run time. _fsl_readl and fsl_writel are pointers to the
- * BE or LE readl() and writel() functions, and fsl_readl() and fsl_writel()
+ * BE or LE pete_readl("drivers/usb/gadget/udc/fsl_udc_core.c:80", ) and pete_writel("drivers/usb/gadget/udc/fsl_udc_core.c:80", ) functions, and fsl_readl() and fsl_writel()
  * call through those pointers. Platform code for SoCs that have BE USB
  * registers should set pdata->big_endian_mmio flag.
  *
@@ -138,8 +138,8 @@ static inline u32 hc32_to_cpu(const u32 x)
 #else /* !CONFIG_PPC32 */
 static inline void fsl_set_accessors(struct fsl_usb2_platform_data *pdata) {}
 
-#define fsl_readl(addr)		readl(addr)
-#define fsl_writel(val32, addr) writel(val32, addr)
+#define fsl_readl(addr)		pete_readl("drivers/usb/gadget/udc/fsl_udc_core.c:141", addr)
+#define fsl_writel(val32, addr) pete_writel("drivers/usb/gadget/udc/fsl_udc_core.c:142", val32, addr)
 #define cpu_to_hc32(x)		cpu_to_le32(x)
 #define hc32_to_cpu(x)		le32_to_cpu(x)
 #endif /* CONFIG_PPC32 */

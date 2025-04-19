@@ -31,7 +31,7 @@ static int sxgbe_mdio_busy_wait(void __iomem *ioaddr, unsigned int mii_data)
 	unsigned long fin_time = jiffies + 3 * HZ; /* 3 seconds */
 
 	while (!time_after(jiffies, fin_time)) {
-		if (!(readl(ioaddr + mii_data) & SXGBE_MII_BUSY))
+		if (!(pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_mdio.c:34", ioaddr + mii_data) & SXGBE_MII_BUSY))
 			return 0;
 		cpu_relax();
 	}
@@ -46,7 +46,7 @@ static void sxgbe_mdio_ctrl_data(struct sxgbe_priv_data *sp, u32 cmd,
 
 	reg |= (cmd << 16) | SXGBE_SMA_SKIP_ADDRFRM |
 	       ((sp->clk_csr & 0x7) << 19) | SXGBE_MII_BUSY;
-	writel(reg, sp->ioaddr + sp->hw->mii.data);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mdio.c:49", reg, sp->ioaddr + sp->hw->mii.data);
 }
 
 static void sxgbe_mdio_c45(struct sxgbe_priv_data *sp, u32 cmd, int phyaddr,
@@ -57,7 +57,7 @@ static void sxgbe_mdio_c45(struct sxgbe_priv_data *sp, u32 cmd, int phyaddr,
 	/* set mdio address register */
 	reg = ((phyreg >> 16) & 0x1f) << 21;
 	reg |= (phyaddr << 16) | (phyreg & 0xffff);
-	writel(reg, sp->ioaddr + sp->hw->mii.addr);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mdio.c:60", reg, sp->ioaddr + sp->hw->mii.addr);
 
 	sxgbe_mdio_ctrl_data(sp, cmd, phydata);
 }
@@ -67,11 +67,11 @@ static void sxgbe_mdio_c22(struct sxgbe_priv_data *sp, u32 cmd, int phyaddr,
 {
 	u32 reg;
 
-	writel(1 << phyaddr, sp->ioaddr + SXGBE_MDIO_CLAUSE22_PORT_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mdio.c:70", 1 << phyaddr, sp->ioaddr + SXGBE_MDIO_CLAUSE22_PORT_REG);
 
 	/* set mdio address register */
 	reg = (phyaddr << 16) | (phyreg & 0x1f);
-	writel(reg, sp->ioaddr + sp->hw->mii.addr);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_mdio.c:74", reg, sp->ioaddr + sp->hw->mii.addr);
 
 	sxgbe_mdio_ctrl_data(sp, cmd, phydata);
 }
@@ -116,7 +116,7 @@ static int sxgbe_mdio_read(struct mii_bus *bus, int phyaddr, int phyreg)
 	if (rc < 0)
 		return rc;
 
-	return readl(priv->ioaddr + priv->hw->mii.data) & 0xffff;
+	return pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_mdio.c:119", priv->ioaddr + priv->hw->mii.data) & 0xffff;
 }
 
 /**

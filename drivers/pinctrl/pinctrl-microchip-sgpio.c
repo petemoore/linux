@@ -140,7 +140,7 @@ static inline u32 sgpio_readl(struct sgpio_priv *priv, u32 rno, u32 off)
 {
 	u32 __iomem *reg = &priv->regs[priv->properties->regoff[rno] + off];
 
-	return readl(reg);
+	return pete_readl("drivers/pinctrl/pinctrl-microchip-sgpio.c:143", reg);
 }
 
 static inline void sgpio_writel(struct sgpio_priv *priv,
@@ -148,19 +148,19 @@ static inline void sgpio_writel(struct sgpio_priv *priv,
 {
 	u32 __iomem *reg = &priv->regs[priv->properties->regoff[rno] + off];
 
-	writel(val, reg);
+	pete_writel("drivers/pinctrl/pinctrl-microchip-sgpio.c:151", val, reg);
 }
 
 static inline void sgpio_clrsetbits(struct sgpio_priv *priv,
 				    u32 rno, u32 off, u32 clear, u32 set)
 {
 	u32 __iomem *reg = &priv->regs[priv->properties->regoff[rno] + off];
-	u32 val = readl(reg);
+	u32 val = pete_readl("drivers/pinctrl/pinctrl-microchip-sgpio.c:158", reg);
 
 	val &= ~clear;
 	val |= set;
 
-	writel(val, reg);
+	pete_writel("drivers/pinctrl/pinctrl-microchip-sgpio.c:163", val, reg);
 }
 
 static inline void sgpio_configure_bitstream(struct sgpio_priv *priv)

@@ -92,8 +92,8 @@ ether1_inw_p (struct net_device *dev, int addr, int svflgs)
 	if (svflgs)
 		local_irq_save (flags);
 
-	writeb(addr >> 12, REG_PAGE);
-	ret = readw(ETHER1_RAM + ((addr & 4095) << 1));
+	pete_writeb("drivers/net/ethernet/i825xx/ether1.c:95", addr >> 12, REG_PAGE);
+	ret = pete_readw("drivers/net/ethernet/i825xx/ether1.c:96", ETHER1_RAM + ((addr & 4095) << 1));
 	if (svflgs)
 		local_irq_restore (flags);
 	return ret;
@@ -107,8 +107,8 @@ ether1_outw_p (struct net_device *dev, unsigned short val, int addr, int svflgs)
 	if (svflgs)
 		local_irq_save (flags);
 
-	writeb(addr >> 12, REG_PAGE);
-	writew(val, ETHER1_RAM + ((addr & 4095) << 1));
+	pete_writeb("drivers/net/ethernet/i825xx/ether1.c:110", addr >> 12, REG_PAGE);
+	pete_writew("drivers/net/ethernet/i825xx/ether1.c:111", val, ETHER1_RAM + ((addr & 4095) << 1));
 	if (svflgs)
 		local_irq_restore (flags);
 }
@@ -140,7 +140,7 @@ ether1_writebuffer (struct net_device *dev, void *data, unsigned int start, unsi
 	do {
 		int used;
 
-		writeb(page, REG_PAGE);
+		pete_writeb("drivers/net/ethernet/i825xx/ether1.c:143", page, REG_PAGE);
 		length -= thislen;
 
 		__asm__ __volatile__(
@@ -203,7 +203,7 @@ ether1_readbuffer (struct net_device *dev, void *data, unsigned int start, unsig
 	do {
 		int used;
 
-		writeb(page, REG_PAGE);
+		pete_writeb("drivers/net/ethernet/i825xx/ether1.c:206", page, REG_PAGE);
 		length -= thislen;
 
 		__asm__ __volatile__(
@@ -298,7 +298,7 @@ ether1_ramtest(struct net_device *dev, unsigned char byte)
 static int
 ether1_reset (struct net_device *dev)
 {
-	writeb(CTRL_RST|CTRL_ACK, REG_CONTROL);
+	pete_writeb("drivers/net/ethernet/i825xx/ether1.c:301", CTRL_RST|CTRL_ACK, REG_CONTROL);
 	return BUS_16;
 }
 
@@ -447,7 +447,7 @@ ether1_init_for_open (struct net_device *dev)
 	int failures = 0;
 	unsigned long timeout;
 
-	writeb(CTRL_RST|CTRL_ACK, REG_CONTROL);
+	pete_writeb("drivers/net/ethernet/i825xx/ether1.c:450", CTRL_RST|CTRL_ACK, REG_CONTROL);
 
 	for (i = 0; i < 6; i++)
 		init_sa.sa_addr[i] = dev->dev_addr[i];
@@ -506,9 +506,9 @@ ether1_init_for_open (struct net_device *dev)
 	/* release reset & give 586 a prod */
 	priv(dev)->resetting = 1;
 	priv(dev)->initialising = 1;
-	writeb(CTRL_RST, REG_CONTROL);
-	writeb(0, REG_CONTROL);
-	writeb(CTRL_CA, REG_CONTROL);
+	pete_writeb("drivers/net/ethernet/i825xx/ether1.c:509", CTRL_RST, REG_CONTROL);
+	pete_writeb("drivers/net/ethernet/i825xx/ether1.c:510", 0, REG_CONTROL);
+	pete_writeb("drivers/net/ethernet/i825xx/ether1.c:511", CTRL_CA, REG_CONTROL);
 
 	/* 586 should now unset iscp.busy */
 	timeout = jiffies + HZ/2;
@@ -756,7 +756,7 @@ again:
 				!= (unsigned short)I82586_NULL) {
 			ether1_writew(dev, SCB_CMDCUCSTART | SCB_CMDRXSTART, SCB_ADDR, scb_t,
 				    scb_command, NORMALIRQS);
-			writeb(CTRL_CA, REG_CONTROL);
+			pete_writeb("drivers/net/ethernet/i825xx/ether1.c:759", CTRL_CA, REG_CONTROL);
 		}
 		priv(dev)->tx_tail = NOP_ADDR;
 		return;
@@ -902,7 +902,7 @@ ether1_interrupt (int irq, void *dev_id)
 	if (status) {
 		ether1_writew(dev, status & (SCB_STRNR | SCB_STCNA | SCB_STFR | SCB_STCX),
 			    SCB_ADDR, scb_t, scb_command, NORMALIRQS);
-		writeb(CTRL_CA | CTRL_ACK, REG_CONTROL);
+		pete_writeb("drivers/net/ethernet/i825xx/ether1.c:905", CTRL_CA | CTRL_ACK, REG_CONTROL);
 		if (status & SCB_STCX) {
 			ether1_xmit_done (dev);
 		}
@@ -914,7 +914,7 @@ ether1_interrupt (int irq, void *dev_id)
 			if (ether1_readw(dev, SCB_ADDR, scb_t, scb_cbl_offset, NORMALIRQS)
 					!= (unsigned short)I82586_NULL) {
 				ether1_writew(dev, SCB_CMDCUCSTART, SCB_ADDR, scb_t, scb_command, NORMALIRQS);
-				writeb(CTRL_CA, REG_CONTROL);
+				pete_writeb("drivers/net/ethernet/i825xx/ether1.c:917", CTRL_CA, REG_CONTROL);
 			}
 			if (priv(dev)->resetting == 2)
 				priv(dev)->resetting = 0;
@@ -926,7 +926,7 @@ ether1_interrupt (int irq, void *dev_id)
 			if (ether1_readw(dev, SCB_ADDR, scb_t, scb_status, NORMALIRQS) & SCB_STRXSUSP) {
 				printk (KERN_WARNING "%s: RU went not ready: RU suspended\n", dev->name);
 				ether1_writew(dev, SCB_CMDRXRESUME, SCB_ADDR, scb_t, scb_command, NORMALIRQS);
-				writeb(CTRL_CA, REG_CONTROL);
+				pete_writeb("drivers/net/ethernet/i825xx/ether1.c:929", CTRL_CA, REG_CONTROL);
 				dev->stats.rx_dropped++;	/* we suspended due to lack of buffer space */
 			} else
 				printk(KERN_WARNING "%s: RU went not ready: %04X\n", dev->name,
@@ -935,7 +935,7 @@ ether1_interrupt (int irq, void *dev_id)
 						NORMALIRQS));
 		}
 	} else
-		writeb(CTRL_ACK, REG_CONTROL);
+		pete_writeb("drivers/net/ethernet/i825xx/ether1.c:938", CTRL_ACK, REG_CONTROL);
 
 	return IRQ_HANDLED;
 }
@@ -1015,7 +1015,7 @@ ether1_probe(struct expansion_card *ec, const struct ecard_id *id)
 	}
 
 	for (i = 0; i < 6; i++)
-		dev->dev_addr[i] = readb(IDPROM_ADDRESS + (i << 2));
+		dev->dev_addr[i] = pete_readb("drivers/net/ethernet/i825xx/ether1.c:1018", IDPROM_ADDRESS + (i << 2));
 
 	if (ether1_init_2(dev)) {
 		ret = -ENODEV;

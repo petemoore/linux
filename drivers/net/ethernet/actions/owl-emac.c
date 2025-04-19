@@ -24,12 +24,12 @@
 
 static u32 owl_emac_reg_read(struct owl_emac_priv *priv, u32 reg)
 {
-	return readl(priv->base + reg);
+	return pete_readl("drivers/net/ethernet/actions/owl-emac.c:27", priv->base + reg);
 }
 
 static void owl_emac_reg_write(struct owl_emac_priv *priv, u32 reg, u32 data)
 {
-	writel(data, priv->base + reg);
+	pete_writel("drivers/net/ethernet/actions/owl-emac.c:32", data, priv->base + reg);
 }
 
 static u32 owl_emac_reg_update(struct owl_emac_priv *priv,

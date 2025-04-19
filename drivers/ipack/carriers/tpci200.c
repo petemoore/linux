@@ -331,7 +331,7 @@ static int tpci200_register(struct tpci200_board *tpci200)
 	 */
 	slot_ctrl = 0;
 	for (i = 0; i < TPCI200_NB_SLOT; i++)
-		writew(slot_ctrl, &tpci200->info->interface_regs->control[i]);
+		pete_writew("drivers/ipack/carriers/tpci200.c:334", slot_ctrl, &tpci200->info->interface_regs->control[i]);
 
 	res = request_irq(tpci200->info->pdev->irq,
 			  tpci200_interrupt, IRQF_SHARED,

@@ -82,7 +82,7 @@ static inline void mss2_init(void) {}
  * These are not preempt-safe.  Locks, if needed, must be taken
  * care of by the caller.
  */
-#define orion5x_setbits(r, mask)	writel(readl(r) | (mask), (r))
-#define orion5x_clrbits(r, mask)	writel(readl(r) & ~(mask), (r))
+#define orion5x_setbits(r, mask)	pete_writel("arch/arm/mach-orion5x/common.h:85", pete_readl("arch/arm/mach-orion5x/common.h:85", r) | (mask), (r))
+#define orion5x_clrbits(r, mask)	pete_writel("arch/arm/mach-orion5x/common.h:86", pete_readl("arch/arm/mach-orion5x/common.h:86", r) & ~(mask), (r))
 
 #endif

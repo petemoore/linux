@@ -37,7 +37,7 @@ static int pt_gpio_request(struct gpio_chip *gc, unsigned offset)
 
 	raw_spin_lock_irqsave(&gc->bgpio_lock, flags);
 
-	using_pins = readl(pt_gpio->reg_base + PT_SYNC_REG);
+	using_pins = pete_readl("drivers/gpio/gpio-amdpt.c:40", pt_gpio->reg_base + PT_SYNC_REG);
 	if (using_pins & BIT(offset)) {
 		dev_warn(gc->parent, "PT GPIO pin %x reconfigured\n",
 			 offset);
@@ -45,7 +45,7 @@ static int pt_gpio_request(struct gpio_chip *gc, unsigned offset)
 		return -EINVAL;
 	}
 
-	writel(using_pins | BIT(offset), pt_gpio->reg_base + PT_SYNC_REG);
+	pete_writel("drivers/gpio/gpio-amdpt.c:48", using_pins | BIT(offset), pt_gpio->reg_base + PT_SYNC_REG);
 
 	raw_spin_unlock_irqrestore(&gc->bgpio_lock, flags);
 
@@ -60,9 +60,9 @@ static void pt_gpio_free(struct gpio_chip *gc, unsigned offset)
 
 	raw_spin_lock_irqsave(&gc->bgpio_lock, flags);
 
-	using_pins = readl(pt_gpio->reg_base + PT_SYNC_REG);
+	using_pins = pete_readl("drivers/gpio/gpio-amdpt.c:63", pt_gpio->reg_base + PT_SYNC_REG);
 	using_pins &= ~BIT(offset);
-	writel(using_pins, pt_gpio->reg_base + PT_SYNC_REG);
+	pete_writel("drivers/gpio/gpio-amdpt.c:65", using_pins, pt_gpio->reg_base + PT_SYNC_REG);
 
 	raw_spin_unlock_irqrestore(&gc->bgpio_lock, flags);
 
@@ -118,8 +118,8 @@ static int pt_gpio_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, pt_gpio);
 
 	/* initialize register setting */
-	writel(0, pt_gpio->reg_base + PT_SYNC_REG);
-	writel(0, pt_gpio->reg_base + PT_CLOCKRATE_REG);
+	pete_writel("drivers/gpio/gpio-amdpt.c:121", 0, pt_gpio->reg_base + PT_SYNC_REG);
+	pete_writel("drivers/gpio/gpio-amdpt.c:122", 0, pt_gpio->reg_base + PT_CLOCKRATE_REG);
 
 	dev_dbg(dev, "PT GPIO driver loaded\n");
 	return ret;

@@ -112,26 +112,26 @@ struct fimc_context {
 
 static u32 fimc_read(struct fimc_context *ctx, u32 reg)
 {
-	return readl(ctx->regs + reg);
+	return pete_readl("drivers/gpu/drm/exynos/exynos_drm_fimc.c:115", ctx->regs + reg);
 }
 
 static void fimc_write(struct fimc_context *ctx, u32 val, u32 reg)
 {
-	writel(val, ctx->regs + reg);
+	pete_writel("drivers/gpu/drm/exynos/exynos_drm_fimc.c:120", val, ctx->regs + reg);
 }
 
 static void fimc_set_bits(struct fimc_context *ctx, u32 reg, u32 bits)
 {
 	void __iomem *r = ctx->regs + reg;
 
-	writel(readl(r) | bits, r);
+	pete_writel("drivers/gpu/drm/exynos/exynos_drm_fimc.c:127", pete_readl("drivers/gpu/drm/exynos/exynos_drm_fimc.c:127", r) | bits, r);
 }
 
 static void fimc_clear_bits(struct fimc_context *ctx, u32 reg, u32 bits)
 {
 	void __iomem *r = ctx->regs + reg;
 
-	writel(readl(r) & ~bits, r);
+	pete_writel("drivers/gpu/drm/exynos/exynos_drm_fimc.c:134", pete_readl("drivers/gpu/drm/exynos/exynos_drm_fimc.c:134", r) & ~bits, r);
 }
 
 static void fimc_sw_reset(struct fimc_context *ctx)

@@ -35,12 +35,12 @@ vb2_to_csi_buffer(const struct vb2_buffer *p)
 
 static void sun4i_csi_capture_start(struct sun4i_csi *csi)
 {
-	writel(CSI_CPT_CTRL_VIDEO_START, csi->regs + CSI_CPT_CTRL_REG);
+	pete_writel("drivers/media/platform/sunxi/sun4i-csi/sun4i_dma.c:38", CSI_CPT_CTRL_VIDEO_START, csi->regs + CSI_CPT_CTRL_REG);
 }
 
 static void sun4i_csi_capture_stop(struct sun4i_csi *csi)
 {
-	writel(0, csi->regs + CSI_CPT_CTRL_REG);
+	pete_writel("drivers/media/platform/sunxi/sun4i-csi/sun4i_dma.c:43", 0, csi->regs + CSI_CPT_CTRL_REG);
 }
 
 static int sun4i_csi_queue_setup(struct vb2_queue *vq,
@@ -100,7 +100,7 @@ static int sun4i_csi_setup_scratch_buffer(struct sun4i_csi *csi,
 		"No more available buffer, using the scratch buffer\n");
 
 	for (plane = 0; plane < csi->fmt.num_planes; plane++) {
-		writel(addr, csi->regs + CSI_BUF_ADDR_REG(plane, slot));
+		pete_writel("drivers/media/platform/sunxi/sun4i-csi/sun4i_dma.c:103", addr, csi->regs + CSI_BUF_ADDR_REG(plane, slot));
 		addr += csi->fmt.plane_fmt[plane].sizeimage;
 	}
 
@@ -135,7 +135,7 @@ static int sun4i_csi_buffer_fill_slot(struct sun4i_csi *csi, unsigned int slot)
 
 		buf_addr = vb2_dma_contig_plane_dma_addr(&v_buf->vb2_buf,
 							 plane);
-		writel(buf_addr, csi->regs + CSI_BUF_ADDR_REG(plane, slot));
+		pete_writel("drivers/media/platform/sunxi/sun4i-csi/sun4i_dma.c:138", buf_addr, csi->regs + CSI_BUF_ADDR_REG(plane, slot));
 	}
 
 	return 0;
@@ -177,7 +177,7 @@ static void sun4i_csi_buffer_mark_done(struct sun4i_csi *csi,
 
 static int sun4i_csi_buffer_flip(struct sun4i_csi *csi, unsigned int sequence)
 {
-	u32 reg = readl(csi->regs + CSI_BUF_CTRL_REG);
+	u32 reg = pete_readl("drivers/media/platform/sunxi/sun4i-csi/sun4i_dma.c:180", csi->regs + CSI_BUF_CTRL_REG);
 	unsigned int next;
 
 	/* Our next buffer is not the current buffer */
@@ -273,9 +273,9 @@ static int sun4i_csi_start_streaming(struct vb2_queue *vq, unsigned int count)
 	spin_lock_irqsave(&csi->qlock, flags);
 
 	/* Setup timings */
-	writel(CSI_WIN_CTRL_W_ACTIVE(csi->fmt.width * 2),
+	pete_writel("drivers/media/platform/sunxi/sun4i-csi/sun4i_dma.c:276", CSI_WIN_CTRL_W_ACTIVE(csi->fmt.width * 2),
 	       csi->regs + CSI_WIN_CTRL_W_REG);
-	writel(CSI_WIN_CTRL_H_ACTIVE(csi->fmt.height),
+	pete_writel("drivers/media/platform/sunxi/sun4i-csi/sun4i_dma.c:278", CSI_WIN_CTRL_H_ACTIVE(csi->fmt.height),
 	       csi->regs + CSI_WIN_CTRL_H_REG);
 
 	/*
@@ -289,7 +289,7 @@ static int sun4i_csi_start_streaming(struct vb2_queue *vq, unsigned int count)
 	href_pol = !!(bus->flags & V4L2_MBUS_HSYNC_ACTIVE_LOW);
 	vref_pol = !!(bus->flags & V4L2_MBUS_VSYNC_ACTIVE_LOW);
 	pclk_pol = !!(bus->flags & V4L2_MBUS_PCLK_SAMPLE_RISING);
-	writel(CSI_CFG_INPUT_FMT(csi_fmt->input) |
+	pete_writel("drivers/media/platform/sunxi/sun4i-csi/sun4i_dma.c:292", CSI_CFG_INPUT_FMT(csi_fmt->input) |
 	       CSI_CFG_OUTPUT_FMT(csi_fmt->output) |
 	       CSI_CFG_VREF_POL(vref_pol) |
 	       CSI_CFG_HREF_POL(href_pol) |
@@ -297,7 +297,7 @@ static int sun4i_csi_start_streaming(struct vb2_queue *vq, unsigned int count)
 	       csi->regs + CSI_CFG_REG);
 
 	/* Setup buffer length */
-	writel(csi->fmt.plane_fmt[0].bytesperline,
+	pete_writel("drivers/media/platform/sunxi/sun4i-csi/sun4i_dma.c:300", csi->fmt.plane_fmt[0].bytesperline,
 	       csi->regs + CSI_BUF_LEN_REG);
 
 	/* Prepare our buffers in hardware */
@@ -308,13 +308,13 @@ static int sun4i_csi_start_streaming(struct vb2_queue *vq, unsigned int count)
 	}
 
 	/* Enable double buffering */
-	writel(CSI_BUF_CTRL_DBE, csi->regs + CSI_BUF_CTRL_REG);
+	pete_writel("drivers/media/platform/sunxi/sun4i-csi/sun4i_dma.c:311", CSI_BUF_CTRL_DBE, csi->regs + CSI_BUF_CTRL_REG);
 
 	/* Clear the pending interrupts */
-	writel(CSI_INT_FRM_DONE, csi->regs + 0x34);
+	pete_writel("drivers/media/platform/sunxi/sun4i-csi/sun4i_dma.c:314", CSI_INT_FRM_DONE, csi->regs + 0x34);
 
 	/* Enable frame done interrupt */
-	writel(CSI_INT_FRM_DONE, csi->regs + CSI_INT_EN_REG);
+	pete_writel("drivers/media/platform/sunxi/sun4i-csi/sun4i_dma.c:317", CSI_INT_FRM_DONE, csi->regs + CSI_INT_EN_REG);
 
 	sun4i_csi_capture_start(csi);
 
@@ -380,10 +380,10 @@ static irqreturn_t sun4i_csi_irq(int irq, void *data)
 	struct sun4i_csi *csi = data;
 	u32 reg;
 
-	reg = readl(csi->regs + CSI_INT_STA_REG);
+	reg = pete_readl("drivers/media/platform/sunxi/sun4i-csi/sun4i_dma.c:383", csi->regs + CSI_INT_STA_REG);
 
 	/* Acknowledge the interrupts */
-	writel(reg, csi->regs + CSI_INT_STA_REG);
+	pete_writel("drivers/media/platform/sunxi/sun4i-csi/sun4i_dma.c:386", reg, csi->regs + CSI_INT_STA_REG);
 
 	if (!(reg & CSI_INT_FRM_DONE))
 		return IRQ_HANDLED;

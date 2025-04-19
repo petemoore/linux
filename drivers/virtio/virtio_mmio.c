@@ -110,12 +110,12 @@ static u64 vm_get_features(struct virtio_device *vdev)
 	struct virtio_mmio_device *vm_dev = to_virtio_mmio_device(vdev);
 	u64 features;
 
-	writel(1, vm_dev->base + VIRTIO_MMIO_DEVICE_FEATURES_SEL);
-	features = readl(vm_dev->base + VIRTIO_MMIO_DEVICE_FEATURES);
+	pete_writel("drivers/virtio/virtio_mmio.c:113", 1, vm_dev->base + VIRTIO_MMIO_DEVICE_FEATURES_SEL);
+	features = pete_readl("drivers/virtio/virtio_mmio.c:114", vm_dev->base + VIRTIO_MMIO_DEVICE_FEATURES);
 	features <<= 32;
 
-	writel(0, vm_dev->base + VIRTIO_MMIO_DEVICE_FEATURES_SEL);
-	features |= readl(vm_dev->base + VIRTIO_MMIO_DEVICE_FEATURES);
+	pete_writel("drivers/virtio/virtio_mmio.c:117", 0, vm_dev->base + VIRTIO_MMIO_DEVICE_FEATURES_SEL);
+	features |= pete_readl("drivers/virtio/virtio_mmio.c:118", vm_dev->base + VIRTIO_MMIO_DEVICE_FEATURES);
 
 	return features;
 }
@@ -134,12 +134,12 @@ static int vm_finalize_features(struct virtio_device *vdev)
 		return -EINVAL;
 	}
 
-	writel(1, vm_dev->base + VIRTIO_MMIO_DRIVER_FEATURES_SEL);
-	writel((u32)(vdev->features >> 32),
+	pete_writel("drivers/virtio/virtio_mmio.c:137", 1, vm_dev->base + VIRTIO_MMIO_DRIVER_FEATURES_SEL);
+	pete_writel("drivers/virtio/virtio_mmio.c:138", (u32)(vdev->features >> 32),
 			vm_dev->base + VIRTIO_MMIO_DRIVER_FEATURES);
 
-	writel(0, vm_dev->base + VIRTIO_MMIO_DRIVER_FEATURES_SEL);
-	writel((u32)vdev->features,
+	pete_writel("drivers/virtio/virtio_mmio.c:141", 0, vm_dev->base + VIRTIO_MMIO_DRIVER_FEATURES_SEL);
+	pete_writel("drivers/virtio/virtio_mmio.c:142", (u32)vdev->features,
 			vm_dev->base + VIRTIO_MMIO_DRIVER_FEATURES);
 
 	return 0;
@@ -159,25 +159,25 @@ static void vm_get(struct virtio_device *vdev, unsigned offset,
 		int i;
 
 		for (i = 0; i < len; i++)
-			ptr[i] = readb(base + offset + i);
+			ptr[i] = pete_readb("drivers/virtio/virtio_mmio.c:162", base + offset + i);
 		return;
 	}
 
 	switch (len) {
 	case 1:
-		b = readb(base + offset);
+		b = pete_readb("drivers/virtio/virtio_mmio.c:168", base + offset);
 		memcpy(buf, &b, sizeof b);
 		break;
 	case 2:
-		w = cpu_to_le16(readw(base + offset));
+		w = cpu_to_le16(pete_readw("drivers/virtio/virtio_mmio.c:172", base + offset));
 		memcpy(buf, &w, sizeof w);
 		break;
 	case 4:
-		l = cpu_to_le32(readl(base + offset));
+		l = cpu_to_le32(pete_readl("drivers/virtio/virtio_mmio.c:176", base + offset));
 		memcpy(buf, &l, sizeof l);
 		break;
 	case 8:
-		l = cpu_to_le32(readl(base + offset));
+		l = cpu_to_le32(pete_readl("drivers/virtio/virtio_mmio.c:180", base + offset));
 		memcpy(buf, &l, sizeof l);
 		l = cpu_to_le32(ioread32(base + offset + sizeof l));
 		memcpy(buf + sizeof l, &l, sizeof l);
@@ -201,7 +201,7 @@ static void vm_set(struct virtio_device *vdev, unsigned offset,
 		int i;
 
 		for (i = 0; i < len; i++)
-			writeb(ptr[i], base + offset + i);
+			pete_writeb("drivers/virtio/virtio_mmio.c:204", ptr[i], base + offset + i);
 
 		return;
 	}
@@ -209,21 +209,21 @@ static void vm_set(struct virtio_device *vdev, unsigned offset,
 	switch (len) {
 	case 1:
 		memcpy(&b, buf, sizeof b);
-		writeb(b, base + offset);
+		pete_writeb("drivers/virtio/virtio_mmio.c:212", b, base + offset);
 		break;
 	case 2:
 		memcpy(&w, buf, sizeof w);
-		writew(le16_to_cpu(w), base + offset);
+		pete_writew("drivers/virtio/virtio_mmio.c:216", le16_to_cpu(w), base + offset);
 		break;
 	case 4:
 		memcpy(&l, buf, sizeof l);
-		writel(le32_to_cpu(l), base + offset);
+		pete_writel("drivers/virtio/virtio_mmio.c:220", le32_to_cpu(l), base + offset);
 		break;
 	case 8:
 		memcpy(&l, buf, sizeof l);
-		writel(le32_to_cpu(l), base + offset);
+		pete_writel("drivers/virtio/virtio_mmio.c:224", le32_to_cpu(l), base + offset);
 		memcpy(&l, buf + sizeof l, sizeof l);
-		writel(le32_to_cpu(l), base + offset + sizeof l);
+		pete_writel("drivers/virtio/virtio_mmio.c:226", le32_to_cpu(l), base + offset + sizeof l);
 		break;
 	default:
 		BUG();
@@ -237,14 +237,14 @@ static u32 vm_generation(struct virtio_device *vdev)
 	if (vm_dev->version == 1)
 		return 0;
 	else
-		return readl(vm_dev->base + VIRTIO_MMIO_CONFIG_GENERATION);
+		return pete_readl("drivers/virtio/virtio_mmio.c:240", vm_dev->base + VIRTIO_MMIO_CONFIG_GENERATION);
 }
 
 static u8 vm_get_status(struct virtio_device *vdev)
 {
 	struct virtio_mmio_device *vm_dev = to_virtio_mmio_device(vdev);
 
-	return readl(vm_dev->base + VIRTIO_MMIO_STATUS) & 0xff;
+	return pete_readl("drivers/virtio/virtio_mmio.c:247", vm_dev->base + VIRTIO_MMIO_STATUS) & 0xff;
 }
 
 static void vm_set_status(struct virtio_device *vdev, u8 status)
@@ -254,7 +254,7 @@ static void vm_set_status(struct virtio_device *vdev, u8 status)
 	/* We should never be setting status to 0. */
 	BUG_ON(status == 0);
 
-	writel(status, vm_dev->base + VIRTIO_MMIO_STATUS);
+	pete_writel("drivers/virtio/virtio_mmio.c:257", status, vm_dev->base + VIRTIO_MMIO_STATUS);
 }
 
 static void vm_reset(struct virtio_device *vdev)
@@ -262,7 +262,7 @@ static void vm_reset(struct virtio_device *vdev)
 	struct virtio_mmio_device *vm_dev = to_virtio_mmio_device(vdev);
 
 	/* 0 status means a reset. */
-	writel(0, vm_dev->base + VIRTIO_MMIO_STATUS);
+	pete_writel("drivers/virtio/virtio_mmio.c:265", 0, vm_dev->base + VIRTIO_MMIO_STATUS);
 }
 
 
@@ -276,7 +276,7 @@ static bool vm_notify(struct virtqueue *vq)
 
 	/* We write the queue's selector into the notification register to
 	 * signal the other end */
-	writel(vq->index, vm_dev->base + VIRTIO_MMIO_QUEUE_NOTIFY);
+	pete_writel("drivers/virtio/virtio_mmio.c:279", vq->index, vm_dev->base + VIRTIO_MMIO_QUEUE_NOTIFY);
 	return true;
 }
 
@@ -290,8 +290,8 @@ static irqreturn_t vm_interrupt(int irq, void *opaque)
 	irqreturn_t ret = IRQ_NONE;
 
 	/* Read and acknowledge interrupts */
-	status = readl(vm_dev->base + VIRTIO_MMIO_INTERRUPT_STATUS);
-	writel(status, vm_dev->base + VIRTIO_MMIO_INTERRUPT_ACK);
+	status = pete_readl("drivers/virtio/virtio_mmio.c:293", vm_dev->base + VIRTIO_MMIO_INTERRUPT_STATUS);
+	pete_writel("drivers/virtio/virtio_mmio.c:294", status, vm_dev->base + VIRTIO_MMIO_INTERRUPT_ACK);
 
 	if (unlikely(status & VIRTIO_MMIO_INT_CONFIG)) {
 		virtio_config_changed(&vm_dev->vdev);
@@ -322,12 +322,12 @@ static void vm_del_vq(struct virtqueue *vq)
 	spin_unlock_irqrestore(&vm_dev->lock, flags);
 
 	/* Select and deactivate the queue */
-	writel(index, vm_dev->base + VIRTIO_MMIO_QUEUE_SEL);
+	pete_writel("drivers/virtio/virtio_mmio.c:325", index, vm_dev->base + VIRTIO_MMIO_QUEUE_SEL);
 	if (vm_dev->version == 1) {
-		writel(0, vm_dev->base + VIRTIO_MMIO_QUEUE_PFN);
+		pete_writel("drivers/virtio/virtio_mmio.c:327", 0, vm_dev->base + VIRTIO_MMIO_QUEUE_PFN);
 	} else {
-		writel(0, vm_dev->base + VIRTIO_MMIO_QUEUE_READY);
-		WARN_ON(readl(vm_dev->base + VIRTIO_MMIO_QUEUE_READY));
+		pete_writel("drivers/virtio/virtio_mmio.c:329", 0, vm_dev->base + VIRTIO_MMIO_QUEUE_READY);
+		WARN_ON(pete_readl("drivers/virtio/virtio_mmio.c:330", vm_dev->base + VIRTIO_MMIO_QUEUE_READY));
 	}
 
 	vring_del_virtqueue(vq);
@@ -361,10 +361,10 @@ static struct virtqueue *vm_setup_vq(struct virtio_device *vdev, unsigned index,
 		return NULL;
 
 	/* Select the queue we're interested in */
-	writel(index, vm_dev->base + VIRTIO_MMIO_QUEUE_SEL);
+	pete_writel("drivers/virtio/virtio_mmio.c:364", index, vm_dev->base + VIRTIO_MMIO_QUEUE_SEL);
 
 	/* Queue shouldn't already be set up. */
-	if (readl(vm_dev->base + (vm_dev->version == 1 ?
+	if (pete_readl("drivers/virtio/virtio_mmio.c:367", vm_dev->base + (vm_dev->version == 1 ?
 			VIRTIO_MMIO_QUEUE_PFN : VIRTIO_MMIO_QUEUE_READY))) {
 		err = -ENOENT;
 		goto error_available;
@@ -377,7 +377,7 @@ static struct virtqueue *vm_setup_vq(struct virtio_device *vdev, unsigned index,
 		goto error_kmalloc;
 	}
 
-	num = readl(vm_dev->base + VIRTIO_MMIO_QUEUE_NUM_MAX);
+	num = pete_readl("drivers/virtio/virtio_mmio.c:380", vm_dev->base + VIRTIO_MMIO_QUEUE_NUM_MAX);
 	if (num == 0) {
 		err = -ENOENT;
 		goto error_new_virtqueue;
@@ -392,7 +392,7 @@ static struct virtqueue *vm_setup_vq(struct virtio_device *vdev, unsigned index,
 	}
 
 	/* Activate the queue */
-	writel(virtqueue_get_vring_size(vq), vm_dev->base + VIRTIO_MMIO_QUEUE_NUM);
+	pete_writel("drivers/virtio/virtio_mmio.c:395", virtqueue_get_vring_size(vq), vm_dev->base + VIRTIO_MMIO_QUEUE_NUM);
 	if (vm_dev->version == 1) {
 		u64 q_pfn = virtqueue_get_desc_addr(vq) >> PAGE_SHIFT;
 
@@ -409,27 +409,27 @@ static struct virtqueue *vm_setup_vq(struct virtio_device *vdev, unsigned index,
 			goto error_bad_pfn;
 		}
 
-		writel(PAGE_SIZE, vm_dev->base + VIRTIO_MMIO_QUEUE_ALIGN);
-		writel(q_pfn, vm_dev->base + VIRTIO_MMIO_QUEUE_PFN);
+		pete_writel("drivers/virtio/virtio_mmio.c:412", PAGE_SIZE, vm_dev->base + VIRTIO_MMIO_QUEUE_ALIGN);
+		pete_writel("drivers/virtio/virtio_mmio.c:413", q_pfn, vm_dev->base + VIRTIO_MMIO_QUEUE_PFN);
 	} else {
 		u64 addr;
 
 		addr = virtqueue_get_desc_addr(vq);
-		writel((u32)addr, vm_dev->base + VIRTIO_MMIO_QUEUE_DESC_LOW);
-		writel((u32)(addr >> 32),
+		pete_writel("drivers/virtio/virtio_mmio.c:418", (u32)addr, vm_dev->base + VIRTIO_MMIO_QUEUE_DESC_LOW);
+		pete_writel("drivers/virtio/virtio_mmio.c:419", (u32)(addr >> 32),
 				vm_dev->base + VIRTIO_MMIO_QUEUE_DESC_HIGH);
 
 		addr = virtqueue_get_avail_addr(vq);
-		writel((u32)addr, vm_dev->base + VIRTIO_MMIO_QUEUE_AVAIL_LOW);
-		writel((u32)(addr >> 32),
+		pete_writel("drivers/virtio/virtio_mmio.c:423", (u32)addr, vm_dev->base + VIRTIO_MMIO_QUEUE_AVAIL_LOW);
+		pete_writel("drivers/virtio/virtio_mmio.c:424", (u32)(addr >> 32),
 				vm_dev->base + VIRTIO_MMIO_QUEUE_AVAIL_HIGH);
 
 		addr = virtqueue_get_used_addr(vq);
-		writel((u32)addr, vm_dev->base + VIRTIO_MMIO_QUEUE_USED_LOW);
-		writel((u32)(addr >> 32),
+		pete_writel("drivers/virtio/virtio_mmio.c:428", (u32)addr, vm_dev->base + VIRTIO_MMIO_QUEUE_USED_LOW);
+		pete_writel("drivers/virtio/virtio_mmio.c:429", (u32)(addr >> 32),
 				vm_dev->base + VIRTIO_MMIO_QUEUE_USED_HIGH);
 
-		writel(1, vm_dev->base + VIRTIO_MMIO_QUEUE_READY);
+		pete_writel("drivers/virtio/virtio_mmio.c:432", 1, vm_dev->base + VIRTIO_MMIO_QUEUE_READY);
 	}
 
 	vq->priv = info;
@@ -445,10 +445,10 @@ error_bad_pfn:
 	vring_del_virtqueue(vq);
 error_new_virtqueue:
 	if (vm_dev->version == 1) {
-		writel(0, vm_dev->base + VIRTIO_MMIO_QUEUE_PFN);
+		pete_writel("drivers/virtio/virtio_mmio.c:448", 0, vm_dev->base + VIRTIO_MMIO_QUEUE_PFN);
 	} else {
-		writel(0, vm_dev->base + VIRTIO_MMIO_QUEUE_READY);
-		WARN_ON(readl(vm_dev->base + VIRTIO_MMIO_QUEUE_READY));
+		pete_writel("drivers/virtio/virtio_mmio.c:450", 0, vm_dev->base + VIRTIO_MMIO_QUEUE_READY);
+		WARN_ON(pete_readl("drivers/virtio/virtio_mmio.c:451", vm_dev->base + VIRTIO_MMIO_QUEUE_READY));
 	}
 	kfree(info);
 error_kmalloc:
@@ -506,11 +506,11 @@ static bool vm_get_shm_region(struct virtio_device *vdev,
 	u64 len, addr;
 
 	/* Select the region we're interested in */
-	writel(id, vm_dev->base + VIRTIO_MMIO_SHM_SEL);
+	pete_writel("drivers/virtio/virtio_mmio.c:509", id, vm_dev->base + VIRTIO_MMIO_SHM_SEL);
 
 	/* Read the region size */
-	len = (u64) readl(vm_dev->base + VIRTIO_MMIO_SHM_LEN_LOW);
-	len |= (u64) readl(vm_dev->base + VIRTIO_MMIO_SHM_LEN_HIGH) << 32;
+	len = (u64) pete_readl("drivers/virtio/virtio_mmio.c:512", vm_dev->base + VIRTIO_MMIO_SHM_LEN_LOW);
+	len |= (u64) pete_readl("drivers/virtio/virtio_mmio.c:513", vm_dev->base + VIRTIO_MMIO_SHM_LEN_HIGH) << 32;
 
 	region->len = len;
 
@@ -521,8 +521,8 @@ static bool vm_get_shm_region(struct virtio_device *vdev,
 		return false;
 
 	/* Read the region base address */
-	addr = (u64) readl(vm_dev->base + VIRTIO_MMIO_SHM_BASE_LOW);
-	addr |= (u64) readl(vm_dev->base + VIRTIO_MMIO_SHM_BASE_HIGH) << 32;
+	addr = (u64) pete_readl("drivers/virtio/virtio_mmio.c:524", vm_dev->base + VIRTIO_MMIO_SHM_BASE_LOW);
+	addr |= (u64) pete_readl("drivers/virtio/virtio_mmio.c:525", vm_dev->base + VIRTIO_MMIO_SHM_BASE_HIGH) << 32;
 
 	region->addr = addr;
 
@@ -557,7 +557,7 @@ static int virtio_mmio_restore(struct device *dev)
 	struct virtio_mmio_device *vm_dev = dev_get_drvdata(dev);
 
 	if (vm_dev->version == 1)
-		writel(PAGE_SIZE, vm_dev->base + VIRTIO_MMIO_GUEST_PAGE_SIZE);
+		pete_writel("drivers/virtio/virtio_mmio.c:560", PAGE_SIZE, vm_dev->base + VIRTIO_MMIO_GUEST_PAGE_SIZE);
 
 	return virtio_device_restore(&vm_dev->vdev);
 }
@@ -601,21 +601,21 @@ static int virtio_mmio_probe(struct platform_device *pdev)
 		return PTR_ERR(vm_dev->base);
 
 	/* Check magic value */
-	magic = readl(vm_dev->base + VIRTIO_MMIO_MAGIC_VALUE);
+	magic = pete_readl("drivers/virtio/virtio_mmio.c:604", vm_dev->base + VIRTIO_MMIO_MAGIC_VALUE);
 	if (magic != ('v' | 'i' << 8 | 'r' << 16 | 't' << 24)) {
 		dev_warn(&pdev->dev, "Wrong magic value 0x%08lx!\n", magic);
 		return -ENODEV;
 	}
 
 	/* Check device version */
-	vm_dev->version = readl(vm_dev->base + VIRTIO_MMIO_VERSION);
+	vm_dev->version = pete_readl("drivers/virtio/virtio_mmio.c:611", vm_dev->base + VIRTIO_MMIO_VERSION);
 	if (vm_dev->version < 1 || vm_dev->version > 2) {
 		dev_err(&pdev->dev, "Version %ld not supported!\n",
 				vm_dev->version);
 		return -ENXIO;
 	}
 
-	vm_dev->vdev.id.device = readl(vm_dev->base + VIRTIO_MMIO_DEVICE_ID);
+	vm_dev->vdev.id.device = pete_readl("drivers/virtio/virtio_mmio.c:618", vm_dev->base + VIRTIO_MMIO_DEVICE_ID);
 	if (vm_dev->vdev.id.device == 0) {
 		/*
 		 * virtio-mmio device with an ID 0 is a (dummy) placeholder
@@ -623,10 +623,10 @@ static int virtio_mmio_probe(struct platform_device *pdev)
 		 */
 		return -ENODEV;
 	}
-	vm_dev->vdev.id.vendor = readl(vm_dev->base + VIRTIO_MMIO_VENDOR_ID);
+	vm_dev->vdev.id.vendor = pete_readl("drivers/virtio/virtio_mmio.c:626", vm_dev->base + VIRTIO_MMIO_VENDOR_ID);
 
 	if (vm_dev->version == 1) {
-		writel(PAGE_SIZE, vm_dev->base + VIRTIO_MMIO_GUEST_PAGE_SIZE);
+		pete_writel("drivers/virtio/virtio_mmio.c:629", PAGE_SIZE, vm_dev->base + VIRTIO_MMIO_GUEST_PAGE_SIZE);
 
 		rc = dma_set_mask(&pdev->dev, DMA_BIT_MASK(64));
 		/*

@@ -94,12 +94,12 @@ void rga_buf_map(struct vb2_buffer *vb);
 /* RGA Hardware */
 static inline void rga_write(struct rockchip_rga *rga, u32 reg, u32 value)
 {
-	writel(value, rga->regs + reg);
+	pete_writel("drivers/media/platform/rockchip/rga/rga.h:97", value, rga->regs + reg);
 };
 
 static inline u32 rga_read(struct rockchip_rga *rga, u32 reg)
 {
-	return readl(rga->regs + reg);
+	return pete_readl("drivers/media/platform/rockchip/rga/rga.h:102", rga->regs + reg);
 };
 
 static inline void rga_mod(struct rockchip_rga *rga, u32 reg, u32 val, u32 mask)

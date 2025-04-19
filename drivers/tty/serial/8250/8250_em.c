@@ -29,20 +29,20 @@ static void serial8250_em_serial_out(struct uart_port *p, int offset, int value)
 {
 	switch (offset) {
 	case UART_TX: /* TX @ 0x00 */
-		writeb(value, p->membase);
+		pete_writeb("drivers/tty/serial/8250/8250_em.c:32", value, p->membase);
 		break;
 	case UART_FCR: /* FCR @ 0x0c (+1) */
 	case UART_LCR: /* LCR @ 0x10 (+1) */
 	case UART_MCR: /* MCR @ 0x14 (+1) */
 	case UART_SCR: /* SCR @ 0x20 (+1) */
-		writel(value, p->membase + ((offset + 1) << 2));
+		pete_writel("drivers/tty/serial/8250/8250_em.c:38", value, p->membase + ((offset + 1) << 2));
 		break;
 	case UART_IER: /* IER @ 0x04 */
 		value &= 0x0f; /* only 4 valid bits - not Xscale */
 		fallthrough;
 	case UART_DLL_EM: /* DLL @ 0x24 (+9) */
 	case UART_DLM_EM: /* DLM @ 0x28 (+9) */
-		writel(value, p->membase + (offset << 2));
+		pete_writel("drivers/tty/serial/8250/8250_em.c:45", value, p->membase + (offset << 2));
 	}
 }
 
@@ -50,17 +50,17 @@ static unsigned int serial8250_em_serial_in(struct uart_port *p, int offset)
 {
 	switch (offset) {
 	case UART_RX: /* RX @ 0x00 */
-		return readb(p->membase);
+		return pete_readb("drivers/tty/serial/8250/8250_em.c:53", p->membase);
 	case UART_MCR: /* MCR @ 0x14 (+1) */
 	case UART_LSR: /* LSR @ 0x18 (+1) */
 	case UART_MSR: /* MSR @ 0x1c (+1) */
 	case UART_SCR: /* SCR @ 0x20 (+1) */
-		return readl(p->membase + ((offset + 1) << 2));
+		return pete_readl("drivers/tty/serial/8250/8250_em.c:58", p->membase + ((offset + 1) << 2));
 	case UART_IER: /* IER @ 0x04 */
 	case UART_IIR: /* IIR @ 0x08 */
 	case UART_DLL_EM: /* DLL @ 0x24 (+9) */
 	case UART_DLM_EM: /* DLM @ 0x28 (+9) */
-		return readl(p->membase + (offset << 2));
+		return pete_readl("drivers/tty/serial/8250/8250_em.c:63", p->membase + (offset << 2));
 	}
 	return 0;
 }

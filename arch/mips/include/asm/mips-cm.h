@@ -336,7 +336,7 @@ static inline int mips_cm_l2sync(void)
 	if (!mips_cm_has_l2sync())
 		return -ENODEV;
 
-	writel(0, mips_cm_l2sync_base);
+	pete_writel("arch/mips/include/asm/mips-cm.h:339", 0, mips_cm_l2sync_base);
 	return 0;
 }
 

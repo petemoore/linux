@@ -48,11 +48,11 @@ static int clk_fixup_mux_set_parent(struct clk_hw *hw, u8 index)
 
 	spin_lock_irqsave(mux->lock, flags);
 
-	val = readl(mux->reg);
+	val = pete_readl("drivers/clk/imx/clk-fixup-mux.c:51", mux->reg);
 	val &= ~(mux->mask << mux->shift);
 	val |= index << mux->shift;
 	fixup_mux->fixup(&val);
-	writel(val, mux->reg);
+	pete_writel("drivers/clk/imx/clk-fixup-mux.c:55", val, mux->reg);
 
 	spin_unlock_irqrestore(mux->lock, flags);
 

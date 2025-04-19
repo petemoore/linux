@@ -1924,7 +1924,7 @@ static void radeon_reinitialize_M10(struct radeonfb_info *rinfo)
 
 	/* write some stuff to the framebuffer... */
 	for (i = 0; i < 0x8000; ++i)
-		writeb(0, rinfo->fb_base + i);
+		pete_writeb("drivers/video/fbdev/aty/radeon_pm.c:1927", 0, rinfo->fb_base + i);
 
 	mdelay(40);
 	OUTREG(LVDS_GEN_CNTL, INREG(LVDS_GEN_CNTL) | LVDS_DIGON | LVDS_ON);
@@ -2172,7 +2172,7 @@ static void radeon_reinitialize_M9P(struct radeonfb_info *rinfo)
 
 	/* write some stuff to the framebuffer... */
 	for (i = 0; i < 0x8000; ++i)
-		writeb(0, rinfo->fb_base + i);
+		pete_writeb("drivers/video/fbdev/aty/radeon_pm.c:2175", 0, rinfo->fb_base + i);
 
 	OUTREG(0x2ec, 0x6332a020);
 	OUTPLL(pllSSPLL_REF_DIV, rinfo->save_regs[44] /*0x3f */);

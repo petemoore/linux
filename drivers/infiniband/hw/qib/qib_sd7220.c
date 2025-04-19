@@ -1066,14 +1066,14 @@ static int qib_sd_setvals(struct qib_devdata *dd)
 	dds_reg_map = DDS_REG_MAP;
 	for (idx = 0; idx < NUM_DDS_REGS; ++idx) {
 		data = ((dds_reg_map & 0xF) << 4) | TX_FAST_ELT;
-		writeq(data, iaddr + idx);
+		pete_writeq("drivers/infiniband/hw/qib/qib_sd7220.c:1069", data, iaddr + idx);
 		qib_read_kreg32(dd, kr_scratch);
 		dds_reg_map >>= 4;
 		for (midx = 0; midx < DDS_ROWS; ++midx) {
 			u64 __iomem *daddr = taddr + ((midx << 4) + idx);
 
 			data = dds_init_vals[midx].reg_vals[idx];
-			writeq(data, daddr);
+			pete_writeq("drivers/infiniband/hw/qib/qib_sd7220.c:1076", data, daddr);
 			qib_read_kreg32(dd, kr_scratch);
 		} /* End inner for (vals for this reg, each row) */
 	} /* end outer for (regs to be stored) */
@@ -1094,12 +1094,12 @@ static int qib_sd_setvals(struct qib_devdata *dd)
 		/* didx is offset by min_idx to address RXEQ range of regs */
 		didx = idx + min_idx;
 		/* Store the next RXEQ register address */
-		writeq(rxeq_init_vals[idx].rdesc, iaddr + didx);
+		pete_writeq("drivers/infiniband/hw/qib/qib_sd7220.c:1097", rxeq_init_vals[idx].rdesc, iaddr + didx);
 		qib_read_kreg32(dd, kr_scratch);
 		/* Iterate through RXEQ values */
 		for (vidx = 0; vidx < 4; vidx++) {
 			data = rxeq_init_vals[idx].rdata[vidx];
-			writeq(data, taddr + (vidx << 6) + idx);
+			pete_writeq("drivers/infiniband/hw/qib/qib_sd7220.c:1102", data, taddr + (vidx << 6) + idx);
 			qib_read_kreg32(dd, kr_scratch);
 		}
 	} /* end outer for (Reg-writes for RXEQ) */

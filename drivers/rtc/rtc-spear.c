@@ -88,9 +88,9 @@ static inline void spear_rtc_clear_interrupt(struct spear_rtc_config *config)
 	unsigned long flags;
 
 	spin_lock_irqsave(&config->lock, flags);
-	val = readl(config->ioaddr + STATUS_REG);
+	val = pete_readl("drivers/rtc/rtc-spear.c:91", config->ioaddr + STATUS_REG);
 	val |= RTC_INT_MASK;
-	writel(val, config->ioaddr + STATUS_REG);
+	pete_writel("drivers/rtc/rtc-spear.c:93", val, config->ioaddr + STATUS_REG);
 	spin_unlock_irqrestore(&config->lock, flags);
 }
 
@@ -98,11 +98,11 @@ static inline void spear_rtc_enable_interrupt(struct spear_rtc_config *config)
 {
 	unsigned int val;
 
-	val = readl(config->ioaddr + CTRL_REG);
+	val = pete_readl("drivers/rtc/rtc-spear.c:101", config->ioaddr + CTRL_REG);
 	if (!(val & INT_ENABLE)) {
 		spear_rtc_clear_interrupt(config);
 		val |= INT_ENABLE;
-		writel(val, config->ioaddr + CTRL_REG);
+		pete_writel("drivers/rtc/rtc-spear.c:105", val, config->ioaddr + CTRL_REG);
 	}
 }
 
@@ -110,10 +110,10 @@ static inline void spear_rtc_disable_interrupt(struct spear_rtc_config *config)
 {
 	unsigned int val;
 
-	val = readl(config->ioaddr + CTRL_REG);
+	val = pete_readl("drivers/rtc/rtc-spear.c:113", config->ioaddr + CTRL_REG);
 	if (val & INT_ENABLE) {
 		val &= ~INT_ENABLE;
-		writel(val, config->ioaddr + CTRL_REG);
+		pete_writel("drivers/rtc/rtc-spear.c:116", val, config->ioaddr + CTRL_REG);
 	}
 }
 
@@ -123,7 +123,7 @@ static inline int is_write_complete(struct spear_rtc_config *config)
 	unsigned long flags;
 
 	spin_lock_irqsave(&config->lock, flags);
-	if ((readl(config->ioaddr + STATUS_REG)) & STATUS_FAIL)
+	if ((pete_readl("drivers/rtc/rtc-spear.c:126", config->ioaddr + STATUS_REG)) & STATUS_FAIL)
 		ret = -EIO;
 	spin_unlock_irqrestore(&config->lock, flags);
 
@@ -138,7 +138,7 @@ static void rtc_wait_not_busy(struct spear_rtc_config *config)
 	/* Assuming BUSY may stay active for 80 msec) */
 	for (count = 0; count < 80; count++) {
 		spin_lock_irqsave(&config->lock, flags);
-		status = readl(config->ioaddr + STATUS_REG);
+		status = pete_readl("drivers/rtc/rtc-spear.c:141", config->ioaddr + STATUS_REG);
 		spin_unlock_irqrestore(&config->lock, flags);
 		if ((status & STATUS_BUSY) == 0)
 			break;
@@ -154,7 +154,7 @@ static irqreturn_t spear_rtc_irq(int irq, void *dev_id)
 	unsigned int irq_data;
 
 	spin_lock(&config->lock);
-	irq_data = readl(config->ioaddr + STATUS_REG);
+	irq_data = pete_readl("drivers/rtc/rtc-spear.c:157", config->ioaddr + STATUS_REG);
 	spin_unlock(&config->lock);
 
 	if ((irq_data & RTC_INT_MASK)) {
@@ -204,8 +204,8 @@ static int spear_rtc_read_time(struct device *dev, struct rtc_time *tm)
 	/* we don't report wday/yday/isdst ... */
 	rtc_wait_not_busy(config);
 
-	time = readl(config->ioaddr + TIME_REG);
-	date = readl(config->ioaddr + DATE_REG);
+	time = pete_readl("drivers/rtc/rtc-spear.c:207", config->ioaddr + TIME_REG);
+	date = pete_readl("drivers/rtc/rtc-spear.c:208", config->ioaddr + DATE_REG);
 	tm->tm_sec = (time >> SECOND_SHIFT) & SECOND_MASK;
 	tm->tm_min = (time >> MINUTE_SHIFT) & MIN_MASK;
 	tm->tm_hour = (time >> HOUR_SHIFT) & HOUR_MASK;
@@ -237,8 +237,8 @@ static int spear_rtc_set_time(struct device *dev, struct rtc_time *tm)
 		(tm->tm_hour << HOUR_SHIFT);
 	date = (tm->tm_mday << MDAY_SHIFT) | (tm->tm_mon << MONTH_SHIFT) |
 		(tm->tm_year << YEAR_SHIFT);
-	writel(time, config->ioaddr + TIME_REG);
-	writel(date, config->ioaddr + DATE_REG);
+	pete_writel("drivers/rtc/rtc-spear.c:240", time, config->ioaddr + TIME_REG);
+	pete_writel("drivers/rtc/rtc-spear.c:241", date, config->ioaddr + DATE_REG);
 
 	return is_write_complete(config);
 }
@@ -258,8 +258,8 @@ static int spear_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alm)
 
 	rtc_wait_not_busy(config);
 
-	time = readl(config->ioaddr + ALARM_TIME_REG);
-	date = readl(config->ioaddr + ALARM_DATE_REG);
+	time = pete_readl("drivers/rtc/rtc-spear.c:261", config->ioaddr + ALARM_TIME_REG);
+	date = pete_readl("drivers/rtc/rtc-spear.c:262", config->ioaddr + ALARM_DATE_REG);
 	alm->time.tm_sec = (time >> SECOND_SHIFT) & SECOND_MASK;
 	alm->time.tm_min = (time >> MINUTE_SHIFT) & MIN_MASK;
 	alm->time.tm_hour = (time >> HOUR_SHIFT) & HOUR_MASK;
@@ -268,7 +268,7 @@ static int spear_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alm)
 	alm->time.tm_year = (date >> YEAR_SHIFT) & YEAR_MASK;
 
 	bcd2tm(&alm->time);
-	alm->enabled = readl(config->ioaddr + CTRL_REG) & INT_ENABLE;
+	alm->enabled = pete_readl("drivers/rtc/rtc-spear.c:271", config->ioaddr + CTRL_REG) & INT_ENABLE;
 
 	return 0;
 }
@@ -296,8 +296,8 @@ static int spear_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alm)
 	date = (alm->time.tm_mday << MDAY_SHIFT) | (alm->time.tm_mon <<
 			MONTH_SHIFT) | (alm->time.tm_year << YEAR_SHIFT);
 
-	writel(time, config->ioaddr + ALARM_TIME_REG);
-	writel(date, config->ioaddr + ALARM_DATE_REG);
+	pete_writel("drivers/rtc/rtc-spear.c:299", time, config->ioaddr + ALARM_TIME_REG);
+	pete_writel("drivers/rtc/rtc-spear.c:300", date, config->ioaddr + ALARM_DATE_REG);
 	err = is_write_complete(config);
 	if (err < 0)
 		return err;

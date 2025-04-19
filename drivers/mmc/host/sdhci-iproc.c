@@ -42,7 +42,7 @@ struct sdhci_iproc_host {
 
 static inline u32 sdhci_iproc_readl(struct sdhci_host *host, int reg)
 {
-	u32 val = readl(host->ioaddr + reg);
+	u32 val = pete_readl("drivers/mmc/host/sdhci-iproc.c:45", host->ioaddr + reg);
 
 	pr_debug("%s: readl [0x%02x] 0x%08x\n",
 		 mmc_hostname(host->mmc), reg, val);
@@ -82,7 +82,7 @@ static inline void sdhci_iproc_writel(struct sdhci_host *host, u32 val, int reg)
 	pr_debug("%s: writel [0x%02x] 0x%08x\n",
 		 mmc_hostname(host->mmc), reg, val);
 
-	writel(val, host->ioaddr + reg);
+	pete_writel("drivers/mmc/host/sdhci-iproc.c:85", val, host->ioaddr + reg);
 
 	if (host->clock <= 400000) {
 		/* Round up to micro-second four SD clock delay */

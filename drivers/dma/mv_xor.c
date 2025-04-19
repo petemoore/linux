@@ -158,7 +158,7 @@ static void mv_chan_activate(struct mv_xor_chan *chan)
 	dev_dbg(mv_chan_to_devp(chan), " activate chan.\n");
 
 	/* writel ensures all descriptors are flushed before activation */
-	writel(BIT(0), XOR_ACTIVATION(chan));
+	pete_writel("drivers/dma/mv_xor.c:161", BIT(0), XOR_ACTIVATION(chan));
 }
 
 static char mv_chan_is_busy(struct mv_xor_chan *chan)
@@ -528,16 +528,16 @@ static int mv_xor_add_io_win(struct mv_xor_chan *mv_chan, u32 addr)
 	 * Reading one of both enabled register is enough, as they are always
 	 * programmed to the identical values
 	 */
-	win_enable = readl(base + WINDOW_BAR_ENABLE(0));
+	win_enable = pete_readl("drivers/dma/mv_xor.c:531", base + WINDOW_BAR_ENABLE(0));
 
 	/* Set 'i' to the first free window to write the new values to */
 	i = ffs(~win_enable) - 1;
 	if (i >= WINDOW_COUNT)
 		return -ENOMEM;
 
-	writel((addr & 0xffff0000) | (attr << 8) | target,
+	pete_writel("drivers/dma/mv_xor.c:538", (addr & 0xffff0000) | (attr << 8) | target,
 	       base + WINDOW_BASE(i));
-	writel(size & 0xffff0000, base + WINDOW_SIZE(i));
+	pete_writel("drivers/dma/mv_xor.c:540", size & 0xffff0000, base + WINDOW_SIZE(i));
 
 	/* Fill the caching variables for later use */
 	xordev->win_start[i] = addr;
@@ -545,8 +545,8 @@ static int mv_xor_add_io_win(struct mv_xor_chan *mv_chan, u32 addr)
 
 	win_enable |= (1 << i);
 	win_enable |= 3 << (16 + (2 * i));
-	writel(win_enable, base + WINDOW_BAR_ENABLE(0));
-	writel(win_enable, base + WINDOW_BAR_ENABLE(1));
+	pete_writel("drivers/dma/mv_xor.c:548", win_enable, base + WINDOW_BAR_ENABLE(0));
+	pete_writel("drivers/dma/mv_xor.c:549", win_enable, base + WINDOW_BAR_ENABLE(1));
 
 	return 0;
 }
@@ -1167,19 +1167,19 @@ mv_xor_conf_mbus_windows(struct mv_xor_device *xordev,
 	int i;
 
 	for (i = 0; i < 8; i++) {
-		writel(0, base + WINDOW_BASE(i));
-		writel(0, base + WINDOW_SIZE(i));
+		pete_writel("drivers/dma/mv_xor.c:1170", 0, base + WINDOW_BASE(i));
+		pete_writel("drivers/dma/mv_xor.c:1171", 0, base + WINDOW_SIZE(i));
 		if (i < 4)
-			writel(0, base + WINDOW_REMAP_HIGH(i));
+			pete_writel("drivers/dma/mv_xor.c:1173", 0, base + WINDOW_REMAP_HIGH(i));
 	}
 
 	for (i = 0; i < dram->num_cs; i++) {
 		const struct mbus_dram_window *cs = dram->cs + i;
 
-		writel((cs->base & 0xffff0000) |
+		pete_writel("drivers/dma/mv_xor.c:1179", (cs->base & 0xffff0000) |
 		       (cs->mbus_attr << 8) |
 		       dram->mbus_dram_target_id, base + WINDOW_BASE(i));
-		writel((cs->size - 1) & 0xffff0000, base + WINDOW_SIZE(i));
+		pete_writel("drivers/dma/mv_xor.c:1182", (cs->size - 1) & 0xffff0000, base + WINDOW_SIZE(i));
 
 		/* Fill the caching variables for later use */
 		xordev->win_start[i] = cs->base;
@@ -1189,10 +1189,10 @@ mv_xor_conf_mbus_windows(struct mv_xor_device *xordev,
 		win_enable |= 3 << (16 + (2 * i));
 	}
 
-	writel(win_enable, base + WINDOW_BAR_ENABLE(0));
-	writel(win_enable, base + WINDOW_BAR_ENABLE(1));
-	writel(0, base + WINDOW_OVERRIDE_CTRL(0));
-	writel(0, base + WINDOW_OVERRIDE_CTRL(1));
+	pete_writel("drivers/dma/mv_xor.c:1192", win_enable, base + WINDOW_BAR_ENABLE(0));
+	pete_writel("drivers/dma/mv_xor.c:1193", win_enable, base + WINDOW_BAR_ENABLE(1));
+	pete_writel("drivers/dma/mv_xor.c:1194", 0, base + WINDOW_OVERRIDE_CTRL(0));
+	pete_writel("drivers/dma/mv_xor.c:1195", 0, base + WINDOW_OVERRIDE_CTRL(1));
 }
 
 static void
@@ -1203,23 +1203,23 @@ mv_xor_conf_mbus_windows_a3700(struct mv_xor_device *xordev)
 	int i;
 
 	for (i = 0; i < 8; i++) {
-		writel(0, base + WINDOW_BASE(i));
-		writel(0, base + WINDOW_SIZE(i));
+		pete_writel("drivers/dma/mv_xor.c:1206", 0, base + WINDOW_BASE(i));
+		pete_writel("drivers/dma/mv_xor.c:1207", 0, base + WINDOW_SIZE(i));
 		if (i < 4)
-			writel(0, base + WINDOW_REMAP_HIGH(i));
+			pete_writel("drivers/dma/mv_xor.c:1209", 0, base + WINDOW_REMAP_HIGH(i));
 	}
 	/*
 	 * For Armada3700 open default 4GB Mbus window. The dram
 	 * related configuration are done at AXIS level.
 	 */
-	writel(0xffff0000, base + WINDOW_SIZE(0));
+	pete_writel("drivers/dma/mv_xor.c:1215", 0xffff0000, base + WINDOW_SIZE(0));
 	win_enable |= 1;
 	win_enable |= 3 << 16;
 
-	writel(win_enable, base + WINDOW_BAR_ENABLE(0));
-	writel(win_enable, base + WINDOW_BAR_ENABLE(1));
-	writel(0, base + WINDOW_OVERRIDE_CTRL(0));
-	writel(0, base + WINDOW_OVERRIDE_CTRL(1));
+	pete_writel("drivers/dma/mv_xor.c:1219", win_enable, base + WINDOW_BAR_ENABLE(0));
+	pete_writel("drivers/dma/mv_xor.c:1220", win_enable, base + WINDOW_BAR_ENABLE(1));
+	pete_writel("drivers/dma/mv_xor.c:1221", 0, base + WINDOW_OVERRIDE_CTRL(0));
+	pete_writel("drivers/dma/mv_xor.c:1222", 0, base + WINDOW_OVERRIDE_CTRL(1));
 }
 
 /*

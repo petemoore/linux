@@ -65,9 +65,9 @@ static void uniphier_pciephy_testio_write(struct uniphier_pciephy_priv *priv,
 					  u32 data)
 {
 	/* need to read TESTO twice after accessing TESTI */
-	writel(data, priv->base + PCL_PHY_TEST_I);
-	readl(priv->base + PCL_PHY_TEST_O);
-	readl(priv->base + PCL_PHY_TEST_O);
+	pete_writel("drivers/phy/socionext/phy-uniphier-pcie.c:68", data, priv->base + PCL_PHY_TEST_I);
+	pete_readl("drivers/phy/socionext/phy-uniphier-pcie.c:69", priv->base + PCL_PHY_TEST_O);
+	pete_readl("drivers/phy/socionext/phy-uniphier-pcie.c:70", priv->base + PCL_PHY_TEST_O);
 }
 
 static void uniphier_pciephy_set_param(struct uniphier_pciephy_priv *priv,
@@ -79,7 +79,7 @@ static void uniphier_pciephy_set_param(struct uniphier_pciephy_priv *priv,
 	val  = FIELD_PREP(TESTI_DAT_MASK, 1);
 	val |= FIELD_PREP(TESTI_ADR_MASK, reg);
 	uniphier_pciephy_testio_write(priv, val);
-	val = readl(priv->base + PCL_PHY_TEST_O) & TESTO_DAT_MASK;
+	val = pete_readl("drivers/phy/socionext/phy-uniphier-pcie.c:82", priv->base + PCL_PHY_TEST_O) & TESTO_DAT_MASK;
 
 	/* update value */
 	val &= ~mask;
@@ -94,26 +94,26 @@ static void uniphier_pciephy_set_param(struct uniphier_pciephy_priv *priv,
 	val  = FIELD_PREP(TESTI_DAT_MASK, 1);
 	val |= FIELD_PREP(TESTI_ADR_MASK, reg);
 	uniphier_pciephy_testio_write(priv, val);
-	readl(priv->base + PCL_PHY_TEST_O);
+	pete_readl("drivers/phy/socionext/phy-uniphier-pcie.c:97", priv->base + PCL_PHY_TEST_O);
 }
 
 static void uniphier_pciephy_assert(struct uniphier_pciephy_priv *priv)
 {
 	u32 val;
 
-	val = readl(priv->base + PCL_PHY_RESET);
+	val = pete_readl("drivers/phy/socionext/phy-uniphier-pcie.c:104", priv->base + PCL_PHY_RESET);
 	val &= ~PCL_PHY_RESET_N;
 	val |= PCL_PHY_RESET_N_MNMODE;
-	writel(val, priv->base + PCL_PHY_RESET);
+	pete_writel("drivers/phy/socionext/phy-uniphier-pcie.c:107", val, priv->base + PCL_PHY_RESET);
 }
 
 static void uniphier_pciephy_deassert(struct uniphier_pciephy_priv *priv)
 {
 	u32 val;
 
-	val = readl(priv->base + PCL_PHY_RESET);
+	val = pete_readl("drivers/phy/socionext/phy-uniphier-pcie.c:114", priv->base + PCL_PHY_RESET);
 	val |= PCL_PHY_RESET_N_MNMODE | PCL_PHY_RESET_N;
-	writel(val, priv->base + PCL_PHY_RESET);
+	pete_writel("drivers/phy/socionext/phy-uniphier-pcie.c:116", val, priv->base + PCL_PHY_RESET);
 }
 
 static int uniphier_pciephy_init(struct phy *phy)
@@ -139,10 +139,10 @@ static int uniphier_pciephy_init(struct phy *phy)
 		goto out_rst_assert;
 
 	/* support only 1 port */
-	val = readl(priv->base + PCL_PHY_CLKCTRL);
+	val = pete_readl("drivers/phy/socionext/phy-uniphier-pcie.c:142", priv->base + PCL_PHY_CLKCTRL);
 	val &= ~PORT_SEL_MASK;
 	val |= PORT_SEL_1;
-	writel(val, priv->base + PCL_PHY_CLKCTRL);
+	pete_writel("drivers/phy/socionext/phy-uniphier-pcie.c:145", val, priv->base + PCL_PHY_CLKCTRL);
 
 	/* legacy controller doesn't have phy_reset and parameters */
 	if (priv->data->is_legacy)

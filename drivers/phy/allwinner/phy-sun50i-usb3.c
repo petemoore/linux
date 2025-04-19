@@ -62,27 +62,27 @@ static void sun50i_usb3_phy_open(struct sun50i_usb3_phy *phy)
 {
 	u32 val;
 
-	val = readl(phy->regs + SUNXI_PHY_EXTERNAL_CONTROL);
+	val = pete_readl("drivers/phy/allwinner/phy-sun50i-usb3.c:65", phy->regs + SUNXI_PHY_EXTERNAL_CONTROL);
 	val |= SUNXI_PEC_EXTERN_VBUS;
 	val |= SUNXI_PEC_SSC_EN | SUNXI_PEC_REF_SSP_EN;
-	writel(val, phy->regs + SUNXI_PHY_EXTERNAL_CONTROL);
+	pete_writel("drivers/phy/allwinner/phy-sun50i-usb3.c:68", val, phy->regs + SUNXI_PHY_EXTERNAL_CONTROL);
 
-	val = readl(phy->regs + SUNXI_PIPE_CLOCK_CONTROL);
+	val = pete_readl("drivers/phy/allwinner/phy-sun50i-usb3.c:70", phy->regs + SUNXI_PIPE_CLOCK_CONTROL);
 	val |= SUNXI_PCC_PIPE_CLK_OPEN;
-	writel(val, phy->regs + SUNXI_PIPE_CLOCK_CONTROL);
+	pete_writel("drivers/phy/allwinner/phy-sun50i-usb3.c:72", val, phy->regs + SUNXI_PIPE_CLOCK_CONTROL);
 
-	val = readl(phy->regs + SUNXI_ISCR);
+	val = pete_readl("drivers/phy/allwinner/phy-sun50i-usb3.c:74", phy->regs + SUNXI_ISCR);
 	val |= SUNXI_ISCR_FORCE_VBUS;
-	writel(val, phy->regs + SUNXI_ISCR);
+	pete_writel("drivers/phy/allwinner/phy-sun50i-usb3.c:76", val, phy->regs + SUNXI_ISCR);
 
 	/*
 	 * All the magic numbers written to the PHY_TUNE_{LOW_HIGH}
 	 * registers are directly taken from the BSP USB3 driver from
 	 * Allwiner.
 	 */
-	writel(0x0047fc87, phy->regs + SUNXI_PHY_TUNE_LOW);
+	pete_writel("drivers/phy/allwinner/phy-sun50i-usb3.c:83", 0x0047fc87, phy->regs + SUNXI_PHY_TUNE_LOW);
 
-	val = readl(phy->regs + SUNXI_PHY_TUNE_HIGH);
+	val = pete_readl("drivers/phy/allwinner/phy-sun50i-usb3.c:85", phy->regs + SUNXI_PHY_TUNE_HIGH);
 	val &= ~(SUNXI_TXVBOOSTLVL_MASK | SUNXI_LOS_BIAS_MASK |
 		 SUNXI_TX_SWING_FULL_MASK | SUNXI_TX_DEEMPH_6GB_MASK |
 		 SUNXI_TX_DEEMPH_3P5DB_MASK);
@@ -91,7 +91,7 @@ static void sun50i_usb3_phy_open(struct sun50i_usb3_phy *phy)
 	val |= SUNXI_TX_SWING_FULL(0x55);
 	val |= SUNXI_TX_DEEMPH_6DB(0x20);
 	val |= SUNXI_TX_DEEMPH_3P5DB(0x15);
-	writel(val, phy->regs + SUNXI_PHY_TUNE_HIGH);
+	pete_writel("drivers/phy/allwinner/phy-sun50i-usb3.c:94", val, phy->regs + SUNXI_PHY_TUNE_HIGH);
 }
 
 static int sun50i_usb3_phy_init(struct phy *_phy)

@@ -65,13 +65,13 @@ const char *sti_mixer_to_str(struct sti_mixer *mixer)
 
 static inline u32 sti_mixer_reg_read(struct sti_mixer *mixer, u32 reg_id)
 {
-	return readl(mixer->regs + reg_id);
+	return pete_readl("drivers/gpu/drm/sti/sti_mixer.c:68", mixer->regs + reg_id);
 }
 
 static inline void sti_mixer_reg_write(struct sti_mixer *mixer,
 				       u32 reg_id, u32 val)
 {
-	writel(val, mixer->regs + reg_id);
+	pete_writel("drivers/gpu/drm/sti/sti_mixer.c:74", val, mixer->regs + reg_id);
 }
 
 #define DBGFS_DUMP(reg) seq_printf(s, "\n  %-25s 0x%08X", #reg, \
@@ -142,7 +142,7 @@ static void mixer_dbg_mxn(struct seq_file *s, void *addr)
 	int i;
 
 	for (i = 1; i < 8; i++)
-		seq_printf(s, "-0x%08X", (int)readl(addr + i * 4));
+		seq_printf(s, "-0x%08X", (int)pete_readl("drivers/gpu/drm/sti/sti_mixer.c:145", addr + i * 4));
 }
 
 static int mixer_dbg_show(struct seq_file *s, void *arg)

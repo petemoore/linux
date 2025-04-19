@@ -160,7 +160,7 @@ void vnic_wq_init_start(struct vnic_wq *wq, unsigned int cq_index,
 	unsigned int count = wq->ring.desc_count;
 
 	paddr = (u64)wq->ring.base_addr | VNIC_PADDR_TARGET;
-	writeq(paddr, &wq->ctrl->ring_base);
+	pete_writeq("drivers/scsi/snic/vnic_wq.c:163", paddr, &wq->ctrl->ring_base);
 	iowrite32(count, &wq->ctrl->ring_size);
 	iowrite32(fetch_index, &wq->ctrl->fetch_index);
 	iowrite32(posted_index, &wq->ctrl->posted_index);

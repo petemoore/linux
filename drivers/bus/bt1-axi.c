@@ -221,9 +221,9 @@ static ssize_t inject_error_store(struct device *dev,
 	 * by this driver.
 	 */
 	if (sysfs_streq(data, "bus"))
-		readb(axi->qos_regs);
+		pete_readb("drivers/bus/bt1-axi.c:224", axi->qos_regs);
 	else if (sysfs_streq(data, "unaligned"))
-		writeb(0, axi->qos_regs);
+		pete_writeb("drivers/bus/bt1-axi.c:226", 0, axi->qos_regs);
 	else
 		return -EINVAL;
 

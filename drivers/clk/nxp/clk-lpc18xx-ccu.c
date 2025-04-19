@@ -143,7 +143,7 @@ static int lpc18xx_ccu_gate_endisable(struct clk_hw *hw, bool enable)
 	 * Divider field is write only, so divider stat field must
 	 * be read so divider field can be set accordingly.
 	 */
-	val = readl(gate->reg);
+	val = pete_readl("drivers/clk/nxp/clk-lpc18xx-ccu.c:146", gate->reg);
 	if (val & LPC18XX_CCU_DIVSTAT)
 		val |= LPC18XX_CCU_DIV;
 
@@ -156,12 +156,12 @@ static int lpc18xx_ccu_gate_endisable(struct clk_hw *hw, bool enable)
 		 * and the next write should clear the RUN bit.
 		 */
 		val |= LPC18XX_CCU_AUTO;
-		writel(val, gate->reg);
+		pete_writel("drivers/clk/nxp/clk-lpc18xx-ccu.c:159", val, gate->reg);
 
 		val &= ~LPC18XX_CCU_RUN;
 	}
 
-	writel(val, gate->reg);
+	pete_writel("drivers/clk/nxp/clk-lpc18xx-ccu.c:164", val, gate->reg);
 
 	return 0;
 }

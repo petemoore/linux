@@ -71,10 +71,10 @@ static int keembay_clk_enable(struct device *dev, struct clk *clk)
 static __always_inline void keembay_pwm_update_bits(struct keembay_pwm *priv, u32 mask,
 					   u32 val, u32 offset)
 {
-	u32 buff = readl(priv->base + offset);
+	u32 buff = pete_readl("drivers/pwm/pwm-keembay.c:74", priv->base + offset);
 
 	buff = u32_replace_bits(buff, val, mask);
-	writel(buff, priv->base + offset);
+	pete_writel("drivers/pwm/pwm-keembay.c:77", buff, priv->base + offset);
 }
 
 static void keembay_pwm_enable(struct keembay_pwm *priv, int ch)
@@ -100,14 +100,14 @@ static void keembay_pwm_get_state(struct pwm_chip *chip, struct pwm_device *pwm,
 	clk_rate = clk_get_rate(priv->clk);
 
 	/* Read channel enabled status */
-	highlow = readl(priv->base + KMB_PWM_LEADIN_OFFSET(pwm->hwpwm));
+	highlow = pete_readl("drivers/pwm/pwm-keembay.c:103", priv->base + KMB_PWM_LEADIN_OFFSET(pwm->hwpwm));
 	if (highlow & KMB_PWM_EN_BIT)
 		state->enabled = true;
 	else
 		state->enabled = false;
 
 	/* Read period and duty cycle */
-	highlow = readl(priv->base + KMB_PWM_HIGHLOW_OFFSET(pwm->hwpwm));
+	highlow = pete_readl("drivers/pwm/pwm-keembay.c:110", priv->base + KMB_PWM_HIGHLOW_OFFSET(pwm->hwpwm));
 	low = FIELD_GET(KMB_PWM_LOW_MASK, highlow) * NSEC_PER_SEC;
 	high = FIELD_GET(KMB_PWM_HIGH_MASK, highlow) * NSEC_PER_SEC;
 	state->duty_cycle = DIV_ROUND_UP_ULL(high, clk_rate);
@@ -167,7 +167,7 @@ static int keembay_pwm_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 	pwm_count = FIELD_PREP(KMB_PWM_HIGH_MASK, high) |
 		    FIELD_PREP(KMB_PWM_LOW_MASK, low);
 
-	writel(pwm_count, priv->base + KMB_PWM_HIGHLOW_OFFSET(pwm->hwpwm));
+	pete_writel("drivers/pwm/pwm-keembay.c:170", pwm_count, priv->base + KMB_PWM_HIGHLOW_OFFSET(pwm->hwpwm));
 
 	if (state->enabled && !current_state.enabled)
 		keembay_pwm_enable(priv, pwm->hwpwm);

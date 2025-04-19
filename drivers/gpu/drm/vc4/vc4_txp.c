@@ -144,8 +144,8 @@
 /* Number of lines received and committed to memory. */
 #define TXP_PROGRESS		0x10
 
-#define TXP_READ(offset) readl(txp->regs + (offset))
-#define TXP_WRITE(offset, val) writel(val, txp->regs + (offset))
+#define TXP_READ(offset) pete_readl("drivers/gpu/drm/vc4/vc4_txp.c:147", txp->regs + (offset))
+#define TXP_WRITE(offset, val) pete_writel("drivers/gpu/drm/vc4/vc4_txp.c:148", val, txp->regs + (offset))
 
 struct vc4_txp {
 	struct vc4_crtc	base;

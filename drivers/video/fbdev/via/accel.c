@@ -16,7 +16,7 @@ static int viafb_set_bpp(void __iomem *engine, u8 bpp)
 
 	/* Preserve the reserved bits */
 	/* Lowest 2 bits to zero gives us no rotation */
-	gemode = readl(engine + VIA_REG_GEMODE) & 0xfffffcfc;
+	gemode = pete_readl("drivers/video/fbdev/via/accel.c:19", engine + VIA_REG_GEMODE) & 0xfffffcfc;
 	switch (bpp) {
 	case 8:
 		gemode |= VIA_GEM_8bpp;
@@ -31,7 +31,7 @@ static int viafb_set_bpp(void __iomem *engine, u8 bpp)
 		printk(KERN_WARNING "viafb_set_bpp: Unsupported bpp %d\n", bpp);
 		return -EINVAL;
 	}
-	writel(gemode, engine + VIA_REG_GEMODE);
+	pete_writel("drivers/video/fbdev/via/accel.c:34", gemode, engine + VIA_REG_GEMODE);
 	return 0;
 }
 
@@ -88,7 +88,7 @@ static int hw_bitblt_1(void __iomem *engine, u8 op, u32 width, u32 height,
 			return -EINVAL;
 		}
 		tmp = src_x | (src_y << 16);
-		writel(tmp, engine + 0x08);
+		pete_writel("drivers/video/fbdev/via/accel.c:91", tmp, engine + 0x08);
 	}
 
 	if (dst_x & 0xFFFFF000 || dst_y & 0xFFFFF000) {
@@ -97,7 +97,7 @@ static int hw_bitblt_1(void __iomem *engine, u8 op, u32 width, u32 height,
 		return -EINVAL;
 	}
 	tmp = dst_x | (dst_y << 16);
-	writel(tmp, engine + 0x0C);
+	pete_writel("drivers/video/fbdev/via/accel.c:100", tmp, engine + 0x0C);
 
 	if ((width - 1) & 0xFFFFF000 || (height - 1) & 0xFFFFF000) {
 		printk(KERN_WARNING "hw_bitblt_1: Unsupported width/height "
@@ -105,13 +105,13 @@ static int hw_bitblt_1(void __iomem *engine, u8 op, u32 width, u32 height,
 		return -EINVAL;
 	}
 	tmp = (width - 1) | ((height - 1) << 16);
-	writel(tmp, engine + 0x10);
+	pete_writel("drivers/video/fbdev/via/accel.c:108", tmp, engine + 0x10);
 
 	if (op != VIA_BITBLT_COLOR)
-		writel(fg_color, engine + 0x18);
+		pete_writel("drivers/video/fbdev/via/accel.c:111", fg_color, engine + 0x18);
 
 	if (op == VIA_BITBLT_MONO)
-		writel(bg_color, engine + 0x1C);
+		pete_writel("drivers/video/fbdev/via/accel.c:114", bg_color, engine + 0x1C);
 
 	if (op != VIA_BITBLT_FILL) {
 		tmp = src_mem ? 0 : src_addr;
@@ -121,7 +121,7 @@ static int hw_bitblt_1(void __iomem *engine, u8 op, u32 width, u32 height,
 			return -EINVAL;
 		}
 		tmp >>= 3;
-		writel(tmp, engine + 0x30);
+		pete_writel("drivers/video/fbdev/via/accel.c:124", tmp, engine + 0x30);
 	}
 
 	if (dst_addr & 0xE0000007) {
@@ -130,7 +130,7 @@ static int hw_bitblt_1(void __iomem *engine, u8 op, u32 width, u32 height,
 		return -EINVAL;
 	}
 	tmp = dst_addr >> 3;
-	writel(tmp, engine + 0x34);
+	pete_writel("drivers/video/fbdev/via/accel.c:133", tmp, engine + 0x34);
 
 	if (op == VIA_BITBLT_FILL)
 		tmp = 0;
@@ -142,7 +142,7 @@ static int hw_bitblt_1(void __iomem *engine, u8 op, u32 width, u32 height,
 		return -EINVAL;
 	}
 	tmp = VIA_PITCH_ENABLE | (tmp >> 3) | (dst_pitch << (16 - 3));
-	writel(tmp, engine + 0x38);
+	pete_writel("drivers/video/fbdev/via/accel.c:145", tmp, engine + 0x38);
 
 	if (op == VIA_BITBLT_FILL)
 		ge_cmd |= fill_rop << 24 | 0x00002000 | 0x00000001;
@@ -155,7 +155,7 @@ static int hw_bitblt_1(void __iomem *engine, u8 op, u32 width, u32 height,
 		else
 			ge_cmd |= 0x00000001;
 	}
-	writel(ge_cmd, engine);
+	pete_writel("drivers/video/fbdev/via/accel.c:158", ge_cmd, engine);
 
 	if (op == VIA_BITBLT_FILL || !src_mem)
 		return 0;
@@ -164,7 +164,7 @@ static int hw_bitblt_1(void __iomem *engine, u8 op, u32 width, u32 height,
 		3) >> 2;
 
 	for (i = 0; i < tmp; i++)
-		writel(src_mem[i], engine + VIA_MMIO_BLTBASE);
+		pete_writel("drivers/video/fbdev/via/accel.c:167", src_mem[i], engine + VIA_MMIO_BLTBASE);
 
 	return 0;
 }
@@ -223,7 +223,7 @@ static int hw_bitblt_2(void __iomem *engine, u8 op, u32 width, u32 height,
 		return -EINVAL;
 	}
 	tmp = (tmp >> 3) | (dst_pitch << (16 - 3));
-	writel(tmp, engine + 0x08);
+	pete_writel("drivers/video/fbdev/via/accel.c:226", tmp, engine + 0x08);
 
 	if ((width - 1) & 0xFFFFF000 || (height - 1) & 0xFFFFF000) {
 		printk(KERN_WARNING "hw_bitblt_2: Unsupported width/height "
@@ -231,7 +231,7 @@ static int hw_bitblt_2(void __iomem *engine, u8 op, u32 width, u32 height,
 		return -EINVAL;
 	}
 	tmp = (width - 1) | ((height - 1) << 16);
-	writel(tmp, engine + 0x0C);
+	pete_writel("drivers/video/fbdev/via/accel.c:234", tmp, engine + 0x0C);
 
 	if (dst_x & 0xFFFFF000 || dst_y & 0xFFFFF000) {
 		printk(KERN_WARNING "hw_bitblt_2: Unsupported destination x/y "
@@ -239,7 +239,7 @@ static int hw_bitblt_2(void __iomem *engine, u8 op, u32 width, u32 height,
 		return -EINVAL;
 	}
 	tmp = dst_x | (dst_y << 16);
-	writel(tmp, engine + 0x10);
+	pete_writel("drivers/video/fbdev/via/accel.c:242", tmp, engine + 0x10);
 
 	if (dst_addr & 0xE0000007) {
 		printk(KERN_WARNING "hw_bitblt_2: Unsupported destination "
@@ -247,7 +247,7 @@ static int hw_bitblt_2(void __iomem *engine, u8 op, u32 width, u32 height,
 		return -EINVAL;
 	}
 	tmp = dst_addr >> 3;
-	writel(tmp, engine + 0x14);
+	pete_writel("drivers/video/fbdev/via/accel.c:250", tmp, engine + 0x14);
 
 	if (op != VIA_BITBLT_FILL) {
 		if (src_x & (op == VIA_BITBLT_MONO ? 0xFFFF8000 : 0xFFFFF000)
@@ -257,7 +257,7 @@ static int hw_bitblt_2(void __iomem *engine, u8 op, u32 width, u32 height,
 			return -EINVAL;
 		}
 		tmp = src_x | (src_y << 16);
-		writel(tmp, engine + 0x18);
+		pete_writel("drivers/video/fbdev/via/accel.c:260", tmp, engine + 0x18);
 
 		tmp = src_mem ? 0 : src_addr;
 		if (dst_addr & 0xE0000007) {
@@ -266,14 +266,14 @@ static int hw_bitblt_2(void __iomem *engine, u8 op, u32 width, u32 height,
 			return -EINVAL;
 		}
 		tmp >>= 3;
-		writel(tmp, engine + 0x1C);
+		pete_writel("drivers/video/fbdev/via/accel.c:269", tmp, engine + 0x1C);
 	}
 
 	if (op == VIA_BITBLT_FILL) {
-		writel(fg_color, engine + 0x58);
+		pete_writel("drivers/video/fbdev/via/accel.c:273", fg_color, engine + 0x58);
 	} else if (op == VIA_BITBLT_MONO) {
-		writel(fg_color, engine + 0x4C);
-		writel(bg_color, engine + 0x50);
+		pete_writel("drivers/video/fbdev/via/accel.c:275", fg_color, engine + 0x4C);
+		pete_writel("drivers/video/fbdev/via/accel.c:276", bg_color, engine + 0x50);
 	}
 
 	if (op == VIA_BITBLT_FILL)
@@ -287,7 +287,7 @@ static int hw_bitblt_2(void __iomem *engine, u8 op, u32 width, u32 height,
 		else
 			ge_cmd |= 0x00000001;
 	}
-	writel(ge_cmd, engine);
+	pete_writel("drivers/video/fbdev/via/accel.c:290", ge_cmd, engine);
 
 	if (op == VIA_BITBLT_FILL || !src_mem)
 		return 0;
@@ -296,7 +296,7 @@ static int hw_bitblt_2(void __iomem *engine, u8 op, u32 width, u32 height,
 		3) >> 2;
 
 	for (i = 0; i < tmp; i++)
-		writel(src_mem[i], engine + VIA_MMIO_BLTBASE);
+		pete_writel("drivers/video/fbdev/via/accel.c:299", src_mem[i], engine + VIA_MMIO_BLTBASE);
 
 	return 0;
 }
@@ -381,7 +381,7 @@ void viafb_reset_engine(struct viafb_par *viapar)
 		break;
 	}
 	for (i = 0; i <= highest_reg; i += 4)
-		writel(0x0, engine + i);
+		pete_writel("drivers/video/fbdev/via/accel.c:384", 0x0, engine + i);
 
 	/* Init AGP and VQ regs */
 	switch (chip_name) {
@@ -390,24 +390,24 @@ void viafb_reset_engine(struct viafb_par *viapar)
 	case UNICHROME_VX800:
 	case UNICHROME_VX855:
 	case UNICHROME_VX900:
-		writel(0x00100000, engine + VIA_REG_CR_TRANSET);
-		writel(0x680A0000, engine + VIA_REG_CR_TRANSPACE);
-		writel(0x02000000, engine + VIA_REG_CR_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:393", 0x00100000, engine + VIA_REG_CR_TRANSET);
+		pete_writel("drivers/video/fbdev/via/accel.c:394", 0x680A0000, engine + VIA_REG_CR_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:395", 0x02000000, engine + VIA_REG_CR_TRANSPACE);
 		break;
 
 	default:
-		writel(0x00100000, engine + VIA_REG_TRANSET);
-		writel(0x00000000, engine + VIA_REG_TRANSPACE);
-		writel(0x00333004, engine + VIA_REG_TRANSPACE);
-		writel(0x60000000, engine + VIA_REG_TRANSPACE);
-		writel(0x61000000, engine + VIA_REG_TRANSPACE);
-		writel(0x62000000, engine + VIA_REG_TRANSPACE);
-		writel(0x63000000, engine + VIA_REG_TRANSPACE);
-		writel(0x64000000, engine + VIA_REG_TRANSPACE);
-		writel(0x7D000000, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:399", 0x00100000, engine + VIA_REG_TRANSET);
+		pete_writel("drivers/video/fbdev/via/accel.c:400", 0x00000000, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:401", 0x00333004, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:402", 0x60000000, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:403", 0x61000000, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:404", 0x62000000, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:405", 0x63000000, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:406", 0x64000000, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:407", 0x7D000000, engine + VIA_REG_TRANSPACE);
 
-		writel(0xFE020000, engine + VIA_REG_TRANSET);
-		writel(0x00000000, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:409", 0xFE020000, engine + VIA_REG_TRANSET);
+		pete_writel("drivers/video/fbdev/via/accel.c:410", 0x00000000, engine + VIA_REG_TRANSPACE);
 		break;
 	}
 
@@ -432,46 +432,46 @@ void viafb_reset_engine(struct viafb_par *viapar)
 		vq_high |= 0x20000000;
 		vq_len |= 0x20000000;
 
-		writel(0x00100000, engine + VIA_REG_CR_TRANSET);
-		writel(vq_high, engine + VIA_REG_CR_TRANSPACE);
-		writel(vq_start_low, engine + VIA_REG_CR_TRANSPACE);
-		writel(vq_end_low, engine + VIA_REG_CR_TRANSPACE);
-		writel(vq_len, engine + VIA_REG_CR_TRANSPACE);
-		writel(0x74301001, engine + VIA_REG_CR_TRANSPACE);
-		writel(0x00000000, engine + VIA_REG_CR_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:435", 0x00100000, engine + VIA_REG_CR_TRANSET);
+		pete_writel("drivers/video/fbdev/via/accel.c:436", vq_high, engine + VIA_REG_CR_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:437", vq_start_low, engine + VIA_REG_CR_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:438", vq_end_low, engine + VIA_REG_CR_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:439", vq_len, engine + VIA_REG_CR_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:440", 0x74301001, engine + VIA_REG_CR_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:441", 0x00000000, engine + VIA_REG_CR_TRANSPACE);
 		break;
 	default:
-		writel(0x00FE0000, engine + VIA_REG_TRANSET);
-		writel(0x080003FE, engine + VIA_REG_TRANSPACE);
-		writel(0x0A00027C, engine + VIA_REG_TRANSPACE);
-		writel(0x0B000260, engine + VIA_REG_TRANSPACE);
-		writel(0x0C000274, engine + VIA_REG_TRANSPACE);
-		writel(0x0D000264, engine + VIA_REG_TRANSPACE);
-		writel(0x0E000000, engine + VIA_REG_TRANSPACE);
-		writel(0x0F000020, engine + VIA_REG_TRANSPACE);
-		writel(0x1000027E, engine + VIA_REG_TRANSPACE);
-		writel(0x110002FE, engine + VIA_REG_TRANSPACE);
-		writel(0x200F0060, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:444", 0x00FE0000, engine + VIA_REG_TRANSET);
+		pete_writel("drivers/video/fbdev/via/accel.c:445", 0x080003FE, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:446", 0x0A00027C, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:447", 0x0B000260, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:448", 0x0C000274, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:449", 0x0D000264, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:450", 0x0E000000, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:451", 0x0F000020, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:452", 0x1000027E, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:453", 0x110002FE, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:454", 0x200F0060, engine + VIA_REG_TRANSPACE);
 
-		writel(0x00000006, engine + VIA_REG_TRANSPACE);
-		writel(0x40008C0F, engine + VIA_REG_TRANSPACE);
-		writel(0x44000000, engine + VIA_REG_TRANSPACE);
-		writel(0x45080C04, engine + VIA_REG_TRANSPACE);
-		writel(0x46800408, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:456", 0x00000006, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:457", 0x40008C0F, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:458", 0x44000000, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:459", 0x45080C04, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:460", 0x46800408, engine + VIA_REG_TRANSPACE);
 
-		writel(vq_high, engine + VIA_REG_TRANSPACE);
-		writel(vq_start_low, engine + VIA_REG_TRANSPACE);
-		writel(vq_end_low, engine + VIA_REG_TRANSPACE);
-		writel(vq_len, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:462", vq_high, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:463", vq_start_low, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:464", vq_end_low, engine + VIA_REG_TRANSPACE);
+		pete_writel("drivers/video/fbdev/via/accel.c:465", vq_len, engine + VIA_REG_TRANSPACE);
 		break;
 	}
 
 	/* Set Cursor Image Base Address */
-	writel(viapar->shared->cursor_vram_addr, engine + VIA_REG_CURSOR_MODE);
-	writel(0x0, engine + VIA_REG_CURSOR_POS);
-	writel(0x0, engine + VIA_REG_CURSOR_ORG);
-	writel(0x0, engine + VIA_REG_CURSOR_BG);
-	writel(0x0, engine + VIA_REG_CURSOR_FG);
+	pete_writel("drivers/video/fbdev/via/accel.c:470", viapar->shared->cursor_vram_addr, engine + VIA_REG_CURSOR_MODE);
+	pete_writel("drivers/video/fbdev/via/accel.c:471", 0x0, engine + VIA_REG_CURSOR_POS);
+	pete_writel("drivers/video/fbdev/via/accel.c:472", 0x0, engine + VIA_REG_CURSOR_ORG);
+	pete_writel("drivers/video/fbdev/via/accel.c:473", 0x0, engine + VIA_REG_CURSOR_BG);
+	pete_writel("drivers/video/fbdev/via/accel.c:474", 0x0, engine + VIA_REG_CURSOR_FG);
 	return;
 }
 
@@ -480,7 +480,7 @@ void viafb_show_hw_cursor(struct fb_info *info, int Status)
 	struct viafb_par *viapar = info->par;
 	u32 temp, iga_path = viapar->iga_path;
 
-	temp = readl(viapar->shared->vdev->engine_mmio + VIA_REG_CURSOR_MODE);
+	temp = pete_readl("drivers/video/fbdev/via/accel.c:483", viapar->shared->vdev->engine_mmio + VIA_REG_CURSOR_MODE);
 	switch (Status) {
 	case HW_Cursor_ON:
 		temp |= 0x1;
@@ -497,7 +497,7 @@ void viafb_show_hw_cursor(struct fb_info *info, int Status)
 	default:
 		temp &= 0x7FFFFFFF;
 	}
-	writel(temp, viapar->shared->vdev->engine_mmio + VIA_REG_CURSOR_MODE);
+	pete_writel("drivers/video/fbdev/via/accel.c:500", temp, viapar->shared->vdev->engine_mmio + VIA_REG_CURSOR_MODE);
 }
 
 void viafb_wait_engine_idle(struct fb_info *info)
@@ -514,7 +514,7 @@ void viafb_wait_engine_idle(struct fb_info *info)
 			      VIA_3D_ENG_BUSY_M1;
 		break;
 	default:
-		while (!(readl(engine + VIA_REG_STATUS) &
+		while (!(pete_readl("drivers/video/fbdev/via/accel.c:517", engine + VIA_REG_STATUS) &
 				VIA_VR_QUEUE_BUSY) && (loop < MAXLOOP)) {
 			loop++;
 			cpu_relax();
@@ -523,7 +523,7 @@ void viafb_wait_engine_idle(struct fb_info *info)
 		break;
 	}
 
-	while ((readl(engine + VIA_REG_STATUS) & mask) && (loop < MAXLOOP)) {
+	while ((pete_readl("drivers/video/fbdev/via/accel.c:526", engine + VIA_REG_STATUS) & mask) && (loop < MAXLOOP)) {
 		loop++;
 		cpu_relax();
 	}

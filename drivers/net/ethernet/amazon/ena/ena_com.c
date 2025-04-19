@@ -148,15 +148,15 @@ static int ena_com_admin_init_aenq(struct ena_com_dev *ena_dev,
 	addr_low = ENA_DMA_ADDR_TO_UINT32_LOW(aenq->dma_addr);
 	addr_high = ENA_DMA_ADDR_TO_UINT32_HIGH(aenq->dma_addr);
 
-	writel(addr_low, ena_dev->reg_bar + ENA_REGS_AENQ_BASE_LO_OFF);
-	writel(addr_high, ena_dev->reg_bar + ENA_REGS_AENQ_BASE_HI_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:151", addr_low, ena_dev->reg_bar + ENA_REGS_AENQ_BASE_LO_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:152", addr_high, ena_dev->reg_bar + ENA_REGS_AENQ_BASE_HI_OFF);
 
 	aenq_caps = 0;
 	aenq_caps |= ena_dev->aenq.q_depth & ENA_REGS_AENQ_CAPS_AENQ_DEPTH_MASK;
 	aenq_caps |= (sizeof(struct ena_admin_aenq_entry)
 		      << ENA_REGS_AENQ_CAPS_AENQ_ENTRY_SIZE_SHIFT) &
 		     ENA_REGS_AENQ_CAPS_AENQ_ENTRY_SIZE_MASK;
-	writel(aenq_caps, ena_dev->reg_bar + ENA_REGS_AENQ_CAPS_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:159", aenq_caps, ena_dev->reg_bar + ENA_REGS_AENQ_CAPS_OFF);
 
 	if (unlikely(!aenq_handlers)) {
 		netdev_err(ena_dev->net_device,
@@ -260,7 +260,7 @@ static struct ena_comp_ctx *__ena_com_submit_admin_cmd(struct ena_com_admin_queu
 	if (unlikely((admin_queue->sq.tail & queue_size_mask) == 0))
 		admin_queue->sq.phase = !admin_queue->sq.phase;
 
-	writel(admin_queue->sq.tail, admin_queue->sq.db_addr);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:263", admin_queue->sq.tail, admin_queue->sq.db_addr);
 
 	return comp_ctx;
 }
@@ -841,7 +841,7 @@ static u32 ena_com_reg_bar_read32(struct ena_com_dev *ena_dev, u16 offset)
 
 	/* If readless is disabled, perform regular read */
 	if (!mmio_read->readless_supported)
-		return readl(ena_dev->reg_bar + offset);
+		return pete_readl("drivers/net/ethernet/amazon/ena/ena_com.c:844", ena_dev->reg_bar + offset);
 
 	spin_lock_irqsave(&mmio_read->lock, flags);
 	mmio_read->seq_num++;
@@ -852,7 +852,7 @@ static u32 ena_com_reg_bar_read32(struct ena_com_dev *ena_dev, u16 offset)
 	mmio_read_reg |= mmio_read->seq_num &
 			ENA_REGS_MMIO_REG_READ_REQ_ID_MASK;
 
-	writel(mmio_read_reg, ena_dev->reg_bar + ENA_REGS_MMIO_REG_READ_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:855", mmio_read_reg, ena_dev->reg_bar + ENA_REGS_MMIO_REG_READ_OFF);
 
 	for (i = 0; i < timeout; i++) {
 		if (READ_ONCE(read_resp->req_id) == mmio_read->seq_num)
@@ -1546,7 +1546,7 @@ void ena_com_admin_aenq_enable(struct ena_com_dev *ena_dev)
 	/* Init head_db to mark that all entries in the queue
 	 * are initially available
 	 */
-	writel(depth, ena_dev->reg_bar + ENA_REGS_AENQ_HEAD_DB_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:1549", depth, ena_dev->reg_bar + ENA_REGS_AENQ_HEAD_DB_OFF);
 }
 
 int ena_com_set_aenq_config(struct ena_com_dev *ena_dev, u32 groups_flag)
@@ -1715,7 +1715,7 @@ void ena_com_set_admin_polling_mode(struct ena_com_dev *ena_dev, bool polling)
 	if (polling)
 		mask_value = ENA_REGS_ADMIN_INTR_MASK;
 
-	writel(mask_value, ena_dev->reg_bar + ENA_REGS_INTR_MASK_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:1718", mask_value, ena_dev->reg_bar + ENA_REGS_INTR_MASK_OFF);
 	ena_dev->admin_queue.polling = polling;
 }
 
@@ -1761,8 +1761,8 @@ void ena_com_mmio_reg_read_request_destroy(struct ena_com_dev *ena_dev)
 {
 	struct ena_com_mmio_read *mmio_read = &ena_dev->mmio_read;
 
-	writel(0x0, ena_dev->reg_bar + ENA_REGS_MMIO_RESP_LO_OFF);
-	writel(0x0, ena_dev->reg_bar + ENA_REGS_MMIO_RESP_HI_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:1764", 0x0, ena_dev->reg_bar + ENA_REGS_MMIO_RESP_LO_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:1765", 0x0, ena_dev->reg_bar + ENA_REGS_MMIO_RESP_HI_OFF);
 
 	dma_free_coherent(ena_dev->dmadev, sizeof(*mmio_read->read_resp),
 			  mmio_read->read_resp, mmio_read->read_resp_dma_addr);
@@ -1778,8 +1778,8 @@ void ena_com_mmio_reg_read_request_write_dev_addr(struct ena_com_dev *ena_dev)
 	addr_low = ENA_DMA_ADDR_TO_UINT32_LOW(mmio_read->read_resp_dma_addr);
 	addr_high = ENA_DMA_ADDR_TO_UINT32_HIGH(mmio_read->read_resp_dma_addr);
 
-	writel(addr_low, ena_dev->reg_bar + ENA_REGS_MMIO_RESP_LO_OFF);
-	writel(addr_high, ena_dev->reg_bar + ENA_REGS_MMIO_RESP_HI_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:1781", addr_low, ena_dev->reg_bar + ENA_REGS_MMIO_RESP_LO_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:1782", addr_high, ena_dev->reg_bar + ENA_REGS_MMIO_RESP_HI_OFF);
 }
 
 int ena_com_admin_init(struct ena_com_dev *ena_dev,
@@ -1830,14 +1830,14 @@ int ena_com_admin_init(struct ena_com_dev *ena_dev,
 	addr_low = ENA_DMA_ADDR_TO_UINT32_LOW(admin_queue->sq.dma_addr);
 	addr_high = ENA_DMA_ADDR_TO_UINT32_HIGH(admin_queue->sq.dma_addr);
 
-	writel(addr_low, ena_dev->reg_bar + ENA_REGS_AQ_BASE_LO_OFF);
-	writel(addr_high, ena_dev->reg_bar + ENA_REGS_AQ_BASE_HI_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:1833", addr_low, ena_dev->reg_bar + ENA_REGS_AQ_BASE_LO_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:1834", addr_high, ena_dev->reg_bar + ENA_REGS_AQ_BASE_HI_OFF);
 
 	addr_low = ENA_DMA_ADDR_TO_UINT32_LOW(admin_queue->cq.dma_addr);
 	addr_high = ENA_DMA_ADDR_TO_UINT32_HIGH(admin_queue->cq.dma_addr);
 
-	writel(addr_low, ena_dev->reg_bar + ENA_REGS_ACQ_BASE_LO_OFF);
-	writel(addr_high, ena_dev->reg_bar + ENA_REGS_ACQ_BASE_HI_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:1839", addr_low, ena_dev->reg_bar + ENA_REGS_ACQ_BASE_LO_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:1840", addr_high, ena_dev->reg_bar + ENA_REGS_ACQ_BASE_HI_OFF);
 
 	aq_caps = 0;
 	aq_caps |= admin_queue->q_depth & ENA_REGS_AQ_CAPS_AQ_DEPTH_MASK;
@@ -1851,8 +1851,8 @@ int ena_com_admin_init(struct ena_com_dev *ena_dev,
 		ENA_REGS_ACQ_CAPS_ACQ_ENTRY_SIZE_SHIFT) &
 		ENA_REGS_ACQ_CAPS_ACQ_ENTRY_SIZE_MASK;
 
-	writel(aq_caps, ena_dev->reg_bar + ENA_REGS_AQ_CAPS_OFF);
-	writel(acq_caps, ena_dev->reg_bar + ENA_REGS_ACQ_CAPS_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:1854", aq_caps, ena_dev->reg_bar + ENA_REGS_AQ_CAPS_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:1855", acq_caps, ena_dev->reg_bar + ENA_REGS_ACQ_CAPS_OFF);
 	ret = ena_com_admin_init_aenq(ena_dev, aenq_handlers);
 	if (ret)
 		goto error;
@@ -2156,7 +2156,7 @@ int ena_com_dev_reset(struct ena_com_dev *ena_dev,
 	reset_val = ENA_REGS_DEV_CTL_DEV_RESET_MASK;
 	reset_val |= (reset_reason << ENA_REGS_DEV_CTL_RESET_REASON_SHIFT) &
 		     ENA_REGS_DEV_CTL_RESET_REASON_MASK;
-	writel(reset_val, ena_dev->reg_bar + ENA_REGS_DEV_CTL_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:2159", reset_val, ena_dev->reg_bar + ENA_REGS_DEV_CTL_OFF);
 
 	/* Write again the MMIO read request address */
 	ena_com_mmio_reg_read_request_write_dev_addr(ena_dev);
@@ -2170,7 +2170,7 @@ int ena_com_dev_reset(struct ena_com_dev *ena_dev,
 	}
 
 	/* reset done */
-	writel(0, ena_dev->reg_bar + ENA_REGS_DEV_CTL_OFF);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_com.c:2173", 0, ena_dev->reg_bar + ENA_REGS_DEV_CTL_OFF);
 	rc = wait_for_reset_state(ena_dev, timeout, 0);
 	if (rc != 0) {
 		netdev_err(ena_dev->net_device,

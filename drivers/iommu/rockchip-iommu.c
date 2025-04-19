@@ -334,12 +334,12 @@ static u32 rk_iova_page_offset(dma_addr_t iova)
 
 static u32 rk_iommu_read(void __iomem *base, u32 offset)
 {
-	return readl(base + offset);
+	return pete_readl("drivers/iommu/rockchip-iommu.c:337", base + offset);
 }
 
 static void rk_iommu_write(void __iomem *base, u32 offset, u32 value)
 {
-	writel(value, base + offset);
+	pete_writel("drivers/iommu/rockchip-iommu.c:342", value, base + offset);
 }
 
 static void rk_iommu_command(struct rk_iommu *iommu, u32 command)
@@ -347,12 +347,12 @@ static void rk_iommu_command(struct rk_iommu *iommu, u32 command)
 	int i;
 
 	for (i = 0; i < iommu->num_mmu; i++)
-		writel(command, iommu->bases[i] + RK_MMU_COMMAND);
+		pete_writel("drivers/iommu/rockchip-iommu.c:350", command, iommu->bases[i] + RK_MMU_COMMAND);
 }
 
 static void rk_iommu_base_command(void __iomem *base, u32 command)
 {
-	writel(command, base + RK_MMU_COMMAND);
+	pete_writel("drivers/iommu/rockchip-iommu.c:355", command, base + RK_MMU_COMMAND);
 }
 static void rk_iommu_zap_lines(struct rk_iommu *iommu, dma_addr_t iova_start,
 			       size_t size)

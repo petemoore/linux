@@ -111,7 +111,7 @@ static inline void qtnf_enable_hdp_irqs(struct qtnf_pcie_pearl_state *ps)
 	unsigned long flags;
 
 	spin_lock_irqsave(&ps->irq_lock, flags);
-	writel(ps->pcie_irq_mask, PCIE_HDP_INT_EN(ps->pcie_reg_base));
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:114", ps->pcie_irq_mask, PCIE_HDP_INT_EN(ps->pcie_reg_base));
 	spin_unlock_irqrestore(&ps->irq_lock, flags);
 }
 
@@ -120,7 +120,7 @@ static inline void qtnf_disable_hdp_irqs(struct qtnf_pcie_pearl_state *ps)
 	unsigned long flags;
 
 	spin_lock_irqsave(&ps->irq_lock, flags);
-	writel(0x0, PCIE_HDP_INT_EN(ps->pcie_reg_base));
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:123", 0x0, PCIE_HDP_INT_EN(ps->pcie_reg_base));
 	spin_unlock_irqrestore(&ps->irq_lock, flags);
 }
 
@@ -130,7 +130,7 @@ static inline void qtnf_en_rxdone_irq(struct qtnf_pcie_pearl_state *ps)
 
 	spin_lock_irqsave(&ps->irq_lock, flags);
 	ps->pcie_irq_mask |= PCIE_HDP_INT_RX_BITS;
-	writel(ps->pcie_irq_mask, PCIE_HDP_INT_EN(ps->pcie_reg_base));
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:133", ps->pcie_irq_mask, PCIE_HDP_INT_EN(ps->pcie_reg_base));
 	spin_unlock_irqrestore(&ps->irq_lock, flags);
 }
 
@@ -140,7 +140,7 @@ static inline void qtnf_dis_rxdone_irq(struct qtnf_pcie_pearl_state *ps)
 
 	spin_lock_irqsave(&ps->irq_lock, flags);
 	ps->pcie_irq_mask &= ~PCIE_HDP_INT_RX_BITS;
-	writel(ps->pcie_irq_mask, PCIE_HDP_INT_EN(ps->pcie_reg_base));
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:143", ps->pcie_irq_mask, PCIE_HDP_INT_EN(ps->pcie_reg_base));
 	spin_unlock_irqrestore(&ps->irq_lock, flags);
 }
 
@@ -150,7 +150,7 @@ static inline void qtnf_en_txdone_irq(struct qtnf_pcie_pearl_state *ps)
 
 	spin_lock_irqsave(&ps->irq_lock, flags);
 	ps->pcie_irq_mask |= PCIE_HDP_INT_TX_BITS;
-	writel(ps->pcie_irq_mask, PCIE_HDP_INT_EN(ps->pcie_reg_base));
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:153", ps->pcie_irq_mask, PCIE_HDP_INT_EN(ps->pcie_reg_base));
 	spin_unlock_irqrestore(&ps->irq_lock, flags);
 }
 
@@ -160,7 +160,7 @@ static inline void qtnf_dis_txdone_irq(struct qtnf_pcie_pearl_state *ps)
 
 	spin_lock_irqsave(&ps->irq_lock, flags);
 	ps->pcie_irq_mask &= ~PCIE_HDP_INT_TX_BITS;
-	writel(ps->pcie_irq_mask, PCIE_HDP_INT_EN(ps->pcie_reg_base));
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:163", ps->pcie_irq_mask, PCIE_HDP_INT_EN(ps->pcie_reg_base));
 	spin_unlock_irqrestore(&ps->irq_lock, flags);
 }
 
@@ -169,7 +169,7 @@ static void qtnf_deassert_intx(struct qtnf_pcie_pearl_state *ps)
 	void __iomem *reg = ps->base.sysctl_bar + PEARL_PCIE_CFG0_OFFSET;
 	u32 cfg;
 
-	cfg = readl(reg);
+	cfg = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:172", reg);
 	cfg &= ~PEARL_ASSERT_INTX;
 	qtnf_non_posted_write(cfg, reg);
 }
@@ -197,21 +197,21 @@ static void qtnf_pcie_pearl_ipc_gen_ep_int(void *arg)
 
 static int qtnf_is_state(__le32 __iomem *reg, u32 state)
 {
-	u32 s = readl(reg);
+	u32 s = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:200", reg);
 
 	return s & state;
 }
 
 static void qtnf_set_state(__le32 __iomem *reg, u32 state)
 {
-	u32 s = readl(reg);
+	u32 s = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:207", reg);
 
 	qtnf_non_posted_write(state | s, reg);
 }
 
 static void qtnf_clear_state(__le32 __iomem *reg, u32 state)
 {
-	u32 s = readl(reg);
+	u32 s = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:214", reg);
 
 	qtnf_non_posted_write(s & ~state, reg);
 }
@@ -266,12 +266,12 @@ static int pearl_alloc_bd_table(struct qtnf_pcie_pearl_state *ps)
 	ps->rx_bd_pbase = paddr;
 
 #ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
-	writel(QTN_HOST_HI32(paddr),
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:269", QTN_HOST_HI32(paddr),
 	       PCIE_HDP_TX_HOST_Q_BASE_H(ps->pcie_reg_base));
 #endif
-	writel(QTN_HOST_LO32(paddr),
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:272", QTN_HOST_LO32(paddr),
 	       PCIE_HDP_TX_HOST_Q_BASE_L(ps->pcie_reg_base));
-	writel(priv->rx_bd_num | (sizeof(struct qtnf_pearl_rx_bd)) << 16,
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:274", priv->rx_bd_num | (sizeof(struct qtnf_pearl_rx_bd)) << 16,
 	       PCIE_HDP_TX_HOST_Q_SZ_CTRL(ps->pcie_reg_base));
 
 	pr_debug("RX descriptor table: vaddr=0x%p paddr=%pad\n", vaddr, &paddr);
@@ -313,13 +313,13 @@ static int pearl_skb2rbd_attach(struct qtnf_pcie_pearl_state *ps, u16 index)
 	wmb();
 
 #ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
-	writel(QTN_HOST_HI32(paddr),
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:316", QTN_HOST_HI32(paddr),
 	       PCIE_HDP_HHBM_BUF_PTR_H(ps->pcie_reg_base));
 #endif
-	writel(QTN_HOST_LO32(paddr),
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:319", QTN_HOST_LO32(paddr),
 	       PCIE_HDP_HHBM_BUF_PTR(ps->pcie_reg_base));
 
-	writel(index, PCIE_HDP_TX_HOST_Q_WR_PTR(ps->pcie_reg_base));
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:322", index, PCIE_HDP_TX_HOST_Q_WR_PTR(ps->pcie_reg_base));
 	return 0;
 }
 
@@ -383,16 +383,16 @@ static int pearl_hhbm_init(struct qtnf_pcie_pearl_state *ps)
 {
 	u32 val;
 
-	val = readl(PCIE_HHBM_CONFIG(ps->pcie_reg_base));
+	val = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:386", PCIE_HHBM_CONFIG(ps->pcie_reg_base));
 	val |= HHBM_CONFIG_SOFT_RESET;
-	writel(val, PCIE_HHBM_CONFIG(ps->pcie_reg_base));
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:388", val, PCIE_HHBM_CONFIG(ps->pcie_reg_base));
 	usleep_range(50, 100);
 	val &= ~HHBM_CONFIG_SOFT_RESET;
 #ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
 	val |= HHBM_64BIT;
 #endif
-	writel(val, PCIE_HHBM_CONFIG(ps->pcie_reg_base));
-	writel(ps->base.rx_bd_num, PCIE_HHBM_Q_LIMIT_REG(ps->pcie_reg_base));
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:394", val, PCIE_HHBM_CONFIG(ps->pcie_reg_base));
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:395", ps->base.rx_bd_num, PCIE_HHBM_Q_LIMIT_REG(ps->pcie_reg_base));
 
 	return 0;
 }
@@ -474,7 +474,7 @@ static void qtnf_pearl_data_tx_reclaim(struct qtnf_pcie_pearl_state *ps)
 
 	spin_lock_irqsave(&priv->tx_reclaim_lock, flags);
 
-	tx_done_index = readl(PCIE_HDP_RX0DMA_CNT(ps->pcie_reg_base))
+	tx_done_index = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:477", PCIE_HDP_RX0DMA_CNT(ps->pcie_reg_base))
 			& (priv->tx_bd_num - 1);
 
 	i = priv->tx_bd_r_index;
@@ -581,10 +581,10 @@ static int qtnf_pcie_skb_send(struct qtnf_bus *bus, struct sk_buff *skb)
 	txbd_paddr = ps->tx_bd_pbase + i * sizeof(struct qtnf_pearl_tx_bd);
 
 #ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
-	writel(QTN_HOST_HI32(txbd_paddr),
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:584", QTN_HOST_HI32(txbd_paddr),
 	       PCIE_HDP_HOST_WR_DESC0_H(ps->pcie_reg_base));
 #endif
-	writel(QTN_HOST_LO32(txbd_paddr),
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:587", QTN_HOST_LO32(txbd_paddr),
 	       PCIE_HDP_HOST_WR_DESC0(ps->pcie_reg_base));
 
 	if (++i >= priv->tx_bd_num)
@@ -648,7 +648,7 @@ static irqreturn_t qtnf_pcie_pearl_interrupt(int irq, void *data)
 	u32 status;
 
 	priv->pcie_irq_count++;
-	status = readl(PCIE_HDP_INT_STATUS(ps->pcie_reg_base));
+	status = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:651", PCIE_HDP_INT_STATUS(ps->pcie_reg_base));
 
 	qtnf_shm_ipc_irq_handler(&priv->shm_ipc_ep_in);
 	qtnf_shm_ipc_irq_handler(&priv->shm_ipc_ep_out);
@@ -852,7 +852,7 @@ static int qtnf_dbg_irq_stats(struct seq_file *s, void *data)
 {
 	struct qtnf_bus *bus = dev_get_drvdata(s->private);
 	struct qtnf_pcie_pearl_state *ps = get_bus_priv(bus);
-	u32 reg = readl(PCIE_HDP_INT_EN(ps->pcie_reg_base));
+	u32 reg = pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:855", PCIE_HDP_INT_EN(ps->pcie_reg_base));
 	u32 status;
 
 	seq_printf(s, "pcie_irq_count(%u)\n", ps->base.pcie_irq_count);
@@ -885,7 +885,7 @@ static int qtnf_dbg_hdp_stats(struct seq_file *s, void *data)
 
 	seq_printf(s, "tx_bd_r_index(%u)\n", priv->tx_bd_r_index);
 	seq_printf(s, "tx_bd_p_index(%u)\n",
-		   readl(PCIE_HDP_RX0DMA_CNT(ps->pcie_reg_base))
+		   pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:888", PCIE_HDP_RX0DMA_CNT(ps->pcie_reg_base))
 			& (priv->tx_bd_num - 1));
 	seq_printf(s, "tx_bd_w_index(%u)\n", priv->tx_bd_w_index);
 	seq_printf(s, "tx queue len(%u)\n",
@@ -894,7 +894,7 @@ static int qtnf_dbg_hdp_stats(struct seq_file *s, void *data)
 
 	seq_printf(s, "rx_bd_r_index(%u)\n", priv->rx_bd_r_index);
 	seq_printf(s, "rx_bd_p_index(%u)\n",
-		   readl(PCIE_HDP_TX0DMA_CNT(ps->pcie_reg_base))
+		   pete_readl("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:897", PCIE_HDP_TX0DMA_CNT(ps->pcie_reg_base))
 			& (priv->rx_bd_num - 1));
 	seq_printf(s, "rx_bd_w_index(%u)\n", priv->rx_bd_w_index);
 	seq_printf(s, "rx alloc queue len(%u)\n",
@@ -1122,7 +1122,7 @@ static int qtnf_pcie_pearl_probe(struct qtnf_bus *bus, unsigned int tx_bd_size,
 
 	ps->pcie_reg_base = ps->base.dmareg_bar;
 	ps->bda = ps->base.epmem_bar;
-	writel(ps->base.msi_enabled, &ps->bda->bda_rc_msi_enabled);
+	pete_writel("drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c:1125", ps->base.msi_enabled, &ps->bda->bda_rc_msi_enabled);
 
 	ret = qtnf_pcie_pearl_init_xfer(ps, tx_bd_size, rx_bd_size);
 	if (ret) {

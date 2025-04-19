@@ -118,11 +118,11 @@ void meson_rdma_flush(struct meson_drm *priv)
 	meson_rdma_stop(priv);
 
 	/* Start of Channel 1 register writes buffer */
-	writel(priv->rdma.addr_dma,
+	pete_writel("drivers/gpu/drm/meson/meson_rdma.c:121", priv->rdma.addr_dma,
 	       priv->io_base + _REG(RDMA_AHB_START_ADDR_1));
 
 	/* Last byte on Channel 1 register writes buffer */
-	writel(priv->rdma.addr_dma + (priv->rdma.offset * RDMA_DESC_SIZE) - 1,
+	pete_writel("drivers/gpu/drm/meson/meson_rdma.c:125", priv->rdma.addr_dma + (priv->rdma.offset * RDMA_DESC_SIZE) - 1,
 	       priv->io_base + _REG(RDMA_AHB_END_ADDR_1));
 
 	/* Trigger Channel 1 on VSYNC event */

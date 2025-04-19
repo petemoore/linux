@@ -315,16 +315,16 @@ static void dsi_phy_tst_set(void __iomem *base, u32 reg, u32 val)
 	/*
 	 * latch reg first
 	 */
-	writel(reg_write, base + PHY_TST_CTRL1);
-	writel(0x02, base + PHY_TST_CTRL0);
-	writel(0x00, base + PHY_TST_CTRL0);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:318", reg_write, base + PHY_TST_CTRL1);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:319", 0x02, base + PHY_TST_CTRL0);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:320", 0x00, base + PHY_TST_CTRL0);
 
 	/*
 	 * then latch value
 	 */
-	writel(val, base + PHY_TST_CTRL1);
-	writel(0x02, base + PHY_TST_CTRL0);
-	writel(0x00, base + PHY_TST_CTRL0);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:325", val, base + PHY_TST_CTRL1);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:326", 0x02, base + PHY_TST_CTRL0);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:327", 0x00, base + PHY_TST_CTRL0);
 }
 
 static void dsi_set_phy_timer(void __iomem *base,
@@ -337,13 +337,13 @@ static void dsi_set_phy_timer(void __iomem *base,
 	 * Set lane value and phy stop wait time.
 	 */
 	val = (lanes - 1) | (PHY_STOP_WAIT_TIME << 8);
-	writel(val, base + PHY_IF_CFG);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:340", val, base + PHY_IF_CFG);
 
 	/*
 	 * Set phy clk division.
 	 */
-	val = readl(base + CLKMGR_CFG) | phy->clk_division;
-	writel(val, base + CLKMGR_CFG);
+	val = pete_readl("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:345", base + CLKMGR_CFG) | phy->clk_division;
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:346", val, base + CLKMGR_CFG);
 
 	/*
 	 * Set lp and hs switching params.
@@ -374,10 +374,10 @@ static void dsi_set_mipi_phy(void __iomem *base,
 	/*
 	 * Reset to clean up phy tst params.
 	 */
-	writel(0, base + PHY_RSTZ);
-	writel(0, base + PHY_TST_CTRL0);
-	writel(1, base + PHY_TST_CTRL0);
-	writel(0, base + PHY_TST_CTRL0);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:377", 0, base + PHY_RSTZ);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:378", 0, base + PHY_TST_CTRL0);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:379", 1, base + PHY_TST_CTRL0);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:380", 0, base + PHY_TST_CTRL0);
 
 	/*
 	 * Clock lane timing control setting: TLPX, THS-PREPARE,
@@ -420,11 +420,11 @@ static void dsi_set_mipi_phy(void __iomem *base,
 		phy->pll_lpf_cs;
 	dsi_phy_tst_set(base, PHY_CFG_PLL_V, val);
 
-	writel(PHY_ENABLECLK, base + PHY_RSTZ);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:423", PHY_ENABLECLK, base + PHY_RSTZ);
 	udelay(1);
-	writel(PHY_ENABLECLK | PHY_UNSHUTDOWNZ, base + PHY_RSTZ);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:425", PHY_ENABLECLK | PHY_UNSHUTDOWNZ, base + PHY_RSTZ);
 	udelay(1);
-	writel(PHY_ENABLECLK | PHY_UNRSTZ | PHY_UNSHUTDOWNZ, base + PHY_RSTZ);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:427", PHY_ENABLECLK | PHY_UNRSTZ | PHY_UNSHUTDOWNZ, base + PHY_RSTZ);
 	usleep_range(1000, 1500);
 
 	/*
@@ -432,7 +432,7 @@ static void dsi_set_mipi_phy(void __iomem *base,
 	 */
 	delay_count = 100;
 	while (delay_count) {
-		val = readl(base +  PHY_STATUS);
+		val = pete_readl("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:435", base +  PHY_STATUS);
 		if ((BIT(0) | BIT(2)) & val)
 			break;
 
@@ -459,11 +459,11 @@ static void dsi_set_mode_timing(void __iomem *base,
 	u64 tmp;
 
 	val = dsi_get_dpi_color_coding(format);
-	writel(val, base + DPI_COLOR_CODING);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:462", val, base + DPI_COLOR_CODING);
 
 	val = (mode->flags & DRM_MODE_FLAG_NHSYNC ? 1 : 0) << 2;
 	val |= (mode->flags & DRM_MODE_FLAG_NVSYNC ? 1 : 0) << 1;
-	writel(val, base +  DPI_CFG_POL);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:466", val, base +  DPI_CFG_POL);
 
 	/*
 	 * The DSI IP accepts vertical timing using lines as normal,
@@ -492,15 +492,15 @@ static void dsi_set_mode_timing(void __iomem *base,
 	hline_time = DIV_ROUND_UP(tmp, pixel_clk_kHz);
 
 	/* all specified in byte-lane clocks */
-	writel(hsa_time, base + VID_HSA_TIME);
-	writel(hbp_time, base + VID_HBP_TIME);
-	writel(hline_time, base + VID_HLINE_TIME);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:495", hsa_time, base + VID_HSA_TIME);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:496", hbp_time, base + VID_HBP_TIME);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:497", hline_time, base + VID_HLINE_TIME);
 
-	writel(vsw, base + VID_VSA_LINES);
-	writel(vbp, base + VID_VBP_LINES);
-	writel(vfp, base + VID_VFP_LINES);
-	writel(mode->vdisplay, base + VID_VACTIVE_LINES);
-	writel(mode->hdisplay, base + VID_PKT_SIZE);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:499", vsw, base + VID_VSA_LINES);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:500", vbp, base + VID_VBP_LINES);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:501", vfp, base + VID_VFP_LINES);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:502", mode->vdisplay, base + VID_VACTIVE_LINES);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:503", mode->hdisplay, base + VID_PKT_SIZE);
 
 	DRM_DEBUG_DRIVER("htot=%d, hfp=%d, hbp=%d, hsw=%d\n",
 			 htot, hfp, hbp, hsw);
@@ -528,10 +528,10 @@ static void dsi_set_video_mode(void __iomem *base, unsigned long flags)
 		val = DSI_NON_BURST_SYNC_EVENTS;
 	else
 		val = DSI_BURST_SYNC_PULSES_1;
-	writel(val, base + VID_MODE_CFG);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:531", val, base + VID_MODE_CFG);
 
-	writel(PHY_TXREQUESTCLKHS, base + LPCLK_CTRL);
-	writel(DSI_VIDEO_MODE, base + MODE_CFG);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:533", PHY_TXREQUESTCLKHS, base + LPCLK_CTRL);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:534", DSI_VIDEO_MODE, base + MODE_CFG);
 }
 
 static void dsi_mipi_init(struct dw_dsi *dsi)
@@ -550,7 +550,7 @@ static void dsi_mipi_init(struct dw_dsi *dsi)
 	dsi_get_phy_params(dphy_req_kHz, phy);
 
 	/* reset Core */
-	writel(RESET, base + PWR_UP);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:553", RESET, base + PWR_UP);
 
 	/* set dsi phy params */
 	dsi_set_mipi_phy(base, phy, dsi->lanes);
@@ -562,7 +562,7 @@ static void dsi_mipi_init(struct dw_dsi *dsi)
 	dsi_set_video_mode(base, dsi->mode_flags);
 
 	/* dsi wake up */
-	writel(POWERUP, base + PWR_UP);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:565", POWERUP, base + PWR_UP);
 
 	DRM_DEBUG_DRIVER("lanes=%d, pixel_clk=%d kHz, bytes_freq=%d kHz\n",
 			 dsi->lanes, mode->clock, phy->lane_byte_clk_kHz);
@@ -577,9 +577,9 @@ static void dsi_encoder_disable(struct drm_encoder *encoder)
 	if (!dsi->enable)
 		return;
 
-	writel(0, base + PWR_UP);
-	writel(0, base + LPCLK_CTRL);
-	writel(0, base + PHY_RSTZ);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:580", 0, base + PWR_UP);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:581", 0, base + LPCLK_CTRL);
+	pete_writel("drivers/gpu/drm/hisilicon/kirin/dw_drm_dsi.c:582", 0, base + PHY_RSTZ);
 	clk_disable_unprepare(ctx->pclk);
 
 	dsi->enable = false;

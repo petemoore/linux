@@ -93,9 +93,9 @@ static int pxa_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
 	if (rc < 0)
 		return rc;
 
-	writel(prescale, pc->mmio_base + offset + PWMCR);
-	writel(dc, pc->mmio_base + offset + PWMDCR);
-	writel(pv, pc->mmio_base + offset + PWMPCR);
+	pete_writel("drivers/pwm/pwm-pxa.c:96", prescale, pc->mmio_base + offset + PWMCR);
+	pete_writel("drivers/pwm/pwm-pxa.c:97", dc, pc->mmio_base + offset + PWMDCR);
+	pete_writel("drivers/pwm/pwm-pxa.c:98", pv, pc->mmio_base + offset + PWMPCR);
 
 	clk_disable_unprepare(pc->clk);
 	return 0;

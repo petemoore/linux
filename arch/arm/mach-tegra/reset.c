@@ -39,17 +39,17 @@ static void __init tegra_cpu_reset_handler_set(const u32 reset_address)
 	 * NOTE: This must be the one and only write to the EVP CPU reset
 	 *       vector in the entire system.
 	 */
-	writel(reset_address, evp_cpu_reset);
+	pete_writel("arch/arm/mach-tegra/reset.c:42", reset_address, evp_cpu_reset);
 	wmb();
-	reg = readl(evp_cpu_reset);
+	reg = pete_readl("arch/arm/mach-tegra/reset.c:44", evp_cpu_reset);
 
 	/*
 	 * Prevent further modifications to the physical reset vector.
 	 *  NOTE: Has no effect on chips prior to Tegra30.
 	 */
-	reg = readl(sb_ctrl);
+	reg = pete_readl("arch/arm/mach-tegra/reset.c:50", sb_ctrl);
 	reg |= 2;
-	writel(reg, sb_ctrl);
+	pete_writel("arch/arm/mach-tegra/reset.c:52", reg, sb_ctrl);
 	wmb();
 }
 

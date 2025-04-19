@@ -27,7 +27,7 @@ static const struct coreclk_ratio orion_coreclk_ratios[] __initconst = {
 
 static u32 __init mv88f5181_get_tclk_freq(void __iomem *sar)
 {
-	u32 opt = (readl(sar) >> SAR_MV88F5181_TCLK_FREQ) &
+	u32 opt = (pete_readl("drivers/clk/mvebu/orion.c:30", sar) >> SAR_MV88F5181_TCLK_FREQ) &
 		SAR_MV88F5181_TCLK_FREQ_MASK;
 	if (opt == 0)
 		return 133333333;
@@ -44,7 +44,7 @@ static u32 __init mv88f5181_get_tclk_freq(void __iomem *sar)
 
 static u32 __init mv88f5181_get_cpu_freq(void __iomem *sar)
 {
-	u32 opt = (readl(sar) >> SAR_MV88F5181_CPU_FREQ) &
+	u32 opt = (pete_readl("drivers/clk/mvebu/orion.c:47", sar) >> SAR_MV88F5181_CPU_FREQ) &
 		SAR_MV88F5181_CPU_FREQ_MASK;
 	if (opt == 0)
 		return 333333333;
@@ -59,7 +59,7 @@ static u32 __init mv88f5181_get_cpu_freq(void __iomem *sar)
 static void __init mv88f5181_get_clk_ratio(void __iomem *sar, int id,
 					   int *mult, int *div)
 {
-	u32 opt = (readl(sar) >> SAR_MV88F5181_CPU_FREQ) &
+	u32 opt = (pete_readl("drivers/clk/mvebu/orion.c:62", sar) >> SAR_MV88F5181_CPU_FREQ) &
 		SAR_MV88F5181_CPU_FREQ_MASK;
 	if (opt == 0 || opt == 1) {
 		*mult = 1;
@@ -97,7 +97,7 @@ CLK_OF_DECLARE(mv88f5181_clk, "marvell,mv88f5181-core-clock", mv88f5181_clk_init
 
 static u32 __init mv88f5182_get_tclk_freq(void __iomem *sar)
 {
-	u32 opt = (readl(sar) >> SAR_MV88F5182_TCLK_FREQ) &
+	u32 opt = (pete_readl("drivers/clk/mvebu/orion.c:100", sar) >> SAR_MV88F5182_TCLK_FREQ) &
 		SAR_MV88F5182_TCLK_FREQ_MASK;
 	if (opt == 1)
 		return 150000000;
@@ -112,7 +112,7 @@ static u32 __init mv88f5182_get_tclk_freq(void __iomem *sar)
 
 static u32 __init mv88f5182_get_cpu_freq(void __iomem *sar)
 {
-	u32 opt = (readl(sar) >> SAR_MV88F5182_CPU_FREQ) &
+	u32 opt = (pete_readl("drivers/clk/mvebu/orion.c:115", sar) >> SAR_MV88F5182_CPU_FREQ) &
 		SAR_MV88F5182_CPU_FREQ_MASK;
 	if (opt == 0)
 		return 333333333;
@@ -127,7 +127,7 @@ static u32 __init mv88f5182_get_cpu_freq(void __iomem *sar)
 static void __init mv88f5182_get_clk_ratio(void __iomem *sar, int id,
 					   int *mult, int *div)
 {
-	u32 opt = (readl(sar) >> SAR_MV88F5182_CPU_FREQ) &
+	u32 opt = (pete_readl("drivers/clk/mvebu/orion.c:130", sar) >> SAR_MV88F5182_CPU_FREQ) &
 		SAR_MV88F5182_CPU_FREQ_MASK;
 	if (opt == 0 || opt == 1) {
 		*mult = 1;
@@ -171,7 +171,7 @@ static u32 __init mv88f5281_get_tclk_freq(void __iomem *sar)
 
 static u32 __init mv88f5281_get_cpu_freq(void __iomem *sar)
 {
-	u32 opt = (readl(sar) >> SAR_MV88F5281_CPU_FREQ) &
+	u32 opt = (pete_readl("drivers/clk/mvebu/orion.c:174", sar) >> SAR_MV88F5281_CPU_FREQ) &
 		SAR_MV88F5281_CPU_FREQ_MASK;
 	if (opt == 1 || opt == 2)
 		return 400000000;
@@ -184,7 +184,7 @@ static u32 __init mv88f5281_get_cpu_freq(void __iomem *sar)
 static void __init mv88f5281_get_clk_ratio(void __iomem *sar, int id,
 					   int *mult, int *div)
 {
-	u32 opt = (readl(sar) >> SAR_MV88F5281_CPU_FREQ) &
+	u32 opt = (pete_readl("drivers/clk/mvebu/orion.c:187", sar) >> SAR_MV88F5281_CPU_FREQ) &
 		SAR_MV88F5281_CPU_FREQ_MASK;
 	if (opt == 1) {
 		*mult = 1;
@@ -222,7 +222,7 @@ CLK_OF_DECLARE(mv88f5281_clk, "marvell,mv88f5281-core-clock", mv88f5281_clk_init
 
 static u32 __init mv88f6183_get_tclk_freq(void __iomem *sar)
 {
-	u32 opt = (readl(sar) >> SAR_MV88F6183_TCLK_FREQ) &
+	u32 opt = (pete_readl("drivers/clk/mvebu/orion.c:225", sar) >> SAR_MV88F6183_TCLK_FREQ) &
 		SAR_MV88F6183_TCLK_FREQ_MASK;
 	if (opt == 0)
 		return 133333333;
@@ -237,7 +237,7 @@ static u32 __init mv88f6183_get_tclk_freq(void __iomem *sar)
 
 static u32 __init mv88f6183_get_cpu_freq(void __iomem *sar)
 {
-	u32 opt = (readl(sar) >> SAR_MV88F6183_CPU_FREQ) &
+	u32 opt = (pete_readl("drivers/clk/mvebu/orion.c:240", sar) >> SAR_MV88F6183_CPU_FREQ) &
 		SAR_MV88F6183_CPU_FREQ_MASK;
 	if (opt == 9)
 		return 333333333;
@@ -250,7 +250,7 @@ static u32 __init mv88f6183_get_cpu_freq(void __iomem *sar)
 static void __init mv88f6183_get_clk_ratio(void __iomem *sar, int id,
 					   int *mult, int *div)
 {
-	u32 opt = (readl(sar) >> SAR_MV88F6183_CPU_FREQ) &
+	u32 opt = (pete_readl("drivers/clk/mvebu/orion.c:253", sar) >> SAR_MV88F6183_CPU_FREQ) &
 		SAR_MV88F6183_CPU_FREQ_MASK;
 	if (opt == 9 || opt == 17) {
 		*mult = 1;

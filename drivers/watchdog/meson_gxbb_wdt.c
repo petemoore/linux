@@ -39,7 +39,7 @@ static int meson_gxbb_wdt_start(struct watchdog_device *wdt_dev)
 {
 	struct meson_gxbb_wdt *data = watchdog_get_drvdata(wdt_dev);
 
-	writel(readl(data->reg_base + GXBB_WDT_CTRL_REG) | GXBB_WDT_CTRL_EN,
+	pete_writel("drivers/watchdog/meson_gxbb_wdt.c:42", pete_readl("drivers/watchdog/meson_gxbb_wdt.c:42", data->reg_base + GXBB_WDT_CTRL_REG) | GXBB_WDT_CTRL_EN,
 	       data->reg_base + GXBB_WDT_CTRL_REG);
 
 	return 0;
@@ -49,7 +49,7 @@ static int meson_gxbb_wdt_stop(struct watchdog_device *wdt_dev)
 {
 	struct meson_gxbb_wdt *data = watchdog_get_drvdata(wdt_dev);
 
-	writel(readl(data->reg_base + GXBB_WDT_CTRL_REG) & ~GXBB_WDT_CTRL_EN,
+	pete_writel("drivers/watchdog/meson_gxbb_wdt.c:52", pete_readl("drivers/watchdog/meson_gxbb_wdt.c:52", data->reg_base + GXBB_WDT_CTRL_REG) & ~GXBB_WDT_CTRL_EN,
 	       data->reg_base + GXBB_WDT_CTRL_REG);
 
 	return 0;
@@ -59,7 +59,7 @@ static int meson_gxbb_wdt_ping(struct watchdog_device *wdt_dev)
 {
 	struct meson_gxbb_wdt *data = watchdog_get_drvdata(wdt_dev);
 
-	writel(0, data->reg_base + GXBB_WDT_RSET_REG);
+	pete_writel("drivers/watchdog/meson_gxbb_wdt.c:62", 0, data->reg_base + GXBB_WDT_RSET_REG);
 
 	return 0;
 }
@@ -77,7 +77,7 @@ static int meson_gxbb_wdt_set_timeout(struct watchdog_device *wdt_dev,
 
 	meson_gxbb_wdt_ping(wdt_dev);
 
-	writel(tcnt, data->reg_base + GXBB_WDT_TCNT_REG);
+	pete_writel("drivers/watchdog/meson_gxbb_wdt.c:80", tcnt, data->reg_base + GXBB_WDT_TCNT_REG);
 
 	return 0;
 }
@@ -87,7 +87,7 @@ static unsigned int meson_gxbb_wdt_get_timeleft(struct watchdog_device *wdt_dev)
 	struct meson_gxbb_wdt *data = watchdog_get_drvdata(wdt_dev);
 	unsigned long reg;
 
-	reg = readl(data->reg_base + GXBB_WDT_TCNT_REG);
+	reg = pete_readl("drivers/watchdog/meson_gxbb_wdt.c:90", data->reg_base + GXBB_WDT_TCNT_REG);
 
 	return ((reg & GXBB_WDT_TCNT_SETUP_MASK) -
 		(reg >> GXBB_WDT_TCNT_CNT_SHIFT)) / 1000;
@@ -178,7 +178,7 @@ static int meson_gxbb_wdt_probe(struct platform_device *pdev)
 	watchdog_set_drvdata(&data->wdt_dev, data);
 
 	/* Setup with 1ms timebase */
-	writel(((clk_get_rate(data->clk) / 1000) & GXBB_WDT_CTRL_DIV_MASK) |
+	pete_writel("drivers/watchdog/meson_gxbb_wdt.c:181", ((clk_get_rate(data->clk) / 1000) & GXBB_WDT_CTRL_DIV_MASK) |
 		GXBB_WDT_CTRL_EE_RESET |
 		GXBB_WDT_CTRL_CLK_EN |
 		GXBB_WDT_CTRL_CLKDIV_EN,

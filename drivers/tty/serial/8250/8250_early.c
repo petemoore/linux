@@ -41,11 +41,11 @@ static unsigned int serial8250_early_in(struct uart_port *port, int offset)
 
 	switch (port->iotype) {
 	case UPIO_MEM:
-		return readb(port->membase + offset);
+		return pete_readb("drivers/tty/serial/8250/8250_early.c:44", port->membase + offset);
 	case UPIO_MEM16:
-		return readw(port->membase + offset);
+		return pete_readw("drivers/tty/serial/8250/8250_early.c:46", port->membase + offset);
 	case UPIO_MEM32:
-		return readl(port->membase + offset);
+		return pete_readl("drivers/tty/serial/8250/8250_early.c:48", port->membase + offset);
 	case UPIO_MEM32BE:
 		return ioread32be(port->membase + offset);
 	case UPIO_PORT:
@@ -64,13 +64,13 @@ static void serial8250_early_out(struct uart_port *port, int offset, int value)
 
 	switch (port->iotype) {
 	case UPIO_MEM:
-		writeb(value, port->membase + offset);
+		pete_writeb("drivers/tty/serial/8250/8250_early.c:67", value, port->membase + offset);
 		break;
 	case UPIO_MEM16:
-		writew(value, port->membase + offset);
+		pete_writew("drivers/tty/serial/8250/8250_early.c:70", value, port->membase + offset);
 		break;
 	case UPIO_MEM32:
-		writel(value, port->membase + offset);
+		pete_writel("drivers/tty/serial/8250/8250_early.c:73", value, port->membase + offset);
 		break;
 	case UPIO_MEM32BE:
 		iowrite32be(value, port->membase + offset);

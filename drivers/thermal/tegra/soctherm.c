@@ -367,7 +367,7 @@ static struct soctherm_oc_irq_chip_data soc_irq_cdata;
  */
 static inline void ccroc_writel(struct tegra_soctherm *ts, u32 value, u32 reg)
 {
-	writel(value, (ts->ccroc_regs + reg));
+	pete_writel("drivers/thermal/tegra/soctherm.c:370", value, (ts->ccroc_regs + reg));
 }
 
 /**
@@ -379,7 +379,7 @@ static inline void ccroc_writel(struct tegra_soctherm *ts, u32 value, u32 reg)
  */
 static inline u32 ccroc_readl(struct tegra_soctherm *ts, u32 reg)
 {
-	return readl(ts->ccroc_regs + reg);
+	return pete_readl("drivers/thermal/tegra/soctherm.c:382", ts->ccroc_regs + reg);
 }
 
 static void enable_tsensor(struct tegra_soctherm *tegra, unsigned int i)
@@ -389,15 +389,15 @@ static void enable_tsensor(struct tegra_soctherm *tegra, unsigned int i)
 	unsigned int val;
 
 	val = sensor->config->tall << SENSOR_CONFIG0_TALL_SHIFT;
-	writel(val, base + SENSOR_CONFIG0);
+	pete_writel("drivers/thermal/tegra/soctherm.c:392", val, base + SENSOR_CONFIG0);
 
 	val  = (sensor->config->tsample - 1) << SENSOR_CONFIG1_TSAMPLE_SHIFT;
 	val |= sensor->config->tiddq_en << SENSOR_CONFIG1_TIDDQ_EN_SHIFT;
 	val |= sensor->config->ten_count << SENSOR_CONFIG1_TEN_COUNT_SHIFT;
 	val |= SENSOR_CONFIG1_TEMP_ENABLE;
-	writel(val, base + SENSOR_CONFIG1);
+	pete_writel("drivers/thermal/tegra/soctherm.c:398", val, base + SENSOR_CONFIG1);
 
-	writel(tegra->calib[i], base + SENSOR_CONFIG2);
+	pete_writel("drivers/thermal/tegra/soctherm.c:400", tegra->calib[i], base + SENSOR_CONFIG2);
 }
 
 /*
@@ -426,7 +426,7 @@ static int tegra_thermctl_get_temp(void *data, int *out_temp)
 	struct tegra_thermctl_zone *zone = data;
 	u32 val;
 
-	val = readl(zone->reg);
+	val = pete_readl("drivers/thermal/tegra/soctherm.c:429", zone->reg);
 	val = REG_GET_MASK(val, zone->sg->sensor_temp_mask);
 	*out_temp = translate_temp(val);
 
@@ -484,11 +484,11 @@ static int thermtrip_program(struct device *dev,
 
 	temp = enforce_temp_range(dev, trip_temp) / ts->soc->thresh_grain;
 
-	r = readl(ts->regs + THERMCTL_THERMTRIP_CTL);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:487", ts->regs + THERMCTL_THERMTRIP_CTL);
 	r = REG_SET_MASK(r, sg->thermtrip_threshold_mask, temp);
 	r = REG_SET_MASK(r, sg->thermtrip_enable_mask, 1);
 	r = REG_SET_MASK(r, sg->thermtrip_any_en_mask, 0);
-	writel(r, ts->regs + THERMCTL_THERMTRIP_CTL);
+	pete_writel("drivers/thermal/tegra/soctherm.c:491", r, ts->regs + THERMCTL_THERMTRIP_CTL);
 
 	return 0;
 }
@@ -541,13 +541,13 @@ static int throttrip_program(struct device *dev,
 				 throt);
 	}
 
-	r = readl(ts->regs + reg_off);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:544", ts->regs + reg_off);
 	r = REG_SET_MASK(r, sg->thermctl_lvl0_up_thresh_mask, temp);
 	r = REG_SET_MASK(r, sg->thermctl_lvl0_dn_thresh_mask, temp);
 	r = REG_SET_MASK(r, THERMCTL_LVL0_CPU0_CPU_THROT_MASK, cpu_throt);
 	r = REG_SET_MASK(r, THERMCTL_LVL0_CPU0_GPU_THROT_MASK, gpu_throt);
 	r = REG_SET_MASK(r, THERMCTL_LVL0_CPU0_EN_MASK, 1);
-	writel(r, ts->regs + reg_off);
+	pete_writel("drivers/thermal/tegra/soctherm.c:550", r, ts->regs + reg_off);
 
 	return 0;
 }
@@ -670,9 +670,9 @@ static void thermal_irq_enable(struct tegra_thermctl_zone *zn)
 
 	/* multiple zones could be handling and setting trips at once */
 	mutex_lock(&zn->ts->thermctl_lock);
-	r = readl(zn->ts->regs + THERMCTL_INTR_ENABLE);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:673", zn->ts->regs + THERMCTL_INTR_ENABLE);
 	r = REG_SET_MASK(r, zn->sg->thermctl_isr_mask, TH_INTR_UP_DN_EN);
-	writel(r, zn->ts->regs + THERMCTL_INTR_ENABLE);
+	pete_writel("drivers/thermal/tegra/soctherm.c:675", r, zn->ts->regs + THERMCTL_INTR_ENABLE);
 	mutex_unlock(&zn->ts->thermctl_lock);
 }
 
@@ -682,9 +682,9 @@ static void thermal_irq_disable(struct tegra_thermctl_zone *zn)
 
 	/* multiple zones could be handling and setting trips at once */
 	mutex_lock(&zn->ts->thermctl_lock);
-	r = readl(zn->ts->regs + THERMCTL_INTR_DISABLE);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:685", zn->ts->regs + THERMCTL_INTR_DISABLE);
 	r = REG_SET_MASK(r, zn->sg->thermctl_isr_mask, 0);
-	writel(r, zn->ts->regs + THERMCTL_INTR_DISABLE);
+	pete_writel("drivers/thermal/tegra/soctherm.c:687", r, zn->ts->regs + THERMCTL_INTR_DISABLE);
 	mutex_unlock(&zn->ts->thermctl_lock);
 }
 
@@ -695,9 +695,9 @@ static int tegra_thermctl_set_trips(void *data, int lo, int hi)
 
 	thermal_irq_disable(zone);
 
-	r = readl(zone->ts->regs + zone->sg->thermctl_lvl0_offset);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:698", zone->ts->regs + zone->sg->thermctl_lvl0_offset);
 	r = REG_SET_MASK(r, THERMCTL_LVL0_CPU0_EN_MASK, 0);
-	writel(r, zone->ts->regs + zone->sg->thermctl_lvl0_offset);
+	pete_writel("drivers/thermal/tegra/soctherm.c:700", r, zone->ts->regs + zone->sg->thermctl_lvl0_offset);
 
 	lo = enforce_temp_range(zone->dev, lo) / zone->ts->soc->thresh_grain;
 	hi = enforce_temp_range(zone->dev, hi) / zone->ts->soc->thresh_grain;
@@ -706,7 +706,7 @@ static int tegra_thermctl_set_trips(void *data, int lo, int hi)
 	r = REG_SET_MASK(r, zone->sg->thermctl_lvl0_up_thresh_mask, hi);
 	r = REG_SET_MASK(r, zone->sg->thermctl_lvl0_dn_thresh_mask, lo);
 	r = REG_SET_MASK(r, THERMCTL_LVL0_CPU0_EN_MASK, 1);
-	writel(r, zone->ts->regs + zone->sg->thermctl_lvl0_offset);
+	pete_writel("drivers/thermal/tegra/soctherm.c:709", r, zone->ts->regs + zone->sg->thermctl_lvl0_offset);
 
 	thermal_irq_enable(zone);
 
@@ -845,8 +845,8 @@ static irqreturn_t soctherm_thermal_isr(int irq, void *dev_id)
 	 * cause a new interrupt but this is taken care of by the re-reading of
 	 * the STATUS register in the thread function.
 	 */
-	r = readl(ts->regs + THERMCTL_INTR_STATUS);
-	writel(r, ts->regs + THERMCTL_INTR_DISABLE);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:848", ts->regs + THERMCTL_INTR_STATUS);
+	pete_writel("drivers/thermal/tegra/soctherm.c:849", r, ts->regs + THERMCTL_INTR_DISABLE);
 
 	return IRQ_WAKE_THREAD;
 }
@@ -874,7 +874,7 @@ static irqreturn_t soctherm_thermal_isr_thread(int irq, void *dev_id)
 	struct thermal_zone_device *tz;
 	u32 st, ex = 0, cp = 0, gp = 0, pl = 0, me = 0;
 
-	st = readl(ts->regs + THERMCTL_INTR_STATUS);
+	st = pete_readl("drivers/thermal/tegra/soctherm.c:877", ts->regs + THERMCTL_INTR_STATUS);
 
 	/* deliberately clear expected interrupts handled in SW */
 	cp |= st & TH_INTR_CD0_MASK;
@@ -891,7 +891,7 @@ static irqreturn_t soctherm_thermal_isr_thread(int irq, void *dev_id)
 
 	ex |= cp | gp | pl | me;
 	if (ex) {
-		writel(ex, ts->regs + THERMCTL_INTR_STATUS);
+		pete_writel("drivers/thermal/tegra/soctherm.c:894", ex, ts->regs + THERMCTL_INTR_STATUS);
 		st &= ~ex;
 
 		if (cp) {
@@ -926,7 +926,7 @@ static irqreturn_t soctherm_thermal_isr_thread(int irq, void *dev_id)
 	if (st) {
 		/* Whine about any other unexpected INTR bits still set */
 		pr_err("soctherm: Ignored unexpected INTRs 0x%08x\n", st);
-		writel(st, ts->regs + THERMCTL_INTR_STATUS);
+		pete_writel("drivers/thermal/tegra/soctherm.c:929", st, ts->regs + THERMCTL_INTR_STATUS);
 	}
 
 	return IRQ_HANDLED;
@@ -951,7 +951,7 @@ static void soctherm_oc_intr_enable(struct tegra_soctherm *ts,
 	if (!enable)
 		return;
 
-	r = readl(ts->regs + OC_INTR_ENABLE);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:954", ts->regs + OC_INTR_ENABLE);
 	switch (alarm) {
 	case THROTTLE_OC1:
 		r = REG_SET_MASK(r, OC_INTR_OC1_MASK, 1);
@@ -969,7 +969,7 @@ static void soctherm_oc_intr_enable(struct tegra_soctherm *ts,
 		r = 0;
 		break;
 	}
-	writel(r, ts->regs + OC_INTR_ENABLE);
+	pete_writel("drivers/thermal/tegra/soctherm.c:972", r, ts->regs + OC_INTR_ENABLE);
 }
 
 /**
@@ -1035,7 +1035,7 @@ static irqreturn_t soctherm_edp_isr_thread(int irq, void *arg)
 	struct tegra_soctherm *ts = arg;
 	u32 st, ex, oc1, oc2, oc3, oc4;
 
-	st = readl(ts->regs + OC_INTR_STATUS);
+	st = pete_readl("drivers/thermal/tegra/soctherm.c:1038", ts->regs + OC_INTR_STATUS);
 
 	/* deliberately clear expected interrupts handled in SW */
 	oc1 = st & OC_INTR_OC1_MASK;
@@ -1046,7 +1046,7 @@ static irqreturn_t soctherm_edp_isr_thread(int irq, void *arg)
 
 	pr_err("soctherm: OC ALARM 0x%08x\n", ex);
 	if (ex) {
-		writel(st, ts->regs + OC_INTR_STATUS);
+		pete_writel("drivers/thermal/tegra/soctherm.c:1049", st, ts->regs + OC_INTR_STATUS);
 		st &= ~ex;
 
 		if (oc1 && !soctherm_handle_alarm(THROTTLE_OC1))
@@ -1080,7 +1080,7 @@ static irqreturn_t soctherm_edp_isr_thread(int irq, void *arg)
 
 	if (st) {
 		pr_err("soctherm: Ignored unexpected OC ALARM 0x%08x\n", st);
-		writel(st, ts->regs + OC_INTR_STATUS);
+		pete_writel("drivers/thermal/tegra/soctherm.c:1083", st, ts->regs + OC_INTR_STATUS);
 	}
 
 	return IRQ_HANDLED;
@@ -1109,8 +1109,8 @@ static irqreturn_t soctherm_edp_isr(int irq, void *arg)
 	if (!ts)
 		return IRQ_NONE;
 
-	r = readl(ts->regs + OC_INTR_STATUS);
-	writel(r, ts->regs + OC_INTR_DISABLE);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:1112", ts->regs + OC_INTR_STATUS);
+	pete_writel("drivers/thermal/tegra/soctherm.c:1113", r, ts->regs + OC_INTR_DISABLE);
 
 	return IRQ_WAKE_THREAD;
 }
@@ -1301,7 +1301,7 @@ static int regs_show(struct seq_file *s, void *data)
 	seq_puts(s, "-----TSENSE (convert HW)-----\n");
 
 	for (i = 0; i < ts->soc->num_tsensors; i++) {
-		r = readl(ts->regs + tsensors[i].base + SENSOR_CONFIG1);
+		r = pete_readl("drivers/thermal/tegra/soctherm.c:1304", ts->regs + tsensors[i].base + SENSOR_CONFIG1);
 		state = REG_GET_MASK(r, SENSOR_CONFIG1_TEMP_ENABLE);
 
 		seq_printf(s, "%s: ", tsensors[i].name);
@@ -1319,19 +1319,19 @@ static int regs_show(struct seq_file *s, void *data)
 		state = REG_GET_MASK(r, SENSOR_CONFIG1_TSAMPLE_MASK);
 		seq_printf(s, "tsample(%d) ", state + 1);
 
-		r = readl(ts->regs + tsensors[i].base + SENSOR_STATUS1);
+		r = pete_readl("drivers/thermal/tegra/soctherm.c:1322", ts->regs + tsensors[i].base + SENSOR_STATUS1);
 		state = REG_GET_MASK(r, SENSOR_STATUS1_TEMP_VALID_MASK);
 		seq_printf(s, "Temp(%d/", state);
 		state = REG_GET_MASK(r, SENSOR_STATUS1_TEMP_MASK);
 		seq_printf(s, "%d) ", translate_temp(state));
 
-		r = readl(ts->regs + tsensors[i].base + SENSOR_STATUS0);
+		r = pete_readl("drivers/thermal/tegra/soctherm.c:1328", ts->regs + tsensors[i].base + SENSOR_STATUS0);
 		state = REG_GET_MASK(r, SENSOR_STATUS0_VALID_MASK);
 		seq_printf(s, "Capture(%d/", state);
 		state = REG_GET_MASK(r, SENSOR_STATUS0_CAPTURE_MASK);
 		seq_printf(s, "%d) ", state);
 
-		r = readl(ts->regs + tsensors[i].base + SENSOR_CONFIG0);
+		r = pete_readl("drivers/thermal/tegra/soctherm.c:1334", ts->regs + tsensors[i].base + SENSOR_CONFIG0);
 		state = REG_GET_MASK(r, SENSOR_CONFIG0_STOP);
 		seq_printf(s, "Stop(%d) ", state);
 		state = REG_GET_MASK(r, SENSOR_CONFIG0_TALL_MASK);
@@ -1343,28 +1343,28 @@ static int regs_show(struct seq_file *s, void *data)
 		state = REG_GET_MASK(r, SENSOR_CONFIG0_CPTR_OVER);
 		seq_printf(s, "%d) ", state);
 
-		r = readl(ts->regs + tsensors[i].base + SENSOR_CONFIG2);
+		r = pete_readl("drivers/thermal/tegra/soctherm.c:1346", ts->regs + tsensors[i].base + SENSOR_CONFIG2);
 		state = REG_GET_MASK(r, SENSOR_CONFIG2_THERMA_MASK);
 		seq_printf(s, "Therm_A/B(%d/", state);
 		state = REG_GET_MASK(r, SENSOR_CONFIG2_THERMB_MASK);
 		seq_printf(s, "%d)\n", (s16)state);
 	}
 
-	r = readl(ts->regs + SENSOR_PDIV);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:1353", ts->regs + SENSOR_PDIV);
 	seq_printf(s, "PDIV: 0x%x\n", r);
 
-	r = readl(ts->regs + SENSOR_HOTSPOT_OFF);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:1356", ts->regs + SENSOR_HOTSPOT_OFF);
 	seq_printf(s, "HOTSPOT: 0x%x\n", r);
 
 	seq_puts(s, "\n");
 	seq_puts(s, "-----SOC_THERM-----\n");
 
-	r = readl(ts->regs + SENSOR_TEMP1);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:1362", ts->regs + SENSOR_TEMP1);
 	state = REG_GET_MASK(r, SENSOR_TEMP1_CPU_TEMP_MASK);
 	seq_printf(s, "Temperatures: CPU(%d) ", translate_temp(state));
 	state = REG_GET_MASK(r, SENSOR_TEMP1_GPU_TEMP_MASK);
 	seq_printf(s, " GPU(%d) ", translate_temp(state));
-	r = readl(ts->regs + SENSOR_TEMP2);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:1367", ts->regs + SENSOR_TEMP2);
 	state = REG_GET_MASK(r, SENSOR_TEMP2_PLLX_TEMP_MASK);
 	seq_printf(s, " PLLX(%d) ", translate_temp(state));
 	state = REG_GET_MASK(r, SENSOR_TEMP2_MEM_TEMP_MASK);
@@ -1377,7 +1377,7 @@ static int regs_show(struct seq_file *s, void *data)
 			u32 mask;
 			u16 off = ttgs[i]->thermctl_lvl0_offset;
 
-			r = readl(ts->regs + THERMCTL_LVL_REG(off, level));
+			r = pete_readl("drivers/thermal/tegra/soctherm.c:1380", ts->regs + THERMCTL_LVL_REG(off, level));
 
 			mask = ttgs[i]->thermctl_lvl0_up_thresh_mask;
 			state = REG_GET_MASK(r, mask);
@@ -1428,7 +1428,7 @@ static int regs_show(struct seq_file *s, void *data)
 		}
 	}
 
-	r = readl(ts->regs + THERMCTL_STATS_CTL);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:1431", ts->regs + THERMCTL_STATS_CTL);
 	seq_printf(s, "STATS: Up(%s) Dn(%s)\n",
 		   r & STATS_CTL_EN_UP ? "En" : "--",
 		   r & STATS_CTL_EN_DN ? "En" : "--");
@@ -1437,15 +1437,15 @@ static int regs_show(struct seq_file *s, void *data)
 		u16 off;
 
 		off = THERMCTL_LVL0_UP_STATS;
-		r = readl(ts->regs + THERMCTL_LVL_REG(off, level));
+		r = pete_readl("drivers/thermal/tegra/soctherm.c:1440", ts->regs + THERMCTL_LVL_REG(off, level));
 		seq_printf(s, "  Level_%d Up(%d) ", level, r);
 
 		off = THERMCTL_LVL0_DN_STATS;
-		r = readl(ts->regs + THERMCTL_LVL_REG(off, level));
+		r = pete_readl("drivers/thermal/tegra/soctherm.c:1444", ts->regs + THERMCTL_LVL_REG(off, level));
 		seq_printf(s, "Dn(%d)\n", r);
 	}
 
-	r = readl(ts->regs + THERMCTL_THERMTRIP_CTL);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:1448", ts->regs + THERMCTL_THERMTRIP_CTL);
 	state = REG_GET_MASK(r, ttgs[0]->thermtrip_any_en_mask);
 	seq_printf(s, "Thermtrip Any En(%d)\n", state);
 	for (i = 0; i < ts->soc->num_ttgs; i++) {
@@ -1456,12 +1456,12 @@ static int regs_show(struct seq_file *s, void *data)
 		seq_printf(s, "Thresh(%d)\n", state);
 	}
 
-	r = readl(ts->regs + THROT_GLOBAL_CFG);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:1459", ts->regs + THROT_GLOBAL_CFG);
 	seq_puts(s, "\n");
 	seq_printf(s, "GLOBAL THROTTLE CONFIG: 0x%08x\n", r);
 
 	seq_puts(s, "---------------------------------------------------\n");
-	r = readl(ts->regs + THROT_STATUS);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:1464", ts->regs + THROT_STATUS);
 	state = REG_GET_MASK(r, THROT_STATUS_BREACH_MASK);
 	seq_printf(s, "THROT STATUS: breach(%d) ", state);
 	state = REG_GET_MASK(r, THROT_STATUS_STATE_MASK);
@@ -1469,7 +1469,7 @@ static int regs_show(struct seq_file *s, void *data)
 	state = REG_GET_MASK(r, THROT_STATUS_ENABLED_MASK);
 	seq_printf(s, "enabled(%d)\n", state);
 
-	r = readl(ts->regs + CPU_PSKIP_STATUS);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:1472", ts->regs + CPU_PSKIP_STATUS);
 	if (ts->soc->use_ccroc) {
 		state = REG_GET_MASK(r, XPU_PSKIP_STATUS_ENABLED_MASK);
 		seq_printf(s, "CPU PSKIP STATUS: enabled(%d)\n", state);
@@ -1548,7 +1548,7 @@ static int throt_get_cdev_cur_state(struct thermal_cooling_device *cdev,
 	struct tegra_soctherm *ts = cdev->devdata;
 	u32 r;
 
-	r = readl(ts->regs + THROT_STATUS);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:1551", ts->regs + THROT_STATUS);
 	if (REG_GET_MASK(r, THROT_STATUS_STATE_MASK))
 		*cur_state = 1;
 	else
@@ -1836,15 +1836,15 @@ static void throttlectl_cpu_level_select(struct tegra_soctherm *ts,
 		break;
 	}
 
-	r = readl(ts->regs + THROT_PSKIP_CTRL(throt, THROTTLE_DEV_CPU));
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:1839", ts->regs + THROT_PSKIP_CTRL(throt, THROTTLE_DEV_CPU));
 	r = REG_SET_MASK(r, THROT_PSKIP_CTRL_ENABLE_MASK, 1);
 	r = REG_SET_MASK(r, THROT_PSKIP_CTRL_VECT_CPU_MASK, throt_vect);
 	r = REG_SET_MASK(r, THROT_PSKIP_CTRL_VECT2_CPU_MASK, throt_vect);
-	writel(r, ts->regs + THROT_PSKIP_CTRL(throt, THROTTLE_DEV_CPU));
+	pete_writel("drivers/thermal/tegra/soctherm.c:1843", r, ts->regs + THROT_PSKIP_CTRL(throt, THROTTLE_DEV_CPU));
 
 	/* bypass sequencer in soc_therm as it is programmed in ccroc */
 	r = REG_SET_MASK(0, THROT_PSKIP_RAMP_SEQ_BYPASS_MODE_MASK, 1);
-	writel(r, ts->regs + THROT_PSKIP_RAMP(throt, THROTTLE_DEV_CPU));
+	pete_writel("drivers/thermal/tegra/soctherm.c:1847", r, ts->regs + THROT_PSKIP_RAMP(throt, THROTTLE_DEV_CPU));
 }
 
 /**
@@ -1869,16 +1869,16 @@ static void throttlectl_cpu_mn(struct tegra_soctherm *ts,
 	depth = ts->throt_cfgs[throt].cpu_throt_depth;
 	dividend = THROT_DEPTH_DIVIDEND(depth);
 
-	r = readl(ts->regs + THROT_PSKIP_CTRL(throt, THROTTLE_DEV_CPU));
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:1872", ts->regs + THROT_PSKIP_CTRL(throt, THROTTLE_DEV_CPU));
 	r = REG_SET_MASK(r, THROT_PSKIP_CTRL_ENABLE_MASK, 1);
 	r = REG_SET_MASK(r, THROT_PSKIP_CTRL_DIVIDEND_MASK, dividend);
 	r = REG_SET_MASK(r, THROT_PSKIP_CTRL_DIVISOR_MASK, 0xff);
-	writel(r, ts->regs + THROT_PSKIP_CTRL(throt, THROTTLE_DEV_CPU));
+	pete_writel("drivers/thermal/tegra/soctherm.c:1876", r, ts->regs + THROT_PSKIP_CTRL(throt, THROTTLE_DEV_CPU));
 
-	r = readl(ts->regs + THROT_PSKIP_RAMP(throt, THROTTLE_DEV_CPU));
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:1878", ts->regs + THROT_PSKIP_RAMP(throt, THROTTLE_DEV_CPU));
 	r = REG_SET_MASK(r, THROT_PSKIP_RAMP_DURATION_MASK, 0xff);
 	r = REG_SET_MASK(r, THROT_PSKIP_RAMP_STEP_MASK, 0xf);
-	writel(r, ts->regs + THROT_PSKIP_RAMP(throt, THROTTLE_DEV_CPU));
+	pete_writel("drivers/thermal/tegra/soctherm.c:1881", r, ts->regs + THROT_PSKIP_RAMP(throt, THROTTLE_DEV_CPU));
 }
 
 /**
@@ -1898,10 +1898,10 @@ static void throttlectl_gpu_level_select(struct tegra_soctherm *ts,
 
 	level = ts->throt_cfgs[throt].gpu_throt_level;
 	throt_vect = THROT_LEVEL_TO_DEPTH(level);
-	r = readl(ts->regs + THROT_PSKIP_CTRL(throt, THROTTLE_DEV_GPU));
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:1901", ts->regs + THROT_PSKIP_CTRL(throt, THROTTLE_DEV_GPU));
 	r = REG_SET_MASK(r, THROT_PSKIP_CTRL_ENABLE_MASK, 1);
 	r = REG_SET_MASK(r, THROT_PSKIP_CTRL_VECT_GPU_MASK, throt_vect);
-	writel(r, ts->regs + THROT_PSKIP_CTRL(throt, THROTTLE_DEV_GPU));
+	pete_writel("drivers/thermal/tegra/soctherm.c:1904", r, ts->regs + THROT_PSKIP_CTRL(throt, THROTTLE_DEV_GPU));
 }
 
 static int soctherm_oc_cfg_program(struct tegra_soctherm *ts,
@@ -1917,10 +1917,10 @@ static int soctherm_oc_cfg_program(struct tegra_soctherm *ts,
 	r = REG_SET_MASK(r, OC1_CFG_THROTTLE_MODE_MASK, oc->mode);
 	r = REG_SET_MASK(r, OC1_CFG_ALARM_POLARITY_MASK, oc->active_low);
 	r = REG_SET_MASK(r, OC1_CFG_EN_THROTTLE_MASK, 1);
-	writel(r, ts->regs + ALARM_CFG(throt));
-	writel(oc->throt_period, ts->regs + ALARM_THROTTLE_PERIOD(throt));
-	writel(oc->alarm_cnt_thresh, ts->regs + ALARM_CNT_THRESHOLD(throt));
-	writel(oc->alarm_filter, ts->regs + ALARM_FILTER(throt));
+	pete_writel("drivers/thermal/tegra/soctherm.c:1920", r, ts->regs + ALARM_CFG(throt));
+	pete_writel("drivers/thermal/tegra/soctherm.c:1921", oc->throt_period, ts->regs + ALARM_THROTTLE_PERIOD(throt));
+	pete_writel("drivers/thermal/tegra/soctherm.c:1922", oc->alarm_cnt_thresh, ts->regs + ALARM_CNT_THRESHOLD(throt));
+	pete_writel("drivers/thermal/tegra/soctherm.c:1923", oc->alarm_filter, ts->regs + ALARM_FILTER(throt));
 	soctherm_oc_intr_enable(ts, throt, oc->intr_en);
 
 	return 0;
@@ -1955,18 +1955,18 @@ static void soctherm_throttle_program(struct tegra_soctherm *ts,
 	throttlectl_gpu_level_select(ts, throt);
 
 	r = REG_SET_MASK(0, THROT_PRIORITY_LITE_PRIO_MASK, stc.priority);
-	writel(r, ts->regs + THROT_PRIORITY_CTRL(throt));
+	pete_writel("drivers/thermal/tegra/soctherm.c:1958", r, ts->regs + THROT_PRIORITY_CTRL(throt));
 
 	r = REG_SET_MASK(0, THROT_DELAY_LITE_DELAY_MASK, 0);
-	writel(r, ts->regs + THROT_DELAY_CTRL(throt));
+	pete_writel("drivers/thermal/tegra/soctherm.c:1961", r, ts->regs + THROT_DELAY_CTRL(throt));
 
-	r = readl(ts->regs + THROT_PRIORITY_LOCK);
+	r = pete_readl("drivers/thermal/tegra/soctherm.c:1963", ts->regs + THROT_PRIORITY_LOCK);
 	r = REG_GET_MASK(r, THROT_PRIORITY_LOCK_PRIORITY_MASK);
 	if (r >= stc.priority)
 		return;
 	r = REG_SET_MASK(0, THROT_PRIORITY_LOCK_PRIORITY_MASK,
 			 stc.priority);
-	writel(r, ts->regs + THROT_PRIORITY_LOCK);
+	pete_writel("drivers/thermal/tegra/soctherm.c:1969", r, ts->regs + THROT_PRIORITY_LOCK);
 }
 
 static void tegra_soctherm_throttle(struct device *dev)
@@ -1994,17 +1994,17 @@ static void tegra_soctherm_throttle(struct device *dev)
 		v = REG_SET_MASK(v, CDIVG_USE_THERM_CONTROLS_MASK, 1);
 		ccroc_writel(ts, v, CCROC_SUPER_CCLKG_DIVIDER);
 	} else {
-		writel(v, ts->regs + THROT_GLOBAL_CFG);
+		pete_writel("drivers/thermal/tegra/soctherm.c:1997", v, ts->regs + THROT_GLOBAL_CFG);
 
-		v = readl(ts->clk_regs + CAR_SUPER_CCLKG_DIVIDER);
+		v = pete_readl("drivers/thermal/tegra/soctherm.c:1999", ts->clk_regs + CAR_SUPER_CCLKG_DIVIDER);
 		v = REG_SET_MASK(v, CDIVG_USE_THERM_CONTROLS_MASK, 1);
-		writel(v, ts->clk_regs + CAR_SUPER_CCLKG_DIVIDER);
+		pete_writel("drivers/thermal/tegra/soctherm.c:2001", v, ts->clk_regs + CAR_SUPER_CCLKG_DIVIDER);
 	}
 
 	/* initialize stats collection */
 	v = STATS_CTL_CLR_DN | STATS_CTL_EN_DN |
 	    STATS_CTL_CLR_UP | STATS_CTL_EN_UP;
-	writel(v, ts->regs + THERMCTL_STATS_CTL);
+	pete_writel("drivers/thermal/tegra/soctherm.c:2007", v, ts->regs + THERMCTL_STATS_CTL);
 }
 
 static int soctherm_interrupts_init(struct platform_device *pdev,
@@ -2070,8 +2070,8 @@ static void soctherm_init(struct platform_device *pdev)
 		enable_tsensor(tegra, i);
 
 	/* program pdiv and hotspot offsets per THERM */
-	pdiv = readl(tegra->regs + SENSOR_PDIV);
-	hotspot = readl(tegra->regs + SENSOR_HOTSPOT_OFF);
+	pdiv = pete_readl("drivers/thermal/tegra/soctherm.c:2073", tegra->regs + SENSOR_PDIV);
+	hotspot = pete_readl("drivers/thermal/tegra/soctherm.c:2074", tegra->regs + SENSOR_HOTSPOT_OFF);
 	for (i = 0; i < tegra->soc->num_ttgs; ++i) {
 		pdiv = REG_SET_MASK(pdiv, ttgs[i]->pdiv_mask,
 				    ttgs[i]->pdiv);
@@ -2082,8 +2082,8 @@ static void soctherm_init(struct platform_device *pdev)
 					ttgs[i]->pllx_hotspot_mask,
 					ttgs[i]->pllx_hotspot_diff);
 	}
-	writel(pdiv, tegra->regs + SENSOR_PDIV);
-	writel(hotspot, tegra->regs + SENSOR_HOTSPOT_OFF);
+	pete_writel("drivers/thermal/tegra/soctherm.c:2085", pdiv, tegra->regs + SENSOR_PDIV);
+	pete_writel("drivers/thermal/tegra/soctherm.c:2086", hotspot, tegra->regs + SENSOR_HOTSPOT_OFF);
 
 	/* Configure hw throttle */
 	tegra_soctherm_throttle(&pdev->dev);

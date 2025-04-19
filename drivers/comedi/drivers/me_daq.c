@@ -174,7 +174,7 @@ static int me_dio_insn_config(struct comedi_device *dev,
 	else
 		devpriv->ctrl2 &= ~ME_CTRL2_PORT_B_ENA;
 
-	writew(devpriv->ctrl2, dev->mmio + ME_CTRL2_REG);
+	pete_writew("drivers/comedi/drivers/me_daq.c:177", devpriv->ctrl2, dev->mmio + ME_CTRL2_REG);
 
 	return insn->n;
 }
@@ -192,20 +192,20 @@ static int me_dio_insn_bits(struct comedi_device *dev,
 	mask = comedi_dio_update_state(s, data);
 	if (mask) {
 		if (mask & 0x0000ffff)
-			writew((s->state & 0xffff), mmio_porta);
+			pete_writew("drivers/comedi/drivers/me_daq.c:195", (s->state & 0xffff), mmio_porta);
 		if (mask & 0xffff0000)
-			writew(((s->state >> 16) & 0xffff), mmio_portb);
+			pete_writew("drivers/comedi/drivers/me_daq.c:197", ((s->state >> 16) & 0xffff), mmio_portb);
 	}
 
 	if (s->io_bits & 0x0000ffff)
 		val = s->state & 0xffff;
 	else
-		val = readw(mmio_porta);
+		val = pete_readw("drivers/comedi/drivers/me_daq.c:203", mmio_porta);
 
 	if (s->io_bits & 0xffff0000)
 		val |= (s->state & 0xffff0000);
 	else
-		val |= (readw(mmio_portb) << 16);
+		val |= (pete_readw("drivers/comedi/drivers/me_daq.c:208", mmio_portb) << 16);
 
 	data[1] = val;
 
@@ -219,7 +219,7 @@ static int me_ai_eoc(struct comedi_device *dev,
 {
 	unsigned int status;
 
-	status = readw(dev->mmio + ME_STATUS_REG);
+	status = pete_readw("drivers/comedi/drivers/me_daq.c:222", dev->mmio + ME_STATUS_REG);
 	if ((status & ME_STATUS_ADFIFO_EMPTY) == 0)
 		return 0;
 	return -EBUSY;
@@ -249,13 +249,13 @@ static int me_ai_insn_read(struct comedi_device *dev,
 
 	/* clear chanlist and ad fifo */
 	devpriv->ctrl2 &= ~(ME_CTRL2_ADFIFO_ENA | ME_CTRL2_CHANLIST_ENA);
-	writew(devpriv->ctrl2, dev->mmio + ME_CTRL2_REG);
+	pete_writew("drivers/comedi/drivers/me_daq.c:252", devpriv->ctrl2, dev->mmio + ME_CTRL2_REG);
 
-	writew(0x00, dev->mmio + ME_STATUS_REG);	/* clear interrupts */
+	pete_writew("drivers/comedi/drivers/me_daq.c:254", 0x00, dev->mmio + ME_STATUS_REG);	/* clear interrupts */
 
 	/* enable the chanlist and ADC fifo */
 	devpriv->ctrl2 |= (ME_CTRL2_ADFIFO_ENA | ME_CTRL2_CHANLIST_ENA);
-	writew(devpriv->ctrl2, dev->mmio + ME_CTRL2_REG);
+	pete_writew("drivers/comedi/drivers/me_daq.c:258", devpriv->ctrl2, dev->mmio + ME_CTRL2_REG);
 
 	/* write to channel list fifo */
 	val = ME_AI_FIFO_CHANLIST_CHAN(chan) | ME_AI_FIFO_CHANLIST_GAIN(range);
@@ -263,15 +263,15 @@ static int me_ai_insn_read(struct comedi_device *dev,
 		val |= ME_AI_FIFO_CHANLIST_UNIPOLAR;
 	if (aref & AREF_DIFF)
 		val |= ME_AI_FIFO_CHANLIST_DIFF;
-	writew(val, dev->mmio + ME_AI_FIFO_REG);
+	pete_writew("drivers/comedi/drivers/me_daq.c:266", val, dev->mmio + ME_AI_FIFO_REG);
 
 	/* set ADC mode to software trigger */
 	devpriv->ctrl1 |= ME_CTRL1_ADC_MODE_SOFT_TRIG;
-	writew(devpriv->ctrl1, dev->mmio + ME_CTRL1_REG);
+	pete_writew("drivers/comedi/drivers/me_daq.c:270", devpriv->ctrl1, dev->mmio + ME_CTRL1_REG);
 
 	for (i = 0; i < insn->n; i++) {
 		/* start ai conversion */
-		readw(dev->mmio + ME_CTRL1_REG);
+		pete_readw("drivers/comedi/drivers/me_daq.c:274", dev->mmio + ME_CTRL1_REG);
 
 		/* wait for ADC fifo not empty flag */
 		ret = comedi_timeout(dev, s, insn, me_ai_eoc, 0);
@@ -279,7 +279,7 @@ static int me_ai_insn_read(struct comedi_device *dev,
 			break;
 
 		/* get value from ADC fifo */
-		val = readw(dev->mmio + ME_AI_FIFO_REG) & s->maxdata;
+		val = pete_readw("drivers/comedi/drivers/me_daq.c:282", dev->mmio + ME_AI_FIFO_REG) & s->maxdata;
 
 		/* munge 2's complement value to offset binary */
 		data[i] = comedi_offset_munge(s, val);
@@ -287,7 +287,7 @@ static int me_ai_insn_read(struct comedi_device *dev,
 
 	/* stop any running conversion */
 	devpriv->ctrl1 &= ~ME_CTRL1_ADC_MODE_MASK;
-	writew(devpriv->ctrl1, dev->mmio + ME_CTRL1_REG);
+	pete_writew("drivers/comedi/drivers/me_daq.c:290", devpriv->ctrl1, dev->mmio + ME_CTRL1_REG);
 
 	return ret ? ret : insn->n;
 }
@@ -305,11 +305,11 @@ static int me_ao_insn_write(struct comedi_device *dev,
 
 	/* Enable all DAC */
 	devpriv->ctrl2 |= ME_CTRL2_DAC_ENA;
-	writew(devpriv->ctrl2, dev->mmio + ME_CTRL2_REG);
+	pete_writew("drivers/comedi/drivers/me_daq.c:308", devpriv->ctrl2, dev->mmio + ME_CTRL2_REG);
 
 	/* and set DAC to "buffered" mode */
 	devpriv->ctrl2 |= ME_CTRL2_BUFFERED_DAC;
-	writew(devpriv->ctrl2, dev->mmio + ME_CTRL2_REG);
+	pete_writew("drivers/comedi/drivers/me_daq.c:312", devpriv->ctrl2, dev->mmio + ME_CTRL2_REG);
 
 	/* Set dac-control register */
 	devpriv->dac_ctrl &= ~ME_DAC_CTRL_MASK(chan);
@@ -317,21 +317,21 @@ static int me_ao_insn_write(struct comedi_device *dev,
 		devpriv->dac_ctrl |= ME_DAC_CTRL_GAIN(chan);
 	if (comedi_range_is_bipolar(s, range))
 		devpriv->dac_ctrl |= ME_DAC_CTRL_BIPOLAR(chan);
-	writew(devpriv->dac_ctrl, dev->mmio + ME_DAC_CTRL_REG);
+	pete_writew("drivers/comedi/drivers/me_daq.c:320", devpriv->dac_ctrl, dev->mmio + ME_DAC_CTRL_REG);
 
 	/* Update dac-control register */
-	readw(dev->mmio + ME_DAC_CTRL_REG);
+	pete_readw("drivers/comedi/drivers/me_daq.c:323", dev->mmio + ME_DAC_CTRL_REG);
 
 	/* Set data register */
 	for (i = 0; i < insn->n; i++) {
 		val = data[i];
 
-		writew(val, dev->mmio + ME_AO_DATA_REG(chan));
+		pete_writew("drivers/comedi/drivers/me_daq.c:329", val, dev->mmio + ME_AO_DATA_REG(chan));
 	}
 	s->readback[chan] = val;
 
 	/* Update dac with data registers */
-	readw(dev->mmio + ME_CTRL2_REG);
+	pete_readw("drivers/comedi/drivers/me_daq.c:334", dev->mmio + ME_CTRL2_REG);
 
 	return insn->n;
 }
@@ -346,16 +346,16 @@ static int me2600_xilinx_download(struct comedi_device *dev,
 	unsigned int i;
 
 	/* disable irq's on PLX */
-	writel(0x00, devpriv->plx_regbase + PLX9052_INTCSR);
+	pete_writel("drivers/comedi/drivers/me_daq.c:349", 0x00, devpriv->plx_regbase + PLX9052_INTCSR);
 
 	/* First, make a dummy read to reset xilinx */
-	value = readw(dev->mmio + XILINX_DOWNLOAD_RESET);
+	value = pete_readw("drivers/comedi/drivers/me_daq.c:352", dev->mmio + XILINX_DOWNLOAD_RESET);
 
 	/* Wait until reset is over */
 	sleep(1);
 
 	/* Write a dummy value to Xilinx */
-	writeb(0x00, dev->mmio + 0x0);
+	pete_writeb("drivers/comedi/drivers/me_daq.c:358", 0x00, dev->mmio + 0x0);
 	sleep(1);
 
 	/*
@@ -379,17 +379,17 @@ static int me2600_xilinx_download(struct comedi_device *dev,
 	 * Firmware data start at offset 16
 	 */
 	for (i = 0; i < file_length; i++)
-		writeb((data[16 + i] & 0xff), dev->mmio + 0x0);
+		pete_writeb("drivers/comedi/drivers/me_daq.c:382", (data[16 + i] & 0xff), dev->mmio + 0x0);
 
 	/* Write 5 dummy values to xilinx */
 	for (i = 0; i < 5; i++)
-		writeb(0x00, dev->mmio + 0x0);
+		pete_writeb("drivers/comedi/drivers/me_daq.c:386", 0x00, dev->mmio + 0x0);
 
 	/* Test if there was an error during download -> INTB was thrown */
-	value = readl(devpriv->plx_regbase + PLX9052_INTCSR);
+	value = pete_readl("drivers/comedi/drivers/me_daq.c:389", devpriv->plx_regbase + PLX9052_INTCSR);
 	if (value & PLX9052_INTCSR_LI2STAT) {
 		/* Disable interrupt */
-		writel(0x00, devpriv->plx_regbase + PLX9052_INTCSR);
+		pete_writel("drivers/comedi/drivers/me_daq.c:392", 0x00, devpriv->plx_regbase + PLX9052_INTCSR);
 		dev_err(dev->class_dev, "Xilinx download failed\n");
 		return -EIO;
 	}
@@ -398,7 +398,7 @@ static int me2600_xilinx_download(struct comedi_device *dev,
 	sleep(1);
 
 	/* Enable PLX-Interrupts */
-	writel(PLX9052_INTCSR_LI1ENAB |
+	pete_writel("drivers/comedi/drivers/me_daq.c:401", PLX9052_INTCSR_LI1ENAB |
 	       PLX9052_INTCSR_LI1POL |
 	       PLX9052_INTCSR_PCIENAB,
 	       devpriv->plx_regbase + PLX9052_INTCSR);
@@ -411,10 +411,10 @@ static int me_reset(struct comedi_device *dev)
 	struct me_private_data *devpriv = dev->private;
 
 	/* Reset board */
-	writew(0x00, dev->mmio + ME_CTRL1_REG);
-	writew(0x00, dev->mmio + ME_CTRL2_REG);
-	writew(0x00, dev->mmio + ME_STATUS_REG);	/* clear interrupts */
-	writew(0x00, dev->mmio + ME_DAC_CTRL_REG);
+	pete_writew("drivers/comedi/drivers/me_daq.c:414", 0x00, dev->mmio + ME_CTRL1_REG);
+	pete_writew("drivers/comedi/drivers/me_daq.c:415", 0x00, dev->mmio + ME_CTRL2_REG);
+	pete_writew("drivers/comedi/drivers/me_daq.c:416", 0x00, dev->mmio + ME_STATUS_REG);	/* clear interrupts */
+	pete_writew("drivers/comedi/drivers/me_daq.c:417", 0x00, dev->mmio + ME_DAC_CTRL_REG);
 
 	/* Save values in the board context */
 	devpriv->dac_ctrl = 0;

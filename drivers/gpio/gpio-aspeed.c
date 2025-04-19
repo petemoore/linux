@@ -719,14 +719,14 @@ static int aspeed_gpio_reset_tolerance(struct gpio_chip *chip,
 	raw_spin_lock_irqsave(&gpio->lock, flags);
 	copro = aspeed_gpio_copro_request(gpio, offset);
 
-	val = readl(treg);
+	val = pete_readl("drivers/gpio/gpio-aspeed.c:722", treg);
 
 	if (enable)
 		val |= GPIO_BIT(offset);
 	else
 		val &= ~GPIO_BIT(offset);
 
-	writel(val, treg);
+	pete_writel("drivers/gpio/gpio-aspeed.c:729", val, treg);
 
 	if (copro)
 		aspeed_gpio_copro_release(gpio, offset);

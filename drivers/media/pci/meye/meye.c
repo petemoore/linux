@@ -404,7 +404,7 @@ static void mchip_sync(int reg)
 
 	if (reg == MCHIP_MM_FIFO_DATA) {
 		for (i = 0; i < MCHIP_REG_TIMEOUT; i++) {
-			status = readl(meye.mchip_mmregs +
+			status = pete_readl("drivers/media/pci/meye/meye.c:407", meye.mchip_mmregs +
 				       MCHIP_MM_FIFO_STATUS);
 			if (!(status & MCHIP_MM_FIFO_WAIT)) {
 				printk(KERN_WARNING "meye: fifo not ready\n");
@@ -418,7 +418,7 @@ static void mchip_sync(int reg)
 		u32 mask = (reg < 0x100) ? MCHIP_HIC_STATUS_MCC_RDY
 					 : MCHIP_HIC_STATUS_VRJ_RDY;
 		for (i = 0; i < MCHIP_REG_TIMEOUT; i++) {
-			status = readl(meye.mchip_mmregs + MCHIP_HIC_STATUS);
+			status = pete_readl("drivers/media/pci/meye/meye.c:421", meye.mchip_mmregs + MCHIP_HIC_STATUS);
 			if (status & mask)
 				return;
 			udelay(1);
@@ -434,14 +434,14 @@ static void mchip_sync(int reg)
 static inline void mchip_set(int reg, u32 v)
 {
 	mchip_sync(reg);
-	writel(v, meye.mchip_mmregs + reg);
+	pete_writel("drivers/media/pci/meye/meye.c:437", v, meye.mchip_mmregs + reg);
 }
 
 /* get the register value */
 static inline u32 mchip_read(int reg)
 {
 	mchip_sync(reg);
-	return readl(meye.mchip_mmregs + reg);
+	return pete_readl("drivers/media/pci/meye/meye.c:444", meye.mchip_mmregs + reg);
 }
 
 /* wait for a register to become a particular value */
@@ -480,11 +480,11 @@ static void mchip_load_tables(void)
 
 	tables = jpeg_huffman_tables(&length);
 	for (i = 0; i < length; i++)
-		writel(tables[i], meye.mchip_mmregs + MCHIP_VRJ_TABLE_DATA);
+		pete_writel("drivers/media/pci/meye/meye.c:483", tables[i], meye.mchip_mmregs + MCHIP_VRJ_TABLE_DATA);
 
 	tables = jpeg_quantisation_tables(&length, meye.params.quality);
 	for (i = 0; i < length; i++)
-		writel(tables[i], meye.mchip_mmregs + MCHIP_VRJ_TABLE_DATA);
+		pete_writel("drivers/media/pci/meye/meye.c:487", tables[i], meye.mchip_mmregs + MCHIP_VRJ_TABLE_DATA);
 }
 
 /* setup the VRJ parameters in the chip */

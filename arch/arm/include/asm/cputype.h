@@ -152,7 +152,7 @@ struct proc_info_list *lookup_processor(u32 midr);
 
 static inline unsigned int __attribute_const__ read_cpuid_ext(unsigned offset)
 {
-	return readl(BASEADDR_V7M_SCB + offset);
+	return pete_readl("arch/arm/include/asm/cputype.h:155", BASEADDR_V7M_SCB + offset);
 }
 
 #else /* ifdef CONFIG_CPU_CP15 / elif defined (CONFIG_CPU_V7M) */
@@ -196,17 +196,17 @@ static inline unsigned int __attribute_const__ read_cpuid_mputype(void)
 
 static inline unsigned int __attribute_const__ read_cpuid_id(void)
 {
-	return readl(BASEADDR_V7M_SCB + V7M_SCB_CPUID);
+	return pete_readl("arch/arm/include/asm/cputype.h:199", BASEADDR_V7M_SCB + V7M_SCB_CPUID);
 }
 
 static inline unsigned int __attribute_const__ read_cpuid_cachetype(void)
 {
-	return readl(BASEADDR_V7M_SCB + V7M_SCB_CTR);
+	return pete_readl("arch/arm/include/asm/cputype.h:204", BASEADDR_V7M_SCB + V7M_SCB_CTR);
 }
 
 static inline unsigned int __attribute_const__ read_cpuid_mputype(void)
 {
-	return readl(BASEADDR_V7M_SCB + MPU_TYPE);
+	return pete_readl("arch/arm/include/asm/cputype.h:209", BASEADDR_V7M_SCB + MPU_TYPE);
 }
 
 #else /* ifdef CONFIG_CPU_CP15 / elif defined(CONFIG_CPU_V7M) */

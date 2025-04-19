@@ -73,7 +73,7 @@ static int toshiba_rbtx4938_irq_nested(int sw_irq)
 {
 	u8 level3;
 
-	level3 = readb(rbtx4938_imstat_addr);
+	level3 = pete_readb("arch/mips/txx9/rbtx4938/irq.c:76", rbtx4938_imstat_addr);
 	if (unlikely(!level3))
 		return -1;
 	/* must use fls so onboard ATA has priority */
@@ -84,9 +84,9 @@ static void toshiba_rbtx4938_irq_ioc_enable(struct irq_data *d)
 {
 	unsigned char v;
 
-	v = readb(rbtx4938_imask_addr);
+	v = pete_readb("arch/mips/txx9/rbtx4938/irq.c:87", rbtx4938_imask_addr);
 	v |= (1 << (d->irq - RBTX4938_IRQ_IOC));
-	writeb(v, rbtx4938_imask_addr);
+	pete_writeb("arch/mips/txx9/rbtx4938/irq.c:89", v, rbtx4938_imask_addr);
 	mmiowb();
 }
 
@@ -94,9 +94,9 @@ static void toshiba_rbtx4938_irq_ioc_disable(struct irq_data *d)
 {
 	unsigned char v;
 
-	v = readb(rbtx4938_imask_addr);
+	v = pete_readb("arch/mips/txx9/rbtx4938/irq.c:97", rbtx4938_imask_addr);
 	v &= ~(1 << (d->irq - RBTX4938_IRQ_IOC));
-	writeb(v, rbtx4938_imask_addr);
+	pete_writeb("arch/mips/txx9/rbtx4938/irq.c:99", v, rbtx4938_imask_addr);
 	mmiowb();
 }
 
@@ -146,10 +146,10 @@ void __init rbtx4938_irq_setup(void)
 	/* all IRC interrupt mode are Low Active. */
 
 	/* mask all IOC interrupts */
-	writeb(0, rbtx4938_imask_addr);
+	pete_writeb("arch/mips/txx9/rbtx4938/irq.c:149", 0, rbtx4938_imask_addr);
 
 	/* clear SoftInt interrupts */
-	writeb(0, rbtx4938_softint_addr);
+	pete_writeb("arch/mips/txx9/rbtx4938/irq.c:152", 0, rbtx4938_softint_addr);
 	tx4938_irq_init();
 	toshiba_rbtx4938_irq_ioc_init();
 	/* Onboard 10M Ether: High Active */

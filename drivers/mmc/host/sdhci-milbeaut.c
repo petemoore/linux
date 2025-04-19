@@ -318,7 +318,7 @@ static int sdhci_milbeaut_remove(struct platform_device *pdev)
 	struct sdhci_host *host = platform_get_drvdata(pdev);
 	struct f_sdhost_priv *priv = sdhci_priv(host);
 
-	sdhci_remove_host(host, readl(host->ioaddr + SDHCI_INT_STATUS) ==
+	sdhci_remove_host(host, pete_readl("drivers/mmc/host/sdhci-milbeaut.c:321", host->ioaddr + SDHCI_INT_STATUS) ==
 			  0xffffffff);
 
 	clk_disable_unprepare(priv->clk_iface);

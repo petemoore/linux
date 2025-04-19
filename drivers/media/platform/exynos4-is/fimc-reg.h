@@ -332,7 +332,7 @@ void fimc_deactivate_capture(struct fimc_dev *fimc);
  */
 static inline void fimc_hw_set_dma_seq(struct fimc_dev *dev, u32 mask)
 {
-	writel(mask, dev->regs + FIMC_REG_CIFCNTSEQ);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-reg.h:335", mask, dev->regs + FIMC_REG_CIFCNTSEQ);
 }
 
 #endif /* FIMC_REG_H_ */

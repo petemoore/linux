@@ -147,16 +147,16 @@ static inline void ixgbe_write_reg(struct ixgbe_hw *hw, u32 reg, u32 value)
 
 	if (ixgbe_removed(reg_addr))
 		return;
-	writel(value, reg_addr + reg);
+	pete_writel("drivers/net/ethernet/intel/ixgbe/ixgbe_common.h:150", value, reg_addr + reg);
 }
 #define IXGBE_WRITE_REG(a, reg, value) ixgbe_write_reg((a), (reg), (value))
 
 #ifndef writeq
 #define writeq writeq
-static inline void writeq(u64 val, void __iomem *addr)
+static inline void pete_writeq("drivers/net/ethernet/intel/ixgbe/ixgbe_common.h:156", u64 val, void __iomem *addr)
 {
-	writel((u32)val, addr);
-	writel((u32)(val >> 32), addr + 4);
+	pete_writel("drivers/net/ethernet/intel/ixgbe/ixgbe_common.h:158", (u32)val, addr);
+	pete_writel("drivers/net/ethernet/intel/ixgbe/ixgbe_common.h:159", (u32)(val >> 32), addr + 4);
 }
 #endif
 
@@ -166,7 +166,7 @@ static inline void ixgbe_write_reg64(struct ixgbe_hw *hw, u32 reg, u64 value)
 
 	if (ixgbe_removed(reg_addr))
 		return;
-	writeq(value, reg_addr + reg);
+	pete_writeq("drivers/net/ethernet/intel/ixgbe/ixgbe_common.h:169", value, reg_addr + reg);
 }
 #define IXGBE_WRITE_REG64(a, reg, value) ixgbe_write_reg64((a), (reg), (value))
 

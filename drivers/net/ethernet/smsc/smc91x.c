@@ -2078,9 +2078,9 @@ static int smc_enable_device(struct platform_device *pdev)
 	 * since a reset causes the IRQ line become active.
 	 */
 	local_irq_save(flags);
-	ecor = readb(addr + (ECOR << SMC_IO_SHIFT)) & ~ECOR_RESET;
-	writeb(ecor | ECOR_RESET, addr + (ECOR << SMC_IO_SHIFT));
-	readb(addr + (ECOR << SMC_IO_SHIFT));
+	ecor = pete_readb("drivers/net/ethernet/smsc/smc91x.c:2081", addr + (ECOR << SMC_IO_SHIFT)) & ~ECOR_RESET;
+	pete_writeb("drivers/net/ethernet/smsc/smc91x.c:2082", ecor | ECOR_RESET, addr + (ECOR << SMC_IO_SHIFT));
+	pete_readb("drivers/net/ethernet/smsc/smc91x.c:2083", addr + (ECOR << SMC_IO_SHIFT));
 
 	/*
 	 * Wait 100us for the chip to reset.
@@ -2092,16 +2092,16 @@ static int smc_enable_device(struct platform_device *pdev)
 	 * reset is asserted, even if the reset bit is cleared in the
 	 * same write.  Must clear reset first, then enable the device.
 	 */
-	writeb(ecor, addr + (ECOR << SMC_IO_SHIFT));
-	writeb(ecor | ECOR_ENABLE, addr + (ECOR << SMC_IO_SHIFT));
+	pete_writeb("drivers/net/ethernet/smsc/smc91x.c:2095", ecor, addr + (ECOR << SMC_IO_SHIFT));
+	pete_writeb("drivers/net/ethernet/smsc/smc91x.c:2096", ecor | ECOR_ENABLE, addr + (ECOR << SMC_IO_SHIFT));
 
 	/*
 	 * Set the appropriate byte/word mode.
 	 */
-	ecsr = readb(addr + (ECSR << SMC_IO_SHIFT)) & ~ECSR_IOIS8;
+	ecsr = pete_readb("drivers/net/ethernet/smsc/smc91x.c:2101", addr + (ECSR << SMC_IO_SHIFT)) & ~ECSR_IOIS8;
 	if (!SMC_16BIT(lp))
 		ecsr |= ECSR_IOIS8;
-	writeb(ecsr, addr + (ECSR << SMC_IO_SHIFT));
+	pete_writeb("drivers/net/ethernet/smsc/smc91x.c:2104", ecsr, addr + (ECSR << SMC_IO_SHIFT));
 	local_irq_restore(flags);
 
 	iounmap(addr);

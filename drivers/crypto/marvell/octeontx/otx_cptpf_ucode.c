@@ -195,7 +195,7 @@ static int cpt_set_ucode_base(struct otx_cpt_eng_grp_info *eng_grp, void *obj)
 	 */
 	for_each_set_bit(i, bmap.bits, bmap.size)
 		if (!eng_grp->g->eng_ref_cnt[i])
-			writeq((u64) dma_addr, cpt->reg_base +
+			pete_writeq("drivers/crypto/marvell/octeontx/otx_cptpf_ucode.c:198", (u64) dma_addr, cpt->reg_base +
 				OTX_CPT_PF_ENGX_UCODE_BASE(i));
 	return 0;
 }
@@ -214,14 +214,14 @@ static int cpt_detach_and_disable_cores(struct otx_cpt_eng_grp_info *eng_grp,
 		return -EINVAL;
 
 	/* Detach the cores from group */
-	reg = readq(cpt->reg_base + OTX_CPT_PF_GX_EN(eng_grp->idx));
+	reg = pete_readq("drivers/crypto/marvell/octeontx/otx_cptpf_ucode.c:217", cpt->reg_base + OTX_CPT_PF_GX_EN(eng_grp->idx));
 	for_each_set_bit(i, bmap.bits, bmap.size) {
 		if (reg & (1ull << i)) {
 			eng_grp->g->eng_ref_cnt[i]--;
 			reg &= ~(1ull << i);
 		}
 	}
-	writeq(reg, cpt->reg_base + OTX_CPT_PF_GX_EN(eng_grp->idx));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptpf_ucode.c:224", reg, cpt->reg_base + OTX_CPT_PF_GX_EN(eng_grp->idx));
 
 	/* Wait for cores to become idle */
 	do {
@@ -230,7 +230,7 @@ static int cpt_detach_and_disable_cores(struct otx_cpt_eng_grp_info *eng_grp,
 		if (timeout-- < 0)
 			return -EBUSY;
 
-		reg = readq(cpt->reg_base + OTX_CPT_PF_EXEC_BUSY);
+		reg = pete_readq("drivers/crypto/marvell/octeontx/otx_cptpf_ucode.c:233", cpt->reg_base + OTX_CPT_PF_EXEC_BUSY);
 		for_each_set_bit(i, bmap.bits, bmap.size)
 			if (reg & (1ull << i)) {
 				busy = 1;
@@ -239,11 +239,11 @@ static int cpt_detach_and_disable_cores(struct otx_cpt_eng_grp_info *eng_grp,
 	} while (busy);
 
 	/* Disable the cores only if they are not used anymore */
-	reg = readq(cpt->reg_base + OTX_CPT_PF_EXE_CTL);
+	reg = pete_readq("drivers/crypto/marvell/octeontx/otx_cptpf_ucode.c:242", cpt->reg_base + OTX_CPT_PF_EXE_CTL);
 	for_each_set_bit(i, bmap.bits, bmap.size)
 		if (!eng_grp->g->eng_ref_cnt[i])
 			reg &= ~(1ull << i);
-	writeq(reg, cpt->reg_base + OTX_CPT_PF_EXE_CTL);
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptpf_ucode.c:246", reg, cpt->reg_base + OTX_CPT_PF_EXE_CTL);
 
 	return 0;
 }
@@ -261,20 +261,20 @@ static int cpt_attach_and_enable_cores(struct otx_cpt_eng_grp_info *eng_grp,
 		return -EINVAL;
 
 	/* Attach the cores to the group */
-	reg = readq(cpt->reg_base + OTX_CPT_PF_GX_EN(eng_grp->idx));
+	reg = pete_readq("drivers/crypto/marvell/octeontx/otx_cptpf_ucode.c:264", cpt->reg_base + OTX_CPT_PF_GX_EN(eng_grp->idx));
 	for_each_set_bit(i, bmap.bits, bmap.size) {
 		if (!(reg & (1ull << i))) {
 			eng_grp->g->eng_ref_cnt[i]++;
 			reg |= 1ull << i;
 		}
 	}
-	writeq(reg, cpt->reg_base + OTX_CPT_PF_GX_EN(eng_grp->idx));
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptpf_ucode.c:271", reg, cpt->reg_base + OTX_CPT_PF_GX_EN(eng_grp->idx));
 
 	/* Enable the cores */
-	reg = readq(cpt->reg_base + OTX_CPT_PF_EXE_CTL);
+	reg = pete_readq("drivers/crypto/marvell/octeontx/otx_cptpf_ucode.c:274", cpt->reg_base + OTX_CPT_PF_EXE_CTL);
 	for_each_set_bit(i, bmap.bits, bmap.size)
 		reg |= 1ull << i;
-	writeq(reg, cpt->reg_base + OTX_CPT_PF_EXE_CTL);
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptpf_ucode.c:277", reg, cpt->reg_base + OTX_CPT_PF_EXE_CTL);
 
 	return 0;
 }
@@ -1568,14 +1568,14 @@ void otx_cpt_disable_all_cores(struct otx_cpt_device *cpt)
 
 	/* Disengage the cores from groups */
 	for (grp = 0; grp < OTX_CPT_MAX_ENGINE_GROUPS; grp++) {
-		writeq(0, cpt->reg_base + OTX_CPT_PF_GX_EN(grp));
+		pete_writeq("drivers/crypto/marvell/octeontx/otx_cptpf_ucode.c:1571", 0, cpt->reg_base + OTX_CPT_PF_GX_EN(grp));
 		udelay(CSR_DELAY);
 	}
 
-	reg = readq(cpt->reg_base + OTX_CPT_PF_EXEC_BUSY);
+	reg = pete_readq("drivers/crypto/marvell/octeontx/otx_cptpf_ucode.c:1575", cpt->reg_base + OTX_CPT_PF_EXEC_BUSY);
 	while (reg) {
 		udelay(CSR_DELAY);
-		reg = readq(cpt->reg_base + OTX_CPT_PF_EXEC_BUSY);
+		reg = pete_readq("drivers/crypto/marvell/octeontx/otx_cptpf_ucode.c:1578", cpt->reg_base + OTX_CPT_PF_EXEC_BUSY);
 		if (timeout--) {
 			dev_warn(&cpt->pdev->dev, "Cores still busy\n");
 			break;
@@ -1583,7 +1583,7 @@ void otx_cpt_disable_all_cores(struct otx_cpt_device *cpt)
 	}
 
 	/* Disable the cores */
-	writeq(0, cpt->reg_base + OTX_CPT_PF_EXE_CTL);
+	pete_writeq("drivers/crypto/marvell/octeontx/otx_cptpf_ucode.c:1586", 0, cpt->reg_base + OTX_CPT_PF_EXE_CTL);
 }
 
 void otx_cpt_cleanup_eng_grps(struct pci_dev *pdev,

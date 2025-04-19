@@ -58,11 +58,11 @@ static int bonito64_pcibios_config_access(unsigned char access_type,
 
 	addrp = CFG_SPACE_REG(addr & 0xffff);
 	if (access_type == PCI_ACCESS_WRITE) {
-		writel(cpu_to_le32(*data), addrp);
+		pete_writel("arch/mips/pci/ops-bonito64.c:61", cpu_to_le32(*data), addrp);
 		/* Wait till done */
 		while (BONITO_PCIMSTAT & 0xF);
 	} else {
-		*data = le32_to_cpu(readl(addrp));
+		*data = le32_to_cpu(pete_readl("arch/mips/pci/ops-bonito64.c:65", addrp));
 	}
 
 	/* Detect Master/Target abort */

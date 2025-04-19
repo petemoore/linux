@@ -65,27 +65,27 @@ static int rockchip_rk3288_efuse_read(void *context, unsigned int offset,
 		return ret;
 	}
 
-	writel(RK3288_LOAD | RK3288_PGENB, efuse->base + REG_EFUSE_CTRL);
+	pete_writel("drivers/nvmem/rockchip-efuse.c:68", RK3288_LOAD | RK3288_PGENB, efuse->base + REG_EFUSE_CTRL);
 	udelay(1);
 	while (bytes--) {
-		writel(readl(efuse->base + REG_EFUSE_CTRL) &
+		pete_writel("drivers/nvmem/rockchip-efuse.c:71", pete_readl("drivers/nvmem/rockchip-efuse.c:71", efuse->base + REG_EFUSE_CTRL) &
 			     (~(RK3288_A_MASK << RK3288_A_SHIFT)),
 			     efuse->base + REG_EFUSE_CTRL);
-		writel(readl(efuse->base + REG_EFUSE_CTRL) |
+		pete_writel("drivers/nvmem/rockchip-efuse.c:74", pete_readl("drivers/nvmem/rockchip-efuse.c:74", efuse->base + REG_EFUSE_CTRL) |
 			     ((offset++ & RK3288_A_MASK) << RK3288_A_SHIFT),
 			     efuse->base + REG_EFUSE_CTRL);
 		udelay(1);
-		writel(readl(efuse->base + REG_EFUSE_CTRL) |
+		pete_writel("drivers/nvmem/rockchip-efuse.c:78", pete_readl("drivers/nvmem/rockchip-efuse.c:78", efuse->base + REG_EFUSE_CTRL) |
 			     RK3288_STROBE, efuse->base + REG_EFUSE_CTRL);
 		udelay(1);
-		*buf++ = readb(efuse->base + REG_EFUSE_DOUT);
-		writel(readl(efuse->base + REG_EFUSE_CTRL) &
+		*buf++ = pete_readb("drivers/nvmem/rockchip-efuse.c:81", efuse->base + REG_EFUSE_DOUT);
+		pete_writel("drivers/nvmem/rockchip-efuse.c:82", pete_readl("drivers/nvmem/rockchip-efuse.c:82", efuse->base + REG_EFUSE_CTRL) &
 		       (~RK3288_STROBE), efuse->base + REG_EFUSE_CTRL);
 		udelay(1);
 	}
 
 	/* Switch to standby mode */
-	writel(RK3288_PGENB | RK3288_CSB, efuse->base + REG_EFUSE_CTRL);
+	pete_writel("drivers/nvmem/rockchip-efuse.c:88", RK3288_PGENB | RK3288_CSB, efuse->base + REG_EFUSE_CTRL);
 
 	clk_disable_unprepare(efuse->clk);
 
@@ -122,17 +122,17 @@ static int rockchip_rk3328_efuse_read(void *context, unsigned int offset,
 	}
 
 	while (addr_len--) {
-		writel(RK3328_AUTO_RD | RK3328_AUTO_ENB |
+		pete_writel("drivers/nvmem/rockchip-efuse.c:125", RK3328_AUTO_RD | RK3328_AUTO_ENB |
 		       ((addr_start++ & RK3399_A_MASK) << RK3399_A_SHIFT),
 		       efuse->base + RK3328_AUTO_CTRL);
 		udelay(4);
-		status = readl(efuse->base + RK3328_INT_STATUS);
+		status = pete_readl("drivers/nvmem/rockchip-efuse.c:129", efuse->base + RK3328_INT_STATUS);
 		if (!(status & RK3328_INT_FINISH)) {
 			ret = -EIO;
 			goto err;
 		}
-		out_value = readl(efuse->base + RK3328_DOUT);
-		writel(RK3328_INT_FINISH, efuse->base + RK3328_INT_STATUS);
+		out_value = pete_readl("drivers/nvmem/rockchip-efuse.c:134", efuse->base + RK3328_DOUT);
+		pete_writel("drivers/nvmem/rockchip-efuse.c:135", RK3328_INT_FINISH, efuse->base + RK3328_INT_STATUS);
 
 		memcpy(&buf[i], &out_value, RK3399_NBYTES);
 		i += RK3399_NBYTES;
@@ -174,16 +174,16 @@ static int rockchip_rk3399_efuse_read(void *context, unsigned int offset,
 		return -ENOMEM;
 	}
 
-	writel(RK3399_LOAD | RK3399_PGENB | RK3399_STROBSFTSEL | RK3399_RSB,
+	pete_writel("drivers/nvmem/rockchip-efuse.c:177", RK3399_LOAD | RK3399_PGENB | RK3399_STROBSFTSEL | RK3399_RSB,
 	       efuse->base + REG_EFUSE_CTRL);
 	udelay(1);
 	while (addr_len--) {
-		writel(readl(efuse->base + REG_EFUSE_CTRL) | RK3399_STROBE |
+		pete_writel("drivers/nvmem/rockchip-efuse.c:181", pete_readl("drivers/nvmem/rockchip-efuse.c:181", efuse->base + REG_EFUSE_CTRL) | RK3399_STROBE |
 		       ((addr_start++ & RK3399_A_MASK) << RK3399_A_SHIFT),
 		       efuse->base + REG_EFUSE_CTRL);
 		udelay(1);
-		out_value = readl(efuse->base + REG_EFUSE_DOUT);
-		writel(readl(efuse->base + REG_EFUSE_CTRL) & (~RK3399_STROBE),
+		out_value = pete_readl("drivers/nvmem/rockchip-efuse.c:185", efuse->base + REG_EFUSE_DOUT);
+		pete_writel("drivers/nvmem/rockchip-efuse.c:186", pete_readl("drivers/nvmem/rockchip-efuse.c:186", efuse->base + REG_EFUSE_CTRL) & (~RK3399_STROBE),
 		       efuse->base + REG_EFUSE_CTRL);
 		udelay(1);
 
@@ -192,7 +192,7 @@ static int rockchip_rk3399_efuse_read(void *context, unsigned int offset,
 	}
 
 	/* Switch to standby mode */
-	writel(RK3399_PD | RK3399_CSB, efuse->base + REG_EFUSE_CTRL);
+	pete_writel("drivers/nvmem/rockchip-efuse.c:195", RK3399_PD | RK3399_CSB, efuse->base + REG_EFUSE_CTRL);
 
 	memcpy(val, buf + addr_offset, bytes);
 

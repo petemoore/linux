@@ -231,13 +231,13 @@ static void axi_clkgen_calc_clk_params(unsigned int divider,
 static void axi_clkgen_write(struct axi_clkgen *axi_clkgen,
 	unsigned int reg, unsigned int val)
 {
-	writel(val, axi_clkgen->base + reg);
+	pete_writel("drivers/clk/clk-axi-clkgen.c:234", val, axi_clkgen->base + reg);
 }
 
 static void axi_clkgen_read(struct axi_clkgen *axi_clkgen,
 	unsigned int reg, unsigned int *val)
 {
-	*val = readl(axi_clkgen->base + reg);
+	*val = pete_readl("drivers/clk/clk-axi-clkgen.c:240", axi_clkgen->base + reg);
 }
 
 static int axi_clkgen_wait_non_busy(struct axi_clkgen *axi_clkgen)

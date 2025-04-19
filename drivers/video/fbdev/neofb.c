@@ -143,7 +143,7 @@ static biosMode bios32[] = {
 
 static inline void write_le32(int regindex, u32 val, const struct neofb_par *par)
 {
-	writel(val, par->neo2200 + par->cursorOff + regindex);
+	pete_writel("drivers/video/fbdev/neofb.c:146", val, par->neo2200 + par->cursorOff + regindex);
 }
 
 static int neoFindMode(int xres, int yres, int depth)
@@ -476,7 +476,7 @@ static inline int neo2200_sync(struct fb_info *info)
 {
 	struct neofb_par *par = info->par;
 
-	while (readl(&par->neo2200->bltStat) & 1)
+	while (pete_readl("drivers/video/fbdev/neofb.c:479", &par->neo2200->bltStat) & 1)
 		cpu_relax();
 	return 0;
 }
@@ -539,8 +539,8 @@ static inline void neo2200_accel_init(struct fb_info *info,
 		return;
 	}
 
-	writel(bltMod << 16, &neo2200->bltStat);
-	writel((pitch << 16) | pitch, &neo2200->pitch);
+	pete_writel("drivers/video/fbdev/neofb.c:542", bltMod << 16, &neo2200->bltStat);
+	pete_writel("drivers/video/fbdev/neofb.c:543", (pitch << 16) | pitch, &neo2200->pitch);
 }
 
 /* --------------------------------------------------------------------- */
@@ -1368,7 +1368,7 @@ neo2200_fillrect(struct fb_info *info, const struct fb_fillrect *rect)
 	neo2200_wait_fifo(info, 4);
 
 	/* set blt control */
-	writel(NEO_BC3_FIFO_EN |
+	pete_writel("drivers/video/fbdev/neofb.c:1371", NEO_BC3_FIFO_EN |
 	       NEO_BC0_SRC_IS_FG | NEO_BC3_SKIP_MAPPING |
 	       //               NEO_BC3_DST_XY_ADDR  |
 	       //               NEO_BC3_SRC_XY_ADDR  |
@@ -1376,18 +1376,18 @@ neo2200_fillrect(struct fb_info *info, const struct fb_fillrect *rect)
 
 	switch (info->var.bits_per_pixel) {
 	case 8:
-		writel(rect->color, &par->neo2200->fgColor);
+		pete_writel("drivers/video/fbdev/neofb.c:1379", rect->color, &par->neo2200->fgColor);
 		break;
 	case 16:
 	case 24:
-		writel(((u32 *) (info->pseudo_palette))[rect->color],
+		pete_writel("drivers/video/fbdev/neofb.c:1383", ((u32 *) (info->pseudo_palette))[rect->color],
 		       &par->neo2200->fgColor);
 		break;
 	}
 
-	writel(dst * ((info->var.bits_per_pixel + 7) >> 3),
+	pete_writel("drivers/video/fbdev/neofb.c:1388", dst * ((info->var.bits_per_pixel + 7) >> 3),
 	       &par->neo2200->dstStart);
-	writel((rect->height << 16) | (rect->width & 0xffff),
+	pete_writel("drivers/video/fbdev/neofb.c:1390", (rect->height << 16) | (rect->width & 0xffff),
 	       &par->neo2200->xyExt);
 }
 
@@ -1416,11 +1416,11 @@ neo2200_copyarea(struct fb_info *info, const struct fb_copyarea *area)
 	neo2200_wait_fifo(info, 4);
 
 	/* set blt control */
-	writel(bltCntl, &par->neo2200->bltCntl);
+	pete_writel("drivers/video/fbdev/neofb.c:1419", bltCntl, &par->neo2200->bltCntl);
 
-	writel(src, &par->neo2200->srcStart);
-	writel(dst, &par->neo2200->dstStart);
-	writel((area->height << 16) | (area->width & 0xffff),
+	pete_writel("drivers/video/fbdev/neofb.c:1421", src, &par->neo2200->srcStart);
+	pete_writel("drivers/video/fbdev/neofb.c:1422", dst, &par->neo2200->dstStart);
+	pete_writel("drivers/video/fbdev/neofb.c:1423", (area->height << 16) | (area->width & 0xffff),
 	       &par->neo2200->xyExt);
 }
 
@@ -1461,28 +1461,28 @@ neo2200_imageblit(struct fb_info *info, const struct fb_image *image)
 
 	switch (info->var.bits_per_pixel) {
 	case 8:
-		writel(image->fg_color, &par->neo2200->fgColor);
-		writel(image->bg_color, &par->neo2200->bgColor);
+		pete_writel("drivers/video/fbdev/neofb.c:1464", image->fg_color, &par->neo2200->fgColor);
+		pete_writel("drivers/video/fbdev/neofb.c:1465", image->bg_color, &par->neo2200->bgColor);
 		break;
 	case 16:
 	case 24:
-		writel(((u32 *) (info->pseudo_palette))[image->fg_color],
+		pete_writel("drivers/video/fbdev/neofb.c:1469", ((u32 *) (info->pseudo_palette))[image->fg_color],
 		       &par->neo2200->fgColor);
-		writel(((u32 *) (info->pseudo_palette))[image->bg_color],
+		pete_writel("drivers/video/fbdev/neofb.c:1471", ((u32 *) (info->pseudo_palette))[image->bg_color],
 		       &par->neo2200->bgColor);
 		break;
 	}
 
-	writel(NEO_BC0_SYS_TO_VID |
+	pete_writel("drivers/video/fbdev/neofb.c:1476", NEO_BC0_SYS_TO_VID |
 		NEO_BC3_SKIP_MAPPING | bltCntl_flags |
 		// NEO_BC3_DST_XY_ADDR |
 		0x0c0000, &par->neo2200->bltCntl);
 
-	writel(0, &par->neo2200->srcStart);
+	pete_writel("drivers/video/fbdev/neofb.c:1481", 0, &par->neo2200->srcStart);
 //      par->neo2200->dstStart = (image->dy << 16) | (image->dx & 0xffff);
-	writel(((image->dx & 0xffff) * (info->var.bits_per_pixel >> 3) +
+	pete_writel("drivers/video/fbdev/neofb.c:1483", ((image->dx & 0xffff) * (info->var.bits_per_pixel >> 3) +
 		image->dy * info->fix.line_length), &par->neo2200->dstStart);
-	writel((image->height << 16) | (image->width & 0xffff),
+	pete_writel("drivers/video/fbdev/neofb.c:1485", (image->height << 16) | (image->width & 0xffff),
 	       &par->neo2200->xyExt);
 
 	memcpy_toio(par->mmio_vbase + 0x100000, image->data, data_len);

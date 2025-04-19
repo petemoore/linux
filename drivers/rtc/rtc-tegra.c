@@ -61,7 +61,7 @@ struct tegra_rtc_info {
  */
 static inline u32 tegra_rtc_check_busy(struct tegra_rtc_info *info)
 {
-	return readl(info->base + TEGRA_RTC_REG_BUSY) & 1;
+	return pete_readl("drivers/rtc/rtc-tegra.c:64", info->base + TEGRA_RTC_REG_BUSY) & 1;
 }
 
 /*
@@ -111,8 +111,8 @@ static int tegra_rtc_read_time(struct device *dev, struct rtc_time *tm)
 	 */
 	spin_lock_irqsave(&info->lock, flags);
 
-	readl(info->base + TEGRA_RTC_REG_MILLI_SECONDS);
-	sec = readl(info->base + TEGRA_RTC_REG_SHADOW_SECONDS);
+	pete_readl("drivers/rtc/rtc-tegra.c:114", info->base + TEGRA_RTC_REG_MILLI_SECONDS);
+	sec = pete_readl("drivers/rtc/rtc-tegra.c:115", info->base + TEGRA_RTC_REG_SHADOW_SECONDS);
 
 	spin_unlock_irqrestore(&info->lock, flags);
 
@@ -137,10 +137,10 @@ static int tegra_rtc_set_time(struct device *dev, struct rtc_time *tm)
 	/* seconds only written if wait succeeded */
 	ret = tegra_rtc_wait_while_busy(dev);
 	if (!ret)
-		writel(sec, info->base + TEGRA_RTC_REG_SECONDS);
+		pete_writel("drivers/rtc/rtc-tegra.c:140", sec, info->base + TEGRA_RTC_REG_SECONDS);
 
 	dev_vdbg(dev, "time read back as %d\n",
-		 readl(info->base + TEGRA_RTC_REG_SECONDS));
+		 pete_readl("drivers/rtc/rtc-tegra.c:143", info->base + TEGRA_RTC_REG_SECONDS));
 
 	return ret;
 }
@@ -150,7 +150,7 @@ static int tegra_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alarm)
 	struct tegra_rtc_info *info = dev_get_drvdata(dev);
 	u32 sec, value;
 
-	sec = readl(info->base + TEGRA_RTC_REG_SECONDS_ALARM0);
+	sec = pete_readl("drivers/rtc/rtc-tegra.c:153", info->base + TEGRA_RTC_REG_SECONDS_ALARM0);
 
 	if (sec == 0) {
 		/* alarm is disabled */
@@ -161,7 +161,7 @@ static int tegra_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alarm)
 		rtc_time64_to_tm(sec, &alarm->time);
 	}
 
-	value = readl(info->base + TEGRA_RTC_REG_INTR_STATUS);
+	value = pete_readl("drivers/rtc/rtc-tegra.c:164", info->base + TEGRA_RTC_REG_INTR_STATUS);
 	alarm->pending = (value & TEGRA_RTC_INTR_STATUS_SEC_ALARM0) != 0;
 
 	return 0;
@@ -177,13 +177,13 @@ static int tegra_rtc_alarm_irq_enable(struct device *dev, unsigned int enabled)
 	spin_lock_irqsave(&info->lock, flags);
 
 	/* read the original value, and OR in the flag */
-	status = readl(info->base + TEGRA_RTC_REG_INTR_MASK);
+	status = pete_readl("drivers/rtc/rtc-tegra.c:180", info->base + TEGRA_RTC_REG_INTR_MASK);
 	if (enabled)
 		status |= TEGRA_RTC_INTR_MASK_SEC_ALARM0; /* set it */
 	else
 		status &= ~TEGRA_RTC_INTR_MASK_SEC_ALARM0; /* clear it */
 
-	writel(status, info->base + TEGRA_RTC_REG_INTR_MASK);
+	pete_writel("drivers/rtc/rtc-tegra.c:186", status, info->base + TEGRA_RTC_REG_INTR_MASK);
 
 	spin_unlock_irqrestore(&info->lock, flags);
 
@@ -201,9 +201,9 @@ static int tegra_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alarm)
 		sec = 0;
 
 	tegra_rtc_wait_while_busy(dev);
-	writel(sec, info->base + TEGRA_RTC_REG_SECONDS_ALARM0);
+	pete_writel("drivers/rtc/rtc-tegra.c:204", sec, info->base + TEGRA_RTC_REG_SECONDS_ALARM0);
 	dev_vdbg(dev, "alarm read back as %d\n",
-		 readl(info->base + TEGRA_RTC_REG_SECONDS_ALARM0));
+		 pete_readl("drivers/rtc/rtc-tegra.c:206", info->base + TEGRA_RTC_REG_SECONDS_ALARM0));
 
 	/* if successfully written and alarm is enabled ... */
 	if (sec) {
@@ -235,14 +235,14 @@ static irqreturn_t tegra_rtc_irq_handler(int irq, void *data)
 	unsigned long events = 0;
 	u32 status;
 
-	status = readl(info->base + TEGRA_RTC_REG_INTR_STATUS);
+	status = pete_readl("drivers/rtc/rtc-tegra.c:238", info->base + TEGRA_RTC_REG_INTR_STATUS);
 	if (status) {
 		/* clear the interrupt masks and status on any IRQ */
 		tegra_rtc_wait_while_busy(dev);
 
 		spin_lock(&info->lock);
-		writel(0, info->base + TEGRA_RTC_REG_INTR_MASK);
-		writel(status, info->base + TEGRA_RTC_REG_INTR_STATUS);
+		pete_writel("drivers/rtc/rtc-tegra.c:244", 0, info->base + TEGRA_RTC_REG_INTR_MASK);
+		pete_writel("drivers/rtc/rtc-tegra.c:245", status, info->base + TEGRA_RTC_REG_INTR_STATUS);
 		spin_unlock(&info->lock);
 	}
 
@@ -315,9 +315,9 @@ static int tegra_rtc_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, info);
 
 	/* clear out the hardware */
-	writel(0, info->base + TEGRA_RTC_REG_SECONDS_ALARM0);
-	writel(0xffffffff, info->base + TEGRA_RTC_REG_INTR_STATUS);
-	writel(0, info->base + TEGRA_RTC_REG_INTR_MASK);
+	pete_writel("drivers/rtc/rtc-tegra.c:318", 0, info->base + TEGRA_RTC_REG_SECONDS_ALARM0);
+	pete_writel("drivers/rtc/rtc-tegra.c:319", 0xffffffff, info->base + TEGRA_RTC_REG_INTR_STATUS);
+	pete_writel("drivers/rtc/rtc-tegra.c:320", 0, info->base + TEGRA_RTC_REG_INTR_MASK);
 
 	device_init_wakeup(&pdev->dev, 1);
 
@@ -359,12 +359,12 @@ static int tegra_rtc_suspend(struct device *dev)
 	tegra_rtc_wait_while_busy(dev);
 
 	/* only use ALARM0 as a wake source */
-	writel(0xffffffff, info->base + TEGRA_RTC_REG_INTR_STATUS);
-	writel(TEGRA_RTC_INTR_STATUS_SEC_ALARM0,
+	pete_writel("drivers/rtc/rtc-tegra.c:362", 0xffffffff, info->base + TEGRA_RTC_REG_INTR_STATUS);
+	pete_writel("drivers/rtc/rtc-tegra.c:363", TEGRA_RTC_INTR_STATUS_SEC_ALARM0,
 	       info->base + TEGRA_RTC_REG_INTR_MASK);
 
 	dev_vdbg(dev, "alarm sec = %d\n",
-		 readl(info->base + TEGRA_RTC_REG_SECONDS_ALARM0));
+		 pete_readl("drivers/rtc/rtc-tegra.c:367", info->base + TEGRA_RTC_REG_SECONDS_ALARM0));
 
 	dev_vdbg(dev, "Suspend (device_may_wakeup=%d) IRQ:%d\n",
 		 device_may_wakeup(dev), info->irq);

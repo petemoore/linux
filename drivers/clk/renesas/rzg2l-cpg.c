@@ -152,8 +152,8 @@ static unsigned long rzg2l_cpg_pll_clk_recalc_rate(struct clk_hw *hw,
 	if (pll_clk->type != CLK_TYPE_SAM_PLL)
 		return parent_rate;
 
-	val1 = readl(priv->base + GET_REG_SAMPLL_CLK1(pll_clk->conf));
-	val2 = readl(priv->base + GET_REG_SAMPLL_CLK2(pll_clk->conf));
+	val1 = pete_readl("drivers/clk/renesas/rzg2l-cpg.c:155", priv->base + GET_REG_SAMPLL_CLK1(pll_clk->conf));
+	val2 = pete_readl("drivers/clk/renesas/rzg2l-cpg.c:156", priv->base + GET_REG_SAMPLL_CLK2(pll_clk->conf));
 	mult = MDIV(val1) + KDIV(val1) / 65536;
 	div = PDIV(val1) * (1 << SDIV(val2));
 
@@ -345,7 +345,7 @@ static int rzg2l_mod_clock_endisable(struct clk_hw *hw, bool enable)
 		value = (bitmask << 16) | bitmask;
 	else
 		value = bitmask << 16;
-	writel(value, priv->base + CLK_ON_R(reg));
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:348", value, priv->base + CLK_ON_R(reg));
 
 	spin_unlock_irqrestore(&priv->rmw_lock, flags);
 
@@ -353,7 +353,7 @@ static int rzg2l_mod_clock_endisable(struct clk_hw *hw, bool enable)
 		return 0;
 
 	for (i = 1000; i > 0; --i) {
-		if (((readl(priv->base + CLK_MON_R(reg))) & bitmask))
+		if (((pete_readl("drivers/clk/renesas/rzg2l-cpg.c:356", priv->base + CLK_MON_R(reg))) & bitmask))
 			break;
 		cpu_relax();
 	}
@@ -389,7 +389,7 @@ static int rzg2l_mod_clock_is_enabled(struct clk_hw *hw)
 		return 1;
 	}
 
-	value = readl(priv->base + CLK_MON_R(clock->off));
+	value = pete_readl("drivers/clk/renesas/rzg2l-cpg.c:392", priv->base + CLK_MON_R(clock->off));
 
 	return value & bitmask;
 }
@@ -482,13 +482,13 @@ static int rzg2l_cpg_reset(struct reset_controller_dev *rcdev,
 	dev_dbg(rcdev->dev, "reset id:%ld offset:0x%x\n", id, CLK_RST_R(reg));
 
 	/* Reset module */
-	writel(we, priv->base + CLK_RST_R(reg));
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:485", we, priv->base + CLK_RST_R(reg));
 
 	/* Wait for at least one cycle of the RCLK clock (@ ca. 32 kHz) */
 	udelay(35);
 
 	/* Release module from reset state */
-	writel(we | dis, priv->base + CLK_RST_R(reg));
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:491", we | dis, priv->base + CLK_RST_R(reg));
 
 	return 0;
 }
@@ -503,7 +503,7 @@ static int rzg2l_cpg_assert(struct reset_controller_dev *rcdev,
 
 	dev_dbg(rcdev->dev, "assert id:%ld offset:0x%x\n", id, CLK_RST_R(reg));
 
-	writel(value, priv->base + CLK_RST_R(reg));
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:506", value, priv->base + CLK_RST_R(reg));
 	return 0;
 }
 
@@ -519,7 +519,7 @@ static int rzg2l_cpg_deassert(struct reset_controller_dev *rcdev,
 	dev_dbg(rcdev->dev, "deassert id:%ld offset:0x%x\n", id,
 		CLK_RST_R(reg));
 
-	writel(value, priv->base + CLK_RST_R(reg));
+	pete_writel("drivers/clk/renesas/rzg2l-cpg.c:522", value, priv->base + CLK_RST_R(reg));
 	return 0;
 }
 
@@ -531,7 +531,7 @@ static int rzg2l_cpg_status(struct reset_controller_dev *rcdev,
 	unsigned int reg = info->resets[id].off;
 	u32 bitmask = BIT(info->resets[id].bit);
 
-	return !(readl(priv->base + CLK_MRST_R(reg)) & bitmask);
+	return !(pete_readl("drivers/clk/renesas/rzg2l-cpg.c:534", priv->base + CLK_MRST_R(reg)) & bitmask);
 }
 
 static const struct reset_control_ops rzg2l_cpg_reset_ops = {

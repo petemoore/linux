@@ -29,8 +29,8 @@
 extern void __iomem *vpif_base;
 extern spinlock_t vpif_lock;
 
-#define regr(reg)               readl((reg) + vpif_base)
-#define regw(value, reg)        writel(value, (reg + vpif_base))
+#define regr(reg)               pete_readl("drivers/media/platform/davinci/vpif.h:32", (reg) + vpif_base)
+#define regw(value, reg)        pete_writel("drivers/media/platform/davinci/vpif.h:33", value, (reg + vpif_base))
 
 /* Register Address Offsets */
 #define VPIF_PID			(0x0000)

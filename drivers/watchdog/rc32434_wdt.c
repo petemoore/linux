@@ -66,7 +66,7 @@ MODULE_PARM_DESC(nowayout, "Watchdog cannot be stopped once started (default="
 
 /* apply or and nand masks to data read from addr and write back */
 #define SET_BITS(addr, or, nand) \
-	writel((readl(&addr) | or) & ~nand, &addr)
+	pete_writel("drivers/watchdog/rc32434_wdt.c:69", (pete_readl("drivers/watchdog/rc32434_wdt.c:69", &addr) | or) & ~nand, &addr)
 
 static int rc32434_wdt_set(int new_timeout)
 {
@@ -78,7 +78,7 @@ static int rc32434_wdt_set(int new_timeout)
 	}
 	timeout = new_timeout;
 	spin_lock(&rc32434_wdt_device.io_lock);
-	writel(SEC2WTCOMP(timeout), &wdt_reg->wtcompare);
+	pete_writel("drivers/watchdog/rc32434_wdt.c:81", SEC2WTCOMP(timeout), &wdt_reg->wtcompare);
 	spin_unlock(&rc32434_wdt_device.io_lock);
 
 	return 0;
@@ -91,7 +91,7 @@ static void rc32434_wdt_start(void)
 	spin_lock(&rc32434_wdt_device.io_lock);
 
 	/* zero the counter before enabling */
-	writel(0, &wdt_reg->wtcount);
+	pete_writel("drivers/watchdog/rc32434_wdt.c:94", 0, &wdt_reg->wtcount);
 
 	/* don't generate a non-maskable interrupt,
 	 * do a warm reset instead */
@@ -130,7 +130,7 @@ static void rc32434_wdt_stop(void)
 static void rc32434_wdt_ping(void)
 {
 	spin_lock(&rc32434_wdt_device.io_lock);
-	writel(0, &wdt_reg->wtcount);
+	pete_writel("drivers/watchdog/rc32434_wdt.c:133", 0, &wdt_reg->wtcount);
 	spin_unlock(&rc32434_wdt_device.io_lock);
 }
 

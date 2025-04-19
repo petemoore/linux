@@ -135,26 +135,26 @@ static inline void smmu_pmu_enable(struct pmu *pmu)
 {
 	struct smmu_pmu *smmu_pmu = to_smmu_pmu(pmu);
 
-	writel(SMMU_PMCG_IRQ_CTRL_IRQEN,
+	pete_writel("drivers/perf/arm_smmuv3_pmu.c:138", SMMU_PMCG_IRQ_CTRL_IRQEN,
 	       smmu_pmu->reg_base + SMMU_PMCG_IRQ_CTRL);
-	writel(SMMU_PMCG_CR_ENABLE, smmu_pmu->reg_base + SMMU_PMCG_CR);
+	pete_writel("drivers/perf/arm_smmuv3_pmu.c:140", SMMU_PMCG_CR_ENABLE, smmu_pmu->reg_base + SMMU_PMCG_CR);
 }
 
 static inline void smmu_pmu_disable(struct pmu *pmu)
 {
 	struct smmu_pmu *smmu_pmu = to_smmu_pmu(pmu);
 
-	writel(0, smmu_pmu->reg_base + SMMU_PMCG_CR);
-	writel(0, smmu_pmu->reg_base + SMMU_PMCG_IRQ_CTRL);
+	pete_writel("drivers/perf/arm_smmuv3_pmu.c:147", 0, smmu_pmu->reg_base + SMMU_PMCG_CR);
+	pete_writel("drivers/perf/arm_smmuv3_pmu.c:148", 0, smmu_pmu->reg_base + SMMU_PMCG_IRQ_CTRL);
 }
 
 static inline void smmu_pmu_counter_set_value(struct smmu_pmu *smmu_pmu,
 					      u32 idx, u64 value)
 {
 	if (smmu_pmu->counter_mask & BIT(32))
-		writeq(value, smmu_pmu->reloc_base + SMMU_PMCG_EVCNTR(idx, 8));
+		pete_writeq("drivers/perf/arm_smmuv3_pmu.c:155", value, smmu_pmu->reloc_base + SMMU_PMCG_EVCNTR(idx, 8));
 	else
-		writel(value, smmu_pmu->reloc_base + SMMU_PMCG_EVCNTR(idx, 4));
+		pete_writel("drivers/perf/arm_smmuv3_pmu.c:157", value, smmu_pmu->reloc_base + SMMU_PMCG_EVCNTR(idx, 4));
 }
 
 static inline u64 smmu_pmu_counter_get_value(struct smmu_pmu *smmu_pmu, u32 idx)
@@ -162,43 +162,43 @@ static inline u64 smmu_pmu_counter_get_value(struct smmu_pmu *smmu_pmu, u32 idx)
 	u64 value;
 
 	if (smmu_pmu->counter_mask & BIT(32))
-		value = readq(smmu_pmu->reloc_base + SMMU_PMCG_EVCNTR(idx, 8));
+		value = pete_readq("drivers/perf/arm_smmuv3_pmu.c:165", smmu_pmu->reloc_base + SMMU_PMCG_EVCNTR(idx, 8));
 	else
-		value = readl(smmu_pmu->reloc_base + SMMU_PMCG_EVCNTR(idx, 4));
+		value = pete_readl("drivers/perf/arm_smmuv3_pmu.c:167", smmu_pmu->reloc_base + SMMU_PMCG_EVCNTR(idx, 4));
 
 	return value;
 }
 
 static inline void smmu_pmu_counter_enable(struct smmu_pmu *smmu_pmu, u32 idx)
 {
-	writeq(BIT(idx), smmu_pmu->reg_base + SMMU_PMCG_CNTENSET0);
+	pete_writeq("drivers/perf/arm_smmuv3_pmu.c:174", BIT(idx), smmu_pmu->reg_base + SMMU_PMCG_CNTENSET0);
 }
 
 static inline void smmu_pmu_counter_disable(struct smmu_pmu *smmu_pmu, u32 idx)
 {
-	writeq(BIT(idx), smmu_pmu->reg_base + SMMU_PMCG_CNTENCLR0);
+	pete_writeq("drivers/perf/arm_smmuv3_pmu.c:179", BIT(idx), smmu_pmu->reg_base + SMMU_PMCG_CNTENCLR0);
 }
 
 static inline void smmu_pmu_interrupt_enable(struct smmu_pmu *smmu_pmu, u32 idx)
 {
-	writeq(BIT(idx), smmu_pmu->reg_base + SMMU_PMCG_INTENSET0);
+	pete_writeq("drivers/perf/arm_smmuv3_pmu.c:184", BIT(idx), smmu_pmu->reg_base + SMMU_PMCG_INTENSET0);
 }
 
 static inline void smmu_pmu_interrupt_disable(struct smmu_pmu *smmu_pmu,
 					      u32 idx)
 {
-	writeq(BIT(idx), smmu_pmu->reg_base + SMMU_PMCG_INTENCLR0);
+	pete_writeq("drivers/perf/arm_smmuv3_pmu.c:190", BIT(idx), smmu_pmu->reg_base + SMMU_PMCG_INTENCLR0);
 }
 
 static inline void smmu_pmu_set_evtyper(struct smmu_pmu *smmu_pmu, u32 idx,
 					u32 val)
 {
-	writel(val, smmu_pmu->reg_base + SMMU_PMCG_EVTYPER(idx));
+	pete_writel("drivers/perf/arm_smmuv3_pmu.c:196", val, smmu_pmu->reg_base + SMMU_PMCG_EVTYPER(idx));
 }
 
 static inline void smmu_pmu_set_smr(struct smmu_pmu *smmu_pmu, u32 idx, u32 val)
 {
-	writel(val, smmu_pmu->reg_base + SMMU_PMCG_SMR(idx));
+	pete_writel("drivers/perf/arm_smmuv3_pmu.c:201", val, smmu_pmu->reg_base + SMMU_PMCG_SMR(idx));
 }
 
 static void smmu_pmu_event_update(struct perf_event *event)
@@ -638,11 +638,11 @@ static irqreturn_t smmu_pmu_handle_irq(int irq_num, void *data)
 	u64 ovsr;
 	unsigned int idx;
 
-	ovsr = readq(smmu_pmu->reloc_base + SMMU_PMCG_OVSSET0);
+	ovsr = pete_readq("drivers/perf/arm_smmuv3_pmu.c:641", smmu_pmu->reloc_base + SMMU_PMCG_OVSSET0);
 	if (!ovsr)
 		return IRQ_NONE;
 
-	writeq(ovsr, smmu_pmu->reloc_base + SMMU_PMCG_OVSCLR0);
+	pete_writeq("drivers/perf/arm_smmuv3_pmu.c:645", ovsr, smmu_pmu->reloc_base + SMMU_PMCG_OVSCLR0);
 
 	for_each_set_bit(idx, (unsigned long *)&ovsr, smmu_pmu->num_counters) {
 		struct perf_event *event = smmu_pmu->events[idx];
@@ -692,7 +692,7 @@ static void smmu_pmu_setup_msi(struct smmu_pmu *pmu)
 	writeq_relaxed(0, pmu->reg_base + SMMU_PMCG_IRQ_CFG0);
 
 	/* MSI supported or not */
-	if (!(readl(pmu->reg_base + SMMU_PMCG_CFGR) & SMMU_PMCG_CFGR_MSI))
+	if (!(pete_readl("drivers/perf/arm_smmuv3_pmu.c:695", pmu->reg_base + SMMU_PMCG_CFGR) & SMMU_PMCG_CFGR_MSI))
 		return;
 
 	ret = platform_msi_domain_alloc_irqs(dev, 1, smmu_pmu_write_msi_msg);

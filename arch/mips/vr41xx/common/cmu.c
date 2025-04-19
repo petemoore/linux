@@ -58,8 +58,8 @@ static void __iomem *cmu_base;
 static uint16_t cmuclkmsk, cmuclkmsk2;
 static DEFINE_SPINLOCK(cmu_lock);
 
-#define cmu_read(offset)		readw(cmu_base + (offset))
-#define cmu_write(offset, value)	writew((value), cmu_base + (offset))
+#define cmu_read(offset)		pete_readw("arch/mips/vr41xx/common/cmu.c:61", cmu_base + (offset))
+#define cmu_write(offset, value)	pete_writew("arch/mips/vr41xx/common/cmu.c:62", (value), cmu_base + (offset))
 
 void vr41xx_supply_clock(vr41xx_clock_t clock)
 {

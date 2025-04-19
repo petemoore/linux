@@ -17,8 +17,8 @@
 
 #define priv(host)			((struct NCR5380_hostdata *)(host)->hostdata)
 
-#define NCR5380_read(reg)           readb(hostdata->io + ((reg) << 2))
-#define NCR5380_write(reg, value)   writeb(value, hostdata->io + ((reg) << 2))
+#define NCR5380_read(reg)           pete_readb("drivers/scsi/arm/oak.c:20", hostdata->io + ((reg) << 2))
+#define NCR5380_write(reg, value)   pete_writeb("drivers/scsi/arm/oak.c:21", value, hostdata->io + ((reg) << 2))
 
 #define NCR5380_dma_xfer_len		NCR5380_dma_xfer_none
 #define NCR5380_dma_recv_setup		oakscsi_pread
@@ -48,7 +48,7 @@ printk("writing %p len %d\n",addr, len);
   while(1)
   {
     int status;
-    while (((status = readw(base + STAT)) & 0x100)==0);
+    while (((status = pete_readw("drivers/scsi/arm/oak.c:51", base + STAT)) & 0x100)==0);
   }
   return 0;
 }
@@ -66,7 +66,7 @@ printk("reading %p len %d\n", addr, len);
     
     timeout = 0x01FFFFFF;
     
-    while (((status = readw(base + STAT)) & 0x100)==0)
+    while (((status = pete_readw("drivers/scsi/arm/oak.c:69", base + STAT)) & 0x100)==0)
     {
       timeout--;
       if(status & 0x200 || !timeout)
@@ -84,7 +84,7 @@ printk("reading %p len %d\n", addr, len);
     }
     else
     {
-      b = (unsigned long) readw(base + DATA);
+      b = (unsigned long) pete_readw("drivers/scsi/arm/oak.c:87", base + DATA);
       *addr ++ = b;
       len -= 1;
       if(len)

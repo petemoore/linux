@@ -197,12 +197,12 @@ MODULE_PARM_DESC(cdns_mcp_int_mask, "Cadence MCP IntMask");
  */
 static inline u32 cdns_readl(struct sdw_cdns *cdns, int offset)
 {
-	return readl(cdns->registers + offset);
+	return pete_readl("drivers/soundwire/cadence_master.c:200", cdns->registers + offset);
 }
 
 static inline void cdns_writel(struct sdw_cdns *cdns, int offset, u32 value)
 {
-	writel(value, cdns->registers + offset);
+	pete_writel("drivers/soundwire/cadence_master.c:205", value, cdns->registers + offset);
 }
 
 static inline void cdns_updatel(struct sdw_cdns *cdns,
@@ -222,7 +222,7 @@ static int cdns_set_wait(struct sdw_cdns *cdns, int offset, u32 mask, u32 value)
 
 	/* Wait for bit to be set */
 	do {
-		reg_read = readl(cdns->registers + offset);
+		reg_read = pete_readl("drivers/soundwire/cadence_master.c:225", cdns->registers + offset);
 		if ((reg_read & mask) == value)
 			return 0;
 
@@ -235,7 +235,7 @@ static int cdns_set_wait(struct sdw_cdns *cdns, int offset, u32 mask, u32 value)
 
 static int cdns_clear_bit(struct sdw_cdns *cdns, int offset, u32 value)
 {
-	writel(value, cdns->registers + offset);
+	pete_writel("drivers/soundwire/cadence_master.c:238", value, cdns->registers + offset);
 
 	/* Wait for bit to be self cleared */
 	return cdns_set_wait(cdns, offset, value, 0);

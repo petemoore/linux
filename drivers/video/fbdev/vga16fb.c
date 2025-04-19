@@ -111,8 +111,8 @@ static const struct fb_fix_screeninfo vga16fb_fix = {
    OR. */
 static inline void rmw(volatile char __iomem *p)
 {
-	readb(p);
-	writeb(1, p);
+	pete_readb("drivers/video/fbdev/vga16fb.c:114", p);
+	pete_writeb("drivers/video/fbdev/vga16fb.c:115", 1, p);
 }
 
 /* Set the Graphics Mode Register, and return its previous value.
@@ -871,7 +871,7 @@ static void vga_8planes_fillrect(struct fb_info *info, const struct fb_fillrect 
 
                         /* we can do memset... */
                         for (x = width; x > 0; --x) {
-                                writeb(rect->color, where);
+                                pete_writeb("drivers/video/fbdev/vga16fb.c:874", rect->color, where);
                                 where++;
                         }
                         where += line_ofs;
@@ -939,7 +939,7 @@ static void vga16fb_fillrect(struct fb_info *info, const struct fb_fillrect *rec
 
 				while (height--) {
 					for (x = 0; x < width; x++) {
-						writeb(0, dst);
+						pete_writeb("drivers/video/fbdev/vga16fb.c:942", 0, dst);
 						dst++;
 					}
 					dst += line_ofs;
@@ -995,8 +995,8 @@ static void vga_8planes_copyarea(struct fb_info *info, const struct fb_copyarea 
                 src = info->screen_base + sx + area->sy * info->fix.line_length;
                 while (height--) {
                         for (x = 0; x < width; x++) {
-                                readb(src);
-                                writeb(0, dest);
+                                pete_readb("drivers/video/fbdev/vga16fb.c:998", src);
+                                pete_writeb("drivers/video/fbdev/vga16fb.c:999", 0, dest);
                                 src++;
                                 dest++;
                         }
@@ -1013,8 +1013,8 @@ static void vga_8planes_copyarea(struct fb_info *info, const struct fb_copyarea 
                         for (x = 0; x < width; x++) {
                                 --src;
                                 --dest;
-                                readb(src);
-                                writeb(0, dest);
+                                pete_readb("drivers/video/fbdev/vga16fb.c:1016", src);
+                                pete_writeb("drivers/video/fbdev/vga16fb.c:1017", 0, dest);
                         }
                         src -= line_ofs;
                         dest -= line_ofs;
@@ -1085,8 +1085,8 @@ static void vga16fb_copyarea(struct fb_info *info, const struct fb_copyarea *are
 				src = info->screen_base + (sx/8) + sy * info->fix.line_length;
 				while (height--) {
 					for (x = 0; x < width; x++) {
-						readb(src);
-						writeb(0, dst);
+						pete_readb("drivers/video/fbdev/vga16fb.c:1088", src);
+						pete_writeb("drivers/video/fbdev/vga16fb.c:1089", 0, dst);
 						dst++;
 						src++;
 					}
@@ -1102,8 +1102,8 @@ static void vga16fb_copyarea(struct fb_info *info, const struct fb_copyarea *are
 					for (x = 0; x < width; x++) {
 						dst--;
 						src--;
-						readb(src);
-						writeb(0, dst);
+						pete_readb("drivers/video/fbdev/vga16fb.c:1105", src);
+						pete_writeb("drivers/video/fbdev/vga16fb.c:1106", 0, dst);
 					}
 					src -= line_ofs;
 					dst -= line_ofs;
@@ -1149,14 +1149,14 @@ static void vga_8planes_imageblit(struct fb_info *info, const struct fb_image *i
         where = info->screen_base + dx + image->dy * info->fix.line_length;
 
         setmask(0xff);
-        writeb(image->bg_color, where);
-        readb(where);
+        pete_writeb("drivers/video/fbdev/vga16fb.c:1152", image->bg_color, where);
+        pete_readb("drivers/video/fbdev/vga16fb.c:1153", where);
         selectmask();
         setmask(image->fg_color ^ image->bg_color);
         setmode(0x42);
         setop(0x18);
         for (y = 0; y < image->height; y++, where += info->fix.line_length)
-                writew(transl_h[cdat[y]&0xF] | transl_l[cdat[y] >> 4], where);
+                pete_writew("drivers/video/fbdev/vga16fb.c:1159", transl_h[cdat[y]&0xF] | transl_l[cdat[y] >> 4], where);
         setmask(oldmask);
         setsr(oldsr);
         setop(oldop);
@@ -1184,15 +1184,15 @@ static void vga_imageblit_expand(struct fb_info *info, const struct fb_image *im
 				selectmask();
 				
 				setmask(0xff);
-				writeb(image->bg_color, where);
+				pete_writeb("drivers/video/fbdev/vga16fb.c:1187", image->bg_color, where);
 				rmb();
-				readb(where); /* fill latches */
+				pete_readb("drivers/video/fbdev/vga16fb.c:1189", where); /* fill latches */
 				setmode(3);
 				wmb();
 				for (y = 0; y < image->height; y++) {
 					dst = where;
 					for (x = image->width/8; x--;) 
-						writeb(*cdat++, dst++);
+						pete_writeb("drivers/video/fbdev/vga16fb.c:1195", *cdat++, dst++);
 					where += info->fix.line_length;
 				}
 				wmb();

@@ -60,31 +60,31 @@ static void __init dove_mpp_gpio_mode(int start, int end, int gpio_mode)
 static void __init dove_mpp_dump_regs(void)
 {
 	pr_debug("PMU_CTRL4_CTRL: %08x\n",
-		 readl(DOVE_MPP_CTRL4_VIRT_BASE));
+		 pete_readl("arch/arm/mach-dove/mpp.c:63", DOVE_MPP_CTRL4_VIRT_BASE));
 
 	pr_debug("PMU_MPP_GENERAL_CTRL: %08x\n",
-		 readl(DOVE_PMU_MPP_GENERAL_CTRL));
+		 pete_readl("arch/arm/mach-dove/mpp.c:66", DOVE_PMU_MPP_GENERAL_CTRL));
 
-	pr_debug("MPP_GENERAL: %08x\n", readl(DOVE_MPP_GENERAL_VIRT_BASE));
+	pr_debug("MPP_GENERAL: %08x\n", pete_readl("arch/arm/mach-dove/mpp.c:68", DOVE_MPP_GENERAL_VIRT_BASE));
 }
 
 static void __init dove_mpp_cfg_nfc(int sel)
 {
-	u32 mpp_gen_cfg = readl(DOVE_MPP_GENERAL_VIRT_BASE);
+	u32 mpp_gen_cfg = pete_readl("arch/arm/mach-dove/mpp.c:73", DOVE_MPP_GENERAL_VIRT_BASE);
 
 	mpp_gen_cfg &= ~0x1;
 	mpp_gen_cfg |= sel;
-	writel(mpp_gen_cfg, DOVE_MPP_GENERAL_VIRT_BASE);
+	pete_writel("arch/arm/mach-dove/mpp.c:77", mpp_gen_cfg, DOVE_MPP_GENERAL_VIRT_BASE);
 
 	dove_mpp_gpio_mode(64, 71, GPIO_OUTPUT_OK);
 }
 
 static void __init dove_mpp_cfg_au1(int sel)
 {
-	u32 mpp_ctrl4 = readl(DOVE_MPP_CTRL4_VIRT_BASE);
-	u32 ssp_ctrl1 = readl(DOVE_SSP_CTRL_STATUS_1);
-	u32 mpp_gen_ctrl = readl(DOVE_MPP_GENERAL_VIRT_BASE);
-	u32 global_cfg_2 = readl(DOVE_GLOBAL_CONFIG_2);
+	u32 mpp_ctrl4 = pete_readl("arch/arm/mach-dove/mpp.c:84", DOVE_MPP_CTRL4_VIRT_BASE);
+	u32 ssp_ctrl1 = pete_readl("arch/arm/mach-dove/mpp.c:85", DOVE_SSP_CTRL_STATUS_1);
+	u32 mpp_gen_ctrl = pete_readl("arch/arm/mach-dove/mpp.c:86", DOVE_MPP_GENERAL_VIRT_BASE);
+	u32 global_cfg_2 = pete_readl("arch/arm/mach-dove/mpp.c:87", DOVE_GLOBAL_CONFIG_2);
 
 	mpp_ctrl4 &= ~(DOVE_AU1_GPIO_SEL);
 	ssp_ctrl1 &= ~(DOVE_SSP_ON_AU1);
@@ -111,17 +111,17 @@ static void __init dove_mpp_cfg_au1(int sel)
 	if (sel & 0x8)
 		mpp_ctrl4 |= DOVE_AU1_GPIO_SEL;
 
-	writel(mpp_ctrl4, DOVE_MPP_CTRL4_VIRT_BASE);
-	writel(ssp_ctrl1, DOVE_SSP_CTRL_STATUS_1);
-	writel(mpp_gen_ctrl, DOVE_MPP_GENERAL_VIRT_BASE);
-	writel(global_cfg_2, DOVE_GLOBAL_CONFIG_2);
+	pete_writel("arch/arm/mach-dove/mpp.c:114", mpp_ctrl4, DOVE_MPP_CTRL4_VIRT_BASE);
+	pete_writel("arch/arm/mach-dove/mpp.c:115", ssp_ctrl1, DOVE_SSP_CTRL_STATUS_1);
+	pete_writel("arch/arm/mach-dove/mpp.c:116", mpp_gen_ctrl, DOVE_MPP_GENERAL_VIRT_BASE);
+	pete_writel("arch/arm/mach-dove/mpp.c:117", global_cfg_2, DOVE_GLOBAL_CONFIG_2);
 }
 
 /* Configure the group registers, enabling GPIO if sel indicates the
    pin is to be used for GPIO */
 static void __init dove_mpp_conf_grp(unsigned int *mpp_grp_list)
 {
-	u32 mpp_ctrl4 = readl(DOVE_MPP_CTRL4_VIRT_BASE);
+	u32 mpp_ctrl4 = pete_readl("arch/arm/mach-dove/mpp.c:124", DOVE_MPP_CTRL4_VIRT_BASE);
 	int gpio_mode;
 
 	for ( ; *mpp_grp_list; mpp_grp_list++) {
@@ -140,7 +140,7 @@ static void __init dove_mpp_conf_grp(unsigned int *mpp_grp_list)
 		dove_mpp_gpio_mode(dove_mpp_grp[num].start,
 				   dove_mpp_grp[num].end, gpio_mode);
 	}
-	writel(mpp_ctrl4, DOVE_MPP_CTRL4_VIRT_BASE);
+	pete_writel("arch/arm/mach-dove/mpp.c:143", mpp_ctrl4, DOVE_MPP_CTRL4_VIRT_BASE);
 }
 
 /* Configure the various MPP pins on Dove */

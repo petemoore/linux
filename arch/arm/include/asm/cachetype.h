@@ -87,12 +87,12 @@ static inline unsigned int read_ccsidr(void)
 
 static inline void set_csselr(unsigned int cache_selector)
 {
-	writel(cache_selector, BASEADDR_V7M_SCB + V7M_SCB_CTR);
+	pete_writel("arch/arm/include/asm/cachetype.h:90", cache_selector, BASEADDR_V7M_SCB + V7M_SCB_CTR);
 }
 
 static inline unsigned int read_ccsidr(void)
 {
-	return readl(BASEADDR_V7M_SCB + V7M_SCB_CCSIDR);
+	return pete_readl("arch/arm/include/asm/cachetype.h:95", BASEADDR_V7M_SCB + V7M_SCB_CCSIDR);
 }
 #endif
 

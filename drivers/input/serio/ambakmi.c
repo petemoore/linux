@@ -35,12 +35,12 @@ struct amba_kmi_port {
 static irqreturn_t amba_kmi_int(int irq, void *dev_id)
 {
 	struct amba_kmi_port *kmi = dev_id;
-	unsigned int status = readb(KMIIR);
+	unsigned int status = pete_readb("drivers/input/serio/ambakmi.c:38", KMIIR);
 	int handled = IRQ_NONE;
 
 	while (status & KMIIR_RXINTR) {
-		serio_interrupt(kmi->io, readb(KMIDATA), 0);
-		status = readb(KMIIR);
+		serio_interrupt(kmi->io, pete_readb("drivers/input/serio/ambakmi.c:42", KMIDATA), 0);
+		status = pete_readb("drivers/input/serio/ambakmi.c:43", KMIIR);
 		handled = IRQ_HANDLED;
 	}
 
@@ -52,11 +52,11 @@ static int amba_kmi_write(struct serio *io, unsigned char val)
 	struct amba_kmi_port *kmi = io->port_data;
 	unsigned int timeleft = 10000; /* timeout in 100ms */
 
-	while ((readb(KMISTAT) & KMISTAT_TXEMPTY) == 0 && --timeleft)
+	while ((pete_readb("drivers/input/serio/ambakmi.c:55", KMISTAT) & KMISTAT_TXEMPTY) == 0 && --timeleft)
 		udelay(10);
 
 	if (timeleft)
-		writeb(val, KMIDATA);
+		pete_writeb("drivers/input/serio/ambakmi.c:59", val, KMIDATA);
 
 	return timeleft ? 0 : SERIO_TIMEOUT;
 }
@@ -72,18 +72,18 @@ static int amba_kmi_open(struct serio *io)
 		goto out;
 
 	divisor = clk_get_rate(kmi->clk) / 8000000 - 1;
-	writeb(divisor, KMICLKDIV);
-	writeb(KMICR_EN, KMICR);
+	pete_writeb("drivers/input/serio/ambakmi.c:75", divisor, KMICLKDIV);
+	pete_writeb("drivers/input/serio/ambakmi.c:76", KMICR_EN, KMICR);
 
 	ret = request_irq(kmi->irq, amba_kmi_int, IRQF_SHARED, "kmi-pl050",
 			  kmi);
 	if (ret) {
 		printk(KERN_ERR "kmi: failed to claim IRQ%d\n", kmi->irq);
-		writeb(0, KMICR);
+		pete_writeb("drivers/input/serio/ambakmi.c:82", 0, KMICR);
 		goto clk_disable;
 	}
 
-	writeb(KMICR_EN | KMICR_RXINTREN, KMICR);
+	pete_writeb("drivers/input/serio/ambakmi.c:86", KMICR_EN | KMICR_RXINTREN, KMICR);
 
 	return 0;
 
@@ -97,7 +97,7 @@ static void amba_kmi_close(struct serio *io)
 {
 	struct amba_kmi_port *kmi = io->port_data;
 
-	writeb(0, KMICR);
+	pete_writeb("drivers/input/serio/ambakmi.c:100", 0, KMICR);
 
 	free_irq(kmi->irq, kmi);
 	clk_disable_unprepare(kmi->clk);

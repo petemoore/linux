@@ -103,7 +103,7 @@ int irdma_add_arp(struct irdma_pci_f *rf, u32 *ip, bool ipv4, u8 *mac)
  */
 inline void wr32(struct irdma_hw *hw, u32 reg, u32 val)
 {
-	writel(val, hw->hw_addr + reg);
+	pete_writel("drivers/infiniband/hw/irdma/utils.c:106", val, hw->hw_addr + reg);
 }
 
 /**
@@ -115,7 +115,7 @@ inline void wr32(struct irdma_hw *hw, u32 reg, u32 val)
  */
 inline u32 rd32(struct irdma_hw *hw, u32 reg)
 {
-	return readl(hw->hw_addr + reg);
+	return pete_readl("drivers/infiniband/hw/irdma/utils.c:118", hw->hw_addr + reg);
 }
 
 /**
@@ -127,7 +127,7 @@ inline u32 rd32(struct irdma_hw *hw, u32 reg)
  */
 inline u64 rd64(struct irdma_hw *hw, u32 reg)
 {
-	return readq(hw->hw_addr + reg);
+	return pete_readq("drivers/infiniband/hw/irdma/utils.c:130", hw->hw_addr + reg);
 }
 
 static void irdma_gid_change_event(struct ib_device *ibdev)

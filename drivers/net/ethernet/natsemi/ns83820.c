@@ -452,7 +452,7 @@ static inline struct ns83820 *PRIV(struct net_device *dev)
 	return netdev_priv(dev);
 }
 
-#define __kick_rx(dev)	writel(CR_RXE, dev->base + CR)
+#define __kick_rx(dev)	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:455", CR_RXE, dev->base + CR)
 
 static inline void kick_rx(struct net_device *ndev)
 {
@@ -460,7 +460,7 @@ static inline void kick_rx(struct net_device *ndev)
 	dprintk("kick_rx: maybe kicking\n");
 	if (test_and_clear_bit(0, &dev->rx_info.idle)) {
 		dprintk("actually kicking\n");
-		writel(dev->rx_info.phy_descs +
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:463", dev->rx_info.phy_descs +
 			(4 * DESC_SIZE * dev->rx_info.next_rx),
 		       dev->base + RXDP);
 		if (dev->rx_info.next_rx == dev->rx_info.next_empty)
@@ -603,15 +603,15 @@ static void phy_intr(struct net_device *ndev)
 	u32 tanar, tanlpar;
 	int speed, fullduplex, newlinkstate;
 
-	cfg = readl(dev->base + CFG) ^ SPDSTS_POLARITY;
+	cfg = pete_readl("drivers/net/ethernet/natsemi/ns83820.c:606", dev->base + CFG) ^ SPDSTS_POLARITY;
 
 	if (dev->CFG_cache & CFG_TBI_EN) {
 		u32 __maybe_unused tbisr;
 
 		/* we have an optical transceiver */
-		tbisr = readl(dev->base + TBISR);
-		tanar = readl(dev->base + TANAR);
-		tanlpar = readl(dev->base + TANLPAR);
+		tbisr = pete_readl("drivers/net/ethernet/natsemi/ns83820.c:612", dev->base + TBISR);
+		tanar = pete_readl("drivers/net/ethernet/natsemi/ns83820.c:613", dev->base + TANAR);
+		tanlpar = pete_readl("drivers/net/ethernet/natsemi/ns83820.c:614", dev->base + TANLPAR);
 		dprintk("phy_intr: tbisr=%08x, tanar=%08x, tanlpar=%08x\n",
 			tbisr, tanar, tanlpar);
 
@@ -619,13 +619,13 @@ static void phy_intr(struct net_device *ndev)
 		      (tanar & TANAR_FULL_DUP)) ) {
 
 			/* both of us are full duplex */
-			writel(readl(dev->base + TXCFG)
+			pete_writel("drivers/net/ethernet/natsemi/ns83820.c:622", pete_readl("drivers/net/ethernet/natsemi/ns83820.c:622", dev->base + TXCFG)
 			       | TXCFG_CSI | TXCFG_HBI | TXCFG_ATP,
 			       dev->base + TXCFG);
-			writel(readl(dev->base + RXCFG) | RXCFG_RX_FD,
+			pete_writel("drivers/net/ethernet/natsemi/ns83820.c:625", pete_readl("drivers/net/ethernet/natsemi/ns83820.c:625", dev->base + RXCFG) | RXCFG_RX_FD,
 			       dev->base + RXCFG);
 			/* Light up full duplex LED */
-			writel(readl(dev->base + GPIOR) | GPIOR_GP1_OUT,
+			pete_writel("drivers/net/ethernet/natsemi/ns83820.c:628", pete_readl("drivers/net/ethernet/natsemi/ns83820.c:628", dev->base + GPIOR) | GPIOR_GP1_OUT,
 			       dev->base + GPIOR);
 
 		} else if (((tanlpar & TANAR_HALF_DUP) &&
@@ -636,13 +636,13 @@ static void phy_intr(struct net_device *ndev)
 			    (tanar & TANAR_FULL_DUP))) {
 
 			/* one or both of us are half duplex */
-			writel((readl(dev->base + TXCFG)
+			pete_writel("drivers/net/ethernet/natsemi/ns83820.c:639", (pete_readl("drivers/net/ethernet/natsemi/ns83820.c:639", dev->base + TXCFG)
 				& ~(TXCFG_CSI | TXCFG_HBI)) | TXCFG_ATP,
 			       dev->base + TXCFG);
-			writel(readl(dev->base + RXCFG) & ~RXCFG_RX_FD,
+			pete_writel("drivers/net/ethernet/natsemi/ns83820.c:642", pete_readl("drivers/net/ethernet/natsemi/ns83820.c:642", dev->base + RXCFG) & ~RXCFG_RX_FD,
 			       dev->base + RXCFG);
 			/* Turn off full duplex LED */
-			writel(readl(dev->base + GPIOR) & ~GPIOR_GP1_OUT,
+			pete_writel("drivers/net/ethernet/natsemi/ns83820.c:645", pete_readl("drivers/net/ethernet/natsemi/ns83820.c:645", dev->base + GPIOR) & ~GPIOR_GP1_OUT,
 			       dev->base + GPIOR);
 		}
 
@@ -662,22 +662,22 @@ static void phy_intr(struct net_device *ndev)
 
 		if (fullduplex) {
 			new_cfg |= CFG_SB;
-			writel(readl(dev->base + TXCFG)
+			pete_writel("drivers/net/ethernet/natsemi/ns83820.c:665", pete_readl("drivers/net/ethernet/natsemi/ns83820.c:665", dev->base + TXCFG)
 					| TXCFG_CSI | TXCFG_HBI,
 			       dev->base + TXCFG);
-			writel(readl(dev->base + RXCFG) | RXCFG_RX_FD,
+			pete_writel("drivers/net/ethernet/natsemi/ns83820.c:668", pete_readl("drivers/net/ethernet/natsemi/ns83820.c:668", dev->base + RXCFG) | RXCFG_RX_FD,
 			       dev->base + RXCFG);
 		} else {
-			writel(readl(dev->base + TXCFG)
+			pete_writel("drivers/net/ethernet/natsemi/ns83820.c:671", pete_readl("drivers/net/ethernet/natsemi/ns83820.c:671", dev->base + TXCFG)
 					& ~(TXCFG_CSI | TXCFG_HBI),
 			       dev->base + TXCFG);
-			writel(readl(dev->base + RXCFG) & ~(RXCFG_RX_FD),
+			pete_writel("drivers/net/ethernet/natsemi/ns83820.c:674", pete_readl("drivers/net/ethernet/natsemi/ns83820.c:674", dev->base + RXCFG) & ~(RXCFG_RX_FD),
 			       dev->base + RXCFG);
 		}
 
 		if ((cfg & CFG_LNKSTS) &&
 		    ((new_cfg ^ dev->CFG_cache) != 0)) {
-			writel(new_cfg, dev->base + CFG);
+			pete_writel("drivers/net/ethernet/natsemi/ns83820.c:680", new_cfg, dev->base + CFG);
 			dev->CFG_cache = new_cfg;
 		}
 
@@ -720,8 +720,8 @@ static int ns83820_setup_rx(struct net_device *ndev)
 	for (i=0; i<NR_RX_DESC; i++)
 		clear_rx_desc(dev, i);
 
-	writel(0, dev->base + RXDP_HI);
-	writel(dev->rx_info.phy_descs, dev->base + RXDP);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:723", 0, dev->base + RXDP_HI);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:724", dev->rx_info.phy_descs, dev->base + RXDP);
 
 	ret = rx_refill(ndev, GFP_KERNEL);
 	if (!ret) {
@@ -729,10 +729,10 @@ static int ns83820_setup_rx(struct net_device *ndev)
 		/* prevent the interrupt handler from stomping on us */
 		spin_lock_irq(&dev->rx_info.lock);
 
-		writel(0x0001, dev->base + CCSR);
-		writel(0, dev->base + RFCR);
-		writel(0x7fc00000, dev->base + RFCR);
-		writel(0xffc00000, dev->base + RFCR);
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:732", 0x0001, dev->base + CCSR);
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:733", 0, dev->base + RFCR);
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:734", 0x7fc00000, dev->base + RFCR);
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:735", 0xffc00000, dev->base + RFCR);
 
 		dev->rx_info.up = 1;
 
@@ -751,8 +751,8 @@ static int ns83820_setup_rx(struct net_device *ndev)
 		dev->IMR_cache |= ISR_TXDESC;
 		dev->IMR_cache |= ISR_TXIDLE;
 
-		writel(dev->IMR_cache, dev->base + IMR);
-		writel(1, dev->base + IER);
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:754", dev->IMR_cache, dev->base + IMR);
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:755", 1, dev->base + IER);
 		spin_unlock(&dev->misc_lock);
 
 		kick_rx(ndev);
@@ -772,7 +772,7 @@ static void ns83820_cleanup_rx(struct ns83820 *dev)
 	/* disable receive interrupts */
 	spin_lock_irqsave(&dev->misc_lock, flags);
 	dev->IMR_cache &= ~(ISR_RXOK | ISR_RXDESC | ISR_RXERR | ISR_RXEARLY | ISR_RXIDLE);
-	writel(dev->IMR_cache, dev->base + IMR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:775", dev->IMR_cache, dev->base + IMR);
 	spin_unlock_irqrestore(&dev->misc_lock, flags);
 
 	/* synchronize with the interrupt handler and kill it */
@@ -780,11 +780,11 @@ static void ns83820_cleanup_rx(struct ns83820 *dev)
 	synchronize_irq(dev->pci_dev->irq);
 
 	/* touch the pci bus... */
-	readl(dev->base + IMR);
+	pete_readl("drivers/net/ethernet/natsemi/ns83820.c:783", dev->base + IMR);
 
 	/* assumes the transmitter is already disabled and reset */
-	writel(0, dev->base + RXDP_HI);
-	writel(0, dev->base + RXDP);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:786", 0, dev->base + RXDP_HI);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:787", 0, dev->base + RXDP);
 
 	for (i=0; i<NR_RX_DESC; i++) {
 		struct sk_buff *skb = dev->rx_info.skbs[i];
@@ -828,7 +828,7 @@ static void rx_irq(struct net_device *ndev)
 
 	dprintk("rx_irq(%p)\n", ndev);
 	dprintk("rxdp: %08x, descs: %08lx next_rx[%d]: %p next_empty[%d]: %p\n",
-		readl(dev->base + RXDP),
+		pete_readl("drivers/net/ethernet/natsemi/ns83820.c:831", dev->base + RXDP),
 		(long)(dev->rx_info.phy_descs),
 		(int)dev->rx_info.next_rx,
 		(dev->rx_info.descs + (DESC_SIZE * dev->rx_info.next_rx)),
@@ -930,11 +930,11 @@ static void rx_action(struct tasklet_struct *t)
 	struct ns83820 *dev = from_tasklet(dev, t, rx_tasklet);
 	struct net_device *ndev = dev->ndev;
 	rx_irq(ndev);
-	writel(ihr, dev->base + IHR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:933", ihr, dev->base + IHR);
 
 	spin_lock_irq(&dev->misc_lock);
 	dev->IMR_cache |= ISR_RXDESC;
-	writel(dev->IMR_cache, dev->base + IMR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:937", dev->IMR_cache, dev->base + IMR);
 	spin_unlock_irq(&dev->misc_lock);
 
 	rx_irq(ndev);
@@ -947,7 +947,7 @@ static inline void kick_tx(struct ns83820 *dev)
 {
 	dprintk("kick_tx(%p): tx_idx=%d free_idx=%d\n",
 		dev, dev->tx_idx, dev->tx_free_idx);
-	writel(CR_TXE, dev->base + CR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:950", CR_TXE, dev->base + CR);
 }
 
 /* No spinlock needed on the transmit irq path as the interrupt handler is
@@ -1176,17 +1176,17 @@ static void ns83820_update_stats(struct ns83820 *dev)
 	u8 __iomem *base = dev->base;
 
 	/* the DP83820 will freeze counters, so we need to read all of them */
-	ndev->stats.rx_errors		+= readl(base + 0x60) & 0xffff;
-	ndev->stats.rx_crc_errors	+= readl(base + 0x64) & 0xffff;
-	ndev->stats.rx_missed_errors	+= readl(base + 0x68) & 0xffff;
-	ndev->stats.rx_frame_errors	+= readl(base + 0x6c) & 0xffff;
-	/*ndev->stats.rx_symbol_errors +=*/ readl(base + 0x70);
-	ndev->stats.rx_length_errors	+= readl(base + 0x74) & 0xffff;
-	ndev->stats.rx_length_errors	+= readl(base + 0x78) & 0xffff;
-	/*ndev->stats.rx_badopcode_errors += */ readl(base + 0x7c);
-	/*ndev->stats.rx_pause_count += */  readl(base + 0x80);
-	/*ndev->stats.tx_pause_count += */  readl(base + 0x84);
-	ndev->stats.tx_carrier_errors	+= readl(base + 0x88) & 0xff;
+	ndev->stats.rx_errors		+= pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1179", base + 0x60) & 0xffff;
+	ndev->stats.rx_crc_errors	+= pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1180", base + 0x64) & 0xffff;
+	ndev->stats.rx_missed_errors	+= pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1181", base + 0x68) & 0xffff;
+	ndev->stats.rx_frame_errors	+= pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1182", base + 0x6c) & 0xffff;
+	/*ndev->stats.rx_symbol_errors +=*/ pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1183", base + 0x70);
+	ndev->stats.rx_length_errors	+= pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1184", base + 0x74) & 0xffff;
+	ndev->stats.rx_length_errors	+= pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1185", base + 0x78) & 0xffff;
+	/*ndev->stats.rx_badopcode_errors += */ pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1186", base + 0x7c);
+	/*ndev->stats.rx_pause_count += */  pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1187", base + 0x80);
+	/*ndev->stats.tx_pause_count += */  pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1188", base + 0x84);
+	ndev->stats.tx_carrier_errors	+= pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1189", base + 0x88) & 0xff;
 }
 
 static struct net_device_stats *ns83820_get_stats(struct net_device *ndev)
@@ -1224,9 +1224,9 @@ static int ns83820_get_link_ksettings(struct net_device *ndev,
 	 */
 
 	/* read current configuration */
-	cfg   = readl(dev->base + CFG) ^ SPDSTS_POLARITY;
-	readl(dev->base + TANAR);
-	tbicr = readl(dev->base + TBICR);
+	cfg   = pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1227", dev->base + CFG) ^ SPDSTS_POLARITY;
+	pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1228", dev->base + TANAR);
+	tbicr = pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1229", dev->base + TBICR);
 
 	fullduplex = (cfg & CFG_DUPSTS) ? 1 : 0;
 
@@ -1278,8 +1278,8 @@ static int ns83820_set_link_ksettings(struct net_device *ndev,
 	int fullduplex   = 0;
 
 	/* read current configuration */
-	cfg = readl(dev->base + CFG) ^ SPDSTS_POLARITY;
-	tanar = readl(dev->base + TANAR);
+	cfg = pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1281", dev->base + CFG) ^ SPDSTS_POLARITY;
+	tanar = pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1282", dev->base + TANAR);
 
 	if (dev->CFG_cache & CFG_TBI_EN) {
 		/* we have optical */
@@ -1300,13 +1300,13 @@ static int ns83820_set_link_ksettings(struct net_device *ndev,
 			/*set full duplex*/
 			if (cmd->base.duplex == DUPLEX_FULL) {
 				/* force full duplex */
-				writel(readl(dev->base + TXCFG)
+				pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1303", pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1303", dev->base + TXCFG)
 					| TXCFG_CSI | TXCFG_HBI | TXCFG_ATP,
 					dev->base + TXCFG);
-				writel(readl(dev->base + RXCFG) | RXCFG_RX_FD,
+				pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1306", pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1306", dev->base + RXCFG) | RXCFG_RX_FD,
 					dev->base + RXCFG);
 				/* Light up full duplex LED */
-				writel(readl(dev->base + GPIOR) | GPIOR_GP1_OUT,
+				pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1309", pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1309", dev->base + GPIOR) | GPIOR_GP1_OUT,
 					dev->base + GPIOR);
 			} else {
 				/*TODO: set half duplex */
@@ -1324,16 +1324,16 @@ static int ns83820_set_link_ksettings(struct net_device *ndev,
 	if (1) {
 		if (cmd->base.autoneg == AUTONEG_ENABLE) {
 			/* restart auto negotiation */
-			writel(TBICR_MR_AN_ENABLE | TBICR_MR_RESTART_AN,
+			pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1327", TBICR_MR_AN_ENABLE | TBICR_MR_RESTART_AN,
 				dev->base + TBICR);
-			writel(TBICR_MR_AN_ENABLE, dev->base + TBICR);
+			pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1329", TBICR_MR_AN_ENABLE, dev->base + TBICR);
 				dev->linkstate = LINK_AUTONEGOTIATE;
 
 			printk(KERN_INFO "%s: autoneg enabled via ethtool\n",
 				ndev->name);
 		} else {
 			/* disable auto negotiation */
-			writel(0x00000000, dev->base + TBICR);
+			pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1336", 0x00000000, dev->base + TBICR);
 		}
 
 		printk(KERN_INFO "%s: autoneg %s via ethtool\n", ndev->name,
@@ -1359,7 +1359,7 @@ static void ns83820_get_drvinfo(struct net_device *ndev, struct ethtool_drvinfo 
 static u32 ns83820_get_link(struct net_device *ndev)
 {
 	struct ns83820 *dev = PRIV(ndev);
-	u32 cfg = readl(dev->base + CFG) ^ SPDSTS_POLARITY;
+	u32 cfg = pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1362", dev->base + CFG) ^ SPDSTS_POLARITY;
 	return cfg & CFG_LNKSTS ? 1 : 0;
 }
 
@@ -1372,9 +1372,9 @@ static const struct ethtool_ops ops = {
 
 static inline void ns83820_disable_interrupts(struct ns83820 *dev)
 {
-	writel(0, dev->base + IMR);
-	writel(0, dev->base + IER);
-	readl(dev->base + IER);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1375", 0, dev->base + IMR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1376", 0, dev->base + IER);
+	pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1377", dev->base + IER);
 }
 
 /* this function is called in irq context from the ISR */
@@ -1396,7 +1396,7 @@ static irqreturn_t ns83820_irq(int foo, void *data)
 
 	dev->ihr = 0;
 
-	isr = readl(dev->base + ISR);
+	isr = pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1399", dev->base + ISR);
 	dprintk("irq: %08x\n", isr);
 	ns83820_do_isr(ndev, isr);
 	return IRQ_HANDLED;
@@ -1423,12 +1423,12 @@ static void ns83820_do_isr(struct net_device *ndev, u32 isr)
 
 		spin_lock_irqsave(&dev->misc_lock, flags);
 		dev->IMR_cache &= ~(ISR_RXDESC | ISR_RXOK);
-		writel(dev->IMR_cache, dev->base + IMR);
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1426", dev->IMR_cache, dev->base + IMR);
 		spin_unlock_irqrestore(&dev->misc_lock, flags);
 
 		tasklet_schedule(&dev->rx_tasklet);
 		//rx_irq(ndev);
-		//writel(4, dev->base + IHR);
+		//pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1431", 4, dev->base + IHR);
 	}
 
 	if ((ISR_RXIDLE | ISR_RXORN | ISR_RXDESC | ISR_RXOK | ISR_RXERR) & isr)
@@ -1445,11 +1445,11 @@ static void ns83820_do_isr(struct net_device *ndev, u32 isr)
 	}
 
 	if ((ISR_RXRCMP & isr) && dev->rx_info.up)
-		writel(CR_RXE, dev->base + CR);
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1448", CR_RXE, dev->base + CR);
 
 	if (ISR_TXIDLE & isr) {
 		u32 txdp;
-		txdp = readl(dev->base + TXDP);
+		txdp = pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1452", dev->base + TXDP);
 		dprintk("txdp: %08x\n", txdp);
 		txdp -= dev->tx_phy_descs;
 		dev->tx_idx = txdp / (DESC_SIZE * 4);
@@ -1480,7 +1480,7 @@ static void ns83820_do_isr(struct net_device *ndev, u32 isr)
 		    (dev->IMR_cache & ISR_TXOK)) {
 			spin_lock_irqsave(&dev->misc_lock, flags);
 			dev->IMR_cache &= ~ISR_TXOK;
-			writel(dev->IMR_cache, dev->base + IMR);
+			pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1483", dev->IMR_cache, dev->base + IMR);
 			spin_unlock_irqrestore(&dev->misc_lock, flags);
 		}
 	}
@@ -1494,7 +1494,7 @@ static void ns83820_do_isr(struct net_device *ndev, u32 isr)
 	if ((ISR_TXIDLE & isr) && (dev->tx_done_idx != dev->tx_free_idx)) {
 		spin_lock_irqsave(&dev->misc_lock, flags);
 		dev->IMR_cache |= ISR_TXOK;
-		writel(dev->IMR_cache, dev->base + IMR);
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1497", dev->IMR_cache, dev->base + IMR);
 		spin_unlock_irqrestore(&dev->misc_lock, flags);
 	}
 
@@ -1508,17 +1508,17 @@ static void ns83820_do_isr(struct net_device *ndev, u32 isr)
 
 #if 0	/* Still working on the interrupt mitigation strategy */
 	if (dev->ihr)
-		writel(dev->ihr, dev->base + IHR);
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1511", dev->ihr, dev->base + IHR);
 #endif
 }
 
 static void ns83820_do_reset(struct ns83820 *dev, u32 which)
 {
 	Dprintk("resetting chip...\n");
-	writel(which, dev->base + CR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1518", which, dev->base + CR);
 	do {
 		schedule();
-	} while (readl(dev->base + CR) & which);
+	} while (pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1521", dev->base + CR) & which);
 	Dprintk("okay!\n");
 }
 
@@ -1567,7 +1567,7 @@ static void ns83820_tx_timeout(struct net_device *ndev, unsigned int txqueue)
 #if defined(DEBUG)
 	{
 		u32 isr;
-		isr = readl(dev->base + ISR);
+		isr = pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1570", dev->base + ISR);
 		printk("irq: %08x imr: %08x\n", isr, dev->IMR_cache);
 		ns83820_do_isr(ndev, isr);
 	}
@@ -1617,7 +1617,7 @@ static int ns83820_open(struct net_device *ndev)
 
 	dprintk("ns83820_open\n");
 
-	writel(0, dev->base + PQCR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1620", 0, dev->base + PQCR);
 
 	ret = ns83820_setup_rx(ndev);
 	if (ret)
@@ -1634,8 +1634,8 @@ static int ns83820_open(struct net_device *ndev)
 	dev->tx_idx = 0;
 	dev->tx_done_idx = 0;
 	desc = dev->tx_phy_descs;
-	writel(0, dev->base + TXDP_HI);
-	writel(desc, dev->base + TXDP);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1637", 0, dev->base + TXDP_HI);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1638", desc, dev->base + TXDP);
 
 	timer_setup(&dev->tx_watchdog, ns83820_tx_watch, 0);
 	mod_timer(&dev->tx_watchdog, jiffies + 2*HZ);
@@ -1658,8 +1658,8 @@ static void ns83820_getmac(struct ns83820 *dev, u8 *mac)
 		/* Read from the perfect match memory: this is loaded by
 		 * the chip from the EEPROM via the EELOAD self test.
 		 */
-		writel(i*2, dev->base + RFCR);
-		data = readl(dev->base + RFDR);
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1661", i*2, dev->base + RFCR);
+		data = pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1662", dev->base + RFDR);
 
 		*mac++ = data;
 		*mac++ = data >> 8;
@@ -1685,10 +1685,10 @@ static void ns83820_set_multicast(struct net_device *ndev)
 		and_mask &= ~RFCR_AAM;
 
 	spin_lock_irq(&dev->misc_lock);
-	val = (readl(rfcr) & and_mask) | or_mask;
+	val = (pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1688", rfcr) & and_mask) | or_mask;
 	/* Ramit : RFCR Write Fix doc says RFEN must be 0 modify other bits */
-	writel(val & ~RFCR_RFEN, rfcr);
-	writel(val, rfcr);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1690", val & ~RFCR_RFEN, rfcr);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1691", val, rfcr);
 	spin_unlock_irq(&dev->misc_lock);
 }
 
@@ -1704,10 +1704,10 @@ static void ns83820_run_bist(struct net_device *ndev, const char *name, u32 enab
 
 	start = jiffies;
 
-	writel(enable, dev->base + PTSCR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1707", enable, dev->base + PTSCR);
 	for (;;) {
 		loops++;
-		status = readl(dev->base + PTSCR);
+		status = pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1710", dev->base + PTSCR);
 		if (!(status & enable))
 			break;
 		if (status & done)
@@ -1736,8 +1736,8 @@ static void ns83820_mii_write_bit(struct ns83820 *dev, int bit)
 {
 	/* drive MDC low */
 	dev->MEAR_cache &= ~MEAR_MDC;
-	writel(dev->MEAR_cache, dev->base + MEAR);
-	readl(dev->base + MEAR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1739", dev->MEAR_cache, dev->base + MEAR);
+	pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1740", dev->base + MEAR);
 
 	/* enable output, set bit */
 	dev->MEAR_cache |= MEAR_MDDIR;
@@ -1747,16 +1747,16 @@ static void ns83820_mii_write_bit(struct ns83820 *dev, int bit)
 		dev->MEAR_cache &= ~MEAR_MDIO;
 
 	/* set the output bit */
-	writel(dev->MEAR_cache, dev->base + MEAR);
-	readl(dev->base + MEAR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1750", dev->MEAR_cache, dev->base + MEAR);
+	pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1751", dev->base + MEAR);
 
 	/* Wait.  Max clock rate is 2.5MHz, this way we come in under 1MHz */
 	udelay(1);
 
 	/* drive MDC high causing the data bit to be latched */
 	dev->MEAR_cache |= MEAR_MDC;
-	writel(dev->MEAR_cache, dev->base + MEAR);
-	readl(dev->base + MEAR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1758", dev->MEAR_cache, dev->base + MEAR);
+	pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1759", dev->base + MEAR);
 
 	/* Wait again... */
 	udelay(1);
@@ -1769,16 +1769,16 @@ static int ns83820_mii_read_bit(struct ns83820 *dev)
 	/* drive MDC low, disable output */
 	dev->MEAR_cache &= ~MEAR_MDC;
 	dev->MEAR_cache &= ~MEAR_MDDIR;
-	writel(dev->MEAR_cache, dev->base + MEAR);
-	readl(dev->base + MEAR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1772", dev->MEAR_cache, dev->base + MEAR);
+	pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1773", dev->base + MEAR);
 
 	/* Wait.  Max clock rate is 2.5MHz, this way we come in under 1MHz */
 	udelay(1);
 
 	/* drive MDC high causing the data bit to be latched */
-	bit = (readl(dev->base + MEAR) & MEAR_MDIO) ? 1 : 0;
+	bit = (pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1779", dev->base + MEAR) & MEAR_MDIO) ? 1 : 0;
 	dev->MEAR_cache |= MEAR_MDC;
-	writel(dev->MEAR_cache, dev->base + MEAR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1781", dev->MEAR_cache, dev->base + MEAR);
 
 	/* Wait again... */
 	udelay(1);
@@ -1978,7 +1978,7 @@ static int ns83820_init_one(struct pci_dev *pci_dev,
 	}
 
 	printk("%s: ns83820.c: 0x22c: %08x, subsystem: %04x:%04x\n",
-		ndev->name, le32_to_cpu(readl(dev->base + 0x22c)),
+		ndev->name, le32_to_cpu(pete_readl("drivers/net/ethernet/natsemi/ns83820.c:1981", dev->base + 0x22c)),
 		pci_dev->subsystem_vendor, pci_dev->subsystem_device);
 
 	ndev->netdev_ops = &netdev_ops;
@@ -1989,7 +1989,7 @@ static int ns83820_init_one(struct pci_dev *pci_dev,
 	ns83820_do_reset(dev, CR_RST);
 
 	/* Must reset the ram bist before running it */
-	writel(PTSCR_RBIST_RST, dev->base + PTSCR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:1992", PTSCR_RBIST_RST, dev->base + PTSCR);
 	ns83820_run_bist(ndev, "sram bist",   PTSCR_RBIST_EN,
 			 PTSCR_RBIST_DONE, PTSCR_RBIST_FAIL);
 	ns83820_run_bist(ndev, "eeprom bist", PTSCR_EEBIST_EN, 0,
@@ -1997,7 +1997,7 @@ static int ns83820_init_one(struct pci_dev *pci_dev,
 	ns83820_run_bist(ndev, "eeprom load", PTSCR_EELOAD_EN, 0, 0);
 
 	/* I love config registers */
-	dev->CFG_cache = readl(dev->base + CFG);
+	dev->CFG_cache = pete_readl("drivers/net/ethernet/natsemi/ns83820.c:2000", dev->base + CFG);
 
 	if ((dev->CFG_cache & CFG_PCI64_DET)) {
 		printk(KERN_INFO "%s: detected 64 bit PCI data bus.\n",
@@ -2033,37 +2033,37 @@ static int ns83820_init_one(struct pci_dev *pci_dev,
 	if (dev->CFG_cache & CFG_TBI_EN) {
 		printk(KERN_INFO "%s: enabling optical transceiver\n",
 			ndev->name);
-		writel(readl(dev->base + GPIOR) | 0x3e8, dev->base + GPIOR);
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2036", pete_readl("drivers/net/ethernet/natsemi/ns83820.c:2036", dev->base + GPIOR) | 0x3e8, dev->base + GPIOR);
 
 		/* setup auto negotiation feature advertisement */
-		writel(readl(dev->base + TANAR)
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2039", pete_readl("drivers/net/ethernet/natsemi/ns83820.c:2039", dev->base + TANAR)
 		       | TANAR_HALF_DUP | TANAR_FULL_DUP,
 		       dev->base + TANAR);
 
 		/* start auto negotiation */
-		writel(TBICR_MR_AN_ENABLE | TBICR_MR_RESTART_AN,
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2044", TBICR_MR_AN_ENABLE | TBICR_MR_RESTART_AN,
 		       dev->base + TBICR);
-		writel(TBICR_MR_AN_ENABLE, dev->base + TBICR);
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2046", TBICR_MR_AN_ENABLE, dev->base + TBICR);
 		dev->linkstate = LINK_AUTONEGOTIATE;
 
 		dev->CFG_cache |= CFG_MODE_1000;
 	}
 
-	writel(dev->CFG_cache, dev->base + CFG);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2052", dev->CFG_cache, dev->base + CFG);
 	dprintk("CFG: %08x\n", dev->CFG_cache);
 
 	if (reset_phy) {
 		printk(KERN_INFO "%s: resetting phy\n", ndev->name);
-		writel(dev->CFG_cache | CFG_PHY_RST, dev->base + CFG);
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2057", dev->CFG_cache | CFG_PHY_RST, dev->base + CFG);
 		msleep(10);
-		writel(dev->CFG_cache, dev->base + CFG);
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2059", dev->CFG_cache, dev->base + CFG);
 	}
 
 #if 0	/* Huh?  This sets the PCI latency register.  Should be done via
 	 * the PCI layer.  FIXME.
 	 */
-	if (readl(dev->base + SRR))
-		writel(readl(dev->base+0x20c) | 0xfe00, dev->base + 0x20c);
+	if (pete_readl("drivers/net/ethernet/natsemi/ns83820.c:2065", dev->base + SRR))
+		pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2066", pete_readl("drivers/net/ethernet/natsemi/ns83820.c:2066", dev->base+0x20c) | 0xfe00, dev->base + 0x20c);
 #endif
 
 	/* Note!  The DMA burst size interacts with packet
@@ -2073,14 +2073,14 @@ static int ns83820_init_one(struct pci_dev *pci_dev,
 	 */
 	/* Ramit : 1024 DMA is not a good idea, it ends up banging
 	 * some DELL and COMPAQ SMP systems */
-	writel(TXCFG_CSI | TXCFG_HBI | TXCFG_ATP | TXCFG_MXDMA512
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2076", TXCFG_CSI | TXCFG_HBI | TXCFG_ATP | TXCFG_MXDMA512
 		| ((1600 / 32) * 0x100),
 		dev->base + TXCFG);
 
 	/* Flush the interrupt holdoff timer */
-	writel(0x000, dev->base + IHR);
-	writel(0x100, dev->base + IHR);
-	writel(0x000, dev->base + IHR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2081", 0x000, dev->base + IHR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2082", 0x100, dev->base + IHR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2083", 0x000, dev->base + IHR);
 
 	/* Set Rx to full duplex, don't accept runt, errored, long or length
 	 * range errored packets.  Use 512 byte DMA.
@@ -2088,13 +2088,13 @@ static int ns83820_init_one(struct pci_dev *pci_dev,
 	/* Ramit : 1024 DMA is not a good idea, it ends up banging
 	 * some DELL and COMPAQ SMP systems
 	 * Turn on ALP, only we are accpeting Jumbo Packets */
-	writel(RXCFG_AEP | RXCFG_ARP | RXCFG_AIRL | RXCFG_RX_FD
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2091", RXCFG_AEP | RXCFG_ARP | RXCFG_AIRL | RXCFG_RX_FD
 		| RXCFG_STRIPCRC
 		//| RXCFG_ALP
 		| (RXCFG_MXDMA512) | 0, dev->base + RXCFG);
 
 	/* Disable priority queueing */
-	writel(0, dev->base + PQCR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2097", 0, dev->base + PQCR);
 
 	/* Enable IP checksum validation and detetion of VLAN headers.
 	 * Note: do not set the reject options as at least the 0x102
@@ -2114,7 +2114,7 @@ static int ns83820_init_one(struct pci_dev *pci_dev,
 #else
 #define VRCR_INIT_VALUE (VRCR_IPEN|VRCR_VTDEN)
 #endif
-	writel(VRCR_INIT_VALUE, dev->base + VRCR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2117", VRCR_INIT_VALUE, dev->base + VRCR);
 
 	/* Enable per-packet TCP/UDP/IP checksumming
 	 * and per packet vlan tag insertion if
@@ -2125,16 +2125,16 @@ static int ns83820_init_one(struct pci_dev *pci_dev,
 #else
 #define VTCR_INIT_VALUE VTCR_PPCHK
 #endif
-	writel(VTCR_INIT_VALUE, dev->base + VTCR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2128", VTCR_INIT_VALUE, dev->base + VTCR);
 
 	/* Ramit : Enable async and sync pause frames */
-	/* writel(0, dev->base + PCR); */
-	writel((PCR_PS_MCAST | PCR_PS_DA | PCR_PSEN | PCR_FFLO_4K |
+	/* pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2131", 0, dev->base + PCR); */
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2132", (PCR_PS_MCAST | PCR_PS_DA | PCR_PSEN | PCR_FFLO_4K |
 		PCR_FFHI_8K | PCR_STLO_4 | PCR_STHI_8 | PCR_PAUSE_CNT),
 		dev->base + PCR);
 
 	/* Disable Wake On Lan */
-	writel(0, dev->base + WCSR);
+	pete_writel("drivers/net/ethernet/natsemi/ns83820.c:2137", 0, dev->base + WCSR);
 
 	ns83820_getmac(dev, ndev->dev_addr);
 
@@ -2157,8 +2157,8 @@ static int ns83820_init_one(struct pci_dev *pci_dev,
 
 	printk(KERN_INFO "%s: ns83820 v" VERSION ": DP83820 v%u.%u: %pM io=0x%08lx irq=%d f=%s\n",
 		ndev->name,
-		(unsigned)readl(dev->base + SRR) >> 8,
-		(unsigned)readl(dev->base + SRR) & 0xff,
+		(unsigned)pete_readl("drivers/net/ethernet/natsemi/ns83820.c:2160", dev->base + SRR) >> 8,
+		(unsigned)pete_readl("drivers/net/ethernet/natsemi/ns83820.c:2161", dev->base + SRR) & 0xff,
 		ndev->dev_addr, addr, pci_dev->irq,
 		(ndev->features & NETIF_F_HIGHDMA) ? "h,sg" : "sg"
 		);

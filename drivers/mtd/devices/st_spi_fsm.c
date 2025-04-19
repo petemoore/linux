@@ -701,12 +701,12 @@ static int stfsm_n25q_en_32bit_addr_seq(struct stfsm_seq *seq)
 
 static inline int stfsm_is_idle(struct stfsm *fsm)
 {
-	return readl(fsm->base + SPI_FAST_SEQ_STA) & 0x10;
+	return pete_readl("drivers/mtd/devices/st_spi_fsm.c:704", fsm->base + SPI_FAST_SEQ_STA) & 0x10;
 }
 
 static inline uint32_t stfsm_fifo_available(struct stfsm *fsm)
 {
-	return (readl(fsm->base + SPI_FAST_SEQ_STA) >> 5) & 0x7f;
+	return (pete_readl("drivers/mtd/devices/st_spi_fsm.c:709", fsm->base + SPI_FAST_SEQ_STA) >> 5) & 0x7f;
 }
 
 static inline void stfsm_load_seq(struct stfsm *fsm,
@@ -719,7 +719,7 @@ static inline void stfsm_load_seq(struct stfsm *fsm,
 	BUG_ON(!stfsm_is_idle(fsm));
 
 	while (words--) {
-		writel(*src, dst);
+		pete_writel("drivers/mtd/devices/st_spi_fsm.c:722", *src, dst);
 		src++;
 		dst += 4;
 	}
@@ -805,7 +805,7 @@ static void stfsm_clear_fifo(struct stfsm *fsm)
 	words = stfsm_fifo_available(fsm);
 	if (words) {
 		for (i = 0; i < words; i++)
-			readl(fsm->base + SPI_FAST_SEQ_DATA_REG);
+			pete_readl("drivers/mtd/devices/st_spi_fsm.c:808", fsm->base + SPI_FAST_SEQ_DATA_REG);
 		dev_dbg(fsm->dev, "cleared %d words from FIFO\n", words);
 	}
 
@@ -827,7 +827,7 @@ static void stfsm_clear_fifo(struct stfsm *fsm)
 	}
 
 	/*    - Read the 32-bit word */
-	readl(fsm->base + SPI_FAST_SEQ_DATA_REG);
+	pete_readl("drivers/mtd/devices/st_spi_fsm.c:830", fsm->base + SPI_FAST_SEQ_DATA_REG);
 
 	dev_dbg(fsm->dev, "cleared %d byte(s) from the data FIFO\n", 4 - i);
 }
@@ -900,7 +900,7 @@ static uint8_t stfsm_wait_busy(struct stfsm *fsm)
 
 		if (!timeout)
 			/* Restart */
-			writel(seq->seq_cfg, fsm->base + SPI_FAST_SEQ_CFG);
+			pete_writel("drivers/mtd/devices/st_spi_fsm.c:903", seq->seq_cfg, fsm->base + SPI_FAST_SEQ_CFG);
 
 		cond_resched();
 	}
@@ -1617,14 +1617,14 @@ static int stfsm_write(struct stfsm *fsm, const uint8_t *buf,
 	/* Need to set FIFO to write mode, before writing data to FIFO (see
 	 * GNBvb79594)
 	 */
-	writel(0x00040000, fsm->base + SPI_FAST_SEQ_CFG);
+	pete_writel("drivers/mtd/devices/st_spi_fsm.c:1620", 0x00040000, fsm->base + SPI_FAST_SEQ_CFG);
 
 	/*
 	 * Before writing data to the FIFO, apply a small delay to allow a
 	 * potential change of FIFO direction to complete.
 	 */
 	if (fsm->fifo_dir_delay == 0)
-		readl(fsm->base + SPI_FAST_SEQ_CFG);
+		pete_readl("drivers/mtd/devices/st_spi_fsm.c:1627", fsm->base + SPI_FAST_SEQ_CFG);
 	else
 		udelay(fsm->fifo_dir_delay);
 
@@ -1879,7 +1879,7 @@ static int stfsm_set_mode(struct stfsm *fsm, uint32_t mode)
 
 	/* Wait for controller to accept mode change */
 	while (--timeout) {
-		ret = readl(fsm->base + SPI_STA_MODE_CHANGE);
+		ret = pete_readl("drivers/mtd/devices/st_spi_fsm.c:1882", fsm->base + SPI_STA_MODE_CHANGE);
 		if (ret & 0x1)
 			break;
 		udelay(1);
@@ -1888,7 +1888,7 @@ static int stfsm_set_mode(struct stfsm *fsm, uint32_t mode)
 	if (!timeout)
 		return -EBUSY;
 
-	writel(mode, fsm->base + SPI_MODESELECT);
+	pete_writel("drivers/mtd/devices/st_spi_fsm.c:1891", mode, fsm->base + SPI_MODESELECT);
 
 	return 0;
 }
@@ -1926,7 +1926,7 @@ static void stfsm_set_freq(struct stfsm *fsm, uint32_t spi_freq)
 	dev_dbg(fsm->dev, "emi_clk = %uHZ, spi_freq = %uHZ, clk_div = %u\n",
 		emi_freq, spi_freq, clk_div);
 
-	writel(clk_div, fsm->base + SPI_CLOCKDIV);
+	pete_writel("drivers/mtd/devices/st_spi_fsm.c:1929", clk_div, fsm->base + SPI_CLOCKDIV);
 }
 
 static int stfsm_init(struct stfsm *fsm)
@@ -1934,9 +1934,9 @@ static int stfsm_init(struct stfsm *fsm)
 	int ret;
 
 	/* Perform a soft reset of the FSM controller */
-	writel(SEQ_CFG_SWRESET, fsm->base + SPI_FAST_SEQ_CFG);
+	pete_writel("drivers/mtd/devices/st_spi_fsm.c:1937", SEQ_CFG_SWRESET, fsm->base + SPI_FAST_SEQ_CFG);
 	udelay(1);
-	writel(0, fsm->base + SPI_FAST_SEQ_CFG);
+	pete_writel("drivers/mtd/devices/st_spi_fsm.c:1939", 0, fsm->base + SPI_FAST_SEQ_CFG);
 
 	/* Set clock to 'safe' frequency initially */
 	stfsm_set_freq(fsm, STFSM_FLASH_SAFE_FREQ);
@@ -1947,19 +1947,19 @@ static int stfsm_init(struct stfsm *fsm)
 		return ret;
 
 	/* Set timing parameters */
-	writel(SPI_CFG_DEVICE_ST            |
+	pete_writel("drivers/mtd/devices/st_spi_fsm.c:1950", SPI_CFG_DEVICE_ST            |
 	       SPI_CFG_DEFAULT_MIN_CS_HIGH  |
 	       SPI_CFG_DEFAULT_CS_SETUPHOLD |
 	       SPI_CFG_DEFAULT_DATA_HOLD,
 	       fsm->base + SPI_CONFIGDATA);
-	writel(STFSM_DEFAULT_WR_TIME, fsm->base + SPI_STATUS_WR_TIME_REG);
+	pete_writel("drivers/mtd/devices/st_spi_fsm.c:1955", STFSM_DEFAULT_WR_TIME, fsm->base + SPI_STATUS_WR_TIME_REG);
 
 	/*
 	 * Set the FSM 'WAIT' delay to the minimum workable value.  Note, for
 	 * our purposes, the WAIT instruction is used purely to achieve
 	 * "sequence validity" rather than actually implement a delay.
 	 */
-	writel(0x00000001, fsm->base + SPI_PROGRAM_ERASE_TIME);
+	pete_writel("drivers/mtd/devices/st_spi_fsm.c:1962", 0x00000001, fsm->base + SPI_PROGRAM_ERASE_TIME);
 
 	/* Clear FIFO, just in case */
 	stfsm_clear_fifo(fsm);

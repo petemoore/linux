@@ -140,13 +140,13 @@ __setup("fas216_logging=", fas216_log_setup);
 static inline unsigned char fas216_readb(FAS216_Info *info, unsigned int reg)
 {
 	unsigned int off = reg << info->scsi.io_shift;
-	return readb(info->scsi.io_base + off);
+	return pete_readb("drivers/scsi/arm/fas216.c:143", info->scsi.io_base + off);
 }
 
 static inline void fas216_writeb(FAS216_Info *info, unsigned int reg, unsigned int val)
 {
 	unsigned int off = reg << info->scsi.io_shift;
-	writeb(val, info->scsi.io_base + off);
+	pete_writeb("drivers/scsi/arm/fas216.c:149", val, info->scsi.io_base + off);
 }
 
 static void fas216_dumpstate(FAS216_Info *info)

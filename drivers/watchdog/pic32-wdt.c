@@ -44,28 +44,28 @@ struct pic32_wdt {
 
 static inline bool pic32_wdt_is_win_enabled(struct pic32_wdt *wdt)
 {
-	return !!(readl(wdt->regs + WDTCON_REG) & WDTCON_WIN_EN);
+	return !!(pete_readl("drivers/watchdog/pic32-wdt.c:47", wdt->regs + WDTCON_REG) & WDTCON_WIN_EN);
 }
 
 static inline u32 pic32_wdt_get_post_scaler(struct pic32_wdt *wdt)
 {
-	u32 v = readl(wdt->regs + WDTCON_REG);
+	u32 v = pete_readl("drivers/watchdog/pic32-wdt.c:52", wdt->regs + WDTCON_REG);
 
 	return (v >> WDTCON_RMPS_SHIFT) & WDTCON_RMPS_MASK;
 }
 
 static inline u32 pic32_wdt_get_clk_id(struct pic32_wdt *wdt)
 {
-	u32 v = readl(wdt->regs + WDTCON_REG);
+	u32 v = pete_readl("drivers/watchdog/pic32-wdt.c:59", wdt->regs + WDTCON_REG);
 
 	return (v >> WDTCON_RMCS_SHIFT) & WDTCON_RMCS_MASK;
 }
 
 static int pic32_wdt_bootstatus(struct pic32_wdt *wdt)
 {
-	u32 v = readl(wdt->rst_base);
+	u32 v = pete_readl("drivers/watchdog/pic32-wdt.c:66", wdt->rst_base);
 
-	writel(RESETCON_WDT_TIMEOUT, PIC32_CLR(wdt->rst_base));
+	pete_writel("drivers/watchdog/pic32-wdt.c:68", RESETCON_WDT_TIMEOUT, PIC32_CLR(wdt->rst_base));
 
 	return v & RESETCON_WDT_TIMEOUT;
 }
@@ -101,14 +101,14 @@ static u32 pic32_wdt_get_timeout_secs(struct pic32_wdt *wdt, struct device *dev)
 static void pic32_wdt_keepalive(struct pic32_wdt *wdt)
 {
 	/* write key through single half-word */
-	writew(WDTCON_CLR_KEY, wdt->regs + WDTCON_REG + 2);
+	pete_writew("drivers/watchdog/pic32-wdt.c:104", WDTCON_CLR_KEY, wdt->regs + WDTCON_REG + 2);
 }
 
 static int pic32_wdt_start(struct watchdog_device *wdd)
 {
 	struct pic32_wdt *wdt = watchdog_get_drvdata(wdd);
 
-	writel(WDTCON_ON, PIC32_SET(wdt->regs + WDTCON_REG));
+	pete_writel("drivers/watchdog/pic32-wdt.c:111", WDTCON_ON, PIC32_SET(wdt->regs + WDTCON_REG));
 	pic32_wdt_keepalive(wdt);
 
 	return 0;
@@ -118,7 +118,7 @@ static int pic32_wdt_stop(struct watchdog_device *wdd)
 {
 	struct pic32_wdt *wdt = watchdog_get_drvdata(wdd);
 
-	writel(WDTCON_ON, PIC32_CLR(wdt->regs + WDTCON_REG));
+	pete_writel("drivers/watchdog/pic32-wdt.c:121", WDTCON_ON, PIC32_CLR(wdt->regs + WDTCON_REG));
 
 	/*
 	 * Cannot touch registers in the CPU cycle following clearing the

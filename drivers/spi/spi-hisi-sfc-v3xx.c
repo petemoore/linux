@@ -83,17 +83,17 @@ struct hisi_sfc_v3xx_host {
 
 static void hisi_sfc_v3xx_disable_int(struct hisi_sfc_v3xx_host *host)
 {
-	writel(0, host->regbase + HISI_SFC_V3XX_INT_MASK);
+	pete_writel("drivers/spi/spi-hisi-sfc-v3xx.c:86", 0, host->regbase + HISI_SFC_V3XX_INT_MASK);
 }
 
 static void hisi_sfc_v3xx_enable_int(struct hisi_sfc_v3xx_host *host)
 {
-	writel(HISI_SFC_V3XX_INT_MASK_ALL, host->regbase + HISI_SFC_V3XX_INT_MASK);
+	pete_writel("drivers/spi/spi-hisi-sfc-v3xx.c:91", HISI_SFC_V3XX_INT_MASK_ALL, host->regbase + HISI_SFC_V3XX_INT_MASK);
 }
 
 static void hisi_sfc_v3xx_clear_int(struct hisi_sfc_v3xx_host *host)
 {
-	writel(HISI_SFC_V3XX_INT_MASK_ALL, host->regbase + HISI_SFC_V3XX_INT_CLR);
+	pete_writel("drivers/spi/spi-hisi-sfc-v3xx.c:96", HISI_SFC_V3XX_INT_MASK_ALL, host->regbase + HISI_SFC_V3XX_INT_CLR);
 }
 
 /*
@@ -105,7 +105,7 @@ static int hisi_sfc_v3xx_handle_completion(struct hisi_sfc_v3xx_host *host)
 {
 	u32 reg;
 
-	reg = readl(host->regbase + HISI_SFC_V3XX_RAW_INT_STAT);
+	reg = pete_readl("drivers/spi/spi-hisi-sfc-v3xx.c:108", host->regbase + HISI_SFC_V3XX_RAW_INT_STAT);
 	hisi_sfc_v3xx_clear_int(host);
 
 	if (reg & HISI_SFC_V3XX_INT_MASK_IACCES) {
@@ -306,10 +306,10 @@ static int hisi_sfc_v3xx_start_bus(struct hisi_sfc_v3xx_host *host,
 		  chip_select << HISI_SFC_V3XX_CMD_CFG_CS_SEL_OFF |
 		  HISI_SFC_V3XX_CMD_CFG_START_MSK;
 
-	writel(op->addr.val, host->regbase + HISI_SFC_V3XX_CMD_ADDR);
-	writel(op->cmd.opcode, host->regbase + HISI_SFC_V3XX_CMD_INS);
+	pete_writel("drivers/spi/spi-hisi-sfc-v3xx.c:309", op->addr.val, host->regbase + HISI_SFC_V3XX_CMD_ADDR);
+	pete_writel("drivers/spi/spi-hisi-sfc-v3xx.c:310", op->cmd.opcode, host->regbase + HISI_SFC_V3XX_CMD_INS);
 
-	writel(config, host->regbase + HISI_SFC_V3XX_CMD_CFG);
+	pete_writel("drivers/spi/spi-hisi-sfc-v3xx.c:312", config, host->regbase + HISI_SFC_V3XX_CMD_CFG);
 
 	return 0;
 }
@@ -481,13 +481,13 @@ static int hisi_sfc_v3xx_probe(struct platform_device *pdev)
 	 * the global config register. The register is read only
 	 * for the OS driver.
 	 */
-	glb_config = readl(host->regbase + HISI_SFC_V3XX_GLB_CFG);
+	glb_config = pete_readl("drivers/spi/spi-hisi-sfc-v3xx.c:484", host->regbase + HISI_SFC_V3XX_GLB_CFG);
 	if (glb_config & HISI_SFC_V3XX_GLB_CFG_CS0_ADDR_MODE)
 		host->address_mode = 4;
 	else
 		host->address_mode = 3;
 
-	version = readl(host->regbase + HISI_SFC_V3XX_VERSION);
+	version = pete_readl("drivers/spi/spi-hisi-sfc-v3xx.c:490", host->regbase + HISI_SFC_V3XX_VERSION);
 
 	if (version >= 0x351)
 		host->max_cmd_dword = 64;

@@ -44,13 +44,13 @@ static struct ingenic_ost *ingenic_ost;
 static u64 notrace ingenic_ost_read_cntl(void)
 {
 	/* Read using __iomem pointer instead of regmap to avoid locking */
-	return readl(ingenic_ost->regs + OST_REG_CNTL);
+	return pete_readl("drivers/clocksource/ingenic-ost.c:47", ingenic_ost->regs + OST_REG_CNTL);
 }
 
 static u64 notrace ingenic_ost_read_cnth(void)
 {
 	/* Read using __iomem pointer instead of regmap to avoid locking */
-	return readl(ingenic_ost->regs + OST_REG_CNTH);
+	return pete_readl("drivers/clocksource/ingenic-ost.c:53", ingenic_ost->regs + OST_REG_CNTH);
 }
 
 static u64 notrace ingenic_ost_clocksource_readl(struct clocksource *cs)

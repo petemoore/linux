@@ -22,11 +22,11 @@ static void dwmac100_dma_init(void __iomem *ioaddr,
 			      struct stmmac_dma_cfg *dma_cfg, int atds)
 {
 	/* Enable Application Access by writing to DMA CSR0 */
-	writel(DMA_BUS_MODE_DEFAULT | (dma_cfg->pbl << DMA_BUS_MODE_PBL_SHIFT),
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac100_dma.c:25", DMA_BUS_MODE_DEFAULT | (dma_cfg->pbl << DMA_BUS_MODE_PBL_SHIFT),
 	       ioaddr + DMA_BUS_MODE);
 
 	/* Mask interrupts by writing to CSR7 */
-	writel(DMA_INTR_DEFAULT_MASK, ioaddr + DMA_INTR_ENA);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac100_dma.c:29", DMA_INTR_DEFAULT_MASK, ioaddr + DMA_INTR_ENA);
 }
 
 static void dwmac100_dma_init_rx(void __iomem *ioaddr,
@@ -34,7 +34,7 @@ static void dwmac100_dma_init_rx(void __iomem *ioaddr,
 				 dma_addr_t dma_rx_phy, u32 chan)
 {
 	/* RX descriptor base addr lists must be written into DMA CSR3 */
-	writel(lower_32_bits(dma_rx_phy), ioaddr + DMA_RCV_BASE_ADDR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac100_dma.c:37", lower_32_bits(dma_rx_phy), ioaddr + DMA_RCV_BASE_ADDR);
 }
 
 static void dwmac100_dma_init_tx(void __iomem *ioaddr,
@@ -42,7 +42,7 @@ static void dwmac100_dma_init_tx(void __iomem *ioaddr,
 				 dma_addr_t dma_tx_phy, u32 chan)
 {
 	/* TX descriptor base addr lists must be written into DMA CSR4 */
-	writel(lower_32_bits(dma_tx_phy), ioaddr + DMA_TX_BASE_ADDR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac100_dma.c:45", lower_32_bits(dma_tx_phy), ioaddr + DMA_TX_BASE_ADDR);
 }
 
 /* Store and Forward capability is not used at all.
@@ -53,7 +53,7 @@ static void dwmac100_dma_init_tx(void __iomem *ioaddr,
 static void dwmac100_dma_operation_mode_tx(void __iomem *ioaddr, int mode,
 					   u32 channel, int fifosz, u8 qmode)
 {
-	u32 csr6 = readl(ioaddr + DMA_CONTROL);
+	u32 csr6 = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac100_dma.c:56", ioaddr + DMA_CONTROL);
 
 	if (mode <= 32)
 		csr6 |= DMA_CONTROL_TTC_32;
@@ -62,7 +62,7 @@ static void dwmac100_dma_operation_mode_tx(void __iomem *ioaddr, int mode,
 	else
 		csr6 |= DMA_CONTROL_TTC_128;
 
-	writel(csr6, ioaddr + DMA_CONTROL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac100_dma.c:65", csr6, ioaddr + DMA_CONTROL);
 }
 
 static void dwmac100_dump_dma_regs(void __iomem *ioaddr, u32 *reg_space)
@@ -71,12 +71,12 @@ static void dwmac100_dump_dma_regs(void __iomem *ioaddr, u32 *reg_space)
 
 	for (i = 0; i < NUM_DWMAC100_DMA_REGS; i++)
 		reg_space[DMA_BUS_MODE / 4 + i] =
-			readl(ioaddr + DMA_BUS_MODE + i * 4);
+			pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac100_dma.c:74", ioaddr + DMA_BUS_MODE + i * 4);
 
 	reg_space[DMA_CUR_TX_BUF_ADDR / 4] =
-		readl(ioaddr + DMA_CUR_TX_BUF_ADDR);
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac100_dma.c:77", ioaddr + DMA_CUR_TX_BUF_ADDR);
 	reg_space[DMA_CUR_RX_BUF_ADDR / 4] =
-		readl(ioaddr + DMA_CUR_RX_BUF_ADDR);
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac100_dma.c:79", ioaddr + DMA_CUR_RX_BUF_ADDR);
 }
 
 /* DMA controller has two counters to track the number of the missed frames. */
@@ -84,7 +84,7 @@ static void dwmac100_dma_diagnostic_fr(void *data, struct stmmac_extra_stats *x,
 				       void __iomem *ioaddr)
 {
 	struct net_device_stats *stats = (struct net_device_stats *)data;
-	u32 csr8 = readl(ioaddr + DMA_MISSED_FRAME_CTR);
+	u32 csr8 = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac100_dma.c:87", ioaddr + DMA_MISSED_FRAME_CTR);
 
 	if (unlikely(csr8)) {
 		if (csr8 & DMA_MISSED_FRAME_OVE) {

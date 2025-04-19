@@ -158,14 +158,14 @@ static int q6v5_wcss_reset(struct q6v5_wcss *wcss)
 	int i;
 
 	/* Assert resets, stop core */
-	val = readl(wcss->reg_base + Q6SS_RESET_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:161", wcss->reg_base + Q6SS_RESET_REG);
 	val |= Q6SS_CORE_ARES | Q6SS_BUS_ARES_ENABLE | Q6SS_STOP_CORE;
-	writel(val, wcss->reg_base + Q6SS_RESET_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:163", val, wcss->reg_base + Q6SS_RESET_REG);
 
 	/* BHS require xo cbcr to be enabled */
-	val = readl(wcss->reg_base + Q6SS_XO_CBCR);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:166", wcss->reg_base + Q6SS_XO_CBCR);
 	val |= 0x1;
-	writel(val, wcss->reg_base + Q6SS_XO_CBCR);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:168", val, wcss->reg_base + Q6SS_XO_CBCR);
 
 	/* Read CLKOFF bit to go low indicating CLK is enabled */
 	ret = readl_poll_timeout(wcss->reg_base + Q6SS_XO_CBCR,
@@ -177,60 +177,60 @@ static int q6v5_wcss_reset(struct q6v5_wcss *wcss)
 		return ret;
 	}
 	/* Enable power block headswitch and wait for it to stabilize */
-	val = readl(wcss->reg_base + Q6SS_PWR_CTL_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:180", wcss->reg_base + Q6SS_PWR_CTL_REG);
 	val |= Q6SS_BHS_ON;
-	writel(val, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:182", val, wcss->reg_base + Q6SS_PWR_CTL_REG);
 	udelay(1);
 
 	/* Put LDO in bypass mode */
 	val |= Q6SS_LDO_BYP;
-	writel(val, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:187", val, wcss->reg_base + Q6SS_PWR_CTL_REG);
 
 	/* Deassert Q6 compiler memory clamp */
-	val = readl(wcss->reg_base + Q6SS_PWR_CTL_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:190", wcss->reg_base + Q6SS_PWR_CTL_REG);
 	val &= ~Q6SS_CLAMP_QMC_MEM;
-	writel(val, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:192", val, wcss->reg_base + Q6SS_PWR_CTL_REG);
 
 	/* Deassert memory peripheral sleep and L2 memory standby */
 	val |= Q6SS_L2DATA_STBY_N | Q6SS_SLP_RET_N;
-	writel(val, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:196", val, wcss->reg_base + Q6SS_PWR_CTL_REG);
 
 	/* Turn on L1, L2, ETB and JU memories 1 at a time */
-	val = readl(wcss->reg_base + Q6SS_MEM_PWR_CTL);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:199", wcss->reg_base + Q6SS_MEM_PWR_CTL);
 	for (i = MEM_BANKS; i >= 0; i--) {
 		val |= BIT(i);
-		writel(val, wcss->reg_base + Q6SS_MEM_PWR_CTL);
+		pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:202", val, wcss->reg_base + Q6SS_MEM_PWR_CTL);
 		/*
 		 * Read back value to ensure the write is done then
 		 * wait for 1us for both memory peripheral and data
 		 * array to turn on.
 		 */
-		val |= readl(wcss->reg_base + Q6SS_MEM_PWR_CTL);
+		val |= pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:208", wcss->reg_base + Q6SS_MEM_PWR_CTL);
 		udelay(1);
 	}
 	/* Remove word line clamp */
-	val = readl(wcss->reg_base + Q6SS_PWR_CTL_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:212", wcss->reg_base + Q6SS_PWR_CTL_REG);
 	val &= ~Q6SS_CLAMP_WL;
-	writel(val, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:214", val, wcss->reg_base + Q6SS_PWR_CTL_REG);
 
 	/* Remove IO clamp */
 	val &= ~Q6SS_CLAMP_IO;
-	writel(val, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:218", val, wcss->reg_base + Q6SS_PWR_CTL_REG);
 
 	/* Bring core out of reset */
-	val = readl(wcss->reg_base + Q6SS_RESET_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:221", wcss->reg_base + Q6SS_RESET_REG);
 	val &= ~Q6SS_CORE_ARES;
-	writel(val, wcss->reg_base + Q6SS_RESET_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:223", val, wcss->reg_base + Q6SS_RESET_REG);
 
 	/* Turn on core clock */
-	val = readl(wcss->reg_base + Q6SS_GFMUX_CTL_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:226", wcss->reg_base + Q6SS_GFMUX_CTL_REG);
 	val |= Q6SS_CLK_ENABLE;
-	writel(val, wcss->reg_base + Q6SS_GFMUX_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:228", val, wcss->reg_base + Q6SS_GFMUX_CTL_REG);
 
 	/* Start core execution */
-	val = readl(wcss->reg_base + Q6SS_RESET_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:231", wcss->reg_base + Q6SS_RESET_REG);
 	val &= ~Q6SS_STOP_CORE;
-	writel(val, wcss->reg_base + Q6SS_RESET_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:233", val, wcss->reg_base + Q6SS_RESET_REG);
 
 	return 0;
 }
@@ -270,7 +270,7 @@ static int q6v5_wcss_start(struct rproc *rproc)
 		goto wcss_q6_reset;
 
 	/* Write bootaddr to EVB so that Q6WCSS will jump there after reset */
-	writel(rproc->bootaddr >> 4, wcss->reg_base + Q6SS_RST_EVB);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:273", rproc->bootaddr >> 4, wcss->reg_base + Q6SS_RST_EVB);
 
 	ret = q6v5_wcss_reset(wcss);
 	if (ret)
@@ -341,9 +341,9 @@ static int q6v5_wcss_qcs404_power_on(struct q6v5_wcss *wcss)
 		goto disable_abhm_cbcr_clk;
 
 	/* Enable the Q6SS XO CBC */
-	val = readl(wcss->reg_base + Q6SS_XO_CBCR);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:344", wcss->reg_base + Q6SS_XO_CBCR);
 	val |= BIT(0);
-	writel(val, wcss->reg_base + Q6SS_XO_CBCR);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:346", val, wcss->reg_base + Q6SS_XO_CBCR);
 	/* Read CLKOFF bit to go low indicating CLK is enabled */
 	ret = readl_poll_timeout(wcss->reg_base + Q6SS_XO_CBCR,
 				 val, !(val & BIT(31)), 1,
@@ -354,12 +354,12 @@ static int q6v5_wcss_qcs404_power_on(struct q6v5_wcss *wcss)
 		goto disable_xo_cbcr_clk;
 	}
 
-	writel(0, wcss->reg_base + Q6SS_CGC_OVERRIDE);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:357", 0, wcss->reg_base + Q6SS_CGC_OVERRIDE);
 
 	/* Enable QDSP6 sleep clock clock */
-	val = readl(wcss->reg_base + Q6SS_SLEEP_CBCR);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:360", wcss->reg_base + Q6SS_SLEEP_CBCR);
 	val |= BIT(0);
-	writel(val, wcss->reg_base + Q6SS_SLEEP_CBCR);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:362", val, wcss->reg_base + Q6SS_SLEEP_CBCR);
 
 	/* Enable the Enable the Q6 AXI clock, GCC_WDSP_Q6SS_AXIM_CBCR*/
 	ret = clk_prepare_enable(wcss->gcc_axim_cbcr);
@@ -367,39 +367,39 @@ static int q6v5_wcss_qcs404_power_on(struct q6v5_wcss *wcss)
 		goto disable_sleep_cbcr_clk;
 
 	/* Assert resets, stop core */
-	val = readl(wcss->reg_base + Q6SS_RESET_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:370", wcss->reg_base + Q6SS_RESET_REG);
 	val |= Q6SS_CORE_ARES | Q6SS_BUS_ARES_ENABLE | Q6SS_STOP_CORE;
-	writel(val, wcss->reg_base + Q6SS_RESET_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:372", val, wcss->reg_base + Q6SS_RESET_REG);
 
 	/* Program the QDSP6SS PWR_CTL register */
-	writel(0x01700000, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:375", 0x01700000, wcss->reg_base + Q6SS_PWR_CTL_REG);
 
-	writel(0x03700000, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:377", 0x03700000, wcss->reg_base + Q6SS_PWR_CTL_REG);
 
-	writel(0x03300000, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:379", 0x03300000, wcss->reg_base + Q6SS_PWR_CTL_REG);
 
-	writel(0x033C0000, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:381", 0x033C0000, wcss->reg_base + Q6SS_PWR_CTL_REG);
 
 	/*
 	 * Enable memories by turning on the QDSP6 memory foot/head switch, one
 	 * bank at a time to avoid in-rush current
 	 */
 	for (idx = 28; idx >= 0; idx--) {
-		writel((readl(wcss->reg_base + Q6SS_MEM_PWR_CTL) |
+		pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:388", (pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:388", wcss->reg_base + Q6SS_MEM_PWR_CTL) |
 			(1 << idx)), wcss->reg_base + Q6SS_MEM_PWR_CTL);
 	}
 
-	writel(0x031C0000, wcss->reg_base + Q6SS_PWR_CTL_REG);
-	writel(0x030C0000, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:392", 0x031C0000, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:393", 0x030C0000, wcss->reg_base + Q6SS_PWR_CTL_REG);
 
-	val = readl(wcss->reg_base + Q6SS_RESET_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:395", wcss->reg_base + Q6SS_RESET_REG);
 	val &= ~Q6SS_CORE_ARES;
-	writel(val, wcss->reg_base + Q6SS_RESET_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:397", val, wcss->reg_base + Q6SS_RESET_REG);
 
 	/* Enable the Q6 core clock at the GFM, Q6SSTOP_QDSP6SS_GFMUX_CTL */
-	val = readl(wcss->reg_base + Q6SS_GFMUX_CTL_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:400", wcss->reg_base + Q6SS_GFMUX_CTL_REG);
 	val |= Q6SS_CLK_ENABLE | Q6SS_SWITCH_CLK_SRC;
-	writel(val, wcss->reg_base + Q6SS_GFMUX_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:402", val, wcss->reg_base + Q6SS_GFMUX_CTL_REG);
 
 	/* Enable sleep clock branch needed for BCR circuit */
 	ret = clk_prepare_enable(wcss->lcc_bcr_sleep);
@@ -409,18 +409,18 @@ static int q6v5_wcss_qcs404_power_on(struct q6v5_wcss *wcss)
 	return 0;
 
 disable_core_gfmux_clk:
-	val = readl(wcss->reg_base + Q6SS_GFMUX_CTL_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:412", wcss->reg_base + Q6SS_GFMUX_CTL_REG);
 	val &= ~(Q6SS_CLK_ENABLE | Q6SS_SWITCH_CLK_SRC);
-	writel(val, wcss->reg_base + Q6SS_GFMUX_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:414", val, wcss->reg_base + Q6SS_GFMUX_CTL_REG);
 	clk_disable_unprepare(wcss->gcc_axim_cbcr);
 disable_sleep_cbcr_clk:
-	val = readl(wcss->reg_base + Q6SS_SLEEP_CBCR);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:417", wcss->reg_base + Q6SS_SLEEP_CBCR);
 	val &= ~Q6SS_CLK_ENABLE;
-	writel(val, wcss->reg_base + Q6SS_SLEEP_CBCR);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:419", val, wcss->reg_base + Q6SS_SLEEP_CBCR);
 disable_xo_cbcr_clk:
-	val = readl(wcss->reg_base + Q6SS_XO_CBCR);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:421", wcss->reg_base + Q6SS_XO_CBCR);
 	val &= ~Q6SS_CLK_ENABLE;
-	writel(val, wcss->reg_base + Q6SS_XO_CBCR);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:423", val, wcss->reg_base + Q6SS_XO_CBCR);
 	clk_disable_unprepare(wcss->qdsp6ss_axim_cbcr);
 disable_abhm_cbcr_clk:
 	clk_disable_unprepare(wcss->qdsp6ss_abhm_cbcr);
@@ -442,12 +442,12 @@ static inline int q6v5_wcss_qcs404_reset(struct q6v5_wcss *wcss)
 {
 	unsigned long val;
 
-	writel(0x80800000, wcss->reg_base + Q6SS_STRAP_ACC);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:445", 0x80800000, wcss->reg_base + Q6SS_STRAP_ACC);
 
 	/* Start core execution */
-	val = readl(wcss->reg_base + Q6SS_RESET_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:448", wcss->reg_base + Q6SS_RESET_REG);
 	val &= ~Q6SS_STOP_CORE;
-	writel(val, wcss->reg_base + Q6SS_RESET_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:450", val, wcss->reg_base + Q6SS_RESET_REG);
 
 	return 0;
 }
@@ -473,7 +473,7 @@ static int q6v5_qcs404_wcss_start(struct rproc *rproc)
 		goto disable_cx_supply;
 	}
 
-	writel(rproc->bootaddr >> 4, wcss->reg_base + Q6SS_RST_EVB);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:476", rproc->bootaddr >> 4, wcss->reg_base + Q6SS_RST_EVB);
 
 	q6v5_wcss_qcs404_reset(wcss);
 
@@ -535,19 +535,19 @@ static int q6v5_qcs404_wcss_shutdown(struct q6v5_wcss *wcss)
 	q6v5_wcss_halt_axi_port(wcss, wcss->halt_map, wcss->halt_wcss);
 
 	/* assert clamps to avoid MX current inrush */
-	val = readl(wcss->reg_base + Q6SS_PWR_CTL_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:538", wcss->reg_base + Q6SS_PWR_CTL_REG);
 	val |= (Q6SS_CLAMP_IO | Q6SS_CLAMP_WL | Q6SS_CLAMP_QMC_MEM);
-	writel(val, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:540", val, wcss->reg_base + Q6SS_PWR_CTL_REG);
 
 	/* Disable memories by turning off memory foot/headswitch */
-	writel((readl(wcss->reg_base + Q6SS_MEM_PWR_CTL) &
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:543", (pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:543", wcss->reg_base + Q6SS_MEM_PWR_CTL) &
 		~QDSS_Q6_MEMORIES),
 		wcss->reg_base + Q6SS_MEM_PWR_CTL);
 
 	/* Clear the BHS_ON bit */
-	val = readl(wcss->reg_base + Q6SS_PWR_CTL_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:548", wcss->reg_base + Q6SS_PWR_CTL_REG);
 	val &= ~Q6SS_BHS_ON;
-	writel(val, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:550", val, wcss->reg_base + Q6SS_PWR_CTL_REG);
 
 	clk_disable_unprepare(wcss->ahbfabric_cbcr_clk);
 	clk_disable_unprepare(wcss->lcc_csr_cbcr);
@@ -555,20 +555,20 @@ static int q6v5_qcs404_wcss_shutdown(struct q6v5_wcss *wcss)
 	clk_disable_unprepare(wcss->qdsp6ss_abhm_cbcr);
 	clk_disable_unprepare(wcss->qdsp6ss_axim_cbcr);
 
-	val = readl(wcss->reg_base + Q6SS_SLEEP_CBCR);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:558", wcss->reg_base + Q6SS_SLEEP_CBCR);
 	val &= ~BIT(0);
-	writel(val, wcss->reg_base + Q6SS_SLEEP_CBCR);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:560", val, wcss->reg_base + Q6SS_SLEEP_CBCR);
 
-	val = readl(wcss->reg_base + Q6SS_XO_CBCR);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:562", wcss->reg_base + Q6SS_XO_CBCR);
 	val &= ~BIT(0);
-	writel(val, wcss->reg_base + Q6SS_XO_CBCR);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:564", val, wcss->reg_base + Q6SS_XO_CBCR);
 
 	clk_disable_unprepare(wcss->ahbs_cbcr);
 	clk_disable_unprepare(wcss->lcc_bcr_sleep);
 
-	val = readl(wcss->reg_base + Q6SS_GFMUX_CTL_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:569", wcss->reg_base + Q6SS_GFMUX_CTL_REG);
 	val &= ~(Q6SS_CLK_ENABLE | Q6SS_SWITCH_CLK_SRC);
-	writel(val, wcss->reg_base + Q6SS_GFMUX_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:571", val, wcss->reg_base + Q6SS_GFMUX_CTL_REG);
 
 	clk_disable_unprepare(wcss->gcc_abhs_cbcr);
 
@@ -600,18 +600,18 @@ static int q6v5_wcss_powerdown(struct q6v5_wcss *wcss)
 	q6v5_wcss_halt_axi_port(wcss, wcss->halt_map, wcss->halt_wcss);
 
 	/* 2 - Enable WCSSAON_CONFIG */
-	val = readl(wcss->rmb_base + SSCAON_CONFIG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:603", wcss->rmb_base + SSCAON_CONFIG);
 	val |= SSCAON_ENABLE;
-	writel(val, wcss->rmb_base + SSCAON_CONFIG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:605", val, wcss->rmb_base + SSCAON_CONFIG);
 
 	/* 3 - Set SSCAON_CONFIG */
 	val |= SSCAON_BUS_EN;
 	val &= ~SSCAON_BUS_MUX_MASK;
-	writel(val, wcss->rmb_base + SSCAON_CONFIG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:610", val, wcss->rmb_base + SSCAON_CONFIG);
 
 	/* 4 - SSCAON_CONFIG 1 */
 	val |= BIT(1);
-	writel(val, wcss->rmb_base + SSCAON_CONFIG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:614", val, wcss->rmb_base + SSCAON_CONFIG);
 
 	/* 5 - wait for SSCAON_STATUS */
 	ret = readl_poll_timeout(wcss->rmb_base + SSCAON_STATUS,
@@ -627,9 +627,9 @@ static int q6v5_wcss_powerdown(struct q6v5_wcss *wcss)
 	reset_control_assert(wcss->wcss_aon_reset);
 
 	/* 7 - Disable WCSSAON_CONFIG 13 */
-	val = readl(wcss->rmb_base + SSCAON_CONFIG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:630", wcss->rmb_base + SSCAON_CONFIG);
 	val &= ~SSCAON_ENABLE;
-	writel(val, wcss->rmb_base + SSCAON_CONFIG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:632", val, wcss->rmb_base + SSCAON_CONFIG);
 
 	/* 8 - De-assert WCSS/Q6 HALTREQ */
 	reset_control_assert(wcss->wcss_reset);
@@ -647,43 +647,43 @@ static int q6v5_q6_powerdown(struct q6v5_wcss *wcss)
 	q6v5_wcss_halt_axi_port(wcss, wcss->halt_map, wcss->halt_q6);
 
 	/* 2 - Disable Q6 Core clock */
-	val = readl(wcss->reg_base + Q6SS_GFMUX_CTL_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:650", wcss->reg_base + Q6SS_GFMUX_CTL_REG);
 	val &= ~Q6SS_CLK_ENABLE;
-	writel(val, wcss->reg_base + Q6SS_GFMUX_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:652", val, wcss->reg_base + Q6SS_GFMUX_CTL_REG);
 
 	/* 3 - Clamp I/O */
-	val = readl(wcss->reg_base + Q6SS_PWR_CTL_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:655", wcss->reg_base + Q6SS_PWR_CTL_REG);
 	val |= Q6SS_CLAMP_IO;
-	writel(val, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:657", val, wcss->reg_base + Q6SS_PWR_CTL_REG);
 
 	/* 4 - Clamp WL */
 	val |= QDSS_BHS_ON;
-	writel(val, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:661", val, wcss->reg_base + Q6SS_PWR_CTL_REG);
 
 	/* 5 - Clear Erase standby */
 	val &= ~Q6SS_L2DATA_STBY_N;
-	writel(val, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:665", val, wcss->reg_base + Q6SS_PWR_CTL_REG);
 
 	/* 6 - Clear Sleep RTN */
 	val &= ~Q6SS_SLP_RET_N;
-	writel(val, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:669", val, wcss->reg_base + Q6SS_PWR_CTL_REG);
 
 	/* 7 - turn off Q6 memory foot/head switch one bank at a time */
 	for (i = 0; i < 20; i++) {
-		val = readl(wcss->reg_base + Q6SS_MEM_PWR_CTL);
+		val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:673", wcss->reg_base + Q6SS_MEM_PWR_CTL);
 		val &= ~BIT(i);
-		writel(val, wcss->reg_base + Q6SS_MEM_PWR_CTL);
+		pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:675", val, wcss->reg_base + Q6SS_MEM_PWR_CTL);
 		mdelay(1);
 	}
 
 	/* 8 - Assert QMC memory RTN */
-	val = readl(wcss->reg_base + Q6SS_PWR_CTL_REG);
+	val = pete_readl("drivers/remoteproc/qcom_q6v5_wcss.c:680", wcss->reg_base + Q6SS_PWR_CTL_REG);
 	val |= Q6SS_CLAMP_QMC_MEM;
-	writel(val, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:682", val, wcss->reg_base + Q6SS_PWR_CTL_REG);
 
 	/* 9 - Turn off BHS */
 	val &= ~Q6SS_BHS_ON;
-	writel(val, wcss->reg_base + Q6SS_PWR_CTL_REG);
+	pete_writel("drivers/remoteproc/qcom_q6v5_wcss.c:686", val, wcss->reg_base + Q6SS_PWR_CTL_REG);
 	udelay(1);
 
 	/* 10 - Wait till BHS Reset is done */

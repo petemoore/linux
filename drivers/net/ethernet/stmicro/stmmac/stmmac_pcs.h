@@ -57,7 +57,7 @@ static inline void dwmac_pcs_isr(void __iomem *ioaddr, u32 reg,
 				 unsigned int intr_status,
 				 struct stmmac_extra_stats *x)
 {
-	u32 val = readl(ioaddr + GMAC_AN_STATUS(reg));
+	u32 val = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_pcs.h:60", ioaddr + GMAC_AN_STATUS(reg));
 
 	if (intr_status & PCS_ANE_IRQ) {
 		x->irq_pcs_ane_n++;
@@ -83,12 +83,12 @@ static inline void dwmac_pcs_isr(void __iomem *ioaddr, u32 reg,
  */
 static inline void dwmac_rane(void __iomem *ioaddr, u32 reg, bool restart)
 {
-	u32 value = readl(ioaddr + GMAC_AN_CTRL(reg));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_pcs.h:86", ioaddr + GMAC_AN_CTRL(reg));
 
 	if (restart)
 		value |= GMAC_AN_CTRL_RAN;
 
-	writel(value, ioaddr + GMAC_AN_CTRL(reg));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_pcs.h:91", value, ioaddr + GMAC_AN_CTRL(reg));
 }
 
 /**
@@ -105,7 +105,7 @@ static inline void dwmac_rane(void __iomem *ioaddr, u32 reg, bool restart)
 static inline void dwmac_ctrl_ane(void __iomem *ioaddr, u32 reg, bool ane,
 				  bool srgmi_ral, bool loopback)
 {
-	u32 value = readl(ioaddr + GMAC_AN_CTRL(reg));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_pcs.h:108", ioaddr + GMAC_AN_CTRL(reg));
 
 	/* Enable and restart the Auto-Negotiation */
 	if (ane)
@@ -120,7 +120,7 @@ static inline void dwmac_ctrl_ane(void __iomem *ioaddr, u32 reg, bool ane,
 	if (loopback)
 		value |= GMAC_AN_CTRL_ELE;
 
-	writel(value, ioaddr + GMAC_AN_CTRL(reg));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/stmmac_pcs.h:123", value, ioaddr + GMAC_AN_CTRL(reg));
 }
 
 /**
@@ -134,7 +134,7 @@ static inline void dwmac_ctrl_ane(void __iomem *ioaddr, u32 reg, bool ane,
 static inline void dwmac_get_adv_lp(void __iomem *ioaddr, u32 reg,
 				    struct rgmii_adv *adv_lp)
 {
-	u32 value = readl(ioaddr + GMAC_ANE_ADV(reg));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_pcs.h:137", ioaddr + GMAC_ANE_ADV(reg));
 
 	if (value & GMAC_ANE_FD)
 		adv_lp->duplex = DUPLEX_FULL;
@@ -143,7 +143,7 @@ static inline void dwmac_get_adv_lp(void __iomem *ioaddr, u32 reg,
 
 	adv_lp->pause = (value & GMAC_ANE_PSE) >> GMAC_ANE_PSE_SHIFT;
 
-	value = readl(ioaddr + GMAC_ANE_LPA(reg));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/stmmac_pcs.h:146", ioaddr + GMAC_ANE_LPA(reg));
 
 	if (value & GMAC_ANE_FD)
 		adv_lp->lp_duplex = DUPLEX_FULL;

@@ -83,9 +83,9 @@ static void spi100k_enable_clock(struct spi_master *master)
 	struct omap1_spi100k *spi100k = spi_master_get_devdata(master);
 
 	/* enable SPI */
-	val = readw(spi100k->base + SPI_SETUP1);
+	val = pete_readw("drivers/spi/spi-omap-100k.c:86", spi100k->base + SPI_SETUP1);
 	val |= SPI_SETUP1_CLOCK_ENABLE;
-	writew(val, spi100k->base + SPI_SETUP1);
+	pete_writew("drivers/spi/spi-omap-100k.c:88", val, spi100k->base + SPI_SETUP1);
 }
 
 static void spi100k_disable_clock(struct spi_master *master)
@@ -94,9 +94,9 @@ static void spi100k_disable_clock(struct spi_master *master)
 	struct omap1_spi100k *spi100k = spi_master_get_devdata(master);
 
 	/* disable SPI */
-	val = readw(spi100k->base + SPI_SETUP1);
+	val = pete_readw("drivers/spi/spi-omap-100k.c:97", spi100k->base + SPI_SETUP1);
 	val &= ~SPI_SETUP1_CLOCK_ENABLE;
-	writew(val, spi100k->base + SPI_SETUP1);
+	pete_writew("drivers/spi/spi-omap-100k.c:99", val, spi100k->base + SPI_SETUP1);
 }
 
 static void spi100k_write_data(struct spi_master *master, int len, int data)
@@ -110,15 +110,15 @@ static void spi100k_write_data(struct spi_master *master, int len, int data)
 	}
 
 	spi100k_enable_clock(master);
-	writew(data, spi100k->base + SPI_TX_MSB);
+	pete_writew("drivers/spi/spi-omap-100k.c:113", data, spi100k->base + SPI_TX_MSB);
 
-	writew(SPI_CTRL_SEN(0) |
+	pete_writew("drivers/spi/spi-omap-100k.c:115", SPI_CTRL_SEN(0) |
 	       SPI_CTRL_WORD_SIZE(len) |
 	       SPI_CTRL_WR,
 	       spi100k->base + SPI_CTRL);
 
 	/* Wait for bit ack send change */
-	while ((readw(spi100k->base + SPI_STATUS) & SPI_STATUS_WE) != SPI_STATUS_WE)
+	while ((pete_readw("drivers/spi/spi-omap-100k.c:121", spi100k->base + SPI_STATUS) & SPI_STATUS_WE) != SPI_STATUS_WE)
 		;
 	udelay(1000);
 
@@ -135,17 +135,17 @@ static int spi100k_read_data(struct spi_master *master, int len)
 		len = 16;
 
 	spi100k_enable_clock(master);
-	writew(SPI_CTRL_SEN(0) |
+	pete_writew("drivers/spi/spi-omap-100k.c:138", SPI_CTRL_SEN(0) |
 	       SPI_CTRL_WORD_SIZE(len) |
 	       SPI_CTRL_RD,
 	       spi100k->base + SPI_CTRL);
 
-	while ((readw(spi100k->base + SPI_STATUS) & SPI_STATUS_RD) != SPI_STATUS_RD)
+	while ((pete_readw("drivers/spi/spi-omap-100k.c:143", spi100k->base + SPI_STATUS) & SPI_STATUS_RD) != SPI_STATUS_RD)
 		;
 	udelay(1000);
 
-	dataL = readw(spi100k->base + SPI_RX_LSB);
-	readw(spi100k->base + SPI_RX_MSB);
+	dataL = pete_readw("drivers/spi/spi-omap-100k.c:147", spi100k->base + SPI_RX_LSB);
+	pete_readw("drivers/spi/spi-omap-100k.c:148", spi100k->base + SPI_RX_MSB);
 	spi100k_disable_clock(master);
 
 	return dataL;
@@ -156,12 +156,12 @@ static void spi100k_open(struct spi_master *master)
 	/* get control of SPI */
 	struct omap1_spi100k *spi100k = spi_master_get_devdata(master);
 
-	writew(SPI_SETUP1_INT_READ_ENABLE |
+	pete_writew("drivers/spi/spi-omap-100k.c:159", SPI_SETUP1_INT_READ_ENABLE |
 	       SPI_SETUP1_INT_WRITE_ENABLE |
 	       SPI_SETUP1_CLOCK_DIVISOR(0), spi100k->base + SPI_SETUP1);
 
 	/* configure clock and interrupts */
-	writew(SPI_SETUP2_ACTIVE_EDGE_FALLING |
+	pete_writew("drivers/spi/spi-omap-100k.c:164", SPI_SETUP2_ACTIVE_EDGE_FALLING |
 	       SPI_SETUP2_NEGATIVE_LEVEL |
 	       SPI_SETUP2_LEVEL_TRIGGER, spi100k->base + SPI_SETUP2);
 }
@@ -169,9 +169,9 @@ static void spi100k_open(struct spi_master *master)
 static void omap1_spi100k_force_cs(struct omap1_spi100k *spi100k, int enable)
 {
 	if (enable)
-		writew(0x05fc, spi100k->base + SPI_CTRL);
+		pete_writew("drivers/spi/spi-omap-100k.c:172", 0x05fc, spi100k->base + SPI_CTRL);
 	else
-		writew(0x05fd, spi100k->base + SPI_CTRL);
+		pete_writew("drivers/spi/spi-omap-100k.c:174", 0x05fd, spi100k->base + SPI_CTRL);
 }
 
 static unsigned
@@ -246,9 +246,9 @@ static int omap1_spi100k_setup_transfer(struct spi_device *spi,
 	cs->word_len = word_len;
 
 	/* SPI init before transfer */
-	writew(0x3e, spi100k->base + SPI_SETUP1);
-	writew(0x00, spi100k->base + SPI_STATUS);
-	writew(0x3e, spi100k->base + SPI_CTRL);
+	pete_writew("drivers/spi/spi-omap-100k.c:249", 0x3e, spi100k->base + SPI_SETUP1);
+	pete_writew("drivers/spi/spi-omap-100k.c:250", 0x00, spi100k->base + SPI_STATUS);
+	pete_writew("drivers/spi/spi-omap-100k.c:251", 0x3e, spi100k->base + SPI_CTRL);
 
 	return 0;
 }

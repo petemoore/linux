@@ -116,7 +116,7 @@ void vnic_rq_init(struct vnic_rq *rq, unsigned int cq_index,
 	u32 fetch_index;
 
 	paddr = (u64)rq->ring.base_addr | VNIC_PADDR_TARGET;
-	writeq(paddr, &rq->ctrl->ring_base);
+	pete_writeq("drivers/scsi/fnic/vnic_rq.c:119", paddr, &rq->ctrl->ring_base);
 	iowrite32(rq->ring.desc_count, &rq->ctrl->ring_size);
 	iowrite32(cq_index, &rq->ctrl->cq_index);
 	iowrite32(error_interrupt_enable, &rq->ctrl->error_interrupt_enable);

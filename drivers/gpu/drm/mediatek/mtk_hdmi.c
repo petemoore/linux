@@ -190,12 +190,12 @@ static inline struct mtk_hdmi *hdmi_ctx_from_bridge(struct drm_bridge *b)
 
 static u32 mtk_hdmi_read(struct mtk_hdmi *hdmi, u32 offset)
 {
-	return readl(hdmi->regs + offset);
+	return pete_readl("drivers/gpu/drm/mediatek/mtk_hdmi.c:193", hdmi->regs + offset);
 }
 
 static void mtk_hdmi_write(struct mtk_hdmi *hdmi, u32 offset, u32 val)
 {
-	writel(val, hdmi->regs + offset);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_hdmi.c:198", val, hdmi->regs + offset);
 }
 
 static void mtk_hdmi_clear_bits(struct mtk_hdmi *hdmi, u32 offset, u32 bits)
@@ -203,9 +203,9 @@ static void mtk_hdmi_clear_bits(struct mtk_hdmi *hdmi, u32 offset, u32 bits)
 	void __iomem *reg = hdmi->regs + offset;
 	u32 tmp;
 
-	tmp = readl(reg);
+	tmp = pete_readl("drivers/gpu/drm/mediatek/mtk_hdmi.c:206", reg);
 	tmp &= ~bits;
-	writel(tmp, reg);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_hdmi.c:208", tmp, reg);
 }
 
 static void mtk_hdmi_set_bits(struct mtk_hdmi *hdmi, u32 offset, u32 bits)
@@ -213,9 +213,9 @@ static void mtk_hdmi_set_bits(struct mtk_hdmi *hdmi, u32 offset, u32 bits)
 	void __iomem *reg = hdmi->regs + offset;
 	u32 tmp;
 
-	tmp = readl(reg);
+	tmp = pete_readl("drivers/gpu/drm/mediatek/mtk_hdmi.c:216", reg);
 	tmp |= bits;
-	writel(tmp, reg);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_hdmi.c:218", tmp, reg);
 }
 
 static void mtk_hdmi_mask(struct mtk_hdmi *hdmi, u32 offset, u32 val, u32 mask)
@@ -223,9 +223,9 @@ static void mtk_hdmi_mask(struct mtk_hdmi *hdmi, u32 offset, u32 val, u32 mask)
 	void __iomem *reg = hdmi->regs + offset;
 	u32 tmp;
 
-	tmp = readl(reg);
+	tmp = pete_readl("drivers/gpu/drm/mediatek/mtk_hdmi.c:226", reg);
 	tmp = (tmp & ~mask) | (val & mask);
-	writel(tmp, reg);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_hdmi.c:228", tmp, reg);
 }
 
 static void mtk_hdmi_hw_vid_black(struct mtk_hdmi *hdmi, bool black)

@@ -55,7 +55,7 @@ static unsigned int tbg_get_mult(void __iomem *reg, const struct tbg_def *ptbg)
 {
 	u32 val;
 
-	val = readl(reg + TBG_CTRL0);
+	val = pete_readl("drivers/clk/mvebu/armada-37xx-tbg.c:58", reg + TBG_CTRL0);
 
 	return ((val >> ptbg->fbdiv_offset) & TBG_DIV_MASK) << 2;
 }
@@ -65,12 +65,12 @@ static unsigned int tbg_get_div(void __iomem *reg, const struct tbg_def *ptbg)
 	u32 val;
 	unsigned int div;
 
-	val = readl(reg + TBG_CTRL7);
+	val = pete_readl("drivers/clk/mvebu/armada-37xx-tbg.c:68", reg + TBG_CTRL7);
 
 	div = (val >> ptbg->refdiv_offset) & TBG_DIV_MASK;
 	if (div == 0)
 		div = 1;
-	val = readl(reg + ptbg->vcodiv_reg);
+	val = pete_readl("drivers/clk/mvebu/armada-37xx-tbg.c:73", reg + ptbg->vcodiv_reg);
 
 	div *= 1 << ((val >>  ptbg->vcodiv_offset) & TBG_DIV_MASK);
 

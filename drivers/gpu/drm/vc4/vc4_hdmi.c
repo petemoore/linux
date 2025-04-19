@@ -852,13 +852,13 @@ static void vc4_hdmi_write_infoframe(struct drm_encoder *encoder,
 	spin_lock_irqsave(&vc4_hdmi->hw_lock, flags);
 
 	for (i = 0; i < len; i += 7) {
-		writel(buffer[i + 0] << 0 |
+		pete_writel("drivers/gpu/drm/vc4/vc4_hdmi.c:855", buffer[i + 0] << 0 |
 		       buffer[i + 1] << 8 |
 		       buffer[i + 2] << 16,
 		       base + packet_reg);
 		packet_reg += 4;
 
-		writel(buffer[i + 3] << 0 |
+		pete_writel("drivers/gpu/drm/vc4/vc4_hdmi.c:861", buffer[i + 3] << 0 |
 		       buffer[i + 4] << 8 |
 		       buffer[i + 5] << 16 |
 		       buffer[i + 6] << 24,
@@ -871,7 +871,7 @@ static void vc4_hdmi_write_infoframe(struct drm_encoder *encoder,
 	 * infoframe and triggers a checksum error on hdmi analyser
 	 */
 	for (; packet_reg < packet_reg_next; packet_reg += 4)
-		writel(0, base + packet_reg);
+		pete_writel("drivers/gpu/drm/vc4/vc4_hdmi.c:874", 0, base + packet_reg);
 
 	HDMI_WRITE(HDMI_RAM_PACKET_CONFIG,
 		   HDMI_READ(HDMI_RAM_PACKET_CONFIG) | BIT(packet_id));

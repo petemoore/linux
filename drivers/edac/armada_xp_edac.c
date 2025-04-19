@@ -131,27 +131,27 @@ static void axp_mc_check(struct mem_ctl_info *mci)
 	uint8_t syndrome_val, cs_val;
 	char *msg = drvdata->msg;
 
-	data_h    = readl(drvdata->base + SDRAM_ERR_DATA_H_REG);
-	data_l    = readl(drvdata->base + SDRAM_ERR_DATA_L_REG);
-	recv_ecc  = readl(drvdata->base + SDRAM_ERR_RECV_ECC_REG);
-	calc_ecc  = readl(drvdata->base + SDRAM_ERR_CALC_ECC_REG);
-	addr      = readl(drvdata->base + SDRAM_ERR_ADDR_REG);
-	cnt_sbe   = readl(drvdata->base + SDRAM_ERR_SBE_COUNT_REG);
-	cnt_dbe   = readl(drvdata->base + SDRAM_ERR_DBE_COUNT_REG);
-	cause_err = readl(drvdata->base + SDRAM_ERR_CAUSE_ERR_REG);
-	cause_msg = readl(drvdata->base + SDRAM_ERR_CAUSE_MSG_REG);
+	data_h    = pete_readl("drivers/edac/armada_xp_edac.c:134", drvdata->base + SDRAM_ERR_DATA_H_REG);
+	data_l    = pete_readl("drivers/edac/armada_xp_edac.c:135", drvdata->base + SDRAM_ERR_DATA_L_REG);
+	recv_ecc  = pete_readl("drivers/edac/armada_xp_edac.c:136", drvdata->base + SDRAM_ERR_RECV_ECC_REG);
+	calc_ecc  = pete_readl("drivers/edac/armada_xp_edac.c:137", drvdata->base + SDRAM_ERR_CALC_ECC_REG);
+	addr      = pete_readl("drivers/edac/armada_xp_edac.c:138", drvdata->base + SDRAM_ERR_ADDR_REG);
+	cnt_sbe   = pete_readl("drivers/edac/armada_xp_edac.c:139", drvdata->base + SDRAM_ERR_SBE_COUNT_REG);
+	cnt_dbe   = pete_readl("drivers/edac/armada_xp_edac.c:140", drvdata->base + SDRAM_ERR_DBE_COUNT_REG);
+	cause_err = pete_readl("drivers/edac/armada_xp_edac.c:141", drvdata->base + SDRAM_ERR_CAUSE_ERR_REG);
+	cause_msg = pete_readl("drivers/edac/armada_xp_edac.c:142", drvdata->base + SDRAM_ERR_CAUSE_MSG_REG);
 
 	/* clear cause registers */
-	writel(~(SDRAM_ERR_CAUSE_DBE_MASK | SDRAM_ERR_CAUSE_SBE_MASK),
+	pete_writel("drivers/edac/armada_xp_edac.c:145", ~(SDRAM_ERR_CAUSE_DBE_MASK | SDRAM_ERR_CAUSE_SBE_MASK),
 	       drvdata->base + SDRAM_ERR_CAUSE_ERR_REG);
-	writel(~(SDRAM_ERR_CAUSE_DBE_MASK | SDRAM_ERR_CAUSE_SBE_MASK),
+	pete_writel("drivers/edac/armada_xp_edac.c:147", ~(SDRAM_ERR_CAUSE_DBE_MASK | SDRAM_ERR_CAUSE_SBE_MASK),
 	       drvdata->base + SDRAM_ERR_CAUSE_MSG_REG);
 
 	/* clear error counter registers */
 	if (cnt_sbe)
-		writel(0, drvdata->base + SDRAM_ERR_SBE_COUNT_REG);
+		pete_writel("drivers/edac/armada_xp_edac.c:152", 0, drvdata->base + SDRAM_ERR_SBE_COUNT_REG);
 	if (cnt_dbe)
-		writel(0, drvdata->base + SDRAM_ERR_DBE_COUNT_REG);
+		pete_writel("drivers/edac/armada_xp_edac.c:154", 0, drvdata->base + SDRAM_ERR_DBE_COUNT_REG);
 
 	if (!cnt_sbe && !cnt_dbe)
 		return;
@@ -223,7 +223,7 @@ static void axp_mc_read_config(struct mem_ctl_info *mci)
 	unsigned int i, cs_struct, cs_size;
 	struct dimm_info *dimm;
 
-	config = readl(drvdata->base + SDRAM_CONFIG_REG);
+	config = pete_readl("drivers/edac/armada_xp_edac.c:226", drvdata->base + SDRAM_CONFIG_REG);
 	if (config & SDRAM_CONFIG_BUS_WIDTH_MASK)
 		/* 64 bit */
 		drvdata->width = 8;
@@ -231,8 +231,8 @@ static void axp_mc_read_config(struct mem_ctl_info *mci)
 		/* 32 bit */
 		drvdata->width = 4;
 
-	addr_ctrl = readl(drvdata->base + SDRAM_ADDR_CTRL_REG);
-	rank_ctrl = readl(drvdata->base + SDRAM_RANK_CTRL_REG);
+	addr_ctrl = pete_readl("drivers/edac/armada_xp_edac.c:234", drvdata->base + SDRAM_ADDR_CTRL_REG);
+	rank_ctrl = pete_readl("drivers/edac/armada_xp_edac.c:235", drvdata->base + SDRAM_RANK_CTRL_REG);
 	for (i = 0; i < SDRAM_NUM_CS; i++) {
 		dimm = mci->dimms[i];
 
@@ -302,7 +302,7 @@ static int axp_mc_probe(struct platform_device *pdev)
 		return PTR_ERR(base);
 	}
 
-	config = readl(base + SDRAM_CONFIG_REG);
+	config = pete_readl("drivers/edac/armada_xp_edac.c:305", base + SDRAM_CONFIG_REG);
 	if (!(config & SDRAM_CONFIG_ECC_MASK)) {
 		dev_warn(&pdev->dev, "SDRAM ECC is not enabled\n");
 		return -EINVAL;
@@ -339,15 +339,15 @@ static int axp_mc_probe(struct platform_device *pdev)
 
 	/* configure SBE threshold */
 	/* it seems that SBEs are not captured otherwise */
-	writel(1 << SDRAM_ERR_CTRL_THR_OFFSET, drvdata->base + SDRAM_ERR_CTRL_REG);
+	pete_writel("drivers/edac/armada_xp_edac.c:342", 1 << SDRAM_ERR_CTRL_THR_OFFSET, drvdata->base + SDRAM_ERR_CTRL_REG);
 
 	/* clear cause registers */
-	writel(~(SDRAM_ERR_CAUSE_DBE_MASK | SDRAM_ERR_CAUSE_SBE_MASK), drvdata->base + SDRAM_ERR_CAUSE_ERR_REG);
-	writel(~(SDRAM_ERR_CAUSE_DBE_MASK | SDRAM_ERR_CAUSE_SBE_MASK), drvdata->base + SDRAM_ERR_CAUSE_MSG_REG);
+	pete_writel("drivers/edac/armada_xp_edac.c:345", ~(SDRAM_ERR_CAUSE_DBE_MASK | SDRAM_ERR_CAUSE_SBE_MASK), drvdata->base + SDRAM_ERR_CAUSE_ERR_REG);
+	pete_writel("drivers/edac/armada_xp_edac.c:346", ~(SDRAM_ERR_CAUSE_DBE_MASK | SDRAM_ERR_CAUSE_SBE_MASK), drvdata->base + SDRAM_ERR_CAUSE_MSG_REG);
 
 	/* clear counter registers */
-	writel(0, drvdata->base + SDRAM_ERR_SBE_COUNT_REG);
-	writel(0, drvdata->base + SDRAM_ERR_DBE_COUNT_REG);
+	pete_writel("drivers/edac/armada_xp_edac.c:349", 0, drvdata->base + SDRAM_ERR_SBE_COUNT_REG);
+	pete_writel("drivers/edac/armada_xp_edac.c:350", 0, drvdata->base + SDRAM_ERR_DBE_COUNT_REG);
 
 	if (edac_mc_add_mc(mci)) {
 		edac_mc_free(mci);
@@ -398,9 +398,9 @@ static void aurora_l2_inject(struct aurora_l2_drvdata *drvdata)
 {
 	drvdata->inject_addr &= AURORA_ERR_INJECT_CTL_ADDR_MASK;
 	drvdata->inject_ctl &= AURORA_ERR_INJECT_CTL_EN_MASK;
-	writel(0, drvdata->base + AURORA_ERR_INJECT_CTL_REG);
-	writel(drvdata->inject_mask, drvdata->base + AURORA_ERR_INJECT_MASK_REG);
-	writel(drvdata->inject_addr | drvdata->inject_ctl, drvdata->base + AURORA_ERR_INJECT_CTL_REG);
+	pete_writel("drivers/edac/armada_xp_edac.c:401", 0, drvdata->base + AURORA_ERR_INJECT_CTL_REG);
+	pete_writel("drivers/edac/armada_xp_edac.c:402", drvdata->inject_mask, drvdata->base + AURORA_ERR_INJECT_MASK_REG);
+	pete_writel("drivers/edac/armada_xp_edac.c:403", drvdata->inject_addr | drvdata->inject_ctl, drvdata->base + AURORA_ERR_INJECT_CTL_REG);
 }
 #endif
 
@@ -413,16 +413,16 @@ static void aurora_l2_check(struct edac_device_ctl_info *dci)
 	size_t size = sizeof(drvdata->msg);
 	size_t len = 0;
 
-	cnt = readl(drvdata->base + AURORA_ERR_CNT_REG);
-	attr_cap = readl(drvdata->base + AURORA_ERR_ATTR_CAP_REG);
-	addr_cap = readl(drvdata->base + AURORA_ERR_ADDR_CAP_REG);
-	way_cap = readl(drvdata->base + AURORA_ERR_WAY_CAP_REG);
+	cnt = pete_readl("drivers/edac/armada_xp_edac.c:416", drvdata->base + AURORA_ERR_CNT_REG);
+	attr_cap = pete_readl("drivers/edac/armada_xp_edac.c:417", drvdata->base + AURORA_ERR_ATTR_CAP_REG);
+	addr_cap = pete_readl("drivers/edac/armada_xp_edac.c:418", drvdata->base + AURORA_ERR_ADDR_CAP_REG);
+	way_cap = pete_readl("drivers/edac/armada_xp_edac.c:419", drvdata->base + AURORA_ERR_WAY_CAP_REG);
 
 	cnt_ce = (cnt & AURORA_ERR_CNT_CE_MASK) >> AURORA_ERR_CNT_CE_OFFSET;
 	cnt_ue = (cnt & AURORA_ERR_CNT_UE_MASK) >> AURORA_ERR_CNT_UE_OFFSET;
 	/* clear error counter registers */
 	if (cnt_ce || cnt_ue)
-		writel(AURORA_ERR_CNT_CLR, drvdata->base + AURORA_ERR_CNT_REG);
+		pete_writel("drivers/edac/armada_xp_edac.c:425", AURORA_ERR_CNT_CLR, drvdata->base + AURORA_ERR_CNT_REG);
 
 	if (!(attr_cap & AURORA_ERR_ATTR_CAP_VALID))
 		goto clear_remaining;
@@ -471,7 +471,7 @@ static void aurora_l2_check(struct edac_device_ctl_info *dci)
 	len += scnprintf(msg+len, size-len, "way=0x%x", (way_cap & AURORA_ERR_WAY_CAP_WAY_MASK) >> AURORA_ERR_WAY_CAP_WAY_OFFSET);
 
 	/* clear error capture registers */
-	writel(AURORA_ERR_ATTR_CAP_VALID, drvdata->base + AURORA_ERR_ATTR_CAP_REG);
+	pete_writel("drivers/edac/armada_xp_edac.c:474", AURORA_ERR_ATTR_CAP_VALID, drvdata->base + AURORA_ERR_ATTR_CAP_REG);
 	if (err) {
 		/* UnCorrECC or TagParity */
 		if (cnt_ue)
@@ -530,7 +530,7 @@ static int aurora_l2_probe(struct platform_device *pdev)
 		return PTR_ERR(base);
 	}
 
-	l2x0_aux_ctrl = readl(base + L2X0_AUX_CTRL);
+	l2x0_aux_ctrl = pete_readl("drivers/edac/armada_xp_edac.c:533", base + L2X0_AUX_CTRL);
 	if (!(l2x0_aux_ctrl & AURORA_ACR_PARITY_EN))
 		dev_warn(&pdev->dev, "tag parity is not enabled\n");
 	if (!(l2x0_aux_ctrl & AURORA_ACR_ECC_EN))
@@ -553,8 +553,8 @@ static int aurora_l2_probe(struct platform_device *pdev)
 	dci->dev_name = dev_name(&pdev->dev);
 
 	/* clear registers */
-	writel(AURORA_ERR_CNT_CLR, drvdata->base + AURORA_ERR_CNT_REG);
-	writel(AURORA_ERR_ATTR_CAP_VALID, drvdata->base + AURORA_ERR_ATTR_CAP_REG);
+	pete_writel("drivers/edac/armada_xp_edac.c:556", AURORA_ERR_CNT_CLR, drvdata->base + AURORA_ERR_CNT_REG);
+	pete_writel("drivers/edac/armada_xp_edac.c:557", AURORA_ERR_ATTR_CAP_VALID, drvdata->base + AURORA_ERR_ATTR_CAP_REG);
 
 	if (edac_device_add_device(dci)) {
 		edac_device_free_ctl_info(dci);

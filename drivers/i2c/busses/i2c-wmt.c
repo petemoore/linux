@@ -95,7 +95,7 @@ static int wmt_i2c_wait_bus_not_busy(struct wmt_i2c_dev *i2c_dev)
 	unsigned long timeout;
 
 	timeout = jiffies + WMT_I2C_TIMEOUT;
-	while (!(readw(i2c_dev->base + REG_CSR) & CSR_READY_MASK)) {
+	while (!(pete_readw("drivers/i2c/busses/i2c-wmt.c:98", i2c_dev->base + REG_CSR) & CSR_READY_MASK)) {
 		if (time_after(jiffies, timeout)) {
 			dev_warn(i2c_dev->dev, "timeout waiting for bus ready\n");
 			return -EBUSY;
@@ -140,19 +140,19 @@ static int wmt_i2c_write(struct i2c_adapter *adap, struct i2c_msg *pmsg,
 		 * start at -1 and break out early from the loop
 		 */
 		xfer_len = -1;
-		writew(0, i2c_dev->base + REG_CDR);
+		pete_writew("drivers/i2c/busses/i2c-wmt.c:143", 0, i2c_dev->base + REG_CDR);
 	} else {
-		writew(pmsg->buf[0] & 0xFF, i2c_dev->base + REG_CDR);
+		pete_writew("drivers/i2c/busses/i2c-wmt.c:145", pmsg->buf[0] & 0xFF, i2c_dev->base + REG_CDR);
 	}
 
 	if (!(pmsg->flags & I2C_M_NOSTART)) {
-		val = readw(i2c_dev->base + REG_CR);
+		val = pete_readw("drivers/i2c/busses/i2c-wmt.c:149", i2c_dev->base + REG_CR);
 		val &= ~CR_TX_END;
-		writew(val, i2c_dev->base + REG_CR);
+		pete_writew("drivers/i2c/busses/i2c-wmt.c:151", val, i2c_dev->base + REG_CR);
 
-		val = readw(i2c_dev->base + REG_CR);
+		val = pete_readw("drivers/i2c/busses/i2c-wmt.c:153", i2c_dev->base + REG_CR);
 		val |= CR_CPU_RDY;
-		writew(val, i2c_dev->base + REG_CR);
+		pete_writew("drivers/i2c/busses/i2c-wmt.c:155", val, i2c_dev->base + REG_CR);
 	}
 
 	reinit_completion(&i2c_dev->complete);
@@ -164,12 +164,12 @@ static int wmt_i2c_write(struct i2c_adapter *adap, struct i2c_msg *pmsg,
 
 	tcr_val |= (TCR_MASTER_WRITE | (pmsg->addr & TCR_SLAVE_ADDR_MASK));
 
-	writew(tcr_val, i2c_dev->base + REG_TCR);
+	pete_writew("drivers/i2c/busses/i2c-wmt.c:167", tcr_val, i2c_dev->base + REG_TCR);
 
 	if (pmsg->flags & I2C_M_NOSTART) {
-		val = readw(i2c_dev->base + REG_CR);
+		val = pete_readw("drivers/i2c/busses/i2c-wmt.c:170", i2c_dev->base + REG_CR);
 		val |= CR_CPU_RDY;
-		writew(val, i2c_dev->base + REG_CR);
+		pete_writew("drivers/i2c/busses/i2c-wmt.c:172", val, i2c_dev->base + REG_CR);
 	}
 
 	while (xfer_len < pmsg->len) {
@@ -185,7 +185,7 @@ static int wmt_i2c_write(struct i2c_adapter *adap, struct i2c_msg *pmsg,
 
 		xfer_len++;
 
-		val = readw(i2c_dev->base + REG_CSR);
+		val = pete_readw("drivers/i2c/busses/i2c-wmt.c:188", i2c_dev->base + REG_CSR);
 		if ((val & CSR_RCV_ACK_MASK) == CSR_RCV_NOT_ACK) {
 			dev_dbg(i2c_dev->dev, "write RCV NACK error\n");
 			return -EIO;
@@ -193,17 +193,17 @@ static int wmt_i2c_write(struct i2c_adapter *adap, struct i2c_msg *pmsg,
 
 		if (pmsg->len == 0) {
 			val = CR_TX_END | CR_CPU_RDY | CR_ENABLE;
-			writew(val, i2c_dev->base + REG_CR);
+			pete_writew("drivers/i2c/busses/i2c-wmt.c:196", val, i2c_dev->base + REG_CR);
 			break;
 		}
 
 		if (xfer_len == pmsg->len) {
 			if (last != 1)
-				writew(CR_ENABLE, i2c_dev->base + REG_CR);
+				pete_writew("drivers/i2c/busses/i2c-wmt.c:202", CR_ENABLE, i2c_dev->base + REG_CR);
 		} else {
-			writew(pmsg->buf[xfer_len] & 0xFF, i2c_dev->base +
+			pete_writew("drivers/i2c/busses/i2c-wmt.c:204", pmsg->buf[xfer_len] & 0xFF, i2c_dev->base +
 								REG_CDR);
-			writew(CR_CPU_RDY | CR_ENABLE, i2c_dev->base + REG_CR);
+			pete_writew("drivers/i2c/busses/i2c-wmt.c:206", CR_CPU_RDY | CR_ENABLE, i2c_dev->base + REG_CR);
 		}
 	}
 
@@ -225,24 +225,24 @@ static int wmt_i2c_read(struct i2c_adapter *adap, struct i2c_msg *pmsg,
 			return ret;
 	}
 
-	val = readw(i2c_dev->base + REG_CR);
+	val = pete_readw("drivers/i2c/busses/i2c-wmt.c:228", i2c_dev->base + REG_CR);
 	val &= ~CR_TX_END;
-	writew(val, i2c_dev->base + REG_CR);
+	pete_writew("drivers/i2c/busses/i2c-wmt.c:230", val, i2c_dev->base + REG_CR);
 
-	val = readw(i2c_dev->base + REG_CR);
+	val = pete_readw("drivers/i2c/busses/i2c-wmt.c:232", i2c_dev->base + REG_CR);
 	val &= ~CR_TX_NEXT_NO_ACK;
-	writew(val, i2c_dev->base + REG_CR);
+	pete_writew("drivers/i2c/busses/i2c-wmt.c:234", val, i2c_dev->base + REG_CR);
 
 	if (!(pmsg->flags & I2C_M_NOSTART)) {
-		val = readw(i2c_dev->base + REG_CR);
+		val = pete_readw("drivers/i2c/busses/i2c-wmt.c:237", i2c_dev->base + REG_CR);
 		val |= CR_CPU_RDY;
-		writew(val, i2c_dev->base + REG_CR);
+		pete_writew("drivers/i2c/busses/i2c-wmt.c:239", val, i2c_dev->base + REG_CR);
 	}
 
 	if (pmsg->len == 1) {
-		val = readw(i2c_dev->base + REG_CR);
+		val = pete_readw("drivers/i2c/busses/i2c-wmt.c:243", i2c_dev->base + REG_CR);
 		val |= CR_TX_NEXT_NO_ACK;
-		writew(val, i2c_dev->base + REG_CR);
+		pete_writew("drivers/i2c/busses/i2c-wmt.c:245", val, i2c_dev->base + REG_CR);
 	}
 
 	reinit_completion(&i2c_dev->complete);
@@ -254,12 +254,12 @@ static int wmt_i2c_read(struct i2c_adapter *adap, struct i2c_msg *pmsg,
 
 	tcr_val |= TCR_MASTER_READ | (pmsg->addr & TCR_SLAVE_ADDR_MASK);
 
-	writew(tcr_val, i2c_dev->base + REG_TCR);
+	pete_writew("drivers/i2c/busses/i2c-wmt.c:257", tcr_val, i2c_dev->base + REG_TCR);
 
 	if (pmsg->flags & I2C_M_NOSTART) {
-		val = readw(i2c_dev->base + REG_CR);
+		val = pete_readw("drivers/i2c/busses/i2c-wmt.c:260", i2c_dev->base + REG_CR);
 		val |= CR_CPU_RDY;
-		writew(val, i2c_dev->base + REG_CR);
+		pete_writew("drivers/i2c/busses/i2c-wmt.c:262", val, i2c_dev->base + REG_CR);
 	}
 
 	while (xfer_len < pmsg->len) {
@@ -273,17 +273,17 @@ static int wmt_i2c_read(struct i2c_adapter *adap, struct i2c_msg *pmsg,
 		if (ret)
 			return ret;
 
-		pmsg->buf[xfer_len] = readw(i2c_dev->base + REG_CDR) >> 8;
+		pmsg->buf[xfer_len] = pete_readw("drivers/i2c/busses/i2c-wmt.c:276", i2c_dev->base + REG_CDR) >> 8;
 		xfer_len++;
 
 		if (xfer_len == pmsg->len - 1) {
-			val = readw(i2c_dev->base + REG_CR);
+			val = pete_readw("drivers/i2c/busses/i2c-wmt.c:280", i2c_dev->base + REG_CR);
 			val |= (CR_TX_NEXT_NO_ACK | CR_CPU_RDY);
-			writew(val, i2c_dev->base + REG_CR);
+			pete_writew("drivers/i2c/busses/i2c-wmt.c:282", val, i2c_dev->base + REG_CR);
 		} else {
-			val = readw(i2c_dev->base + REG_CR);
+			val = pete_readw("drivers/i2c/busses/i2c-wmt.c:284", i2c_dev->base + REG_CR);
 			val |= CR_CPU_RDY;
-			writew(val, i2c_dev->base + REG_CR);
+			pete_writew("drivers/i2c/busses/i2c-wmt.c:286", val, i2c_dev->base + REG_CR);
 		}
 	}
 
@@ -326,8 +326,8 @@ static irqreturn_t wmt_i2c_isr(int irq, void *data)
 	struct wmt_i2c_dev *i2c_dev = data;
 
 	/* save the status and write-clear it */
-	i2c_dev->cmd_status = readw(i2c_dev->base + REG_ISR);
-	writew(i2c_dev->cmd_status, i2c_dev->base + REG_ISR);
+	i2c_dev->cmd_status = pete_readw("drivers/i2c/busses/i2c-wmt.c:329", i2c_dev->base + REG_ISR);
+	pete_writew("drivers/i2c/busses/i2c-wmt.c:330", i2c_dev->cmd_status, i2c_dev->base + REG_ISR);
 
 	complete(&i2c_dev->complete);
 
@@ -351,18 +351,18 @@ static int wmt_i2c_reset_hardware(struct wmt_i2c_dev *i2c_dev)
 		return err;
 	}
 
-	writew(0, i2c_dev->base + REG_CR);
-	writew(MCR_APB_166M, i2c_dev->base + REG_MCR);
-	writew(ISR_WRITE_ALL, i2c_dev->base + REG_ISR);
-	writew(IMR_ENABLE_ALL, i2c_dev->base + REG_IMR);
-	writew(CR_ENABLE, i2c_dev->base + REG_CR);
-	readw(i2c_dev->base + REG_CSR);		/* read clear */
-	writew(ISR_WRITE_ALL, i2c_dev->base + REG_ISR);
+	pete_writew("drivers/i2c/busses/i2c-wmt.c:354", 0, i2c_dev->base + REG_CR);
+	pete_writew("drivers/i2c/busses/i2c-wmt.c:355", MCR_APB_166M, i2c_dev->base + REG_MCR);
+	pete_writew("drivers/i2c/busses/i2c-wmt.c:356", ISR_WRITE_ALL, i2c_dev->base + REG_ISR);
+	pete_writew("drivers/i2c/busses/i2c-wmt.c:357", IMR_ENABLE_ALL, i2c_dev->base + REG_IMR);
+	pete_writew("drivers/i2c/busses/i2c-wmt.c:358", CR_ENABLE, i2c_dev->base + REG_CR);
+	pete_readw("drivers/i2c/busses/i2c-wmt.c:359", i2c_dev->base + REG_CSR);		/* read clear */
+	pete_writew("drivers/i2c/busses/i2c-wmt.c:360", ISR_WRITE_ALL, i2c_dev->base + REG_ISR);
 
 	if (i2c_dev->mode == I2C_MODE_STANDARD)
-		writew(SCL_TIMEOUT(128) | TR_STD, i2c_dev->base + REG_TR);
+		pete_writew("drivers/i2c/busses/i2c-wmt.c:363", SCL_TIMEOUT(128) | TR_STD, i2c_dev->base + REG_TR);
 	else
-		writew(SCL_TIMEOUT(128) | TR_HS, i2c_dev->base + REG_TR);
+		pete_writew("drivers/i2c/busses/i2c-wmt.c:365", SCL_TIMEOUT(128) | TR_HS, i2c_dev->base + REG_TR);
 
 	return 0;
 }
@@ -441,7 +441,7 @@ static int wmt_i2c_remove(struct platform_device *pdev)
 	struct wmt_i2c_dev *i2c_dev = platform_get_drvdata(pdev);
 
 	/* Disable interrupts, clock and delete adapter */
-	writew(0, i2c_dev->base + REG_IMR);
+	pete_writew("drivers/i2c/busses/i2c-wmt.c:444", 0, i2c_dev->base + REG_IMR);
 	clk_disable_unprepare(i2c_dev->clk);
 	i2c_del_adapter(&i2c_dev->adapter);
 

@@ -61,18 +61,18 @@ static int visconti_pin_config_set(struct pinctrl_dev *pctldev,
 			fallthrough;
 		case PIN_CONFIG_BIAS_PULL_DOWN:
 			/* update pudsel setting */
-			val = readl(priv->base + pin->pudsel_offset);
+			val = pete_readl("drivers/pinctrl/visconti/pinctrl-common.c:64", priv->base + pin->pudsel_offset);
 			val &= ~BIT(pin->pud_shift);
 			val |= set_val << pin->pud_shift;
-			writel(val, priv->base + pin->pudsel_offset);
+			pete_writel("drivers/pinctrl/visconti/pinctrl-common.c:67", val, priv->base + pin->pudsel_offset);
 			pude_val = 1;
 			fallthrough;
 		case PIN_CONFIG_BIAS_DISABLE:
 			/* update pude setting */
-			val = readl(priv->base + pin->pude_offset);
+			val = pete_readl("drivers/pinctrl/visconti/pinctrl-common.c:72", priv->base + pin->pude_offset);
 			val &= ~BIT(pin->pud_shift);
 			val |= pude_val << pin->pud_shift;
-			writel(val, priv->base + pin->pude_offset);
+			pete_writel("drivers/pinctrl/visconti/pinctrl-common.c:75", val, priv->base + pin->pude_offset);
 			dev_dbg(priv->dev, "BIAS(%d): off = 0x%x val = 0x%x\n",
 				param, pin->pude_offset, val);
 			break;
@@ -103,10 +103,10 @@ static int visconti_pin_config_set(struct pinctrl_dev *pctldev,
 				goto err;
 			}
 			/* update drive setting */
-			val = readl(priv->base + pin->dsel_offset);
+			val = pete_readl("drivers/pinctrl/visconti/pinctrl-common.c:106", priv->base + pin->dsel_offset);
 			val &= ~(DSEL_MASK << pin->dsel_shift);
 			val |= set_val << pin->dsel_shift;
-			writel(val, priv->base + pin->dsel_offset);
+			pete_writel("drivers/pinctrl/visconti/pinctrl-common.c:109", val, priv->base + pin->dsel_offset);
 			break;
 
 		default:
@@ -233,10 +233,10 @@ static int visconti_set_mux(struct pinctrl_dev *pctldev,
 	spin_lock_irqsave(&priv->lock, flags);
 
 	/* update mux */
-	val = readl(priv->base + mux->offset);
+	val = pete_readl("drivers/pinctrl/visconti/pinctrl-common.c:236", priv->base + mux->offset);
 	val &= ~mux->mask;
 	val |= mux->val;
-	writel(val, priv->base + mux->offset);
+	pete_writel("drivers/pinctrl/visconti/pinctrl-common.c:239", val, priv->base + mux->offset);
 
 	spin_unlock_irqrestore(&priv->lock, flags);
 
@@ -258,10 +258,10 @@ static int visconti_gpio_request_enable(struct pinctrl_dev *pctldev,
 
 	/* update mux */
 	spin_lock_irqsave(&priv->lock, flags);
-	val = readl(priv->base + gpio_mux->offset);
+	val = pete_readl("drivers/pinctrl/visconti/pinctrl-common.c:261", priv->base + gpio_mux->offset);
 	val &= ~gpio_mux->mask;
 	val |= gpio_mux->val;
-	writel(val, priv->base + gpio_mux->offset);
+	pete_writel("drivers/pinctrl/visconti/pinctrl-common.c:264", val, priv->base + gpio_mux->offset);
 	spin_unlock_irqrestore(&priv->lock, flags);
 
 	return 0;

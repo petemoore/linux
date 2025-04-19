@@ -88,7 +88,7 @@ struct sdricoh_host {
 static inline unsigned int sdricoh_readl(struct sdricoh_host *host,
 					 unsigned int reg)
 {
-	unsigned int value = readl(host->iobase + reg);
+	unsigned int value = pete_readl("drivers/mmc/host/sdricoh_cs.c:91", host->iobase + reg);
 	dev_vdbg(host->dev, "rl %x 0x%x\n", reg, value);
 	return value;
 }
@@ -96,7 +96,7 @@ static inline unsigned int sdricoh_readl(struct sdricoh_host *host,
 static inline void sdricoh_writel(struct sdricoh_host *host, unsigned int reg,
 				  unsigned int value)
 {
-	writel(value, host->iobase + reg);
+	pete_writel("drivers/mmc/host/sdricoh_cs.c:99", value, host->iobase + reg);
 	dev_vdbg(host->dev, "wl %x 0x%x\n", reg, value);
 
 }
@@ -104,7 +104,7 @@ static inline void sdricoh_writel(struct sdricoh_host *host, unsigned int reg,
 static inline unsigned int sdricoh_readw(struct sdricoh_host *host,
 					 unsigned int reg)
 {
-	unsigned int value = readw(host->iobase + reg);
+	unsigned int value = pete_readw("drivers/mmc/host/sdricoh_cs.c:107", host->iobase + reg);
 	dev_vdbg(host->dev, "rb %x 0x%x\n", reg, value);
 	return value;
 }
@@ -112,14 +112,14 @@ static inline unsigned int sdricoh_readw(struct sdricoh_host *host,
 static inline void sdricoh_writew(struct sdricoh_host *host, unsigned int reg,
 					 unsigned short value)
 {
-	writew(value, host->iobase + reg);
+	pete_writew("drivers/mmc/host/sdricoh_cs.c:115", value, host->iobase + reg);
 	dev_vdbg(host->dev, "ww %x 0x%x\n", reg, value);
 }
 
 static inline unsigned int sdricoh_readb(struct sdricoh_host *host,
 					 unsigned int reg)
 {
-	unsigned int value = readb(host->iobase + reg);
+	unsigned int value = pete_readb("drivers/mmc/host/sdricoh_cs.c:122", host->iobase + reg);
 	dev_vdbg(host->dev, "rb %x 0x%x\n", reg, value);
 	return value;
 }
@@ -404,7 +404,7 @@ static int sdricoh_init_mmc(struct pci_dev *pci_dev,
 		return -ENODEV;
 	}
 	/* check version? */
-	if (readl(iobase + R104_VERSION) != 0x4000) {
+	if (pete_readl("drivers/mmc/host/sdricoh_cs.c:407", iobase + R104_VERSION) != 0x4000) {
 		dev_dbg(dev, "no supported mmc controller found\n");
 		result = -ENODEV;
 		goto unmap_io;

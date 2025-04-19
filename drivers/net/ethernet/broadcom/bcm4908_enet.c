@@ -81,12 +81,12 @@ struct bcm4908_enet {
 
 static u32 enet_read(struct bcm4908_enet *enet, u16 offset)
 {
-	return readl(enet->base + offset);
+	return pete_readl("drivers/net/ethernet/broadcom/bcm4908_enet.c:84", enet->base + offset);
 }
 
 static void enet_write(struct bcm4908_enet *enet, u16 offset, u32 value)
 {
-	writel(value, enet->base + offset);
+	pete_writel("drivers/net/ethernet/broadcom/bcm4908_enet.c:89", value, enet->base + offset);
 }
 
 static void enet_maskset(struct bcm4908_enet *enet, u16 offset, u32 mask, u32 set)

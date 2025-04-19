@@ -772,14 +772,14 @@ static int jz4760_codec_reg_read(void *context, unsigned int reg,
 	if (ret)
 		return ret;
 
-	tmp = readl(codec->base + ICDC_RGADW_OFFSET);
+	tmp = pete_readl("sound/soc/codecs/jz4760.c:775", codec->base + ICDC_RGADW_OFFSET);
 	tmp &= ~ICDC_RGADW_RGADDR_MASK;
 	tmp |= FIELD_PREP(ICDC_RGADW_RGADDR_MASK, reg);
-	writel(tmp, codec->base + ICDC_RGADW_OFFSET);
+	pete_writel("sound/soc/codecs/jz4760.c:778", tmp, codec->base + ICDC_RGADW_OFFSET);
 
 	/* wait 6+ cycles */
 	for (i = 0; i < 6; i++)
-		*val = readl(codec->base + ICDC_RGDATA_OFFSET) &
+		*val = pete_readl("sound/soc/codecs/jz4760.c:782", codec->base + ICDC_RGDATA_OFFSET) &
 			ICDC_RGDATA_RGDOUT_MASK;
 
 	return 0;
@@ -795,7 +795,7 @@ static int jz4760_codec_reg_write(void *context, unsigned int reg,
 	if (ret)
 		return ret;
 
-	writel(ICDC_RGADW_RGWR | FIELD_PREP(ICDC_RGADW_RGADDR_MASK, reg) | val,
+	pete_writel("sound/soc/codecs/jz4760.c:798", ICDC_RGADW_RGWR | FIELD_PREP(ICDC_RGADW_RGADDR_MASK, reg) | val,
 	       codec->base + ICDC_RGADW_OFFSET);
 
 	ret = jz4760_codec_io_wait(codec);

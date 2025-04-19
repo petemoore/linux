@@ -45,14 +45,14 @@ static unsigned long dosample(void)
 
 	/* Latch and spin until top byte of counter2 is zero */
 	do {
-		writeb(SGINT_TCWORD_CNT2 | SGINT_TCWORD_CLAT, &sgint->tcword);
-		(void) readb(&sgint->tcnt2);
-		msb = readb(&sgint->tcnt2);
+		pete_writeb("arch/mips/sgi-ip22/ip22-time.c:48", SGINT_TCWORD_CNT2 | SGINT_TCWORD_CLAT, &sgint->tcword);
+		(void) pete_readb("arch/mips/sgi-ip22/ip22-time.c:49", &sgint->tcnt2);
+		msb = pete_readb("arch/mips/sgi-ip22/ip22-time.c:50", &sgint->tcnt2);
 		ct1 = read_c0_count();
 	} while (msb);
 
 	/* Stop the counter. */
-	writeb(SGINT_TCWORD_CNT2 | SGINT_TCWORD_CALL | SGINT_TCWORD_MSWST,
+	pete_writeb("arch/mips/sgi-ip22/ip22-time.c:55", SGINT_TCWORD_CNT2 | SGINT_TCWORD_CALL | SGINT_TCWORD_MSWST,
 	       &sgint->tcword);
 	/*
 	 * Return the difference, this is how far the r4k counter increments

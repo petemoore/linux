@@ -44,12 +44,12 @@ static void __iomem *rt2880_pci_base;
 
 static u32 rt2880_pci_reg_read(u32 reg)
 {
-	return readl(rt2880_pci_base + reg);
+	return pete_readl("arch/mips/pci/pci-rt2880.c:47", rt2880_pci_base + reg);
 }
 
 static void rt2880_pci_reg_write(u32 val, u32 reg)
 {
-	writel(val, rt2880_pci_base + reg);
+	pete_writel("arch/mips/pci/pci-rt2880.c:52", val, rt2880_pci_base + reg);
 }
 
 static inline u32 rt2880_pci_get_cfgaddr(unsigned int bus, unsigned int slot,

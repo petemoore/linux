@@ -768,7 +768,7 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
 	if (pdev->vendor == PCI_VENDOR_ID_AL && pdev->device == 0x5237)
 		no_fminterval = true;
 
-	control = readl(base + OHCI_CONTROL);
+	control = pete_readl("drivers/usb/host/pci-quirks.c:771", base + OHCI_CONTROL);
 
 /* On PA-RISC, PDC can leave IR set incorrectly; ignore it there. */
 #ifdef __hppa__
@@ -778,42 +778,42 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
 
 	if (control & OHCI_CTRL_IR) {
 		int wait_time = 500; /* arbitrary; 5 seconds */
-		writel(OHCI_INTR_OC, base + OHCI_INTRENABLE);
-		writel(OHCI_OCR, base + OHCI_CMDSTATUS);
+		pete_writel("drivers/usb/host/pci-quirks.c:781", OHCI_INTR_OC, base + OHCI_INTRENABLE);
+		pete_writel("drivers/usb/host/pci-quirks.c:782", OHCI_OCR, base + OHCI_CMDSTATUS);
 		while (wait_time > 0 &&
-				readl(base + OHCI_CONTROL) & OHCI_CTRL_IR) {
+				pete_readl("drivers/usb/host/pci-quirks.c:784", base + OHCI_CONTROL) & OHCI_CTRL_IR) {
 			wait_time -= 10;
 			msleep(10);
 		}
 		if (wait_time <= 0)
 			dev_warn(&pdev->dev,
 				 "OHCI: BIOS handoff failed (BIOS bug?) %08x\n",
-				 readl(base + OHCI_CONTROL));
+				 pete_readl("drivers/usb/host/pci-quirks.c:791", base + OHCI_CONTROL));
 	}
 #endif
 
 	/* disable interrupts */
-	writel((u32) ~0, base + OHCI_INTRDISABLE);
+	pete_writel("drivers/usb/host/pci-quirks.c:796", (u32) ~0, base + OHCI_INTRDISABLE);
 
 	/* Go into the USB_RESET state, preserving RWC (and possibly IR) */
-	writel(control & OHCI_CTRL_MASK, base + OHCI_CONTROL);
-	readl(base + OHCI_CONTROL);
+	pete_writel("drivers/usb/host/pci-quirks.c:799", control & OHCI_CTRL_MASK, base + OHCI_CONTROL);
+	pete_readl("drivers/usb/host/pci-quirks.c:800", base + OHCI_CONTROL);
 
 	/* software reset of the controller, preserving HcFmInterval */
 	if (!no_fminterval)
-		fminterval = readl(base + OHCI_FMINTERVAL);
+		fminterval = pete_readl("drivers/usb/host/pci-quirks.c:804", base + OHCI_FMINTERVAL);
 
-	writel(OHCI_HCR, base + OHCI_CMDSTATUS);
+	pete_writel("drivers/usb/host/pci-quirks.c:806", OHCI_HCR, base + OHCI_CMDSTATUS);
 
 	/* reset requires max 10 us delay */
 	for (cnt = 30; cnt > 0; --cnt) {	/* ... allow extra time */
-		if ((readl(base + OHCI_CMDSTATUS) & OHCI_HCR) == 0)
+		if ((pete_readl("drivers/usb/host/pci-quirks.c:810", base + OHCI_CMDSTATUS) & OHCI_HCR) == 0)
 			break;
 		udelay(1);
 	}
 
 	if (!no_fminterval)
-		writel(fminterval, base + OHCI_FMINTERVAL);
+		pete_writel("drivers/usb/host/pci-quirks.c:816", fminterval, base + OHCI_FMINTERVAL);
 
 	/* Now the controller is safely in SUSPEND and nothing can wake it up */
 	iounmap(base);
@@ -923,7 +923,7 @@ static void ehci_bios_handoff(struct pci_dev *pdev,
 	 * any power sessions to remain intact.
 	 */
 	if (tried_handoff)
-		writel(0, op_reg_base + EHCI_CONFIGFLAG);
+		pete_writel("drivers/usb/host/pci-quirks.c:926", 0, op_reg_base + EHCI_CONFIGFLAG);
 }
 
 static void quirk_usb_disable_ehci(struct pci_dev *pdev)
@@ -940,14 +940,14 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
 	if (base == NULL)
 		return;
 
-	cap_length = readb(base);
+	cap_length = pete_readb("drivers/usb/host/pci-quirks.c:943", base);
 	op_reg_base = base + cap_length;
 
 	/* EHCI 0.96 and later may have "extended capabilities"
 	 * spec section 5.1 explains the bios handoff, e.g. for
 	 * booting from USB disk or using a usb keyboard
 	 */
-	hcc_params = readl(base + EHCI_HCC_PARAMS);
+	hcc_params = pete_readl("drivers/usb/host/pci-quirks.c:950", base + EHCI_HCC_PARAMS);
 	offset = (hcc_params >> 8) & 0xff;
 	while (offset && --count) {
 		pci_read_config_dword(pdev, offset, &cap);
@@ -972,25 +972,25 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
 	/*
 	 * halt EHCI & disable its interrupts in any case
 	 */
-	val = readl(op_reg_base + EHCI_USBSTS);
+	val = pete_readl("drivers/usb/host/pci-quirks.c:975", op_reg_base + EHCI_USBSTS);
 	if ((val & EHCI_USBSTS_HALTED) == 0) {
-		val = readl(op_reg_base + EHCI_USBCMD);
+		val = pete_readl("drivers/usb/host/pci-quirks.c:977", op_reg_base + EHCI_USBCMD);
 		val &= ~EHCI_USBCMD_RUN;
-		writel(val, op_reg_base + EHCI_USBCMD);
+		pete_writel("drivers/usb/host/pci-quirks.c:979", val, op_reg_base + EHCI_USBCMD);
 
 		wait_time = 2000;
 		do {
-			writel(0x3f, op_reg_base + EHCI_USBSTS);
+			pete_writel("drivers/usb/host/pci-quirks.c:983", 0x3f, op_reg_base + EHCI_USBSTS);
 			udelay(100);
 			wait_time -= 100;
-			val = readl(op_reg_base + EHCI_USBSTS);
+			val = pete_readl("drivers/usb/host/pci-quirks.c:986", op_reg_base + EHCI_USBSTS);
 			if ((val == ~(u32)0) || (val & EHCI_USBSTS_HALTED)) {
 				break;
 			}
 		} while (wait_time > 0);
 	}
-	writel(0, op_reg_base + EHCI_USBINTR);
-	writel(0x3f, op_reg_base + EHCI_USBSTS);
+	pete_writel("drivers/usb/host/pci-quirks.c:992", 0, op_reg_base + EHCI_USBINTR);
+	pete_writel("drivers/usb/host/pci-quirks.c:993", 0x3f, op_reg_base + EHCI_USBSTS);
 
 	iounmap(base);
 }
@@ -1166,19 +1166,19 @@ static void quirk_usb_handoff_xhci(struct pci_dev *pdev)
 		dev_warn(&pdev->dev, "xHCI controller failing to respond");
 		goto iounmap;
 	}
-	val = readl(base + ext_cap_offset);
+	val = pete_readl("drivers/usb/host/pci-quirks.c:1169", base + ext_cap_offset);
 
 	/* Auto handoff never worked for these devices. Force it and continue */
 	if ((pdev->vendor == PCI_VENDOR_ID_TI && pdev->device == 0x8241) ||
 			(pdev->vendor == PCI_VENDOR_ID_RENESAS
 			 && pdev->device == 0x0014)) {
 		val = (val | XHCI_HC_OS_OWNED) & ~XHCI_HC_BIOS_OWNED;
-		writel(val, base + ext_cap_offset);
+		pete_writel("drivers/usb/host/pci-quirks.c:1176", val, base + ext_cap_offset);
 	}
 
 	/* If the BIOS owns the HC, signal that the OS wants it, and wait */
 	if (val & XHCI_HC_BIOS_OWNED) {
-		writel(val | XHCI_HC_OS_OWNED, base + ext_cap_offset);
+		pete_writel("drivers/usb/host/pci-quirks.c:1181", val | XHCI_HC_OS_OWNED, base + ext_cap_offset);
 
 		/* Wait for 1 second with 10 microsecond polling interval */
 		timeout = handshake(base + ext_cap_offset, XHCI_HC_BIOS_OWNED,
@@ -1189,23 +1189,23 @@ static void quirk_usb_handoff_xhci(struct pci_dev *pdev)
 			dev_warn(&pdev->dev,
 				 "xHCI BIOS handoff failed (BIOS bug ?) %08x\n",
 				 val);
-			writel(val & ~XHCI_HC_BIOS_OWNED, base + ext_cap_offset);
+			pete_writel("drivers/usb/host/pci-quirks.c:1192", val & ~XHCI_HC_BIOS_OWNED, base + ext_cap_offset);
 		}
 	}
 
-	val = readl(base + ext_cap_offset + XHCI_LEGACY_CONTROL_OFFSET);
+	val = pete_readl("drivers/usb/host/pci-quirks.c:1196", base + ext_cap_offset + XHCI_LEGACY_CONTROL_OFFSET);
 	/* Mask off (turn off) any enabled SMIs */
 	val &= XHCI_LEGACY_DISABLE_SMI;
 	/* Mask all SMI events bits, RW1C */
 	val |= XHCI_LEGACY_SMI_EVENTS;
 	/* Disable any BIOS SMIs and clear all SMI events*/
-	writel(val, base + ext_cap_offset + XHCI_LEGACY_CONTROL_OFFSET);
+	pete_writel("drivers/usb/host/pci-quirks.c:1202", val, base + ext_cap_offset + XHCI_LEGACY_CONTROL_OFFSET);
 
 hc_init:
 	if (pdev->vendor == PCI_VENDOR_ID_INTEL)
 		usb_enable_intel_xhci_ports(pdev);
 
-	op_reg_base = base + XHCI_HC_LENGTH(readl(base));
+	op_reg_base = base + XHCI_HC_LENGTH(pete_readl("drivers/usb/host/pci-quirks.c:1208", base));
 
 	/* Wait for the host controller to be ready before writing any
 	 * operational or runtime registers.  Wait 5 seconds and no more.
@@ -1214,22 +1214,22 @@ hc_init:
 			5000000, 10);
 	/* Assume a buggy HC and start HC initialization anyway */
 	if (timeout) {
-		val = readl(op_reg_base + XHCI_STS_OFFSET);
+		val = pete_readl("drivers/usb/host/pci-quirks.c:1217", op_reg_base + XHCI_STS_OFFSET);
 		dev_warn(&pdev->dev,
 			 "xHCI HW not ready after 5 sec (HC bug?) status = 0x%x\n",
 			 val);
 	}
 
 	/* Send the halt and disable interrupts command */
-	val = readl(op_reg_base + XHCI_CMD_OFFSET);
+	val = pete_readl("drivers/usb/host/pci-quirks.c:1224", op_reg_base + XHCI_CMD_OFFSET);
 	val &= ~(XHCI_CMD_RUN | XHCI_IRQS);
-	writel(val, op_reg_base + XHCI_CMD_OFFSET);
+	pete_writel("drivers/usb/host/pci-quirks.c:1226", val, op_reg_base + XHCI_CMD_OFFSET);
 
 	/* Wait for the HC to halt - poll every 125 usec (one microframe). */
 	timeout = handshake(op_reg_base + XHCI_STS_OFFSET, XHCI_STS_HALT, 1,
 			XHCI_MAX_HALT_USEC, 125);
 	if (timeout) {
-		val = readl(op_reg_base + XHCI_STS_OFFSET);
+		val = pete_readl("drivers/usb/host/pci-quirks.c:1232", op_reg_base + XHCI_STS_OFFSET);
 		dev_warn(&pdev->dev,
 			 "xHCI HW did not halt within %d usec status = 0x%x\n",
 			 XHCI_MAX_HALT_USEC, val);

@@ -1331,7 +1331,7 @@ static int igb_reg_test(struct igb_adapter *adapter, u64 *data)
 						test->write);
 				break;
 			case WRITE_NO_TEST:
-				writel(test->write,
+				pete_writel("drivers/net/ethernet/intel/igb/igb_ethtool.c:1334", test->write,
 				    (adapter->hw.hw_addr + test->reg)
 					+ (i * test->reg_offset));
 				break;

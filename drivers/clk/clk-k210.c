@@ -342,13 +342,13 @@ struct k210_sysclk {
  */
 static void k210_aclk_set_selector(void __iomem *regs, u8 sel)
 {
-	u32 reg = readl(regs + K210_SYSCTL_SEL0);
+	u32 reg = pete_readl("drivers/clk/clk-k210.c:345", regs + K210_SYSCTL_SEL0);
 
 	if (sel)
 		reg |= K210_ACLK_SEL;
 	else
 		reg &= K210_ACLK_SEL;
-	writel(reg, regs + K210_SYSCTL_SEL0);
+	pete_writel("drivers/clk/clk-k210.c:351", reg, regs + K210_SYSCTL_SEL0);
 }
 
 static void k210_init_pll(void __iomem *regs, enum k210_pll_id pllid,
@@ -367,18 +367,18 @@ static void k210_pll_wait_for_lock(struct k210_pll *pll)
 				pll->lock_shift);
 
 	while (true) {
-		reg = readl(pll->lock);
+		reg = pete_readl("drivers/clk/clk-k210.c:370", pll->lock);
 		if ((reg & mask) == mask)
 			break;
 
 		reg |= BIT(pll->lock_shift + K210_PLL_CLEAR_SLIP);
-		writel(reg, pll->lock);
+		pete_writel("drivers/clk/clk-k210.c:375", reg, pll->lock);
 	}
 }
 
 static bool k210_pll_hw_is_enabled(struct k210_pll *pll)
 {
-	u32 reg = readl(pll->reg);
+	u32 reg = pete_readl("drivers/clk/clk-k210.c:381", pll->reg);
 	u32 mask = K210_PLL_PWRD | K210_PLL_EN;
 
 	if (reg & K210_PLL_RESET)
@@ -403,33 +403,33 @@ static void k210_pll_enable_hw(void __iomem *regs, struct k210_pll *pll)
 		k210_aclk_set_selector(regs, 0);
 
 	/* Set PLL factors */
-	reg = readl(pll->reg);
+	reg = pete_readl("drivers/clk/clk-k210.c:406", pll->reg);
 	reg &= ~GENMASK(19, 0);
 	reg |= FIELD_PREP(K210_PLL_CLKR, pll_cfg->r);
 	reg |= FIELD_PREP(K210_PLL_CLKF, pll_cfg->f);
 	reg |= FIELD_PREP(K210_PLL_CLKOD, pll_cfg->od);
 	reg |= FIELD_PREP(K210_PLL_BWADJ, pll_cfg->bwadj);
 	reg |= K210_PLL_PWRD;
-	writel(reg, pll->reg);
+	pete_writel("drivers/clk/clk-k210.c:413", reg, pll->reg);
 
 	/*
 	 * Reset the PLL: ensure reset is low before asserting it.
 	 * The magic NOPs come from the Kendryte reference SDK.
 	 */
 	reg &= ~K210_PLL_RESET;
-	writel(reg, pll->reg);
+	pete_writel("drivers/clk/clk-k210.c:420", reg, pll->reg);
 	reg |= K210_PLL_RESET;
-	writel(reg, pll->reg);
+	pete_writel("drivers/clk/clk-k210.c:422", reg, pll->reg);
 	nop();
 	nop();
 	reg &= ~K210_PLL_RESET;
-	writel(reg, pll->reg);
+	pete_writel("drivers/clk/clk-k210.c:426", reg, pll->reg);
 
 	k210_pll_wait_for_lock(pll);
 
 	reg &= ~K210_PLL_BYPASS;
 	reg |= K210_PLL_EN;
-	writel(reg, pll->reg);
+	pete_writel("drivers/clk/clk-k210.c:432", reg, pll->reg);
 
 	if (pll->id == K210_PLL0)
 		k210_aclk_set_selector(regs, 1);
@@ -463,13 +463,13 @@ static void k210_pll_disable(struct clk_hw *hw)
 	 * parent of the cpu clock.
 	 */
 	spin_lock_irqsave(&ksc->clk_lock, flags);
-	reg = readl(pll->reg);
+	reg = pete_readl("drivers/clk/clk-k210.c:466", pll->reg);
 	reg |= K210_PLL_BYPASS;
-	writel(reg, pll->reg);
+	pete_writel("drivers/clk/clk-k210.c:468", reg, pll->reg);
 
 	reg &= ~K210_PLL_PWRD;
 	reg &= ~K210_PLL_EN;
-	writel(reg, pll->reg);
+	pete_writel("drivers/clk/clk-k210.c:472", reg, pll->reg);
 	spin_unlock_irqrestore(&ksc->clk_lock, flags);
 }
 
@@ -482,7 +482,7 @@ static unsigned long k210_pll_get_rate(struct clk_hw *hw,
 				       unsigned long parent_rate)
 {
 	struct k210_pll *pll = to_k210_pll(hw);
-	u32 reg = readl(pll->reg);
+	u32 reg = pete_readl("drivers/clk/clk-k210.c:485", pll->reg);
 	u32 r, f, od;
 
 	if (reg & K210_PLL_BYPASS)
@@ -514,10 +514,10 @@ static int k210_pll2_set_parent(struct clk_hw *hw, u8 index)
 
 	spin_lock_irqsave(&ksc->clk_lock, flags);
 
-	reg = readl(pll->reg);
+	reg = pete_readl("drivers/clk/clk-k210.c:517", pll->reg);
 	reg &= ~K210_PLL_SEL;
 	reg |= FIELD_PREP(K210_PLL_SEL, index);
-	writel(reg, pll->reg);
+	pete_writel("drivers/clk/clk-k210.c:520", reg, pll->reg);
 
 	spin_unlock_irqrestore(&ksc->clk_lock, flags);
 
@@ -527,7 +527,7 @@ static int k210_pll2_set_parent(struct clk_hw *hw, u8 index)
 static u8 k210_pll2_get_parent(struct clk_hw *hw)
 {
 	struct k210_pll *pll = to_k210_pll(hw);
-	u32 reg = readl(pll->reg);
+	u32 reg = pete_readl("drivers/clk/clk-k210.c:530", pll->reg);
 
 	return FIELD_GET(K210_PLL_SEL, reg);
 }
@@ -614,7 +614,7 @@ static u8 k210_aclk_get_parent(struct clk_hw *hw)
 	struct k210_sysclk *ksc = to_k210_sysclk(hw);
 	u32 sel;
 
-	sel = readl(ksc->regs + K210_SYSCTL_SEL0) & K210_ACLK_SEL;
+	sel = pete_readl("drivers/clk/clk-k210.c:617", ksc->regs + K210_SYSCTL_SEL0) & K210_ACLK_SEL;
 
 	return sel ? 1 : 0;
 }
@@ -623,7 +623,7 @@ static unsigned long k210_aclk_get_rate(struct clk_hw *hw,
 					unsigned long parent_rate)
 {
 	struct k210_sysclk *ksc = to_k210_sysclk(hw);
-	u32 reg = readl(ksc->regs + K210_SYSCTL_SEL0);
+	u32 reg = pete_readl("drivers/clk/clk-k210.c:626", ksc->regs + K210_SYSCTL_SEL0);
 	unsigned int shift;
 
 	if (!(reg & 0x1))
@@ -682,9 +682,9 @@ static int k210_clk_enable(struct clk_hw *hw)
 		return 0;
 
 	spin_lock_irqsave(&ksc->clk_lock, flags);
-	reg = readl(ksc->regs + cfg->gate_reg);
+	reg = pete_readl("drivers/clk/clk-k210.c:685", ksc->regs + cfg->gate_reg);
 	reg |= BIT(cfg->gate_bit);
-	writel(reg, ksc->regs + cfg->gate_reg);
+	pete_writel("drivers/clk/clk-k210.c:687", reg, ksc->regs + cfg->gate_reg);
 	spin_unlock_irqrestore(&ksc->clk_lock, flags);
 
 	return 0;
@@ -702,9 +702,9 @@ static void k210_clk_disable(struct clk_hw *hw)
 		return;
 
 	spin_lock_irqsave(&ksc->clk_lock, flags);
-	reg = readl(ksc->regs + cfg->gate_reg);
+	reg = pete_readl("drivers/clk/clk-k210.c:705", ksc->regs + cfg->gate_reg);
 	reg &= ~BIT(cfg->gate_bit);
-	writel(reg, ksc->regs + cfg->gate_reg);
+	pete_writel("drivers/clk/clk-k210.c:707", reg, ksc->regs + cfg->gate_reg);
 	spin_unlock_irqrestore(&ksc->clk_lock, flags);
 }
 
@@ -717,12 +717,12 @@ static int k210_clk_set_parent(struct clk_hw *hw, u8 index)
 	u32 reg;
 
 	spin_lock_irqsave(&ksc->clk_lock, flags);
-	reg = readl(ksc->regs + cfg->mux_reg);
+	reg = pete_readl("drivers/clk/clk-k210.c:720", ksc->regs + cfg->mux_reg);
 	if (index)
 		reg |= BIT(cfg->mux_bit);
 	else
 		reg &= ~BIT(cfg->mux_bit);
-	writel(reg, ksc->regs + cfg->mux_reg);
+	pete_writel("drivers/clk/clk-k210.c:725", reg, ksc->regs + cfg->mux_reg);
 	spin_unlock_irqrestore(&ksc->clk_lock, flags);
 
 	return 0;
@@ -737,7 +737,7 @@ static u8 k210_clk_get_parent(struct clk_hw *hw)
 	u32 reg, idx;
 
 	spin_lock_irqsave(&ksc->clk_lock, flags);
-	reg = readl(ksc->regs + cfg->mux_reg);
+	reg = pete_readl("drivers/clk/clk-k210.c:740", ksc->regs + cfg->mux_reg);
 	idx = (reg & BIT(cfg->mux_bit)) ? 1 : 0;
 	spin_unlock_irqrestore(&ksc->clk_lock, flags);
 
@@ -755,7 +755,7 @@ static unsigned long k210_clk_get_rate(struct clk_hw *hw,
 	if (!cfg->div_reg)
 		return parent_rate;
 
-	reg = readl(ksc->regs + cfg->div_reg);
+	reg = pete_readl("drivers/clk/clk-k210.c:758", ksc->regs + cfg->div_reg);
 	div_val = (reg >> cfg->div_shift) & GENMASK(cfg->div_width - 1, 0);
 
 	switch (cfg->div_type) {

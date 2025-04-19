@@ -64,17 +64,17 @@ struct n64audio {
 
 static void n64audio_write_reg(struct n64audio *priv, const u8 reg, const u32 value)
 {
-	writel(value, priv->ai_reg_base + reg);
+	pete_writel("sound/mips/snd-n64.c:67", value, priv->ai_reg_base + reg);
 }
 
 static void n64mi_write_reg(struct n64audio *priv, const u8 reg, const u32 value)
 {
-	writel(value, priv->mi_reg_base + reg);
+	pete_writel("sound/mips/snd-n64.c:72", value, priv->mi_reg_base + reg);
 }
 
 static u32 n64mi_read_reg(struct n64audio *priv, const u8 reg)
 {
-	return readl(priv->mi_reg_base + reg);
+	return pete_readl("sound/mips/snd-n64.c:77", priv->mi_reg_base + reg);
 }
 
 static void n64audio_push(struct n64audio *priv)

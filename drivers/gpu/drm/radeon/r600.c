@@ -1087,7 +1087,7 @@ void r600_pcie_gart_tlb_flush(struct radeon_device *rdev)
 		 * method for them.
 		 */
 		WREG32(HDP_DEBUG1, 0);
-		readl((void __iomem *)ptr);
+		pete_readl("drivers/gpu/drm/radeon/r600.c:1090", (void __iomem *)ptr);
 	} else
 		WREG32(R_005480_HDP_MEM_COHERENCY_FLUSH_CNTL, 0x1);
 
@@ -4387,7 +4387,7 @@ void r600_mmio_hdp_flush(struct radeon_device *rdev)
 		void __iomem *ptr = (void *)rdev->vram_scratch.ptr;
 
 		WREG32(HDP_DEBUG1, 0);
-		readl((void __iomem *)ptr);
+		pete_readl("drivers/gpu/drm/radeon/r600.c:4390", (void __iomem *)ptr);
 	} else
 		WREG32(R_005480_HDP_MEM_COHERENCY_FLUSH_CNTL, 0x1);
 }

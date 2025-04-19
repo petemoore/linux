@@ -72,21 +72,21 @@ typedef struct {
 static inline unsigned long notrace omap_mpu_timer_read(int nr)
 {
 	omap_mpu_timer_regs_t __iomem *timer = omap_mpu_timer_base(nr);
-	return readl(&timer->read_tim);
+	return pete_readl("arch/arm/mach-omap1/time.c:75", &timer->read_tim);
 }
 
 static inline void omap_mpu_set_autoreset(int nr)
 {
 	omap_mpu_timer_regs_t __iomem *timer = omap_mpu_timer_base(nr);
 
-	writel(readl(&timer->cntl) | MPU_TIMER_AR, &timer->cntl);
+	pete_writel("arch/arm/mach-omap1/time.c:82", pete_readl("arch/arm/mach-omap1/time.c:82", &timer->cntl) | MPU_TIMER_AR, &timer->cntl);
 }
 
 static inline void omap_mpu_remove_autoreset(int nr)
 {
 	omap_mpu_timer_regs_t __iomem *timer = omap_mpu_timer_base(nr);
 
-	writel(readl(&timer->cntl) & ~MPU_TIMER_AR, &timer->cntl);
+	pete_writel("arch/arm/mach-omap1/time.c:89", pete_readl("arch/arm/mach-omap1/time.c:89", &timer->cntl) & ~MPU_TIMER_AR, &timer->cntl);
 }
 
 static inline void omap_mpu_timer_start(int nr, unsigned long load_val,
@@ -98,18 +98,18 @@ static inline void omap_mpu_timer_start(int nr, unsigned long load_val,
 	if (autoreset)
 		timerflags |= MPU_TIMER_AR;
 
-	writel(MPU_TIMER_CLOCK_ENABLE, &timer->cntl);
+	pete_writel("arch/arm/mach-omap1/time.c:101", MPU_TIMER_CLOCK_ENABLE, &timer->cntl);
 	udelay(1);
-	writel(load_val, &timer->load_tim);
+	pete_writel("arch/arm/mach-omap1/time.c:103", load_val, &timer->load_tim);
         udelay(1);
-	writel(timerflags, &timer->cntl);
+	pete_writel("arch/arm/mach-omap1/time.c:105", timerflags, &timer->cntl);
 }
 
 static inline void omap_mpu_timer_stop(int nr)
 {
 	omap_mpu_timer_regs_t __iomem *timer = omap_mpu_timer_base(nr);
 
-	writel(readl(&timer->cntl) & ~MPU_TIMER_ST, &timer->cntl);
+	pete_writel("arch/arm/mach-omap1/time.c:112", pete_readl("arch/arm/mach-omap1/time.c:112", &timer->cntl) & ~MPU_TIMER_ST, &timer->cntl);
 }
 
 /*

@@ -128,25 +128,25 @@ struct pci_endpoint_test_data {
 static inline u32 pci_endpoint_test_readl(struct pci_endpoint_test *test,
 					  u32 offset)
 {
-	return readl(test->base + offset);
+	return pete_readl("drivers/misc/pci_endpoint_test.c:131", test->base + offset);
 }
 
 static inline void pci_endpoint_test_writel(struct pci_endpoint_test *test,
 					    u32 offset, u32 value)
 {
-	writel(value, test->base + offset);
+	pete_writel("drivers/misc/pci_endpoint_test.c:137", value, test->base + offset);
 }
 
 static inline u32 pci_endpoint_test_bar_readl(struct pci_endpoint_test *test,
 					      int bar, int offset)
 {
-	return readl(test->bar[bar] + offset);
+	return pete_readl("drivers/misc/pci_endpoint_test.c:143", test->bar[bar] + offset);
 }
 
 static inline void pci_endpoint_test_bar_writel(struct pci_endpoint_test *test,
 						int bar, u32 offset, u32 value)
 {
-	writel(value, test->bar[bar] + offset);
+	pete_writel("drivers/misc/pci_endpoint_test.c:149", value, test->bar[bar] + offset);
 }
 
 static irqreturn_t pci_endpoint_test_irqhandler(int irq, void *dev_id)

@@ -91,7 +91,7 @@ static void octeon_mmc_acquire_bus(struct cvm_mmc_host *host)
 		down(&octeon_bootbus_sem);
 		/* For CN70XX, switch the MMC controller onto the bus. */
 		if (OCTEON_IS_MODEL(OCTEON_CN70XX))
-			writeq(0, (void __iomem *)CVMX_MIO_BOOT_CTL);
+			pete_writeq("drivers/mmc/host/cavium-octeon.c:94", 0, (void __iomem *)CVMX_MIO_BOOT_CTL);
 	} else {
 		down(&host->mmc_serializer);
 	}
@@ -107,9 +107,9 @@ static void octeon_mmc_release_bus(struct cvm_mmc_host *host)
 
 static void octeon_mmc_int_enable(struct cvm_mmc_host *host, u64 val)
 {
-	writeq(val, host->base + MIO_EMM_INT(host));
+	pete_writeq("drivers/mmc/host/cavium-octeon.c:110", val, host->base + MIO_EMM_INT(host));
 	if (!host->has_ciu3)
-		writeq(val, host->base + MIO_EMM_INT_EN(host));
+		pete_writeq("drivers/mmc/host/cavium-octeon.c:112", val, host->base + MIO_EMM_INT_EN(host));
 }
 
 static void octeon_mmc_set_shared_power(struct cvm_mmc_host *host, int dir)
@@ -229,8 +229,8 @@ static int octeon_mmc_probe(struct platform_device *pdev)
 	 * Clear out any pending interrupts that may be left over from
 	 * bootloader.
 	 */
-	val = readq(host->base + MIO_EMM_INT(host));
-	writeq(val, host->base + MIO_EMM_INT(host));
+	val = pete_readq("drivers/mmc/host/cavium-octeon.c:232", host->base + MIO_EMM_INT(host));
+	pete_writeq("drivers/mmc/host/cavium-octeon.c:233", val, host->base + MIO_EMM_INT(host));
 
 	if (host->has_ciu3) {
 		/* Only CMD_DONE, DMA_DONE, CMD_ERR, DMA_ERR */
@@ -304,9 +304,9 @@ static int octeon_mmc_remove(struct platform_device *pdev)
 		if (host->slot[i])
 			cvm_mmc_of_slot_remove(host->slot[i]);
 
-	dma_cfg = readq(host->dma_base + MIO_EMM_DMA_CFG(host));
+	dma_cfg = pete_readq("drivers/mmc/host/cavium-octeon.c:307", host->dma_base + MIO_EMM_DMA_CFG(host));
 	dma_cfg &= ~MIO_EMM_DMA_CFG_EN;
-	writeq(dma_cfg, host->dma_base + MIO_EMM_DMA_CFG(host));
+	pete_writeq("drivers/mmc/host/cavium-octeon.c:309", dma_cfg, host->dma_base + MIO_EMM_DMA_CFG(host));
 
 	octeon_mmc_set_shared_power(host, 0);
 	return 0;

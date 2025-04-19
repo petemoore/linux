@@ -24,7 +24,7 @@ static void dwmac4_core_init(struct mac_device_info *hw,
 			     struct net_device *dev)
 {
 	void __iomem *ioaddr = hw->pcsr;
-	u32 value = readl(ioaddr + GMAC_CONFIG);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:27", ioaddr + GMAC_CONFIG);
 
 	value |= GMAC_CORE_INIT;
 
@@ -45,7 +45,7 @@ static void dwmac4_core_init(struct mac_device_info *hw,
 		}
 	}
 
-	writel(value, ioaddr + GMAC_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:48", value, ioaddr + GMAC_CONFIG);
 
 	/* Enable GMAC interrupts */
 	value = GMAC_INT_DEFAULT_ENABLE;
@@ -54,17 +54,17 @@ static void dwmac4_core_init(struct mac_device_info *hw,
 		value |= GMAC_PCS_IRQ_DEFAULT;
 
 	/* Enable FPE interrupt */
-	if ((GMAC_HW_FEAT_FPESEL & readl(ioaddr + GMAC_HW_FEATURE3)) >> 26)
+	if ((GMAC_HW_FEAT_FPESEL & pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:57", ioaddr + GMAC_HW_FEATURE3)) >> 26)
 		value |= GMAC_INT_FPE_EN;
 
-	writel(value, ioaddr + GMAC_INT_EN);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:60", value, ioaddr + GMAC_INT_EN);
 }
 
 static void dwmac4_rx_queue_enable(struct mac_device_info *hw,
 				   u8 mode, u32 queue)
 {
 	void __iomem *ioaddr = hw->pcsr;
-	u32 value = readl(ioaddr + GMAC_RXQ_CTRL0);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:67", ioaddr + GMAC_RXQ_CTRL0);
 
 	value &= GMAC_RX_QUEUE_CLEAR(queue);
 	if (mode == MTL_QUEUE_AVB)
@@ -72,7 +72,7 @@ static void dwmac4_rx_queue_enable(struct mac_device_info *hw,
 	else if (mode == MTL_QUEUE_DCB)
 		value |= GMAC_RX_DCB_QUEUE_ENABLE(queue);
 
-	writel(value, ioaddr + GMAC_RXQ_CTRL0);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:75", value, ioaddr + GMAC_RXQ_CTRL0);
 }
 
 static void dwmac4_rx_queue_priority(struct mac_device_info *hw,
@@ -86,12 +86,12 @@ static void dwmac4_rx_queue_priority(struct mac_device_info *hw,
 	if (queue >= 4)
 		queue -= 4;
 
-	value = readl(ioaddr + base_register);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:89", ioaddr + base_register);
 
 	value &= ~GMAC_RXQCTRL_PSRQX_MASK(queue);
 	value |= (prio << GMAC_RXQCTRL_PSRQX_SHIFT(queue)) &
 						GMAC_RXQCTRL_PSRQX_MASK(queue);
-	writel(value, ioaddr + base_register);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:94", value, ioaddr + base_register);
 }
 
 static void dwmac4_tx_queue_priority(struct mac_device_info *hw,
@@ -105,13 +105,13 @@ static void dwmac4_tx_queue_priority(struct mac_device_info *hw,
 	if (queue >= 4)
 		queue -= 4;
 
-	value = readl(ioaddr + base_register);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:108", ioaddr + base_register);
 
 	value &= ~GMAC_TXQCTRL_PSTQX_MASK(queue);
 	value |= (prio << GMAC_TXQCTRL_PSTQX_SHIFT(queue)) &
 						GMAC_TXQCTRL_PSTQX_MASK(queue);
 
-	writel(value, ioaddr + base_register);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:114", value, ioaddr + base_register);
 }
 
 static void dwmac4_rx_queue_routing(struct mac_device_info *hw,
@@ -128,7 +128,7 @@ static void dwmac4_rx_queue_routing(struct mac_device_info *hw,
 		{ GMAC_RXQCTRL_MCBCQ_MASK, GMAC_RXQCTRL_MCBCQ_SHIFT },
 	};
 
-	value = readl(ioaddr + GMAC_RXQ_CTRL1);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:131", ioaddr + GMAC_RXQ_CTRL1);
 
 	/* routing configuration */
 	value &= ~route_possibilities[packet - 1].reg_mask;
@@ -144,14 +144,14 @@ static void dwmac4_rx_queue_routing(struct mac_device_info *hw,
 		value |= 0x1 << GMAC_RXQCTRL_MCBCQEN_SHIFT;
 	}
 
-	writel(value, ioaddr + GMAC_RXQ_CTRL1);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:147", value, ioaddr + GMAC_RXQ_CTRL1);
 }
 
 static void dwmac4_prog_mtl_rx_algorithms(struct mac_device_info *hw,
 					  u32 rx_alg)
 {
 	void __iomem *ioaddr = hw->pcsr;
-	u32 value = readl(ioaddr + MTL_OPERATION_MODE);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:154", ioaddr + MTL_OPERATION_MODE);
 
 	value &= ~MTL_OPERATION_RAA;
 	switch (rx_alg) {
@@ -165,14 +165,14 @@ static void dwmac4_prog_mtl_rx_algorithms(struct mac_device_info *hw,
 		break;
 	}
 
-	writel(value, ioaddr + MTL_OPERATION_MODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:168", value, ioaddr + MTL_OPERATION_MODE);
 }
 
 static void dwmac4_prog_mtl_tx_algorithms(struct mac_device_info *hw,
 					  u32 tx_alg)
 {
 	void __iomem *ioaddr = hw->pcsr;
-	u32 value = readl(ioaddr + MTL_OPERATION_MODE);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:175", ioaddr + MTL_OPERATION_MODE);
 
 	value &= ~MTL_OPERATION_SCHALG_MASK;
 	switch (tx_alg) {
@@ -192,18 +192,18 @@ static void dwmac4_prog_mtl_tx_algorithms(struct mac_device_info *hw,
 		break;
 	}
 
-	writel(value, ioaddr + MTL_OPERATION_MODE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:195", value, ioaddr + MTL_OPERATION_MODE);
 }
 
 static void dwmac4_set_mtl_tx_queue_weight(struct mac_device_info *hw,
 					   u32 weight, u32 queue)
 {
 	void __iomem *ioaddr = hw->pcsr;
-	u32 value = readl(ioaddr + MTL_TXQX_WEIGHT_BASE_ADDR(queue));
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:202", ioaddr + MTL_TXQX_WEIGHT_BASE_ADDR(queue));
 
 	value &= ~MTL_TXQ_WEIGHT_ISCQW_MASK;
 	value |= weight & MTL_TXQ_WEIGHT_ISCQW_MASK;
-	writel(value, ioaddr + MTL_TXQX_WEIGHT_BASE_ADDR(queue));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:206", value, ioaddr + MTL_TXQX_WEIGHT_BASE_ADDR(queue));
 }
 
 static void dwmac4_map_mtl_dma(struct mac_device_info *hw, u32 queue, u32 chan)
@@ -212,9 +212,9 @@ static void dwmac4_map_mtl_dma(struct mac_device_info *hw, u32 queue, u32 chan)
 	u32 value;
 
 	if (queue < 4)
-		value = readl(ioaddr + MTL_RXQ_DMA_MAP0);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:215", ioaddr + MTL_RXQ_DMA_MAP0);
 	else
-		value = readl(ioaddr + MTL_RXQ_DMA_MAP1);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:217", ioaddr + MTL_RXQ_DMA_MAP1);
 
 	if (queue == 0 || queue == 4) {
 		value &= ~MTL_RXQ_DMA_Q04MDMACH_MASK;
@@ -228,9 +228,9 @@ static void dwmac4_map_mtl_dma(struct mac_device_info *hw, u32 queue, u32 chan)
 	}
 
 	if (queue < 4)
-		writel(value, ioaddr + MTL_RXQ_DMA_MAP0);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:231", value, ioaddr + MTL_RXQ_DMA_MAP0);
 	else
-		writel(value, ioaddr + MTL_RXQ_DMA_MAP1);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:233", value, ioaddr + MTL_RXQ_DMA_MAP1);
 }
 
 static void dwmac4_config_cbs(struct mac_device_info *hw,
@@ -247,31 +247,31 @@ static void dwmac4_config_cbs(struct mac_device_info *hw,
 	pr_debug("\tlow_credit: 0x%08x\n", low_credit);
 
 	/* enable AV algorithm */
-	value = readl(ioaddr + MTL_ETSX_CTRL_BASE_ADDR(queue));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:250", ioaddr + MTL_ETSX_CTRL_BASE_ADDR(queue));
 	value |= MTL_ETS_CTRL_AVALG;
 	value |= MTL_ETS_CTRL_CC;
-	writel(value, ioaddr + MTL_ETSX_CTRL_BASE_ADDR(queue));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:253", value, ioaddr + MTL_ETSX_CTRL_BASE_ADDR(queue));
 
 	/* configure send slope */
-	value = readl(ioaddr + MTL_SEND_SLP_CREDX_BASE_ADDR(queue));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:256", ioaddr + MTL_SEND_SLP_CREDX_BASE_ADDR(queue));
 	value &= ~MTL_SEND_SLP_CRED_SSC_MASK;
 	value |= send_slope & MTL_SEND_SLP_CRED_SSC_MASK;
-	writel(value, ioaddr + MTL_SEND_SLP_CREDX_BASE_ADDR(queue));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:259", value, ioaddr + MTL_SEND_SLP_CREDX_BASE_ADDR(queue));
 
 	/* configure idle slope (same register as tx weight) */
 	dwmac4_set_mtl_tx_queue_weight(hw, idle_slope, queue);
 
 	/* configure high credit */
-	value = readl(ioaddr + MTL_HIGH_CREDX_BASE_ADDR(queue));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:265", ioaddr + MTL_HIGH_CREDX_BASE_ADDR(queue));
 	value &= ~MTL_HIGH_CRED_HC_MASK;
 	value |= high_credit & MTL_HIGH_CRED_HC_MASK;
-	writel(value, ioaddr + MTL_HIGH_CREDX_BASE_ADDR(queue));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:268", value, ioaddr + MTL_HIGH_CREDX_BASE_ADDR(queue));
 
 	/* configure high credit */
-	value = readl(ioaddr + MTL_LOW_CREDX_BASE_ADDR(queue));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:271", ioaddr + MTL_LOW_CREDX_BASE_ADDR(queue));
 	value &= ~MTL_HIGH_CRED_LC_MASK;
 	value |= low_credit & MTL_HIGH_CRED_LC_MASK;
-	writel(value, ioaddr + MTL_LOW_CREDX_BASE_ADDR(queue));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:274", value, ioaddr + MTL_LOW_CREDX_BASE_ADDR(queue));
 }
 
 static void dwmac4_dump_regs(struct mac_device_info *hw, u32 *reg_space)
@@ -280,22 +280,22 @@ static void dwmac4_dump_regs(struct mac_device_info *hw, u32 *reg_space)
 	int i;
 
 	for (i = 0; i < GMAC_REG_NUM; i++)
-		reg_space[i] = readl(ioaddr + i * 4);
+		reg_space[i] = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:283", ioaddr + i * 4);
 }
 
 static int dwmac4_rx_ipc_enable(struct mac_device_info *hw)
 {
 	void __iomem *ioaddr = hw->pcsr;
-	u32 value = readl(ioaddr + GMAC_CONFIG);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:289", ioaddr + GMAC_CONFIG);
 
 	if (hw->rx_csum)
 		value |= GMAC_CONFIG_IPC;
 	else
 		value &= ~GMAC_CONFIG_IPC;
 
-	writel(value, ioaddr + GMAC_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:296", value, ioaddr + GMAC_CONFIG);
 
-	value = readl(ioaddr + GMAC_CONFIG);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:298", ioaddr + GMAC_CONFIG);
 
 	return !!(value & GMAC_CONFIG_IPC);
 }
@@ -317,11 +317,11 @@ static void dwmac4_pmt(struct mac_device_info *hw, unsigned long mode)
 
 	if (pmt) {
 		/* The receiver must be enabled for WOL before powering down */
-		config = readl(ioaddr + GMAC_CONFIG);
+		config = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:320", ioaddr + GMAC_CONFIG);
 		config |= GMAC_CONFIG_RE;
-		writel(config, ioaddr + GMAC_CONFIG);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:322", config, ioaddr + GMAC_CONFIG);
 	}
-	writel(pmt, ioaddr + GMAC_PMT);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:324", pmt, ioaddr + GMAC_PMT);
 }
 
 static void dwmac4_set_umac_addr(struct mac_device_info *hw,
@@ -352,13 +352,13 @@ static void dwmac4_set_eee_mode(struct mac_device_info *hw,
 	 * receive path and instruct the transmit to enter in LPI
 	 * state.
 	 */
-	value = readl(ioaddr + GMAC4_LPI_CTRL_STATUS);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:355", ioaddr + GMAC4_LPI_CTRL_STATUS);
 	value |= GMAC4_LPI_CTRL_STATUS_LPIEN | GMAC4_LPI_CTRL_STATUS_LPITXA;
 
 	if (en_tx_lpi_clockgating)
 		value |= GMAC4_LPI_CTRL_STATUS_LPITCSE;
 
-	writel(value, ioaddr + GMAC4_LPI_CTRL_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:361", value, ioaddr + GMAC4_LPI_CTRL_STATUS);
 }
 
 static void dwmac4_reset_eee_mode(struct mac_device_info *hw)
@@ -366,9 +366,9 @@ static void dwmac4_reset_eee_mode(struct mac_device_info *hw)
 	void __iomem *ioaddr = hw->pcsr;
 	u32 value;
 
-	value = readl(ioaddr + GMAC4_LPI_CTRL_STATUS);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:369", ioaddr + GMAC4_LPI_CTRL_STATUS);
 	value &= ~(GMAC4_LPI_CTRL_STATUS_LPIEN | GMAC4_LPI_CTRL_STATUS_LPITXA);
-	writel(value, ioaddr + GMAC4_LPI_CTRL_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:371", value, ioaddr + GMAC4_LPI_CTRL_STATUS);
 }
 
 static void dwmac4_set_eee_pls(struct mac_device_info *hw, int link)
@@ -376,14 +376,14 @@ static void dwmac4_set_eee_pls(struct mac_device_info *hw, int link)
 	void __iomem *ioaddr = hw->pcsr;
 	u32 value;
 
-	value = readl(ioaddr + GMAC4_LPI_CTRL_STATUS);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:379", ioaddr + GMAC4_LPI_CTRL_STATUS);
 
 	if (link)
 		value |= GMAC4_LPI_CTRL_STATUS_PLS;
 	else
 		value &= ~GMAC4_LPI_CTRL_STATUS_PLS;
 
-	writel(value, ioaddr + GMAC4_LPI_CTRL_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:386", value, ioaddr + GMAC4_LPI_CTRL_STATUS);
 }
 
 static void dwmac4_set_eee_lpi_entry_timer(struct mac_device_info *hw, int et)
@@ -393,10 +393,10 @@ static void dwmac4_set_eee_lpi_entry_timer(struct mac_device_info *hw, int et)
 	int regval;
 
 	/* Program LPI entry timer value into register */
-	writel(value, ioaddr + GMAC4_LPI_ENTRY_TIMER);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:396", value, ioaddr + GMAC4_LPI_ENTRY_TIMER);
 
 	/* Enable/disable LPI entry timer */
-	regval = readl(ioaddr + GMAC4_LPI_CTRL_STATUS);
+	regval = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:399", ioaddr + GMAC4_LPI_CTRL_STATUS);
 	regval |= GMAC4_LPI_CTRL_STATUS_LPIEN | GMAC4_LPI_CTRL_STATUS_LPITXA;
 
 	if (et)
@@ -404,7 +404,7 @@ static void dwmac4_set_eee_lpi_entry_timer(struct mac_device_info *hw, int et)
 	else
 		regval &= ~GMAC4_LPI_CTRL_STATUS_LPIATE;
 
-	writel(regval, ioaddr + GMAC4_LPI_CTRL_STATUS);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:407", regval, ioaddr + GMAC4_LPI_CTRL_STATUS);
 }
 
 static void dwmac4_set_eee_timer(struct mac_device_info *hw, int ls, int tw)
@@ -419,7 +419,7 @@ static void dwmac4_set_eee_timer(struct mac_device_info *hw, int ls, int tw)
 	 * TW: minimum time (us) for which the core waits
 	 *  after it has stopped transmitting the LPI pattern.
 	 */
-	writel(value, ioaddr + GMAC4_LPI_TIMER_CTRL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:422", value, ioaddr + GMAC4_LPI_TIMER_CTRL);
 }
 
 static void dwmac4_write_single_vlan(struct net_device *dev, u16 vid)
@@ -427,11 +427,11 @@ static void dwmac4_write_single_vlan(struct net_device *dev, u16 vid)
 	void __iomem *ioaddr = (void __iomem *)dev->base_addr;
 	u32 val;
 
-	val = readl(ioaddr + GMAC_VLAN_TAG);
+	val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:430", ioaddr + GMAC_VLAN_TAG);
 	val &= ~GMAC_VLAN_TAG_VID;
 	val |= GMAC_VLAN_TAG_ETV | vid;
 
-	writel(val, ioaddr + GMAC_VLAN_TAG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:434", val, ioaddr + GMAC_VLAN_TAG);
 }
 
 static int dwmac4_write_vlan_filter(struct net_device *dev,
@@ -445,18 +445,18 @@ static int dwmac4_write_vlan_filter(struct net_device *dev,
 	if (index >= hw->num_vlan)
 		return -EINVAL;
 
-	writel(data, ioaddr + GMAC_VLAN_TAG_DATA);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:448", data, ioaddr + GMAC_VLAN_TAG_DATA);
 
-	val = readl(ioaddr + GMAC_VLAN_TAG);
+	val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:450", ioaddr + GMAC_VLAN_TAG);
 	val &= ~(GMAC_VLAN_TAG_CTRL_OFS_MASK |
 		GMAC_VLAN_TAG_CTRL_CT |
 		GMAC_VLAN_TAG_CTRL_OB);
 	val |= (index << GMAC_VLAN_TAG_CTRL_OFS_SHIFT) | GMAC_VLAN_TAG_CTRL_OB;
 
-	writel(val, ioaddr + GMAC_VLAN_TAG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:456", val, ioaddr + GMAC_VLAN_TAG);
 
 	for (i = 0; i < timeout; i++) {
-		val = readl(ioaddr + GMAC_VLAN_TAG);
+		val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:459", ioaddr + GMAC_VLAN_TAG);
 		if (!(val & GMAC_VLAN_TAG_CTRL_OB))
 			return 0;
 		udelay(1);
@@ -586,12 +586,12 @@ static void dwmac4_vlan_promisc_enable(struct net_device *dev,
 		}
 	}
 
-	hash = readl(ioaddr + GMAC_VLAN_HASH_TABLE);
+	hash = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:589", ioaddr + GMAC_VLAN_HASH_TABLE);
 	if (hash & GMAC_VLAN_VLHT) {
-		value = readl(ioaddr + GMAC_VLAN_TAG);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:591", ioaddr + GMAC_VLAN_TAG);
 		if (value & GMAC_VLAN_VTHM) {
 			value &= ~GMAC_VLAN_VTHM;
-			writel(value, ioaddr + GMAC_VLAN_TAG);
+			pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:594", value, ioaddr + GMAC_VLAN_TAG);
 		}
 	}
 }
@@ -619,11 +619,11 @@ static void dwmac4_restore_hw_vlan_rx_fltr(struct net_device *dev,
 		}
 	}
 
-	hash = readl(ioaddr + GMAC_VLAN_HASH_TABLE);
+	hash = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:622", ioaddr + GMAC_VLAN_HASH_TABLE);
 	if (hash & GMAC_VLAN_VLHT) {
-		value = readl(ioaddr + GMAC_VLAN_TAG);
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:624", ioaddr + GMAC_VLAN_TAG);
 		value |= GMAC_VLAN_VTHM;
-		writel(value, ioaddr + GMAC_VLAN_TAG);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:626", value, ioaddr + GMAC_VLAN_TAG);
 	}
 }
 
@@ -639,7 +639,7 @@ static void dwmac4_set_filter(struct mac_device_info *hw,
 
 	memset(mc_filter, 0, sizeof(mc_filter));
 
-	value = readl(ioaddr + GMAC_PACKET_FILTER);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:642", ioaddr + GMAC_PACKET_FILTER);
 	value &= ~GMAC_PACKET_FILTER_HMC;
 	value &= ~GMAC_PACKET_FILTER_HPF;
 	value &= ~GMAC_PACKET_FILTER_PCF;
@@ -649,11 +649,11 @@ static void dwmac4_set_filter(struct mac_device_info *hw,
 	if (dev->flags & IFF_PROMISC) {
 		/* VLAN Tag Filter Fail Packets Queuing */
 		if (hw->vlan_fail_q_en) {
-			value = readl(ioaddr + GMAC_RXQ_CTRL4);
+			value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:652", ioaddr + GMAC_RXQ_CTRL4);
 			value &= ~GMAC_RXQCTRL_VFFQ_MASK;
 			value |= GMAC_RXQCTRL_VFFQE |
 				 (hw->vlan_fail_q << GMAC_RXQCTRL_VFFQ_SHIFT);
-			writel(value, ioaddr + GMAC_RXQ_CTRL4);
+			pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:656", value, ioaddr + GMAC_RXQ_CTRL4);
 			value = GMAC_PACKET_FILTER_PR | GMAC_PACKET_FILTER_RA;
 		} else {
 			value = GMAC_PACKET_FILTER_PR | GMAC_PACKET_FILTER_PCF;
@@ -688,7 +688,7 @@ static void dwmac4_set_filter(struct mac_device_info *hw,
 	}
 
 	for (i = 0; i < numhashregs; i++)
-		writel(mc_filter[i], ioaddr + GMAC_HASH_TAB(i));
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:691", mc_filter[i], ioaddr + GMAC_HASH_TAB(i));
 
 	value |= GMAC_PACKET_FILTER_HPF;
 
@@ -708,8 +708,8 @@ static void dwmac4_set_filter(struct mac_device_info *hw,
 		}
 
 		while (reg < GMAC_MAX_PERFECT_ADDRESSES) {
-			writel(0, ioaddr + GMAC_ADDR_HIGH(reg));
-			writel(0, ioaddr + GMAC_ADDR_LOW(reg));
+			pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:711", 0, ioaddr + GMAC_ADDR_HIGH(reg));
+			pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:712", 0, ioaddr + GMAC_ADDR_LOW(reg));
 			reg++;
 		}
 	}
@@ -718,7 +718,7 @@ static void dwmac4_set_filter(struct mac_device_info *hw,
 	if (dev->features & NETIF_F_HW_VLAN_CTAG_FILTER)
 		value |= GMAC_PACKET_FILTER_VTFE;
 
-	writel(value, ioaddr + GMAC_PACKET_FILTER);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:721", value, ioaddr + GMAC_PACKET_FILTER);
 
 	if (dev->flags & IFF_PROMISC && !hw->vlan_fail_q_en) {
 		if (!hw->promisc) {
@@ -748,7 +748,7 @@ static void dwmac4_flow_ctrl(struct mac_device_info *hw, unsigned int duplex,
 	} else {
 		pr_debug("\tReceive Flow-Control OFF\n");
 	}
-	writel(flow, ioaddr + GMAC_RX_FLOW_CTRL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:751", flow, ioaddr + GMAC_RX_FLOW_CTRL);
 
 	if (fc & FLOW_TX) {
 		pr_debug("\tTransmit Flow-Control ON\n");
@@ -763,11 +763,11 @@ static void dwmac4_flow_ctrl(struct mac_device_info *hw, unsigned int duplex,
 				flow |=
 				(pause_time << GMAC_TX_FLOW_CTRL_PT_SHIFT);
 
-			writel(flow, ioaddr + GMAC_QX_TX_FLOW_CTRL(queue));
+			pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:766", flow, ioaddr + GMAC_QX_TX_FLOW_CTRL(queue));
 		}
 	} else {
 		for (queue = 0; queue < tx_cnt; queue++)
-			writel(0, ioaddr + GMAC_QX_TX_FLOW_CTRL(queue));
+			pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:770", 0, ioaddr + GMAC_QX_TX_FLOW_CTRL(queue));
 	}
 }
 
@@ -792,7 +792,7 @@ static void dwmac4_phystatus(void __iomem *ioaddr, struct stmmac_extra_stats *x)
 {
 	u32 status;
 
-	status = readl(ioaddr + GMAC_PHYIF_CONTROL_STATUS);
+	status = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:795", ioaddr + GMAC_PHYIF_CONTROL_STATUS);
 	x->irq_rgmii_n++;
 
 	/* Check the link status */
@@ -826,16 +826,16 @@ static int dwmac4_irq_mtl_status(struct mac_device_info *hw, u32 chan)
 	u32 mtl_int_qx_status;
 	int ret = 0;
 
-	mtl_int_qx_status = readl(ioaddr + MTL_INT_STATUS);
+	mtl_int_qx_status = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:829", ioaddr + MTL_INT_STATUS);
 
 	/* Check MTL Interrupt */
 	if (mtl_int_qx_status & MTL_INT_QX(chan)) {
 		/* read Queue x Interrupt status */
-		u32 status = readl(ioaddr + MTL_CHAN_INT_CTRL(chan));
+		u32 status = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:834", ioaddr + MTL_CHAN_INT_CTRL(chan));
 
 		if (status & MTL_RX_OVERFLOW_INT) {
 			/*  clear Interrupt */
-			writel(status | MTL_RX_OVERFLOW_INT,
+			pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:838", status | MTL_RX_OVERFLOW_INT,
 			       ioaddr + MTL_CHAN_INT_CTRL(chan));
 			ret = CORE_IRQ_MTL_RX_OVERFLOW;
 		}
@@ -848,8 +848,8 @@ static int dwmac4_irq_status(struct mac_device_info *hw,
 			     struct stmmac_extra_stats *x)
 {
 	void __iomem *ioaddr = hw->pcsr;
-	u32 intr_status = readl(ioaddr + GMAC_INT_STATUS);
-	u32 intr_enable = readl(ioaddr + GMAC_INT_EN);
+	u32 intr_status = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:851", ioaddr + GMAC_INT_STATUS);
+	u32 intr_enable = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:852", ioaddr + GMAC_INT_EN);
 	int ret = 0;
 
 	/* Discard disabled bits */
@@ -864,14 +864,14 @@ static int dwmac4_irq_status(struct mac_device_info *hw,
 		x->mmc_rx_csum_offload_irq_n++;
 	/* Clear the PMT bits 5 and 6 by reading the PMT status reg */
 	if (unlikely(intr_status & pmt_irq)) {
-		readl(ioaddr + GMAC_PMT);
+		pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:867", ioaddr + GMAC_PMT);
 		x->irq_receive_pmt_irq_n++;
 	}
 
 	/* MAC tx/rx EEE LPI entry/exit interrupts */
 	if (intr_status & lpi_irq) {
 		/* Clear LPI interrupt by reading MAC_LPI_Control_Status */
-		u32 status = readl(ioaddr + GMAC4_LPI_CTRL_STATUS);
+		u32 status = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:874", ioaddr + GMAC4_LPI_CTRL_STATUS);
 
 		if (status & GMAC4_LPI_CTRL_STATUS_TLPIEN) {
 			ret |= CORE_IRQ_TX_PATH_IN_LPI_MODE;
@@ -901,7 +901,7 @@ static void dwmac4_debug(void __iomem *ioaddr, struct stmmac_extra_stats *x,
 	u32 queue;
 
 	for (queue = 0; queue < tx_queues; queue++) {
-		value = readl(ioaddr + MTL_CHAN_TX_DEBUG(queue));
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:904", ioaddr + MTL_CHAN_TX_DEBUG(queue));
 
 		if (value & MTL_DEBUG_TXSTSFSTS)
 			x->mtl_tx_status_fifo_full++;
@@ -926,7 +926,7 @@ static void dwmac4_debug(void __iomem *ioaddr, struct stmmac_extra_stats *x,
 	}
 
 	for (queue = 0; queue < rx_queues; queue++) {
-		value = readl(ioaddr + MTL_CHAN_RX_DEBUG(queue));
+		value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:929", ioaddr + MTL_CHAN_RX_DEBUG(queue));
 
 		if (value & MTL_DEBUG_RXFSTS_MASK) {
 			u32 rxfsts = (value & MTL_DEBUG_RXFSTS_MASK)
@@ -959,7 +959,7 @@ static void dwmac4_debug(void __iomem *ioaddr, struct stmmac_extra_stats *x,
 	}
 
 	/* GMAC debug */
-	value = readl(ioaddr + GMAC_DEBUG);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:962", ioaddr + GMAC_DEBUG);
 
 	if (value & GMAC_DEBUG_TFCSTS_MASK) {
 		u32 tfcsts = (value & GMAC_DEBUG_TFCSTS_MASK)
@@ -985,14 +985,14 @@ static void dwmac4_debug(void __iomem *ioaddr, struct stmmac_extra_stats *x,
 
 static void dwmac4_set_mac_loopback(void __iomem *ioaddr, bool enable)
 {
-	u32 value = readl(ioaddr + GMAC_CONFIG);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:988", ioaddr + GMAC_CONFIG);
 
 	if (enable)
 		value |= GMAC_CONFIG_LM;
 	else
 		value &= ~GMAC_CONFIG_LM;
 
-	writel(value, ioaddr + GMAC_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:995", value, ioaddr + GMAC_CONFIG);
 }
 
 static void dwmac4_update_vlan_hash(struct mac_device_info *hw, u32 hash,
@@ -1001,9 +1001,9 @@ static void dwmac4_update_vlan_hash(struct mac_device_info *hw, u32 hash,
 	void __iomem *ioaddr = hw->pcsr;
 	u32 value;
 
-	writel(hash, ioaddr + GMAC_VLAN_HASH_TABLE);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1004", hash, ioaddr + GMAC_VLAN_HASH_TABLE);
 
-	value = readl(ioaddr + GMAC_VLAN_TAG);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1006", ioaddr + GMAC_VLAN_TAG);
 
 	if (hash) {
 		value |= GMAC_VLAN_VTHM | GMAC_VLAN_ETV;
@@ -1013,7 +1013,7 @@ static void dwmac4_update_vlan_hash(struct mac_device_info *hw, u32 hash,
 			value |= GMAC_VLAN_DOVLTC;
 		}
 
-		writel(value, ioaddr + GMAC_VLAN_TAG);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1016", value, ioaddr + GMAC_VLAN_TAG);
 	} else if (perfect_match) {
 		u32 value = GMAC_VLAN_ETV;
 
@@ -1023,25 +1023,25 @@ static void dwmac4_update_vlan_hash(struct mac_device_info *hw, u32 hash,
 			value |= GMAC_VLAN_DOVLTC;
 		}
 
-		writel(value | perfect_match, ioaddr + GMAC_VLAN_TAG);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1026", value | perfect_match, ioaddr + GMAC_VLAN_TAG);
 	} else {
 		value &= ~(GMAC_VLAN_VTHM | GMAC_VLAN_ETV);
 		value &= ~(GMAC_VLAN_EDVLP | GMAC_VLAN_ESVL);
 		value &= ~GMAC_VLAN_DOVLTC;
 		value &= ~GMAC_VLAN_VID;
 
-		writel(value, ioaddr + GMAC_VLAN_TAG);
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1033", value, ioaddr + GMAC_VLAN_TAG);
 	}
 }
 
 static void dwmac4_sarc_configure(void __iomem *ioaddr, int val)
 {
-	u32 value = readl(ioaddr + GMAC_CONFIG);
+	u32 value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1039", ioaddr + GMAC_CONFIG);
 
 	value &= ~GMAC_CONFIG_SARC;
 	value |= val << GMAC_CONFIG_SARC_SHIFT;
 
-	writel(value, ioaddr + GMAC_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1044", value, ioaddr + GMAC_CONFIG);
 }
 
 static void dwmac4_enable_vlan(struct mac_device_info *hw, u32 type)
@@ -1049,12 +1049,12 @@ static void dwmac4_enable_vlan(struct mac_device_info *hw, u32 type)
 	void __iomem *ioaddr = hw->pcsr;
 	u32 value;
 
-	value = readl(ioaddr + GMAC_VLAN_INCL);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1052", ioaddr + GMAC_VLAN_INCL);
 	value |= GMAC_VLAN_VLTI;
 	value |= GMAC_VLAN_CSVL; /* Only use SVLAN */
 	value &= ~GMAC_VLAN_VLC;
 	value |= (type << GMAC_VLAN_VLC_SHIFT) & GMAC_VLAN_VLC;
-	writel(value, ioaddr + GMAC_VLAN_INCL);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1057", value, ioaddr + GMAC_VLAN_INCL);
 }
 
 static void dwmac4_set_arp_offload(struct mac_device_info *hw, bool en,
@@ -1063,14 +1063,14 @@ static void dwmac4_set_arp_offload(struct mac_device_info *hw, bool en,
 	void __iomem *ioaddr = hw->pcsr;
 	u32 value;
 
-	writel(addr, ioaddr + GMAC_ARP_ADDR);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1066", addr, ioaddr + GMAC_ARP_ADDR);
 
-	value = readl(ioaddr + GMAC_CONFIG);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1068", ioaddr + GMAC_CONFIG);
 	if (en)
 		value |= GMAC_CONFIG_ARPEN;
 	else
 		value &= ~GMAC_CONFIG_ARPEN;
-	writel(value, ioaddr + GMAC_CONFIG);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1073", value, ioaddr + GMAC_CONFIG);
 }
 
 static int dwmac4_config_l3_filter(struct mac_device_info *hw, u32 filter_no,
@@ -1080,11 +1080,11 @@ static int dwmac4_config_l3_filter(struct mac_device_info *hw, u32 filter_no,
 	void __iomem *ioaddr = hw->pcsr;
 	u32 value;
 
-	value = readl(ioaddr + GMAC_PACKET_FILTER);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1083", ioaddr + GMAC_PACKET_FILTER);
 	value |= GMAC_PACKET_FILTER_IPFE;
-	writel(value, ioaddr + GMAC_PACKET_FILTER);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1085", value, ioaddr + GMAC_PACKET_FILTER);
 
-	value = readl(ioaddr + GMAC_L3L4_CTRL(filter_no));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1087", ioaddr + GMAC_L3L4_CTRL(filter_no));
 
 	/* For IPv6 not both SA/DA filters can be active */
 	if (ipv6) {
@@ -1113,16 +1113,16 @@ static int dwmac4_config_l3_filter(struct mac_device_info *hw, u32 filter_no,
 		}
 	}
 
-	writel(value, ioaddr + GMAC_L3L4_CTRL(filter_no));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1116", value, ioaddr + GMAC_L3L4_CTRL(filter_no));
 
 	if (sa) {
-		writel(match, ioaddr + GMAC_L3_ADDR0(filter_no));
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1119", match, ioaddr + GMAC_L3_ADDR0(filter_no));
 	} else {
-		writel(match, ioaddr + GMAC_L3_ADDR1(filter_no));
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1121", match, ioaddr + GMAC_L3_ADDR1(filter_no));
 	}
 
 	if (!en)
-		writel(0, ioaddr + GMAC_L3L4_CTRL(filter_no));
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1125", 0, ioaddr + GMAC_L3L4_CTRL(filter_no));
 
 	return 0;
 }
@@ -1134,11 +1134,11 @@ static int dwmac4_config_l4_filter(struct mac_device_info *hw, u32 filter_no,
 	void __iomem *ioaddr = hw->pcsr;
 	u32 value;
 
-	value = readl(ioaddr + GMAC_PACKET_FILTER);
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1137", ioaddr + GMAC_PACKET_FILTER);
 	value |= GMAC_PACKET_FILTER_IPFE;
-	writel(value, ioaddr + GMAC_PACKET_FILTER);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1139", value, ioaddr + GMAC_PACKET_FILTER);
 
-	value = readl(ioaddr + GMAC_L3L4_CTRL(filter_no));
+	value = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1141", ioaddr + GMAC_L3L4_CTRL(filter_no));
 	if (udp) {
 		value |= GMAC_L4PEN0;
 	} else {
@@ -1157,7 +1157,7 @@ static int dwmac4_config_l4_filter(struct mac_device_info *hw, u32 filter_no,
 			value |= GMAC_L4DPIM0;
 	}
 
-	writel(value, ioaddr + GMAC_L3L4_CTRL(filter_no));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1160", value, ioaddr + GMAC_L3L4_CTRL(filter_no));
 
 	if (sa) {
 		value = match & GMAC_L4SP0;
@@ -1165,10 +1165,10 @@ static int dwmac4_config_l4_filter(struct mac_device_info *hw, u32 filter_no,
 		value = (match << GMAC_L4DP0_SHIFT) & GMAC_L4DP0;
 	}
 
-	writel(value, ioaddr + GMAC_L4_ADDR(filter_no));
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1168", value, ioaddr + GMAC_L4_ADDR(filter_no));
 
 	if (!en)
-		writel(0, ioaddr + GMAC_L3L4_CTRL(filter_no));
+		pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1171", 0, ioaddr + GMAC_L3L4_CTRL(filter_no));
 
 	return 0;
 }
@@ -1319,7 +1319,7 @@ static u32 dwmac4_get_num_vlan(void __iomem *ioaddr)
 {
 	u32 val, num_vlan;
 
-	val = readl(ioaddr + GMAC_HW_FEATURE3);
+	val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac4_core.c:1322", ioaddr + GMAC_HW_FEATURE3);
 	switch (val & GMAC_HW_FEAT_NRVF) {
 	case 0:
 		num_vlan = 1;

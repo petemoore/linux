@@ -65,19 +65,19 @@ static void bad_io_access(unsigned long port, const char *access)
 #endif
 
 #ifndef mmio_read16be
-#define mmio_read16be(addr) swab16(readw(addr))
-#define mmio_read32be(addr) swab32(readl(addr))
-#define mmio_read64be(addr) swab64(readq(addr))
+#define mmio_read16be(addr) swab16(pete_readw("lib/iomap.c:68", addr))
+#define mmio_read32be(addr) swab32(pete_readl("lib/iomap.c:69", addr))
+#define mmio_read64be(addr) swab64(pete_readq("lib/iomap.c:70", addr))
 #endif
 
 unsigned int ioread8(const void __iomem *addr)
 {
-	IO_COND(addr, return inb(port), return readb(addr));
+	IO_COND(addr, return inb(port), return pete_readb("lib/iomap.c:75", addr));
 	return 0xff;
 }
 unsigned int ioread16(const void __iomem *addr)
 {
-	IO_COND(addr, return inw(port), return readw(addr));
+	IO_COND(addr, return inw(port), return pete_readw("lib/iomap.c:80", addr));
 	return 0xffff;
 }
 unsigned int ioread16be(const void __iomem *addr)
@@ -87,7 +87,7 @@ unsigned int ioread16be(const void __iomem *addr)
 }
 unsigned int ioread32(const void __iomem *addr)
 {
-	IO_COND(addr, return inl(port), return readl(addr));
+	IO_COND(addr, return inl(port), return pete_readl("lib/iomap.c:90", addr));
 	return 0xffffffff;
 }
 unsigned int ioread32be(const void __iomem *addr)
@@ -144,13 +144,13 @@ static u64 pio_read64be_hi_lo(unsigned long port)
 
 u64 ioread64_lo_hi(const void __iomem *addr)
 {
-	IO_COND(addr, return pio_read64_lo_hi(port), return readq(addr));
+	IO_COND(addr, return pio_read64_lo_hi(port), return pete_readq("lib/iomap.c:147", addr));
 	return 0xffffffffffffffffULL;
 }
 
 u64 ioread64_hi_lo(const void __iomem *addr)
 {
-	IO_COND(addr, return pio_read64_hi_lo(port), return readq(addr));
+	IO_COND(addr, return pio_read64_hi_lo(port), return pete_readq("lib/iomap.c:153", addr));
 	return 0xffffffffffffffffULL;
 }
 
@@ -181,18 +181,18 @@ EXPORT_SYMBOL(ioread64be_hi_lo);
 #endif
 
 #ifndef mmio_write16be
-#define mmio_write16be(val,port) writew(swab16(val),port)
-#define mmio_write32be(val,port) writel(swab32(val),port)
-#define mmio_write64be(val,port) writeq(swab64(val),port)
+#define mmio_write16be(val,port) pete_writew("lib/iomap.c:184", swab16(val),port)
+#define mmio_write32be(val,port) pete_writel("lib/iomap.c:185", swab32(val),port)
+#define mmio_write64be(val,port) pete_writeq("lib/iomap.c:186", swab64(val),port)
 #endif
 
 void iowrite8(u8 val, void __iomem *addr)
 {
-	IO_COND(addr, outb(val,port), writeb(val, addr));
+	IO_COND(addr, outb(val,port), pete_writeb("lib/iomap.c:191", val, addr));
 }
 void iowrite16(u16 val, void __iomem *addr)
 {
-	IO_COND(addr, outw(val,port), writew(val, addr));
+	IO_COND(addr, outw(val,port), pete_writew("lib/iomap.c:195", val, addr));
 }
 void iowrite16be(u16 val, void __iomem *addr)
 {
@@ -200,7 +200,7 @@ void iowrite16be(u16 val, void __iomem *addr)
 }
 void iowrite32(u32 val, void __iomem *addr)
 {
-	IO_COND(addr, outl(val,port), writel(val, addr));
+	IO_COND(addr, outl(val,port), pete_writel("lib/iomap.c:203", val, addr));
 }
 void iowrite32be(u32 val, void __iomem *addr)
 {
@@ -240,13 +240,13 @@ static void pio_write64be_hi_lo(u64 val, unsigned long port)
 void iowrite64_lo_hi(u64 val, void __iomem *addr)
 {
 	IO_COND(addr, pio_write64_lo_hi(val, port),
-		writeq(val, addr));
+		pete_writeq("lib/iomap.c:243", val, addr));
 }
 
 void iowrite64_hi_lo(u64 val, void __iomem *addr)
 {
 	IO_COND(addr, pio_write64_hi_lo(val, port),
-		writeq(val, addr));
+		pete_writeq("lib/iomap.c:249", val, addr));
 }
 
 void iowrite64be_lo_hi(u64 val, void __iomem *addr)

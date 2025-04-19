@@ -288,8 +288,8 @@ static int __qlcnic_set_win_base(struct qlcnic_adapter *adapter, u32 addr)
 
 	base = adapter->ahw->pci_base0 +
 	       QLC_83XX_CRB_WIN_FUNC(adapter->ahw->pci_func);
-	writel(addr, base);
-	val = readl(base);
+	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:291", addr, base);
+	val = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:292", base);
 	if (val != addr)
 		return -EIO;
 
@@ -415,13 +415,13 @@ int qlcnic_83xx_setup_intr(struct qlcnic_adapter *adapter)
 
 static inline void qlcnic_83xx_clear_legacy_intr_mask(struct qlcnic_adapter *adapter)
 {
-	writel(0, adapter->tgt_mask_reg);
+	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:418", 0, adapter->tgt_mask_reg);
 }
 
 static inline void qlcnic_83xx_set_legacy_intr_mask(struct qlcnic_adapter *adapter)
 {
 	if (adapter->tgt_mask_reg)
-		writel(1, adapter->tgt_mask_reg);
+		pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:424", 1, adapter->tgt_mask_reg);
 }
 
 static inline void qlcnic_83xx_enable_legacy_msix_mbx_intr(struct qlcnic_adapter
@@ -435,7 +435,7 @@ static inline void qlcnic_83xx_enable_legacy_msix_mbx_intr(struct qlcnic_adapter
 	 * BAR offset for Interrupt Source Register
 	 */
 	mask = QLCRDX(adapter->ahw, QLCNIC_DEF_INT_MASK);
-	writel(0, adapter->ahw->pci_base0 + mask);
+	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:438", 0, adapter->ahw->pci_base0 + mask);
 }
 
 void qlcnic_83xx_disable_mbx_intr(struct qlcnic_adapter *adapter)
@@ -443,7 +443,7 @@ void qlcnic_83xx_disable_mbx_intr(struct qlcnic_adapter *adapter)
 	u32 mask;
 
 	mask = QLCRDX(adapter->ahw, QLCNIC_DEF_INT_MASK);
-	writel(1, adapter->ahw->pci_base0 + mask);
+	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:446", 1, adapter->ahw->pci_base0 + mask);
 	QLCWRX(adapter->ahw, QLCNIC_MBX_INTR_ENBL, 0);
 }
 
@@ -456,7 +456,7 @@ static inline void qlcnic_83xx_get_mbx_data(struct qlcnic_adapter *adapter,
 		return;
 
 	for (i = 0; i < cmd->rsp.num; i++)
-		cmd->rsp.arg[i] = readl(QLCNIC_MBX_FW(adapter->ahw, i));
+		cmd->rsp.arg[i] = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:459", QLCNIC_MBX_FW(adapter->ahw, i));
 }
 
 irqreturn_t qlcnic_83xx_clear_legacy_intr(struct qlcnic_adapter *adapter)
@@ -465,7 +465,7 @@ irqreturn_t qlcnic_83xx_clear_legacy_intr(struct qlcnic_adapter *adapter)
 	struct qlcnic_hardware_context *ahw = adapter->ahw;
 	int retries = 0;
 
-	intr_val = readl(adapter->tgt_status_reg);
+	intr_val = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:468", adapter->tgt_status_reg);
 
 	if (!QLC_83XX_VALID_INTX_BIT31(intr_val))
 		return IRQ_NONE;
@@ -479,9 +479,9 @@ irqreturn_t qlcnic_83xx_clear_legacy_intr(struct qlcnic_adapter *adapter)
 
 	/* clear the interrupt trigger control register */
 	writel_relaxed(0, adapter->isr_int_vec);
-	intr_val = readl(adapter->isr_int_vec);
+	intr_val = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:482", adapter->isr_int_vec);
 	do {
-		intr_val = readl(adapter->tgt_status_reg);
+		intr_val = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:484", adapter->tgt_status_reg);
 		if (QLC_83XX_INTX_FUNC(intr_val) != ahw->pci_func)
 			break;
 		retries++;
@@ -508,7 +508,7 @@ static void qlcnic_83xx_poll_process_aen(struct qlcnic_adapter *adapter)
 	if (!(resp & QLCNIC_SET_OWNER))
 		goto out;
 
-	event = readl(QLCNIC_MBX_FW(adapter->ahw, 0));
+	event = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:511", QLCNIC_MBX_FW(adapter->ahw, 0));
 	if (event &  QLCNIC_MBX_ASYNC_EVENT) {
 		__qlcnic_83xx_process_aen(adapter);
 	} else {
@@ -641,7 +641,7 @@ int qlcnic_83xx_cam_lock(struct qlcnic_adapter *adapter)
 
 	addr = ahw->pci_base0 + QLC_83XX_SEM_LOCK_FUNC(ahw->pci_func);
 	do {
-		val = readl(addr);
+		val = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:644", addr);
 		if (val) {
 			/* write the function number to register */
 			QLC_SHARED_REG_WR32(adapter, QLCNIC_FLASH_LOCK_OWNER,
@@ -660,7 +660,7 @@ void qlcnic_83xx_cam_unlock(struct qlcnic_adapter *adapter)
 	struct qlcnic_hardware_context *ahw = adapter->ahw;
 
 	addr = ahw->pci_base0 + QLC_83XX_SEM_UNLOCK_FUNC(ahw->pci_func);
-	readl(addr);
+	pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:663", addr);
 }
 
 void qlcnic_83xx_read_crb(struct qlcnic_adapter *adapter, char *buf,
@@ -968,7 +968,7 @@ static void __qlcnic_83xx_process_aen(struct qlcnic_adapter *adapter)
 	int i;
 
 	for (i = 0; i < QLC_83XX_MBX_AEN_CNT; i++)
-		event[i] = readl(QLCNIC_MBX_FW(ahw, i));
+		event[i] = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:971", QLCNIC_MBX_FW(ahw, i));
 
 	switch (QLCNIC_MBX_RSP(event[0])) {
 
@@ -1020,7 +1020,7 @@ static void qlcnic_83xx_process_aen(struct qlcnic_adapter *adapter)
 	spin_lock_irqsave(&mbx->aen_lock, flags);
 	resp = QLCRDX(ahw, QLCNIC_FW_MBX_CTRL);
 	if (resp & QLCNIC_SET_OWNER) {
-		event = readl(QLCNIC_MBX_FW(ahw, 0));
+		event = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:1023", QLCNIC_MBX_FW(ahw, 0));
 		if (event &  QLCNIC_MBX_ASYNC_EVENT) {
 			__qlcnic_83xx_process_aen(adapter);
 		} else {
@@ -1996,9 +1996,9 @@ void qlcnic_83xx_config_ipaddr(struct qlcnic_adapter *adapter, __be32 ip,
 
 	/*
 	 * Adapter needs IP address in network byte order.
-	 * But hardware mailbox registers go through writel(), hence IP address
+	 * But hardware mailbox registers go through pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:1999", ), hence IP address
 	 * gets swapped on big endian architecture.
-	 * To negate swapping of writel() on big endian architecture
+	 * To negate swapping of pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:2001", ) on big endian architecture
 	 * use swab32(value).
 	 */
 
@@ -2356,7 +2356,7 @@ static irqreturn_t qlcnic_83xx_handle_aen(int irq, void *data)
 	if (!(resp & QLCNIC_SET_OWNER))
 		goto out;
 
-	event = readl(QLCNIC_MBX_FW(adapter->ahw, 0));
+	event = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:2359", QLCNIC_MBX_FW(adapter->ahw, 0));
 	if (event &  QLCNIC_MBX_ASYNC_EVENT) {
 		__qlcnic_83xx_process_aen(adapter);
 	} else {
@@ -2368,7 +2368,7 @@ static irqreturn_t qlcnic_83xx_handle_aen(int irq, void *data)
 
 out:
 	mask = QLCRDX(adapter->ahw, QLCNIC_DEF_INT_MASK);
-	writel(0, adapter->ahw->pci_base0 + mask);
+	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:2371", 0, adapter->ahw->pci_base0 + mask);
 	spin_unlock_irqrestore(&mbx->aen_lock, flags);
 	return IRQ_HANDLED;
 }
@@ -3225,7 +3225,7 @@ int qlcnic_83xx_test_link(struct qlcnic_adapter *adapter)
 	else
 		pci_func = ahw->pci_func;
 
-	state = readl(ahw->pci_base0 + QLC_83XX_LINK_STATE(pci_func));
+	state = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:3228", ahw->pci_base0 + QLC_83XX_LINK_STATE(pci_func));
 	if (!QLC_83xx_FUNC_VAL(state, pci_func)) {
 		dev_info(&adapter->pdev->dev, "link state down\n");
 		return config;
@@ -3962,16 +3962,16 @@ static void qlcnic_83xx_encode_mbx_cmd(struct qlcnic_adapter *adapter,
 
 	if (cmd->op_type != QLC_83XX_MBX_POST_BC_OP) {
 		mbx_cmd = cmd->req.arg[0];
-		writel(mbx_cmd, QLCNIC_MBX_HOST(ahw, 0));
+		pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:3965", mbx_cmd, QLCNIC_MBX_HOST(ahw, 0));
 		for (i = 1; i < cmd->req.num; i++)
-			writel(cmd->req.arg[i], QLCNIC_MBX_HOST(ahw, i));
+			pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:3967", cmd->req.arg[i], QLCNIC_MBX_HOST(ahw, i));
 	} else {
 		fw_hal_version = ahw->fw_hal_version;
 		hdr_size = sizeof(struct qlcnic_bc_hdr) / sizeof(u32);
 		total_size = cmd->pay_size + hdr_size;
 		tmp = QLCNIC_CMD_BC_EVENT_SETUP | total_size << 16;
 		mbx_cmd = tmp | fw_hal_version << 29;
-		writel(mbx_cmd, QLCNIC_MBX_HOST(ahw, 0));
+		pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:3974", mbx_cmd, QLCNIC_MBX_HOST(ahw, 0));
 
 		/* Back channel specific operations bits */
 		mbx_cmd = 0x1 | 1 << 4;
@@ -3979,12 +3979,12 @@ static void qlcnic_83xx_encode_mbx_cmd(struct qlcnic_adapter *adapter,
 		if (qlcnic_sriov_pf_check(adapter))
 			mbx_cmd |= cmd->func_num << 5;
 
-		writel(mbx_cmd, QLCNIC_MBX_HOST(ahw, 1));
+		pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:3982", mbx_cmd, QLCNIC_MBX_HOST(ahw, 1));
 
 		for (i = 2, j = 0; j < hdr_size; i++, j++)
-			writel(*(cmd->hdr++), QLCNIC_MBX_HOST(ahw, i));
+			pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:3985", *(cmd->hdr++), QLCNIC_MBX_HOST(ahw, i));
 		for (j = 0; j < cmd->pay_size; j++, i++)
-			writel(*(cmd->pay++), QLCNIC_MBX_HOST(ahw, i));
+			pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:3987", *(cmd->pay++), QLCNIC_MBX_HOST(ahw, i));
 	}
 }
 
@@ -4036,7 +4036,7 @@ static int qlcnic_83xx_check_mac_rcode(struct qlcnic_adapter *adapter,
 	u32 fw_data;
 
 	if (cmd->cmd_op == QLCNIC_CMD_CONFIG_MAC_VLAN) {
-		fw_data = readl(QLCNIC_MBX_FW(adapter->ahw, 2));
+		fw_data = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:4039", QLCNIC_MBX_FW(adapter->ahw, 2));
 		mac_cmd_rcode = (u8)fw_data;
 		if (mac_cmd_rcode == QLC_83XX_NO_NIC_RESOURCE ||
 		    mac_cmd_rcode == QLC_83XX_MAC_PRESENT ||
@@ -4057,7 +4057,7 @@ static void qlcnic_83xx_decode_mbx_rsp(struct qlcnic_adapter *adapter,
 	u8 mbx_err_code;
 	u32 fw_data;
 
-	fw_data = readl(QLCNIC_MBX_FW(ahw, 0));
+	fw_data = pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:4060", QLCNIC_MBX_FW(ahw, 0));
 	mbx_err_code = QLCNIC_MBX_STATUS(fw_data);
 	qlcnic_83xx_get_mbx_data(adapter, cmd);
 
@@ -4087,7 +4087,7 @@ static inline void qlcnic_dump_mailbox_registers(struct qlcnic_adapter *adapter)
 
 	offset = QLCRDX(ahw, QLCNIC_DEF_INT_MASK);
 	dev_info(&adapter->pdev->dev, "Mbx interrupt mask=0x%x, Mbx interrupt enable=0x%x, Host mbx control=0x%x, Fw mbx control=0x%x",
-		 readl(ahw->pci_base0 + offset),
+		 pete_readl("drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.c:4090", ahw->pci_base0 + offset),
 		 QLCRDX(ahw, QLCNIC_MBX_INTR_ENBL),
 		 QLCRDX(ahw, QLCNIC_HOST_MBX_CTRL),
 		 QLCRDX(ahw, QLCNIC_FW_MBX_CTRL));

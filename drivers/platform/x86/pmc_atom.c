@@ -202,12 +202,12 @@ static const struct pmc_data cht_data = {
 
 static inline u32 pmc_reg_read(struct pmc_dev *pmc, int reg_offset)
 {
-	return readl(pmc->regmap + reg_offset);
+	return pete_readl("drivers/platform/x86/pmc_atom.c:205", pmc->regmap + reg_offset);
 }
 
 static inline void pmc_reg_write(struct pmc_dev *pmc, int reg_offset, u32 val)
 {
-	writel(val, pmc->regmap + reg_offset);
+	pete_writel("drivers/platform/x86/pmc_atom.c:210", val, pmc->regmap + reg_offset);
 }
 
 int pmc_atom_read(int offset, u32 *value)

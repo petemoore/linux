@@ -963,7 +963,7 @@ void bnx2fc_arm_cq(struct bnx2fc_rport *tgt)
 	rx_db->doorbell_cq_cons = tgt->cq_cons_idx | (tgt->cq_curr_toggle_bit <<
 			FCOE_CQE_TOGGLE_BIT_SHIFT);
 	msg = *((u32 *)rx_db);
-	writel(cpu_to_le32(msg), tgt->ctx_base);
+	pete_writel("drivers/scsi/bnx2fc/bnx2fc_hwi.c:966", cpu_to_le32(msg), tgt->ctx_base);
 
 }
 
@@ -1436,7 +1436,7 @@ void bnx2fc_ring_doorbell(struct bnx2fc_rport *tgt)
 	sq_db->prod = tgt->sq_prod_idx |
 				(tgt->sq_curr_toggle_bit << 15);
 	msg = *((u32 *)sq_db);
-	writel(cpu_to_le32(msg), tgt->ctx_base);
+	pete_writel("drivers/scsi/bnx2fc/bnx2fc_hwi.c:1439", cpu_to_le32(msg), tgt->ctx_base);
 
 }
 

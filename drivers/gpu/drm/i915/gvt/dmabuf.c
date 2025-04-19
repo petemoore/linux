@@ -88,7 +88,7 @@ static int vgpu_gem_get_pages(
 		(fb_info->start >> PAGE_SHIFT);
 	for_each_sg(st->sgl, sg, page_num, i) {
 		dma_addr_t dma_addr =
-			GEN8_DECODE_PTE(readq(&gtt_entries[i]));
+			GEN8_DECODE_PTE(pete_readq("drivers/gpu/drm/i915/gvt/dmabuf.c:91", &gtt_entries[i]));
 		if (vgpu_pin_dma_address(vgpu, PAGE_SIZE, dma_addr)) {
 			ret = -EINVAL;
 			goto out;

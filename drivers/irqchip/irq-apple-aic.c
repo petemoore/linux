@@ -240,7 +240,7 @@ static void __exception_irq_entry aic_handle_irq(struct pt_regs *regs)
 		 * We cannot use a relaxed read here, as reads from DMA buffers
 		 * need to be ordered after the IRQ fires.
 		 */
-		event = readl(ic->base + AIC_EVENT);
+		event = pete_readl("drivers/irqchip/irq-apple-aic.c:243", ic->base + AIC_EVENT);
 		type = FIELD_GET(AIC_EVENT_TYPE, event);
 		irq = FIELD_GET(AIC_EVENT_NUM, event);
 
@@ -658,7 +658,7 @@ static void aic_handle_ipi(struct pt_regs *regs)
 	 * The mask read does not need to be ordered. Only we can change
 	 * our own mask anyway, so no races are possible here, as long as
 	 * we are properly in the interrupt handler (which is covered by
-	 * the barrier that is part of the top-level AIC handler's readl()).
+	 * the barrier that is part of the top-level AIC handler's pete_readl("drivers/irqchip/irq-apple-aic.c:661", )).
 	 */
 	enabled = atomic_read(this_cpu_ptr(&aic_vipi_enable));
 

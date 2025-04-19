@@ -41,11 +41,11 @@ void mxs_ssp_set_clk_rate(struct mxs_ssp *ssp, unsigned int rate)
 
 	ssp_sck = ssp_clk / clock_divide / (1 + clock_rate);
 
-	val = readl(ssp->base + HW_SSP_TIMING(ssp));
+	val = pete_readl("drivers/clk/mxs/clk-ssp.c:44", ssp->base + HW_SSP_TIMING(ssp));
 	val &= ~(BM_SSP_TIMING_CLOCK_DIVIDE | BM_SSP_TIMING_CLOCK_RATE);
 	val |= BF_SSP(clock_divide, TIMING_CLOCK_DIVIDE);
 	val |= BF_SSP(clock_rate, TIMING_CLOCK_RATE);
-	writel(val, ssp->base + HW_SSP_TIMING(ssp));
+	pete_writel("drivers/clk/mxs/clk-ssp.c:48", val, ssp->base + HW_SSP_TIMING(ssp));
 
 	ssp->clk_rate = ssp_sck;
 

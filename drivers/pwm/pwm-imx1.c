@@ -83,10 +83,10 @@ static int pwm_imx1_config(struct pwm_chip *chip,
 	 * both the prescaler (/1 .. /128) and then by CLKSEL
 	 * (/2 .. /16).
 	 */
-	max = readl(imx->mmio_base + MX1_PWMP);
+	max = pete_readl("drivers/pwm/pwm-imx1.c:86", imx->mmio_base + MX1_PWMP);
 	p = max * duty_ns / period_ns;
 
-	writel(max - p, imx->mmio_base + MX1_PWMS);
+	pete_writel("drivers/pwm/pwm-imx1.c:89", max - p, imx->mmio_base + MX1_PWMS);
 
 	return 0;
 }
@@ -101,9 +101,9 @@ static int pwm_imx1_enable(struct pwm_chip *chip, struct pwm_device *pwm)
 	if (ret < 0)
 		return ret;
 
-	value = readl(imx->mmio_base + MX1_PWMC);
+	value = pete_readl("drivers/pwm/pwm-imx1.c:104", imx->mmio_base + MX1_PWMC);
 	value |= MX1_PWMC_EN;
-	writel(value, imx->mmio_base + MX1_PWMC);
+	pete_writel("drivers/pwm/pwm-imx1.c:106", value, imx->mmio_base + MX1_PWMC);
 
 	return 0;
 }
@@ -113,9 +113,9 @@ static void pwm_imx1_disable(struct pwm_chip *chip, struct pwm_device *pwm)
 	struct pwm_imx1_chip *imx = to_pwm_imx1_chip(chip);
 	u32 value;
 
-	value = readl(imx->mmio_base + MX1_PWMC);
+	value = pete_readl("drivers/pwm/pwm-imx1.c:116", imx->mmio_base + MX1_PWMC);
 	value &= ~MX1_PWMC_EN;
-	writel(value, imx->mmio_base + MX1_PWMC);
+	pete_writel("drivers/pwm/pwm-imx1.c:118", value, imx->mmio_base + MX1_PWMC);
 
 	pwm_imx1_clk_disable_unprepare(chip);
 }

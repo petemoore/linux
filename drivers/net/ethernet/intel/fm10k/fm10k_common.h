@@ -19,7 +19,7 @@ u32 fm10k_read_reg(struct fm10k_hw *hw, int reg);
 do { \
 	u32 __iomem *hw_addr = READ_ONCE((hw)->hw_addr); \
 	if (!FM10K_REMOVED(hw_addr)) \
-		writel((val), &hw_addr[(reg)]); \
+		pete_writel("drivers/net/ethernet/intel/fm10k/fm10k_common.h:22", (val), &hw_addr[(reg)]); \
 } while (0)
 
 /* Switch register write operations, index using DWORDS */
@@ -27,7 +27,7 @@ do { \
 do { \
 	u32 __iomem *sw_addr = READ_ONCE((hw)->sw_addr); \
 	if (!FM10K_REMOVED(sw_addr)) \
-		writel((val), &sw_addr[(reg)]); \
+		pete_writel("drivers/net/ethernet/intel/fm10k/fm10k_common.h:30", (val), &sw_addr[(reg)]); \
 } while (0)
 
 /* read ctrl register which has no clear on read fields as PCIe flush */

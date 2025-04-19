@@ -157,9 +157,9 @@ static int ii20k_ao_insn_write(struct comedi_device *dev,
 		/* munge the offset binary data to 2's complement */
 		val = comedi_offset_munge(s, val);
 
-		writeb(val & 0xff, iobase + II20K_AO_LSB_REG(chan));
-		writeb((val >> 8) & 0xff, iobase + II20K_AO_MSB_REG(chan));
-		writeb(0x00, iobase + II20K_AO_STRB_REG(chan));
+		pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:160", val & 0xff, iobase + II20K_AO_LSB_REG(chan));
+		pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:161", (val >> 8) & 0xff, iobase + II20K_AO_MSB_REG(chan));
+		pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:162", 0x00, iobase + II20K_AO_STRB_REG(chan));
 	}
 
 	return insn->n;
@@ -173,7 +173,7 @@ static int ii20k_ai_eoc(struct comedi_device *dev,
 	void __iomem *iobase = ii20k_module_iobase(dev, s);
 	unsigned char status;
 
-	status = readb(iobase + II20K_AI_STATUS_REG);
+	status = pete_readb("drivers/comedi/drivers/ii_pci20kc.c:176", iobase + II20K_AI_STATUS_REG);
 	if ((status & II20K_AI_STATUS_INT) == 0)
 		return 0;
 	return -EBUSY;
@@ -189,34 +189,34 @@ static void ii20k_ai_setup(struct comedi_device *dev,
 	unsigned char val;
 
 	/* initialize module */
-	writeb(II20K_AI_CONF_ENA, iobase + II20K_AI_CONF_REG);
+	pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:192", II20K_AI_CONF_ENA, iobase + II20K_AI_CONF_REG);
 
 	/* software conversion */
-	writeb(0, iobase + II20K_AI_STATUS_CMD_REG);
+	pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:195", 0, iobase + II20K_AI_STATUS_CMD_REG);
 
 	/* set the time base for the settling time counter based on the gain */
 	val = (range < 3) ? II20K_AI_OPT_TIMEBASE(0) : II20K_AI_OPT_TIMEBASE(2);
-	writeb(val, iobase + II20K_AI_OPT_REG);
+	pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:199", val, iobase + II20K_AI_OPT_REG);
 
 	/* set the settling time counter based on the gain */
 	val = (range < 2) ? 0x58 : (range < 3) ? 0x93 : 0x99;
-	writeb(val, iobase + II20K_AI_SET_TIME_REG);
+	pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:203", val, iobase + II20K_AI_SET_TIME_REG);
 
 	/* set number of input channels */
-	writeb(1, iobase + II20K_AI_LAST_CHAN_ADDR_REG);
+	pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:206", 1, iobase + II20K_AI_LAST_CHAN_ADDR_REG);
 
 	/* set the channel list byte */
 	val = II20K_AI_CHANLIST_ONBOARD_ONLY |
 	      II20K_AI_CHANLIST_MUX_ENA |
 	      II20K_AI_CHANLIST_GAIN(range) |
 	      II20K_AI_CHANLIST_CHAN(chan);
-	writeb(val, iobase + II20K_AI_CHANLIST_REG);
+	pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:213", val, iobase + II20K_AI_CHANLIST_REG);
 
 	/* reset settling time counter and trigger delay counter */
-	writeb(0, iobase + II20K_AI_COUNT_RESET_REG);
+	pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:216", 0, iobase + II20K_AI_COUNT_RESET_REG);
 
 	/* reset channel scanner */
-	writeb(0, iobase + II20K_AI_CHAN_RESET_REG);
+	pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:219", 0, iobase + II20K_AI_CHAN_RESET_REG);
 }
 
 static int ii20k_ai_insn_read(struct comedi_device *dev,
@@ -234,14 +234,14 @@ static int ii20k_ai_insn_read(struct comedi_device *dev,
 		unsigned int val;
 
 		/* generate a software start convert signal */
-		readb(iobase + II20K_AI_PACER_RESET_REG);
+		pete_readb("drivers/comedi/drivers/ii_pci20kc.c:237", iobase + II20K_AI_PACER_RESET_REG);
 
 		ret = comedi_timeout(dev, s, insn, ii20k_ai_eoc, 0);
 		if (ret)
 			return ret;
 
-		val = readb(iobase + II20K_AI_LSB_REG);
-		val |= (readb(iobase + II20K_AI_MSB_REG) << 8);
+		val = pete_readb("drivers/comedi/drivers/ii_pci20kc.c:243", iobase + II20K_AI_LSB_REG);
+		val |= (pete_readb("drivers/comedi/drivers/ii_pci20kc.c:244", iobase + II20K_AI_MSB_REG) << 8);
 
 		/* munge the 2's complement data to offset binary */
 		data[i] = comedi_offset_munge(s, val);
@@ -309,9 +309,9 @@ static void ii20k_dio_config(struct comedi_device *dev,
 	ctrl23 |= II20K_CTRL23_SET;
 
 	/* order is important */
-	writeb(ctrl01, dev->mmio + II20K_CTRL01_REG);
-	writeb(ctrl23, dev->mmio + II20K_CTRL23_REG);
-	writeb(dir_ena, dev->mmio + II20K_DIR_ENA_REG);
+	pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:312", ctrl01, dev->mmio + II20K_CTRL01_REG);
+	pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:313", ctrl23, dev->mmio + II20K_CTRL23_REG);
+	pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:314", dir_ena, dev->mmio + II20K_DIR_ENA_REG);
 }
 
 static int ii20k_dio_insn_config(struct comedi_device *dev,
@@ -351,23 +351,23 @@ static int ii20k_dio_insn_bits(struct comedi_device *dev,
 	mask = comedi_dio_update_state(s, data);
 	if (mask) {
 		if (mask & 0x000000ff)
-			writeb((s->state >> 0) & 0xff,
+			pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:354", (s->state >> 0) & 0xff,
 			       dev->mmio + II20K_DIO0_REG);
 		if (mask & 0x0000ff00)
-			writeb((s->state >> 8) & 0xff,
+			pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:357", (s->state >> 8) & 0xff,
 			       dev->mmio + II20K_DIO1_REG);
 		if (mask & 0x00ff0000)
-			writeb((s->state >> 16) & 0xff,
+			pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:360", (s->state >> 16) & 0xff,
 			       dev->mmio + II20K_DIO2_REG);
 		if (mask & 0xff000000)
-			writeb((s->state >> 24) & 0xff,
+			pete_writeb("drivers/comedi/drivers/ii_pci20kc.c:363", (s->state >> 24) & 0xff,
 			       dev->mmio + II20K_DIO3_REG);
 	}
 
-	data[1] = readb(dev->mmio + II20K_DIO0_REG);
-	data[1] |= readb(dev->mmio + II20K_DIO1_REG) << 8;
-	data[1] |= readb(dev->mmio + II20K_DIO2_REG) << 16;
-	data[1] |= readb(dev->mmio + II20K_DIO3_REG) << 24;
+	data[1] = pete_readb("drivers/comedi/drivers/ii_pci20kc.c:367", dev->mmio + II20K_DIO0_REG);
+	data[1] |= pete_readb("drivers/comedi/drivers/ii_pci20kc.c:368", dev->mmio + II20K_DIO1_REG) << 8;
+	data[1] |= pete_readb("drivers/comedi/drivers/ii_pci20kc.c:369", dev->mmio + II20K_DIO2_REG) << 16;
+	data[1] |= pete_readb("drivers/comedi/drivers/ii_pci20kc.c:370", dev->mmio + II20K_DIO3_REG) << 24;
 
 	return insn->n;
 }
@@ -379,7 +379,7 @@ static int ii20k_init_module(struct comedi_device *dev,
 	unsigned char id;
 	int ret;
 
-	id = readb(iobase + II20K_ID_REG);
+	id = pete_readb("drivers/comedi/drivers/ii_pci20kc.c:382", iobase + II20K_ID_REG);
 	switch (id) {
 	case II20K_ID_PCI20006M_1:
 	case II20K_ID_PCI20006M_2:
@@ -440,7 +440,7 @@ static int ii20k_attach(struct comedi_device *dev,
 	if (!dev->mmio)
 		return -ENOMEM;
 
-	id = readb(dev->mmio + II20K_ID_REG);
+	id = pete_readb("drivers/comedi/drivers/ii_pci20kc.c:443", dev->mmio + II20K_ID_REG);
 	switch (id & II20K_ID_MASK) {
 	case II20K_ID_PCI20001C_1A:
 		has_dio = false;

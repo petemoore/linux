@@ -49,36 +49,36 @@
  */
 static void sun4i_clkevt_sync(void __iomem *base)
 {
-	u32 old = readl(base + TIMER_CNTVAL_REG(1));
+	u32 old = pete_readl("drivers/clocksource/timer-sun4i.c:52", base + TIMER_CNTVAL_REG(1));
 
-	while ((old - readl(base + TIMER_CNTVAL_REG(1))) < TIMER_SYNC_TICKS)
+	while ((old - pete_readl("drivers/clocksource/timer-sun4i.c:54", base + TIMER_CNTVAL_REG(1))) < TIMER_SYNC_TICKS)
 		cpu_relax();
 }
 
 static void sun4i_clkevt_time_stop(void __iomem *base, u8 timer)
 {
-	u32 val = readl(base + TIMER_CTL_REG(timer));
-	writel(val & ~TIMER_CTL_ENABLE, base + TIMER_CTL_REG(timer));
+	u32 val = pete_readl("drivers/clocksource/timer-sun4i.c:60", base + TIMER_CTL_REG(timer));
+	pete_writel("drivers/clocksource/timer-sun4i.c:61", val & ~TIMER_CTL_ENABLE, base + TIMER_CTL_REG(timer));
 	sun4i_clkevt_sync(base);
 }
 
 static void sun4i_clkevt_time_setup(void __iomem *base, u8 timer,
 				    unsigned long delay)
 {
-	writel(delay, base + TIMER_INTVAL_REG(timer));
+	pete_writel("drivers/clocksource/timer-sun4i.c:68", delay, base + TIMER_INTVAL_REG(timer));
 }
 
 static void sun4i_clkevt_time_start(void __iomem *base, u8 timer,
 				    bool periodic)
 {
-	u32 val = readl(base + TIMER_CTL_REG(timer));
+	u32 val = pete_readl("drivers/clocksource/timer-sun4i.c:74", base + TIMER_CTL_REG(timer));
 
 	if (periodic)
 		val &= ~TIMER_CTL_ONESHOT;
 	else
 		val |= TIMER_CTL_ONESHOT;
 
-	writel(val | TIMER_CTL_ENABLE | TIMER_CTL_RELOAD,
+	pete_writel("drivers/clocksource/timer-sun4i.c:81", val | TIMER_CTL_ENABLE | TIMER_CTL_RELOAD,
 	       base + TIMER_CTL_REG(timer));
 }
 
@@ -126,7 +126,7 @@ static int sun4i_clkevt_next_event(unsigned long evt,
 
 static void sun4i_timer_clear_interrupt(void __iomem *base)
 {
-	writel(TIMER_IRQ_EN(0), base + TIMER_IRQ_ST_REG);
+	pete_writel("drivers/clocksource/timer-sun4i.c:129", TIMER_IRQ_EN(0), base + TIMER_IRQ_ST_REG);
 }
 
 static irqreturn_t sun4i_timer_interrupt(int irq, void *dev_id)
@@ -163,7 +163,7 @@ static struct timer_of to = {
 
 static u64 notrace sun4i_timer_sched_read(void)
 {
-	return ~readl(timer_of_base(&to) + TIMER_CNTVAL_REG(1));
+	return ~pete_readl("drivers/clocksource/timer-sun4i.c:166", timer_of_base(&to) + TIMER_CNTVAL_REG(1));
 }
 
 static int __init sun4i_timer_init(struct device_node *node)
@@ -175,8 +175,8 @@ static int __init sun4i_timer_init(struct device_node *node)
 	if (ret)
 		return ret;
 
-	writel(~0, timer_of_base(&to) + TIMER_INTVAL_REG(1));
-	writel(TIMER_CTL_ENABLE | TIMER_CTL_RELOAD |
+	pete_writel("drivers/clocksource/timer-sun4i.c:178", ~0, timer_of_base(&to) + TIMER_INTVAL_REG(1));
+	pete_writel("drivers/clocksource/timer-sun4i.c:179", TIMER_CTL_ENABLE | TIMER_CTL_RELOAD |
 	       TIMER_CTL_CLK_SRC(TIMER_CTL_CLK_SRC_OSC24M),
 	       timer_of_base(&to) + TIMER_CTL_REG(1));
 
@@ -199,7 +199,7 @@ static int __init sun4i_timer_init(struct device_node *node)
 		return ret;
 	}
 
-	writel(TIMER_CTL_CLK_SRC(TIMER_CTL_CLK_SRC_OSC24M),
+	pete_writel("drivers/clocksource/timer-sun4i.c:202", TIMER_CTL_CLK_SRC(TIMER_CTL_CLK_SRC_OSC24M),
 	       timer_of_base(&to) + TIMER_CTL_REG(0));
 
 	/* Make sure timer is stopped before playing with interrupts */
@@ -212,8 +212,8 @@ static int __init sun4i_timer_init(struct device_node *node)
 					TIMER_SYNC_TICKS, 0xffffffff);
 
 	/* Enable timer0 interrupt */
-	val = readl(timer_of_base(&to) + TIMER_IRQ_EN_REG);
-	writel(val | TIMER_IRQ_EN(0), timer_of_base(&to) + TIMER_IRQ_EN_REG);
+	val = pete_readl("drivers/clocksource/timer-sun4i.c:215", timer_of_base(&to) + TIMER_IRQ_EN_REG);
+	pete_writel("drivers/clocksource/timer-sun4i.c:216", val | TIMER_IRQ_EN(0), timer_of_base(&to) + TIMER_IRQ_EN_REG);
 
 	return ret;
 }

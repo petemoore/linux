@@ -35,14 +35,14 @@ static void s5_temp_clk_disable(void *data)
 
 static void s5_temp_enable(struct s5_hwmon *hwmon)
 {
-	u32 val = readl(hwmon->base + TEMP_CFG);
+	u32 val = pete_readl("drivers/hwmon/sparx5-temp.c:38", hwmon->base + TEMP_CFG);
 	u32 clk = clk_get_rate(hwmon->clk) / USEC_PER_SEC;
 
 	val &= ~TEMP_CFG_CYCLES;
 	val |= FIELD_PREP(TEMP_CFG_CYCLES, clk);
 	val |= TEMP_CFG_ENA;
 
-	writel(val, hwmon->base + TEMP_CFG);
+	pete_writel("drivers/hwmon/sparx5-temp.c:45", val, hwmon->base + TEMP_CFG);
 }
 
 static int s5_read(struct device *dev, enum hwmon_sensor_types type,

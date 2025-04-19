@@ -703,7 +703,7 @@ static int __init ar7_register_devices(void)
 
 	/* Register watchdog only if enabled in hardware */
 	bootcr = ioremap(AR7_REGS_DCL, 4);
-	val = readl(bootcr);
+	val = pete_readl("arch/mips/ar7/platform.c:706", bootcr);
 	iounmap(bootcr);
 	if (val & AR7_WDT_HW_ENA) {
 		if (ar7_has_high_vlynq())

@@ -90,13 +90,13 @@ static struct clock_event_device __percpu *armada_370_xp_evt;
 
 static void local_timer_ctrl_clrset(u32 clr, u32 set)
 {
-	writel((readl(local_base + TIMER_CTRL_OFF) & ~clr) | set,
+	pete_writel("drivers/clocksource/timer-armada-370-xp.c:93", (pete_readl("drivers/clocksource/timer-armada-370-xp.c:93", local_base + TIMER_CTRL_OFF) & ~clr) | set,
 		local_base + TIMER_CTRL_OFF);
 }
 
 static u64 notrace armada_370_xp_read_sched_clock(void)
 {
-	return ~readl(timer_base + TIMER0_VAL_OFF);
+	return ~pete_readl("drivers/clocksource/timer-armada-370-xp.c:99", timer_base + TIMER0_VAL_OFF);
 }
 
 /*
@@ -109,12 +109,12 @@ armada_370_xp_clkevt_next_event(unsigned long delta,
 	/*
 	 * Clear clockevent timer interrupt.
 	 */
-	writel(TIMER0_CLR_MASK, local_base + LCL_TIMER_EVENTS_STATUS);
+	pete_writel("drivers/clocksource/timer-armada-370-xp.c:112", TIMER0_CLR_MASK, local_base + LCL_TIMER_EVENTS_STATUS);
 
 	/*
 	 * Setup new clockevent timer value.
 	 */
-	writel(delta, local_base + TIMER0_VAL_OFF);
+	pete_writel("drivers/clocksource/timer-armada-370-xp.c:117", delta, local_base + TIMER0_VAL_OFF);
 
 	/*
 	 * Enable the timer.
@@ -133,7 +133,7 @@ static int armada_370_xp_clkevt_shutdown(struct clock_event_device *evt)
 	/*
 	 * ACK pending timer interrupt.
 	 */
-	writel(TIMER0_CLR_MASK, local_base + LCL_TIMER_EVENTS_STATUS);
+	pete_writel("drivers/clocksource/timer-armada-370-xp.c:136", TIMER0_CLR_MASK, local_base + LCL_TIMER_EVENTS_STATUS);
 	return 0;
 }
 
@@ -142,8 +142,8 @@ static int armada_370_xp_clkevt_set_periodic(struct clock_event_device *evt)
 	/*
 	 * Setup timer to fire at 1/HZ intervals.
 	 */
-	writel(ticks_per_jiffy - 1, local_base + TIMER0_RELOAD_OFF);
-	writel(ticks_per_jiffy - 1, local_base + TIMER0_VAL_OFF);
+	pete_writel("drivers/clocksource/timer-armada-370-xp.c:145", ticks_per_jiffy - 1, local_base + TIMER0_RELOAD_OFF);
+	pete_writel("drivers/clocksource/timer-armada-370-xp.c:146", ticks_per_jiffy - 1, local_base + TIMER0_VAL_OFF);
 
 	/*
 	 * Enable timer.
@@ -161,7 +161,7 @@ static irqreturn_t armada_370_xp_timer_interrupt(int irq, void *dev_id)
 	 */
 	struct clock_event_device *evt = dev_id;
 
-	writel(TIMER0_CLR_MASK, local_base + LCL_TIMER_EVENTS_STATUS);
+	pete_writel("drivers/clocksource/timer-armada-370-xp.c:164", TIMER0_CLR_MASK, local_base + LCL_TIMER_EVENTS_STATUS);
 	evt->event_handler(evt);
 
 	return IRQ_HANDLED;
@@ -213,17 +213,17 @@ static u32 timer0_ctrl_reg, timer0_local_ctrl_reg;
 
 static int armada_370_xp_timer_suspend(void)
 {
-	timer0_ctrl_reg = readl(timer_base + TIMER_CTRL_OFF);
-	timer0_local_ctrl_reg = readl(local_base + TIMER_CTRL_OFF);
+	timer0_ctrl_reg = pete_readl("drivers/clocksource/timer-armada-370-xp.c:216", timer_base + TIMER_CTRL_OFF);
+	timer0_local_ctrl_reg = pete_readl("drivers/clocksource/timer-armada-370-xp.c:217", local_base + TIMER_CTRL_OFF);
 	return 0;
 }
 
 static void armada_370_xp_timer_resume(void)
 {
-	writel(0xffffffff, timer_base + TIMER0_VAL_OFF);
-	writel(0xffffffff, timer_base + TIMER0_RELOAD_OFF);
-	writel(timer0_ctrl_reg, timer_base + TIMER_CTRL_OFF);
-	writel(timer0_local_ctrl_reg, local_base + TIMER_CTRL_OFF);
+	pete_writel("drivers/clocksource/timer-armada-370-xp.c:223", 0xffffffff, timer_base + TIMER0_VAL_OFF);
+	pete_writel("drivers/clocksource/timer-armada-370-xp.c:224", 0xffffffff, timer_base + TIMER0_RELOAD_OFF);
+	pete_writel("drivers/clocksource/timer-armada-370-xp.c:225", timer0_ctrl_reg, timer_base + TIMER_CTRL_OFF);
+	pete_writel("drivers/clocksource/timer-armada-370-xp.c:226", timer0_local_ctrl_reg, local_base + TIMER_CTRL_OFF);
 }
 
 static struct syscore_ops armada_370_xp_timer_syscore_ops = {
@@ -233,7 +233,7 @@ static struct syscore_ops armada_370_xp_timer_syscore_ops = {
 
 static unsigned long armada_370_delay_timer_read(void)
 {
-	return ~readl(timer_base + TIMER0_VAL_OFF);
+	return ~pete_readl("drivers/clocksource/timer-armada-370-xp.c:236", timer_base + TIMER0_VAL_OFF);
 }
 
 static struct delay_timer armada_370_delay_timer = {
@@ -279,8 +279,8 @@ static int __init armada_370_xp_timer_common_init(struct device_node *np)
 	 * Setup free-running clocksource timer (interrupts
 	 * disabled).
 	 */
-	writel(0xffffffff, timer_base + TIMER0_VAL_OFF);
-	writel(0xffffffff, timer_base + TIMER0_RELOAD_OFF);
+	pete_writel("drivers/clocksource/timer-armada-370-xp.c:282", 0xffffffff, timer_base + TIMER0_VAL_OFF);
+	pete_writel("drivers/clocksource/timer-armada-370-xp.c:283", 0xffffffff, timer_base + TIMER0_RELOAD_OFF);
 
 	atomic_io_modify(timer_base + TIMER_CTRL_OFF,
 		TIMER0_RELOAD_EN | enable_mask,

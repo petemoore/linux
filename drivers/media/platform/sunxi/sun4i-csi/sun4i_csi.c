@@ -307,7 +307,7 @@ static int __maybe_unused sun4i_csi_runtime_resume(struct device *dev)
 	clk_set_rate(csi->isp_clk, 80000000);
 	clk_prepare_enable(csi->isp_clk);
 
-	writel(1, csi->regs + CSI_EN_REG);
+	pete_writel("drivers/media/platform/sunxi/sun4i-csi/sun4i_csi.c:310", 1, csi->regs + CSI_EN_REG);
 
 	return 0;
 }

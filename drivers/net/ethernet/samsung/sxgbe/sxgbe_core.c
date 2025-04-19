@@ -23,21 +23,21 @@ static void sxgbe_core_init(void __iomem *ioaddr)
 	u32 regval;
 
 	/* TX configuration */
-	regval = readl(ioaddr + SXGBE_CORE_TX_CONFIG_REG);
+	regval = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:26", ioaddr + SXGBE_CORE_TX_CONFIG_REG);
 	/* Other configurable parameters IFP, IPG, ISR, ISM
 	 * needs to be set if needed
 	 */
 	regval |= SXGBE_TX_JABBER_DISABLE;
-	writel(regval, ioaddr + SXGBE_CORE_TX_CONFIG_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:31", regval, ioaddr + SXGBE_CORE_TX_CONFIG_REG);
 
 	/* RX configuration */
-	regval = readl(ioaddr + SXGBE_CORE_RX_CONFIG_REG);
+	regval = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:34", ioaddr + SXGBE_CORE_RX_CONFIG_REG);
 	/* Other configurable parameters CST, SPEN, USP, GPSLCE
 	 * WD, LM, S2KP, HDSMS, GPSL, ELEN, ARPEN needs to be
 	 * set if needed
 	 */
 	regval |= SXGBE_RX_JUMBPKT_ENABLE | SXGBE_RX_ACS_ENABLE;
-	writel(regval, ioaddr + SXGBE_CORE_RX_CONFIG_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:40", regval, ioaddr + SXGBE_CORE_RX_CONFIG_REG);
 }
 
 /* Dump MAC registers */
@@ -51,7 +51,7 @@ static int sxgbe_get_lpi_status(void __iomem *ioaddr, const u32 irq_status)
 	int lpi_status;
 
 	/* Reading this register shall clear all the LPI status bits */
-	lpi_status = readl(ioaddr + SXGBE_CORE_LPI_CTRL_STATUS);
+	lpi_status = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:54", ioaddr + SXGBE_CORE_LPI_CTRL_STATUS);
 
 	if (lpi_status & LPI_CTRL_STATUS_TLPIEN)
 		status |= TX_ENTRY_LPI_MODE;
@@ -71,7 +71,7 @@ static int sxgbe_core_host_irq_status(void __iomem *ioaddr,
 {
 	int irq_status, status = 0;
 
-	irq_status = readl(ioaddr + SXGBE_CORE_INT_STATUS_REG);
+	irq_status = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:74", ioaddr + SXGBE_CORE_INT_STATUS_REG);
 
 	if (unlikely(irq_status & LPI_INT_STATUS))
 		status |= sxgbe_get_lpi_status(ioaddr, irq_status);
@@ -93,8 +93,8 @@ static void sxgbe_core_set_umac_addr(void __iomem *ioaddr, unsigned char *addr,
 	high_word = (addr[5] << 8) | (addr[4]);
 	low_word = (addr[3] << 24) | (addr[2] << 16) |
 		   (addr[1] << 8) | (addr[0]);
-	writel(high_word, ioaddr + SXGBE_CORE_ADD_HIGHOFFSET(reg_n));
-	writel(low_word, ioaddr + SXGBE_CORE_ADD_LOWOFFSET(reg_n));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:96", high_word, ioaddr + SXGBE_CORE_ADD_HIGHOFFSET(reg_n));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:97", low_word, ioaddr + SXGBE_CORE_ADD_LOWOFFSET(reg_n));
 }
 
 static void sxgbe_core_get_umac_addr(void __iomem *ioaddr, unsigned char *addr,
@@ -102,8 +102,8 @@ static void sxgbe_core_get_umac_addr(void __iomem *ioaddr, unsigned char *addr,
 {
 	u32 high_word, low_word;
 
-	high_word = readl(ioaddr + SXGBE_CORE_ADD_HIGHOFFSET(reg_n));
-	low_word = readl(ioaddr + SXGBE_CORE_ADD_LOWOFFSET(reg_n));
+	high_word = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:105", ioaddr + SXGBE_CORE_ADD_HIGHOFFSET(reg_n));
+	low_word = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:106", ioaddr + SXGBE_CORE_ADD_LOWOFFSET(reg_n));
 
 	/* extract and assign address */
 	addr[5] = (high_word & 0x0000FF00) >> 8;
@@ -118,68 +118,68 @@ static void sxgbe_enable_tx(void __iomem *ioaddr, bool enable)
 {
 	u32 tx_config;
 
-	tx_config = readl(ioaddr + SXGBE_CORE_TX_CONFIG_REG);
+	tx_config = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:121", ioaddr + SXGBE_CORE_TX_CONFIG_REG);
 	tx_config &= ~SXGBE_TX_ENABLE;
 
 	if (enable)
 		tx_config |= SXGBE_TX_ENABLE;
-	writel(tx_config, ioaddr + SXGBE_CORE_TX_CONFIG_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:126", tx_config, ioaddr + SXGBE_CORE_TX_CONFIG_REG);
 }
 
 static void sxgbe_enable_rx(void __iomem *ioaddr, bool enable)
 {
 	u32 rx_config;
 
-	rx_config = readl(ioaddr + SXGBE_CORE_RX_CONFIG_REG);
+	rx_config = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:133", ioaddr + SXGBE_CORE_RX_CONFIG_REG);
 	rx_config &= ~SXGBE_RX_ENABLE;
 
 	if (enable)
 		rx_config |= SXGBE_RX_ENABLE;
-	writel(rx_config, ioaddr + SXGBE_CORE_RX_CONFIG_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:138", rx_config, ioaddr + SXGBE_CORE_RX_CONFIG_REG);
 }
 
 static int sxgbe_get_controller_version(void __iomem *ioaddr)
 {
-	return readl(ioaddr + SXGBE_CORE_VERSION_REG);
+	return pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:143", ioaddr + SXGBE_CORE_VERSION_REG);
 }
 
 /* If supported then get the optional core features */
 static unsigned int sxgbe_get_hw_feature(void __iomem *ioaddr,
 					 unsigned char feature_index)
 {
-	return readl(ioaddr + (SXGBE_CORE_HW_FEA_REG(feature_index)));
+	return pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:150", ioaddr + (SXGBE_CORE_HW_FEA_REG(feature_index)));
 }
 
 static void sxgbe_core_set_speed(void __iomem *ioaddr, unsigned char speed)
 {
-	u32 tx_cfg = readl(ioaddr + SXGBE_CORE_TX_CONFIG_REG);
+	u32 tx_cfg = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:155", ioaddr + SXGBE_CORE_TX_CONFIG_REG);
 
 	/* clear the speed bits */
 	tx_cfg &= ~0x60000000;
 	tx_cfg |= (speed << SXGBE_SPEED_LSHIFT);
 
 	/* set the speed */
-	writel(tx_cfg, ioaddr + SXGBE_CORE_TX_CONFIG_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:162", tx_cfg, ioaddr + SXGBE_CORE_TX_CONFIG_REG);
 }
 
 static void sxgbe_core_enable_rxqueue(void __iomem *ioaddr, int queue_num)
 {
 	u32 reg_val;
 
-	reg_val = readl(ioaddr + SXGBE_CORE_RX_CTL0_REG);
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:169", ioaddr + SXGBE_CORE_RX_CTL0_REG);
 	reg_val &= ~(SXGBE_CORE_RXQ_ENABLE_MASK << queue_num);
 	reg_val |= SXGBE_CORE_RXQ_ENABLE;
-	writel(reg_val, ioaddr + SXGBE_CORE_RX_CTL0_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:172", reg_val, ioaddr + SXGBE_CORE_RX_CTL0_REG);
 }
 
 static void sxgbe_core_disable_rxqueue(void __iomem *ioaddr, int queue_num)
 {
 	u32 reg_val;
 
-	reg_val = readl(ioaddr + SXGBE_CORE_RX_CTL0_REG);
+	reg_val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:179", ioaddr + SXGBE_CORE_RX_CTL0_REG);
 	reg_val &= ~(SXGBE_CORE_RXQ_ENABLE_MASK << queue_num);
 	reg_val |= SXGBE_CORE_RXQ_DISABLE;
-	writel(reg_val, ioaddr + SXGBE_CORE_RX_CTL0_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:182", reg_val, ioaddr + SXGBE_CORE_RX_CTL0_REG);
 }
 
 static void  sxgbe_set_eee_mode(void __iomem *ioaddr)
@@ -191,25 +191,25 @@ static void  sxgbe_set_eee_mode(void __iomem *ioaddr)
 	 * to LPI mode after all outstanding and pending packets are
 	 * transmitted.
 	 */
-	ctrl = readl(ioaddr + SXGBE_CORE_LPI_CTRL_STATUS);
+	ctrl = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:194", ioaddr + SXGBE_CORE_LPI_CTRL_STATUS);
 	ctrl |= LPI_CTRL_STATUS_LPIEN | LPI_CTRL_STATUS_TXA;
-	writel(ctrl, ioaddr + SXGBE_CORE_LPI_CTRL_STATUS);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:196", ctrl, ioaddr + SXGBE_CORE_LPI_CTRL_STATUS);
 }
 
 static void  sxgbe_reset_eee_mode(void __iomem *ioaddr)
 {
 	u32 ctrl;
 
-	ctrl = readl(ioaddr + SXGBE_CORE_LPI_CTRL_STATUS);
+	ctrl = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:203", ioaddr + SXGBE_CORE_LPI_CTRL_STATUS);
 	ctrl &= ~(LPI_CTRL_STATUS_LPIEN | LPI_CTRL_STATUS_TXA);
-	writel(ctrl, ioaddr + SXGBE_CORE_LPI_CTRL_STATUS);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:205", ctrl, ioaddr + SXGBE_CORE_LPI_CTRL_STATUS);
 }
 
 static void  sxgbe_set_eee_pls(void __iomem *ioaddr, const int link)
 {
 	u32 ctrl;
 
-	ctrl = readl(ioaddr + SXGBE_CORE_LPI_CTRL_STATUS);
+	ctrl = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:212", ioaddr + SXGBE_CORE_LPI_CTRL_STATUS);
 
 	/* If the PHY link status is UP then set PLS */
 	if (link)
@@ -217,7 +217,7 @@ static void  sxgbe_set_eee_pls(void __iomem *ioaddr, const int link)
 	else
 		ctrl &= ~LPI_CTRL_STATUS_PLS;
 
-	writel(ctrl, ioaddr + SXGBE_CORE_LPI_CTRL_STATUS);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:220", ctrl, ioaddr + SXGBE_CORE_LPI_CTRL_STATUS);
 }
 
 static void  sxgbe_set_eee_timer(void __iomem *ioaddr,
@@ -232,25 +232,25 @@ static void  sxgbe_set_eee_timer(void __iomem *ioaddr,
 	 * TW: minimum time (us) for which the core waits
 	 *  after it has stopped transmitting the LPI pattern.
 	 */
-	writel(value, ioaddr + SXGBE_CORE_LPI_TIMER_CTRL);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:235", value, ioaddr + SXGBE_CORE_LPI_TIMER_CTRL);
 }
 
 static void sxgbe_enable_rx_csum(void __iomem *ioaddr)
 {
 	u32 ctrl;
 
-	ctrl = readl(ioaddr + SXGBE_CORE_RX_CONFIG_REG);
+	ctrl = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:242", ioaddr + SXGBE_CORE_RX_CONFIG_REG);
 	ctrl |= SXGBE_RX_CSUMOFFLOAD_ENABLE;
-	writel(ctrl, ioaddr + SXGBE_CORE_RX_CONFIG_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:244", ctrl, ioaddr + SXGBE_CORE_RX_CONFIG_REG);
 }
 
 static void sxgbe_disable_rx_csum(void __iomem *ioaddr)
 {
 	u32 ctrl;
 
-	ctrl = readl(ioaddr + SXGBE_CORE_RX_CONFIG_REG);
+	ctrl = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:251", ioaddr + SXGBE_CORE_RX_CONFIG_REG);
 	ctrl &= ~SXGBE_RX_CSUMOFFLOAD_ENABLE;
-	writel(ctrl, ioaddr + SXGBE_CORE_RX_CONFIG_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_core.c:253", ctrl, ioaddr + SXGBE_CORE_RX_CONFIG_REG);
 }
 
 static const struct sxgbe_core_ops core_ops = {

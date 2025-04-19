@@ -33,9 +33,9 @@ static void htpic_irq_dispatch(struct irq_desc *desc)
 	uint32_t pending;
 
 	chained_irq_enter(chip, desc);
-	pending = readl(priv->base);
+	pending = pete_readl("drivers/irqchip/irq-loongson-htpic.c:36", priv->base);
 	/* Ack all IRQs at once, otherwise IRQ flood might happen */
-	writel(pending, priv->base);
+	pete_writel("drivers/irqchip/irq-loongson-htpic.c:38", pending, priv->base);
 
 	if (!pending)
 		spurious_interrupt();
@@ -60,15 +60,15 @@ static void htpic_reg_init(void)
 
 	for (i = 0; i < HTINT_NUM_VECTORS; i++) {
 		/* Disable all HT Vectors */
-		writel(0x0, htpic->base + HTINT_EN_OFF + i * 0x4);
+		pete_writel("drivers/irqchip/irq-loongson-htpic.c:63", 0x0, htpic->base + HTINT_EN_OFF + i * 0x4);
 		/* Read back to force write */
-		(void) readl(htpic->base + i * 0x4);
+		(void) pete_readl("drivers/irqchip/irq-loongson-htpic.c:65", htpic->base + i * 0x4);
 		/* Ack all possible pending IRQs */
-		writel(GENMASK(31, 0), htpic->base + i * 0x4);
+		pete_writel("drivers/irqchip/irq-loongson-htpic.c:67", GENMASK(31, 0), htpic->base + i * 0x4);
 	}
 
 	/* Enable 16 vectors for PIC */
-	writel(0xffff, htpic->base + HTINT_EN_OFF);
+	pete_writel("drivers/irqchip/irq-loongson-htpic.c:71", 0xffff, htpic->base + HTINT_EN_OFF);
 }
 
 static void htpic_resume(void)

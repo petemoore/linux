@@ -76,24 +76,24 @@ struct j721e_pcie_data {
 
 static inline u32 j721e_pcie_user_readl(struct j721e_pcie *pcie, u32 offset)
 {
-	return readl(pcie->user_cfg_base + offset);
+	return pete_readl("drivers/pci/controller/cadence/pci-j721e.c:79", pcie->user_cfg_base + offset);
 }
 
 static inline void j721e_pcie_user_writel(struct j721e_pcie *pcie, u32 offset,
 					  u32 value)
 {
-	writel(value, pcie->user_cfg_base + offset);
+	pete_writel("drivers/pci/controller/cadence/pci-j721e.c:85", value, pcie->user_cfg_base + offset);
 }
 
 static inline u32 j721e_pcie_intd_readl(struct j721e_pcie *pcie, u32 offset)
 {
-	return readl(pcie->intd_cfg_base + offset);
+	return pete_readl("drivers/pci/controller/cadence/pci-j721e.c:90", pcie->intd_cfg_base + offset);
 }
 
 static inline void j721e_pcie_intd_writel(struct j721e_pcie *pcie, u32 offset,
 					  u32 value)
 {
-	writel(value, pcie->intd_cfg_base + offset);
+	pete_writel("drivers/pci/controller/cadence/pci-j721e.c:96", value, pcie->intd_cfg_base + offset);
 }
 
 static irqreturn_t j721e_pcie_link_irq_handler(int irq, void *priv)

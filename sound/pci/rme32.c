@@ -234,7 +234,7 @@ static int snd_rme32_create_switches(struct snd_card *card, struct rme32 * rme32
 
 static inline unsigned int snd_rme32_pcm_byteptr(struct rme32 * rme32)
 {
-	return (readl(rme32->iobase + RME32_IO_GET_POS)
+	return (pete_readl("sound/pci/rme32.c:237", rme32->iobase + RME32_IO_GET_POS)
 		& RME32_RCR_AUDIO_ADDR_MASK);
 }
 
@@ -404,9 +404,9 @@ static const struct snd_pcm_hardware snd_rme32_adat_fd_info =
 
 static void snd_rme32_reset_dac(struct rme32 *rme32)
 {
-        writel(rme32->wcreg | RME32_WCR_PD,
+        pete_writel("sound/pci/rme32.c:407", rme32->wcreg | RME32_WCR_PD,
                rme32->iobase + RME32_IO_CONTROL_REGISTER);
-        writel(rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
+        pete_writel("sound/pci/rme32.c:409", rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
 }
 
 static int snd_rme32_playback_getrate(struct rme32 * rme32)
@@ -543,7 +543,7 @@ static int snd_rme32_playback_setrate(struct rme32 * rme32, int rate)
                 /* change to/from double-speed: reset the DAC (if available) */
                 snd_rme32_reset_dac(rme32);
         } else {
-                writel(rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
+                pete_writel("sound/pci/rme32.c:546", rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
 	}
 	return 0;
 }
@@ -574,7 +574,7 @@ static int snd_rme32_setclockmode(struct rme32 * rme32, int mode)
 	default:
 		return -EINVAL;
 	}
-	writel(rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme32.c:577", rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
 	return 0;
 }
 
@@ -606,7 +606,7 @@ static int snd_rme32_setinputtype(struct rme32 * rme32, int type)
 	default:
 		return -EINVAL;
 	}
-	writel(rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme32.c:609", rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
 	return 0;
 }
 
@@ -648,7 +648,7 @@ static int snd_rme32_setformat(struct rme32 *rme32, snd_pcm_format_t format)
 	default:
 		return -EINVAL;
 	}
-	writel(rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme32.c:651", rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
 	return 0;
 }
 
@@ -702,7 +702,7 @@ snd_rme32_playback_hw_params(struct snd_pcm_substream *substream,
 	if ((rme32->wcreg & RME32_WCR_ADAT) == 0) {
 		rme32->wcreg &= ~(RME32_WCR_PRO | RME32_WCR_EMP);
 		rme32->wcreg |= rme32->wcreg_spdif_stream;
-		writel(rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
+		pete_writel("sound/pci/rme32.c:705", rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
 	}
 	spin_unlock_irq(&rme32->lock);
 
@@ -727,7 +727,7 @@ snd_rme32_capture_hw_params(struct snd_pcm_substream *substream,
 	spin_lock_irq(&rme32->lock);
 	/* enable AutoSync for record-preparing */
 	rme32->wcreg |= RME32_WCR_AUTOSYNC;
-	writel(rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme32.c:730", rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
 
 	err = snd_rme32_setformat(rme32, params_format(params));
 	if (err < 0) {
@@ -753,7 +753,7 @@ snd_rme32_capture_hw_params(struct snd_pcm_substream *substream,
 	}
 	/* AutoSync off for recording */
 	rme32->wcreg &= ~RME32_WCR_AUTOSYNC;
-	writel(rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme32.c:756", rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
 
 	snd_rme32_setframelog(rme32, params_channels(params), 0);
 	if (rme32->playback_periodsize != 0) {
@@ -773,11 +773,11 @@ snd_rme32_capture_hw_params(struct snd_pcm_substream *substream,
 static void snd_rme32_pcm_start(struct rme32 * rme32, int from_pause)
 {
 	if (!from_pause) {
-		writel(0, rme32->iobase + RME32_IO_RESET_POS);
+		pete_writel("sound/pci/rme32.c:776", 0, rme32->iobase + RME32_IO_RESET_POS);
 	}
 
 	rme32->wcreg |= RME32_WCR_START;
-	writel(rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme32.c:780", rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
 }
 
 static void snd_rme32_pcm_stop(struct rme32 * rme32, int to_pause)
@@ -786,23 +786,23 @@ static void snd_rme32_pcm_stop(struct rme32 * rme32, int to_pause)
 	 * Check if there is an unconfirmed IRQ, if so confirm it, or else
 	 * the hardware will not stop generating interrupts
 	 */
-	rme32->rcreg = readl(rme32->iobase + RME32_IO_CONTROL_REGISTER);
+	rme32->rcreg = pete_readl("sound/pci/rme32.c:789", rme32->iobase + RME32_IO_CONTROL_REGISTER);
 	if (rme32->rcreg & RME32_RCR_IRQ) {
-		writel(0, rme32->iobase + RME32_IO_CONFIRM_ACTION_IRQ);
+		pete_writel("sound/pci/rme32.c:791", 0, rme32->iobase + RME32_IO_CONFIRM_ACTION_IRQ);
 	}
 	rme32->wcreg &= ~RME32_WCR_START;
 	if (rme32->wcreg & RME32_WCR_SEL)
 		rme32->wcreg |= RME32_WCR_MUTE;
-	writel(rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme32.c:796", rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
 	if (! to_pause)
-		writel(0, rme32->iobase + RME32_IO_RESET_POS);
+		pete_writel("sound/pci/rme32.c:798", 0, rme32->iobase + RME32_IO_RESET_POS);
 }
 
 static irqreturn_t snd_rme32_interrupt(int irq, void *dev_id)
 {
 	struct rme32 *rme32 = (struct rme32 *) dev_id;
 
-	rme32->rcreg = readl(rme32->iobase + RME32_IO_CONTROL_REGISTER);
+	rme32->rcreg = pete_readl("sound/pci/rme32.c:805", rme32->iobase + RME32_IO_CONTROL_REGISTER);
 	if (!(rme32->rcreg & RME32_RCR_IRQ)) {
 		return IRQ_NONE;
 	} else {
@@ -812,7 +812,7 @@ static irqreturn_t snd_rme32_interrupt(int irq, void *dev_id)
 		if (rme32->playback_substream) {
 			snd_pcm_period_elapsed(rme32->playback_substream);
 		}
-		writel(0, rme32->iobase + RME32_IO_CONFIRM_ACTION_IRQ);
+		pete_writel("sound/pci/rme32.c:815", 0, rme32->iobase + RME32_IO_CONFIRM_ACTION_IRQ);
 	}
 	return IRQ_HANDLED;
 }
@@ -851,7 +851,7 @@ static int snd_rme32_playback_spdif_open(struct snd_pcm_substream *substream)
 		return -EBUSY;
 	}
 	rme32->wcreg &= ~RME32_WCR_ADAT;
-	writel(rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme32.c:854", rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
 	rme32->playback_substream = substream;
 	spin_unlock_irq(&rme32->lock);
 
@@ -936,7 +936,7 @@ snd_rme32_playback_adat_open(struct snd_pcm_substream *substream)
                 return -EBUSY;
         }
 	rme32->wcreg |= RME32_WCR_ADAT;
-	writel(rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme32.c:939", rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
 	rme32->playback_substream = substream;
 	spin_unlock_irq(&rme32->lock);
 	
@@ -1033,11 +1033,11 @@ static int snd_rme32_playback_prepare(struct snd_pcm_substream *substream)
 		rme32->playback_pcm.hw_buffer_size = RME32_BUFFER_SIZE;
 		rme32->playback_pcm.sw_buffer_size = snd_pcm_lib_buffer_bytes(substream);
 	} else {
-		writel(0, rme32->iobase + RME32_IO_RESET_POS);
+		pete_writel("sound/pci/rme32.c:1036", 0, rme32->iobase + RME32_IO_RESET_POS);
 	}
 	if (rme32->wcreg & RME32_WCR_SEL)
 		rme32->wcreg &= ~RME32_WCR_MUTE;
-	writel(rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme32.c:1040", rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
 	spin_unlock_irq(&rme32->lock);
 	return 0;
 }
@@ -1053,7 +1053,7 @@ static int snd_rme32_capture_prepare(struct snd_pcm_substream *substream)
 		rme32->capture_pcm.hw_queue_size = RME32_BUFFER_SIZE / 2;
 		rme32->capture_pcm.sw_buffer_size = snd_pcm_lib_buffer_bytes(substream);
 	} else {
-		writel(0, rme32->iobase + RME32_IO_RESET_POS);
+		pete_writel("sound/pci/rme32.c:1056", 0, rme32->iobase + RME32_IO_RESET_POS);
 	}
 	spin_unlock_irq(&rme32->lock);
 	return 0;
@@ -1399,13 +1399,13 @@ static int snd_rme32_create(struct rme32 *rme32)
         snd_rme32_reset_dac(rme32);
 
 	/* reset buffer pointer */
-	writel(0, rme32->iobase + RME32_IO_RESET_POS);
+	pete_writel("sound/pci/rme32.c:1402", 0, rme32->iobase + RME32_IO_RESET_POS);
 
 	/* set default values in registers */
 	rme32->wcreg = RME32_WCR_SEL |	 /* normal playback */
 		RME32_WCR_INP_0 | /* input select */
 		RME32_WCR_MUTE;	 /* muting on */
-	writel(rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme32.c:1408", rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
 
 
 	/* init switch interface */
@@ -1432,7 +1432,7 @@ snd_rme32_proc_read(struct snd_info_entry * entry, struct snd_info_buffer *buffe
 	int n;
 	struct rme32 *rme32 = (struct rme32 *) entry->private_data;
 
-	rme32->rcreg = readl(rme32->iobase + RME32_IO_CONTROL_REGISTER);
+	rme32->rcreg = pete_readl("sound/pci/rme32.c:1435", rme32->iobase + RME32_IO_CONTROL_REGISTER);
 
 	snd_iprintf(buffer, rme32->card->longname);
 	snd_iprintf(buffer, " (index #%d)\n", rme32->card->number + 1);
@@ -1561,7 +1561,7 @@ snd_rme32_put_loopback_control(struct snd_kcontrol *kcontrol,
 	else
 		val |= RME32_WCR_MUTE;
 	rme32->wcreg = val;
-	writel(val, rme32->iobase + RME32_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme32.c:1564", val, rme32->iobase + RME32_IO_CONTROL_REGISTER);
 	spin_unlock_irq(&rme32->lock);
 	return change;
 }
@@ -1772,7 +1772,7 @@ static int snd_rme32_control_spdif_stream_put(struct snd_kcontrol *kcontrol,
 	rme32->wcreg_spdif_stream = val;
 	rme32->wcreg &= ~(RME32_WCR_PRO | RME32_WCR_EMP);
 	rme32->wcreg |= val;
-	writel(rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
+	pete_writel("sound/pci/rme32.c:1775", rme32->wcreg, rme32->iobase + RME32_IO_CONTROL_REGISTER);
 	spin_unlock_irq(&rme32->lock);
 	return change;
 }

@@ -40,12 +40,12 @@ static int reset_simple_update(struct reset_controller_dev *rcdev,
 
 	spin_lock_irqsave(&data->lock, flags);
 
-	reg = readl(data->membase + (bank * reg_width));
+	reg = pete_readl("drivers/reset/reset-simple.c:43", data->membase + (bank * reg_width));
 	if (assert ^ data->active_low)
 		reg |= BIT(offset);
 	else
 		reg &= ~BIT(offset);
-	writel(reg, data->membase + (bank * reg_width));
+	pete_writel("drivers/reset/reset-simple.c:48", reg, data->membase + (bank * reg_width));
 
 	spin_unlock_irqrestore(&data->lock, flags);
 
@@ -91,7 +91,7 @@ static int reset_simple_status(struct reset_controller_dev *rcdev,
 	int offset = id % (reg_width * BITS_PER_BYTE);
 	u32 reg;
 
-	reg = readl(data->membase + (bank * reg_width));
+	reg = pete_readl("drivers/reset/reset-simple.c:94", data->membase + (bank * reg_width));
 
 	return !(reg & BIT(offset)) ^ !data->status_active_low;
 }

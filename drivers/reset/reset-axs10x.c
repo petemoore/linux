@@ -31,7 +31,7 @@ static int axs10x_reset_reset(struct reset_controller_dev *rcdev,
 	unsigned long flags;
 
 	spin_lock_irqsave(&rst->lock, flags);
-	writel(BIT(id), rst->regs_rst);
+	pete_writel("drivers/reset/reset-axs10x.c:34", BIT(id), rst->regs_rst);
 	spin_unlock_irqrestore(&rst->lock, flags);
 
 	return 0;

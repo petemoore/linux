@@ -93,48 +93,48 @@ struct sprd_i2c {
 
 static void sprd_i2c_set_count(struct sprd_i2c *i2c_dev, u32 count)
 {
-	writel(count, i2c_dev->base + I2C_COUNT);
+	pete_writel("drivers/i2c/busses/i2c-sprd.c:96", count, i2c_dev->base + I2C_COUNT);
 }
 
 static void sprd_i2c_send_stop(struct sprd_i2c *i2c_dev, int stop)
 {
-	u32 tmp = readl(i2c_dev->base + I2C_CTL);
+	u32 tmp = pete_readl("drivers/i2c/busses/i2c-sprd.c:101", i2c_dev->base + I2C_CTL);
 
 	if (stop)
-		writel(tmp & ~STP_EN, i2c_dev->base + I2C_CTL);
+		pete_writel("drivers/i2c/busses/i2c-sprd.c:104", tmp & ~STP_EN, i2c_dev->base + I2C_CTL);
 	else
-		writel(tmp | STP_EN, i2c_dev->base + I2C_CTL);
+		pete_writel("drivers/i2c/busses/i2c-sprd.c:106", tmp | STP_EN, i2c_dev->base + I2C_CTL);
 }
 
 static void sprd_i2c_clear_start(struct sprd_i2c *i2c_dev)
 {
-	u32 tmp = readl(i2c_dev->base + I2C_CTL);
+	u32 tmp = pete_readl("drivers/i2c/busses/i2c-sprd.c:111", i2c_dev->base + I2C_CTL);
 
-	writel(tmp & ~I2C_START, i2c_dev->base + I2C_CTL);
+	pete_writel("drivers/i2c/busses/i2c-sprd.c:113", tmp & ~I2C_START, i2c_dev->base + I2C_CTL);
 }
 
 static void sprd_i2c_clear_ack(struct sprd_i2c *i2c_dev)
 {
-	u32 tmp = readl(i2c_dev->base + I2C_STATUS);
+	u32 tmp = pete_readl("drivers/i2c/busses/i2c-sprd.c:118", i2c_dev->base + I2C_STATUS);
 
-	writel(tmp & ~I2C_RX_ACK, i2c_dev->base + I2C_STATUS);
+	pete_writel("drivers/i2c/busses/i2c-sprd.c:120", tmp & ~I2C_RX_ACK, i2c_dev->base + I2C_STATUS);
 }
 
 static void sprd_i2c_clear_irq(struct sprd_i2c *i2c_dev)
 {
-	u32 tmp = readl(i2c_dev->base + I2C_STATUS);
+	u32 tmp = pete_readl("drivers/i2c/busses/i2c-sprd.c:125", i2c_dev->base + I2C_STATUS);
 
-	writel(tmp & ~I2C_INT, i2c_dev->base + I2C_STATUS);
+	pete_writel("drivers/i2c/busses/i2c-sprd.c:127", tmp & ~I2C_INT, i2c_dev->base + I2C_STATUS);
 }
 
 static void sprd_i2c_reset_fifo(struct sprd_i2c *i2c_dev)
 {
-	writel(I2C_RST, i2c_dev->base + ADDR_RST);
+	pete_writel("drivers/i2c/busses/i2c-sprd.c:132", I2C_RST, i2c_dev->base + ADDR_RST);
 }
 
 static void sprd_i2c_set_devaddr(struct sprd_i2c *i2c_dev, struct i2c_msg *m)
 {
-	writel(m->addr << 1, i2c_dev->base + I2C_ADDR_CFG);
+	pete_writel("drivers/i2c/busses/i2c-sprd.c:137", m->addr << 1, i2c_dev->base + I2C_ADDR_CFG);
 }
 
 static void sprd_i2c_write_bytes(struct sprd_i2c *i2c_dev, u8 *buf, u32 len)
@@ -142,7 +142,7 @@ static void sprd_i2c_write_bytes(struct sprd_i2c *i2c_dev, u8 *buf, u32 len)
 	u32 i;
 
 	for (i = 0; i < len; i++)
-		writeb(buf[i], i2c_dev->base + I2C_TX);
+		pete_writeb("drivers/i2c/busses/i2c-sprd.c:145", buf[i], i2c_dev->base + I2C_TX);
 }
 
 static void sprd_i2c_read_bytes(struct sprd_i2c *i2c_dev, u8 *buf, u32 len)
@@ -150,63 +150,63 @@ static void sprd_i2c_read_bytes(struct sprd_i2c *i2c_dev, u8 *buf, u32 len)
 	u32 i;
 
 	for (i = 0; i < len; i++)
-		buf[i] = readb(i2c_dev->base + I2C_RX);
+		buf[i] = pete_readb("drivers/i2c/busses/i2c-sprd.c:153", i2c_dev->base + I2C_RX);
 }
 
 static void sprd_i2c_set_full_thld(struct sprd_i2c *i2c_dev, u32 full_thld)
 {
-	u32 tmp = readl(i2c_dev->base + I2C_CTL);
+	u32 tmp = pete_readl("drivers/i2c/busses/i2c-sprd.c:158", i2c_dev->base + I2C_CTL);
 
 	tmp &= ~FIFO_AF_LVL_MASK;
 	tmp |= full_thld << FIFO_AF_LVL;
-	writel(tmp, i2c_dev->base + I2C_CTL);
+	pete_writel("drivers/i2c/busses/i2c-sprd.c:162", tmp, i2c_dev->base + I2C_CTL);
 };
 
 static void sprd_i2c_set_empty_thld(struct sprd_i2c *i2c_dev, u32 empty_thld)
 {
-	u32 tmp = readl(i2c_dev->base + I2C_CTL);
+	u32 tmp = pete_readl("drivers/i2c/busses/i2c-sprd.c:167", i2c_dev->base + I2C_CTL);
 
 	tmp &= ~FIFO_AE_LVL_MASK;
 	tmp |= empty_thld << FIFO_AE_LVL;
-	writel(tmp, i2c_dev->base + I2C_CTL);
+	pete_writel("drivers/i2c/busses/i2c-sprd.c:171", tmp, i2c_dev->base + I2C_CTL);
 };
 
 static void sprd_i2c_set_fifo_full_int(struct sprd_i2c *i2c_dev, int enable)
 {
-	u32 tmp = readl(i2c_dev->base + I2C_CTL);
+	u32 tmp = pete_readl("drivers/i2c/busses/i2c-sprd.c:176", i2c_dev->base + I2C_CTL);
 
 	if (enable)
 		tmp |= FULL_INTEN;
 	else
 		tmp &= ~FULL_INTEN;
 
-	writel(tmp, i2c_dev->base + I2C_CTL);
+	pete_writel("drivers/i2c/busses/i2c-sprd.c:183", tmp, i2c_dev->base + I2C_CTL);
 };
 
 static void sprd_i2c_set_fifo_empty_int(struct sprd_i2c *i2c_dev, int enable)
 {
-	u32 tmp = readl(i2c_dev->base + I2C_CTL);
+	u32 tmp = pete_readl("drivers/i2c/busses/i2c-sprd.c:188", i2c_dev->base + I2C_CTL);
 
 	if (enable)
 		tmp |= EMPTY_INTEN;
 	else
 		tmp &= ~EMPTY_INTEN;
 
-	writel(tmp, i2c_dev->base + I2C_CTL);
+	pete_writel("drivers/i2c/busses/i2c-sprd.c:195", tmp, i2c_dev->base + I2C_CTL);
 };
 
 static void sprd_i2c_opt_start(struct sprd_i2c *i2c_dev)
 {
-	u32 tmp = readl(i2c_dev->base + I2C_CTL);
+	u32 tmp = pete_readl("drivers/i2c/busses/i2c-sprd.c:200", i2c_dev->base + I2C_CTL);
 
-	writel(tmp | I2C_START, i2c_dev->base + I2C_CTL);
+	pete_writel("drivers/i2c/busses/i2c-sprd.c:202", tmp | I2C_START, i2c_dev->base + I2C_CTL);
 }
 
 static void sprd_i2c_opt_mode(struct sprd_i2c *i2c_dev, int rw)
 {
-	u32 cmd = readl(i2c_dev->base + I2C_CTL) & ~I2C_MODE;
+	u32 cmd = pete_readl("drivers/i2c/busses/i2c-sprd.c:207", i2c_dev->base + I2C_CTL) & ~I2C_MODE;
 
-	writel(cmd | rw << 3, i2c_dev->base + I2C_CTL);
+	pete_writel("drivers/i2c/busses/i2c-sprd.c:209", cmd | rw << 3, i2c_dev->base + I2C_CTL);
 }
 
 static void sprd_i2c_data_transfer(struct sprd_i2c *i2c_dev)
@@ -339,21 +339,21 @@ static void sprd_i2c_set_clk(struct sprd_i2c *i2c_dev, u32 freq)
 	u32 div0 = I2C_ADDR_DVD0_CALC(high, low);
 	u32 div1 = I2C_ADDR_DVD1_CALC(high, low);
 
-	writel(div0, i2c_dev->base + ADDR_DVD0);
-	writel(div1, i2c_dev->base + ADDR_DVD1);
+	pete_writel("drivers/i2c/busses/i2c-sprd.c:342", div0, i2c_dev->base + ADDR_DVD0);
+	pete_writel("drivers/i2c/busses/i2c-sprd.c:343", div1, i2c_dev->base + ADDR_DVD1);
 
 	/* Start hold timing = hold time(us) * source clock */
 	if (freq == I2C_MAX_FAST_MODE_FREQ)
-		writel((6 * apb_clk) / 10000000, i2c_dev->base + ADDR_STA0_DVD);
+		pete_writel("drivers/i2c/busses/i2c-sprd.c:347", (6 * apb_clk) / 10000000, i2c_dev->base + ADDR_STA0_DVD);
 	else if (freq == I2C_MAX_STANDARD_MODE_FREQ)
-		writel((4 * apb_clk) / 1000000, i2c_dev->base + ADDR_STA0_DVD);
+		pete_writel("drivers/i2c/busses/i2c-sprd.c:349", (4 * apb_clk) / 1000000, i2c_dev->base + ADDR_STA0_DVD);
 }
 
 static void sprd_i2c_enable(struct sprd_i2c *i2c_dev)
 {
 	u32 tmp = I2C_DVD_OPT;
 
-	writel(tmp, i2c_dev->base + I2C_CTL);
+	pete_writel("drivers/i2c/busses/i2c-sprd.c:356", tmp, i2c_dev->base + I2C_CTL);
 
 	sprd_i2c_set_full_thld(i2c_dev, I2C_FIFO_FULL_THLD);
 	sprd_i2c_set_empty_thld(i2c_dev, I2C_FIFO_EMPTY_THLD);
@@ -362,15 +362,15 @@ static void sprd_i2c_enable(struct sprd_i2c *i2c_dev)
 	sprd_i2c_reset_fifo(i2c_dev);
 	sprd_i2c_clear_irq(i2c_dev);
 
-	tmp = readl(i2c_dev->base + I2C_CTL);
-	writel(tmp | I2C_EN | I2C_INT_EN, i2c_dev->base + I2C_CTL);
+	tmp = pete_readl("drivers/i2c/busses/i2c-sprd.c:365", i2c_dev->base + I2C_CTL);
+	pete_writel("drivers/i2c/busses/i2c-sprd.c:366", tmp | I2C_EN | I2C_INT_EN, i2c_dev->base + I2C_CTL);
 }
 
 static irqreturn_t sprd_i2c_isr_thread(int irq, void *dev_id)
 {
 	struct sprd_i2c *i2c_dev = dev_id;
 	struct i2c_msg *msg = i2c_dev->msg;
-	bool ack = !(readl(i2c_dev->base + I2C_STATUS) & I2C_RX_ACK);
+	bool ack = !(pete_readl("drivers/i2c/busses/i2c-sprd.c:373", i2c_dev->base + I2C_STATUS) & I2C_RX_ACK);
 	u32 i2c_tran;
 
 	if (msg->flags & I2C_M_RD)
@@ -414,7 +414,7 @@ static irqreturn_t sprd_i2c_isr(int irq, void *dev_id)
 {
 	struct sprd_i2c *i2c_dev = dev_id;
 	struct i2c_msg *msg = i2c_dev->msg;
-	bool ack = !(readl(i2c_dev->base + I2C_STATUS) & I2C_RX_ACK);
+	bool ack = !(pete_readl("drivers/i2c/busses/i2c-sprd.c:417", i2c_dev->base + I2C_STATUS) & I2C_RX_ACK);
 	u32 i2c_tran;
 
 	if (msg->flags & I2C_M_RD)

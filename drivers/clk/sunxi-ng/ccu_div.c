@@ -60,7 +60,7 @@ static unsigned long ccu_div_recalc_rate(struct clk_hw *hw,
 	unsigned long val;
 	u32 reg;
 
-	reg = readl(cd->common.base + cd->common.reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_div.c:63", cd->common.base + cd->common.reg);
 	val = reg >> cd->div.shift;
 	val &= (1 << cd->div.width) - 1;
 
@@ -104,10 +104,10 @@ static int ccu_div_set_rate(struct clk_hw *hw, unsigned long rate,
 
 	spin_lock_irqsave(cd->common.lock, flags);
 
-	reg = readl(cd->common.base + cd->common.reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_div.c:107", cd->common.base + cd->common.reg);
 	reg &= ~GENMASK(cd->div.width + cd->div.shift - 1, cd->div.shift);
 
-	writel(reg | (val << cd->div.shift),
+	pete_writel("drivers/clk/sunxi-ng/ccu_div.c:110", reg | (val << cd->div.shift),
 	       cd->common.base + cd->common.reg);
 
 	spin_unlock_irqrestore(cd->common.lock, flags);

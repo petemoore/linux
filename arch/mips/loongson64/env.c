@@ -164,7 +164,7 @@ void __init prom_lefi_init_env(void)
 	pr_info("CpuClock = %u\n", cpu_clock_freq);
 
 	/* Read the ID of PCI host bridge to detect bridge type */
-	id = readl(HOST_BRIDGE_CONFIG_ADDR);
+	id = pete_readl("arch/mips/loongson64/env.c:167", HOST_BRIDGE_CONFIG_ADDR);
 	vendor = id & 0xffff;
 
 	switch (vendor) {

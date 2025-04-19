@@ -543,7 +543,7 @@ static int __init dns323_identify_rev(void)
 #define  SMI_OPCODE_WRITE	0x00000000
 
 	for (i = 0; i < 1000; i++) {
-		reg = readl(ETH_SMI_REG);
+		reg = pete_readl("arch/arm/mach-orion5x/dns323-setup.c:546", ETH_SMI_REG);
 		if (!(reg & SMI_BUSY))
 			break;
 	}
@@ -551,11 +551,11 @@ static int __init dns323_identify_rev(void)
 		pr_warn("DNS-323: Timeout accessing PHY, assuming rev B1\n");
 		return DNS323_REV_B1;
 	}
-	writel((3 << 21)	/* phy ID reg */ |
+	pete_writel("arch/arm/mach-orion5x/dns323-setup.c:554", (3 << 21)	/* phy ID reg */ |
 	       (8 << 16)	/* phy addr */ |
 	       SMI_OPCODE_READ, ETH_SMI_REG);
 	for (i = 0; i < 1000; i++) {
-		reg = readl(ETH_SMI_REG);
+		reg = pete_readl("arch/arm/mach-orion5x/dns323-setup.c:558", ETH_SMI_REG);
 		if (reg & SMI_READ_VALID)
 			break;
 	}
@@ -596,7 +596,7 @@ static void __init dns323_init(void)
 	switch(system_rev) {
 	case DNS323_REV_A1:
 		orion5x_mpp_conf(dns323a_mpp_modes);
-		writel(0, MPP_DEV_CTRL);		/* DEV_D[31:16] */
+		pete_writel("arch/arm/mach-orion5x/dns323-setup.c:599", 0, MPP_DEV_CTRL);		/* DEV_D[31:16] */
 		break;
 	case DNS323_REV_B1:
 		orion5x_mpp_conf(dns323b_mpp_modes);
@@ -704,7 +704,7 @@ static void __init dns323_init(void)
 		 * Note: AFAIK, rev B1 needs the same treatement but I'll let
 		 * somebody else test it.
 		 */
-		writel(0x5, ORION5X_SATA_VIRT_BASE + 0x2c);
+		pete_writel("arch/arm/mach-orion5x/dns323-setup.c:707", 0x5, ORION5X_SATA_VIRT_BASE + 0x2c);
 		break;
 	}
 }

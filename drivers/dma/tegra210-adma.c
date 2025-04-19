@@ -169,22 +169,22 @@ struct tegra_adma {
 
 static inline void tdma_write(struct tegra_adma *tdma, u32 reg, u32 val)
 {
-	writel(val, tdma->base_addr + tdma->cdata->global_reg_offset + reg);
+	pete_writel("drivers/dma/tegra210-adma.c:172", val, tdma->base_addr + tdma->cdata->global_reg_offset + reg);
 }
 
 static inline u32 tdma_read(struct tegra_adma *tdma, u32 reg)
 {
-	return readl(tdma->base_addr + tdma->cdata->global_reg_offset + reg);
+	return pete_readl("drivers/dma/tegra210-adma.c:177", tdma->base_addr + tdma->cdata->global_reg_offset + reg);
 }
 
 static inline void tdma_ch_write(struct tegra_adma_chan *tdc, u32 reg, u32 val)
 {
-	writel(val, tdc->chan_addr + reg);
+	pete_writel("drivers/dma/tegra210-adma.c:182", val, tdc->chan_addr + reg);
 }
 
 static inline u32 tdma_ch_read(struct tegra_adma_chan *tdc, u32 reg)
 {
-	return readl(tdc->chan_addr + reg);
+	return pete_readl("drivers/dma/tegra210-adma.c:187", tdc->chan_addr + reg);
 }
 
 static inline struct tegra_adma_chan *to_tegra_adma_chan(struct dma_chan *dc)

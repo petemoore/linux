@@ -185,13 +185,13 @@ struct vop {
 
 static inline void vop_writel(struct vop *vop, uint32_t offset, uint32_t v)
 {
-	writel(v, vop->regs + offset);
+	pete_writel("drivers/gpu/drm/rockchip/rockchip_drm_vop.c:188", v, vop->regs + offset);
 	vop->regsbak[offset >> 2] = v;
 }
 
 static inline uint32_t vop_readl(struct vop *vop, uint32_t offset)
 {
-	return readl(vop->regs + offset);
+	return pete_readl("drivers/gpu/drm/rockchip/rockchip_drm_vop.c:194", vop->regs + offset);
 }
 
 static inline uint32_t vop_read_reg(struct vop *vop, uint32_t base,
@@ -227,7 +227,7 @@ static void vop_reg_set(struct vop *vop, const struct vop_reg *reg,
 	if (reg->relaxed)
 		writel_relaxed(v, vop->regs + offset);
 	else
-		writel(v, vop->regs + offset);
+		pete_writel("drivers/gpu/drm/rockchip/rockchip_drm_vop.c:230", v, vop->regs + offset);
 }
 
 static inline uint32_t vop_get_intr_type(struct vop *vop,
@@ -1213,7 +1213,7 @@ static void vop_crtc_write_gamma_lut(struct vop *vop, struct drm_crtc *crtc)
 		word = (drm_color_lut_extract(lut[i].red, 10) << 20) |
 		       (drm_color_lut_extract(lut[i].green, 10) << 10) |
 			drm_color_lut_extract(lut[i].blue, 10);
-		writel(word, vop->lut_regs + i * 4);
+		pete_writel("drivers/gpu/drm/rockchip/rockchip_drm_vop.c:1216", word, vop->lut_regs + i * 4);
 	}
 }
 

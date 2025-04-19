@@ -46,9 +46,9 @@ static void pch_pic_bitset(struct pch_pic *priv, int offset, int bit)
 	void __iomem *addr = priv->base + offset + PIC_REG_IDX(bit) * 4;
 
 	raw_spin_lock(&priv->pic_lock);
-	reg = readl(addr);
+	reg = pete_readl("drivers/irqchip/irq-loongson-pch-pic.c:49", addr);
 	reg |= BIT(PIC_REG_BIT(bit));
-	writel(reg, addr);
+	pete_writel("drivers/irqchip/irq-loongson-pch-pic.c:51", reg, addr);
 	raw_spin_unlock(&priv->pic_lock);
 }
 
@@ -58,9 +58,9 @@ static void pch_pic_bitclr(struct pch_pic *priv, int offset, int bit)
 	void __iomem *addr = priv->base + offset + PIC_REG_IDX(bit) * 4;
 
 	raw_spin_lock(&priv->pic_lock);
-	reg = readl(addr);
+	reg = pete_readl("drivers/irqchip/irq-loongson-pch-pic.c:61", addr);
 	reg &= ~BIT(PIC_REG_BIT(bit));
-	writel(reg, addr);
+	pete_writel("drivers/irqchip/irq-loongson-pch-pic.c:63", reg, addr);
 	raw_spin_unlock(&priv->pic_lock);
 }
 
@@ -76,7 +76,7 @@ static void pch_pic_unmask_irq(struct irq_data *d)
 {
 	struct pch_pic *priv = irq_data_get_irq_chip_data(d);
 
-	writel(BIT(PIC_REG_BIT(d->hwirq)),
+	pete_writel("drivers/irqchip/irq-loongson-pch-pic.c:79", BIT(PIC_REG_BIT(d->hwirq)),
 			priv->base + PCH_PIC_CLR + PIC_REG_IDX(d->hwirq) * 4);
 
 	irq_chip_unmask_parent(d);
@@ -122,9 +122,9 @@ static void pch_pic_ack_irq(struct irq_data *d)
 	unsigned int reg;
 	struct pch_pic *priv = irq_data_get_irq_chip_data(d);
 
-	reg = readl(priv->base + PCH_PIC_EDGE + PIC_REG_IDX(d->hwirq) * 4);
+	reg = pete_readl("drivers/irqchip/irq-loongson-pch-pic.c:125", priv->base + PCH_PIC_EDGE + PIC_REG_IDX(d->hwirq) * 4);
 	if (reg & BIT(PIC_REG_BIT(d->hwirq))) {
-		writel(BIT(PIC_REG_BIT(d->hwirq)),
+		pete_writel("drivers/irqchip/irq-loongson-pch-pic.c:127", BIT(PIC_REG_BIT(d->hwirq)),
 			priv->base + PCH_PIC_CLR + PIC_REG_IDX(d->hwirq) * 4);
 	}
 	irq_chip_ack_parent(d);
@@ -181,9 +181,9 @@ static void pch_pic_reset(struct pch_pic *priv)
 
 	for (i = 0; i < PIC_COUNT; i++) {
 		/* Write vectored ID */
-		writeb(priv->ht_vec_base + i, priv->base + PCH_INT_HTVEC(i));
+		pete_writeb("drivers/irqchip/irq-loongson-pch-pic.c:184", priv->ht_vec_base + i, priv->base + PCH_INT_HTVEC(i));
 		/* Hardcode route to HT0 Lo */
-		writeb(1, priv->base + PCH_INT_ROUTE(i));
+		pete_writeb("drivers/irqchip/irq-loongson-pch-pic.c:186", 1, priv->base + PCH_INT_ROUTE(i));
 	}
 
 	for (i = 0; i < PIC_REG_COUNT; i++) {

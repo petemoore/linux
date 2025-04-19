@@ -104,8 +104,8 @@ static irqreturn_t sun4i_ps2_interrupt(int irq, void *dev_id)
 	spin_lock(&drvdata->lock);
 
 	/* Get the PS/2 interrupts and clear them */
-	intr_status  = readl(drvdata->reg_base + PS2_REG_LSTS);
-	fifo_status  = readl(drvdata->reg_base + PS2_REG_FSTS);
+	intr_status  = pete_readl("drivers/input/serio/sun4i-ps2.c:107", drvdata->reg_base + PS2_REG_LSTS);
+	fifo_status  = pete_readl("drivers/input/serio/sun4i-ps2.c:108", drvdata->reg_base + PS2_REG_FSTS);
 
 	/* Check line status register */
 	if (intr_status & PS2_LINE_ERROR_BIT) {
@@ -115,24 +115,24 @@ static irqreturn_t sun4i_ps2_interrupt(int irq, void *dev_id)
 
 		rval = PS2_LSTS_TXTDO | PS2_LSTS_STOPERR | PS2_LSTS_ACKERR |
 			PS2_LSTS_PARERR | PS2_LSTS_RXTDO;
-		writel(rval, drvdata->reg_base + PS2_REG_LSTS);
+		pete_writel("drivers/input/serio/sun4i-ps2.c:118", rval, drvdata->reg_base + PS2_REG_LSTS);
 	}
 
 	/* Check FIFO status register */
 	if (fifo_status & PS2_FIFO_ERROR_BIT) {
 		rval = PS2_FSTS_TXUF | PS2_FSTS_TXOF | PS2_FSTS_TXRDY |
 			PS2_FSTS_RXUF | PS2_FSTS_RXOF | PS2_FSTS_RXRDY;
-		writel(rval, drvdata->reg_base + PS2_REG_FSTS);
+		pete_writel("drivers/input/serio/sun4i-ps2.c:125", rval, drvdata->reg_base + PS2_REG_FSTS);
 	}
 
 	rval = (fifo_status >> 16) & 0x3;
 	while (rval--) {
-		byte = readl(drvdata->reg_base + PS2_REG_DATA) & 0xff;
+		byte = pete_readl("drivers/input/serio/sun4i-ps2.c:130", drvdata->reg_base + PS2_REG_DATA) & 0xff;
 		serio_interrupt(drvdata->serio, byte, rxflags);
 	}
 
-	writel(intr_status, drvdata->reg_base + PS2_REG_LSTS);
-	writel(fifo_status, drvdata->reg_base + PS2_REG_FSTS);
+	pete_writel("drivers/input/serio/sun4i-ps2.c:134", intr_status, drvdata->reg_base + PS2_REG_LSTS);
+	pete_writel("drivers/input/serio/sun4i-ps2.c:135", fifo_status, drvdata->reg_base + PS2_REG_FSTS);
 
 	spin_unlock(&drvdata->lock);
 
@@ -151,28 +151,28 @@ static int sun4i_ps2_open(struct serio *serio)
 	/* Set line control and enable interrupt */
 	rval = PS2_LCTL_STOPERREN | PS2_LCTL_ACKERREN
 		| PS2_LCTL_PARERREN | PS2_LCTL_RXDTOEN;
-	writel(rval, drvdata->reg_base + PS2_REG_LCTL);
+	pete_writel("drivers/input/serio/sun4i-ps2.c:154", rval, drvdata->reg_base + PS2_REG_LCTL);
 
 	/* Reset FIFO */
 	rval = PS2_FCTL_TXRST | PS2_FCTL_RXRST | PS2_FCTL_TXUFIEN
 		| PS2_FCTL_TXOFIEN | PS2_FCTL_RXUFIEN
 		| PS2_FCTL_RXOFIEN | PS2_FCTL_RXRDYIEN;
 
-	writel(rval, drvdata->reg_base + PS2_REG_FCTL);
+	pete_writel("drivers/input/serio/sun4i-ps2.c:161", rval, drvdata->reg_base + PS2_REG_FCTL);
 
 	src_clk = clk_get_rate(drvdata->clk);
 	/* Set clock divider register */
 	clk_scdf = src_clk / PS2_SAMPLE_CLK - 1;
 	clk_pcdf = PS2_SAMPLE_CLK / PS2_SCLK - 1;
 	rval = (clk_scdf << 8) | clk_pcdf;
-	writel(rval, drvdata->reg_base + PS2_REG_CLKDR);
+	pete_writel("drivers/input/serio/sun4i-ps2.c:168", rval, drvdata->reg_base + PS2_REG_CLKDR);
 
 	/* Set global control register */
 	rval = PS2_GCTL_RESET | PS2_GCTL_INTEN | PS2_GCTL_MASTER
 		| PS2_GCTL_BUSEN;
 
 	spin_lock_irqsave(&drvdata->lock, flags);
-	writel(rval, drvdata->reg_base + PS2_REG_GCTL);
+	pete_writel("drivers/input/serio/sun4i-ps2.c:175", rval, drvdata->reg_base + PS2_REG_GCTL);
 	spin_unlock_irqrestore(&drvdata->lock, flags);
 
 	return 0;
@@ -184,8 +184,8 @@ static void sun4i_ps2_close(struct serio *serio)
 	u32 rval;
 
 	/* Shut off the interrupt */
-	rval = readl(drvdata->reg_base + PS2_REG_GCTL);
-	writel(rval & ~(PS2_GCTL_INTEN), drvdata->reg_base + PS2_REG_GCTL);
+	rval = pete_readl("drivers/input/serio/sun4i-ps2.c:187", drvdata->reg_base + PS2_REG_GCTL);
+	pete_writel("drivers/input/serio/sun4i-ps2.c:188", rval & ~(PS2_GCTL_INTEN), drvdata->reg_base + PS2_REG_GCTL);
 
 	synchronize_irq(drvdata->irq);
 }
@@ -196,8 +196,8 @@ static int sun4i_ps2_write(struct serio *serio, unsigned char val)
 	struct sun4i_ps2data *drvdata = serio->port_data;
 
 	do {
-		if (readl(drvdata->reg_base + PS2_REG_FSTS) & PS2_FSTS_TXRDY) {
-			writel(val, drvdata->reg_base + PS2_REG_DATA);
+		if (pete_readl("drivers/input/serio/sun4i-ps2.c:199", drvdata->reg_base + PS2_REG_FSTS) & PS2_FSTS_TXRDY) {
+			pete_writel("drivers/input/serio/sun4i-ps2.c:200", val, drvdata->reg_base + PS2_REG_DATA);
 			return 0;
 		}
 	} while (time_before(jiffies, expire));
@@ -260,7 +260,7 @@ static int sun4i_ps2_probe(struct platform_device *pdev)
 	strlcpy(serio->phys, dev_name(dev), sizeof(serio->phys));
 
 	/* shutoff interrupt */
-	writel(0, drvdata->reg_base + PS2_REG_GCTL);
+	pete_writel("drivers/input/serio/sun4i-ps2.c:263", 0, drvdata->reg_base + PS2_REG_GCTL);
 
 	/* Get IRQ for the device */
 	drvdata->irq = platform_get_irq(pdev, 0);

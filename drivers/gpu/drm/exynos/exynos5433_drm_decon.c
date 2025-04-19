@@ -94,8 +94,8 @@ static const unsigned int capabilities[WINDOWS_NR] = {
 static inline void decon_set_bits(struct decon_context *ctx, u32 reg, u32 mask,
 				  u32 val)
 {
-	val = (val & mask) | (readl(ctx->addr + reg) & ~mask);
-	writel(val, ctx->addr + reg);
+	val = (val & mask) | (pete_readl("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:97", ctx->addr + reg) & ~mask);
+	pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:98", val, ctx->addr + reg);
 }
 
 static int decon_enable_vblank(struct exynos_drm_crtc *crtc)
@@ -109,7 +109,7 @@ static int decon_enable_vblank(struct exynos_drm_crtc *crtc)
 	else
 		val |= VIDINTCON0_INTFRMEN | VIDINTCON0_FRAMESEL_FP;
 
-	writel(val, ctx->addr + DECON_VIDINTCON0);
+	pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:112", val, ctx->addr + DECON_VIDINTCON0);
 
 	enable_irq(ctx->irq);
 	if (!(ctx->out_type & I80_HW_TRG))
@@ -126,7 +126,7 @@ static void decon_disable_vblank(struct exynos_drm_crtc *crtc)
 		disable_irq_nosync(ctx->te_irq);
 	disable_irq_nosync(ctx->irq);
 
-	writel(0, ctx->addr + DECON_VIDINTCON0);
+	pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:129", 0, ctx->addr + DECON_VIDINTCON0);
 }
 
 /* return number of starts/ends of frame transmissions since reset */
@@ -138,11 +138,11 @@ static u32 decon_get_frame_count(struct decon_context *ctx, bool end)
 	 * Usually the loop will be executed once, in rare cases when the loop
 	 * is executed at frame change time 2nd pass will be needed.
 	 */
-	frm = readl(ctx->addr + DECON_CRFMID);
+	frm = pete_readl("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:141", ctx->addr + DECON_CRFMID);
 	do {
-		status = readl(ctx->addr + DECON_VIDCON1);
+		status = pete_readl("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:143", ctx->addr + DECON_VIDCON1);
 		pfrm = frm;
-		frm = readl(ctx->addr + DECON_CRFMID);
+		frm = pete_readl("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:145", ctx->addr + DECON_CRFMID);
 	} while (frm != pfrm && --cnt);
 
 	/* CRFMID is incremented on BPORCH in case of I80 and on VSYNC in case
@@ -177,13 +177,13 @@ static void decon_setup_trigger(struct decon_context *ctx)
 		return;
 
 	if (!(ctx->out_type & I80_HW_TRG)) {
-		writel(TRIGCON_TRIGEN_PER_F | TRIGCON_TRIGEN_F |
+		pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:180", TRIGCON_TRIGEN_PER_F | TRIGCON_TRIGEN_F |
 		       TRIGCON_TE_AUTO_MASK | TRIGCON_SWTRIGEN,
 		       ctx->addr + DECON_TRIGCON);
 		return;
 	}
 
-	writel(TRIGCON_TRIGEN_PER_F | TRIGCON_TRIGEN_F | TRIGCON_HWTRIGMASK
+	pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:186", TRIGCON_TRIGEN_PER_F | TRIGCON_TRIGEN_F | TRIGCON_HWTRIGMASK
 	       | TRIGCON_HWTRIGEN, ctx->addr + DECON_TRIGCON);
 
 	if (regmap_update_bits(ctx->sysreg, DSD_CFG_MUX,
@@ -219,7 +219,7 @@ static void decon_commit(struct exynos_drm_crtc *crtc)
 		val |= VIDOUT_RGB_IF;
 	}
 
-	writel(val, ctx->addr + DECON_VIDOUTCON0);
+	pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:222", val, ctx->addr + DECON_VIDOUTCON0);
 
 	if (interlaced)
 		val = VIDTCON2_LINEVAL(m->vdisplay / 2 - 1) |
@@ -227,7 +227,7 @@ static void decon_commit(struct exynos_drm_crtc *crtc)
 	else
 		val = VIDTCON2_LINEVAL(m->vdisplay - 1) |
 			VIDTCON2_HOZVAL(m->hdisplay - 1);
-	writel(val, ctx->addr + DECON_VIDTCON2);
+	pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:230", val, ctx->addr + DECON_VIDTCON2);
 
 	if (!crtc->i80_mode) {
 		int vbp = m->crtc_vtotal - m->crtc_vsync_end;
@@ -236,21 +236,21 @@ static void decon_commit(struct exynos_drm_crtc *crtc)
 		if (interlaced)
 			vbp = vbp / 2 - 1;
 		val = VIDTCON00_VBPD_F(vbp - 1) | VIDTCON00_VFPD_F(vfp - 1);
-		writel(val, ctx->addr + DECON_VIDTCON00);
+		pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:239", val, ctx->addr + DECON_VIDTCON00);
 
 		val = VIDTCON01_VSPW_F(
 				m->crtc_vsync_end - m->crtc_vsync_start - 1);
-		writel(val, ctx->addr + DECON_VIDTCON01);
+		pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:243", val, ctx->addr + DECON_VIDTCON01);
 
 		val = VIDTCON10_HBPD_F(
 				m->crtc_htotal - m->crtc_hsync_end - 1) |
 			VIDTCON10_HFPD_F(
 				m->crtc_hsync_start - m->crtc_hdisplay - 1);
-		writel(val, ctx->addr + DECON_VIDTCON10);
+		pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:249", val, ctx->addr + DECON_VIDTCON10);
 
 		val = VIDTCON11_HSPW_F(
 				m->crtc_hsync_end - m->crtc_hsync_start - 1);
-		writel(val, ctx->addr + DECON_VIDTCON11);
+		pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:253", val, ctx->addr + DECON_VIDTCON11);
 	}
 
 	/* enable output and display signal */
@@ -329,7 +329,7 @@ static void decon_win_set_pixfmt(struct decon_context *ctx, unsigned int win,
 	else
 		pixel_alpha = DRM_MODE_BLEND_PIXEL_NONE;
 
-	val = readl(ctx->addr + DECON_WINCONx(win));
+	val = pete_readl("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:332", ctx->addr + DECON_WINCONx(win));
 	val &= WINCONx_ENWIN_F;
 
 	switch (fb->format->format) {
@@ -411,32 +411,32 @@ static void decon_update_plane(struct exynos_drm_crtc *crtc,
 	if (crtc->base.mode.flags & DRM_MODE_FLAG_INTERLACE) {
 		val = COORDINATE_X(state->crtc.x) |
 			COORDINATE_Y(state->crtc.y / 2);
-		writel(val, ctx->addr + DECON_VIDOSDxA(win));
+		pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:414", val, ctx->addr + DECON_VIDOSDxA(win));
 
 		val = COORDINATE_X(state->crtc.x + state->crtc.w - 1) |
 			COORDINATE_Y((state->crtc.y + state->crtc.h) / 2 - 1);
-		writel(val, ctx->addr + DECON_VIDOSDxB(win));
+		pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:418", val, ctx->addr + DECON_VIDOSDxB(win));
 	} else {
 		val = COORDINATE_X(state->crtc.x) | COORDINATE_Y(state->crtc.y);
-		writel(val, ctx->addr + DECON_VIDOSDxA(win));
+		pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:421", val, ctx->addr + DECON_VIDOSDxA(win));
 
 		val = COORDINATE_X(state->crtc.x + state->crtc.w - 1) |
 				COORDINATE_Y(state->crtc.y + state->crtc.h - 1);
-		writel(val, ctx->addr + DECON_VIDOSDxB(win));
+		pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:425", val, ctx->addr + DECON_VIDOSDxB(win));
 	}
 
 	val = VIDOSD_Wx_ALPHA_R_F(0xff) | VIDOSD_Wx_ALPHA_G_F(0xff) |
 		VIDOSD_Wx_ALPHA_B_F(0xff);
-	writel(val, ctx->addr + DECON_VIDOSDxC(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:430", val, ctx->addr + DECON_VIDOSDxC(win));
 
 	val = VIDOSD_Wx_ALPHA_R_F(0x0) | VIDOSD_Wx_ALPHA_G_F(0x0) |
 		VIDOSD_Wx_ALPHA_B_F(0x0);
-	writel(val, ctx->addr + DECON_VIDOSDxD(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:434", val, ctx->addr + DECON_VIDOSDxD(win));
 
-	writel(dma_addr, ctx->addr + DECON_VIDW0xADD0B0(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:436", dma_addr, ctx->addr + DECON_VIDW0xADD0B0(win));
 
 	val = dma_addr + pitch * state->src.h;
-	writel(val, ctx->addr + DECON_VIDW0xADD1B0(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:439", val, ctx->addr + DECON_VIDW0xADD1B0(win));
 
 	if (!(ctx->out_type & IFTYPE_HDMI))
 		val = BIT_VAL(pitch - state->crtc.w * cpp, 27, 14)
@@ -444,7 +444,7 @@ static void decon_update_plane(struct exynos_drm_crtc *crtc,
 	else
 		val = BIT_VAL(pitch - state->crtc.w * cpp, 29, 15)
 			| BIT_VAL(state->crtc.w * cpp, 14, 0);
-	writel(val, ctx->addr + DECON_VIDW0xADD2(win));
+	pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:447", val, ctx->addr + DECON_VIDW0xADD2(win));
 
 	decon_win_set_pixfmt(ctx, win, fb);
 
@@ -485,11 +485,11 @@ static void decon_swreset(struct decon_context *ctx)
 	u32 val;
 	int ret;
 
-	writel(0, ctx->addr + DECON_VIDCON0);
+	pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:488", 0, ctx->addr + DECON_VIDCON0);
 	readl_poll_timeout(ctx->addr + DECON_VIDCON0, val,
 			   ~val & VIDCON0_STOP_STATUS, 12, 20000);
 
-	writel(VIDCON0_SWRESET, ctx->addr + DECON_VIDCON0);
+	pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:492", VIDCON0_SWRESET, ctx->addr + DECON_VIDCON0);
 	ret = readl_poll_timeout(ctx->addr + DECON_VIDCON0, val,
 				 ~val & VIDCON0_SWRESET, 12, 20000);
 
@@ -502,11 +502,11 @@ static void decon_swreset(struct decon_context *ctx)
 	if (!(ctx->out_type & IFTYPE_HDMI))
 		return;
 
-	writel(VIDCON0_CLKVALUP | VIDCON0_VLCKFREE, ctx->addr + DECON_VIDCON0);
+	pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:505", VIDCON0_CLKVALUP | VIDCON0_VLCKFREE, ctx->addr + DECON_VIDCON0);
 	decon_set_bits(ctx, DECON_CMU,
 		       CMU_CLKGAGE_MODE_SFR_F | CMU_CLKGAGE_MODE_MEM_F, ~0);
-	writel(VIDCON1_VCLK_RUN_VDEN_DISABLE, ctx->addr + DECON_VIDCON1);
-	writel(CRCCTRL_CRCEN | CRCCTRL_CRCSTART_F | CRCCTRL_CRCCLKEN,
+	pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:508", VIDCON1_VCLK_RUN_VDEN_DISABLE, ctx->addr + DECON_VIDCON1);
+	pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:509", CRCCTRL_CRCEN | CRCCTRL_CRCSTART_F | CRCCTRL_CRCCLKEN,
 	       ctx->addr + DECON_CRCCTRL);
 }
 
@@ -690,13 +690,13 @@ static irqreturn_t decon_irq_handler(int irq, void *dev_id)
 	struct decon_context *ctx = dev_id;
 	u32 val;
 
-	val = readl(ctx->addr + DECON_VIDINTCON1);
+	val = pete_readl("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:693", ctx->addr + DECON_VIDINTCON1);
 	val &= VIDINTCON1_INTFRMDONEPEND | VIDINTCON1_INTFRMPEND;
 
 	if (val) {
-		writel(val, ctx->addr + DECON_VIDINTCON1);
+		pete_writel("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:697", val, ctx->addr + DECON_VIDINTCON1);
 		if (ctx->out_type & IFTYPE_HDMI) {
-			val = readl(ctx->addr + DECON_VIDOUTCON0);
+			val = pete_readl("drivers/gpu/drm/exynos/exynos5433_drm_decon.c:699", ctx->addr + DECON_VIDOUTCON0);
 			val &= VIDOUT_INTERLACE_EN_F | VIDOUT_INTERLACE_FIELD_F;
 			if (val ==
 			    (VIDOUT_INTERLACE_EN_F | VIDOUT_INTERLACE_FIELD_F))

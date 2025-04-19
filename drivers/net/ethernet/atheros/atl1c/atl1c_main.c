@@ -694,7 +694,7 @@ static enum atl1c_nic_type atl1c_get_mac_type(struct pci_dev *pdev,
 	case PCI_DEVICE_ID_ATHEROS_L1D:
 		return athr_l1d;
 	case PCI_DEVICE_ID_ATHEROS_L1D_2_0:
-		if (readl(hw_addr + REG_MT_MAGIC) == MT_MAGIC)
+		if (pete_readl("drivers/net/ethernet/atheros/atl1c/atl1c_main.c:697", hw_addr + REG_MT_MAGIC) == MT_MAGIC)
 			return athr_mt;
 		return athr_l1d_2;
 	default:

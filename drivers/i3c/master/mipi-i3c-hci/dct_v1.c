@@ -25,7 +25,7 @@ void i3c_hci_dct_get_val(struct i3c_hci *hci, unsigned int dct_idx,
 	unsigned int i;
 
 	for (i = 0; i < 4; i++) {
-		dct_entry_data[i] = readl(reg);
+		dct_entry_data[i] = pete_readl("drivers/i3c/master/mipi-i3c-hci/dct_v1.c:28", reg);
 		reg += 4;
 	}
 

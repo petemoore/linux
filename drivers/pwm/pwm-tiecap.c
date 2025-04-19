@@ -72,32 +72,32 @@ static int ecap_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
 
 	pm_runtime_get_sync(pc->chip.dev);
 
-	value = readw(pc->mmio_base + ECCTL2);
+	value = pete_readw("drivers/pwm/pwm-tiecap.c:75", pc->mmio_base + ECCTL2);
 
 	/* Configure APWM mode & disable sync option */
 	value |= ECCTL2_APWM_MODE | ECCTL2_SYNC_SEL_DISA;
 
-	writew(value, pc->mmio_base + ECCTL2);
+	pete_writew("drivers/pwm/pwm-tiecap.c:80", value, pc->mmio_base + ECCTL2);
 
 	if (!enabled) {
 		/* Update active registers if not running */
-		writel(duty_cycles, pc->mmio_base + CAP2);
-		writel(period_cycles, pc->mmio_base + CAP1);
+		pete_writel("drivers/pwm/pwm-tiecap.c:84", duty_cycles, pc->mmio_base + CAP2);
+		pete_writel("drivers/pwm/pwm-tiecap.c:85", period_cycles, pc->mmio_base + CAP1);
 	} else {
 		/*
 		 * Update shadow registers to configure period and
 		 * compare values. This helps current PWM period to
 		 * complete on reconfiguring
 		 */
-		writel(duty_cycles, pc->mmio_base + CAP4);
-		writel(period_cycles, pc->mmio_base + CAP3);
+		pete_writel("drivers/pwm/pwm-tiecap.c:92", duty_cycles, pc->mmio_base + CAP4);
+		pete_writel("drivers/pwm/pwm-tiecap.c:93", period_cycles, pc->mmio_base + CAP3);
 	}
 
 	if (!enabled) {
-		value = readw(pc->mmio_base + ECCTL2);
+		value = pete_readw("drivers/pwm/pwm-tiecap.c:97", pc->mmio_base + ECCTL2);
 		/* Disable APWM mode to put APWM output Low */
 		value &= ~ECCTL2_APWM_MODE;
-		writew(value, pc->mmio_base + ECCTL2);
+		pete_writew("drivers/pwm/pwm-tiecap.c:100", value, pc->mmio_base + ECCTL2);
 	}
 
 	pm_runtime_put_sync(pc->chip.dev);
@@ -113,7 +113,7 @@ static int ecap_pwm_set_polarity(struct pwm_chip *chip, struct pwm_device *pwm,
 
 	pm_runtime_get_sync(pc->chip.dev);
 
-	value = readw(pc->mmio_base + ECCTL2);
+	value = pete_readw("drivers/pwm/pwm-tiecap.c:116", pc->mmio_base + ECCTL2);
 
 	if (polarity == PWM_POLARITY_INVERSED)
 		/* Duty cycle defines LOW period of PWM */
@@ -122,7 +122,7 @@ static int ecap_pwm_set_polarity(struct pwm_chip *chip, struct pwm_device *pwm,
 		/* Duty cycle defines HIGH period of PWM */
 		value &= ~ECCTL2_APWM_POL_LOW;
 
-	writew(value, pc->mmio_base + ECCTL2);
+	pete_writew("drivers/pwm/pwm-tiecap.c:125", value, pc->mmio_base + ECCTL2);
 
 	pm_runtime_put_sync(pc->chip.dev);
 
@@ -141,9 +141,9 @@ static int ecap_pwm_enable(struct pwm_chip *chip, struct pwm_device *pwm)
 	 * Enable 'Free run Time stamp counter mode' to start counter
 	 * and  'APWM mode' to enable APWM output
 	 */
-	value = readw(pc->mmio_base + ECCTL2);
+	value = pete_readw("drivers/pwm/pwm-tiecap.c:144", pc->mmio_base + ECCTL2);
 	value |= ECCTL2_TSCTR_FREERUN | ECCTL2_APWM_MODE;
-	writew(value, pc->mmio_base + ECCTL2);
+	pete_writew("drivers/pwm/pwm-tiecap.c:146", value, pc->mmio_base + ECCTL2);
 
 	return 0;
 }
@@ -157,9 +157,9 @@ static void ecap_pwm_disable(struct pwm_chip *chip, struct pwm_device *pwm)
 	 * Disable 'Free run Time stamp counter mode' to stop counter
 	 * and 'APWM mode' to put APWM output to low
 	 */
-	value = readw(pc->mmio_base + ECCTL2);
+	value = pete_readw("drivers/pwm/pwm-tiecap.c:160", pc->mmio_base + ECCTL2);
 	value &= ~(ECCTL2_TSCTR_FREERUN | ECCTL2_APWM_MODE);
-	writew(value, pc->mmio_base + ECCTL2);
+	pete_writew("drivers/pwm/pwm-tiecap.c:162", value, pc->mmio_base + ECCTL2);
 
 	/* Disable clock on PWM disable */
 	pm_runtime_put_sync(pc->chip.dev);
@@ -276,17 +276,17 @@ static int ecap_pwm_remove(struct platform_device *pdev)
 static void ecap_pwm_save_context(struct ecap_pwm_chip *pc)
 {
 	pm_runtime_get_sync(pc->chip.dev);
-	pc->ctx.ecctl2 = readw(pc->mmio_base + ECCTL2);
-	pc->ctx.cap4 = readl(pc->mmio_base + CAP4);
-	pc->ctx.cap3 = readl(pc->mmio_base + CAP3);
+	pc->ctx.ecctl2 = pete_readw("drivers/pwm/pwm-tiecap.c:279", pc->mmio_base + ECCTL2);
+	pc->ctx.cap4 = pete_readl("drivers/pwm/pwm-tiecap.c:280", pc->mmio_base + CAP4);
+	pc->ctx.cap3 = pete_readl("drivers/pwm/pwm-tiecap.c:281", pc->mmio_base + CAP3);
 	pm_runtime_put_sync(pc->chip.dev);
 }
 
 static void ecap_pwm_restore_context(struct ecap_pwm_chip *pc)
 {
-	writel(pc->ctx.cap3, pc->mmio_base + CAP3);
-	writel(pc->ctx.cap4, pc->mmio_base + CAP4);
-	writew(pc->ctx.ecctl2, pc->mmio_base + ECCTL2);
+	pete_writel("drivers/pwm/pwm-tiecap.c:287", pc->ctx.cap3, pc->mmio_base + CAP3);
+	pete_writel("drivers/pwm/pwm-tiecap.c:288", pc->ctx.cap4, pc->mmio_base + CAP4);
+	pete_writew("drivers/pwm/pwm-tiecap.c:289", pc->ctx.ecctl2, pc->mmio_base + ECCTL2);
 }
 
 static int ecap_pwm_suspend(struct device *dev)

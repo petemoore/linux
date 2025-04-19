@@ -1821,7 +1821,7 @@ static void gbe_reset_mod_stats(struct gbe_priv *gbe_dev, int stats_mod)
 		if (gbe_dev->et_stats[i].type == stats_mod) {
 			p_stats_entry = base + gbe_dev->et_stats[i].offset;
 			gbe_dev->hw_stats[i] = 0;
-			gbe_dev->hw_stats_prev[i] = readl(p_stats_entry);
+			gbe_dev->hw_stats_prev[i] = pete_readl("drivers/net/ethernet/ti/netcp_ethss.c:1824", p_stats_entry);
 		}
 	}
 }
@@ -1838,7 +1838,7 @@ static inline void gbe_update_hw_stats_entry(struct gbe_priv *gbe_dev,
 	 */
 	base = gbe_dev->hw_stats_regs[gbe_dev->et_stats[et_stats_entry].type];
 	p_stats_entry = base + gbe_dev->et_stats[et_stats_entry].offset;
-	curr = readl(p_stats_entry);
+	curr = pete_readl("drivers/net/ethernet/ti/netcp_ethss.c:1841", p_stats_entry);
 	delta = curr - gbe_dev->hw_stats_prev[et_stats_entry];
 	gbe_dev->hw_stats_prev[et_stats_entry] = curr;
 	gbe_dev->hw_stats[et_stats_entry] += delta;
@@ -1861,7 +1861,7 @@ static inline void gbe_stats_mod_visible_ver14(struct gbe_priv *gbe_dev,
 {
 	u32 val;
 
-	val = readl(GBE_REG_ADDR(gbe_dev, switch_regs, stat_port_en));
+	val = pete_readl("drivers/net/ethernet/ti/netcp_ethss.c:1864", GBE_REG_ADDR(gbe_dev, switch_regs, stat_port_en));
 
 	switch (stats_mod) {
 	case GBE_STATSA_MODULE:
@@ -1877,7 +1877,7 @@ static inline void gbe_stats_mod_visible_ver14(struct gbe_priv *gbe_dev,
 	}
 
 	/* make the stat module visible */
-	writel(val, GBE_REG_ADDR(gbe_dev, switch_regs, stat_port_en));
+	pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:1880", val, GBE_REG_ADDR(gbe_dev, switch_regs, stat_port_en));
 }
 
 static void gbe_reset_mod_stats_ver14(struct gbe_priv *gbe_dev, int stats_mod)
@@ -2058,8 +2058,8 @@ static void gbe_set_slave_mac(struct gbe_slave *slave,
 {
 	struct net_device *ndev = gbe_intf->ndev;
 
-	writel(mac_hi(ndev->dev_addr), GBE_REG_ADDR(slave, port_regs, sa_hi));
-	writel(mac_lo(ndev->dev_addr), GBE_REG_ADDR(slave, port_regs, sa_lo));
+	pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2061", mac_hi(ndev->dev_addr), GBE_REG_ADDR(slave, port_regs, sa_hi));
+	pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2062", mac_lo(ndev->dev_addr), GBE_REG_ADDR(slave, port_regs, sa_lo));
 }
 
 static int gbe_get_slave_port(struct gbe_priv *priv, u32 slave_num)
@@ -2088,7 +2088,7 @@ static void netcp_ethss_link_state_action(struct gbe_priv *gbe_dev,
 			mac_control &= ~MACSL_GIG_MODE;
 		}
 
-		writel(mac_control, GBE_REG_ADDR(slave, emac_regs,
+		pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2091", mac_control, GBE_REG_ADDR(slave, emac_regs,
 						 mac_control));
 
 		cpsw_ale_control_set(gbe_dev->ale, slave->port_num,
@@ -2101,7 +2101,7 @@ static void netcp_ethss_link_state_action(struct gbe_priv *gbe_dev,
 		    (slave->link_interface != XGMII_LINK_MAC_PHY)))
 			netif_carrier_on(ndev);
 	} else {
-		writel(mac_control, GBE_REG_ADDR(slave, emac_regs,
+		pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2104", mac_control, GBE_REG_ADDR(slave, emac_regs,
 						 mac_control));
 		cpsw_ale_control_set(gbe_dev->ale, slave->port_num,
 				     ALE_PORT_STATE,
@@ -2128,7 +2128,7 @@ static void netcp_2u_rgmii_get_port_link(struct gbe_priv *gbe_dev, bool *status)
 {
 	u32 val = 0;
 
-	val = readl(GBE_REG_ADDR(gbe_dev, ss_regs, rgmii_status));
+	val = pete_readl("drivers/net/ethernet/ti/netcp_ethss.c:2131", GBE_REG_ADDR(gbe_dev, ss_regs, rgmii_status));
 	*status = !!(val & RGMII_REG_STATUS_LINK);
 }
 
@@ -2200,11 +2200,11 @@ static int gbe_port_reset(struct gbe_slave *slave)
 	u32 i, v;
 
 	/* Set the soft reset bit */
-	writel(SOFT_RESET, GBE_REG_ADDR(slave, emac_regs, soft_reset));
+	pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2203", SOFT_RESET, GBE_REG_ADDR(slave, emac_regs, soft_reset));
 
 	/* Wait for the bit to clear */
 	for (i = 0; i < DEVICE_EMACSL_RESET_POLL_COUNT; i++) {
-		v = readl(GBE_REG_ADDR(slave, emac_regs, soft_reset));
+		v = pete_readl("drivers/net/ethernet/ti/netcp_ethss.c:2207", GBE_REG_ADDR(slave, emac_regs, soft_reset));
 		if ((v & SOFT_RESET_MASK) != SOFT_RESET)
 			return 0;
 	}
@@ -2226,9 +2226,9 @@ static void gbe_port_config(struct gbe_priv *gbe_dev, struct gbe_slave *slave,
 	/* Enable correct MII mode at SS level */
 	if (IS_SS_ID_XGBE(gbe_dev) &&
 	    (slave->link_interface >= XGMII_LINK_MAC_PHY)) {
-		xgmii_mode = readl(GBE_REG_ADDR(gbe_dev, ss_regs, control));
+		xgmii_mode = pete_readl("drivers/net/ethernet/ti/netcp_ethss.c:2229", GBE_REG_ADDR(gbe_dev, ss_regs, control));
 		xgmii_mode |= (1 << slave->slave_num);
-		writel(xgmii_mode, GBE_REG_ADDR(gbe_dev, ss_regs, control));
+		pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2231", xgmii_mode, GBE_REG_ADDR(gbe_dev, ss_regs, control));
 	}
 
 	if (IS_SS_ID_MU(gbe_dev))
@@ -2236,8 +2236,8 @@ static void gbe_port_config(struct gbe_priv *gbe_dev, struct gbe_slave *slave,
 	else
 		rx_maxlen_reg = GBE_REG_ADDR(slave, emac_regs, rx_maxlen);
 
-	writel(max_rx_len, rx_maxlen_reg);
-	writel(slave->mac_control, GBE_REG_ADDR(slave, emac_regs, mac_control));
+	pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2239", max_rx_len, rx_maxlen_reg);
+	pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2240", slave->mac_control, GBE_REG_ADDR(slave, emac_regs, mac_control));
 }
 
 static void gbe_sgmii_rtreset(struct gbe_priv *priv,
@@ -2303,7 +2303,7 @@ static int gbe_slave_open(struct gbe_intf *gbe_intf)
 	 * as we only configure to use priority 0
 	 */
 	if (IS_SS_ID_MU(priv))
-		writel(HOST_TX_PRI_MAP_DEFAULT,
+		pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2306", HOST_TX_PRI_MAP_DEFAULT,
 		       GBE_REG_ADDR(slave, port_regs, rx_pri_map));
 
 	/* enable forwarding */
@@ -2363,11 +2363,11 @@ static void gbe_init_host_port(struct gbe_priv *priv)
 
 	/* Host Tx Pri */
 	if (IS_SS_ID_NU(priv) || IS_SS_ID_XGBE(priv))
-		writel(HOST_TX_PRI_MAP_DEFAULT,
+		pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2366", HOST_TX_PRI_MAP_DEFAULT,
 		       GBE_REG_ADDR(priv, host_port_regs, tx_pri_map));
 
 	/* Max length register */
-	writel(NETCP_MAX_FRAME_SIZE, GBE_REG_ADDR(priv, host_port_regs,
+	pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2370", NETCP_MAX_FRAME_SIZE, GBE_REG_ADDR(priv, host_port_regs,
 						  rx_maxlen));
 
 	cpsw_ale_start(priv->ale);
@@ -2620,7 +2620,7 @@ static void gbe_hwtstamp(struct gbe_intf *gbe_intf)
 
 	if (!gbe_dev->rx_ts_enabled &&
 	    !gbe_dev->tx_ts_enabled) {
-		writel(0, GBE_REG_ADDR(slave, port_regs, ts_ctl));
+		pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2623", 0, GBE_REG_ADDR(slave, port_regs, ts_ctl));
 		return;
 	}
 
@@ -2637,9 +2637,9 @@ static void gbe_hwtstamp(struct gbe_intf *gbe_intf)
 	if (gbe_dev->rx_ts_enabled)
 		ts_en |= (TS_RX_ANX_ALL_EN | TS_RX_VLAN_LT1_EN);
 
-	writel(ts_en,  GBE_REG_ADDR(slave, port_regs, ts_ctl));
-	writel(seq_id, GBE_REG_ADDR(slave, port_regs, ts_seq_ltype));
-	writel(ctl,    GBE_REG_ADDR(slave, port_regs, ts_ctl_ltype2));
+	pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2640", ts_en,  GBE_REG_ADDR(slave, port_regs, ts_ctl));
+	pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2641", seq_id, GBE_REG_ADDR(slave, port_regs, ts_seq_ltype));
+	pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2642", ctl,    GBE_REG_ADDR(slave, port_regs, ts_ctl_ltype2));
 }
 
 static int gbe_hwtstamp_set(struct gbe_intf *gbe_intf, struct ifreq *ifr)
@@ -2899,7 +2899,7 @@ static int gbe_open(void *intf_priv, struct net_device *ndev)
 	u32 reg, val;
 	int ret;
 
-	reg = readl(GBE_REG_ADDR(gbe_dev, switch_regs, id_ver));
+	reg = pete_readl("drivers/net/ethernet/ti/netcp_ethss.c:2902", GBE_REG_ADDR(gbe_dev, switch_regs, id_ver));
 	dev_dbg(gbe_dev->dev, "initializing gbe version %d.%d (%d) GBE identification value 0x%x\n",
 		GBE_MAJOR_VERSION(reg), GBE_MINOR_VERSION(reg),
 		GBE_RTL_VERSION(reg), GBE_IDENT(reg));
@@ -2923,7 +2923,7 @@ static int gbe_open(void *intf_priv, struct net_device *ndev)
 	gbe_slave_stop(gbe_intf);
 
 	/* disable priority elevation and enable statistics on all ports */
-	writel(0, GBE_REG_ADDR(gbe_dev, switch_regs, ptype));
+	pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2926", 0, GBE_REG_ADDR(gbe_dev, switch_regs, ptype));
 
 	/* Control register */
 	val = GBE_CTL_P0_ENABLE;
@@ -2931,10 +2931,10 @@ static int gbe_open(void *intf_priv, struct net_device *ndev)
 		val |= ETH_SW_CTL_P0_TX_CRC_REMOVE;
 		netcp->hw_cap = ETH_SW_CAN_REMOVE_ETH_FCS;
 	}
-	writel(val, GBE_REG_ADDR(gbe_dev, switch_regs, control));
+	pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2934", val, GBE_REG_ADDR(gbe_dev, switch_regs, control));
 
 	/* All statistics enabled and STAT AB visible by default */
-	writel(gbe_dev->stats_en_mask, GBE_REG_ADDR(gbe_dev, switch_regs,
+	pete_writel("drivers/net/ethernet/ti/netcp_ethss.c:2937", gbe_dev->stats_en_mask, GBE_REG_ADDR(gbe_dev, switch_regs,
 						    stat_port_en));
 
 	ret = gbe_slave_open(gbe_intf);
@@ -3347,7 +3347,7 @@ static int get_gbe_resource_version(struct gbe_priv *gbe_dev,
 		return PTR_ERR(regs);
 	}
 	gbe_dev->ss_regs = regs;
-	gbe_dev->ss_version = readl(gbe_dev->ss_regs);
+	gbe_dev->ss_version = pete_readl("drivers/net/ethernet/ti/netcp_ethss.c:3350", gbe_dev->ss_regs);
 	return 0;
 }
 

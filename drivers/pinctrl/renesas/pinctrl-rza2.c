@@ -77,31 +77,31 @@ static void rza2_set_pin_function(void __iomem *pfc_base, u8 port, u8 pin,
 	u8 reg8;
 
 	/* Set pin to 'Non-use (Hi-z input protection)'  */
-	reg16 = readw(pfc_base + RZA2_PDR(port));
+	reg16 = pete_readw("drivers/pinctrl/renesas/pinctrl-rza2.c:80", pfc_base + RZA2_PDR(port));
 	mask16 = RZA2_PDR_MASK << (pin * 2);
 	reg16 &= ~mask16;
-	writew(reg16, pfc_base + RZA2_PDR(port));
+	pete_writew("drivers/pinctrl/renesas/pinctrl-rza2.c:83", reg16, pfc_base + RZA2_PDR(port));
 
 	/* Temporarily switch to GPIO */
-	reg8 = readb(pfc_base + RZA2_PMR(port));
+	reg8 = pete_readb("drivers/pinctrl/renesas/pinctrl-rza2.c:86", pfc_base + RZA2_PMR(port));
 	reg8 &= ~BIT(pin);
-	writeb(reg8, pfc_base + RZA2_PMR(port));
+	pete_writeb("drivers/pinctrl/renesas/pinctrl-rza2.c:88", reg8, pfc_base + RZA2_PMR(port));
 
 	/* PFS Register Write Protect : OFF */
-	writeb(0x00, pfc_base + RZA2_PWPR);		/* B0WI=0, PFSWE=0 */
-	writeb(PWPR_PFSWE, pfc_base + RZA2_PWPR);	/* B0WI=0, PFSWE=1 */
+	pete_writeb("drivers/pinctrl/renesas/pinctrl-rza2.c:91", 0x00, pfc_base + RZA2_PWPR);		/* B0WI=0, PFSWE=0 */
+	pete_writeb("drivers/pinctrl/renesas/pinctrl-rza2.c:92", PWPR_PFSWE, pfc_base + RZA2_PWPR);	/* B0WI=0, PFSWE=1 */
 
 	/* Set Pin function (interrupt disabled, ISEL=0) */
-	writeb(func, pfc_base + RZA2_PFS(port, pin));
+	pete_writeb("drivers/pinctrl/renesas/pinctrl-rza2.c:95", func, pfc_base + RZA2_PFS(port, pin));
 
 	/* PFS Register Write Protect : ON */
-	writeb(0x00, pfc_base + RZA2_PWPR);	/* B0WI=0, PFSWE=0 */
-	writeb(0x80, pfc_base + RZA2_PWPR);	/* B0WI=1, PFSWE=0 */
+	pete_writeb("drivers/pinctrl/renesas/pinctrl-rza2.c:98", 0x00, pfc_base + RZA2_PWPR);	/* B0WI=0, PFSWE=0 */
+	pete_writeb("drivers/pinctrl/renesas/pinctrl-rza2.c:99", 0x80, pfc_base + RZA2_PWPR);	/* B0WI=1, PFSWE=0 */
 
 	/* Port Mode  : Peripheral module pin functions */
-	reg8 = readb(pfc_base + RZA2_PMR(port));
+	reg8 = pete_readb("drivers/pinctrl/renesas/pinctrl-rza2.c:102", pfc_base + RZA2_PMR(port));
 	reg8 |= BIT(pin);
-	writeb(reg8, pfc_base + RZA2_PMR(port));
+	pete_writeb("drivers/pinctrl/renesas/pinctrl-rza2.c:104", reg8, pfc_base + RZA2_PMR(port));
 }
 
 static void rza2_pin_to_gpio(void __iomem *pfc_base, unsigned int offset,
@@ -112,7 +112,7 @@ static void rza2_pin_to_gpio(void __iomem *pfc_base, unsigned int offset,
 	u16 mask16;
 	u16 reg16;
 
-	reg16 = readw(pfc_base + RZA2_PDR(port));
+	reg16 = pete_readw("drivers/pinctrl/renesas/pinctrl-rza2.c:115", pfc_base + RZA2_PDR(port));
 	mask16 = RZA2_PDR_MASK << (pin * 2);
 	reg16 &= ~mask16;
 
@@ -121,7 +121,7 @@ static void rza2_pin_to_gpio(void __iomem *pfc_base, unsigned int offset,
 	else
 		reg16 |= RZA2_PDR_OUTPUT << (pin * 2);	/* pin as output */
 
-	writew(reg16, pfc_base + RZA2_PDR(port));
+	pete_writew("drivers/pinctrl/renesas/pinctrl-rza2.c:124", reg16, pfc_base + RZA2_PDR(port));
 }
 
 static int rza2_chip_get_direction(struct gpio_chip *chip, unsigned int offset)
@@ -131,7 +131,7 @@ static int rza2_chip_get_direction(struct gpio_chip *chip, unsigned int offset)
 	u8 pin = RZA2_PIN_ID_TO_PIN(offset);
 	u16 reg16;
 
-	reg16 = readw(priv->base + RZA2_PDR(port));
+	reg16 = pete_readw("drivers/pinctrl/renesas/pinctrl-rza2.c:134", priv->base + RZA2_PDR(port));
 	reg16 = (reg16 >> (pin * 2)) & RZA2_PDR_MASK;
 
 	if (reg16 == RZA2_PDR_OUTPUT)
@@ -165,7 +165,7 @@ static int rza2_chip_get(struct gpio_chip *chip, unsigned int offset)
 	u8 port = RZA2_PIN_ID_TO_PORT(offset);
 	u8 pin = RZA2_PIN_ID_TO_PIN(offset);
 
-	return !!(readb(priv->base + RZA2_PIDR(port)) & BIT(pin));
+	return !!(pete_readb("drivers/pinctrl/renesas/pinctrl-rza2.c:168", priv->base + RZA2_PIDR(port)) & BIT(pin));
 }
 
 static void rza2_chip_set(struct gpio_chip *chip, unsigned int offset,
@@ -176,14 +176,14 @@ static void rza2_chip_set(struct gpio_chip *chip, unsigned int offset,
 	u8 pin = RZA2_PIN_ID_TO_PIN(offset);
 	u8 new_value;
 
-	new_value = readb(priv->base + RZA2_PODR(port));
+	new_value = pete_readb("drivers/pinctrl/renesas/pinctrl-rza2.c:179", priv->base + RZA2_PODR(port));
 
 	if (value)
 		new_value |= BIT(pin);
 	else
 		new_value &= ~BIT(pin);
 
-	writeb(new_value, priv->base + RZA2_PODR(port));
+	pete_writeb("drivers/pinctrl/renesas/pinctrl-rza2.c:186", new_value, priv->base + RZA2_PODR(port));
 }
 
 static int rza2_chip_direction_output(struct gpio_chip *chip,

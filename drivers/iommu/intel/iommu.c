@@ -391,7 +391,7 @@ static void init_translation_status(struct intel_iommu *iommu)
 {
 	u32 gsts;
 
-	gsts = readl(iommu->reg + DMAR_GSTS_REG);
+	gsts = pete_readl("drivers/iommu/intel/iommu.c:394", iommu->reg + DMAR_GSTS_REG);
 	if (gsts & DMA_GSTS_TES)
 		iommu->flags |= VTD_FLAG_TRANS_PRE_ENABLED;
 }
@@ -1350,7 +1350,7 @@ static void iommu_set_root_entry(struct intel_iommu *iommu)
 	raw_spin_lock_irqsave(&iommu->register_lock, flag);
 	dmar_writeq(iommu->reg + DMAR_RTADDR_REG, addr);
 
-	writel(iommu->gcmd | DMA_GCMD_SRTP, iommu->reg + DMAR_GCMD_REG);
+	pete_writel("drivers/iommu/intel/iommu.c:1353", iommu->gcmd | DMA_GCMD_SRTP, iommu->reg + DMAR_GCMD_REG);
 
 	/* Make sure hardware complete it */
 	IOMMU_WAIT_OP(iommu, DMAR_GSTS_REG,
@@ -1373,7 +1373,7 @@ void iommu_flush_write_buffer(struct intel_iommu *iommu)
 		return;
 
 	raw_spin_lock_irqsave(&iommu->register_lock, flag);
-	writel(iommu->gcmd | DMA_GCMD_WBF, iommu->reg + DMAR_GCMD_REG);
+	pete_writel("drivers/iommu/intel/iommu.c:1376", iommu->gcmd | DMA_GCMD_WBF, iommu->reg + DMAR_GCMD_REG);
 
 	/* Make sure hardware complete it */
 	IOMMU_WAIT_OP(iommu, DMAR_GSTS_REG,
@@ -1752,9 +1752,9 @@ static void iommu_disable_protect_mem_regions(struct intel_iommu *iommu)
 		return;
 
 	raw_spin_lock_irqsave(&iommu->register_lock, flags);
-	pmen = readl(iommu->reg + DMAR_PMEN_REG);
+	pmen = pete_readl("drivers/iommu/intel/iommu.c:1755", iommu->reg + DMAR_PMEN_REG);
 	pmen &= ~DMA_PMEN_EPM;
-	writel(pmen, iommu->reg + DMAR_PMEN_REG);
+	pete_writel("drivers/iommu/intel/iommu.c:1757", pmen, iommu->reg + DMAR_PMEN_REG);
 
 	/* wait for the protected region status bit to clear */
 	IOMMU_WAIT_OP(iommu, DMAR_PMEN_REG,
@@ -1770,7 +1770,7 @@ static void iommu_enable_translation(struct intel_iommu *iommu)
 
 	raw_spin_lock_irqsave(&iommu->register_lock, flags);
 	iommu->gcmd |= DMA_GCMD_TE;
-	writel(iommu->gcmd, iommu->reg + DMAR_GCMD_REG);
+	pete_writel("drivers/iommu/intel/iommu.c:1773", iommu->gcmd, iommu->reg + DMAR_GCMD_REG);
 
 	/* Make sure hardware complete it */
 	IOMMU_WAIT_OP(iommu, DMAR_GSTS_REG,
@@ -1790,7 +1790,7 @@ static void iommu_disable_translation(struct intel_iommu *iommu)
 
 	raw_spin_lock_irqsave(&iommu->register_lock, flag);
 	iommu->gcmd &= ~DMA_GCMD_TE;
-	writel(iommu->gcmd, iommu->reg + DMAR_GCMD_REG);
+	pete_writel("drivers/iommu/intel/iommu.c:1793", iommu->gcmd, iommu->reg + DMAR_GCMD_REG);
 
 	/* Make sure hardware complete it */
 	IOMMU_WAIT_OP(iommu, DMAR_GSTS_REG,
@@ -3571,13 +3571,13 @@ static int iommu_suspend(void)
 		raw_spin_lock_irqsave(&iommu->register_lock, flag);
 
 		iommu->iommu_state[SR_DMAR_FECTL_REG] =
-			readl(iommu->reg + DMAR_FECTL_REG);
+			pete_readl("drivers/iommu/intel/iommu.c:3574", iommu->reg + DMAR_FECTL_REG);
 		iommu->iommu_state[SR_DMAR_FEDATA_REG] =
-			readl(iommu->reg + DMAR_FEDATA_REG);
+			pete_readl("drivers/iommu/intel/iommu.c:3576", iommu->reg + DMAR_FEDATA_REG);
 		iommu->iommu_state[SR_DMAR_FEADDR_REG] =
-			readl(iommu->reg + DMAR_FEADDR_REG);
+			pete_readl("drivers/iommu/intel/iommu.c:3578", iommu->reg + DMAR_FEADDR_REG);
 		iommu->iommu_state[SR_DMAR_FEUADDR_REG] =
-			readl(iommu->reg + DMAR_FEUADDR_REG);
+			pete_readl("drivers/iommu/intel/iommu.c:3580", iommu->reg + DMAR_FEUADDR_REG);
 
 		raw_spin_unlock_irqrestore(&iommu->register_lock, flag);
 	}
@@ -3608,13 +3608,13 @@ static void iommu_resume(void)
 
 		raw_spin_lock_irqsave(&iommu->register_lock, flag);
 
-		writel(iommu->iommu_state[SR_DMAR_FECTL_REG],
+		pete_writel("drivers/iommu/intel/iommu.c:3611", iommu->iommu_state[SR_DMAR_FECTL_REG],
 			iommu->reg + DMAR_FECTL_REG);
-		writel(iommu->iommu_state[SR_DMAR_FEDATA_REG],
+		pete_writel("drivers/iommu/intel/iommu.c:3613", iommu->iommu_state[SR_DMAR_FEDATA_REG],
 			iommu->reg + DMAR_FEDATA_REG);
-		writel(iommu->iommu_state[SR_DMAR_FEADDR_REG],
+		pete_writel("drivers/iommu/intel/iommu.c:3615", iommu->iommu_state[SR_DMAR_FEADDR_REG],
 			iommu->reg + DMAR_FEADDR_REG);
-		writel(iommu->iommu_state[SR_DMAR_FEUADDR_REG],
+		pete_writel("drivers/iommu/intel/iommu.c:3617", iommu->iommu_state[SR_DMAR_FEUADDR_REG],
 			iommu->reg + DMAR_FEUADDR_REG);
 
 		raw_spin_unlock_irqrestore(&iommu->register_lock, flag);
@@ -4169,7 +4169,7 @@ static ssize_t version_show(struct device *dev,
 			    struct device_attribute *attr, char *buf)
 {
 	struct intel_iommu *iommu = dev_to_intel_iommu(dev);
-	u32 ver = readl(iommu->reg + DMAR_VER_REG);
+	u32 ver = pete_readl("drivers/iommu/intel/iommu.c:4172", iommu->reg + DMAR_VER_REG);
 	return sprintf(buf, "%d:%d\n",
 		       DMAR_VER_MAJOR(ver), DMAR_VER_MINOR(ver));
 }

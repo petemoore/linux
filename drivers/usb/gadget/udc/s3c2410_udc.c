@@ -58,17 +58,17 @@ static struct dentry		*s3c2410_udc_debugfs_root;
 
 static inline u32 udc_read(u32 reg)
 {
-	return readb(base_addr + reg);
+	return pete_readb("drivers/usb/gadget/udc/s3c2410_udc.c:61", base_addr + reg);
 }
 
 static inline void udc_write(u32 value, u32 reg)
 {
-	writeb(value, base_addr + reg);
+	pete_writeb("drivers/usb/gadget/udc/s3c2410_udc.c:66", value, base_addr + reg);
 }
 
 static inline void udc_writeb(void __iomem *base, u32 value, u32 reg)
 {
-	writeb(value, base + reg);
+	pete_writeb("drivers/usb/gadget/udc/s3c2410_udc.c:71", value, base + reg);
 }
 
 static struct s3c2410_udc_mach_info *udc_info;
@@ -177,7 +177,7 @@ static inline void s3c2410_udc_clear_ep0_opr(void __iomem *base)
 static inline void s3c2410_udc_clear_ep0_sst(void __iomem *base)
 {
 	udc_writeb(base, S3C2410_UDC_INDEX_EP0, S3C2410_UDC_INDEX_REG);
-	writeb(0x00, base + S3C2410_UDC_EP0_CSR_REG);
+	pete_writeb("drivers/usb/gadget/udc/s3c2410_udc.c:180", 0x00, base + S3C2410_UDC_EP0_CSR_REG);
 }
 
 static inline void s3c2410_udc_clear_ep0_se(void __iomem *base)

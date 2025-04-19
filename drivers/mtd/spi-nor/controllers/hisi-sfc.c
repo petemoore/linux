@@ -141,7 +141,7 @@ static void hisi_spi_nor_init(struct hifmc_host *host)
 	reg = TIMING_CFG_TCSH(CS_HOLD_TIME)
 		| TIMING_CFG_TCSS(CS_SETUP_TIME)
 		| TIMING_CFG_TSHSL(CS_DESELECT_TIME);
-	writel(reg, host->regbase + FMC_SPI_TIMING_CFG);
+	pete_writel("drivers/mtd/spi-nor/controllers/hisi-sfc.c:144", reg, host->regbase + FMC_SPI_TIMING_CFG);
 }
 
 static int hisi_spi_nor_prep(struct spi_nor *nor)
@@ -184,17 +184,17 @@ static int hisi_spi_nor_op_reg(struct spi_nor *nor,
 	u32 reg;
 
 	reg = FMC_CMD_CMD1(opcode);
-	writel(reg, host->regbase + FMC_CMD);
+	pete_writel("drivers/mtd/spi-nor/controllers/hisi-sfc.c:187", reg, host->regbase + FMC_CMD);
 
 	reg = FMC_DATA_NUM_CNT(len);
-	writel(reg, host->regbase + FMC_DATA_NUM);
+	pete_writel("drivers/mtd/spi-nor/controllers/hisi-sfc.c:190", reg, host->regbase + FMC_DATA_NUM);
 
 	reg = OP_CFG_FM_CS(priv->chipselect);
-	writel(reg, host->regbase + FMC_OP_CFG);
+	pete_writel("drivers/mtd/spi-nor/controllers/hisi-sfc.c:193", reg, host->regbase + FMC_OP_CFG);
 
-	writel(0xff, host->regbase + FMC_INT_CLR);
+	pete_writel("drivers/mtd/spi-nor/controllers/hisi-sfc.c:195", 0xff, host->regbase + FMC_INT_CLR);
 	reg = FMC_OP_CMD1_EN | FMC_OP_REG_OP_START | optype;
-	writel(reg, host->regbase + FMC_OP);
+	pete_writel("drivers/mtd/spi-nor/controllers/hisi-sfc.c:197", reg, host->regbase + FMC_OP);
 
 	return hisi_spi_nor_wait_op_finish(host);
 }
@@ -234,16 +234,16 @@ static int hisi_spi_nor_dma_transfer(struct spi_nor *nor, loff_t start_off,
 	u8 if_type = 0;
 	u32 reg;
 
-	reg = readl(host->regbase + FMC_CFG);
+	reg = pete_readl("drivers/mtd/spi-nor/controllers/hisi-sfc.c:237", host->regbase + FMC_CFG);
 	reg &= ~(FMC_CFG_OP_MODE_MASK | SPI_NOR_ADDR_MODE_MASK);
 	reg |= FMC_CFG_OP_MODE_NORMAL;
 	reg |= (nor->addr_width == 4) ? SPI_NOR_ADDR_MODE_4BYTES
 		: SPI_NOR_ADDR_MODE_3BYTES;
-	writel(reg, host->regbase + FMC_CFG);
+	pete_writel("drivers/mtd/spi-nor/controllers/hisi-sfc.c:242", reg, host->regbase + FMC_CFG);
 
-	writel(start_off, host->regbase + FMC_ADDRL);
-	writel(dma_buf, host->regbase + FMC_DMA_SADDR_D0);
-	writel(FMC_DMA_LEN_SET(len), host->regbase + FMC_DMA_LEN);
+	pete_writel("drivers/mtd/spi-nor/controllers/hisi-sfc.c:244", start_off, host->regbase + FMC_ADDRL);
+	pete_writel("drivers/mtd/spi-nor/controllers/hisi-sfc.c:245", dma_buf, host->regbase + FMC_DMA_SADDR_D0);
+	pete_writel("drivers/mtd/spi-nor/controllers/hisi-sfc.c:246", FMC_DMA_LEN_SET(len), host->regbase + FMC_DMA_LEN);
 
 	reg = OP_CFG_FM_CS(priv->chipselect);
 	if (op_type == FMC_OP_READ)
@@ -253,14 +253,14 @@ static int hisi_spi_nor_dma_transfer(struct spi_nor *nor, loff_t start_off,
 	reg |= OP_CFG_MEM_IF_TYPE(if_type);
 	if (op_type == FMC_OP_READ)
 		reg |= OP_CFG_DUMMY_NUM(nor->read_dummy >> 3);
-	writel(reg, host->regbase + FMC_OP_CFG);
+	pete_writel("drivers/mtd/spi-nor/controllers/hisi-sfc.c:256", reg, host->regbase + FMC_OP_CFG);
 
-	writel(0xff, host->regbase + FMC_INT_CLR);
+	pete_writel("drivers/mtd/spi-nor/controllers/hisi-sfc.c:258", 0xff, host->regbase + FMC_INT_CLR);
 	reg = OP_CTRL_RW_OP(op_type) | OP_CTRL_DMA_OP_READY;
 	reg |= (op_type == FMC_OP_READ)
 		? OP_CTRL_RD_OPCODE(nor->read_opcode)
 		: OP_CTRL_WR_OPCODE(nor->program_opcode);
-	writel(reg, host->regbase + FMC_OP_DMA);
+	pete_writel("drivers/mtd/spi-nor/controllers/hisi-sfc.c:263", reg, host->regbase + FMC_OP_DMA);
 
 	return hisi_spi_nor_wait_op_finish(host);
 }

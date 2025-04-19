@@ -2285,37 +2285,37 @@ static irqreturn_t netxen_intr(int irq, void *data)
 	struct netxen_adapter *adapter = sds_ring->adapter;
 	u32 status = 0;
 
-	status = readl(adapter->isr_int_vec);
+	status = pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_main.c:2288", adapter->isr_int_vec);
 
 	if (!(status & adapter->int_vec_bit))
 		return IRQ_NONE;
 
 	if (NX_IS_REVISION_P3(adapter->ahw.revision_id)) {
 		/* check interrupt state machine, to be sure */
-		status = readl(adapter->crb_int_state_reg);
+		status = pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_main.c:2295", adapter->crb_int_state_reg);
 		if (!ISR_LEGACY_INT_TRIGGERED(status))
 			return IRQ_NONE;
 
 	} else {
 		unsigned long our_int = 0;
 
-		our_int = readl(adapter->crb_int_state_reg);
+		our_int = pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_main.c:2302", adapter->crb_int_state_reg);
 
 		/* not our interrupt */
 		if (!test_and_clear_bit((7 + adapter->portnum), &our_int))
 			return IRQ_NONE;
 
 		/* claim interrupt */
-		writel((our_int & 0xffffffff), adapter->crb_int_state_reg);
+		pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_main.c:2309", (our_int & 0xffffffff), adapter->crb_int_state_reg);
 
 		/* clear interrupt */
 		netxen_nic_disable_int(sds_ring);
 	}
 
-	writel(0xffffffff, adapter->tgt_status_reg);
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_main.c:2315", 0xffffffff, adapter->tgt_status_reg);
 	/* read twice to ensure write is flushed */
-	readl(adapter->isr_int_vec);
-	readl(adapter->isr_int_vec);
+	pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_main.c:2317", adapter->isr_int_vec);
+	pete_readl("drivers/net/ethernet/qlogic/netxen/netxen_nic_main.c:2318", adapter->isr_int_vec);
 
 	napi_schedule(&sds_ring->napi);
 
@@ -2328,7 +2328,7 @@ static irqreturn_t netxen_msi_intr(int irq, void *data)
 	struct netxen_adapter *adapter = sds_ring->adapter;
 
 	/* clear interrupt */
-	writel(0xffffffff, adapter->tgt_status_reg);
+	pete_writel("drivers/net/ethernet/qlogic/netxen/netxen_nic_main.c:2331", 0xffffffff, adapter->tgt_status_reg);
 
 	napi_schedule(&sds_ring->napi);
 	return IRQ_HANDLED;

@@ -139,10 +139,10 @@ static int mic_sw_reset(struct exynos_mic *mic)
 	unsigned int retry = 100;
 	int ret;
 
-	writel(MIC_SW_RST, mic->reg + MIC_OP);
+	pete_writel("drivers/gpu/drm/exynos/exynos_drm_mic.c:142", MIC_SW_RST, mic->reg + MIC_OP);
 
 	while (retry-- > 0) {
-		ret = readl(mic->reg + MIC_OP);
+		ret = pete_readl("drivers/gpu/drm/exynos/exynos_drm_mic.c:145", mic->reg + MIC_OP);
 		if (!(ret & MIC_SW_RST))
 			return 0;
 
@@ -160,20 +160,20 @@ static void mic_set_porch_timing(struct exynos_mic *mic)
 	reg = MIC_V_PULSE_WIDTH(vm.vsync_len) +
 		MIC_V_PERIOD_LINE(vm.vsync_len + vm.vactive +
 				vm.vback_porch + vm.vfront_porch);
-	writel(reg, mic->reg + MIC_V_TIMING_0);
+	pete_writel("drivers/gpu/drm/exynos/exynos_drm_mic.c:163", reg, mic->reg + MIC_V_TIMING_0);
 
 	reg = MIC_VBP_SIZE(vm.vback_porch) +
 		MIC_VFP_SIZE(vm.vfront_porch);
-	writel(reg, mic->reg + MIC_V_TIMING_1);
+	pete_writel("drivers/gpu/drm/exynos/exynos_drm_mic.c:167", reg, mic->reg + MIC_V_TIMING_1);
 
 	reg = MIC_V_PULSE_WIDTH(vm.hsync_len) +
 		MIC_V_PERIOD_LINE(vm.hsync_len + vm.hactive +
 				vm.hback_porch + vm.hfront_porch);
-	writel(reg, mic->reg + MIC_INPUT_TIMING_0);
+	pete_writel("drivers/gpu/drm/exynos/exynos_drm_mic.c:172", reg, mic->reg + MIC_INPUT_TIMING_0);
 
 	reg = MIC_VBP_SIZE(vm.hback_porch) +
 		MIC_VFP_SIZE(vm.hfront_porch);
-	writel(reg, mic->reg + MIC_INPUT_TIMING_1);
+	pete_writel("drivers/gpu/drm/exynos/exynos_drm_mic.c:176", reg, mic->reg + MIC_INPUT_TIMING_1);
 }
 
 static void mic_set_img_size(struct exynos_mic *mic)
@@ -184,7 +184,7 @@ static void mic_set_img_size(struct exynos_mic *mic)
 	reg = MIC_IMG_H_SIZE(vm->hactive) +
 		MIC_IMG_V_SIZE(vm->vactive);
 
-	writel(reg, mic->reg + MIC_IMG_SIZE);
+	pete_writel("drivers/gpu/drm/exynos/exynos_drm_mic.c:187", reg, mic->reg + MIC_IMG_SIZE);
 }
 
 static void mic_set_output_timing(struct exynos_mic *mic)
@@ -195,23 +195,23 @@ static void mic_set_output_timing(struct exynos_mic *mic)
 	DRM_DEV_DEBUG(mic->dev, "w: %u, h: %u\n", vm.hactive, vm.vactive);
 	bs_size_2d = ((vm.hactive >> 2) << 1) + (vm.vactive % 4);
 	reg = MIC_BS_SIZE_2D(bs_size_2d);
-	writel(reg, mic->reg + MIC_2D_OUTPUT_TIMING_2);
+	pete_writel("drivers/gpu/drm/exynos/exynos_drm_mic.c:198", reg, mic->reg + MIC_2D_OUTPUT_TIMING_2);
 
 	if (!mic->i80_mode) {
 		reg = MIC_H_PULSE_WIDTH_2D(vm.hsync_len) +
 			MIC_H_PERIOD_PIXEL_2D(vm.hsync_len + bs_size_2d +
 					vm.hback_porch + vm.hfront_porch);
-		writel(reg, mic->reg + MIC_2D_OUTPUT_TIMING_0);
+		pete_writel("drivers/gpu/drm/exynos/exynos_drm_mic.c:204", reg, mic->reg + MIC_2D_OUTPUT_TIMING_0);
 
 		reg = MIC_HBP_SIZE_2D(vm.hback_porch) +
 			MIC_H_PERIOD_PIXEL_2D(vm.hfront_porch);
-		writel(reg, mic->reg + MIC_2D_OUTPUT_TIMING_1);
+		pete_writel("drivers/gpu/drm/exynos/exynos_drm_mic.c:208", reg, mic->reg + MIC_2D_OUTPUT_TIMING_1);
 	}
 }
 
 static void mic_set_reg_on(struct exynos_mic *mic, bool enable)
 {
-	u32 reg = readl(mic->reg + MIC_OP);
+	u32 reg = pete_readl("drivers/gpu/drm/exynos/exynos_drm_mic.c:214", mic->reg + MIC_OP);
 
 	if (enable) {
 		reg &= ~(MIC_MODE_SEL_MASK | MIC_CORE_VER_CONTROL | MIC_PSR_EN);
@@ -225,7 +225,7 @@ static void mic_set_reg_on(struct exynos_mic *mic, bool enable)
 	}
 
 	reg |= MIC_UPD_REG;
-	writel(reg, mic->reg + MIC_OP);
+	pete_writel("drivers/gpu/drm/exynos/exynos_drm_mic.c:228", reg, mic->reg + MIC_OP);
 }
 
 static void mic_disable(struct drm_bridge *bridge) { }

@@ -81,12 +81,12 @@ legacy_sel_wr:
 
 		raw_spin_lock_irqsave(&dw->lock, flags);
 
-		writel(viewport_sel, &regs->type.legacy.viewport_sel);
-		*val = readl(ptr);
+		pete_writel("drivers/dma/dw-edma/dw-edma-v0-debugfs.c:84", viewport_sel, &regs->type.legacy.viewport_sel);
+		*val = pete_readl("drivers/dma/dw-edma/dw-edma-v0-debugfs.c:85", ptr);
 
 		raw_spin_unlock_irqrestore(&dw->lock, flags);
 	} else {
-		*val = readl(reg);
+		*val = pete_readl("drivers/dma/dw-edma/dw-edma-v0-debugfs.c:89", reg);
 	}
 
 	return 0;

@@ -88,14 +88,14 @@ static const struct soc_device_attribute rcar_quirks_match[]  = {
 static void xhci_rcar_start_gen2(struct usb_hcd *hcd)
 {
 	/* LCLK Select */
-	writel(RCAR_USB3_LCLK_ENA_VAL, hcd->regs + RCAR_USB3_LCLK);
+	pete_writel("drivers/usb/host/xhci-rcar.c:91", RCAR_USB3_LCLK_ENA_VAL, hcd->regs + RCAR_USB3_LCLK);
 	/* USB3.0 Configuration */
-	writel(RCAR_USB3_CONF1_VAL, hcd->regs + RCAR_USB3_CONF1);
-	writel(RCAR_USB3_CONF2_VAL, hcd->regs + RCAR_USB3_CONF2);
-	writel(RCAR_USB3_CONF3_VAL, hcd->regs + RCAR_USB3_CONF3);
+	pete_writel("drivers/usb/host/xhci-rcar.c:93", RCAR_USB3_CONF1_VAL, hcd->regs + RCAR_USB3_CONF1);
+	pete_writel("drivers/usb/host/xhci-rcar.c:94", RCAR_USB3_CONF2_VAL, hcd->regs + RCAR_USB3_CONF2);
+	pete_writel("drivers/usb/host/xhci-rcar.c:95", RCAR_USB3_CONF3_VAL, hcd->regs + RCAR_USB3_CONF3);
 	/* USB3.0 Polarity */
-	writel(RCAR_USB3_RX_POL_VAL, hcd->regs + RCAR_USB3_RX_POL);
-	writel(RCAR_USB3_TX_POL_VAL, hcd->regs + RCAR_USB3_TX_POL);
+	pete_writel("drivers/usb/host/xhci-rcar.c:97", RCAR_USB3_RX_POL_VAL, hcd->regs + RCAR_USB3_RX_POL);
+	pete_writel("drivers/usb/host/xhci-rcar.c:98", RCAR_USB3_TX_POL_VAL, hcd->regs + RCAR_USB3_TX_POL);
 }
 
 static int xhci_rcar_is_gen2(struct device *dev)
@@ -114,9 +114,9 @@ void xhci_rcar_start(struct usb_hcd *hcd)
 
 	if (hcd->regs != NULL) {
 		/* Interrupt Enable */
-		temp = readl(hcd->regs + RCAR_USB3_INT_ENA);
+		temp = pete_readl("drivers/usb/host/xhci-rcar.c:117", hcd->regs + RCAR_USB3_INT_ENA);
 		temp |= RCAR_USB3_INT_ENA_VAL;
-		writel(temp, hcd->regs + RCAR_USB3_INT_ENA);
+		pete_writel("drivers/usb/host/xhci-rcar.c:119", temp, hcd->regs + RCAR_USB3_INT_ENA);
 		if (xhci_rcar_is_gen2(hcd->self.controller))
 			xhci_rcar_start_gen2(hcd);
 	}
@@ -138,7 +138,7 @@ static int xhci_rcar_download_firmware(struct usb_hcd *hcd)
 	 * According to the datasheet, "Upon the completion of FW Download,
 	 * there is no need to write or reload FW".
 	 */
-	if (readl(regs + RCAR_USB3_DL_CTRL) & RCAR_USB3_DL_CTRL_FW_SUCCESS)
+	if (pete_readl("drivers/usb/host/xhci-rcar.c:141", regs + RCAR_USB3_DL_CTRL) & RCAR_USB3_DL_CTRL_FW_SUCCESS)
 		return 0;
 
 	attr = soc_device_match(rcar_quirks_match);
@@ -158,9 +158,9 @@ static int xhci_rcar_download_firmware(struct usb_hcd *hcd)
 		return retval;
 
 	/* download R-Car USB3.0 firmware */
-	temp = readl(regs + RCAR_USB3_DL_CTRL);
+	temp = pete_readl("drivers/usb/host/xhci-rcar.c:161", regs + RCAR_USB3_DL_CTRL);
 	temp |= RCAR_USB3_DL_CTRL_ENABLE;
-	writel(temp, regs + RCAR_USB3_DL_CTRL);
+	pete_writel("drivers/usb/host/xhci-rcar.c:163", temp, regs + RCAR_USB3_DL_CTRL);
 
 	for (index = 0; index < fw->size; index += 4) {
 		/* to avoid reading beyond the end of the buffer */
@@ -168,10 +168,10 @@ static int xhci_rcar_download_firmware(struct usb_hcd *hcd)
 			if ((j + index) < fw->size)
 				data |= fw->data[index + j] << (8 * j);
 		}
-		writel(data, regs + RCAR_USB3_FW_DATA0);
-		temp = readl(regs + RCAR_USB3_DL_CTRL);
+		pete_writel("drivers/usb/host/xhci-rcar.c:171", data, regs + RCAR_USB3_FW_DATA0);
+		temp = pete_readl("drivers/usb/host/xhci-rcar.c:172", regs + RCAR_USB3_DL_CTRL);
 		temp |= RCAR_USB3_DL_CTRL_FW_SET_DATA0;
-		writel(temp, regs + RCAR_USB3_DL_CTRL);
+		pete_writel("drivers/usb/host/xhci-rcar.c:174", temp, regs + RCAR_USB3_DL_CTRL);
 
 		retval = readl_poll_timeout_atomic(regs + RCAR_USB3_DL_CTRL,
 				val, !(val & RCAR_USB3_DL_CTRL_FW_SET_DATA0),
@@ -180,9 +180,9 @@ static int xhci_rcar_download_firmware(struct usb_hcd *hcd)
 			break;
 	}
 
-	temp = readl(regs + RCAR_USB3_DL_CTRL);
+	temp = pete_readl("drivers/usb/host/xhci-rcar.c:183", regs + RCAR_USB3_DL_CTRL);
 	temp &= ~RCAR_USB3_DL_CTRL_ENABLE;
-	writel(temp, regs + RCAR_USB3_DL_CTRL);
+	pete_writel("drivers/usb/host/xhci-rcar.c:185", temp, regs + RCAR_USB3_DL_CTRL);
 
 	retval = readl_poll_timeout_atomic((regs + RCAR_USB3_DL_CTRL),
 			val, val & RCAR_USB3_DL_CTRL_FW_SUCCESS, 1, 10000);

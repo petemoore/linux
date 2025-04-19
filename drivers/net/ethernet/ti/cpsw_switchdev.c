@@ -130,7 +130,7 @@ static u16 cpsw_get_pvid(struct cpsw_priv *priv)
 		pvid = slave_read(cpsw->slaves + (priv->emac_port - 1), reg);
 	} else {
 		port_vlan_reg = &cpsw->host_port_regs->port_vlan;
-		pvid = readl(port_vlan_reg);
+		pvid = pete_readl("drivers/net/ethernet/ti/cpsw_switchdev.c:133", port_vlan_reg);
 	}
 
 	pvid = pvid & 0xfff;
@@ -158,7 +158,7 @@ static void cpsw_set_pvid(struct cpsw_priv *priv, u16 vid, bool cfi, u32 cos)
 	} else {
 		/* CPU port */
 		port_vlan_reg = &cpsw->host_port_regs->port_vlan;
-		writel(pvid, port_vlan_reg);
+		pete_writel("drivers/net/ethernet/ti/cpsw_switchdev.c:161", pvid, port_vlan_reg);
 	}
 }
 

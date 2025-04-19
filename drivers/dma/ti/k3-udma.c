@@ -328,12 +328,12 @@ static inline struct udma_desc *to_udma_desc(struct dma_async_tx_descriptor *t)
 /* Generic register access functions */
 static inline u32 udma_read(void __iomem *base, int reg)
 {
-	return readl(base + reg);
+	return pete_readl("drivers/dma/ti/k3-udma.c:331", base + reg);
 }
 
 static inline void udma_write(void __iomem *base, int reg, u32 val)
 {
-	writel(val, base + reg);
+	pete_writel("drivers/dma/ti/k3-udma.c:336", val, base + reg);
 }
 
 static inline void udma_update_bits(void __iomem *base, int reg,
@@ -341,12 +341,12 @@ static inline void udma_update_bits(void __iomem *base, int reg,
 {
 	u32 tmp, orig;
 
-	orig = readl(base + reg);
+	orig = pete_readl("drivers/dma/ti/k3-udma.c:344", base + reg);
 	tmp = orig & ~mask;
 	tmp |= (val & mask);
 
 	if (tmp != orig)
-		writel(tmp, base + reg);
+		pete_writel("drivers/dma/ti/k3-udma.c:349", tmp, base + reg);
 }
 
 /* TCHANRT */

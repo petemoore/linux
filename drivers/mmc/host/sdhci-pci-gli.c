@@ -657,7 +657,7 @@ static u32 sdhci_gl9750_readl(struct sdhci_host *host, int reg)
 {
 	u32 value;
 
-	value = readl(host->ioaddr + reg);
+	value = pete_readl("drivers/mmc/host/sdhci-pci-gli.c:660", host->ioaddr + reg);
 	if (unlikely(reg == SDHCI_MAX_CURRENT && !(value & 0xff)))
 		value |= 0xc8;
 

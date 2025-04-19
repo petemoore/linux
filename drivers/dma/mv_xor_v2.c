@@ -228,7 +228,7 @@ static void mv_xor_v2_add_desc_to_desq(struct mv_xor_v2_device *xor_dev,
 				       int num_of_desc)
 {
 	/* write the number of new descriptors in the DESQ. */
-	writel(num_of_desc, xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_ADD_OFF);
+	pete_writel("drivers/dma/mv_xor_v2.c:231", num_of_desc, xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_ADD_OFF);
 }
 
 /*
@@ -238,7 +238,7 @@ static void mv_xor_v2_free_desc_from_desq(struct mv_xor_v2_device *xor_dev,
 					  int num_of_desc)
 {
 	/* write the number of new descriptors in the DESQ. */
-	writel(num_of_desc, xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_DEALLOC_OFF);
+	pete_writel("drivers/dma/mv_xor_v2.c:241", num_of_desc, xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_DEALLOC_OFF);
 }
 
 /*
@@ -247,7 +247,7 @@ static void mv_xor_v2_free_desc_from_desq(struct mv_xor_v2_device *xor_dev,
  */
 static int mv_xor_v2_set_desc_size(struct mv_xor_v2_device *xor_dev)
 {
-	writel(MV_XOR_V2_DMA_DESQ_CTRL_128B,
+	pete_writel("drivers/dma/mv_xor_v2.c:250", MV_XOR_V2_DMA_DESQ_CTRL_128B,
 	       xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_CTRL_OFF);
 
 	return MV_XOR_V2_EXT_DESC_SIZE;
@@ -262,17 +262,17 @@ void mv_xor_v2_enable_imsg_thrd(struct mv_xor_v2_device *xor_dev)
 	u32 reg;
 
 	/* Configure threshold of number of descriptors, and enable timer */
-	reg = readl(xor_dev->dma_base + MV_XOR_V2_DMA_IMSG_THRD_OFF);
+	reg = pete_readl("drivers/dma/mv_xor_v2.c:265", xor_dev->dma_base + MV_XOR_V2_DMA_IMSG_THRD_OFF);
 	reg &= ~MV_XOR_V2_DMA_IMSG_THRD_MASK;
 	reg |= MV_XOR_V2_DONE_IMSG_THRD;
 	reg |= MV_XOR_V2_DMA_IMSG_TIMER_EN;
-	writel(reg, xor_dev->dma_base + MV_XOR_V2_DMA_IMSG_THRD_OFF);
+	pete_writel("drivers/dma/mv_xor_v2.c:269", reg, xor_dev->dma_base + MV_XOR_V2_DMA_IMSG_THRD_OFF);
 
 	/* Configure Timer Threshold */
-	reg = readl(xor_dev->dma_base + MV_XOR_V2_DMA_IMSG_TMOT);
+	reg = pete_readl("drivers/dma/mv_xor_v2.c:272", xor_dev->dma_base + MV_XOR_V2_DMA_IMSG_TMOT);
 	reg &= ~MV_XOR_V2_DMA_IMSG_TIMER_THRD_MASK;
 	reg |= MV_XOR_V2_TIMER_THRD;
-	writel(reg, xor_dev->dma_base + MV_XOR_V2_DMA_IMSG_TMOT);
+	pete_writel("drivers/dma/mv_xor_v2.c:275", reg, xor_dev->dma_base + MV_XOR_V2_DMA_IMSG_TMOT);
 }
 
 static irqreturn_t mv_xor_v2_interrupt_handler(int irq, void *data)
@@ -281,7 +281,7 @@ static irqreturn_t mv_xor_v2_interrupt_handler(int irq, void *data)
 	unsigned int ndescs;
 	u32 reg;
 
-	reg = readl(xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_DONE_OFF);
+	reg = pete_readl("drivers/dma/mv_xor_v2.c:284", xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_DONE_OFF);
 
 	ndescs = ((reg >> MV_XOR_V2_DMA_DESQ_DONE_PENDING_SHIFT) &
 		  MV_XOR_V2_DMA_DESQ_DONE_PENDING_MASK);
@@ -539,7 +539,7 @@ int mv_xor_v2_get_pending_params(struct mv_xor_v2_device *xor_dev,
 {
 	u32 reg;
 
-	reg = readl(xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_DONE_OFF);
+	reg = pete_readl("drivers/dma/mv_xor_v2.c:542", xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_DONE_OFF);
 
 	/* get the next pending descriptor index */
 	*pending_ptr = ((reg >> MV_XOR_V2_DMA_DESQ_DONE_READ_PTR_SHIFT) &
@@ -619,11 +619,11 @@ static void mv_xor_v2_set_msi_msg(struct msi_desc *desc, struct msi_msg *msg)
 {
 	struct mv_xor_v2_device *xor_dev = dev_get_drvdata(desc->dev);
 
-	writel(msg->address_lo,
+	pete_writel("drivers/dma/mv_xor_v2.c:622", msg->address_lo,
 	       xor_dev->dma_base + MV_XOR_V2_DMA_IMSG_BALR_OFF);
-	writel(msg->address_hi & 0xFFFF,
+	pete_writel("drivers/dma/mv_xor_v2.c:624", msg->address_hi & 0xFFFF,
 	       xor_dev->dma_base + MV_XOR_V2_DMA_IMSG_BAHR_OFF);
-	writel(msg->data,
+	pete_writel("drivers/dma/mv_xor_v2.c:626", msg->data,
 	       xor_dev->dma_base + MV_XOR_V2_DMA_IMSG_CDAT_OFF);
 }
 
@@ -632,13 +632,13 @@ static int mv_xor_v2_descq_init(struct mv_xor_v2_device *xor_dev)
 	u32 reg;
 
 	/* write the DESQ size to the DMA engine */
-	writel(MV_XOR_V2_DESC_NUM,
+	pete_writel("drivers/dma/mv_xor_v2.c:635", MV_XOR_V2_DESC_NUM,
 	       xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_SIZE_OFF);
 
 	/* write the DESQ address to the DMA enngine*/
-	writel(lower_32_bits(xor_dev->hw_desq),
+	pete_writel("drivers/dma/mv_xor_v2.c:639", lower_32_bits(xor_dev->hw_desq),
 	       xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_BALR_OFF);
-	writel(upper_32_bits(xor_dev->hw_desq),
+	pete_writel("drivers/dma/mv_xor_v2.c:641", upper_32_bits(xor_dev->hw_desq),
 	       xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_BAHR_OFF);
 
 	/*
@@ -650,17 +650,17 @@ static int mv_xor_v2_descq_init(struct mv_xor_v2_device *xor_dev)
 	 *  - Enable cacheable - Bufferable, Modifiable, Other Allocate
 	 *    and Allocate
 	 */
-	reg = readl(xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_ARATTR_OFF);
+	reg = pete_readl("drivers/dma/mv_xor_v2.c:653", xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_ARATTR_OFF);
 	reg &= ~MV_XOR_V2_DMA_DESQ_ATTR_CACHE_MASK;
 	reg |= MV_XOR_V2_DMA_DESQ_ATTR_OUTER_SHAREABLE |
 		MV_XOR_V2_DMA_DESQ_ATTR_CACHEABLE;
-	writel(reg, xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_ARATTR_OFF);
+	pete_writel("drivers/dma/mv_xor_v2.c:657", reg, xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_ARATTR_OFF);
 
-	reg = readl(xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_AWATTR_OFF);
+	reg = pete_readl("drivers/dma/mv_xor_v2.c:659", xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_AWATTR_OFF);
 	reg &= ~MV_XOR_V2_DMA_DESQ_ATTR_CACHE_MASK;
 	reg |= MV_XOR_V2_DMA_DESQ_ATTR_OUTER_SHAREABLE |
 		MV_XOR_V2_DMA_DESQ_ATTR_CACHEABLE;
-	writel(reg, xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_AWATTR_OFF);
+	pete_writel("drivers/dma/mv_xor_v2.c:663", reg, xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_AWATTR_OFF);
 
 	/* BW CTRL - set values to optimize the XOR performance:
 	 *
@@ -677,15 +677,15 @@ static int mv_xor_v2_descq_init(struct mv_xor_v2_device *xor_dev)
 		MV_XOR_V2_GLOB_BW_CTRL_RD_BURST_LEN_SHIFT) |
 	       (MV_XOR_V2_GLOB_BW_CTRL_WR_BURST_LEN_VAL <<
 		MV_XOR_V2_GLOB_BW_CTRL_WR_BURST_LEN_SHIFT));
-	writel(reg, xor_dev->glob_base + MV_XOR_V2_GLOB_BW_CTRL);
+	pete_writel("drivers/dma/mv_xor_v2.c:680", reg, xor_dev->glob_base + MV_XOR_V2_GLOB_BW_CTRL);
 
 	/* Disable the AXI timer feature */
-	reg = readl(xor_dev->glob_base + MV_XOR_V2_GLOB_PAUSE);
+	reg = pete_readl("drivers/dma/mv_xor_v2.c:683", xor_dev->glob_base + MV_XOR_V2_GLOB_PAUSE);
 	reg |= MV_XOR_V2_GLOB_PAUSE_AXI_TIME_DIS_VAL;
-	writel(reg, xor_dev->glob_base + MV_XOR_V2_GLOB_PAUSE);
+	pete_writel("drivers/dma/mv_xor_v2.c:685", reg, xor_dev->glob_base + MV_XOR_V2_GLOB_PAUSE);
 
 	/* enable the DMA engine */
-	writel(0, xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_STOP_OFF);
+	pete_writel("drivers/dma/mv_xor_v2.c:688", 0, xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_STOP_OFF);
 
 	return 0;
 }
@@ -695,7 +695,7 @@ static int mv_xor_v2_suspend(struct platform_device *dev, pm_message_t state)
 	struct mv_xor_v2_device *xor_dev = platform_get_drvdata(dev);
 
 	/* Set this bit to disable to stop the XOR unit. */
-	writel(0x1, xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_STOP_OFF);
+	pete_writel("drivers/dma/mv_xor_v2.c:698", 0x1, xor_dev->dma_base + MV_XOR_V2_DMA_DESQ_STOP_OFF);
 
 	return 0;
 }

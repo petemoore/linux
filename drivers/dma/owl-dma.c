@@ -242,48 +242,48 @@ static void pchan_update(struct owl_dma_pchan *pchan, u32 reg,
 {
 	u32 regval;
 
-	regval = readl(pchan->base + reg);
+	regval = pete_readl("drivers/dma/owl-dma.c:245", pchan->base + reg);
 
 	if (state)
 		regval |= val;
 	else
 		regval &= ~val;
 
-	writel(val, pchan->base + reg);
+	pete_writel("drivers/dma/owl-dma.c:252", val, pchan->base + reg);
 }
 
 static void pchan_writel(struct owl_dma_pchan *pchan, u32 reg, u32 data)
 {
-	writel(data, pchan->base + reg);
+	pete_writel("drivers/dma/owl-dma.c:257", data, pchan->base + reg);
 }
 
 static u32 pchan_readl(struct owl_dma_pchan *pchan, u32 reg)
 {
-	return readl(pchan->base + reg);
+	return pete_readl("drivers/dma/owl-dma.c:262", pchan->base + reg);
 }
 
 static void dma_update(struct owl_dma *od, u32 reg, u32 val, bool state)
 {
 	u32 regval;
 
-	regval = readl(od->base + reg);
+	regval = pete_readl("drivers/dma/owl-dma.c:269", od->base + reg);
 
 	if (state)
 		regval |= val;
 	else
 		regval &= ~val;
 
-	writel(val, od->base + reg);
+	pete_writel("drivers/dma/owl-dma.c:276", val, od->base + reg);
 }
 
 static void dma_writel(struct owl_dma *od, u32 reg, u32 data)
 {
-	writel(data, od->base + reg);
+	pete_writel("drivers/dma/owl-dma.c:281", data, od->base + reg);
 }
 
 static u32 dma_readl(struct owl_dma *od, u32 reg)
 {
-	return readl(od->base + reg);
+	return pete_readl("drivers/dma/owl-dma.c:286", od->base + reg);
 }
 
 static inline struct owl_dma *to_owl_dma(struct dma_device *dd)

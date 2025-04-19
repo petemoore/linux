@@ -159,12 +159,12 @@ static void bcm2835_debug_print(struct bcm2835_i2c_dev *i2c_dev)
 static inline void bcm2835_i2c_writel(struct bcm2835_i2c_dev *i2c_dev,
 				      u32 reg, u32 val)
 {
-	writel(val, i2c_dev->regs + reg);
+	pete_writel("drivers/i2c/busses/i2c-bcm2835.c:162", val, i2c_dev->regs + reg);
 }
 
 static inline u32 bcm2835_i2c_readl(struct bcm2835_i2c_dev *i2c_dev, u32 reg)
 {
-	return readl(i2c_dev->regs + reg);
+	return pete_readl("drivers/i2c/busses/i2c-bcm2835.c:167", i2c_dev->regs + reg);
 }
 
 #define to_clk_bcm2835_i2c(_hw) container_of(_hw, struct clk_bcm2835_i2c, hw)

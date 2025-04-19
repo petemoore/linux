@@ -111,10 +111,10 @@ static int __sh_rtc_interrupt(struct sh_rtc *rtc)
 {
 	unsigned int tmp, pending;
 
-	tmp = readb(rtc->regbase + RCR1);
+	tmp = pete_readb("drivers/rtc/rtc-sh.c:114", rtc->regbase + RCR1);
 	pending = tmp & RCR1_CF;
 	tmp &= ~RCR1_CF;
-	writeb(tmp, rtc->regbase + RCR1);
+	pete_writeb("drivers/rtc/rtc-sh.c:117", tmp, rtc->regbase + RCR1);
 
 	/* Users have requested One x Second IRQ */
 	if (pending && rtc->periodic_freq & PF_OXS)
@@ -127,10 +127,10 @@ static int __sh_rtc_alarm(struct sh_rtc *rtc)
 {
 	unsigned int tmp, pending;
 
-	tmp = readb(rtc->regbase + RCR1);
+	tmp = pete_readb("drivers/rtc/rtc-sh.c:130", rtc->regbase + RCR1);
 	pending = tmp & RCR1_AF;
 	tmp &= ~(RCR1_AF | RCR1_AIE);
-	writeb(tmp, rtc->regbase + RCR1);
+	pete_writeb("drivers/rtc/rtc-sh.c:133", tmp, rtc->regbase + RCR1);
 
 	if (pending)
 		rtc_update_irq(rtc->rtc_dev, 1, RTC_AF | RTC_IRQF);
@@ -142,10 +142,10 @@ static int __sh_rtc_periodic(struct sh_rtc *rtc)
 {
 	unsigned int tmp, pending;
 
-	tmp = readb(rtc->regbase + RCR2);
+	tmp = pete_readb("drivers/rtc/rtc-sh.c:145", rtc->regbase + RCR2);
 	pending = tmp & RCR2_PEF;
 	tmp &= ~RCR2_PEF;
-	writeb(tmp, rtc->regbase + RCR2);
+	pete_writeb("drivers/rtc/rtc-sh.c:148", tmp, rtc->regbase + RCR2);
 
 	if (!pending)
 		return 0;
@@ -219,14 +219,14 @@ static inline void sh_rtc_setaie(struct device *dev, unsigned int enable)
 
 	spin_lock_irq(&rtc->lock);
 
-	tmp = readb(rtc->regbase + RCR1);
+	tmp = pete_readb("drivers/rtc/rtc-sh.c:222", rtc->regbase + RCR1);
 
 	if (enable)
 		tmp |= RCR1_AIE;
 	else
 		tmp &= ~RCR1_AIE;
 
-	writeb(tmp, rtc->regbase + RCR1);
+	pete_writeb("drivers/rtc/rtc-sh.c:229", tmp, rtc->regbase + RCR1);
 
 	spin_unlock_irq(&rtc->lock);
 }
@@ -236,10 +236,10 @@ static int sh_rtc_proc(struct device *dev, struct seq_file *seq)
 	struct sh_rtc *rtc = dev_get_drvdata(dev);
 	unsigned int tmp;
 
-	tmp = readb(rtc->regbase + RCR1);
+	tmp = pete_readb("drivers/rtc/rtc-sh.c:239", rtc->regbase + RCR1);
 	seq_printf(seq, "carry_IRQ\t: %s\n", (tmp & RCR1_CIE) ? "yes" : "no");
 
-	tmp = readb(rtc->regbase + RCR2);
+	tmp = pete_readb("drivers/rtc/rtc-sh.c:242", rtc->regbase + RCR2);
 	seq_printf(seq, "periodic_IRQ\t: %s\n",
 		   (tmp & RCR2_PESMASK) ? "yes" : "no");
 
@@ -253,14 +253,14 @@ static inline void sh_rtc_setcie(struct device *dev, unsigned int enable)
 
 	spin_lock_irq(&rtc->lock);
 
-	tmp = readb(rtc->regbase + RCR1);
+	tmp = pete_readb("drivers/rtc/rtc-sh.c:256", rtc->regbase + RCR1);
 
 	if (!enable)
 		tmp &= ~RCR1_CIE;
 	else
 		tmp |= RCR1_CIE;
 
-	writeb(tmp, rtc->regbase + RCR1);
+	pete_writeb("drivers/rtc/rtc-sh.c:263", tmp, rtc->regbase + RCR1);
 
 	spin_unlock_irq(&rtc->lock);
 }
@@ -276,7 +276,7 @@ static int sh_rtc_read_time(struct device *dev, struct rtc_time *tm)
 	struct sh_rtc *rtc = dev_get_drvdata(dev);
 	unsigned int sec128, sec2, yr, yr100, cf_bit;
 
-	if (!(readb(rtc->regbase + RCR2) & RCR2_RTCEN))
+	if (!(pete_readb("drivers/rtc/rtc-sh.c:279", rtc->regbase + RCR2) & RCR2_RTCEN))
 		return -EINVAL;
 
 	do {
@@ -284,33 +284,33 @@ static int sh_rtc_read_time(struct device *dev, struct rtc_time *tm)
 
 		spin_lock_irq(&rtc->lock);
 
-		tmp = readb(rtc->regbase + RCR1);
+		tmp = pete_readb("drivers/rtc/rtc-sh.c:287", rtc->regbase + RCR1);
 		tmp &= ~RCR1_CF; /* Clear CF-bit */
 		tmp |= RCR1_CIE;
-		writeb(tmp, rtc->regbase + RCR1);
+		pete_writeb("drivers/rtc/rtc-sh.c:290", tmp, rtc->regbase + RCR1);
 
-		sec128 = readb(rtc->regbase + R64CNT);
+		sec128 = pete_readb("drivers/rtc/rtc-sh.c:292", rtc->regbase + R64CNT);
 
-		tm->tm_sec	= bcd2bin(readb(rtc->regbase + RSECCNT));
-		tm->tm_min	= bcd2bin(readb(rtc->regbase + RMINCNT));
-		tm->tm_hour	= bcd2bin(readb(rtc->regbase + RHRCNT));
-		tm->tm_wday	= bcd2bin(readb(rtc->regbase + RWKCNT));
-		tm->tm_mday	= bcd2bin(readb(rtc->regbase + RDAYCNT));
-		tm->tm_mon	= bcd2bin(readb(rtc->regbase + RMONCNT)) - 1;
+		tm->tm_sec	= bcd2bin(pete_readb("drivers/rtc/rtc-sh.c:294", rtc->regbase + RSECCNT));
+		tm->tm_min	= bcd2bin(pete_readb("drivers/rtc/rtc-sh.c:295", rtc->regbase + RMINCNT));
+		tm->tm_hour	= bcd2bin(pete_readb("drivers/rtc/rtc-sh.c:296", rtc->regbase + RHRCNT));
+		tm->tm_wday	= bcd2bin(pete_readb("drivers/rtc/rtc-sh.c:297", rtc->regbase + RWKCNT));
+		tm->tm_mday	= bcd2bin(pete_readb("drivers/rtc/rtc-sh.c:298", rtc->regbase + RDAYCNT));
+		tm->tm_mon	= bcd2bin(pete_readb("drivers/rtc/rtc-sh.c:299", rtc->regbase + RMONCNT)) - 1;
 
 		if (rtc->capabilities & RTC_CAP_4_DIGIT_YEAR) {
-			yr  = readw(rtc->regbase + RYRCNT);
+			yr  = pete_readw("drivers/rtc/rtc-sh.c:302", rtc->regbase + RYRCNT);
 			yr100 = bcd2bin(yr >> 8);
 			yr &= 0xff;
 		} else {
-			yr  = readb(rtc->regbase + RYRCNT);
+			yr  = pete_readb("drivers/rtc/rtc-sh.c:306", rtc->regbase + RYRCNT);
 			yr100 = bcd2bin((yr == 0x99) ? 0x19 : 0x20);
 		}
 
 		tm->tm_year = (yr100 * 100 + bcd2bin(yr)) - 1900;
 
-		sec2 = readb(rtc->regbase + R64CNT);
-		cf_bit = readb(rtc->regbase + RCR1) & RCR1_CF;
+		sec2 = pete_readb("drivers/rtc/rtc-sh.c:312", rtc->regbase + R64CNT);
+		cf_bit = pete_readb("drivers/rtc/rtc-sh.c:313", rtc->regbase + RCR1) & RCR1_CF;
 
 		spin_unlock_irq(&rtc->lock);
 	} while (cf_bit != 0 || ((sec128 ^ sec2) & RTC_BIT_INVERTED) != 0);
@@ -342,32 +342,32 @@ static int sh_rtc_set_time(struct device *dev, struct rtc_time *tm)
 	spin_lock_irq(&rtc->lock);
 
 	/* Reset pre-scaler & stop RTC */
-	tmp = readb(rtc->regbase + RCR2);
+	tmp = pete_readb("drivers/rtc/rtc-sh.c:345", rtc->regbase + RCR2);
 	tmp |= RCR2_RESET;
 	tmp &= ~RCR2_START;
-	writeb(tmp, rtc->regbase + RCR2);
+	pete_writeb("drivers/rtc/rtc-sh.c:348", tmp, rtc->regbase + RCR2);
 
-	writeb(bin2bcd(tm->tm_sec),  rtc->regbase + RSECCNT);
-	writeb(bin2bcd(tm->tm_min),  rtc->regbase + RMINCNT);
-	writeb(bin2bcd(tm->tm_hour), rtc->regbase + RHRCNT);
-	writeb(bin2bcd(tm->tm_wday), rtc->regbase + RWKCNT);
-	writeb(bin2bcd(tm->tm_mday), rtc->regbase + RDAYCNT);
-	writeb(bin2bcd(tm->tm_mon + 1), rtc->regbase + RMONCNT);
+	pete_writeb("drivers/rtc/rtc-sh.c:350", bin2bcd(tm->tm_sec),  rtc->regbase + RSECCNT);
+	pete_writeb("drivers/rtc/rtc-sh.c:351", bin2bcd(tm->tm_min),  rtc->regbase + RMINCNT);
+	pete_writeb("drivers/rtc/rtc-sh.c:352", bin2bcd(tm->tm_hour), rtc->regbase + RHRCNT);
+	pete_writeb("drivers/rtc/rtc-sh.c:353", bin2bcd(tm->tm_wday), rtc->regbase + RWKCNT);
+	pete_writeb("drivers/rtc/rtc-sh.c:354", bin2bcd(tm->tm_mday), rtc->regbase + RDAYCNT);
+	pete_writeb("drivers/rtc/rtc-sh.c:355", bin2bcd(tm->tm_mon + 1), rtc->regbase + RMONCNT);
 
 	if (rtc->capabilities & RTC_CAP_4_DIGIT_YEAR) {
 		year = (bin2bcd((tm->tm_year + 1900) / 100) << 8) |
 			bin2bcd(tm->tm_year % 100);
-		writew(year, rtc->regbase + RYRCNT);
+		pete_writew("drivers/rtc/rtc-sh.c:360", year, rtc->regbase + RYRCNT);
 	} else {
 		year = tm->tm_year % 100;
-		writeb(bin2bcd(year), rtc->regbase + RYRCNT);
+		pete_writeb("drivers/rtc/rtc-sh.c:363", bin2bcd(year), rtc->regbase + RYRCNT);
 	}
 
 	/* Start RTC */
-	tmp = readb(rtc->regbase + RCR2);
+	tmp = pete_readb("drivers/rtc/rtc-sh.c:367", rtc->regbase + RCR2);
 	tmp &= ~RCR2_RESET;
 	tmp |= RCR2_RTCEN | RCR2_START;
-	writeb(tmp, rtc->regbase + RCR2);
+	pete_writeb("drivers/rtc/rtc-sh.c:370", tmp, rtc->regbase + RCR2);
 
 	spin_unlock_irq(&rtc->lock);
 
@@ -379,7 +379,7 @@ static inline int sh_rtc_read_alarm_value(struct sh_rtc *rtc, int reg_off)
 	unsigned int byte;
 	int value = -1;			/* return -1 for ignored values */
 
-	byte = readb(rtc->regbase + reg_off);
+	byte = pete_readb("drivers/rtc/rtc-sh.c:382", rtc->regbase + reg_off);
 	if (byte & AR_ENB) {
 		byte &= ~AR_ENB;	/* strip the enable bit */
 		value = bcd2bin(byte);
@@ -404,7 +404,7 @@ static int sh_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *wkalrm)
 	if (tm->tm_mon > 0)
 		tm->tm_mon -= 1; /* RTC is 1-12, tm_mon is 0-11 */
 
-	wkalrm->enabled = (readb(rtc->regbase + RCR1) & RCR1_AIE) ? 1 : 0;
+	wkalrm->enabled = (pete_readb("drivers/rtc/rtc-sh.c:407", rtc->regbase + RCR1) & RCR1_AIE) ? 1 : 0;
 
 	spin_unlock_irq(&rtc->lock);
 
@@ -416,9 +416,9 @@ static inline void sh_rtc_write_alarm_value(struct sh_rtc *rtc,
 {
 	/* < 0 for a value that is ignored */
 	if (value < 0)
-		writeb(0, rtc->regbase + reg_off);
+		pete_writeb("drivers/rtc/rtc-sh.c:419", 0, rtc->regbase + reg_off);
 	else
-		writeb(bin2bcd(value) | AR_ENB,  rtc->regbase + reg_off);
+		pete_writeb("drivers/rtc/rtc-sh.c:421", bin2bcd(value) | AR_ENB,  rtc->regbase + reg_off);
 }
 
 static int sh_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *wkalrm)
@@ -431,9 +431,9 @@ static int sh_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *wkalrm)
 	spin_lock_irq(&rtc->lock);
 
 	/* disable alarm interrupt and clear the alarm flag */
-	rcr1 = readb(rtc->regbase + RCR1);
+	rcr1 = pete_readb("drivers/rtc/rtc-sh.c:434", rtc->regbase + RCR1);
 	rcr1 &= ~(RCR1_AF | RCR1_AIE);
-	writeb(rcr1, rtc->regbase + RCR1);
+	pete_writeb("drivers/rtc/rtc-sh.c:436", rcr1, rtc->regbase + RCR1);
 
 	/* set alarm time */
 	sh_rtc_write_alarm_value(rtc, tm->tm_sec,  RSECAR);
@@ -448,7 +448,7 @@ static int sh_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *wkalrm)
 
 	if (wkalrm->enabled) {
 		rcr1 |= RCR1_AIE;
-		writeb(rcr1, rtc->regbase + RCR1);
+		pete_writeb("drivers/rtc/rtc-sh.c:451", rcr1, rtc->regbase + RCR1);
 	}
 
 	spin_unlock_irq(&rtc->lock);

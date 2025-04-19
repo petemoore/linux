@@ -81,10 +81,10 @@ union acp_pdm_dma_count {
 
 static inline u32 rn_readl(void __iomem *base_addr)
 {
-	return readl(base_addr - ACP_PHY_BASE_ADDRESS);
+	return pete_readl("sound/soc/amd/renoir/rn_acp3x.h:84", base_addr - ACP_PHY_BASE_ADDRESS);
 }
 
 static inline void rn_writel(u32 val, void __iomem *base_addr)
 {
-	writel(val, base_addr - ACP_PHY_BASE_ADDRESS);
+	pete_writel("sound/soc/amd/renoir/rn_acp3x.h:89", val, base_addr - ACP_PHY_BASE_ADDRESS);
 }

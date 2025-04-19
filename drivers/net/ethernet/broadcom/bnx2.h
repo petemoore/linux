@@ -7005,13 +7005,13 @@ struct bnx2 {
 };
 
 #define BNX2_RD(bp, offset)					\
-	readl(bp->regview + offset)
+	pete_readl("drivers/net/ethernet/broadcom/bnx2.h:7008", bp->regview + offset)
 
 #define BNX2_WR(bp, offset, val)					\
-	writel(val, bp->regview + offset)
+	pete_writel("drivers/net/ethernet/broadcom/bnx2.h:7011", val, bp->regview + offset)
 
 #define BNX2_WR16(bp, offset, val)				\
-	writew(val, bp->regview + offset)
+	pete_writew("drivers/net/ethernet/broadcom/bnx2.h:7014", val, bp->regview + offset)
 
 struct cpu_reg {
 	u32 mode;

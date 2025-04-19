@@ -50,13 +50,13 @@ static void hisi_inno_phy_write_reg(struct hisi_inno_phy_priv *priv,
 	      ((addr << 8) & PHY_TEST_ADDR) |
 	      ((port << 16) & PHY_TEST_PORT) |
 	      PHY_TEST_WREN | PHY_TEST_RST;
-	writel(val, reg);
+	pete_writel("drivers/phy/hisilicon/phy-hisi-inno-usb2.c:53", val, reg);
 
 	val |= PHY_TEST_CLK;
-	writel(val, reg);
+	pete_writel("drivers/phy/hisilicon/phy-hisi-inno-usb2.c:56", val, reg);
 
 	val &= ~PHY_TEST_CLK;
-	writel(val, reg);
+	pete_writel("drivers/phy/hisilicon/phy-hisi-inno-usb2.c:59", val, reg);
 }
 
 static void hisi_inno_phy_setup(struct hisi_inno_phy_priv *priv)

@@ -60,12 +60,12 @@ struct ralink_usb_phy {
 
 static void u2_phy_w32(struct ralink_usb_phy *phy, u32 val, u32 reg)
 {
-	writel(val, phy->base + reg);
+	pete_writel("drivers/phy/ralink/phy-ralink-usb.c:63", val, phy->base + reg);
 }
 
 static u32 u2_phy_r32(struct ralink_usb_phy *phy, u32 reg)
 {
-	return readl(phy->base + reg);
+	return pete_readl("drivers/phy/ralink/phy-ralink-usb.c:68", phy->base + reg);
 }
 
 static void ralink_usb_phy_init(struct ralink_usb_phy *phy)

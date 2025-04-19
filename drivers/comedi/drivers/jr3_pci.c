@@ -713,7 +713,7 @@ static int jr3_pci_auto_attach(struct comedi_device *dev,
 
 	/* Reset DSP card */
 	for (i = 0; i < dev->n_subdevices; i++)
-		writel(0, &block[i].reset);
+		pete_writel("drivers/comedi/drivers/jr3_pci.c:716", 0, &block[i].reset);
 
 	ret = comedi_load_firmware(dev, &comedi_to_pci_dev(dev)->dev,
 				   "comedi/jr3pci.idm",

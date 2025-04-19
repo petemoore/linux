@@ -928,30 +928,30 @@ static void mc_pcie_setup_window(void __iomem *bridge_base_addr, u32 index,
 	else
 		val = PCIE_TX_RX_INTERFACE;
 
-	writel(val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
+	pete_writel("drivers/pci/controller/pcie-microchip-host.c:931", val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
 	       ATR0_AXI4_SLV0_TRSL_PARAM);
 
 	val = lower_32_bits(axi_addr) | (atr_sz << ATR_SIZE_SHIFT) |
 			    ATR_IMPL_ENABLE;
-	writel(val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
+	pete_writel("drivers/pci/controller/pcie-microchip-host.c:936", val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
 	       ATR0_AXI4_SLV0_SRCADDR_PARAM);
 
 	val = upper_32_bits(axi_addr);
-	writel(val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
+	pete_writel("drivers/pci/controller/pcie-microchip-host.c:940", val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
 	       ATR0_AXI4_SLV0_SRC_ADDR);
 
 	val = lower_32_bits(pci_addr);
-	writel(val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
+	pete_writel("drivers/pci/controller/pcie-microchip-host.c:944", val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
 	       ATR0_AXI4_SLV0_TRSL_ADDR_LSB);
 
 	val = upper_32_bits(pci_addr);
-	writel(val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
+	pete_writel("drivers/pci/controller/pcie-microchip-host.c:948", val, bridge_base_addr + (index * ATR_ENTRY_SIZE) +
 	       ATR0_AXI4_SLV0_TRSL_ADDR_UDW);
 
-	val = readl(bridge_base_addr + ATR0_PCIE_WIN0_SRCADDR_PARAM);
+	val = pete_readl("drivers/pci/controller/pcie-microchip-host.c:951", bridge_base_addr + ATR0_PCIE_WIN0_SRCADDR_PARAM);
 	val |= (ATR0_PCIE_ATR_SIZE << ATR0_PCIE_ATR_SIZE_SHIFT);
-	writel(val, bridge_base_addr + ATR0_PCIE_WIN0_SRCADDR_PARAM);
-	writel(0, bridge_base_addr + ATR0_PCIE_WIN0_SRC_ADDR);
+	pete_writel("drivers/pci/controller/pcie-microchip-host.c:953", val, bridge_base_addr + ATR0_PCIE_WIN0_SRCADDR_PARAM);
+	pete_writel("drivers/pci/controller/pcie-microchip-host.c:954", 0, bridge_base_addr + ATR0_PCIE_WIN0_SRC_ADDR);
 }
 
 static int mc_pcie_setup_windows(struct platform_device *pdev,

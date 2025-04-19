@@ -80,7 +80,7 @@ parisc_agp_configure(void)
 
 	agp_bridge->gart_bus_addr = info->gart_base;
 	agp_bridge->capndx = info->lba_cap_offset;
-	agp_bridge->mode = readl(info->lba_regs+info->lba_cap_offset+PCI_AGP_STATUS);
+	agp_bridge->mode = pete_readl("drivers/char/agp/parisc-agp.c:83", info->lba_regs+info->lba_cap_offset+PCI_AGP_STATUS);
 
 	return 0;
 }
@@ -90,8 +90,8 @@ parisc_agp_tlbflush(struct agp_memory *mem)
 {
 	struct _parisc_agp_info *info = &parisc_agp_info;
 
-	writeq(info->gart_base | ilog2(info->gart_size), info->ioc_regs+IOC_PCOM);
-	readq(info->ioc_regs+IOC_PCOM);	/* flush */
+	pete_writeq("drivers/char/agp/parisc-agp.c:93", info->gart_base | ilog2(info->gart_size), info->ioc_regs+IOC_PCOM);
+	pete_readq("drivers/char/agp/parisc-agp.c:94", info->ioc_regs+IOC_PCOM);	/* flush */
 }
 
 static int
@@ -200,12 +200,12 @@ parisc_agp_enable(struct agp_bridge_data *bridge, u32 mode)
 	struct _parisc_agp_info *info = &parisc_agp_info;
 	u32 command;
 
-	command = readl(info->lba_regs + info->lba_cap_offset + PCI_AGP_STATUS);
+	command = pete_readl("drivers/char/agp/parisc-agp.c:203", info->lba_regs + info->lba_cap_offset + PCI_AGP_STATUS);
 
 	command = agp_collect_device_status(bridge, mode, command);
 	command |= 0x00000100;
 
-	writel(command, info->lba_regs + info->lba_cap_offset + PCI_AGP_COMMAND);
+	pete_writel("drivers/char/agp/parisc-agp.c:208", command, info->lba_regs + info->lba_cap_offset + PCI_AGP_COMMAND);
 
 	agp_device_command(command, (mode & AGP8X_MODE) != 0);
 }
@@ -245,7 +245,7 @@ agp_ioc_init(void __iomem *ioc_regs)
 
         info->ioc_regs = ioc_regs;
 
-        io_tlb_ps = readq(info->ioc_regs+IOC_TCNFG);
+        io_tlb_ps = pete_readq("drivers/char/agp/parisc-agp.c:248", info->ioc_regs+IOC_TCNFG);
         switch (io_tlb_ps) {
         case 0: io_tlb_shift = 12; break;
         case 1: io_tlb_shift = 13; break;
@@ -261,13 +261,13 @@ agp_ioc_init(void __iomem *ioc_regs)
         info->io_page_size = 1 << io_tlb_shift;
         info->io_pages_per_kpage = PAGE_SIZE / info->io_page_size;
 
-        iova_base = readq(info->ioc_regs+IOC_IBASE) & ~0x1;
+        iova_base = pete_readq("drivers/char/agp/parisc-agp.c:264", info->ioc_regs+IOC_IBASE) & ~0x1;
         info->gart_base = iova_base + PLUTO_IOVA_SIZE - PLUTO_GART_SIZE;
 
         info->gart_size = PLUTO_GART_SIZE;
         info->gatt_entries = info->gart_size / info->io_page_size;
 
-        io_pdir = phys_to_virt(readq(info->ioc_regs+IOC_PDIR_BASE));
+        io_pdir = phys_to_virt(pete_readq("drivers/char/agp/parisc-agp.c:270", info->ioc_regs+IOC_PDIR_BASE));
         info->gatt = &io_pdir[(PLUTO_IOVA_SIZE/2) >> PAGE_SHIFT];
 
         if (info->gatt[0] != SBA_AGPGART_COOKIE) {
@@ -289,18 +289,18 @@ lba_find_capability(int cap)
         u8 pos, id;
         int ttl = 48;
 
-        status = readw(info->lba_regs + PCI_STATUS);
+        status = pete_readw("drivers/char/agp/parisc-agp.c:292", info->lba_regs + PCI_STATUS);
         if (!(status & PCI_STATUS_CAP_LIST))
                 return 0;
-        pos = readb(info->lba_regs + PCI_CAPABILITY_LIST);
+        pos = pete_readb("drivers/char/agp/parisc-agp.c:295", info->lba_regs + PCI_CAPABILITY_LIST);
         while (ttl-- && pos >= 0x40) {
                 pos &= ~3;
-                id = readb(info->lba_regs + pos + PCI_CAP_LIST_ID);
+                id = pete_readb("drivers/char/agp/parisc-agp.c:298", info->lba_regs + pos + PCI_CAP_LIST_ID);
                 if (id == 0xff)
                         break;
                 if (id == cap)
                         return pos;
-                pos = readb(info->lba_regs + pos + PCI_CAP_LIST_NEXT);
+                pos = pete_readb("drivers/char/agp/parisc-agp.c:303", info->lba_regs + pos + PCI_CAP_LIST_NEXT);
         }
         return 0;
 }
@@ -314,7 +314,7 @@ agp_lba_init(void __iomem *lba_hpa)
 	info->lba_regs = lba_hpa;
         info->lba_cap_offset = lba_find_capability(PCI_CAP_ID_AGP);
 
-        cap = readl(lba_hpa + info->lba_cap_offset) & 0xff;
+        cap = pete_readl("drivers/char/agp/parisc-agp.c:317", lba_hpa + info->lba_cap_offset) & 0xff;
         if (cap != PCI_CAP_ID_AGP) {
                 printk(KERN_ERR DRVPFX "Invalid capability ID 0x%02x at 0x%x\n",
                        cap, info->lba_cap_offset);

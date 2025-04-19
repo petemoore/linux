@@ -420,13 +420,13 @@ MODULE_DEVICE_TABLE(of, mtk_i2c_of_match);
 
 static u16 mtk_i2c_readw(struct mtk_i2c *i2c, enum I2C_REGS_OFFSET reg)
 {
-	return readw(i2c->base + i2c->dev_comp->regs[reg]);
+	return pete_readw("drivers/i2c/busses/i2c-mt65xx.c:423", i2c->base + i2c->dev_comp->regs[reg]);
 }
 
 static void mtk_i2c_writew(struct mtk_i2c *i2c, u16 val,
 			   enum I2C_REGS_OFFSET reg)
 {
-	writew(val, i2c->base + i2c->dev_comp->regs[reg]);
+	pete_writew("drivers/i2c/busses/i2c-mt65xx.c:429", val, i2c->base + i2c->dev_comp->regs[reg]);
 }
 
 static int mtk_i2c_clock_enable(struct mtk_i2c *i2c)
@@ -489,21 +489,21 @@ static void mtk_i2c_init_hw(struct mtk_i2c *i2c)
 	mtk_i2c_writew(i2c, intr_stat_reg, OFFSET_INTR_STAT);
 
 	if (i2c->dev_comp->apdma_sync) {
-		writel(I2C_DMA_WARM_RST, i2c->pdmabase + OFFSET_RST);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:492", I2C_DMA_WARM_RST, i2c->pdmabase + OFFSET_RST);
 		udelay(10);
-		writel(I2C_DMA_CLR_FLAG, i2c->pdmabase + OFFSET_RST);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:494", I2C_DMA_CLR_FLAG, i2c->pdmabase + OFFSET_RST);
 		udelay(10);
-		writel(I2C_DMA_HANDSHAKE_RST | I2C_DMA_HARD_RST,
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:496", I2C_DMA_HANDSHAKE_RST | I2C_DMA_HARD_RST,
 		       i2c->pdmabase + OFFSET_RST);
 		mtk_i2c_writew(i2c, I2C_HANDSHAKE_RST | I2C_SOFT_RST,
 			       OFFSET_SOFTRESET);
 		udelay(10);
-		writel(I2C_DMA_CLR_FLAG, i2c->pdmabase + OFFSET_RST);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:501", I2C_DMA_CLR_FLAG, i2c->pdmabase + OFFSET_RST);
 		mtk_i2c_writew(i2c, I2C_CHN_CLR_FLAG, OFFSET_SOFTRESET);
 	} else {
-		writel(I2C_DMA_HARD_RST, i2c->pdmabase + OFFSET_RST);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:504", I2C_DMA_HARD_RST, i2c->pdmabase + OFFSET_RST);
 		udelay(50);
-		writel(I2C_DMA_CLR_FLAG, i2c->pdmabase + OFFSET_RST);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:506", I2C_DMA_CLR_FLAG, i2c->pdmabase + OFFSET_RST);
 		mtk_i2c_writew(i2c, I2C_SOFT_RST, OFFSET_SOFTRESET);
 	}
 
@@ -911,8 +911,8 @@ static int mtk_i2c_do_transfer(struct mtk_i2c *i2c, struct i2c_msg *msgs,
 
 	/* Prepare buffer data to start transfer */
 	if (i2c->op == I2C_MASTER_RD) {
-		writel(I2C_DMA_INT_FLAG_NONE, i2c->pdmabase + OFFSET_INT_FLAG);
-		writel(I2C_DMA_CON_RX | dma_sync, i2c->pdmabase + OFFSET_CON);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:914", I2C_DMA_INT_FLAG_NONE, i2c->pdmabase + OFFSET_INT_FLAG);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:915", I2C_DMA_CON_RX | dma_sync, i2c->pdmabase + OFFSET_CON);
 
 		dma_rd_buf = i2c_get_dma_safe_msg_buf(msgs, 1);
 		if (!dma_rd_buf)
@@ -928,14 +928,14 @@ static int mtk_i2c_do_transfer(struct mtk_i2c *i2c, struct i2c_msg *msgs,
 
 		if (i2c->dev_comp->max_dma_support > 32) {
 			reg_4g_mode = upper_32_bits(rpaddr);
-			writel(reg_4g_mode, i2c->pdmabase + OFFSET_RX_4G_MODE);
+			pete_writel("drivers/i2c/busses/i2c-mt65xx.c:931", reg_4g_mode, i2c->pdmabase + OFFSET_RX_4G_MODE);
 		}
 
-		writel((u32)rpaddr, i2c->pdmabase + OFFSET_RX_MEM_ADDR);
-		writel(msgs->len, i2c->pdmabase + OFFSET_RX_LEN);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:934", (u32)rpaddr, i2c->pdmabase + OFFSET_RX_MEM_ADDR);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:935", msgs->len, i2c->pdmabase + OFFSET_RX_LEN);
 	} else if (i2c->op == I2C_MASTER_WR) {
-		writel(I2C_DMA_INT_FLAG_NONE, i2c->pdmabase + OFFSET_INT_FLAG);
-		writel(I2C_DMA_CON_TX | dma_sync, i2c->pdmabase + OFFSET_CON);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:937", I2C_DMA_INT_FLAG_NONE, i2c->pdmabase + OFFSET_INT_FLAG);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:938", I2C_DMA_CON_TX | dma_sync, i2c->pdmabase + OFFSET_CON);
 
 		dma_wr_buf = i2c_get_dma_safe_msg_buf(msgs, 1);
 		if (!dma_wr_buf)
@@ -951,14 +951,14 @@ static int mtk_i2c_do_transfer(struct mtk_i2c *i2c, struct i2c_msg *msgs,
 
 		if (i2c->dev_comp->max_dma_support > 32) {
 			reg_4g_mode = upper_32_bits(wpaddr);
-			writel(reg_4g_mode, i2c->pdmabase + OFFSET_TX_4G_MODE);
+			pete_writel("drivers/i2c/busses/i2c-mt65xx.c:954", reg_4g_mode, i2c->pdmabase + OFFSET_TX_4G_MODE);
 		}
 
-		writel((u32)wpaddr, i2c->pdmabase + OFFSET_TX_MEM_ADDR);
-		writel(msgs->len, i2c->pdmabase + OFFSET_TX_LEN);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:957", (u32)wpaddr, i2c->pdmabase + OFFSET_TX_MEM_ADDR);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:958", msgs->len, i2c->pdmabase + OFFSET_TX_LEN);
 	} else {
-		writel(I2C_DMA_CLR_FLAG, i2c->pdmabase + OFFSET_INT_FLAG);
-		writel(I2C_DMA_CLR_FLAG | dma_sync, i2c->pdmabase + OFFSET_CON);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:960", I2C_DMA_CLR_FLAG, i2c->pdmabase + OFFSET_INT_FLAG);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:961", I2C_DMA_CLR_FLAG | dma_sync, i2c->pdmabase + OFFSET_CON);
 
 		dma_wr_buf = i2c_get_dma_safe_msg_buf(msgs, 1);
 		if (!dma_wr_buf)
@@ -997,19 +997,19 @@ static int mtk_i2c_do_transfer(struct mtk_i2c *i2c, struct i2c_msg *msgs,
 
 		if (i2c->dev_comp->max_dma_support > 32) {
 			reg_4g_mode = upper_32_bits(wpaddr);
-			writel(reg_4g_mode, i2c->pdmabase + OFFSET_TX_4G_MODE);
+			pete_writel("drivers/i2c/busses/i2c-mt65xx.c:1000", reg_4g_mode, i2c->pdmabase + OFFSET_TX_4G_MODE);
 
 			reg_4g_mode = upper_32_bits(rpaddr);
-			writel(reg_4g_mode, i2c->pdmabase + OFFSET_RX_4G_MODE);
+			pete_writel("drivers/i2c/busses/i2c-mt65xx.c:1003", reg_4g_mode, i2c->pdmabase + OFFSET_RX_4G_MODE);
 		}
 
-		writel((u32)wpaddr, i2c->pdmabase + OFFSET_TX_MEM_ADDR);
-		writel((u32)rpaddr, i2c->pdmabase + OFFSET_RX_MEM_ADDR);
-		writel(msgs->len, i2c->pdmabase + OFFSET_TX_LEN);
-		writel((msgs + 1)->len, i2c->pdmabase + OFFSET_RX_LEN);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:1006", (u32)wpaddr, i2c->pdmabase + OFFSET_TX_MEM_ADDR);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:1007", (u32)rpaddr, i2c->pdmabase + OFFSET_RX_MEM_ADDR);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:1008", msgs->len, i2c->pdmabase + OFFSET_TX_LEN);
+		pete_writel("drivers/i2c/busses/i2c-mt65xx.c:1009", (msgs + 1)->len, i2c->pdmabase + OFFSET_RX_LEN);
 	}
 
-	writel(I2C_DMA_START_EN, i2c->pdmabase + OFFSET_EN);
+	pete_writel("drivers/i2c/busses/i2c-mt65xx.c:1012", I2C_DMA_START_EN, i2c->pdmabase + OFFSET_EN);
 
 	if (!i2c->auto_restart) {
 		start_reg = I2C_TRANSAC_START;

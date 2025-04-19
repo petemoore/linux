@@ -134,12 +134,12 @@ static struct sun50i_iommu *sun50i_iommu_from_dev(struct device *dev)
 
 static u32 iommu_read(struct sun50i_iommu *iommu, u32 offset)
 {
-	return readl(iommu->base + offset);
+	return pete_readl("drivers/iommu/sun50i-iommu.c:137", iommu->base + offset);
 }
 
 static void iommu_write(struct sun50i_iommu *iommu, u32 offset, u32 value)
 {
-	writel(value, iommu->base + offset);
+	pete_writel("drivers/iommu/sun50i-iommu.c:142", value, iommu->base + offset);
 }
 
 /*

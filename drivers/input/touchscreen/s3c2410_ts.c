@@ -127,8 +127,8 @@ static void touch_timer_fire(struct timer_list *unused)
 	unsigned long data1;
 	bool down;
 
-	data0 = readl(ts.io + S3C2410_ADCDAT0);
-	data1 = readl(ts.io + S3C2410_ADCDAT1);
+	data0 = pete_readl("drivers/input/touchscreen/s3c2410_ts.c:130", ts.io + S3C2410_ADCDAT0);
+	data1 = pete_readl("drivers/input/touchscreen/s3c2410_ts.c:131", ts.io + S3C2410_ADCDAT1);
 
 	down = get_down(data0, data1);
 
@@ -160,7 +160,7 @@ static void touch_timer_fire(struct timer_list *unused)
 		input_report_key(ts.input, BTN_TOUCH, 0);
 		input_sync(ts.input);
 
-		writel(WAIT4INT | INT_DOWN, ts.io + S3C2410_ADCTSC);
+		pete_writel("drivers/input/touchscreen/s3c2410_ts.c:163", WAIT4INT | INT_DOWN, ts.io + S3C2410_ADCTSC);
 	}
 }
 
@@ -179,8 +179,8 @@ static irqreturn_t stylus_irq(int irq, void *dev_id)
 	unsigned long data1;
 	bool down;
 
-	data0 = readl(ts.io + S3C2410_ADCDAT0);
-	data1 = readl(ts.io + S3C2410_ADCDAT1);
+	data0 = pete_readl("drivers/input/touchscreen/s3c2410_ts.c:182", ts.io + S3C2410_ADCDAT0);
+	data1 = pete_readl("drivers/input/touchscreen/s3c2410_ts.c:183", ts.io + S3C2410_ADCDAT1);
 
 	down = get_down(data0, data1);
 
@@ -195,7 +195,7 @@ static irqreturn_t stylus_irq(int irq, void *dev_id)
 
 	if (ts.features & FEAT_PEN_IRQ) {
 		/* Clear pen down/up interrupt */
-		writel(0x0, ts.io + S3C64XX_ADCCLRINTPNDNUP);
+		pete_writel("drivers/input/touchscreen/s3c2410_ts.c:198", 0x0, ts.io + S3C64XX_ADCCLRINTPNDNUP);
 	}
 
 	return IRQ_HANDLED;
@@ -241,11 +241,11 @@ static void s3c24xx_ts_conversion(struct s3c_adc_client *client,
 static void s3c24xx_ts_select(struct s3c_adc_client *client, unsigned select)
 {
 	if (select) {
-		writel(S3C2410_ADCTSC_PULL_UP_DISABLE | AUTOPST,
+		pete_writel("drivers/input/touchscreen/s3c2410_ts.c:244", S3C2410_ADCTSC_PULL_UP_DISABLE | AUTOPST,
 		       ts.io + S3C2410_ADCTSC);
 	} else {
 		mod_timer(&touch_timer, jiffies+1);
-		writel(WAIT4INT | INT_UP, ts.io + S3C2410_ADCTSC);
+		pete_writel("drivers/input/touchscreen/s3c2410_ts.c:248", WAIT4INT | INT_UP, ts.io + S3C2410_ADCTSC);
 	}
 }
 
@@ -324,9 +324,9 @@ static int s3c2410ts_probe(struct platform_device *pdev)
 
 	/* Initialise registers */
 	if ((info->delay & 0xffff) > 0)
-		writel(info->delay & 0xffff, ts.io + S3C2410_ADCDLY);
+		pete_writel("drivers/input/touchscreen/s3c2410_ts.c:327", info->delay & 0xffff, ts.io + S3C2410_ADCDLY);
 
-	writel(WAIT4INT | INT_DOWN, ts.io + S3C2410_ADCTSC);
+	pete_writel("drivers/input/touchscreen/s3c2410_ts.c:329", WAIT4INT | INT_DOWN, ts.io + S3C2410_ADCTSC);
 
 	input_dev = input_allocate_device();
 	if (!input_dev) {
@@ -406,7 +406,7 @@ static int s3c2410ts_remove(struct platform_device *pdev)
 #ifdef CONFIG_PM
 static int s3c2410ts_suspend(struct device *dev)
 {
-	writel(TSC_SLEEP, ts.io + S3C2410_ADCTSC);
+	pete_writel("drivers/input/touchscreen/s3c2410_ts.c:409", TSC_SLEEP, ts.io + S3C2410_ADCTSC);
 	disable_irq(ts.irq_tc);
 	clk_disable(ts.clock);
 
@@ -423,9 +423,9 @@ static int s3c2410ts_resume(struct device *dev)
 
 	/* Initialise registers */
 	if ((info->delay & 0xffff) > 0)
-		writel(info->delay & 0xffff, ts.io + S3C2410_ADCDLY);
+		pete_writel("drivers/input/touchscreen/s3c2410_ts.c:426", info->delay & 0xffff, ts.io + S3C2410_ADCDLY);
 
-	writel(WAIT4INT | INT_DOWN, ts.io + S3C2410_ADCTSC);
+	pete_writel("drivers/input/touchscreen/s3c2410_ts.c:428", WAIT4INT | INT_DOWN, ts.io + S3C2410_ADCTSC);
 
 	return 0;
 }

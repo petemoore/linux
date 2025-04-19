@@ -61,7 +61,7 @@ static struct resource mc_base_addr;
 
 static inline void adjust_end(struct console_data *cd)
 {
-	u32 last_byte = readl(&cd->hdr->last_byte);
+	u32 last_byte = pete_readl("drivers/soc/fsl/dpaa2-console.c:64", &cd->hdr->last_byte);
 
 	cd->end_of_data = cd->start_addr + LAST_BYTE(last_byte);
 }
@@ -77,10 +77,10 @@ static u64 get_mc_fw_base_address(void)
 		return 0;
 	}
 
-	mcfwbase  = readl(mcfbaregs + MCFBAHR_OFFSET) &
+	mcfwbase  = pete_readl("drivers/soc/fsl/dpaa2-console.c:80", mcfbaregs + MCFBAHR_OFFSET) &
 			  MC_FW_ADDR_MASK_HIGH;
 	mcfwbase <<= 32;
-	mcfwbase |= readl(mcfbaregs + MCFBALR_OFFSET) & MC_FW_ADDR_MASK_LOW;
+	mcfwbase |= pete_readl("drivers/soc/fsl/dpaa2-console.c:83", mcfbaregs + MCFBALR_OFFSET) & MC_FW_ADDR_MASK_LOW;
 	iounmap(mcfbaregs);
 
 	pr_debug("MC base address at 0x%016llx\n", mcfwbase);
@@ -128,10 +128,10 @@ static int dpaa2_generic_console_open(struct inode *node, struct file *fp,
 	}
 
 	cd->hdr = (struct log_header __iomem *)cd->map_addr;
-	read_magic = readl(&cd->hdr->magic_word);
-	last_byte =  readl(&cd->hdr->last_byte);
-	buf_start =  readl(&cd->hdr->buf_start);
-	buf_length = readl(&cd->hdr->buf_length);
+	read_magic = pete_readl("drivers/soc/fsl/dpaa2-console.c:131", &cd->hdr->magic_word);
+	last_byte =  pete_readl("drivers/soc/fsl/dpaa2-console.c:132", &cd->hdr->last_byte);
+	buf_start =  pete_readl("drivers/soc/fsl/dpaa2-console.c:133", &cd->hdr->buf_start);
+	buf_length = pete_readl("drivers/soc/fsl/dpaa2-console.c:134", &cd->hdr->buf_length);
 
 	if (read_magic != expected_magic) {
 		pr_warn("expected = %08x, read = %08x\n",

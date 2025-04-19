@@ -51,18 +51,18 @@ static const u32 rst_map[] = {
 
 static void hsdk_reset_config(struct hsdk_rst *rst, unsigned long id)
 {
-	writel(rst_map[id], rst->regs_ctl + CGU_SYS_RST_CTRL);
+	pete_writel("drivers/reset/reset-hsdk.c:54", rst_map[id], rst->regs_ctl + CGU_SYS_RST_CTRL);
 }
 
 static int hsdk_reset_do(struct hsdk_rst *rst)
 {
 	u32 reg;
 
-	reg = readl(rst->regs_rst + CGU_IP_SW_RESET);
+	reg = pete_readl("drivers/reset/reset-hsdk.c:61", rst->regs_rst + CGU_IP_SW_RESET);
 	reg &= ~CGU_IP_SW_RESET_DELAY_MASK;
 	reg |= CGU_IP_SW_RESET_DELAY << CGU_IP_SW_RESET_DELAY_SHIFT;
 	reg |= CGU_IP_SW_RESET_RESET;
-	writel(reg, rst->regs_rst + CGU_IP_SW_RESET);
+	pete_writel("drivers/reset/reset-hsdk.c:65", reg, rst->regs_rst + CGU_IP_SW_RESET);
 
 	/* wait till reset bit is back to 0 */
 	return readl_poll_timeout_atomic(rst->regs_rst + CGU_IP_SW_RESET, reg,

@@ -200,13 +200,13 @@ static int update_no_reboot_bit_mem(void *priv, bool set)
 	struct iTCO_wdt_private *p = priv;
 	u32 val32 = 0, newval32 = 0;
 
-	val32 = readl(p->gcs_pmc);
+	val32 = pete_readl("drivers/watchdog/iTCO_wdt.c:203", p->gcs_pmc);
 	if (set)
 		val32 |= no_reboot_bit(p);
 	else
 		val32 &= ~no_reboot_bit(p);
-	writel(val32, p->gcs_pmc);
-	newval32 = readl(p->gcs_pmc);
+	pete_writel("drivers/watchdog/iTCO_wdt.c:208", val32, p->gcs_pmc);
+	newval32 = pete_readl("drivers/watchdog/iTCO_wdt.c:209", p->gcs_pmc);
 
 	/* make sure the update is successful */
 	if (val32 != newval32)

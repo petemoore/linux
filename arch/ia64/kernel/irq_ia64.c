@@ -641,5 +641,5 @@ ia64_send_ipi (int cpu, int vector, int delivery_mode, int redirect)
 	ipi_data = (delivery_mode << 8) | (vector & 0xff);
 	ipi_addr = ipi_base_addr + ((phys_cpu_id << 4) | ((redirect & 1) << 3));
 
-	writeq(ipi_data, ipi_addr);
+	pete_writeq("arch/ia64/kernel/irq_ia64.c:644", ipi_data, ipi_addr);
 }

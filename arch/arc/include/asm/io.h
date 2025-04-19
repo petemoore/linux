@@ -197,16 +197,16 @@ __raw_writesx(32, l)
  *
  * http://lkml.kernel.org/r/20150622133656.GG1583@arm.com
  */
-#define readb(c)		({ u8  __v = readb_relaxed(c); __iormb(); __v; })
-#define readw(c)		({ u16 __v = readw_relaxed(c); __iormb(); __v; })
-#define readl(c)		({ u32 __v = readl_relaxed(c); __iormb(); __v; })
+#define pete_readb("arch/arc/include/asm/io.h:200", c)		({ u8  __v = readb_relaxed(c); __iormb(); __v; })
+#define pete_readw("arch/arc/include/asm/io.h:201", c)		({ u16 __v = readw_relaxed(c); __iormb(); __v; })
+#define pete_readl("arch/arc/include/asm/io.h:202", c)		({ u32 __v = readl_relaxed(c); __iormb(); __v; })
 #define readsb(p,d,l)		({ __raw_readsb(p,d,l); __iormb(); })
 #define readsw(p,d,l)		({ __raw_readsw(p,d,l); __iormb(); })
 #define readsl(p,d,l)		({ __raw_readsl(p,d,l); __iormb(); })
 
-#define writeb(v,c)		({ __iowmb(); writeb_relaxed(v,c); })
-#define writew(v,c)		({ __iowmb(); writew_relaxed(v,c); })
-#define writel(v,c)		({ __iowmb(); writel_relaxed(v,c); })
+#define pete_writeb("arch/arc/include/asm/io.h:207", v,c)		({ __iowmb(); writeb_relaxed(v,c); })
+#define pete_writew("arch/arc/include/asm/io.h:208", v,c)		({ __iowmb(); writew_relaxed(v,c); })
+#define pete_writel("arch/arc/include/asm/io.h:209", v,c)		({ __iowmb(); writel_relaxed(v,c); })
 #define writesb(p,d,l)		({ __iowmb(); __raw_writesb(p,d,l); })
 #define writesw(p,d,l)		({ __iowmb(); __raw_writesw(p,d,l); })
 #define writesl(p,d,l)		({ __iowmb(); __raw_writesl(p,d,l); })

@@ -365,7 +365,7 @@ static void i40e_tx_timeout(struct net_device *netdev, unsigned int txqueue)
 		netdev_info(netdev, "tx_timeout: VSI_seid: %d, Q %d, NTC: 0x%x, HWB: 0x%x, NTU: 0x%x, TAIL: 0x%x, INT: 0x%x\n",
 			    vsi->seid, txqueue, tx_ring->next_to_clean,
 			    head, tx_ring->next_to_use,
-			    readl(tx_ring->tail), val);
+			    pete_readl("drivers/net/ethernet/intel/i40e/i40e_main.c:368", tx_ring->tail), val);
 	}
 
 	pf->tx_timeout_last_recovery = jiffies;
@@ -3504,7 +3504,7 @@ static int i40e_configure_rx_ring(struct i40e_ring *ring)
 
 	/* cache tail for quicker writes, and clear the reg before use */
 	ring->tail = hw->hw_addr + I40E_QRX_TAIL(pf_q);
-	writel(0, ring->tail);
+	pete_writel("drivers/net/ethernet/intel/i40e/i40e_main.c:3507", 0, ring->tail);
 
 	if (ring->xsk_pool) {
 		xsk_pool_set_rxq_info(ring->xsk_pool, &ring->xdp_rxq);

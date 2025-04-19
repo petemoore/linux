@@ -153,7 +153,7 @@ static void tegra_kbc_report_keys(struct tegra_kbc *kbc)
 
 	for (i = 0; i < KBC_MAX_KPENT; i++) {
 		if ((i % 4) == 0)
-			val = readl(kbc->mmio + KBC_KP_ENT0_0 + i);
+			val = pete_readl("drivers/input/keyboard/tegra-kbc.c:156", kbc->mmio + KBC_KP_ENT0_0 + i);
 
 		if (val & 0x80) {
 			unsigned int col = val & 0x07;
@@ -230,12 +230,12 @@ static void tegra_kbc_set_fifo_interrupt(struct tegra_kbc *kbc, bool enable)
 {
 	u32 val;
 
-	val = readl(kbc->mmio + KBC_CONTROL_0);
+	val = pete_readl("drivers/input/keyboard/tegra-kbc.c:233", kbc->mmio + KBC_CONTROL_0);
 	if (enable)
 		val |= KBC_CONTROL_FIFO_CNT_INT_EN;
 	else
 		val &= ~KBC_CONTROL_FIFO_CNT_INT_EN;
-	writel(val, kbc->mmio + KBC_CONTROL_0);
+	pete_writel("drivers/input/keyboard/tegra-kbc.c:238", val, kbc->mmio + KBC_CONTROL_0);
 }
 
 static void tegra_kbc_keypress_timer(struct timer_list *t)
@@ -247,7 +247,7 @@ static void tegra_kbc_keypress_timer(struct timer_list *t)
 
 	spin_lock_irqsave(&kbc->lock, flags);
 
-	val = (readl(kbc->mmio + KBC_INT_0) >> 4) & 0xf;
+	val = (pete_readl("drivers/input/keyboard/tegra-kbc.c:250", kbc->mmio + KBC_INT_0) >> 4) & 0xf;
 	if (val) {
 		unsigned long dly;
 
@@ -286,8 +286,8 @@ static irqreturn_t tegra_kbc_isr(int irq, void *args)
 	 * Quickly bail out & reenable interrupts if the fifo threshold
 	 * count interrupt wasn't the interrupt source
 	 */
-	val = readl(kbc->mmio + KBC_INT_0);
-	writel(val, kbc->mmio + KBC_INT_0);
+	val = pete_readl("drivers/input/keyboard/tegra-kbc.c:289", kbc->mmio + KBC_INT_0);
+	pete_writel("drivers/input/keyboard/tegra-kbc.c:290", val, kbc->mmio + KBC_INT_0);
 
 	if (val & KBC_INT_FIFO_CNT_INT_STATUS) {
 		/*
@@ -315,7 +315,7 @@ static void tegra_kbc_setup_wakekeys(struct tegra_kbc *kbc, bool filter)
 	rst_val = (filter && !kbc->wakeup) ? ~0 : 0;
 
 	for (i = 0; i < kbc->hw_support->max_rows; i++)
-		writel(rst_val, kbc->mmio + KBC_ROW0_MASK_0 + i * 4);
+		pete_writel("drivers/input/keyboard/tegra-kbc.c:318", rst_val, kbc->mmio + KBC_ROW0_MASK_0 + i * 4);
 }
 
 static void tegra_kbc_config_pins(struct tegra_kbc *kbc)
@@ -329,8 +329,8 @@ static void tegra_kbc_config_pins(struct tegra_kbc *kbc)
 		u32 c_mask = 0x0f << c_shft;
 		u32 r_offs = (i / 6) * 4 + KBC_ROW_CFG0_0;
 		u32 c_offs = (i / 8) * 4 + KBC_COL_CFG0_0;
-		u32 row_cfg = readl(kbc->mmio + r_offs);
-		u32 col_cfg = readl(kbc->mmio + c_offs);
+		u32 row_cfg = pete_readl("drivers/input/keyboard/tegra-kbc.c:332", kbc->mmio + r_offs);
+		u32 col_cfg = pete_readl("drivers/input/keyboard/tegra-kbc.c:333", kbc->mmio + c_offs);
 
 		row_cfg &= ~r_mask;
 		col_cfg &= ~c_mask;
@@ -348,8 +348,8 @@ static void tegra_kbc_config_pins(struct tegra_kbc *kbc)
 			break;
 		}
 
-		writel(row_cfg, kbc->mmio + r_offs);
-		writel(col_cfg, kbc->mmio + c_offs);
+		pete_writel("drivers/input/keyboard/tegra-kbc.c:351", row_cfg, kbc->mmio + r_offs);
+		pete_writel("drivers/input/keyboard/tegra-kbc.c:352", col_cfg, kbc->mmio + c_offs);
 	}
 }
 
@@ -372,7 +372,7 @@ static int tegra_kbc_start(struct tegra_kbc *kbc)
 	tegra_kbc_config_pins(kbc);
 	tegra_kbc_setup_wakekeys(kbc, false);
 
-	writel(kbc->repeat_cnt, kbc->mmio + KBC_RPT_DLY_0);
+	pete_writel("drivers/input/keyboard/tegra-kbc.c:375", kbc->repeat_cnt, kbc->mmio + KBC_RPT_DLY_0);
 
 	/* Keyboard debounce count is maximum of 12 bits. */
 	debounce_cnt = min(kbc->debounce_cnt, KBC_MAX_DEBOUNCE_CNT);
@@ -380,13 +380,13 @@ static int tegra_kbc_start(struct tegra_kbc *kbc)
 	val |= KBC_FIFO_TH_CNT_SHIFT(1); /* set fifo interrupt threshold to 1 */
 	val |= KBC_CONTROL_FIFO_CNT_INT_EN;  /* interrupt on FIFO threshold */
 	val |= KBC_CONTROL_KBC_EN;     /* enable */
-	writel(val, kbc->mmio + KBC_CONTROL_0);
+	pete_writel("drivers/input/keyboard/tegra-kbc.c:383", val, kbc->mmio + KBC_CONTROL_0);
 
 	/*
 	 * Compute the delay(ns) from interrupt mode to continuous polling
 	 * mode so the timer routine is scheduled appropriately.
 	 */
-	val = readl(kbc->mmio + KBC_INIT_DLY_0);
+	val = pete_readl("drivers/input/keyboard/tegra-kbc.c:389", kbc->mmio + KBC_INIT_DLY_0);
 	kbc->cp_dly_jiffies = usecs_to_jiffies((val & 0xfffff) * 32);
 
 	kbc->num_pressed_keys = 0;
@@ -396,15 +396,15 @@ static int tegra_kbc_start(struct tegra_kbc *kbc)
 	 * and enable keyboard interrupts.
 	 */
 	while (1) {
-		val = readl(kbc->mmio + KBC_INT_0);
+		val = pete_readl("drivers/input/keyboard/tegra-kbc.c:399", kbc->mmio + KBC_INT_0);
 		val >>= 4;
 		if (!val)
 			break;
 
-		val = readl(kbc->mmio + KBC_KP_ENT0_0);
-		val = readl(kbc->mmio + KBC_KP_ENT1_0);
+		val = pete_readl("drivers/input/keyboard/tegra-kbc.c:404", kbc->mmio + KBC_KP_ENT0_0);
+		val = pete_readl("drivers/input/keyboard/tegra-kbc.c:405", kbc->mmio + KBC_KP_ENT1_0);
 	}
-	writel(0x7, kbc->mmio + KBC_INT_0);
+	pete_writel("drivers/input/keyboard/tegra-kbc.c:407", 0x7, kbc->mmio + KBC_INT_0);
 
 	enable_irq(kbc->irq);
 
@@ -417,9 +417,9 @@ static void tegra_kbc_stop(struct tegra_kbc *kbc)
 	u32 val;
 
 	spin_lock_irqsave(&kbc->lock, flags);
-	val = readl(kbc->mmio + KBC_CONTROL_0);
+	val = pete_readl("drivers/input/keyboard/tegra-kbc.c:420", kbc->mmio + KBC_CONTROL_0);
 	val &= ~1;
-	writel(val, kbc->mmio + KBC_CONTROL_0);
+	pete_writel("drivers/input/keyboard/tegra-kbc.c:422", val, kbc->mmio + KBC_CONTROL_0);
 	spin_unlock_irqrestore(&kbc->lock, flags);
 
 	disable_irq(kbc->irq);
@@ -718,12 +718,12 @@ static void tegra_kbc_set_keypress_interrupt(struct tegra_kbc *kbc, bool enable)
 {
 	u32 val;
 
-	val = readl(kbc->mmio + KBC_CONTROL_0);
+	val = pete_readl("drivers/input/keyboard/tegra-kbc.c:721", kbc->mmio + KBC_CONTROL_0);
 	if (enable)
 		val |= KBC_CONTROL_KEYPRESS_INT_EN;
 	else
 		val &= ~KBC_CONTROL_KEYPRESS_INT_EN;
-	writel(val, kbc->mmio + KBC_CONTROL_0);
+	pete_writel("drivers/input/keyboard/tegra-kbc.c:726", val, kbc->mmio + KBC_CONTROL_0);
 }
 
 static int tegra_kbc_suspend(struct device *dev)
@@ -738,13 +738,13 @@ static int tegra_kbc_suspend(struct device *dev)
 		tegra_kbc_set_fifo_interrupt(kbc, false);
 
 		/* Forcefully clear the interrupt status */
-		writel(0x7, kbc->mmio + KBC_INT_0);
+		pete_writel("drivers/input/keyboard/tegra-kbc.c:741", 0x7, kbc->mmio + KBC_INT_0);
 		/*
 		 * Store the previous resident time of continuous polling mode.
 		 * Force the keyboard into interrupt mode.
 		 */
-		kbc->cp_to_wkup_dly = readl(kbc->mmio + KBC_TO_CNT_0);
-		writel(0, kbc->mmio + KBC_TO_CNT_0);
+		kbc->cp_to_wkup_dly = pete_readl("drivers/input/keyboard/tegra-kbc.c:746", kbc->mmio + KBC_TO_CNT_0);
+		pete_writel("drivers/input/keyboard/tegra-kbc.c:747", 0, kbc->mmio + KBC_TO_CNT_0);
 
 		tegra_kbc_setup_wakekeys(kbc, true);
 		msleep(30);
@@ -777,7 +777,7 @@ static int tegra_kbc_resume(struct device *dev)
 		tegra_kbc_set_keypress_interrupt(kbc, false);
 
 		/* Restore the resident time of continuous polling mode. */
-		writel(kbc->cp_to_wkup_dly, kbc->mmio + KBC_TO_CNT_0);
+		pete_writel("drivers/input/keyboard/tegra-kbc.c:780", kbc->cp_to_wkup_dly, kbc->mmio + KBC_TO_CNT_0);
 
 		tegra_kbc_set_fifo_interrupt(kbc, true);
 

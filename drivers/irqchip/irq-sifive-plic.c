@@ -89,9 +89,9 @@ static inline void plic_toggle(struct plic_handler *handler,
 
 	raw_spin_lock(&handler->enable_lock);
 	if (enable)
-		writel(readl(reg) | hwirq_mask, reg);
+		pete_writel("drivers/irqchip/irq-sifive-plic.c:92", pete_readl("drivers/irqchip/irq-sifive-plic.c:92", reg) | hwirq_mask, reg);
 	else
-		writel(readl(reg) & ~hwirq_mask, reg);
+		pete_writel("drivers/irqchip/irq-sifive-plic.c:94", pete_readl("drivers/irqchip/irq-sifive-plic.c:94", reg) & ~hwirq_mask, reg);
 	raw_spin_unlock(&handler->enable_lock);
 }
 
@@ -101,7 +101,7 @@ static inline void plic_irq_toggle(const struct cpumask *mask,
 	int cpu;
 	struct plic_priv *priv = irq_data_get_irq_chip_data(d);
 
-	writel(enable, priv->regs + PRIORITY_BASE + d->hwirq * PRIORITY_PER_ID);
+	pete_writel("drivers/irqchip/irq-sifive-plic.c:104", enable, priv->regs + PRIORITY_BASE + d->hwirq * PRIORITY_PER_ID);
 	for_each_cpu(cpu, mask) {
 		struct plic_handler *handler = per_cpu_ptr(&plic_handlers, cpu);
 
@@ -165,10 +165,10 @@ static void plic_irq_eoi(struct irq_data *d)
 
 	if (irqd_irq_masked(d)) {
 		plic_irq_unmask(d);
-		writel(d->hwirq, handler->hart_base + CONTEXT_CLAIM);
+		pete_writel("drivers/irqchip/irq-sifive-plic.c:168", d->hwirq, handler->hart_base + CONTEXT_CLAIM);
 		plic_irq_mask(d);
 	} else {
-		writel(d->hwirq, handler->hart_base + CONTEXT_CLAIM);
+		pete_writel("drivers/irqchip/irq-sifive-plic.c:171", d->hwirq, handler->hart_base + CONTEXT_CLAIM);
 	}
 }
 
@@ -238,7 +238,7 @@ static void plic_handle_irq(struct irq_desc *desc)
 
 	chained_irq_enter(chip, desc);
 
-	while ((hwirq = readl(claim))) {
+	while ((hwirq = pete_readl("drivers/irqchip/irq-sifive-plic.c:241", claim))) {
 		int err = generic_handle_domain_irq(handler->priv->irqdomain,
 						    hwirq);
 		if (unlikely(err))
@@ -252,7 +252,7 @@ static void plic_handle_irq(struct irq_desc *desc)
 static void plic_set_threshold(struct plic_handler *handler, u32 threshold)
 {
 	/* priority must be > threshold to trigger an interrupt */
-	writel(threshold, handler->hart_base + CONTEXT_THRESHOLD);
+	pete_writel("drivers/irqchip/irq-sifive-plic.c:255", threshold, handler->hart_base + CONTEXT_THRESHOLD);
 }
 
 static int plic_dying_cpu(unsigned int cpu)

@@ -20,10 +20,10 @@ static void psb_lid_timer_func(struct timer_list *t)
 	u32 __iomem *lid_state = dev_priv->opregion.lid_state;
 	u32 pp_status;
 
-	if (readl(lid_state) == dev_priv->lid_last_state)
+	if (pete_readl("drivers/gpu/drm/gma500/psb_lid.c:23", lid_state) == dev_priv->lid_last_state)
 		goto lid_timer_schedule;
 
-	if ((readl(lid_state)) & 0x01) {
+	if ((pete_readl("drivers/gpu/drm/gma500/psb_lid.c:26", lid_state)) & 0x01) {
 		/*lid state is open*/
 		REG_WRITE(PP_CONTROL, REG_READ(PP_CONTROL) | POWER_TARGET_ON);
 		do {
@@ -46,7 +46,7 @@ static void psb_lid_timer_func(struct timer_list *t)
 			pp_status = REG_READ(PP_STATUS);
 		} while ((pp_status & PP_ON) == 0);
 	}
-	dev_priv->lid_last_state =  readl(lid_state);
+	dev_priv->lid_last_state =  pete_readl("drivers/gpu/drm/gma500/psb_lid.c:49", lid_state);
 
 lid_timer_schedule:
 	spin_lock_irqsave(&dev_priv->lid_lock, irq_flags);

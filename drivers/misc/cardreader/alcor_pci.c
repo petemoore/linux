@@ -55,19 +55,19 @@ MODULE_DEVICE_TABLE(pci, pci_ids);
 
 void alcor_write8(struct alcor_pci_priv *priv, u8 val, unsigned int addr)
 {
-	writeb(val, priv->iobase + addr);
+	pete_writeb("drivers/misc/cardreader/alcor_pci.c:58", val, priv->iobase + addr);
 }
 EXPORT_SYMBOL_GPL(alcor_write8);
 
 void alcor_write16(struct alcor_pci_priv *priv, u16 val, unsigned int addr)
 {
-	writew(val, priv->iobase + addr);
+	pete_writew("drivers/misc/cardreader/alcor_pci.c:64", val, priv->iobase + addr);
 }
 EXPORT_SYMBOL_GPL(alcor_write16);
 
 void alcor_write32(struct alcor_pci_priv *priv, u32 val, unsigned int addr)
 {
-	writel(val, priv->iobase + addr);
+	pete_writel("drivers/misc/cardreader/alcor_pci.c:70", val, priv->iobase + addr);
 }
 EXPORT_SYMBOL_GPL(alcor_write32);
 
@@ -79,13 +79,13 @@ EXPORT_SYMBOL_GPL(alcor_write32be);
 
 u8 alcor_read8(struct alcor_pci_priv *priv, unsigned int addr)
 {
-	return readb(priv->iobase + addr);
+	return pete_readb("drivers/misc/cardreader/alcor_pci.c:82", priv->iobase + addr);
 }
 EXPORT_SYMBOL_GPL(alcor_read8);
 
 u32 alcor_read32(struct alcor_pci_priv *priv, unsigned int addr)
 {
-	return readl(priv->iobase + addr);
+	return pete_readl("drivers/misc/cardreader/alcor_pci.c:88", priv->iobase + addr);
 }
 EXPORT_SYMBOL_GPL(alcor_read32);
 

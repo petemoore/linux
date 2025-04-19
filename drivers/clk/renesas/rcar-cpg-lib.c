@@ -30,10 +30,10 @@ void cpg_reg_modify(void __iomem *reg, u32 clear, u32 set)
 	u32 val;
 
 	spin_lock_irqsave(&cpg_lock, flags);
-	val = readl(reg);
+	val = pete_readl("drivers/clk/renesas/rcar-cpg-lib.c:33", reg);
 	val &= ~clear;
 	val |= set;
-	writel(val, reg);
+	pete_writel("drivers/clk/renesas/rcar-cpg-lib.c:36", val, reg);
 	spin_unlock_irqrestore(&cpg_lock, flags);
 };
 
@@ -45,11 +45,11 @@ static int cpg_simple_notifier_call(struct notifier_block *nb,
 
 	switch (action) {
 	case PM_EVENT_SUSPEND:
-		csn->saved = readl(csn->reg);
+		csn->saved = pete_readl("drivers/clk/renesas/rcar-cpg-lib.c:48", csn->reg);
 		return NOTIFY_OK;
 
 	case PM_EVENT_RESUME:
-		writel(csn->saved, csn->reg);
+		pete_writel("drivers/clk/renesas/rcar-cpg-lib.c:52", csn->saved, csn->reg);
 		return NOTIFY_OK;
 	}
 	return NOTIFY_DONE;
@@ -149,7 +149,7 @@ static int cpg_sd_clock_is_enabled(struct clk_hw *hw)
 {
 	struct sd_clock *clock = to_sd_clock(hw);
 
-	return !(readl(clock->csn.reg) & CPG_SD_STP_MASK);
+	return !(pete_readl("drivers/clk/renesas/rcar-cpg-lib.c:152", clock->csn.reg) & CPG_SD_STP_MASK);
 }
 
 static unsigned long cpg_sd_clock_recalc_rate(struct clk_hw *hw,
@@ -251,9 +251,9 @@ struct clk * __init cpg_sd_clk_register(const char *name,
 		clock->div_num--;
 	}
 
-	val = readl(clock->csn.reg) & ~CPG_SD_FC_MASK;
+	val = pete_readl("drivers/clk/renesas/rcar-cpg-lib.c:254", clock->csn.reg) & ~CPG_SD_FC_MASK;
 	val |= CPG_SD_STP_MASK | (clock->div_table[0].val & CPG_SD_FC_MASK);
-	writel(val, clock->csn.reg);
+	pete_writel("drivers/clk/renesas/rcar-cpg-lib.c:256", val, clock->csn.reg);
 
 	clk = clk_register(NULL, &clock->hw);
 	if (IS_ERR(clk))

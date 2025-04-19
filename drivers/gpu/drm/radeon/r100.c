@@ -4102,8 +4102,8 @@ uint32_t r100_mm_rreg_slow(struct radeon_device *rdev, uint32_t reg)
 	uint32_t ret;
 
 	spin_lock_irqsave(&rdev->mmio_idx_lock, flags);
-	writel(reg, ((void __iomem *)rdev->rmmio) + RADEON_MM_INDEX);
-	ret = readl(((void __iomem *)rdev->rmmio) + RADEON_MM_DATA);
+	pete_writel("drivers/gpu/drm/radeon/r100.c:4105", reg, ((void __iomem *)rdev->rmmio) + RADEON_MM_INDEX);
+	ret = pete_readl("drivers/gpu/drm/radeon/r100.c:4106", ((void __iomem *)rdev->rmmio) + RADEON_MM_DATA);
 	spin_unlock_irqrestore(&rdev->mmio_idx_lock, flags);
 	return ret;
 }
@@ -4113,8 +4113,8 @@ void r100_mm_wreg_slow(struct radeon_device *rdev, uint32_t reg, uint32_t v)
 	unsigned long flags;
 
 	spin_lock_irqsave(&rdev->mmio_idx_lock, flags);
-	writel(reg, ((void __iomem *)rdev->rmmio) + RADEON_MM_INDEX);
-	writel(v, ((void __iomem *)rdev->rmmio) + RADEON_MM_DATA);
+	pete_writel("drivers/gpu/drm/radeon/r100.c:4116", reg, ((void __iomem *)rdev->rmmio) + RADEON_MM_INDEX);
+	pete_writel("drivers/gpu/drm/radeon/r100.c:4117", v, ((void __iomem *)rdev->rmmio) + RADEON_MM_DATA);
 	spin_unlock_irqrestore(&rdev->mmio_idx_lock, flags);
 }
 

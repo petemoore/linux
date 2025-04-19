@@ -2635,10 +2635,10 @@ retry_probe:
 	QEDI_INFO(&qedi->dbg_ctx, QEDI_LOG_DISC,
 		  "Writing %d to primary and secondary BDQ doorbell registers.\n",
 		  qedi->bdq_prod_idx);
-	writew(qedi->bdq_prod_idx, qedi->bdq_primary_prod);
-	readw(qedi->bdq_primary_prod);
-	writew(qedi->bdq_prod_idx, qedi->bdq_secondary_prod);
-	readw(qedi->bdq_secondary_prod);
+	pete_writew("drivers/scsi/qedi/qedi_main.c:2638", qedi->bdq_prod_idx, qedi->bdq_primary_prod);
+	pete_readw("drivers/scsi/qedi/qedi_main.c:2639", qedi->bdq_primary_prod);
+	pete_writew("drivers/scsi/qedi/qedi_main.c:2640", qedi->bdq_prod_idx, qedi->bdq_secondary_prod);
+	pete_readw("drivers/scsi/qedi/qedi_main.c:2641", qedi->bdq_secondary_prod);
 
 	ether_addr_copy(qedi->mac, qedi->dev_info.common.hw_mac);
 	QEDI_INFO(&qedi->dbg_ctx, QEDI_LOG_DISC, "MAC address is %pM.\n",

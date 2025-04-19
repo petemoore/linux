@@ -132,7 +132,7 @@ static enum fpga_mgr_states altera_cvp_state(struct fpga_manager *mgr)
 
 static void altera_cvp_write_data_iomem(struct altera_cvp_conf *conf, u32 val)
 {
-	writel(val, conf->map);
+	pete_writel("drivers/fpga/altera-cvp.c:135", val, conf->map);
 }
 
 static void altera_cvp_write_data_config(struct altera_cvp_conf *conf, u32 val)

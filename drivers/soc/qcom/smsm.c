@@ -149,7 +149,7 @@ static int smsm_update_bits(void *data, u32 mask, u32 value)
 	spin_lock_irqsave(&smsm->lock, flags);
 
 	/* Update the entry */
-	val = orig = readl(smsm->local_state);
+	val = orig = pete_readl("drivers/soc/qcom/smsm.c:152", smsm->local_state);
 	val &= ~mask;
 	val |= value;
 
@@ -161,7 +161,7 @@ static int smsm_update_bits(void *data, u32 mask, u32 value)
 	}
 
 	/* Write out the new value */
-	writel(val, smsm->local_state);
+	pete_writel("drivers/soc/qcom/smsm.c:164", val, smsm->local_state);
 	spin_unlock_irqrestore(&smsm->lock, flags);
 
 	/* Make sure the value update is ordered before any kicks */
@@ -171,7 +171,7 @@ static int smsm_update_bits(void *data, u32 mask, u32 value)
 	for (host = 0; host < smsm->num_hosts; host++) {
 		hostp = &smsm->hosts[host];
 
-		val = readl(smsm->subscription + host);
+		val = pete_readl("drivers/soc/qcom/smsm.c:174", smsm->subscription + host);
 		if (val & changes && hostp->ipc_regmap) {
 			regmap_write(hostp->ipc_regmap,
 				     hostp->ipc_offset,
@@ -203,7 +203,7 @@ static irqreturn_t smsm_intr(int irq, void *data)
 	u32 changed;
 	u32 val;
 
-	val = readl(entry->remote_state);
+	val = pete_readl("drivers/soc/qcom/smsm.c:206", entry->remote_state);
 	changed = val ^ xchg(&entry->last_value, val);
 
 	for_each_set_bit(i, entry->irq_enabled, 32) {
@@ -241,9 +241,9 @@ static void smsm_mask_irq(struct irq_data *irqd)
 	u32 val;
 
 	if (entry->subscription) {
-		val = readl(entry->subscription + smsm->local_host);
+		val = pete_readl("drivers/soc/qcom/smsm.c:244", entry->subscription + smsm->local_host);
 		val &= ~BIT(irq);
-		writel(val, entry->subscription + smsm->local_host);
+		pete_writel("drivers/soc/qcom/smsm.c:246", val, entry->subscription + smsm->local_host);
 	}
 
 	clear_bit(irq, entry->irq_enabled);
@@ -264,7 +264,7 @@ static void smsm_unmask_irq(struct irq_data *irqd)
 	u32 val;
 
 	/* Make sure our last cached state is up-to-date */
-	if (readl(entry->remote_state) & BIT(irq))
+	if (pete_readl("drivers/soc/qcom/smsm.c:267", entry->remote_state) & BIT(irq))
 		set_bit(irq, &entry->last_value);
 	else
 		clear_bit(irq, &entry->last_value);
@@ -272,9 +272,9 @@ static void smsm_unmask_irq(struct irq_data *irqd)
 	set_bit(irq, entry->irq_enabled);
 
 	if (entry->subscription) {
-		val = readl(entry->subscription + smsm->local_host);
+		val = pete_readl("drivers/soc/qcom/smsm.c:275", entry->subscription + smsm->local_host);
 		val |= BIT(irq);
-		writel(val, entry->subscription + smsm->local_host);
+		pete_writel("drivers/soc/qcom/smsm.c:277", val, entry->subscription + smsm->local_host);
 	}
 }
 
@@ -314,7 +314,7 @@ static int smsm_get_irqchip_state(struct irq_data *irqd,
 	if (which != IRQCHIP_STATE_LINE_LEVEL)
 		return -EINVAL;
 
-	val = readl(entry->remote_state);
+	val = pete_readl("drivers/soc/qcom/smsm.c:317", entry->remote_state);
 	*state = !!(val & BIT(irq));
 
 	return 0;
@@ -590,7 +590,7 @@ static int qcom_smsm_probe(struct platform_device *pdev)
 
 		/* Setup subscription pointers and unsubscribe to any kicks */
 		entry->subscription = intr_mask + id * smsm->num_hosts;
-		writel(0, entry->subscription + smsm->local_host);
+		pete_writel("drivers/soc/qcom/smsm.c:593", 0, entry->subscription + smsm->local_host);
 
 		ret = smsm_inbound_entry(smsm, entry, node);
 		if (ret < 0)

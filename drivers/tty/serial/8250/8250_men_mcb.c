@@ -58,7 +58,7 @@ static int get_num_ports(struct mcb_device *mdev,
 	case MEN_UART_ID_Z125:
 		return 1U;
 	case MEN_UART_ID_Z025:
-		return readb(membase) >> 4;
+		return pete_readb("drivers/tty/serial/8250/8250_men_mcb.c:61", membase) >> 4;
 	case MEN_UART_ID_Z057:
 		return 4U;
 	default:

@@ -63,7 +63,7 @@ static int vdec_hevc_load_firmware(struct amvdec_session *sess,
 	amvdec_write_dos(core, HEVC_IMEM_DMA_COUNT, MC_SIZE / 4);
 	amvdec_write_dos(core, HEVC_IMEM_DMA_CTRL, (0x8000 | (7 << 16)));
 
-	while (i && (readl(core->dos_base + HEVC_IMEM_DMA_CTRL) & 0x8000))
+	while (i && (pete_readl("drivers/staging/media/meson/vdec/vdec_hevc.c:66", core->dos_base + HEVC_IMEM_DMA_CTRL) & 0x8000))
 		i--;
 
 	if (i == 0) {

@@ -66,7 +66,7 @@ bool ena_com_cq_empty(struct ena_com_io_cq *io_cq);
 static inline void ena_com_unmask_intr(struct ena_com_io_cq *io_cq,
 				       struct ena_eth_io_intr_reg *intr_reg)
 {
-	writel(intr_reg->intr_control, io_cq->unmask_reg);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_eth_com.h:69", intr_reg->intr_control, io_cq->unmask_reg);
 }
 
 static inline int ena_com_free_q_entries(struct ena_com_io_sq *io_sq)
@@ -156,7 +156,7 @@ static inline int ena_com_write_sq_doorbell(struct ena_com_io_sq *io_sq)
 		   "Write submission queue doorbell for queue: %d tail: %d\n",
 		   io_sq->qid, tail);
 
-	writel(tail, io_sq->db_addr);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_eth_com.h:159", tail, io_sq->db_addr);
 
 	if (is_llq_max_tx_burst_exists(io_sq)) {
 		netdev_dbg(ena_com_io_sq_to_ena_dev(io_sq)->net_device,
@@ -182,7 +182,7 @@ static inline int ena_com_update_dev_comp_head(struct ena_com_io_cq *io_cq)
 			netdev_dbg(ena_com_io_cq_to_ena_dev(io_cq)->net_device,
 				   "Write completion queue doorbell for queue %d: head: %d\n",
 				   io_cq->qid, head);
-			writel(head, io_cq->cq_head_db_reg);
+			pete_writel("drivers/net/ethernet/amazon/ena/ena_eth_com.h:185", head, io_cq->cq_head_db_reg);
 			io_cq->last_head_update = head;
 		}
 	}
@@ -201,7 +201,7 @@ static inline void ena_com_update_numa_node(struct ena_com_io_cq *io_cq,
 	numa_cfg.numa_cfg = (numa_node & ENA_ETH_IO_NUMA_NODE_CFG_REG_NUMA_MASK)
 		| ENA_ETH_IO_NUMA_NODE_CFG_REG_ENABLED_MASK;
 
-	writel(numa_cfg.numa_cfg, io_cq->numa_node_cfg_reg);
+	pete_writel("drivers/net/ethernet/amazon/ena/ena_eth_com.h:204", numa_cfg.numa_cfg, io_cq->numa_node_cfg_reg);
 }
 
 static inline void ena_com_comp_ack(struct ena_com_io_sq *io_sq, u16 elem)

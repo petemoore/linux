@@ -280,24 +280,24 @@ static struct hc_driver __read_mostly tegra_xhci_hc_driver;
 
 static inline u32 fpci_readl(struct tegra_xusb *tegra, unsigned int offset)
 {
-	return readl(tegra->fpci_base + offset);
+	return pete_readl("drivers/usb/host/xhci-tegra.c:283", tegra->fpci_base + offset);
 }
 
 static inline void fpci_writel(struct tegra_xusb *tegra, u32 value,
 			       unsigned int offset)
 {
-	writel(value, tegra->fpci_base + offset);
+	pete_writel("drivers/usb/host/xhci-tegra.c:289", value, tegra->fpci_base + offset);
 }
 
 static inline u32 ipfs_readl(struct tegra_xusb *tegra, unsigned int offset)
 {
-	return readl(tegra->ipfs_base + offset);
+	return pete_readl("drivers/usb/host/xhci-tegra.c:294", tegra->ipfs_base + offset);
 }
 
 static inline void ipfs_writel(struct tegra_xusb *tegra, u32 value,
 			       unsigned int offset)
 {
-	writel(value, tegra->ipfs_base + offset);
+	pete_writel("drivers/usb/host/xhci-tegra.c:300", value, tegra->ipfs_base + offset);
 }
 
 static u32 csb_readl(struct tegra_xusb *tegra, unsigned int offset)
@@ -895,7 +895,7 @@ static int tegra_xusb_load_firmware(struct tegra_xusb *tegra)
 	int err;
 
 	header = (struct tegra_xusb_fw_header *)tegra->fw.virt;
-	op = tegra->regs + HC_LENGTH(readl(&cap->hc_capbase));
+	op = tegra->regs + HC_LENGTH(pete_readl("drivers/usb/host/xhci-tegra.c:898", &cap->hc_capbase));
 
 	if (csb_readl(tegra, XUSB_CSB_MP_ILOAD_BASE_LO) != 0) {
 		dev_info(dev, "Firmware already loaded, Falcon state %#x\n",
@@ -971,14 +971,14 @@ static int tegra_xusb_load_firmware(struct tegra_xusb *tegra)
 	timeout = jiffies + msecs_to_jiffies(200);
 
 	do {
-		value = readl(&op->status);
+		value = pete_readl("drivers/usb/host/xhci-tegra.c:974", &op->status);
 		if ((value & STS_CNR) == 0)
 			break;
 
 		usleep_range(1000, 2000);
 	} while (time_is_after_jiffies(timeout));
 
-	value = readl(&op->status);
+	value = pete_readl("drivers/usb/host/xhci-tegra.c:981", &op->status);
 	if (value & STS_CNR) {
 		value = csb_readl(tegra, XUSB_FALC_CPUCTL);
 		dev_err(dev, "XHCI controller not read: %#010x\n", value);
@@ -1812,7 +1812,7 @@ static bool xhci_hub_ports_suspended(struct xhci_hub *hub)
 	u32 value;
 
 	for (i = 0; i < hub->num_ports; i++) {
-		value = readl(hub->ports[i]->addr);
+		value = pete_readl("drivers/usb/host/xhci-tegra.c:1815", hub->ports[i]->addr);
 		if ((value & PORT_PE) == 0)
 			continue;
 
@@ -1938,7 +1938,7 @@ static void tegra_xhci_enable_phy_sleepwalk_wake(struct tegra_xusb *tegra)
 			if (!is_host_mode_phy(tegra, i, j))
 				continue;
 
-			portsc = readl(rhub->ports[index]->addr);
+			portsc = pete_readl("drivers/usb/host/xhci-tegra.c:1941", rhub->ports[index]->addr);
 			speed = tegra_xhci_portsc_to_speed(tegra, portsc);
 			tegra_xusb_padctl_enable_phy_sleepwalk(padctl, phy, speed);
 			tegra_xusb_padctl_enable_phy_wake(padctl, phy);
@@ -1983,9 +1983,9 @@ static int tegra_xusb_enter_elpg(struct tegra_xusb *tegra, bool runtime)
 
 	dev_dbg(dev, "entering ELPG\n");
 
-	usbcmd = readl(&xhci->op_regs->command);
+	usbcmd = pete_readl("drivers/usb/host/xhci-tegra.c:1986", &xhci->op_regs->command);
 	usbcmd &= ~CMD_EIE;
-	writel(usbcmd, &xhci->op_regs->command);
+	pete_writel("drivers/usb/host/xhci-tegra.c:1988", usbcmd, &xhci->op_regs->command);
 
 	err = tegra_xusb_check_ports(tegra);
 	if (err < 0) {
@@ -2021,9 +2021,9 @@ out:
 	if (!err)
 		dev_dbg(tegra->dev, "entering ELPG done\n");
 	else {
-		usbcmd = readl(&xhci->op_regs->command);
+		usbcmd = pete_readl("drivers/usb/host/xhci-tegra.c:2024", &xhci->op_regs->command);
 		usbcmd |= CMD_EIE;
-		writel(usbcmd, &xhci->op_regs->command);
+		pete_writel("drivers/usb/host/xhci-tegra.c:2026", usbcmd, &xhci->op_regs->command);
 
 		dev_dbg(tegra->dev, "entering ELPG failed\n");
 		pm_runtime_mark_last_busy(tegra->dev);
@@ -2091,9 +2091,9 @@ static int tegra_xusb_exit_elpg(struct tegra_xusb *tegra, bool runtime)
 		goto disable_phy;
 	}
 
-	usbcmd = readl(&xhci->op_regs->command);
+	usbcmd = pete_readl("drivers/usb/host/xhci-tegra.c:2094", &xhci->op_regs->command);
 	usbcmd |= CMD_EIE;
-	writel(usbcmd, &xhci->op_regs->command);
+	pete_writel("drivers/usb/host/xhci-tegra.c:2096", usbcmd, &xhci->op_regs->command);
 
 	goto out;
 

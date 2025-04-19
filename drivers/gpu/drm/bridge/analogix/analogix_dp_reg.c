@@ -28,13 +28,13 @@ void analogix_dp_enable_video_mute(struct analogix_dp_device *dp, bool enable)
 	u32 reg;
 
 	if (enable) {
-		reg = readl(dp->reg_base + ANALOGIX_DP_VIDEO_CTL_1);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:31", dp->reg_base + ANALOGIX_DP_VIDEO_CTL_1);
 		reg |= HDCP_VIDEO_MUTE;
-		writel(reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_1);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:33", reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_1);
 	} else {
-		reg = readl(dp->reg_base + ANALOGIX_DP_VIDEO_CTL_1);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:35", dp->reg_base + ANALOGIX_DP_VIDEO_CTL_1);
 		reg &= ~HDCP_VIDEO_MUTE;
-		writel(reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_1);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:37", reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_1);
 	}
 }
 
@@ -42,9 +42,9 @@ void analogix_dp_stop_video(struct analogix_dp_device *dp)
 {
 	u32 reg;
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_VIDEO_CTL_1);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:45", dp->reg_base + ANALOGIX_DP_VIDEO_CTL_1);
 	reg &= ~VIDEO_EN;
-	writel(reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:47", reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_1);
 }
 
 void analogix_dp_lane_swap(struct analogix_dp_device *dp, bool enable)
@@ -58,7 +58,7 @@ void analogix_dp_lane_swap(struct analogix_dp_device *dp, bool enable)
 		reg = LANE3_MAP_LOGIC_LANE_3 | LANE2_MAP_LOGIC_LANE_2 |
 		      LANE1_MAP_LOGIC_LANE_1 | LANE0_MAP_LOGIC_LANE_0;
 
-	writel(reg, dp->reg_base + ANALOGIX_DP_LANE_MAP);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:61", reg, dp->reg_base + ANALOGIX_DP_LANE_MAP);
 }
 
 void analogix_dp_init_analog_param(struct analogix_dp_device *dp)
@@ -66,53 +66,53 @@ void analogix_dp_init_analog_param(struct analogix_dp_device *dp)
 	u32 reg;
 
 	reg = TX_TERMINAL_CTRL_50_OHM;
-	writel(reg, dp->reg_base + ANALOGIX_DP_ANALOG_CTL_1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:69", reg, dp->reg_base + ANALOGIX_DP_ANALOG_CTL_1);
 
 	reg = SEL_24M | TX_DVDD_BIT_1_0625V;
-	writel(reg, dp->reg_base + ANALOGIX_DP_ANALOG_CTL_2);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:72", reg, dp->reg_base + ANALOGIX_DP_ANALOG_CTL_2);
 
 	if (dp->plat_data && is_rockchip(dp->plat_data->dev_type)) {
 		reg = REF_CLK_24M;
 		if (dp->plat_data->dev_type == RK3288_DP)
 			reg ^= REF_CLK_MASK;
 
-		writel(reg, dp->reg_base + ANALOGIX_DP_PLL_REG_1);
-		writel(0x95, dp->reg_base + ANALOGIX_DP_PLL_REG_2);
-		writel(0x40, dp->reg_base + ANALOGIX_DP_PLL_REG_3);
-		writel(0x58, dp->reg_base + ANALOGIX_DP_PLL_REG_4);
-		writel(0x22, dp->reg_base + ANALOGIX_DP_PLL_REG_5);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:79", reg, dp->reg_base + ANALOGIX_DP_PLL_REG_1);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:80", 0x95, dp->reg_base + ANALOGIX_DP_PLL_REG_2);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:81", 0x40, dp->reg_base + ANALOGIX_DP_PLL_REG_3);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:82", 0x58, dp->reg_base + ANALOGIX_DP_PLL_REG_4);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:83", 0x22, dp->reg_base + ANALOGIX_DP_PLL_REG_5);
 	}
 
 	reg = DRIVE_DVDD_BIT_1_0625V | VCO_BIT_600_MICRO;
-	writel(reg, dp->reg_base + ANALOGIX_DP_ANALOG_CTL_3);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:87", reg, dp->reg_base + ANALOGIX_DP_ANALOG_CTL_3);
 
 	reg = PD_RING_OSC | AUX_TERMINAL_CTRL_50_OHM |
 		TX_CUR1_2X | TX_CUR_16_MA;
-	writel(reg, dp->reg_base + ANALOGIX_DP_PLL_FILTER_CTL_1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:91", reg, dp->reg_base + ANALOGIX_DP_PLL_FILTER_CTL_1);
 
 	reg = CH3_AMP_400_MV | CH2_AMP_400_MV |
 		CH1_AMP_400_MV | CH0_AMP_400_MV;
-	writel(reg, dp->reg_base + ANALOGIX_DP_TX_AMP_TUNING_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:95", reg, dp->reg_base + ANALOGIX_DP_TX_AMP_TUNING_CTL);
 }
 
 void analogix_dp_init_interrupt(struct analogix_dp_device *dp)
 {
 	/* Set interrupt pin assertion polarity as high */
-	writel(INT_POL1 | INT_POL0, dp->reg_base + ANALOGIX_DP_INT_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:101", INT_POL1 | INT_POL0, dp->reg_base + ANALOGIX_DP_INT_CTL);
 
 	/* Clear pending regisers */
-	writel(0xff, dp->reg_base + ANALOGIX_DP_COMMON_INT_STA_1);
-	writel(0x4f, dp->reg_base + ANALOGIX_DP_COMMON_INT_STA_2);
-	writel(0xe0, dp->reg_base + ANALOGIX_DP_COMMON_INT_STA_3);
-	writel(0xe7, dp->reg_base + ANALOGIX_DP_COMMON_INT_STA_4);
-	writel(0x63, dp->reg_base + ANALOGIX_DP_INT_STA);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:104", 0xff, dp->reg_base + ANALOGIX_DP_COMMON_INT_STA_1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:105", 0x4f, dp->reg_base + ANALOGIX_DP_COMMON_INT_STA_2);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:106", 0xe0, dp->reg_base + ANALOGIX_DP_COMMON_INT_STA_3);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:107", 0xe7, dp->reg_base + ANALOGIX_DP_COMMON_INT_STA_4);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:108", 0x63, dp->reg_base + ANALOGIX_DP_INT_STA);
 
 	/* 0:mask,1: unmask */
-	writel(0x00, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_1);
-	writel(0x00, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_2);
-	writel(0x00, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_3);
-	writel(0x00, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_4);
-	writel(0x00, dp->reg_base + ANALOGIX_DP_INT_STA_MASK);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:111", 0x00, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:112", 0x00, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_2);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:113", 0x00, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_3);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:114", 0x00, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_4);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:115", 0x00, dp->reg_base + ANALOGIX_DP_INT_STA_MASK);
 }
 
 void analogix_dp_reset(struct analogix_dp_device *dp)
@@ -130,44 +130,44 @@ void analogix_dp_reset(struct analogix_dp_device *dp)
 			AUD_FIFO_FUNC_EN_N | AUD_FUNC_EN_N |
 			HDCP_FUNC_EN_N | SW_FUNC_EN_N;
 
-	writel(reg, dp->reg_base + ANALOGIX_DP_FUNC_EN_1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:133", reg, dp->reg_base + ANALOGIX_DP_FUNC_EN_1);
 
 	reg = SSC_FUNC_EN_N | AUX_FUNC_EN_N |
 		SERDES_FIFO_FUNC_EN_N |
 		LS_CLK_DOMAIN_FUNC_EN_N;
-	writel(reg, dp->reg_base + ANALOGIX_DP_FUNC_EN_2);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:138", reg, dp->reg_base + ANALOGIX_DP_FUNC_EN_2);
 
 	usleep_range(20, 30);
 
 	analogix_dp_lane_swap(dp, 0);
 
-	writel(0x0, dp->reg_base + ANALOGIX_DP_SYS_CTL_1);
-	writel(0x40, dp->reg_base + ANALOGIX_DP_SYS_CTL_2);
-	writel(0x0, dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
-	writel(0x0, dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:144", 0x0, dp->reg_base + ANALOGIX_DP_SYS_CTL_1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:145", 0x40, dp->reg_base + ANALOGIX_DP_SYS_CTL_2);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:146", 0x0, dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:147", 0x0, dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
 
-	writel(0x0, dp->reg_base + ANALOGIX_DP_PKT_SEND_CTL);
-	writel(0x0, dp->reg_base + ANALOGIX_DP_HDCP_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:149", 0x0, dp->reg_base + ANALOGIX_DP_PKT_SEND_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:150", 0x0, dp->reg_base + ANALOGIX_DP_HDCP_CTL);
 
-	writel(0x5e, dp->reg_base + ANALOGIX_DP_HPD_DEGLITCH_L);
-	writel(0x1a, dp->reg_base + ANALOGIX_DP_HPD_DEGLITCH_H);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:152", 0x5e, dp->reg_base + ANALOGIX_DP_HPD_DEGLITCH_L);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:153", 0x1a, dp->reg_base + ANALOGIX_DP_HPD_DEGLITCH_H);
 
-	writel(0x10, dp->reg_base + ANALOGIX_DP_LINK_DEBUG_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:155", 0x10, dp->reg_base + ANALOGIX_DP_LINK_DEBUG_CTL);
 
-	writel(0x0, dp->reg_base + ANALOGIX_DP_PHY_TEST);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:157", 0x0, dp->reg_base + ANALOGIX_DP_PHY_TEST);
 
-	writel(0x0, dp->reg_base + ANALOGIX_DP_VIDEO_FIFO_THRD);
-	writel(0x20, dp->reg_base + ANALOGIX_DP_AUDIO_MARGIN);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:159", 0x0, dp->reg_base + ANALOGIX_DP_VIDEO_FIFO_THRD);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:160", 0x20, dp->reg_base + ANALOGIX_DP_AUDIO_MARGIN);
 
-	writel(0x4, dp->reg_base + ANALOGIX_DP_M_VID_GEN_FILTER_TH);
-	writel(0x2, dp->reg_base + ANALOGIX_DP_M_AUD_GEN_FILTER_TH);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:162", 0x4, dp->reg_base + ANALOGIX_DP_M_VID_GEN_FILTER_TH);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:163", 0x2, dp->reg_base + ANALOGIX_DP_M_AUD_GEN_FILTER_TH);
 
-	writel(0x00000101, dp->reg_base + ANALOGIX_DP_SOC_GENERAL_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:165", 0x00000101, dp->reg_base + ANALOGIX_DP_SOC_GENERAL_CTL);
 }
 
 void analogix_dp_swreset(struct analogix_dp_device *dp)
 {
-	writel(RESET_DP_TX, dp->reg_base + ANALOGIX_DP_TX_SW_RESET);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:170", RESET_DP_TX, dp->reg_base + ANALOGIX_DP_TX_SW_RESET);
 }
 
 void analogix_dp_config_interrupt(struct analogix_dp_device *dp)
@@ -176,19 +176,19 @@ void analogix_dp_config_interrupt(struct analogix_dp_device *dp)
 
 	/* 0: mask, 1: unmask */
 	reg = COMMON_INT_MASK_1;
-	writel(reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:179", reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_1);
 
 	reg = COMMON_INT_MASK_2;
-	writel(reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_2);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:182", reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_2);
 
 	reg = COMMON_INT_MASK_3;
-	writel(reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_3);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:185", reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_3);
 
 	reg = COMMON_INT_MASK_4;
-	writel(reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_4);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:188", reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_4);
 
 	reg = INT_STA_MASK;
-	writel(reg, dp->reg_base + ANALOGIX_DP_INT_STA_MASK);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:191", reg, dp->reg_base + ANALOGIX_DP_INT_STA_MASK);
 }
 
 void analogix_dp_mute_hpd_interrupt(struct analogix_dp_device *dp)
@@ -196,13 +196,13 @@ void analogix_dp_mute_hpd_interrupt(struct analogix_dp_device *dp)
 	u32 reg;
 
 	/* 0: mask, 1: unmask */
-	reg = readl(dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_4);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:199", dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_4);
 	reg &= ~COMMON_INT_MASK_4;
-	writel(reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_4);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:201", reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_4);
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_INT_STA_MASK);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:203", dp->reg_base + ANALOGIX_DP_INT_STA_MASK);
 	reg &= ~INT_STA_MASK;
-	writel(reg, dp->reg_base + ANALOGIX_DP_INT_STA_MASK);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:205", reg, dp->reg_base + ANALOGIX_DP_INT_STA_MASK);
 }
 
 void analogix_dp_unmute_hpd_interrupt(struct analogix_dp_device *dp)
@@ -211,17 +211,17 @@ void analogix_dp_unmute_hpd_interrupt(struct analogix_dp_device *dp)
 
 	/* 0: mask, 1: unmask */
 	reg = COMMON_INT_MASK_4;
-	writel(reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_4);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:214", reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_MASK_4);
 
 	reg = INT_STA_MASK;
-	writel(reg, dp->reg_base + ANALOGIX_DP_INT_STA_MASK);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:217", reg, dp->reg_base + ANALOGIX_DP_INT_STA_MASK);
 }
 
 enum pll_status analogix_dp_get_pll_lock_status(struct analogix_dp_device *dp)
 {
 	u32 reg;
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_DEBUG_CTL);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:224", dp->reg_base + ANALOGIX_DP_DEBUG_CTL);
 	if (reg & PLL_LOCK)
 		return PLL_LOCKED;
 	else
@@ -239,12 +239,12 @@ void analogix_dp_set_pll_power_down(struct analogix_dp_device *dp, bool enable)
 		mask = RK_PLL_PD;
 	}
 
-	reg = readl(dp->reg_base + pd_addr);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:242", dp->reg_base + pd_addr);
 	if (enable)
 		reg |= mask;
 	else
 		reg &= ~mask;
-	writel(reg, dp->reg_base + pd_addr);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:247", reg, dp->reg_base + pd_addr);
 }
 
 void analogix_dp_set_analog_power_down(struct analogix_dp_device *dp,
@@ -265,52 +265,52 @@ void analogix_dp_set_analog_power_down(struct analogix_dp_device *dp,
 		else
 			mask = AUX_PD;
 
-		reg = readl(dp->reg_base + phy_pd_addr);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:268", dp->reg_base + phy_pd_addr);
 		if (enable)
 			reg |= mask;
 		else
 			reg &= ~mask;
-		writel(reg, dp->reg_base + phy_pd_addr);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:273", reg, dp->reg_base + phy_pd_addr);
 		break;
 	case CH0_BLOCK:
 		mask = CH0_PD;
-		reg = readl(dp->reg_base + phy_pd_addr);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:277", dp->reg_base + phy_pd_addr);
 
 		if (enable)
 			reg |= mask;
 		else
 			reg &= ~mask;
-		writel(reg, dp->reg_base + phy_pd_addr);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:283", reg, dp->reg_base + phy_pd_addr);
 		break;
 	case CH1_BLOCK:
 		mask = CH1_PD;
-		reg = readl(dp->reg_base + phy_pd_addr);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:287", dp->reg_base + phy_pd_addr);
 
 		if (enable)
 			reg |= mask;
 		else
 			reg &= ~mask;
-		writel(reg, dp->reg_base + phy_pd_addr);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:293", reg, dp->reg_base + phy_pd_addr);
 		break;
 	case CH2_BLOCK:
 		mask = CH2_PD;
-		reg = readl(dp->reg_base + phy_pd_addr);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:297", dp->reg_base + phy_pd_addr);
 
 		if (enable)
 			reg |= mask;
 		else
 			reg &= ~mask;
-		writel(reg, dp->reg_base + phy_pd_addr);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:303", reg, dp->reg_base + phy_pd_addr);
 		break;
 	case CH3_BLOCK:
 		mask = CH3_PD;
-		reg = readl(dp->reg_base + phy_pd_addr);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:307", dp->reg_base + phy_pd_addr);
 
 		if (enable)
 			reg |= mask;
 		else
 			reg &= ~mask;
-		writel(reg, dp->reg_base + phy_pd_addr);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:313", reg, dp->reg_base + phy_pd_addr);
 		break;
 	case ANALOG_TOTAL:
 		/*
@@ -323,29 +323,29 @@ void analogix_dp_set_analog_power_down(struct analogix_dp_device *dp,
 		else
 			mask = DP_PHY_PD;
 
-		reg = readl(dp->reg_base + phy_pd_addr);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:326", dp->reg_base + phy_pd_addr);
 		if (enable)
 			reg |= mask;
 		else
 			reg &= ~mask;
 
-		writel(reg, dp->reg_base + phy_pd_addr);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:332", reg, dp->reg_base + phy_pd_addr);
 		if (dp->plat_data && is_rockchip(dp->plat_data->dev_type))
 			usleep_range(10, 15);
 		break;
 	case POWER_ALL:
 		if (enable) {
 			reg = DP_ALL_PD;
-			writel(reg, dp->reg_base + phy_pd_addr);
+			pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:339", reg, dp->reg_base + phy_pd_addr);
 		} else {
 			reg = DP_ALL_PD;
-			writel(reg, dp->reg_base + phy_pd_addr);
+			pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:342", reg, dp->reg_base + phy_pd_addr);
 			usleep_range(10, 15);
 			reg &= ~DP_INC_BG;
-			writel(reg, dp->reg_base + phy_pd_addr);
+			pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:345", reg, dp->reg_base + phy_pd_addr);
 			usleep_range(10, 15);
 
-			writel(0x00, dp->reg_base + phy_pd_addr);
+			pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:348", 0x00, dp->reg_base + phy_pd_addr);
 		}
 		break;
 	default:
@@ -361,11 +361,11 @@ int analogix_dp_init_analog_func(struct analogix_dp_device *dp)
 	analogix_dp_set_analog_power_down(dp, POWER_ALL, 0);
 
 	reg = PLL_LOCK_CHG;
-	writel(reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_STA_1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:364", reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_STA_1);
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_DEBUG_CTL);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:366", dp->reg_base + ANALOGIX_DP_DEBUG_CTL);
 	reg &= ~(F_PLL_LOCK | PLL_LOCK_CTRL);
-	writel(reg, dp->reg_base + ANALOGIX_DP_DEBUG_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:368", reg, dp->reg_base + ANALOGIX_DP_DEBUG_CTL);
 
 	/* Power up PLL */
 	if (analogix_dp_get_pll_lock_status(dp) == PLL_UNLOCKED) {
@@ -382,10 +382,10 @@ int analogix_dp_init_analog_func(struct analogix_dp_device *dp)
 	}
 
 	/* Enable Serdes FIFO function and Link symbol clock domain module */
-	reg = readl(dp->reg_base + ANALOGIX_DP_FUNC_EN_2);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:385", dp->reg_base + ANALOGIX_DP_FUNC_EN_2);
 	reg &= ~(SERDES_FIFO_FUNC_EN_N | LS_CLK_DOMAIN_FUNC_EN_N
 		| AUX_FUNC_EN_N);
-	writel(reg, dp->reg_base + ANALOGIX_DP_FUNC_EN_2);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:388", reg, dp->reg_base + ANALOGIX_DP_FUNC_EN_2);
 	return 0;
 }
 
@@ -397,10 +397,10 @@ void analogix_dp_clear_hotplug_interrupts(struct analogix_dp_device *dp)
 		return;
 
 	reg = HOTPLUG_CHG | HPD_LOST | PLUG;
-	writel(reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_STA_4);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:400", reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_STA_4);
 
 	reg = INT_HPD;
-	writel(reg, dp->reg_base + ANALOGIX_DP_INT_STA);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:403", reg, dp->reg_base + ANALOGIX_DP_INT_STA);
 }
 
 void analogix_dp_init_hpd(struct analogix_dp_device *dp)
@@ -412,18 +412,18 @@ void analogix_dp_init_hpd(struct analogix_dp_device *dp)
 
 	analogix_dp_clear_hotplug_interrupts(dp);
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:415", dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
 	reg &= ~(F_HPD | HPD_CTRL);
-	writel(reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:417", reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
 }
 
 void analogix_dp_force_hpd(struct analogix_dp_device *dp)
 {
 	u32 reg;
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:424", dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
 	reg = (F_HPD | HPD_CTRL);
-	writel(reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:426", reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
 }
 
 enum dp_irq_type analogix_dp_get_irq_type(struct analogix_dp_device *dp)
@@ -438,7 +438,7 @@ enum dp_irq_type analogix_dp_get_irq_type(struct analogix_dp_device *dp)
 			return DP_IRQ_TYPE_HP_CABLE_OUT;
 	} else {
 		/* Parse hotplug interrupt status register */
-		reg = readl(dp->reg_base + ANALOGIX_DP_COMMON_INT_STA_4);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:441", dp->reg_base + ANALOGIX_DP_COMMON_INT_STA_4);
 
 		if (reg & PLUG)
 			return DP_IRQ_TYPE_HP_CABLE_IN;
@@ -458,9 +458,9 @@ void analogix_dp_reset_aux(struct analogix_dp_device *dp)
 	u32 reg;
 
 	/* Disable AUX channel module */
-	reg = readl(dp->reg_base + ANALOGIX_DP_FUNC_EN_2);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:461", dp->reg_base + ANALOGIX_DP_FUNC_EN_2);
 	reg |= AUX_FUNC_EN_N;
-	writel(reg, dp->reg_base + ANALOGIX_DP_FUNC_EN_2);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:463", reg, dp->reg_base + ANALOGIX_DP_FUNC_EN_2);
 }
 
 void analogix_dp_init_aux(struct analogix_dp_device *dp)
@@ -469,7 +469,7 @@ void analogix_dp_init_aux(struct analogix_dp_device *dp)
 
 	/* Clear inerrupts related to AUX channel */
 	reg = RPLY_RECEIV | AUX_ERR;
-	writel(reg, dp->reg_base + ANALOGIX_DP_INT_STA);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:472", reg, dp->reg_base + ANALOGIX_DP_INT_STA);
 
 	analogix_dp_set_analog_power_down(dp, AUX_BLOCK, true);
 	usleep_range(10, 11);
@@ -487,16 +487,16 @@ void analogix_dp_init_aux(struct analogix_dp_device *dp)
 	reg |= AUX_HW_RETRY_COUNT_SEL(0) |
 	       AUX_HW_RETRY_INTERVAL_600_MICROSECONDS;
 
-	writel(reg, dp->reg_base + ANALOGIX_DP_AUX_HW_RETRY_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:490", reg, dp->reg_base + ANALOGIX_DP_AUX_HW_RETRY_CTL);
 
 	/* Receive AUX Channel DEFER commands equal to DEFFER_COUNT*64 */
 	reg = DEFER_CTRL_EN | DEFER_COUNT(1);
-	writel(reg, dp->reg_base + ANALOGIX_DP_AUX_CH_DEFER_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:494", reg, dp->reg_base + ANALOGIX_DP_AUX_CH_DEFER_CTL);
 
 	/* Enable AUX channel module */
-	reg = readl(dp->reg_base + ANALOGIX_DP_FUNC_EN_2);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:497", dp->reg_base + ANALOGIX_DP_FUNC_EN_2);
 	reg &= ~AUX_FUNC_EN_N;
-	writel(reg, dp->reg_base + ANALOGIX_DP_FUNC_EN_2);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:499", reg, dp->reg_base + ANALOGIX_DP_FUNC_EN_2);
 }
 
 int analogix_dp_get_plug_in_status(struct analogix_dp_device *dp)
@@ -507,7 +507,7 @@ int analogix_dp_get_plug_in_status(struct analogix_dp_device *dp)
 		if (gpiod_get_value(dp->hpd_gpiod))
 			return 0;
 	} else {
-		reg = readl(dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:510", dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
 		if (reg & HPD_STATUS)
 			return 0;
 	}
@@ -519,9 +519,9 @@ void analogix_dp_enable_sw_function(struct analogix_dp_device *dp)
 {
 	u32 reg;
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_FUNC_EN_1);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:522", dp->reg_base + ANALOGIX_DP_FUNC_EN_1);
 	reg &= ~SW_FUNC_EN_N;
-	writel(reg, dp->reg_base + ANALOGIX_DP_FUNC_EN_1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:524", reg, dp->reg_base + ANALOGIX_DP_FUNC_EN_1);
 }
 
 void analogix_dp_set_link_bandwidth(struct analogix_dp_device *dp, u32 bwtype)
@@ -530,14 +530,14 @@ void analogix_dp_set_link_bandwidth(struct analogix_dp_device *dp, u32 bwtype)
 
 	reg = bwtype;
 	if ((bwtype == DP_LINK_BW_2_7) || (bwtype == DP_LINK_BW_1_62))
-		writel(reg, dp->reg_base + ANALOGIX_DP_LINK_BW_SET);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:533", reg, dp->reg_base + ANALOGIX_DP_LINK_BW_SET);
 }
 
 void analogix_dp_get_link_bandwidth(struct analogix_dp_device *dp, u32 *bwtype)
 {
 	u32 reg;
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_LINK_BW_SET);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:540", dp->reg_base + ANALOGIX_DP_LINK_BW_SET);
 	*bwtype = reg;
 }
 
@@ -546,14 +546,14 @@ void analogix_dp_set_lane_count(struct analogix_dp_device *dp, u32 count)
 	u32 reg;
 
 	reg = count;
-	writel(reg, dp->reg_base + ANALOGIX_DP_LANE_COUNT_SET);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:549", reg, dp->reg_base + ANALOGIX_DP_LANE_COUNT_SET);
 }
 
 void analogix_dp_get_lane_count(struct analogix_dp_device *dp, u32 *count)
 {
 	u32 reg;
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_LANE_COUNT_SET);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:556", dp->reg_base + ANALOGIX_DP_LANE_COUNT_SET);
 	*count = reg;
 }
 
@@ -563,13 +563,13 @@ void analogix_dp_enable_enhanced_mode(struct analogix_dp_device *dp,
 	u32 reg;
 
 	if (enable) {
-		reg = readl(dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:566", dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
 		reg |= ENHANCED;
-		writel(reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:568", reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
 	} else {
-		reg = readl(dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:570", dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
 		reg &= ~ENHANCED;
-		writel(reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:572", reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
 	}
 }
 
@@ -581,25 +581,25 @@ void analogix_dp_set_training_pattern(struct analogix_dp_device *dp,
 	switch (pattern) {
 	case PRBS7:
 		reg = SCRAMBLING_ENABLE | LINK_QUAL_PATTERN_SET_PRBS7;
-		writel(reg, dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:584", reg, dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
 		break;
 	case D10_2:
 		reg = SCRAMBLING_ENABLE | LINK_QUAL_PATTERN_SET_D10_2;
-		writel(reg, dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:588", reg, dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
 		break;
 	case TRAINING_PTN1:
 		reg = SCRAMBLING_DISABLE | SW_TRAINING_PATTERN_SET_PTN1;
-		writel(reg, dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:592", reg, dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
 		break;
 	case TRAINING_PTN2:
 		reg = SCRAMBLING_DISABLE | SW_TRAINING_PATTERN_SET_PTN2;
-		writel(reg, dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:596", reg, dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
 		break;
 	case DP_NONE:
 		reg = SCRAMBLING_ENABLE |
 			LINK_QUAL_PATTERN_SET_DISABLE |
 			SW_TRAINING_PATTERN_SET_NORMAL;
-		writel(reg, dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:602", reg, dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
 		break;
 	default:
 		break;
@@ -611,10 +611,10 @@ void analogix_dp_set_lane0_pre_emphasis(struct analogix_dp_device *dp,
 {
 	u32 reg;
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_LN0_LINK_TRAINING_CTL);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:614", dp->reg_base + ANALOGIX_DP_LN0_LINK_TRAINING_CTL);
 	reg &= ~PRE_EMPHASIS_SET_MASK;
 	reg |= level << PRE_EMPHASIS_SET_SHIFT;
-	writel(reg, dp->reg_base + ANALOGIX_DP_LN0_LINK_TRAINING_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:617", reg, dp->reg_base + ANALOGIX_DP_LN0_LINK_TRAINING_CTL);
 }
 
 void analogix_dp_set_lane1_pre_emphasis(struct analogix_dp_device *dp,
@@ -622,10 +622,10 @@ void analogix_dp_set_lane1_pre_emphasis(struct analogix_dp_device *dp,
 {
 	u32 reg;
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_LN1_LINK_TRAINING_CTL);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:625", dp->reg_base + ANALOGIX_DP_LN1_LINK_TRAINING_CTL);
 	reg &= ~PRE_EMPHASIS_SET_MASK;
 	reg |= level << PRE_EMPHASIS_SET_SHIFT;
-	writel(reg, dp->reg_base + ANALOGIX_DP_LN1_LINK_TRAINING_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:628", reg, dp->reg_base + ANALOGIX_DP_LN1_LINK_TRAINING_CTL);
 }
 
 void analogix_dp_set_lane2_pre_emphasis(struct analogix_dp_device *dp,
@@ -633,10 +633,10 @@ void analogix_dp_set_lane2_pre_emphasis(struct analogix_dp_device *dp,
 {
 	u32 reg;
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_LN2_LINK_TRAINING_CTL);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:636", dp->reg_base + ANALOGIX_DP_LN2_LINK_TRAINING_CTL);
 	reg &= ~PRE_EMPHASIS_SET_MASK;
 	reg |= level << PRE_EMPHASIS_SET_SHIFT;
-	writel(reg, dp->reg_base + ANALOGIX_DP_LN2_LINK_TRAINING_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:639", reg, dp->reg_base + ANALOGIX_DP_LN2_LINK_TRAINING_CTL);
 }
 
 void analogix_dp_set_lane3_pre_emphasis(struct analogix_dp_device *dp,
@@ -644,10 +644,10 @@ void analogix_dp_set_lane3_pre_emphasis(struct analogix_dp_device *dp,
 {
 	u32 reg;
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_LN3_LINK_TRAINING_CTL);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:647", dp->reg_base + ANALOGIX_DP_LN3_LINK_TRAINING_CTL);
 	reg &= ~PRE_EMPHASIS_SET_MASK;
 	reg |= level << PRE_EMPHASIS_SET_SHIFT;
-	writel(reg, dp->reg_base + ANALOGIX_DP_LN3_LINK_TRAINING_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:650", reg, dp->reg_base + ANALOGIX_DP_LN3_LINK_TRAINING_CTL);
 }
 
 void analogix_dp_set_lane0_link_training(struct analogix_dp_device *dp,
@@ -656,7 +656,7 @@ void analogix_dp_set_lane0_link_training(struct analogix_dp_device *dp,
 	u32 reg;
 
 	reg = training_lane;
-	writel(reg, dp->reg_base + ANALOGIX_DP_LN0_LINK_TRAINING_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:659", reg, dp->reg_base + ANALOGIX_DP_LN0_LINK_TRAINING_CTL);
 }
 
 void analogix_dp_set_lane1_link_training(struct analogix_dp_device *dp,
@@ -665,7 +665,7 @@ void analogix_dp_set_lane1_link_training(struct analogix_dp_device *dp,
 	u32 reg;
 
 	reg = training_lane;
-	writel(reg, dp->reg_base + ANALOGIX_DP_LN1_LINK_TRAINING_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:668", reg, dp->reg_base + ANALOGIX_DP_LN1_LINK_TRAINING_CTL);
 }
 
 void analogix_dp_set_lane2_link_training(struct analogix_dp_device *dp,
@@ -674,7 +674,7 @@ void analogix_dp_set_lane2_link_training(struct analogix_dp_device *dp,
 	u32 reg;
 
 	reg = training_lane;
-	writel(reg, dp->reg_base + ANALOGIX_DP_LN2_LINK_TRAINING_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:677", reg, dp->reg_base + ANALOGIX_DP_LN2_LINK_TRAINING_CTL);
 }
 
 void analogix_dp_set_lane3_link_training(struct analogix_dp_device *dp,
@@ -683,42 +683,42 @@ void analogix_dp_set_lane3_link_training(struct analogix_dp_device *dp,
 	u32 reg;
 
 	reg = training_lane;
-	writel(reg, dp->reg_base + ANALOGIX_DP_LN3_LINK_TRAINING_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:686", reg, dp->reg_base + ANALOGIX_DP_LN3_LINK_TRAINING_CTL);
 }
 
 u32 analogix_dp_get_lane0_link_training(struct analogix_dp_device *dp)
 {
-	return readl(dp->reg_base + ANALOGIX_DP_LN0_LINK_TRAINING_CTL);
+	return pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:691", dp->reg_base + ANALOGIX_DP_LN0_LINK_TRAINING_CTL);
 }
 
 u32 analogix_dp_get_lane1_link_training(struct analogix_dp_device *dp)
 {
-	return readl(dp->reg_base + ANALOGIX_DP_LN1_LINK_TRAINING_CTL);
+	return pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:696", dp->reg_base + ANALOGIX_DP_LN1_LINK_TRAINING_CTL);
 }
 
 u32 analogix_dp_get_lane2_link_training(struct analogix_dp_device *dp)
 {
-	return readl(dp->reg_base + ANALOGIX_DP_LN2_LINK_TRAINING_CTL);
+	return pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:701", dp->reg_base + ANALOGIX_DP_LN2_LINK_TRAINING_CTL);
 }
 
 u32 analogix_dp_get_lane3_link_training(struct analogix_dp_device *dp)
 {
-	return readl(dp->reg_base + ANALOGIX_DP_LN3_LINK_TRAINING_CTL);
+	return pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:706", dp->reg_base + ANALOGIX_DP_LN3_LINK_TRAINING_CTL);
 }
 
 void analogix_dp_reset_macro(struct analogix_dp_device *dp)
 {
 	u32 reg;
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_PHY_TEST);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:713", dp->reg_base + ANALOGIX_DP_PHY_TEST);
 	reg |= MACRO_RST;
-	writel(reg, dp->reg_base + ANALOGIX_DP_PHY_TEST);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:715", reg, dp->reg_base + ANALOGIX_DP_PHY_TEST);
 
 	/* 10 us is the minimum reset time. */
 	usleep_range(10, 20);
 
 	reg &= ~MACRO_RST;
-	writel(reg, dp->reg_base + ANALOGIX_DP_PHY_TEST);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:721", reg, dp->reg_base + ANALOGIX_DP_PHY_TEST);
 }
 
 void analogix_dp_init_video(struct analogix_dp_device *dp)
@@ -726,19 +726,19 @@ void analogix_dp_init_video(struct analogix_dp_device *dp)
 	u32 reg;
 
 	reg = VSYNC_DET | VID_FORMAT_CHG | VID_CLK_CHG;
-	writel(reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_STA_1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:729", reg, dp->reg_base + ANALOGIX_DP_COMMON_INT_STA_1);
 
 	reg = 0x0;
-	writel(reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:732", reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_1);
 
 	reg = CHA_CRI(4) | CHA_CTRL;
-	writel(reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_2);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:735", reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_2);
 
 	reg = 0x0;
-	writel(reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:738", reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
 
 	reg = VID_HRES_TH(2) | VID_VRES_TH(0);
-	writel(reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_8);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:741", reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_8);
 }
 
 void analogix_dp_set_video_color_format(struct analogix_dp_device *dp)
@@ -749,36 +749,36 @@ void analogix_dp_set_video_color_format(struct analogix_dp_device *dp)
 	reg = (dp->video_info.dynamic_range << IN_D_RANGE_SHIFT) |
 		(dp->video_info.color_depth << IN_BPC_SHIFT) |
 		(dp->video_info.color_space << IN_COLOR_F_SHIFT);
-	writel(reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_2);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:752", reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_2);
 
 	/* Set Input Color YCbCr Coefficients to ITU601 or ITU709 */
-	reg = readl(dp->reg_base + ANALOGIX_DP_VIDEO_CTL_3);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:755", dp->reg_base + ANALOGIX_DP_VIDEO_CTL_3);
 	reg &= ~IN_YC_COEFFI_MASK;
 	if (dp->video_info.ycbcr_coeff)
 		reg |= IN_YC_COEFFI_ITU709;
 	else
 		reg |= IN_YC_COEFFI_ITU601;
-	writel(reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_3);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:761", reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_3);
 }
 
 int analogix_dp_is_slave_video_stream_clock_on(struct analogix_dp_device *dp)
 {
 	u32 reg;
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_SYS_CTL_1);
-	writel(reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_1);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:768", dp->reg_base + ANALOGIX_DP_SYS_CTL_1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:769", reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_1);
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_SYS_CTL_1);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:771", dp->reg_base + ANALOGIX_DP_SYS_CTL_1);
 
 	if (!(reg & DET_STA)) {
 		dev_dbg(dp->dev, "Input stream clock not detected.\n");
 		return -EINVAL;
 	}
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_SYS_CTL_2);
-	writel(reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_2);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:778", dp->reg_base + ANALOGIX_DP_SYS_CTL_2);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:779", reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_2);
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_SYS_CTL_2);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:781", dp->reg_base + ANALOGIX_DP_SYS_CTL_2);
 	dev_dbg(dp->dev, "wait SYS_CTL_2.\n");
 
 	if (reg & CHA_STA) {
@@ -796,30 +796,30 @@ void analogix_dp_set_video_cr_mn(struct analogix_dp_device *dp,
 	u32 reg;
 
 	if (type == REGISTER_M) {
-		reg = readl(dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:799", dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
 		reg |= FIX_M_VID;
-		writel(reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:801", reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
 		reg = m_value & 0xff;
-		writel(reg, dp->reg_base + ANALOGIX_DP_M_VID_0);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:803", reg, dp->reg_base + ANALOGIX_DP_M_VID_0);
 		reg = (m_value >> 8) & 0xff;
-		writel(reg, dp->reg_base + ANALOGIX_DP_M_VID_1);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:805", reg, dp->reg_base + ANALOGIX_DP_M_VID_1);
 		reg = (m_value >> 16) & 0xff;
-		writel(reg, dp->reg_base + ANALOGIX_DP_M_VID_2);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:807", reg, dp->reg_base + ANALOGIX_DP_M_VID_2);
 
 		reg = n_value & 0xff;
-		writel(reg, dp->reg_base + ANALOGIX_DP_N_VID_0);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:810", reg, dp->reg_base + ANALOGIX_DP_N_VID_0);
 		reg = (n_value >> 8) & 0xff;
-		writel(reg, dp->reg_base + ANALOGIX_DP_N_VID_1);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:812", reg, dp->reg_base + ANALOGIX_DP_N_VID_1);
 		reg = (n_value >> 16) & 0xff;
-		writel(reg, dp->reg_base + ANALOGIX_DP_N_VID_2);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:814", reg, dp->reg_base + ANALOGIX_DP_N_VID_2);
 	} else  {
-		reg = readl(dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:816", dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
 		reg &= ~FIX_M_VID;
-		writel(reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:818", reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_4);
 
-		writel(0x00, dp->reg_base + ANALOGIX_DP_N_VID_0);
-		writel(0x80, dp->reg_base + ANALOGIX_DP_N_VID_1);
-		writel(0x00, dp->reg_base + ANALOGIX_DP_N_VID_2);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:820", 0x00, dp->reg_base + ANALOGIX_DP_N_VID_0);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:821", 0x80, dp->reg_base + ANALOGIX_DP_N_VID_1);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:822", 0x00, dp->reg_base + ANALOGIX_DP_N_VID_2);
 	}
 }
 
@@ -828,13 +828,13 @@ void analogix_dp_set_video_timing_mode(struct analogix_dp_device *dp, u32 type)
 	u32 reg;
 
 	if (type == VIDEO_TIMING_FROM_CAPTURE) {
-		reg = readl(dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:831", dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
 		reg &= ~FORMAT_SEL;
-		writel(reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:833", reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
 	} else {
-		reg = readl(dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:835", dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
 		reg |= FORMAT_SEL;
-		writel(reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:837", reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
 	}
 }
 
@@ -843,15 +843,15 @@ void analogix_dp_enable_video_master(struct analogix_dp_device *dp, bool enable)
 	u32 reg;
 
 	if (enable) {
-		reg = readl(dp->reg_base + ANALOGIX_DP_SOC_GENERAL_CTL);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:846", dp->reg_base + ANALOGIX_DP_SOC_GENERAL_CTL);
 		reg &= ~VIDEO_MODE_MASK;
 		reg |= VIDEO_MASTER_MODE_EN | VIDEO_MODE_MASTER_MODE;
-		writel(reg, dp->reg_base + ANALOGIX_DP_SOC_GENERAL_CTL);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:849", reg, dp->reg_base + ANALOGIX_DP_SOC_GENERAL_CTL);
 	} else {
-		reg = readl(dp->reg_base + ANALOGIX_DP_SOC_GENERAL_CTL);
+		reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:851", dp->reg_base + ANALOGIX_DP_SOC_GENERAL_CTL);
 		reg &= ~VIDEO_MODE_MASK;
 		reg |= VIDEO_MODE_SLAVE_MODE;
-		writel(reg, dp->reg_base + ANALOGIX_DP_SOC_GENERAL_CTL);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:854", reg, dp->reg_base + ANALOGIX_DP_SOC_GENERAL_CTL);
 	}
 }
 
@@ -859,19 +859,19 @@ void analogix_dp_start_video(struct analogix_dp_device *dp)
 {
 	u32 reg;
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_VIDEO_CTL_1);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:862", dp->reg_base + ANALOGIX_DP_VIDEO_CTL_1);
 	reg |= VIDEO_EN;
-	writel(reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:864", reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_1);
 }
 
 int analogix_dp_is_video_stream_on(struct analogix_dp_device *dp)
 {
 	u32 reg;
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
-	writel(reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:871", dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:872", reg, dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:874", dp->reg_base + ANALOGIX_DP_SYS_CTL_3);
 	if (!(reg & STRM_VALID)) {
 		dev_dbg(dp->dev, "Input video stream is not detected.\n");
 		return -EINVAL;
@@ -884,55 +884,55 @@ void analogix_dp_config_video_slave_mode(struct analogix_dp_device *dp)
 {
 	u32 reg;
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_FUNC_EN_1);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:887", dp->reg_base + ANALOGIX_DP_FUNC_EN_1);
 	if (dp->plat_data && is_rockchip(dp->plat_data->dev_type)) {
 		reg &= ~(RK_VID_CAP_FUNC_EN_N | RK_VID_FIFO_FUNC_EN_N);
 	} else {
 		reg &= ~(MASTER_VID_FUNC_EN_N | SLAVE_VID_FUNC_EN_N);
 		reg |= MASTER_VID_FUNC_EN_N;
 	}
-	writel(reg, dp->reg_base + ANALOGIX_DP_FUNC_EN_1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:894", reg, dp->reg_base + ANALOGIX_DP_FUNC_EN_1);
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:896", dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
 	reg &= ~INTERACE_SCAN_CFG;
 	reg |= (dp->video_info.interlaced << 2);
-	writel(reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:899", reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:901", dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
 	reg &= ~VSYNC_POLARITY_CFG;
 	reg |= (dp->video_info.v_sync_polarity << 1);
-	writel(reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:904", reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:906", dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
 	reg &= ~HSYNC_POLARITY_CFG;
 	reg |= (dp->video_info.h_sync_polarity << 0);
-	writel(reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:909", reg, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_10);
 
 	reg = AUDIO_MODE_SPDIF_MODE | VIDEO_MODE_SLAVE_MODE;
-	writel(reg, dp->reg_base + ANALOGIX_DP_SOC_GENERAL_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:912", reg, dp->reg_base + ANALOGIX_DP_SOC_GENERAL_CTL);
 }
 
 void analogix_dp_enable_scrambling(struct analogix_dp_device *dp)
 {
 	u32 reg;
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:919", dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
 	reg &= ~SCRAMBLING_DISABLE;
-	writel(reg, dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:921", reg, dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
 }
 
 void analogix_dp_disable_scrambling(struct analogix_dp_device *dp)
 {
 	u32 reg;
 
-	reg = readl(dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:928", dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
 	reg |= SCRAMBLING_DISABLE;
-	writel(reg, dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:930", reg, dp->reg_base + ANALOGIX_DP_TRAINING_PTN_SET);
 }
 
 void analogix_dp_enable_psr_crc(struct analogix_dp_device *dp)
 {
-	writel(PSR_VID_CRC_ENABLE, dp->reg_base + ANALOGIX_DP_CRC_CON);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:935", PSR_VID_CRC_ENABLE, dp->reg_base + ANALOGIX_DP_CRC_CON);
 }
 
 static ssize_t analogix_dp_get_psr_status(struct analogix_dp_device *dp)
@@ -956,44 +956,44 @@ int analogix_dp_send_psr_spd(struct analogix_dp_device *dp,
 	ssize_t psr_status;
 
 	/* don't send info frame */
-	val = readl(dp->reg_base + ANALOGIX_DP_PKT_SEND_CTL);
+	val = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:959", dp->reg_base + ANALOGIX_DP_PKT_SEND_CTL);
 	val &= ~IF_EN;
-	writel(val, dp->reg_base + ANALOGIX_DP_PKT_SEND_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:961", val, dp->reg_base + ANALOGIX_DP_PKT_SEND_CTL);
 
 	/* configure single frame update mode */
-	writel(PSR_FRAME_UP_TYPE_BURST | PSR_CRC_SEL_HARDWARE,
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:964", PSR_FRAME_UP_TYPE_BURST | PSR_CRC_SEL_HARDWARE,
 	       dp->reg_base + ANALOGIX_DP_PSR_FRAME_UPDATE_CTRL);
 
 	/* configure VSC HB0~HB3 */
-	writel(vsc->sdp_header.HB0, dp->reg_base + ANALOGIX_DP_SPD_HB0);
-	writel(vsc->sdp_header.HB1, dp->reg_base + ANALOGIX_DP_SPD_HB1);
-	writel(vsc->sdp_header.HB2, dp->reg_base + ANALOGIX_DP_SPD_HB2);
-	writel(vsc->sdp_header.HB3, dp->reg_base + ANALOGIX_DP_SPD_HB3);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:968", vsc->sdp_header.HB0, dp->reg_base + ANALOGIX_DP_SPD_HB0);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:969", vsc->sdp_header.HB1, dp->reg_base + ANALOGIX_DP_SPD_HB1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:970", vsc->sdp_header.HB2, dp->reg_base + ANALOGIX_DP_SPD_HB2);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:971", vsc->sdp_header.HB3, dp->reg_base + ANALOGIX_DP_SPD_HB3);
 
 	/* configure reused VSC PB0~PB3, magic number from vendor */
-	writel(0x00, dp->reg_base + ANALOGIX_DP_SPD_PB0);
-	writel(0x16, dp->reg_base + ANALOGIX_DP_SPD_PB1);
-	writel(0xCE, dp->reg_base + ANALOGIX_DP_SPD_PB2);
-	writel(0x5D, dp->reg_base + ANALOGIX_DP_SPD_PB3);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:974", 0x00, dp->reg_base + ANALOGIX_DP_SPD_PB0);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:975", 0x16, dp->reg_base + ANALOGIX_DP_SPD_PB1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:976", 0xCE, dp->reg_base + ANALOGIX_DP_SPD_PB2);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:977", 0x5D, dp->reg_base + ANALOGIX_DP_SPD_PB3);
 
 	/* configure DB0 / DB1 values */
-	writel(vsc->db[0], dp->reg_base + ANALOGIX_DP_VSC_SHADOW_DB0);
-	writel(vsc->db[1], dp->reg_base + ANALOGIX_DP_VSC_SHADOW_DB1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:980", vsc->db[0], dp->reg_base + ANALOGIX_DP_VSC_SHADOW_DB0);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:981", vsc->db[1], dp->reg_base + ANALOGIX_DP_VSC_SHADOW_DB1);
 
 	/* set reuse spd inforframe */
-	val = readl(dp->reg_base + ANALOGIX_DP_VIDEO_CTL_3);
+	val = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:984", dp->reg_base + ANALOGIX_DP_VIDEO_CTL_3);
 	val |= REUSE_SPD_EN;
-	writel(val, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_3);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:986", val, dp->reg_base + ANALOGIX_DP_VIDEO_CTL_3);
 
 	/* mark info frame update */
-	val = readl(dp->reg_base + ANALOGIX_DP_PKT_SEND_CTL);
+	val = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:989", dp->reg_base + ANALOGIX_DP_PKT_SEND_CTL);
 	val = (val | IF_UP) & ~IF_EN;
-	writel(val, dp->reg_base + ANALOGIX_DP_PKT_SEND_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:991", val, dp->reg_base + ANALOGIX_DP_PKT_SEND_CTL);
 
 	/* send info frame */
-	val = readl(dp->reg_base + ANALOGIX_DP_PKT_SEND_CTL);
+	val = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:994", dp->reg_base + ANALOGIX_DP_PKT_SEND_CTL);
 	val |= IF_EN;
-	writel(val, dp->reg_base + ANALOGIX_DP_PKT_SEND_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:996", val, dp->reg_base + ANALOGIX_DP_PKT_SEND_CTL);
 
 	if (!blocking)
 		return 0;
@@ -1036,7 +1036,7 @@ ssize_t analogix_dp_transfer(struct analogix_dp_device *dp,
 
 	/* Clear AUX CH data buffer */
 	reg = BUF_CLR;
-	writel(reg, dp->reg_base + ANALOGIX_DP_BUFFER_DATA_CTL);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:1039", reg, dp->reg_base + ANALOGIX_DP_BUFFER_DATA_CTL);
 
 	switch (msg->request & ~DP_AUX_I2C_MOT) {
 	case DP_AUX_I2C_WRITE:
@@ -1064,20 +1064,20 @@ ssize_t analogix_dp_transfer(struct analogix_dp_device *dp,
 	}
 
 	reg |= AUX_LENGTH(msg->size);
-	writel(reg, dp->reg_base + ANALOGIX_DP_AUX_CH_CTL_1);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:1067", reg, dp->reg_base + ANALOGIX_DP_AUX_CH_CTL_1);
 
 	/* Select DPCD device address */
 	reg = AUX_ADDR_7_0(msg->address);
-	writel(reg, dp->reg_base + ANALOGIX_DP_AUX_ADDR_7_0);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:1071", reg, dp->reg_base + ANALOGIX_DP_AUX_ADDR_7_0);
 	reg = AUX_ADDR_15_8(msg->address);
-	writel(reg, dp->reg_base + ANALOGIX_DP_AUX_ADDR_15_8);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:1073", reg, dp->reg_base + ANALOGIX_DP_AUX_ADDR_15_8);
 	reg = AUX_ADDR_19_16(msg->address);
-	writel(reg, dp->reg_base + ANALOGIX_DP_AUX_ADDR_19_16);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:1075", reg, dp->reg_base + ANALOGIX_DP_AUX_ADDR_19_16);
 
 	if (!(msg->request & DP_AUX_I2C_READ)) {
 		for (i = 0; i < msg->size; i++) {
 			reg = buffer[i];
-			writel(reg, dp->reg_base + ANALOGIX_DP_BUF_DATA_0 +
+			pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:1080", reg, dp->reg_base + ANALOGIX_DP_BUF_DATA_0 +
 			       4 * i);
 			num_transferred++;
 		}
@@ -1090,7 +1090,7 @@ ssize_t analogix_dp_transfer(struct analogix_dp_device *dp,
 	if (msg->size < 1)
 		reg |= ADDR_ONLY;
 
-	writel(reg, dp->reg_base + ANALOGIX_DP_AUX_CH_CTL_2);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:1093", reg, dp->reg_base + ANALOGIX_DP_AUX_CH_CTL_2);
 
 	ret = readx_poll_timeout(readl, dp->reg_base + ANALOGIX_DP_AUX_CH_CTL_2,
 				 reg, !(reg & AUX_EN), 25, 500 * 1000);
@@ -1109,13 +1109,13 @@ ssize_t analogix_dp_transfer(struct analogix_dp_device *dp,
 	}
 
 	/* Clear interrupt source for AUX CH command reply */
-	writel(RPLY_RECEIV, dp->reg_base + ANALOGIX_DP_INT_STA);
+	pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:1112", RPLY_RECEIV, dp->reg_base + ANALOGIX_DP_INT_STA);
 
 	/* Clear interrupt source for AUX CH access error */
-	reg = readl(dp->reg_base + ANALOGIX_DP_INT_STA);
-	status_reg = readl(dp->reg_base + ANALOGIX_DP_AUX_CH_STA);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:1115", dp->reg_base + ANALOGIX_DP_INT_STA);
+	status_reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:1116", dp->reg_base + ANALOGIX_DP_AUX_CH_STA);
 	if ((reg & AUX_ERR) || (status_reg & AUX_STATUS_MASK)) {
-		writel(AUX_ERR, dp->reg_base + ANALOGIX_DP_INT_STA);
+		pete_writel("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:1118", AUX_ERR, dp->reg_base + ANALOGIX_DP_INT_STA);
 
 		dev_warn(dp->dev, "AUX CH error happened: %#x (%d)\n",
 			 status_reg & AUX_STATUS_MASK, !!(reg & AUX_ERR));
@@ -1124,7 +1124,7 @@ ssize_t analogix_dp_transfer(struct analogix_dp_device *dp,
 
 	if (msg->request & DP_AUX_I2C_READ) {
 		for (i = 0; i < msg->size; i++) {
-			reg = readl(dp->reg_base + ANALOGIX_DP_BUF_DATA_0 +
+			reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:1127", dp->reg_base + ANALOGIX_DP_BUF_DATA_0 +
 				    4 * i);
 			buffer[i] = (unsigned char)reg;
 			num_transferred++;
@@ -1132,7 +1132,7 @@ ssize_t analogix_dp_transfer(struct analogix_dp_device *dp,
 	}
 
 	/* Check if Rx sends defer */
-	reg = readl(dp->reg_base + ANALOGIX_DP_AUX_RX_COMM);
+	reg = pete_readl("drivers/gpu/drm/bridge/analogix/analogix_dp_reg.c:1135", dp->reg_base + ANALOGIX_DP_AUX_RX_COMM);
 	if (reg == AUX_RX_COMM_AUX_DEFER)
 		msg->reply = DP_AUX_NATIVE_REPLY_DEFER;
 	else if (reg == AUX_RX_COMM_I2C_DEFER)

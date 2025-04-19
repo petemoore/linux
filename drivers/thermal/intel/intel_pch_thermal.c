@@ -141,12 +141,12 @@ static int pch_wpt_init(struct pch_thermal_device *ptd, int *nr_trips)
 	*nr_trips = 0;
 
 	/* Check if BIOS has already enabled thermal sensor */
-	if (WPT_TSEL_ETS & readb(ptd->hw_base + WPT_TSEL)) {
+	if (WPT_TSEL_ETS & pete_readb("drivers/thermal/intel/intel_pch_thermal.c:144", ptd->hw_base + WPT_TSEL)) {
 		ptd->bios_enabled = true;
 		goto read_trips;
 	}
 
-	tsel = readb(ptd->hw_base + WPT_TSEL);
+	tsel = pete_readb("drivers/thermal/intel/intel_pch_thermal.c:149", ptd->hw_base + WPT_TSEL);
 	/*
 	 * When TSEL's Policy Lock-Down bit is 1, TSEL become RO.
 	 * If so, thermal sensor cannot enable. Bail out.
@@ -156,15 +156,15 @@ static int pch_wpt_init(struct pch_thermal_device *ptd, int *nr_trips)
 		return -ENODEV;
 	}
 
-	writeb(tsel|WPT_TSEL_ETS, ptd->hw_base + WPT_TSEL);
-	if (!(WPT_TSEL_ETS & readb(ptd->hw_base + WPT_TSEL))) {
+	pete_writeb("drivers/thermal/intel/intel_pch_thermal.c:159", tsel|WPT_TSEL_ETS, ptd->hw_base + WPT_TSEL);
+	if (!(WPT_TSEL_ETS & pete_readb("drivers/thermal/intel/intel_pch_thermal.c:160", ptd->hw_base + WPT_TSEL))) {
 		dev_err(&ptd->pdev->dev, "Sensor can't be enabled\n");
 		return -ENODEV;
 	}
 
 read_trips:
 	ptd->crt_trip_id = -1;
-	trip_temp = readw(ptd->hw_base + WPT_CTT);
+	trip_temp = pete_readw("drivers/thermal/intel/intel_pch_thermal.c:167", ptd->hw_base + WPT_CTT);
 	trip_temp &= 0x1FF;
 	if (trip_temp) {
 		ptd->crt_temp = GET_WPT_TEMP(trip_temp);
@@ -173,7 +173,7 @@ read_trips:
 	}
 
 	ptd->hot_trip_id = -1;
-	trip_temp = readw(ptd->hw_base + WPT_PHL);
+	trip_temp = pete_readw("drivers/thermal/intel/intel_pch_thermal.c:176", ptd->hw_base + WPT_PHL);
 	trip_temp &= 0x1FF;
 	if (trip_temp) {
 		ptd->hot_temp = GET_WPT_TEMP(trip_temp);
@@ -188,7 +188,7 @@ read_trips:
 
 static int pch_wpt_get_temp(struct pch_thermal_device *ptd, int *temp)
 {
-	*temp = GET_WPT_TEMP(WPT_TEMP_TSR & readw(ptd->hw_base + WPT_TEMP));
+	*temp = GET_WPT_TEMP(WPT_TEMP_TSR & pete_readw("drivers/thermal/intel/intel_pch_thermal.c:191", ptd->hw_base + WPT_TEMP));
 
 	return 0;
 }
@@ -201,8 +201,8 @@ static int pch_wpt_suspend(struct pch_thermal_device *ptd)
 
 	/* Shutdown the thermal sensor if it is not enabled by BIOS */
 	if (!ptd->bios_enabled) {
-		tsel = readb(ptd->hw_base + WPT_TSEL);
-		writeb(tsel & 0xFE, ptd->hw_base + WPT_TSEL);
+		tsel = pete_readb("drivers/thermal/intel/intel_pch_thermal.c:204", ptd->hw_base + WPT_TSEL);
+		pete_writeb("drivers/thermal/intel/intel_pch_thermal.c:205", tsel & 0xFE, ptd->hw_base + WPT_TSEL);
 		return 0;
 	}
 
@@ -219,10 +219,10 @@ static int pch_wpt_suspend(struct pch_thermal_device *ptd)
 		return 0;
 
 	/* Get the PCH temperature threshold value */
-	pch_thr_temp = GET_PCH_TEMP(WPT_TEMP_TSR & readw(ptd->hw_base + WPT_TSPM));
+	pch_thr_temp = GET_PCH_TEMP(WPT_TEMP_TSR & pete_readw("drivers/thermal/intel/intel_pch_thermal.c:222", ptd->hw_base + WPT_TSPM));
 
 	/* Get the PCH current temperature value */
-	pch_cur_temp = GET_PCH_TEMP(WPT_TEMP_TSR & readw(ptd->hw_base + WPT_TEMP));
+	pch_cur_temp = GET_PCH_TEMP(WPT_TEMP_TSR & pete_readw("drivers/thermal/intel/intel_pch_thermal.c:225", ptd->hw_base + WPT_TEMP));
 
 	/*
 	 * If current PCH temperature is higher than configured PCH threshold
@@ -241,7 +241,7 @@ static int pch_wpt_suspend(struct pch_thermal_device *ptd)
 			pch_cur_temp, pch_thr_temp, pch_delay_cnt, delay_timeout);
 		msleep(delay_timeout);
 		/* Read the PCH current temperature for next cycle. */
-		pch_cur_temp = GET_PCH_TEMP(WPT_TEMP_TSR & readw(ptd->hw_base + WPT_TEMP));
+		pch_cur_temp = GET_PCH_TEMP(WPT_TEMP_TSR & pete_readw("drivers/thermal/intel/intel_pch_thermal.c:244", ptd->hw_base + WPT_TEMP));
 		pch_delay_cnt++;
 	}
 
@@ -263,9 +263,9 @@ static int pch_wpt_resume(struct pch_thermal_device *ptd)
 	if (ptd->bios_enabled)
 		return 0;
 
-	tsel = readb(ptd->hw_base + WPT_TSEL);
+	tsel = pete_readb("drivers/thermal/intel/intel_pch_thermal.c:266", ptd->hw_base + WPT_TSEL);
 
-	writeb(tsel | WPT_TSEL_ETS, ptd->hw_base + WPT_TSEL);
+	pete_writeb("drivers/thermal/intel/intel_pch_thermal.c:268", tsel | WPT_TSEL_ETS, ptd->hw_base + WPT_TSEL);
 
 	return 0;
 }

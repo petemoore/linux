@@ -140,8 +140,8 @@ MODULE_PARM_DESC(dumb_switch, "Assume switch is not connected to MDIO bus");
 #define CPMAC_STATS_TX_CARRIERSENSE	0x0260
 #define CPMAC_STATS_TX_OCTETS		0x0264
 
-#define cpmac_read(base, reg)		(readl((void __iomem *)(base) + (reg)))
-#define cpmac_write(base, reg, val)	(writel(val, (void __iomem *)(base) + \
+#define cpmac_read(base, reg)		(pete_readl("drivers/net/ethernet/ti/cpmac.c:143", (void __iomem *)(base) + (reg)))
+#define cpmac_write(base, reg, val)	(pete_writel("drivers/net/ethernet/ti/cpmac.c:144", val, (void __iomem *)(base) + \
 						(reg)))
 
 /* MDIO bus */

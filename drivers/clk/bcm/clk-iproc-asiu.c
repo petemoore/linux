@@ -53,9 +53,9 @@ static int iproc_asiu_clk_enable(struct clk_hw *hw)
 	if (clk->gate.offset == IPROC_CLK_INVALID_OFFSET)
 		return 0;
 
-	val = readl(asiu->gate_base + clk->gate.offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-asiu.c:56", asiu->gate_base + clk->gate.offset);
 	val |= (1 << clk->gate.en_shift);
-	writel(val, asiu->gate_base + clk->gate.offset);
+	pete_writel("drivers/clk/bcm/clk-iproc-asiu.c:58", val, asiu->gate_base + clk->gate.offset);
 
 	return 0;
 }
@@ -70,9 +70,9 @@ static void iproc_asiu_clk_disable(struct clk_hw *hw)
 	if (clk->gate.offset == IPROC_CLK_INVALID_OFFSET)
 		return;
 
-	val = readl(asiu->gate_base + clk->gate.offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-asiu.c:73", asiu->gate_base + clk->gate.offset);
 	val &= ~(1 << clk->gate.en_shift);
-	writel(val, asiu->gate_base + clk->gate.offset);
+	pete_writel("drivers/clk/bcm/clk-iproc-asiu.c:75", val, asiu->gate_base + clk->gate.offset);
 }
 
 static unsigned long iproc_asiu_clk_recalc_rate(struct clk_hw *hw,
@@ -89,7 +89,7 @@ static unsigned long iproc_asiu_clk_recalc_rate(struct clk_hw *hw,
 	}
 
 	/* if clock divisor is not enabled, simply return parent rate */
-	val = readl(asiu->div_base + clk->div.offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-asiu.c:92", asiu->div_base + clk->div.offset);
 	if ((val & (1 << clk->div.en_shift)) == 0) {
 		clk->rate = parent_rate;
 		return parent_rate;
@@ -139,9 +139,9 @@ static int iproc_asiu_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 
 	/* simply disable the divisor if one wants the same rate as parent */
 	if (rate == parent_rate) {
-		val = readl(asiu->div_base + clk->div.offset);
+		val = pete_readl("drivers/clk/bcm/clk-iproc-asiu.c:142", asiu->div_base + clk->div.offset);
 		val &= ~(1 << clk->div.en_shift);
-		writel(val, asiu->div_base + clk->div.offset);
+		pete_writel("drivers/clk/bcm/clk-iproc-asiu.c:144", val, asiu->div_base + clk->div.offset);
 		return 0;
 	}
 
@@ -153,7 +153,7 @@ static int iproc_asiu_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 	div_h--;
 	div_l--;
 
-	val = readl(asiu->div_base + clk->div.offset);
+	val = pete_readl("drivers/clk/bcm/clk-iproc-asiu.c:156", asiu->div_base + clk->div.offset);
 	val |= 1 << clk->div.en_shift;
 	if (div_h) {
 		val &= ~(bit_mask(clk->div.high_width)
@@ -169,7 +169,7 @@ static int iproc_asiu_clk_set_rate(struct clk_hw *hw, unsigned long rate,
 	} else {
 		val &= ~(bit_mask(clk->div.low_width) << clk->div.low_shift);
 	}
-	writel(val, asiu->div_base + clk->div.offset);
+	pete_writel("drivers/clk/bcm/clk-iproc-asiu.c:172", val, asiu->div_base + clk->div.offset);
 
 	return 0;
 }

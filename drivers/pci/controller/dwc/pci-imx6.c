@@ -543,14 +543,14 @@ static void imx6_pcie_deassert_core_reset(struct imx6_pcie *imx6_pcie)
 		 */
 		if (likely(imx6_pcie->phy_base)) {
 			/* De-assert DCC_FB_EN */
-			writel(PCIE_PHY_CMN_REG4_DCC_FB_EN,
+			pete_writel("drivers/pci/controller/dwc/pci-imx6.c:546", PCIE_PHY_CMN_REG4_DCC_FB_EN,
 			       imx6_pcie->phy_base + PCIE_PHY_CMN_REG4);
 			/* Assert RX_EQS and RX_EQS_SEL */
-			writel(PCIE_PHY_CMN_REG24_RX_EQ_SEL
+			pete_writel("drivers/pci/controller/dwc/pci-imx6.c:549", PCIE_PHY_CMN_REG24_RX_EQ_SEL
 				| PCIE_PHY_CMN_REG24_RX_EQ,
 			       imx6_pcie->phy_base + PCIE_PHY_CMN_REG24);
 			/* Assert ATT_MODE */
-			writel(PCIE_PHY_CMN_REG26_ATT_MODE,
+			pete_writel("drivers/pci/controller/dwc/pci-imx6.c:553", PCIE_PHY_CMN_REG26_ATT_MODE,
 			       imx6_pcie->phy_base + PCIE_PHY_CMN_REG26);
 		} else {
 			dev_warn(dev, "Unable to apply ERR010728 workaround. DT missing fsl,imx7d-pcie-phy phandle ?\n");

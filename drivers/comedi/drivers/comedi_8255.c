@@ -53,10 +53,10 @@ static int subdev_8255_mmio(struct comedi_device *dev,
 			    int dir, int port, int data, unsigned long regbase)
 {
 	if (dir) {
-		writeb(data, dev->mmio + regbase + port);
+		pete_writeb("drivers/comedi/drivers/comedi_8255.c:56", data, dev->mmio + regbase + port);
 		return 0;
 	}
-	return readb(dev->mmio + regbase + port);
+	return pete_readb("drivers/comedi/drivers/comedi_8255.c:59", dev->mmio + regbase + port);
 }
 
 static int subdev_8255_insn(struct comedi_device *dev,

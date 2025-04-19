@@ -30,7 +30,7 @@ static int xlnx_i2s_set_sclkout_div(struct snd_soc_dai *cpu_dai,
 	if (!div || (div & ~I2S_I2STIM_VALID_MASK))
 		return -EINVAL;
 
-	writel(div, base + I2S_I2STIM_OFFSET);
+	pete_writel("sound/soc/xilinx/xlnx_i2s.c:33", div, base + I2S_I2STIM_OFFSET);
 
 	return 0;
 }
@@ -46,7 +46,7 @@ static int xlnx_i2s_hw_params(struct snd_pcm_substream *substream,
 
 	while (chan_id > 0) {
 		reg_off = I2S_CH0_OFFSET + ((chan_id - 1) * 4);
-		writel(chan_id, base + reg_off);
+		pete_writel("sound/soc/xilinx/xlnx_i2s.c:49", chan_id, base + reg_off);
 		chan_id--;
 	}
 
@@ -62,12 +62,12 @@ static int xlnx_i2s_trigger(struct snd_pcm_substream *substream, int cmd,
 	case SNDRV_PCM_TRIGGER_START:
 	case SNDRV_PCM_TRIGGER_RESUME:
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
-		writel(1, base + I2S_CORE_CTRL_OFFSET);
+		pete_writel("sound/soc/xilinx/xlnx_i2s.c:65", 1, base + I2S_CORE_CTRL_OFFSET);
 		break;
 	case SNDRV_PCM_TRIGGER_STOP:
 	case SNDRV_PCM_TRIGGER_SUSPEND:
 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
-		writel(0, base + I2S_CORE_CTRL_OFFSET);
+		pete_writel("sound/soc/xilinx/xlnx_i2s.c:70", 0, base + I2S_CORE_CTRL_OFFSET);
 		break;
 	default:
 		return -EINVAL;

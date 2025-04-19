@@ -1345,7 +1345,7 @@ static int sparx5_sd25g28_apply_params(struct sparx5_serdes_macro *macro,
 		 priv,
 		 SD25G_LANE_CMU_FF(sd_index));
 
-	value = readl(sdx5_addr(regs, SD25G_LANE_CMU_C0(sd_index)));
+	value = pete_readl("drivers/phy/microchip/sparx5_serdes.c:1348", sdx5_addr(regs, SD25G_LANE_CMU_C0(sd_index)));
 	value = SD25G_LANE_CMU_C0_PLL_LOL_UDL_GET(value);
 
 	if (value) {
@@ -1353,7 +1353,7 @@ static int sparx5_sd25g28_apply_params(struct sparx5_serdes_macro *macro,
 		return -EINVAL;
 	}
 
-	value = readl(sdx5_addr(regs, SD_LANE_25G_SD_LANE_STAT(sd_index)));
+	value = pete_readl("drivers/phy/microchip/sparx5_serdes.c:1356", sdx5_addr(regs, SD_LANE_25G_SD_LANE_STAT(sd_index)));
 	value = SD_LANE_25G_SD_LANE_STAT_PMA_RST_DONE_GET(value);
 
 	if (value != 0x1) {
@@ -1831,7 +1831,7 @@ static int sparx5_sd10g28_apply_params(struct sparx5_serdes_macro *macro,
 
 	usleep_range(3000, 6000);
 
-	value = readl(sdx5_addr(regs, SD_LANE_SD_LANE_STAT(lane_index)));
+	value = pete_readl("drivers/phy/microchip/sparx5_serdes.c:1834", sdx5_addr(regs, SD_LANE_SD_LANE_STAT(lane_index)));
 	value = SD_LANE_SD_LANE_STAT_PMA_RST_DONE_GET(value);
 	if (value != 1) {
 		dev_err(dev, "10G PMA Reset failed: 0x%x\n", value);
@@ -2044,7 +2044,7 @@ static int sparx5_cmu_apply_cfg(struct sparx5_serdes_private *priv,
 
 	msleep(20);
 
-	value = readl(sdx5_addr(regs, SD_CMU_CMU_E0(cmu_idx)));
+	value = pete_readl("drivers/phy/microchip/sparx5_serdes.c:2047", sdx5_addr(regs, SD_CMU_CMU_E0(cmu_idx)));
 	value = SD_CMU_CMU_E0_PLL_LOL_UDL_GET(value);
 
 	if (value) {

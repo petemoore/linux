@@ -49,15 +49,15 @@ static int iop_wait_ready_itl(struct hptiop_hba *hba, u32 millisec)
 	int i;
 
 	for (i = 0; i < millisec; i++) {
-		req = readl(&hba->u.itl.iop->inbound_queue);
+		req = pete_readl("drivers/scsi/hptiop.c:52", &hba->u.itl.iop->inbound_queue);
 		if (req != IOPMU_QUEUE_EMPTY)
 			break;
 		msleep(1);
 	}
 
 	if (req != IOPMU_QUEUE_EMPTY) {
-		writel(req, &hba->u.itl.iop->outbound_queue);
-		readl(&hba->u.itl.iop->outbound_intstatus);
+		pete_writel("drivers/scsi/hptiop.c:59", req, &hba->u.itl.iop->outbound_queue);
+		pete_readl("drivers/scsi/hptiop.c:60", &hba->u.itl.iop->outbound_intstatus);
 		return 0;
 	}
 
@@ -87,7 +87,7 @@ static void hptiop_drain_outbound_queue_itl(struct hptiop_hba *hba)
 {
 	u32 req;
 
-	while ((req = readl(&hba->u.itl.iop->outbound_queue)) !=
+	while ((req = pete_readl("drivers/scsi/hptiop.c:90", &hba->u.itl.iop->outbound_queue)) !=
 						IOPMU_QUEUE_EMPTY) {
 
 		if (req & IOPMU_QUEUE_MASK_HOST_BITS)
@@ -98,11 +98,11 @@ static void hptiop_drain_outbound_queue_itl(struct hptiop_hba *hba)
 			p = (struct hpt_iop_request_header __iomem *)
 				((char __iomem *)hba->u.itl.iop + req);
 
-			if (readl(&p->flags) & IOP_REQUEST_FLAG_SYNC_REQUEST) {
-				if (readl(&p->context))
+			if (pete_readl("drivers/scsi/hptiop.c:101", &p->flags) & IOP_REQUEST_FLAG_SYNC_REQUEST) {
+				if (pete_readl("drivers/scsi/hptiop.c:102", &p->context))
 					hptiop_request_callback_itl(hba, req);
 				else
-					writel(1, &p->context);
+					pete_writel("drivers/scsi/hptiop.c:105", 1, &p->context);
 			}
 			else
 				hptiop_request_callback_itl(hba, req);
@@ -117,16 +117,16 @@ static int iop_intr_itl(struct hptiop_hba *hba)
 	u32 status;
 	int ret = 0;
 
-	if (plx && readl(plx + 0x11C5C) & 0xf)
-		writel(1, plx + 0x11C60);
+	if (plx && pete_readl("drivers/scsi/hptiop.c:120", plx + 0x11C5C) & 0xf)
+		pete_writel("drivers/scsi/hptiop.c:121", 1, plx + 0x11C60);
 
-	status = readl(&iop->outbound_intstatus);
+	status = pete_readl("drivers/scsi/hptiop.c:123", &iop->outbound_intstatus);
 
 	if (status & IOPMU_OUTBOUND_INT_MSG0) {
-		u32 msg = readl(&iop->outbound_msgaddr0);
+		u32 msg = pete_readl("drivers/scsi/hptiop.c:126", &iop->outbound_msgaddr0);
 
 		dprintk("received outbound msg %x\n", msg);
-		writel(IOPMU_OUTBOUND_INT_MSG0, &iop->outbound_intstatus);
+		pete_writel("drivers/scsi/hptiop.c:129", IOPMU_OUTBOUND_INT_MSG0, &iop->outbound_intstatus);
 		hptiop_message_callback(hba, msg);
 		ret = 1;
 	}
@@ -141,8 +141,8 @@ static int iop_intr_itl(struct hptiop_hba *hba)
 
 static u64 mv_outbound_read(struct hpt_iopmu_mv __iomem *mu)
 {
-	u32 outbound_tail = readl(&mu->outbound_tail);
-	u32 outbound_head = readl(&mu->outbound_head);
+	u32 outbound_tail = pete_readl("drivers/scsi/hptiop.c:144", &mu->outbound_tail);
+	u32 outbound_head = pete_readl("drivers/scsi/hptiop.c:145", &mu->outbound_head);
 
 	if (outbound_tail != outbound_head) {
 		u64 p;
@@ -152,7 +152,7 @@ static u64 mv_outbound_read(struct hpt_iopmu_mv __iomem *mu)
 
 		if (outbound_tail == MVIOP_QUEUE_LEN)
 			outbound_tail = 0;
-		writel(outbound_tail, &mu->outbound_tail);
+		pete_writel("drivers/scsi/hptiop.c:155", outbound_tail, &mu->outbound_tail);
 		return p;
 	} else
 		return 0;
@@ -160,15 +160,15 @@ static u64 mv_outbound_read(struct hpt_iopmu_mv __iomem *mu)
 
 static void mv_inbound_write(u64 p, struct hptiop_hba *hba)
 {
-	u32 inbound_head = readl(&hba->u.mv.mu->inbound_head);
+	u32 inbound_head = pete_readl("drivers/scsi/hptiop.c:163", &hba->u.mv.mu->inbound_head);
 	u32 head = inbound_head + 1;
 
 	if (head == MVIOP_QUEUE_LEN)
 		head = 0;
 
 	memcpy_toio(&hba->u.mv.mu->inbound_q[inbound_head], &p, 8);
-	writel(head, &hba->u.mv.mu->inbound_head);
-	writel(MVIOP_MU_INBOUND_INT_POSTQUEUE,
+	pete_writel("drivers/scsi/hptiop.c:170", head, &hba->u.mv.mu->inbound_head);
+	pete_writel("drivers/scsi/hptiop.c:171", MVIOP_MU_INBOUND_INT_POSTQUEUE,
 			&hba->u.mv.regs->inbound_doorbell);
 }
 
@@ -205,12 +205,12 @@ static int iop_intr_mv(struct hptiop_hba *hba)
 	u32 status;
 	int ret = 0;
 
-	status = readl(&hba->u.mv.regs->outbound_doorbell);
-	writel(~status, &hba->u.mv.regs->outbound_doorbell);
+	status = pete_readl("drivers/scsi/hptiop.c:208", &hba->u.mv.regs->outbound_doorbell);
+	pete_writel("drivers/scsi/hptiop.c:209", ~status, &hba->u.mv.regs->outbound_doorbell);
 
 	if (status & MVIOP_MU_OUTBOUND_INT_MSG) {
 		u32 msg;
-		msg = readl(&hba->u.mv.mu->outbound_msg);
+		msg = pete_readl("drivers/scsi/hptiop.c:213", &hba->u.mv.mu->outbound_msg);
 		dprintk("received outbound msg %x\n", msg);
 		hptiop_message_callback(hba, msg);
 		ret = 1;
@@ -256,22 +256,22 @@ static int iop_intr_mvfrey(struct hptiop_hba *hba)
 	int ret = 0;
 
 	if (hba->initialized)
-		writel(0, &(hba->u.mvfrey.mu->pcie_f0_int_enable));
+		pete_writel("drivers/scsi/hptiop.c:259", 0, &(hba->u.mvfrey.mu->pcie_f0_int_enable));
 
-	status = readl(&(hba->u.mvfrey.mu->f0_doorbell));
+	status = pete_readl("drivers/scsi/hptiop.c:261", &(hba->u.mvfrey.mu->f0_doorbell));
 	if (status) {
-		writel(status, &(hba->u.mvfrey.mu->f0_doorbell));
+		pete_writel("drivers/scsi/hptiop.c:263", status, &(hba->u.mvfrey.mu->f0_doorbell));
 		if (status & CPU_TO_F0_DRBL_MSG_BIT) {
-			u32 msg = readl(&(hba->u.mvfrey.mu->cpu_to_f0_msg_a));
+			u32 msg = pete_readl("drivers/scsi/hptiop.c:265", &(hba->u.mvfrey.mu->cpu_to_f0_msg_a));
 			dprintk("received outbound msg %x\n", msg);
 			hptiop_message_callback(hba, msg);
 		}
 		ret = 1;
 	}
 
-	status = readl(&(hba->u.mvfrey.mu->isr_cause));
+	status = pete_readl("drivers/scsi/hptiop.c:272", &(hba->u.mvfrey.mu->isr_cause));
 	if (status) {
-		writel(status, &(hba->u.mvfrey.mu->isr_cause));
+		pete_writel("drivers/scsi/hptiop.c:274", status, &(hba->u.mvfrey.mu->isr_cause));
 		do {
 			cptr = *hba->u.mvfrey.outlist_cptr & 0xff;
 			cur_rptr = hba->u.mvfrey.outlist_rptr;
@@ -290,7 +290,7 @@ static int iop_intr_mvfrey(struct hptiop_hba *hba)
 	}
 
 	if (hba->initialized)
-		writel(0x1010, &(hba->u.mvfrey.mu->pcie_f0_int_enable));
+		pete_writel("drivers/scsi/hptiop.c:293", 0x1010, &(hba->u.mvfrey.mu->pcie_f0_int_enable));
 
 	return ret;
 }
@@ -301,15 +301,15 @@ static int iop_send_sync_request_itl(struct hptiop_hba *hba,
 	struct hpt_iop_request_header __iomem *req = _req;
 	u32 i;
 
-	writel(readl(&req->flags) | IOP_REQUEST_FLAG_SYNC_REQUEST, &req->flags);
-	writel(0, &req->context);
-	writel((unsigned long)req - (unsigned long)hba->u.itl.iop,
+	pete_writel("drivers/scsi/hptiop.c:304", pete_readl("drivers/scsi/hptiop.c:304", &req->flags) | IOP_REQUEST_FLAG_SYNC_REQUEST, &req->flags);
+	pete_writel("drivers/scsi/hptiop.c:305", 0, &req->context);
+	pete_writel("drivers/scsi/hptiop.c:306", (unsigned long)req - (unsigned long)hba->u.itl.iop,
 			&hba->u.itl.iop->inbound_queue);
-	readl(&hba->u.itl.iop->outbound_intstatus);
+	pete_readl("drivers/scsi/hptiop.c:308", &hba->u.itl.iop->outbound_intstatus);
 
 	for (i = 0; i < millisec; i++) {
 		iop_intr_itl(hba);
-		if (readl(&req->context))
+		if (pete_readl("drivers/scsi/hptiop.c:312", &req->context))
 			return 0;
 		msleep(1);
 	}
@@ -359,21 +359,21 @@ static int iop_send_sync_request_mvfrey(struct hptiop_hba *hba,
 
 static void hptiop_post_msg_itl(struct hptiop_hba *hba, u32 msg)
 {
-	writel(msg, &hba->u.itl.iop->inbound_msgaddr0);
-	readl(&hba->u.itl.iop->outbound_intstatus);
+	pete_writel("drivers/scsi/hptiop.c:362", msg, &hba->u.itl.iop->inbound_msgaddr0);
+	pete_readl("drivers/scsi/hptiop.c:363", &hba->u.itl.iop->outbound_intstatus);
 }
 
 static void hptiop_post_msg_mv(struct hptiop_hba *hba, u32 msg)
 {
-	writel(msg, &hba->u.mv.mu->inbound_msg);
-	writel(MVIOP_MU_INBOUND_INT_MSG, &hba->u.mv.regs->inbound_doorbell);
-	readl(&hba->u.mv.regs->inbound_doorbell);
+	pete_writel("drivers/scsi/hptiop.c:368", msg, &hba->u.mv.mu->inbound_msg);
+	pete_writel("drivers/scsi/hptiop.c:369", MVIOP_MU_INBOUND_INT_MSG, &hba->u.mv.regs->inbound_doorbell);
+	pete_readl("drivers/scsi/hptiop.c:370", &hba->u.mv.regs->inbound_doorbell);
 }
 
 static void hptiop_post_msg_mvfrey(struct hptiop_hba *hba, u32 msg)
 {
-	writel(msg, &(hba->u.mvfrey.mu->f0_to_cpu_msg_a));
-	readl(&(hba->u.mvfrey.mu->f0_to_cpu_msg_a));
+	pete_writel("drivers/scsi/hptiop.c:375", msg, &(hba->u.mvfrey.mu->f0_to_cpu_msg_a));
+	pete_readl("drivers/scsi/hptiop.c:376", &(hba->u.mvfrey.mu->f0_to_cpu_msg_a));
 }
 
 static int iop_send_sync_msg(struct hptiop_hba *hba, u32 msg, u32 millisec)
@@ -403,17 +403,17 @@ static int iop_get_config_itl(struct hptiop_hba *hba,
 	u32 req32;
 	struct hpt_iop_request_get_config __iomem *req;
 
-	req32 = readl(&hba->u.itl.iop->inbound_queue);
+	req32 = pete_readl("drivers/scsi/hptiop.c:406", &hba->u.itl.iop->inbound_queue);
 	if (req32 == IOPMU_QUEUE_EMPTY)
 		return -1;
 
 	req = (struct hpt_iop_request_get_config __iomem *)
 			((unsigned long)hba->u.itl.iop + req32);
 
-	writel(0, &req->header.flags);
-	writel(IOP_REQUEST_TYPE_GET_CONFIG, &req->header.type);
-	writel(sizeof(struct hpt_iop_request_get_config), &req->header.size);
-	writel(IOP_RESULT_PENDING, &req->header.result);
+	pete_writel("drivers/scsi/hptiop.c:413", 0, &req->header.flags);
+	pete_writel("drivers/scsi/hptiop.c:414", IOP_REQUEST_TYPE_GET_CONFIG, &req->header.type);
+	pete_writel("drivers/scsi/hptiop.c:415", sizeof(struct hpt_iop_request_get_config), &req->header.size);
+	pete_writel("drivers/scsi/hptiop.c:416", IOP_RESULT_PENDING, &req->header.result);
 
 	if (iop_send_sync_request_itl(hba, req, 20000)) {
 		dprintk("Get config send cmd failed\n");
@@ -421,7 +421,7 @@ static int iop_get_config_itl(struct hptiop_hba *hba,
 	}
 
 	memcpy_fromio(config, req, sizeof(*config));
-	writel(req32, &hba->u.itl.iop->outbound_queue);
+	pete_writel("drivers/scsi/hptiop.c:424", req32, &hba->u.itl.iop->outbound_queue);
 	return 0;
 }
 
@@ -475,7 +475,7 @@ static int iop_set_config_itl(struct hptiop_hba *hba,
 	u32 req32;
 	struct hpt_iop_request_set_config __iomem *req;
 
-	req32 = readl(&hba->u.itl.iop->inbound_queue);
+	req32 = pete_readl("drivers/scsi/hptiop.c:478", &hba->u.itl.iop->inbound_queue);
 	if (req32 == IOPMU_QUEUE_EMPTY)
 		return -1;
 
@@ -487,17 +487,17 @@ static int iop_set_config_itl(struct hptiop_hba *hba,
 		sizeof(struct hpt_iop_request_set_config) -
 			sizeof(struct hpt_iop_request_header));
 
-	writel(0, &req->header.flags);
-	writel(IOP_REQUEST_TYPE_SET_CONFIG, &req->header.type);
-	writel(sizeof(struct hpt_iop_request_set_config), &req->header.size);
-	writel(IOP_RESULT_PENDING, &req->header.result);
+	pete_writel("drivers/scsi/hptiop.c:490", 0, &req->header.flags);
+	pete_writel("drivers/scsi/hptiop.c:491", IOP_REQUEST_TYPE_SET_CONFIG, &req->header.type);
+	pete_writel("drivers/scsi/hptiop.c:492", sizeof(struct hpt_iop_request_set_config), &req->header.size);
+	pete_writel("drivers/scsi/hptiop.c:493", IOP_RESULT_PENDING, &req->header.result);
 
 	if (iop_send_sync_request_itl(hba, req, 20000)) {
 		dprintk("Set config send cmd failed\n");
 		return -1;
 	}
 
-	writel(req32, &hba->u.itl.iop->outbound_queue);
+	pete_writel("drivers/scsi/hptiop.c:500", req32, &hba->u.itl.iop->outbound_queue);
 	return 0;
 }
 
@@ -548,21 +548,21 @@ static int iop_set_config_mvfrey(struct hptiop_hba *hba,
 
 static void hptiop_enable_intr_itl(struct hptiop_hba *hba)
 {
-	writel(~(IOPMU_OUTBOUND_INT_POSTQUEUE | IOPMU_OUTBOUND_INT_MSG0),
+	pete_writel("drivers/scsi/hptiop.c:551", ~(IOPMU_OUTBOUND_INT_POSTQUEUE | IOPMU_OUTBOUND_INT_MSG0),
 		&hba->u.itl.iop->outbound_intmask);
 }
 
 static void hptiop_enable_intr_mv(struct hptiop_hba *hba)
 {
-	writel(MVIOP_MU_OUTBOUND_INT_POSTQUEUE | MVIOP_MU_OUTBOUND_INT_MSG,
+	pete_writel("drivers/scsi/hptiop.c:557", MVIOP_MU_OUTBOUND_INT_POSTQUEUE | MVIOP_MU_OUTBOUND_INT_MSG,
 		&hba->u.mv.regs->outbound_intmask);
 }
 
 static void hptiop_enable_intr_mvfrey(struct hptiop_hba *hba)
 {
-	writel(CPU_TO_F0_DRBL_MSG_BIT, &(hba->u.mvfrey.mu->f0_doorbell_enable));
-	writel(0x1, &(hba->u.mvfrey.mu->isr_enable));
-	writel(0x1010, &(hba->u.mvfrey.mu->pcie_f0_int_enable));
+	pete_writel("drivers/scsi/hptiop.c:563", CPU_TO_F0_DRBL_MSG_BIT, &(hba->u.mvfrey.mu->f0_doorbell_enable));
+	pete_writel("drivers/scsi/hptiop.c:564", 0x1, &(hba->u.mvfrey.mu->isr_enable));
+	pete_writel("drivers/scsi/hptiop.c:565", 0x1010, &(hba->u.mvfrey.mu->pcie_f0_int_enable));
 }
 
 static int hptiop_initialize_iop(struct hptiop_hba *hba)
@@ -801,23 +801,23 @@ static void hptiop_iop_request_callback_itl(struct hptiop_hba *hba, u32 tag)
 			((unsigned long)hba->u.itl.iop + tag);
 	dprintk("hptiop_iop_request_callback_itl: req=%p, type=%d, "
 			"result=%d, context=0x%x tag=%d\n",
-			req, readl(&req->type), readl(&req->result),
-			readl(&req->context), tag);
+			req, pete_readl("drivers/scsi/hptiop.c:804", &req->type), pete_readl("drivers/scsi/hptiop.c:804", &req->result),
+			pete_readl("drivers/scsi/hptiop.c:805", &req->context), tag);
 
-	BUG_ON(!readl(&req->result));
-	BUG_ON(readl(&req->type) != IOP_REQUEST_TYPE_IOCTL_COMMAND);
+	BUG_ON(!pete_readl("drivers/scsi/hptiop.c:807", &req->result));
+	BUG_ON(pete_readl("drivers/scsi/hptiop.c:808", &req->type) != IOP_REQUEST_TYPE_IOCTL_COMMAND);
 
 	p = (struct hpt_iop_request_ioctl_command __iomem *)req;
 	arg = (struct hpt_ioctl_k *)(unsigned long)
-		(readl(&req->context) |
-			((u64)readl(&req->context_hi32)<<32));
+		(pete_readl("drivers/scsi/hptiop.c:812", &req->context) |
+			((u64)pete_readl("drivers/scsi/hptiop.c:813", &req->context_hi32)<<32));
 
-	if (readl(&req->result) == IOP_RESULT_SUCCESS) {
+	if (pete_readl("drivers/scsi/hptiop.c:815", &req->result) == IOP_RESULT_SUCCESS) {
 		arg->result = HPT_IOCTL_RESULT_OK;
 
 		if (arg->outbuf_size)
 			memcpy_fromio(arg->outbuf,
-				&p->buf[(readl(&p->inbuf_size) + 3)& ~3],
+				&p->buf[(pete_readl("drivers/scsi/hptiop.c:820", &p->inbuf_size) + 3)& ~3],
 				arg->outbuf_size);
 
 		if (arg->bytes_returned)
@@ -827,7 +827,7 @@ static void hptiop_iop_request_callback_itl(struct hptiop_hba *hba, u32 tag)
 		arg->result = HPT_IOCTL_RESULT_FAILED;
 
 	arg->done(arg);
-	writel(tag, &hba->u.itl.iop->outbound_queue);
+	pete_writel("drivers/scsi/hptiop.c:830", tag, &hba->u.itl.iop->outbound_queue);
 }
 
 static irqreturn_t hptiop_intr(int irq, void *dev_id)
@@ -890,10 +890,10 @@ static void hptiop_post_req_itl(struct hptiop_hba *hba,
 		else
 			size_bits = IOPMU_QUEUE_REQUEST_SIZE_BIT |
 						IOPMU_QUEUE_ADDR_HOST_BIT;
-		writel(_req->req_shifted_phy | size_bits,
+		pete_writel("drivers/scsi/hptiop.c:893", _req->req_shifted_phy | size_bits,
 			&hba->u.itl.iop->inbound_queue);
 	} else
-		writel(_req->req_shifted_phy | IOPMU_QUEUE_ADDR_HOST_BIT,
+		pete_writel("drivers/scsi/hptiop.c:896", _req->req_shifted_phy | IOPMU_QUEUE_ADDR_HOST_BIT,
 					&hba->u.itl.iop->inbound_queue);
 }
 
@@ -947,9 +947,9 @@ static void hptiop_post_req_mvfrey(struct hptiop_hba *hba,
 	hba->u.mvfrey.inlist[index].addr =
 			(dma_addr_t)_req->req_shifted_phy << 5;
 	hba->u.mvfrey.inlist[index].intrfc_len = (reqhdr->size + 3) / 4;
-	writel(hba->u.mvfrey.inlist_wptr,
+	pete_writel("drivers/scsi/hptiop.c:950", hba->u.mvfrey.inlist_wptr,
 		&(hba->u.mvfrey.mu->inbound_write_ptr));
-	readl(&(hba->u.mvfrey.mu->inbound_write_ptr));
+	pete_readl("drivers/scsi/hptiop.c:952", &(hba->u.mvfrey.mu->inbound_write_ptr));
 }
 
 static int hptiop_reset_comm_itl(struct hptiop_hba *hba)
@@ -972,19 +972,19 @@ static int hptiop_reset_comm_mvfrey(struct hptiop_hba *hba)
 	/* wait 100ms for MCU ready */
 	msleep(100);
 
-	writel(cpu_to_le32(hba->u.mvfrey.inlist_phy & 0xffffffff),
+	pete_writel("drivers/scsi/hptiop.c:975", cpu_to_le32(hba->u.mvfrey.inlist_phy & 0xffffffff),
 			&(hba->u.mvfrey.mu->inbound_base));
-	writel(cpu_to_le32((hba->u.mvfrey.inlist_phy >> 16) >> 16),
+	pete_writel("drivers/scsi/hptiop.c:977", cpu_to_le32((hba->u.mvfrey.inlist_phy >> 16) >> 16),
 			&(hba->u.mvfrey.mu->inbound_base_high));
 
-	writel(cpu_to_le32(hba->u.mvfrey.outlist_phy & 0xffffffff),
+	pete_writel("drivers/scsi/hptiop.c:980", cpu_to_le32(hba->u.mvfrey.outlist_phy & 0xffffffff),
 			&(hba->u.mvfrey.mu->outbound_base));
-	writel(cpu_to_le32((hba->u.mvfrey.outlist_phy >> 16) >> 16),
+	pete_writel("drivers/scsi/hptiop.c:982", cpu_to_le32((hba->u.mvfrey.outlist_phy >> 16) >> 16),
 			&(hba->u.mvfrey.mu->outbound_base_high));
 
-	writel(cpu_to_le32(hba->u.mvfrey.outlist_cptr_phy & 0xffffffff),
+	pete_writel("drivers/scsi/hptiop.c:985", cpu_to_le32(hba->u.mvfrey.outlist_cptr_phy & 0xffffffff),
 			&(hba->u.mvfrey.mu->outbound_shadow_base));
-	writel(cpu_to_le32((hba->u.mvfrey.outlist_cptr_phy >> 16) >> 16),
+	pete_writel("drivers/scsi/hptiop.c:987", cpu_to_le32((hba->u.mvfrey.outlist_cptr_phy >> 16) >> 16),
 			&(hba->u.mvfrey.mu->outbound_shadow_base_high));
 
 	hba->u.mvfrey.inlist_wptr = (list_count - 1) | CL_POINTER_TOGGLE;
@@ -1195,7 +1195,7 @@ static int hptiop_internal_memalloc_mv(struct hptiop_hba *hba)
 
 static int hptiop_internal_memalloc_mvfrey(struct hptiop_hba *hba)
 {
-	u32 list_count = readl(&hba->u.mvfrey.mu->inbound_conf_ctl);
+	u32 list_count = pete_readl("drivers/scsi/hptiop.c:1198", &hba->u.mvfrey.mu->inbound_conf_ctl);
 	char *p;
 	dma_addr_t phy;
 
@@ -1523,27 +1523,27 @@ static void hptiop_disable_intr_itl(struct hptiop_hba *hba)
 {
 	u32 int_mask;
 
-	int_mask = readl(&hba->u.itl.iop->outbound_intmask);
-	writel(int_mask |
+	int_mask = pete_readl("drivers/scsi/hptiop.c:1526", &hba->u.itl.iop->outbound_intmask);
+	pete_writel("drivers/scsi/hptiop.c:1527", int_mask |
 		IOPMU_OUTBOUND_INT_MSG0 | IOPMU_OUTBOUND_INT_POSTQUEUE,
 		&hba->u.itl.iop->outbound_intmask);
-	readl(&hba->u.itl.iop->outbound_intmask);
+	pete_readl("drivers/scsi/hptiop.c:1530", &hba->u.itl.iop->outbound_intmask);
 }
 
 static void hptiop_disable_intr_mv(struct hptiop_hba *hba)
 {
-	writel(0, &hba->u.mv.regs->outbound_intmask);
-	readl(&hba->u.mv.regs->outbound_intmask);
+	pete_writel("drivers/scsi/hptiop.c:1535", 0, &hba->u.mv.regs->outbound_intmask);
+	pete_readl("drivers/scsi/hptiop.c:1536", &hba->u.mv.regs->outbound_intmask);
 }
 
 static void hptiop_disable_intr_mvfrey(struct hptiop_hba *hba)
 {
-	writel(0, &(hba->u.mvfrey.mu->f0_doorbell_enable));
-	readl(&(hba->u.mvfrey.mu->f0_doorbell_enable));
-	writel(0, &(hba->u.mvfrey.mu->isr_enable));
-	readl(&(hba->u.mvfrey.mu->isr_enable));
-	writel(0, &(hba->u.mvfrey.mu->pcie_f0_int_enable));
-	readl(&(hba->u.mvfrey.mu->pcie_f0_int_enable));
+	pete_writel("drivers/scsi/hptiop.c:1541", 0, &(hba->u.mvfrey.mu->f0_doorbell_enable));
+	pete_readl("drivers/scsi/hptiop.c:1542", &(hba->u.mvfrey.mu->f0_doorbell_enable));
+	pete_writel("drivers/scsi/hptiop.c:1543", 0, &(hba->u.mvfrey.mu->isr_enable));
+	pete_readl("drivers/scsi/hptiop.c:1544", &(hba->u.mvfrey.mu->isr_enable));
+	pete_writel("drivers/scsi/hptiop.c:1545", 0, &(hba->u.mvfrey.mu->pcie_f0_int_enable));
+	pete_readl("drivers/scsi/hptiop.c:1546", &(hba->u.mvfrey.mu->pcie_f0_int_enable));
 }
 
 static void hptiop_remove(struct pci_dev *pcidev)

@@ -115,11 +115,11 @@ static irqreturn_t aspeed_gfx_irq_handler(int irq, void *data)
 	struct aspeed_gfx *priv = to_aspeed_gfx(drm);
 	u32 reg;
 
-	reg = readl(priv->base + CRT_CTRL1);
+	reg = pete_readl("drivers/gpu/drm/aspeed/aspeed_gfx_drv.c:118", priv->base + CRT_CTRL1);
 
 	if (reg & CRT_CTRL_VERTICAL_INTR_STS) {
 		drm_crtc_handle_vblank(&priv->pipe.crtc);
-		writel(reg, priv->base + CRT_CTRL1);
+		pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_drv.c:122", reg, priv->base + CRT_CTRL1);
 		return IRQ_HANDLED;
 	}
 
@@ -190,8 +190,8 @@ static int aspeed_gfx_load(struct drm_device *drm)
 	clk_prepare_enable(priv->clk);
 
 	/* Sanitize control registers */
-	writel(0, priv->base + CRT_CTRL1);
-	writel(0, priv->base + CRT_CTRL2);
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_drv.c:193", 0, priv->base + CRT_CTRL1);
+	pete_writel("drivers/gpu/drm/aspeed/aspeed_gfx_drv.c:194", 0, priv->base + CRT_CTRL2);
 
 	ret = aspeed_gfx_setup_mode_config(drm);
 	if (ret < 0)

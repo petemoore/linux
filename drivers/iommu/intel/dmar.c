@@ -1109,7 +1109,7 @@ static int alloc_iommu(struct dmar_drhd_unit *drhd)
 
 	iommu->node = NUMA_NO_NODE;
 
-	ver = readl(iommu->reg + DMAR_VER_REG);
+	ver = pete_readl("drivers/iommu/intel/dmar.c:1112", iommu->reg + DMAR_VER_REG);
 	pr_info("%s: reg_base_addr %llx ver %d:%d cap %llx ecap %llx\n",
 		iommu->name,
 		(unsigned long long)drhd->reg_base_addr,
@@ -1118,7 +1118,7 @@ static int alloc_iommu(struct dmar_drhd_unit *drhd)
 		(unsigned long long)iommu->ecap);
 
 	/* Reflect status in gcmd */
-	sts = readl(iommu->reg + DMAR_GSTS_REG);
+	sts = pete_readl("drivers/iommu/intel/dmar.c:1121", iommu->reg + DMAR_GSTS_REG);
 	if (sts & DMA_GSTS_IRES)
 		iommu->gcmd |= DMA_GCMD_IRE;
 	if (sts & DMA_GSTS_TES)
@@ -1272,7 +1272,7 @@ static int qi_check_fault(struct intel_iommu *iommu, int index, int wait_index)
 	if (qi->desc_status[wait_index] == QI_ABORT)
 		return -EAGAIN;
 
-	fault = readl(iommu->reg + DMAR_FSTS_REG);
+	fault = pete_readl("drivers/iommu/intel/dmar.c:1275", iommu->reg + DMAR_FSTS_REG);
 	if (fault & (DMA_FSTS_IQE | DMA_FSTS_ITE | DMA_FSTS_ICE))
 		qi_dump_fault(iommu, fault);
 
@@ -1282,7 +1282,7 @@ static int qi_check_fault(struct intel_iommu *iommu, int index, int wait_index)
 	 * is cleared.
 	 */
 	if (fault & DMA_FSTS_IQE) {
-		head = readl(iommu->reg + DMAR_IQH_REG);
+		head = pete_readl("drivers/iommu/intel/dmar.c:1285", iommu->reg + DMAR_IQH_REG);
 		if ((head >> shift) == index) {
 			struct qi_desc *desc = qi->desc + head;
 
@@ -1293,7 +1293,7 @@ static int qi_check_fault(struct intel_iommu *iommu, int index, int wait_index)
 			 */
 			memcpy(desc, qi->desc + (wait_index << shift),
 			       1 << shift);
-			writel(DMA_FSTS_IQE, iommu->reg + DMAR_FSTS_REG);
+			pete_writel("drivers/iommu/intel/dmar.c:1296", DMA_FSTS_IQE, iommu->reg + DMAR_FSTS_REG);
 			pr_info("Invalidation Queue Error (IQE) cleared\n");
 			return -EINVAL;
 		}
@@ -1304,13 +1304,13 @@ static int qi_check_fault(struct intel_iommu *iommu, int index, int wait_index)
 	 * No new descriptors are fetched until the ITE is cleared.
 	 */
 	if (fault & DMA_FSTS_ITE) {
-		head = readl(iommu->reg + DMAR_IQH_REG);
+		head = pete_readl("drivers/iommu/intel/dmar.c:1307", iommu->reg + DMAR_IQH_REG);
 		head = ((head >> shift) - 1 + QI_LENGTH) % QI_LENGTH;
 		head |= 1;
-		tail = readl(iommu->reg + DMAR_IQT_REG);
+		tail = pete_readl("drivers/iommu/intel/dmar.c:1310", iommu->reg + DMAR_IQT_REG);
 		tail = ((tail >> shift) - 1 + QI_LENGTH) % QI_LENGTH;
 
-		writel(DMA_FSTS_ITE, iommu->reg + DMAR_FSTS_REG);
+		pete_writel("drivers/iommu/intel/dmar.c:1313", DMA_FSTS_ITE, iommu->reg + DMAR_FSTS_REG);
 		pr_info("Invalidation Time-out Error (ITE) cleared\n");
 
 		do {
@@ -1324,7 +1324,7 @@ static int qi_check_fault(struct intel_iommu *iommu, int index, int wait_index)
 	}
 
 	if (fault & DMA_FSTS_ICE) {
-		writel(DMA_FSTS_ICE, iommu->reg + DMAR_FSTS_REG);
+		pete_writel("drivers/iommu/intel/dmar.c:1327", DMA_FSTS_ICE, iommu->reg + DMAR_FSTS_REG);
 		pr_info("Invalidation Completion Error (ICE) cleared\n");
 	}
 
@@ -1415,7 +1415,7 @@ restart:
 	 * update the HW tail register indicating the presence of
 	 * new descriptors.
 	 */
-	writel(qi->free_head << shift, iommu->reg + DMAR_IQT_REG);
+	pete_writel("drivers/iommu/intel/dmar.c:1418", qi->free_head << shift, iommu->reg + DMAR_IQT_REG);
 
 	while (qi->desc_status[wait_index] != QI_DONE) {
 		/*
@@ -1643,20 +1643,20 @@ void dmar_disable_qi(struct intel_iommu *iommu)
 
 	raw_spin_lock_irqsave(&iommu->register_lock, flags);
 
-	sts =  readl(iommu->reg + DMAR_GSTS_REG);
+	sts =  pete_readl("drivers/iommu/intel/dmar.c:1646", iommu->reg + DMAR_GSTS_REG);
 	if (!(sts & DMA_GSTS_QIES))
 		goto end;
 
 	/*
 	 * Give a chance to HW to complete the pending invalidation requests.
 	 */
-	while ((readl(iommu->reg + DMAR_IQT_REG) !=
-		readl(iommu->reg + DMAR_IQH_REG)) &&
+	while ((pete_readl("drivers/iommu/intel/dmar.c:1653", iommu->reg + DMAR_IQT_REG) !=
+		pete_readl("drivers/iommu/intel/dmar.c:1654", iommu->reg + DMAR_IQH_REG)) &&
 		(DMAR_OPERATION_TIMEOUT > (get_cycles() - start_time)))
 		cpu_relax();
 
 	iommu->gcmd &= ~DMA_GCMD_QIE;
-	writel(iommu->gcmd, iommu->reg + DMAR_GCMD_REG);
+	pete_writel("drivers/iommu/intel/dmar.c:1659", iommu->gcmd, iommu->reg + DMAR_GCMD_REG);
 
 	IOMMU_WAIT_OP(iommu, DMAR_GSTS_REG, readl,
 		      !(sts & DMA_GSTS_QIES), sts);
@@ -1687,12 +1687,12 @@ static void __dmar_enable_qi(struct intel_iommu *iommu)
 	raw_spin_lock_irqsave(&iommu->register_lock, flags);
 
 	/* write zero to the tail reg */
-	writel(0, iommu->reg + DMAR_IQT_REG);
+	pete_writel("drivers/iommu/intel/dmar.c:1690", 0, iommu->reg + DMAR_IQT_REG);
 
 	dmar_writeq(iommu->reg + DMAR_IQA_REG, val);
 
 	iommu->gcmd |= DMA_GCMD_QIE;
-	writel(iommu->gcmd, iommu->reg + DMAR_GCMD_REG);
+	pete_writel("drivers/iommu/intel/dmar.c:1695", iommu->gcmd, iommu->reg + DMAR_GCMD_REG);
 
 	/* Make sure hardware complete it */
 	IOMMU_WAIT_OP(iommu, DMAR_GSTS_REG, readl, (sts & DMA_GSTS_QIES), sts);
@@ -1887,9 +1887,9 @@ void dmar_msi_unmask(struct irq_data *data)
 
 	/* unmask it */
 	raw_spin_lock_irqsave(&iommu->register_lock, flag);
-	writel(0, iommu->reg + reg);
+	pete_writel("drivers/iommu/intel/dmar.c:1890", 0, iommu->reg + reg);
 	/* Read a reg to force flush the post write */
-	readl(iommu->reg + reg);
+	pete_readl("drivers/iommu/intel/dmar.c:1892", iommu->reg + reg);
 	raw_spin_unlock_irqrestore(&iommu->register_lock, flag);
 }
 
@@ -1901,9 +1901,9 @@ void dmar_msi_mask(struct irq_data *data)
 
 	/* mask it */
 	raw_spin_lock_irqsave(&iommu->register_lock, flag);
-	writel(DMA_FECTL_IM, iommu->reg + reg);
+	pete_writel("drivers/iommu/intel/dmar.c:1904", DMA_FECTL_IM, iommu->reg + reg);
 	/* Read a reg to force flush the post write */
-	readl(iommu->reg + reg);
+	pete_readl("drivers/iommu/intel/dmar.c:1906", iommu->reg + reg);
 	raw_spin_unlock_irqrestore(&iommu->register_lock, flag);
 }
 
@@ -1914,9 +1914,9 @@ void dmar_msi_write(int irq, struct msi_msg *msg)
 	unsigned long flag;
 
 	raw_spin_lock_irqsave(&iommu->register_lock, flag);
-	writel(msg->data, iommu->reg + reg + 4);
-	writel(msg->address_lo, iommu->reg + reg + 8);
-	writel(msg->address_hi, iommu->reg + reg + 12);
+	pete_writel("drivers/iommu/intel/dmar.c:1917", msg->data, iommu->reg + reg + 4);
+	pete_writel("drivers/iommu/intel/dmar.c:1918", msg->address_lo, iommu->reg + reg + 8);
+	pete_writel("drivers/iommu/intel/dmar.c:1919", msg->address_hi, iommu->reg + reg + 12);
 	raw_spin_unlock_irqrestore(&iommu->register_lock, flag);
 }
 
@@ -1927,9 +1927,9 @@ void dmar_msi_read(int irq, struct msi_msg *msg)
 	unsigned long flag;
 
 	raw_spin_lock_irqsave(&iommu->register_lock, flag);
-	msg->data = readl(iommu->reg + reg + 4);
-	msg->address_lo = readl(iommu->reg + reg + 8);
-	msg->address_hi = readl(iommu->reg + reg + 12);
+	msg->data = pete_readl("drivers/iommu/intel/dmar.c:1930", iommu->reg + reg + 4);
+	msg->address_lo = pete_readl("drivers/iommu/intel/dmar.c:1931", iommu->reg + reg + 8);
+	msg->address_hi = pete_readl("drivers/iommu/intel/dmar.c:1932", iommu->reg + reg + 12);
 	raw_spin_unlock_irqrestore(&iommu->register_lock, flag);
 }
 
@@ -1975,7 +1975,7 @@ irqreturn_t dmar_fault(int irq, void *dev_id)
 				      DEFAULT_RATELIMIT_BURST);
 
 	raw_spin_lock_irqsave(&iommu->register_lock, flag);
-	fault_status = readl(iommu->reg + DMAR_FSTS_REG);
+	fault_status = pete_readl("drivers/iommu/intel/dmar.c:1978", iommu->reg + DMAR_FSTS_REG);
 	if (fault_status && __ratelimit(&rs))
 		pr_err("DRHD: handling fault status reg %x\n", fault_status);
 
@@ -1997,7 +1997,7 @@ irqreturn_t dmar_fault(int irq, void *dev_id)
 		bool pasid_present;
 
 		/* highest 32 bits */
-		data = readl(iommu->reg + reg +
+		data = pete_readl("drivers/iommu/intel/dmar.c:2000", iommu->reg + reg +
 				fault_index * PRIMARY_FAULT_REG_LEN + 12);
 		if (!(data & DMA_FRCD_F))
 			break;
@@ -2007,7 +2007,7 @@ irqreturn_t dmar_fault(int irq, void *dev_id)
 			type = dma_frcd_type(data);
 
 			pasid = dma_frcd_pasid_value(data);
-			data = readl(iommu->reg + reg +
+			data = pete_readl("drivers/iommu/intel/dmar.c:2010", iommu->reg + reg +
 				     fault_index * PRIMARY_FAULT_REG_LEN + 8);
 			source_id = dma_frcd_source_id(data);
 
@@ -2018,7 +2018,7 @@ irqreturn_t dmar_fault(int irq, void *dev_id)
 		}
 
 		/* clear the fault */
-		writel(DMA_FRCD_F, iommu->reg + reg +
+		pete_writel("drivers/iommu/intel/dmar.c:2021", DMA_FRCD_F, iommu->reg + reg +
 			fault_index * PRIMARY_FAULT_REG_LEN + 12);
 
 		raw_spin_unlock_irqrestore(&iommu->register_lock, flag);
@@ -2035,7 +2035,7 @@ irqreturn_t dmar_fault(int irq, void *dev_id)
 		raw_spin_lock_irqsave(&iommu->register_lock, flag);
 	}
 
-	writel(DMA_FSTS_PFO | DMA_FSTS_PPF | DMA_FSTS_PRO,
+	pete_writel("drivers/iommu/intel/dmar.c:2038", DMA_FSTS_PFO | DMA_FSTS_PPF | DMA_FSTS_PRO,
 	       iommu->reg + DMAR_FSTS_REG);
 
 unlock_exit:
@@ -2089,8 +2089,8 @@ int __init enable_drhd_fault_handling(void)
 		 * Clear any previous faults.
 		 */
 		dmar_fault(iommu->irq, iommu);
-		fault_status = readl(iommu->reg + DMAR_FSTS_REG);
-		writel(fault_status, iommu->reg + DMAR_FSTS_REG);
+		fault_status = pete_readl("drivers/iommu/intel/dmar.c:2092", iommu->reg + DMAR_FSTS_REG);
+		pete_writel("drivers/iommu/intel/dmar.c:2093", fault_status, iommu->reg + DMAR_FSTS_REG);
 	}
 
 	return 0;

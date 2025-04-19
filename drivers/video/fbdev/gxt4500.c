@@ -138,8 +138,8 @@ static const unsigned char watfmt[] = {
 /* Colormap array; 1k entries of 4 bytes each */
 #define CMAP			0x6000
 
-#define readreg(par, reg)	readl((par)->regs + (reg))
-#define writereg(par, reg, val)	writel((val), (par)->regs + (reg))
+#define readreg(par, reg)	pete_readl("drivers/video/fbdev/gxt4500.c:141", (par)->regs + (reg))
+#define writereg(par, reg, val)	pete_writel("drivers/video/fbdev/gxt4500.c:142", (val), (par)->regs + (reg))
 
 struct gxt4500_par {
 	void __iomem *regs;

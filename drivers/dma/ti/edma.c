@@ -2178,10 +2178,10 @@ static int edma_xbar_event_map(struct device *dev, struct edma_soc_info *pdata,
 	for (i = 0; i < nelm; i++) {
 		shift = (xbar_chans[i][1] & 0x03) << 3;
 		offset = xbar_chans[i][1] & 0xfffffffc;
-		mux = readl(xbar + offset);
+		mux = pete_readl("drivers/dma/ti/edma.c:2181", xbar + offset);
 		mux &= ~(0xff << shift);
 		mux |= xbar_chans[i][0] << shift;
-		writel(mux, (xbar + offset));
+		pete_writel("drivers/dma/ti/edma.c:2184", mux, (xbar + offset));
 	}
 
 	pdata->xbar_chans = (const s16 (*)[2]) xbar_chans;

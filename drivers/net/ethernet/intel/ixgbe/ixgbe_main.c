@@ -301,7 +301,7 @@ static u32 ixgbe_check_remove(struct ixgbe_hw *hw, u32 reg)
 	 * has been removed.
 	 */
 	for (i = 0; i < IXGBE_FAILED_READ_RETRIES; i++) {
-		value = readl(reg_addr + IXGBE_STATUS);
+		value = pete_readl("drivers/net/ethernet/intel/ixgbe/ixgbe_main.c:304", reg_addr + IXGBE_STATUS);
 		if (value != IXGBE_FAILED_READ_REG)
 			break;
 		mdelay(3);
@@ -310,7 +310,7 @@ static u32 ixgbe_check_remove(struct ixgbe_hw *hw, u32 reg)
 	if (value == IXGBE_FAILED_READ_REG)
 		ixgbe_remove_adapter(hw);
 	else
-		value = readl(reg_addr + reg);
+		value = pete_readl("drivers/net/ethernet/intel/ixgbe/ixgbe_main.c:313", reg_addr + reg);
 	return value;
 }
 
@@ -340,7 +340,7 @@ u32 ixgbe_read_reg(struct ixgbe_hw *hw, u32 reg)
 		int i;
 
 		for (i = 0; i < 200; ++i) {
-			value = readl(reg_addr + IXGBE_MAC_SGMII_BUSY);
+			value = pete_readl("drivers/net/ethernet/intel/ixgbe/ixgbe_main.c:343", reg_addr + IXGBE_MAC_SGMII_BUSY);
 			if (likely(!value))
 				goto writes_completed;
 			if (value == IXGBE_FAILED_READ_REG) {
@@ -355,7 +355,7 @@ u32 ixgbe_read_reg(struct ixgbe_hw *hw, u32 reg)
 	}
 
 writes_completed:
-	value = readl(reg_addr + reg);
+	value = pete_readl("drivers/net/ethernet/intel/ixgbe/ixgbe_main.c:358", reg_addr + reg);
 	if (unlikely(value == IXGBE_FAILED_READ_REG))
 		value = ixgbe_check_remove(hw, reg);
 	return value;
@@ -1635,7 +1635,7 @@ void ixgbe_alloc_rx_buffers(struct ixgbe_ring *rx_ring, u16 cleaned_count)
 		 * such as IA-64).
 		 */
 		wmb();
-		writel(i, rx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/ixgbe/ixgbe_main.c:1638", i, rx_ring->tail);
 	}
 }
 
@@ -2428,7 +2428,7 @@ static int ixgbe_clean_rx_irq(struct ixgbe_q_vector *q_vector,
 		 * know there are new descriptors to fetch.
 		 */
 		wmb();
-		writel(ring->next_to_use, ring->tail);
+		pete_writel("drivers/net/ethernet/intel/ixgbe/ixgbe_main.c:2431", ring->next_to_use, ring->tail);
 	}
 
 	u64_stats_update_begin(&rx_ring->syncp);
@@ -8318,7 +8318,7 @@ static int ixgbe_tx_map(struct ixgbe_ring *tx_ring,
 	ixgbe_maybe_stop_tx(tx_ring, DESC_NEEDED);
 
 	if (netif_xmit_stopped(txring_txq(tx_ring)) || !netdev_xmit_more()) {
-		writel(i, tx_ring->tail);
+		pete_writel("drivers/net/ethernet/intel/ixgbe/ixgbe_main.c:8321", i, tx_ring->tail);
 	}
 
 	return 0;
@@ -10203,7 +10203,7 @@ void ixgbe_xdp_ring_update_tail(struct ixgbe_ring *ring)
 	 * are new descriptors to fetch.
 	 */
 	wmb();
-	writel(ring->next_to_use, ring->tail);
+	pete_writel("drivers/net/ethernet/intel/ixgbe/ixgbe_main.c:10206", ring->next_to_use, ring->tail);
 }
 
 static int ixgbe_xdp_xmit(struct net_device *dev, int n,

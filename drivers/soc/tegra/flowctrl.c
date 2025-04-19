@@ -41,7 +41,7 @@ static void flowctrl_update(u8 offset, u32 value)
 		      "Tegra flowctrl not initialised!\n"))
 		return;
 
-	writel(value, tegra_flowctrl_base + offset);
+	pete_writel("drivers/soc/tegra/flowctrl.c:44", value, tegra_flowctrl_base + offset);
 
 	/* ensure the update has reached the flow controller */
 	wmb();
@@ -56,7 +56,7 @@ u32 flowctrl_read_cpu_csr(unsigned int cpuid)
 		      "Tegra flowctrl not initialised!\n"))
 		return 0;
 
-	return readl(tegra_flowctrl_base + offset);
+	return pete_readl("drivers/soc/tegra/flowctrl.c:59", tegra_flowctrl_base + offset);
 }
 
 void flowctrl_write_cpu_csr(unsigned int cpuid, u32 value)

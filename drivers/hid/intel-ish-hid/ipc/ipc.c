@@ -31,7 +31,7 @@ static inline uint32_t ish_reg_read(const struct ishtp_device *dev,
 {
 	struct ish_hw *hw = to_ish_hw(dev);
 
-	return readl(hw->mem_addr + offset);
+	return pete_readl("drivers/hid/intel-ish-hid/ipc/ipc.c:34", hw->mem_addr + offset);
 }
 
 /**
@@ -48,7 +48,7 @@ static inline void ish_reg_write(struct ishtp_device *dev,
 {
 	struct ish_hw *hw = to_ish_hw(dev);
 
-	writel(value, hw->mem_addr + offset);
+	pete_writel("drivers/hid/intel-ish-hid/ipc/ipc.c:51", value, hw->mem_addr + offset);
 }
 
 /**

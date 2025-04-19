@@ -245,7 +245,7 @@ static void davinci_fifo_data_trans(struct mmc_davinci_host *host,
 	 */
 	if (host->data_dir == DAVINCI_MMC_DATADIR_WRITE) {
 		for (i = 0; i < (n >> 2); i++) {
-			writel(*((u32 *)p), host->base + DAVINCI_MMCDXR);
+			pete_writel("drivers/mmc/host/davinci_mmc.c:248", *((u32 *)p), host->base + DAVINCI_MMCDXR);
 			p = p + 4;
 		}
 		if (n & 3) {
@@ -254,7 +254,7 @@ static void davinci_fifo_data_trans(struct mmc_davinci_host *host,
 		}
 	} else {
 		for (i = 0; i < (n >> 2); i++) {
-			*((u32 *)p) = readl(host->base + DAVINCI_MMCDRR);
+			*((u32 *)p) = pete_readl("drivers/mmc/host/davinci_mmc.c:257", host->base + DAVINCI_MMCDRR);
 			p  = p + 4;
 		}
 		if (n & 3) {
@@ -340,7 +340,7 @@ static void mmc_davinci_start_command(struct mmc_davinci_host *host,
 		cmd_reg |= MMCCMD_PPLEN;
 
 	/* set Command timeout */
-	writel(0x1FFF, host->base + DAVINCI_MMCTOR);
+	pete_writel("drivers/mmc/host/davinci_mmc.c:343", 0x1FFF, host->base + DAVINCI_MMCTOR);
 
 	/* Enable interrupt (calculate here, defer until FIFO is stuffed). */
 	im_val =  MMCST0_RSPDNE | MMCST0_CRCRS | MMCST0_TOUTRS;
@@ -363,8 +363,8 @@ static void mmc_davinci_start_command(struct mmc_davinci_host *host,
 	if (!host->do_dma && (host->data_dir == DAVINCI_MMC_DATADIR_WRITE))
 		davinci_fifo_data_trans(host, rw_threshold);
 
-	writel(cmd->arg, host->base + DAVINCI_MMCARGHL);
-	writel(cmd_reg,  host->base + DAVINCI_MMCCMD);
+	pete_writel("drivers/mmc/host/davinci_mmc.c:366", cmd->arg, host->base + DAVINCI_MMCARGHL);
+	pete_writel("drivers/mmc/host/davinci_mmc.c:367", cmd_reg,  host->base + DAVINCI_MMCCMD);
 
 	host->active_request = true;
 
@@ -378,7 +378,7 @@ static void mmc_davinci_start_command(struct mmc_davinci_host *host,
 	}
 
 	if (host->active_request)
-		writel(im_val, host->base + DAVINCI_MMCIM);
+		pete_writel("drivers/mmc/host/davinci_mmc.c:381", im_val, host->base + DAVINCI_MMCIM);
 }
 
 /*----------------------------------------------------------------------*/
@@ -525,8 +525,8 @@ mmc_davinci_prepare_data(struct mmc_davinci_host *host, struct mmc_request *req)
 	host->data = data;
 	if (data == NULL) {
 		host->data_dir = DAVINCI_MMC_DATADIR_NONE;
-		writel(0, host->base + DAVINCI_MMCBLEN);
-		writel(0, host->base + DAVINCI_MMCNBLK);
+		pete_writel("drivers/mmc/host/davinci_mmc.c:528", 0, host->base + DAVINCI_MMCBLEN);
+		pete_writel("drivers/mmc/host/davinci_mmc.c:529", 0, host->base + DAVINCI_MMCNBLK);
 		return;
 	}
 
@@ -540,22 +540,22 @@ mmc_davinci_prepare_data(struct mmc_davinci_host *host, struct mmc_request *req)
 	if (timeout > 0xffff)
 		timeout = 0xffff;
 
-	writel(timeout, host->base + DAVINCI_MMCTOD);
-	writel(data->blocks, host->base + DAVINCI_MMCNBLK);
-	writel(data->blksz, host->base + DAVINCI_MMCBLEN);
+	pete_writel("drivers/mmc/host/davinci_mmc.c:543", timeout, host->base + DAVINCI_MMCTOD);
+	pete_writel("drivers/mmc/host/davinci_mmc.c:544", data->blocks, host->base + DAVINCI_MMCNBLK);
+	pete_writel("drivers/mmc/host/davinci_mmc.c:545", data->blksz, host->base + DAVINCI_MMCBLEN);
 
 	/* Configure the FIFO */
 	if (data->flags & MMC_DATA_WRITE) {
 		host->data_dir = DAVINCI_MMC_DATADIR_WRITE;
-		writel(fifo_lev | MMCFIFOCTL_FIFODIR_WR | MMCFIFOCTL_FIFORST,
+		pete_writel("drivers/mmc/host/davinci_mmc.c:550", fifo_lev | MMCFIFOCTL_FIFODIR_WR | MMCFIFOCTL_FIFORST,
 			host->base + DAVINCI_MMCFIFOCTL);
-		writel(fifo_lev | MMCFIFOCTL_FIFODIR_WR,
+		pete_writel("drivers/mmc/host/davinci_mmc.c:552", fifo_lev | MMCFIFOCTL_FIFODIR_WR,
 			host->base + DAVINCI_MMCFIFOCTL);
 	} else {
 		host->data_dir = DAVINCI_MMC_DATADIR_READ;
-		writel(fifo_lev | MMCFIFOCTL_FIFODIR_RD | MMCFIFOCTL_FIFORST,
+		pete_writel("drivers/mmc/host/davinci_mmc.c:556", fifo_lev | MMCFIFOCTL_FIFODIR_RD | MMCFIFOCTL_FIFORST,
 			host->base + DAVINCI_MMCFIFOCTL);
-		writel(fifo_lev | MMCFIFOCTL_FIFODIR_RD,
+		pete_writel("drivers/mmc/host/davinci_mmc.c:558", fifo_lev | MMCFIFOCTL_FIFODIR_RD,
 			host->base + DAVINCI_MMCFIFOCTL);
 	}
 
@@ -592,7 +592,7 @@ static void mmc_davinci_request(struct mmc_host *mmc, struct mmc_request *req)
 	 * typically some kind of write.  If so, we can't proceed yet.
 	 */
 	while (time_before(jiffies, timeout)) {
-		mmcst1  = readl(host->base + DAVINCI_MMCST1);
+		mmcst1  = pete_readl("drivers/mmc/host/davinci_mmc.c:595", host->base + DAVINCI_MMCST1);
 		if (!(mmcst1 & MMCST1_BUSY))
 			break;
 		cpu_relax();
@@ -655,9 +655,9 @@ static void calculate_clk_divider(struct mmc_host *mmc, struct mmc_ios *ios)
 		if (open_drain_freq > 0xFF)
 			open_drain_freq = 0xFF;
 
-		temp = readl(host->base + DAVINCI_MMCCLK) & ~MMCCLK_CLKRT_MASK;
+		temp = pete_readl("drivers/mmc/host/davinci_mmc.c:658", host->base + DAVINCI_MMCCLK) & ~MMCCLK_CLKRT_MASK;
 		temp |= open_drain_freq;
-		writel(temp, host->base + DAVINCI_MMCCLK);
+		pete_writel("drivers/mmc/host/davinci_mmc.c:660", temp, host->base + DAVINCI_MMCCLK);
 
 		/* Convert ns to clock cycles */
 		host->ns_in_one_cycle = (1000000) / (MMCSD_INIT_CLOCK/1000);
@@ -668,16 +668,16 @@ static void calculate_clk_divider(struct mmc_host *mmc, struct mmc_ios *ios)
 		if (mmc_push_pull_freq > 0xFF)
 			mmc_push_pull_freq = 0xFF;
 
-		temp = readl(host->base + DAVINCI_MMCCLK) & ~MMCCLK_CLKEN;
-		writel(temp, host->base + DAVINCI_MMCCLK);
+		temp = pete_readl("drivers/mmc/host/davinci_mmc.c:671", host->base + DAVINCI_MMCCLK) & ~MMCCLK_CLKEN;
+		pete_writel("drivers/mmc/host/davinci_mmc.c:672", temp, host->base + DAVINCI_MMCCLK);
 
 		udelay(10);
 
-		temp = readl(host->base + DAVINCI_MMCCLK) & ~MMCCLK_CLKRT_MASK;
+		temp = pete_readl("drivers/mmc/host/davinci_mmc.c:676", host->base + DAVINCI_MMCCLK) & ~MMCCLK_CLKRT_MASK;
 		temp |= mmc_push_pull_freq;
-		writel(temp, host->base + DAVINCI_MMCCLK);
+		pete_writel("drivers/mmc/host/davinci_mmc.c:678", temp, host->base + DAVINCI_MMCCLK);
 
-		writel(temp | MMCCLK_CLKEN, host->base + DAVINCI_MMCCLK);
+		pete_writel("drivers/mmc/host/davinci_mmc.c:680", temp | MMCCLK_CLKEN, host->base + DAVINCI_MMCCLK);
 
 		udelay(10);
 	}
@@ -708,29 +708,29 @@ static void mmc_davinci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 	switch (ios->bus_width) {
 	case MMC_BUS_WIDTH_8:
 		dev_dbg(mmc_dev(host->mmc), "Enabling 8 bit mode\n");
-		writel((readl(host->base + DAVINCI_MMCCTL) &
+		pete_writel("drivers/mmc/host/davinci_mmc.c:711", (pete_readl("drivers/mmc/host/davinci_mmc.c:711", host->base + DAVINCI_MMCCTL) &
 			~MMCCTL_WIDTH_4_BIT) | MMCCTL_WIDTH_8_BIT,
 			host->base + DAVINCI_MMCCTL);
 		break;
 	case MMC_BUS_WIDTH_4:
 		dev_dbg(mmc_dev(host->mmc), "Enabling 4 bit mode\n");
 		if (host->version == MMC_CTLR_VERSION_2)
-			writel((readl(host->base + DAVINCI_MMCCTL) &
+			pete_writel("drivers/mmc/host/davinci_mmc.c:718", (pete_readl("drivers/mmc/host/davinci_mmc.c:718", host->base + DAVINCI_MMCCTL) &
 				~MMCCTL_WIDTH_8_BIT) | MMCCTL_WIDTH_4_BIT,
 				host->base + DAVINCI_MMCCTL);
 		else
-			writel(readl(host->base + DAVINCI_MMCCTL) |
+			pete_writel("drivers/mmc/host/davinci_mmc.c:722", pete_readl("drivers/mmc/host/davinci_mmc.c:722", host->base + DAVINCI_MMCCTL) |
 				MMCCTL_WIDTH_4_BIT,
 				host->base + DAVINCI_MMCCTL);
 		break;
 	case MMC_BUS_WIDTH_1:
 		dev_dbg(mmc_dev(host->mmc), "Enabling 1 bit mode\n");
 		if (host->version == MMC_CTLR_VERSION_2)
-			writel(readl(host->base + DAVINCI_MMCCTL) &
+			pete_writel("drivers/mmc/host/davinci_mmc.c:729", pete_readl("drivers/mmc/host/davinci_mmc.c:729", host->base + DAVINCI_MMCCTL) &
 				~(MMCCTL_WIDTH_8_BIT | MMCCTL_WIDTH_4_BIT),
 				host->base + DAVINCI_MMCCTL);
 		else
-			writel(readl(host->base + DAVINCI_MMCCTL) &
+			pete_writel("drivers/mmc/host/davinci_mmc.c:733", pete_readl("drivers/mmc/host/davinci_mmc.c:733", host->base + DAVINCI_MMCCTL) &
 				~MMCCTL_WIDTH_4_BIT,
 				host->base + DAVINCI_MMCCTL);
 		break;
@@ -744,10 +744,10 @@ static void mmc_davinci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 		bool lose = true;
 
 		/* Send clock cycles, poll completion */
-		writel(0, host->base + DAVINCI_MMCARGHL);
-		writel(MMCCMD_INITCK, host->base + DAVINCI_MMCCMD);
+		pete_writel("drivers/mmc/host/davinci_mmc.c:747", 0, host->base + DAVINCI_MMCARGHL);
+		pete_writel("drivers/mmc/host/davinci_mmc.c:748", MMCCMD_INITCK, host->base + DAVINCI_MMCCMD);
 		while (time_before(jiffies, timeout)) {
-			u32 tmp = readl(host->base + DAVINCI_MMCST0);
+			u32 tmp = pete_readl("drivers/mmc/host/davinci_mmc.c:750", host->base + DAVINCI_MMCST0);
 
 			if (tmp & MMCST0_RSPDNE) {
 				lose = false;
@@ -773,9 +773,9 @@ mmc_davinci_xfer_done(struct mmc_davinci_host *host, struct mmc_data *data)
 		 * Davinci Errata (TMS320DM355 Silicon Revision 1.1 Errata
 		 * 2.1.6): Signal SDIO interrupt only if it is enabled by core
 		 */
-		if (host->sdio_int && !(readl(host->base + DAVINCI_SDIOST0) &
+		if (host->sdio_int && !(pete_readl("drivers/mmc/host/davinci_mmc.c:776", host->base + DAVINCI_SDIOST0) &
 					SDIOST0_DAT1_HI)) {
-			writel(SDIOIST_IOINT, host->base + DAVINCI_SDIOIST);
+			pete_writel("drivers/mmc/host/davinci_mmc.c:778", SDIOIST_IOINT, host->base + DAVINCI_SDIOIST);
 			mmc_signal_sdio_irq(host->mmc);
 		}
 	}
@@ -791,7 +791,7 @@ mmc_davinci_xfer_done(struct mmc_davinci_host *host, struct mmc_data *data)
 
 	if (!data->stop || (host->cmd && host->cmd->error)) {
 		mmc_request_done(host->mmc, data->mrq);
-		writel(0, host->base + DAVINCI_MMCIM);
+		pete_writel("drivers/mmc/host/davinci_mmc.c:794", 0, host->base + DAVINCI_MMCIM);
 		host->active_request = false;
 	} else
 		mmc_davinci_start_command(host, data->stop);
@@ -805,13 +805,13 @@ static void mmc_davinci_cmd_done(struct mmc_davinci_host *host,
 	if (cmd->flags & MMC_RSP_PRESENT) {
 		if (cmd->flags & MMC_RSP_136) {
 			/* response type 2 */
-			cmd->resp[3] = readl(host->base + DAVINCI_MMCRSP01);
-			cmd->resp[2] = readl(host->base + DAVINCI_MMCRSP23);
-			cmd->resp[1] = readl(host->base + DAVINCI_MMCRSP45);
-			cmd->resp[0] = readl(host->base + DAVINCI_MMCRSP67);
+			cmd->resp[3] = pete_readl("drivers/mmc/host/davinci_mmc.c:808", host->base + DAVINCI_MMCRSP01);
+			cmd->resp[2] = pete_readl("drivers/mmc/host/davinci_mmc.c:809", host->base + DAVINCI_MMCRSP23);
+			cmd->resp[1] = pete_readl("drivers/mmc/host/davinci_mmc.c:810", host->base + DAVINCI_MMCRSP45);
+			cmd->resp[0] = pete_readl("drivers/mmc/host/davinci_mmc.c:811", host->base + DAVINCI_MMCRSP67);
 		} else {
 			/* response types 1, 1b, 3, 4, 5, 6 */
-			cmd->resp[0] = readl(host->base + DAVINCI_MMCRSP67);
+			cmd->resp[0] = pete_readl("drivers/mmc/host/davinci_mmc.c:814", host->base + DAVINCI_MMCRSP67);
 		}
 	}
 
@@ -819,7 +819,7 @@ static void mmc_davinci_cmd_done(struct mmc_davinci_host *host,
 		if (cmd->error == -ETIMEDOUT)
 			cmd->mrq->cmd->retries = 0;
 		mmc_request_done(host->mmc, cmd->mrq);
-		writel(0, host->base + DAVINCI_MMCIM);
+		pete_writel("drivers/mmc/host/davinci_mmc.c:822", 0, host->base + DAVINCI_MMCIM);
 		host->active_request = false;
 	}
 }
@@ -829,13 +829,13 @@ static inline void mmc_davinci_reset_ctrl(struct mmc_davinci_host *host,
 {
 	u32 temp;
 
-	temp = readl(host->base + DAVINCI_MMCCTL);
+	temp = pete_readl("drivers/mmc/host/davinci_mmc.c:832", host->base + DAVINCI_MMCCTL);
 	if (val)	/* reset */
 		temp |= MMCCTL_CMDRST | MMCCTL_DATRST;
 	else		/* enable */
 		temp &= ~(MMCCTL_CMDRST | MMCCTL_DATRST);
 
-	writel(temp, host->base + DAVINCI_MMCCTL);
+	pete_writel("drivers/mmc/host/davinci_mmc.c:838", temp, host->base + DAVINCI_MMCCTL);
 	udelay(10);
 }
 
@@ -851,11 +851,11 @@ static irqreturn_t mmc_davinci_sdio_irq(int irq, void *dev_id)
 	struct mmc_davinci_host *host = dev_id;
 	unsigned int status;
 
-	status = readl(host->base + DAVINCI_SDIOIST);
+	status = pete_readl("drivers/mmc/host/davinci_mmc.c:854", host->base + DAVINCI_SDIOIST);
 	if (status & SDIOIST_IOINT) {
 		dev_dbg(mmc_dev(host->mmc),
 			"SDIO interrupt status %x\n", status);
-		writel(status | SDIOIST_IOINT, host->base + DAVINCI_SDIOIST);
+		pete_writel("drivers/mmc/host/davinci_mmc.c:858", status | SDIOIST_IOINT, host->base + DAVINCI_SDIOIST);
 		mmc_signal_sdio_irq(host->mmc);
 	}
 	return IRQ_HANDLED;
@@ -870,15 +870,15 @@ static irqreturn_t mmc_davinci_irq(int irq, void *dev_id)
 	struct mmc_data *data = host->data;
 
 	if (host->cmd == NULL && host->data == NULL) {
-		status = readl(host->base + DAVINCI_MMCST0);
+		status = pete_readl("drivers/mmc/host/davinci_mmc.c:873", host->base + DAVINCI_MMCST0);
 		dev_dbg(mmc_dev(host->mmc),
 			"Spurious interrupt 0x%04x\n", status);
 		/* Disable the interrupt from mmcsd */
-		writel(0, host->base + DAVINCI_MMCIM);
+		pete_writel("drivers/mmc/host/davinci_mmc.c:877", 0, host->base + DAVINCI_MMCIM);
 		return IRQ_NONE;
 	}
 
-	status = readl(host->base + DAVINCI_MMCST0);
+	status = pete_readl("drivers/mmc/host/davinci_mmc.c:881", host->base + DAVINCI_MMCST0);
 	qstatus = status;
 
 	/* handle FIFO first when using PIO for data.
@@ -898,12 +898,12 @@ static irqreturn_t mmc_davinci_irq(int irq, void *dev_id)
 		 * needlessly. In order to avoid these spurious interrupts,
 		 * keep interrupts masked during the loop.
 		 */
-		im_val = readl(host->base + DAVINCI_MMCIM);
-		writel(0, host->base + DAVINCI_MMCIM);
+		im_val = pete_readl("drivers/mmc/host/davinci_mmc.c:901", host->base + DAVINCI_MMCIM);
+		pete_writel("drivers/mmc/host/davinci_mmc.c:902", 0, host->base + DAVINCI_MMCIM);
 
 		do {
 			davinci_fifo_data_trans(host, rw_threshold);
-			status = readl(host->base + DAVINCI_MMCST0);
+			status = pete_readl("drivers/mmc/host/davinci_mmc.c:906", host->base + DAVINCI_MMCST0);
 			qstatus |= status;
 		} while (host->bytes_left &&
 			 (status & (MMCST0_DXRDY | MMCST0_DRRDY)));
@@ -914,7 +914,7 @@ static irqreturn_t mmc_davinci_irq(int irq, void *dev_id)
 		 * is first set. Otherwise, writing to MMCIM after reading the
 		 * status is race-prone.
 		 */
-		writel(im_val, host->base + DAVINCI_MMCIM);
+		pete_writel("drivers/mmc/host/davinci_mmc.c:917", im_val, host->base + DAVINCI_MMCIM);
 	}
 
 	if (qstatus & MMCST0_DATDNE) {
@@ -958,7 +958,7 @@ static irqreturn_t mmc_davinci_irq(int irq, void *dev_id)
 		 * (101, 010) aren't part of it ...
 		 */
 		if (qstatus & MMCST0_CRCWR) {
-			u32 temp = readb(host->base + DAVINCI_MMCDRSP);
+			u32 temp = pete_readb("drivers/mmc/host/davinci_mmc.c:961", host->base + DAVINCI_MMCDRSP);
 
 			if (temp == 0x9f)
 				data->error = -ETIMEDOUT;
@@ -1033,17 +1033,17 @@ static void mmc_davinci_enable_sdio_irq(struct mmc_host *mmc, int enable)
 	struct mmc_davinci_host *host = mmc_priv(mmc);
 
 	if (enable) {
-		if (!(readl(host->base + DAVINCI_SDIOST0) & SDIOST0_DAT1_HI)) {
-			writel(SDIOIST_IOINT, host->base + DAVINCI_SDIOIST);
+		if (!(pete_readl("drivers/mmc/host/davinci_mmc.c:1036", host->base + DAVINCI_SDIOST0) & SDIOST0_DAT1_HI)) {
+			pete_writel("drivers/mmc/host/davinci_mmc.c:1037", SDIOIST_IOINT, host->base + DAVINCI_SDIOIST);
 			mmc_signal_sdio_irq(host->mmc);
 		} else {
 			host->sdio_int = true;
-			writel(readl(host->base + DAVINCI_SDIOIEN) |
+			pete_writel("drivers/mmc/host/davinci_mmc.c:1041", pete_readl("drivers/mmc/host/davinci_mmc.c:1041", host->base + DAVINCI_SDIOIEN) |
 			       SDIOIEN_IOINTEN, host->base + DAVINCI_SDIOIEN);
 		}
 	} else {
 		host->sdio_int = false;
-		writel(readl(host->base + DAVINCI_SDIOIEN) & ~SDIOIEN_IOINTEN,
+		pete_writel("drivers/mmc/host/davinci_mmc.c:1046", pete_readl("drivers/mmc/host/davinci_mmc.c:1046", host->base + DAVINCI_SDIOIEN) & ~SDIOIEN_IOINTEN,
 		       host->base + DAVINCI_SDIOIEN);
 	}
 }
@@ -1109,11 +1109,11 @@ static void init_mmcsd_host(struct mmc_davinci_host *host)
 
 	mmc_davinci_reset_ctrl(host, 1);
 
-	writel(0, host->base + DAVINCI_MMCCLK);
-	writel(MMCCLK_CLKEN, host->base + DAVINCI_MMCCLK);
+	pete_writel("drivers/mmc/host/davinci_mmc.c:1112", 0, host->base + DAVINCI_MMCCLK);
+	pete_writel("drivers/mmc/host/davinci_mmc.c:1113", MMCCLK_CLKEN, host->base + DAVINCI_MMCCLK);
 
-	writel(0x1FFF, host->base + DAVINCI_MMCTOR);
-	writel(0xFFFF, host->base + DAVINCI_MMCTOD);
+	pete_writel("drivers/mmc/host/davinci_mmc.c:1115", 0x1FFF, host->base + DAVINCI_MMCTOR);
+	pete_writel("drivers/mmc/host/davinci_mmc.c:1116", 0xFFFF, host->base + DAVINCI_MMCTOD);
 
 	mmc_davinci_reset_ctrl(host, 0);
 }
@@ -1365,7 +1365,7 @@ static int davinci_mmcsd_suspend(struct device *dev)
 {
 	struct mmc_davinci_host *host = dev_get_drvdata(dev);
 
-	writel(0, host->base + DAVINCI_MMCIM);
+	pete_writel("drivers/mmc/host/davinci_mmc.c:1368", 0, host->base + DAVINCI_MMCIM);
 	mmc_davinci_reset_ctrl(host, 1);
 	clk_disable(host->clk);
 

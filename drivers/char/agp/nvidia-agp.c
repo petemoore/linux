@@ -215,7 +215,7 @@ static int nvidia_insert_memory(struct agp_memory *mem, off_t pg_start, int type
 		return -EINVAL;
 
 	for (j = pg_start; j < (pg_start + mem->page_count); j++) {
-		if (!PGE_EMPTY(agp_bridge, readl(agp_bridge->gatt_table+nvidia_private.pg_offset+j)))
+		if (!PGE_EMPTY(agp_bridge, pete_readl("drivers/char/agp/nvidia-agp.c:218", agp_bridge->gatt_table+nvidia_private.pg_offset+j)))
 			return -EBUSY;
 	}
 
@@ -224,13 +224,13 @@ static int nvidia_insert_memory(struct agp_memory *mem, off_t pg_start, int type
 		mem->is_flushed = true;
 	}
 	for (i = 0, j = pg_start; i < mem->page_count; i++, j++) {
-		writel(agp_bridge->driver->mask_memory(agp_bridge,
+		pete_writel("drivers/char/agp/nvidia-agp.c:227", agp_bridge->driver->mask_memory(agp_bridge,
 			       page_to_phys(mem->pages[i]), mask_type),
 			agp_bridge->gatt_table+nvidia_private.pg_offset+j);
 	}
 
 	/* PCI Posting. */
-	readl(agp_bridge->gatt_table+nvidia_private.pg_offset+j - 1);
+	pete_readl("drivers/char/agp/nvidia-agp.c:233", agp_bridge->gatt_table+nvidia_private.pg_offset+j - 1);
 
 	agp_bridge->driver->tlb_flush(mem);
 	return 0;
@@ -251,7 +251,7 @@ static int nvidia_remove_memory(struct agp_memory *mem, off_t pg_start, int type
 		return 0;
 
 	for (i = pg_start; i < (mem->page_count + pg_start); i++)
-		writel(agp_bridge->scratch_page, agp_bridge->gatt_table+nvidia_private.pg_offset+i);
+		pete_writel("drivers/char/agp/nvidia-agp.c:254", agp_bridge->scratch_page, agp_bridge->gatt_table+nvidia_private.pg_offset+i);
 
 	agp_bridge->driver->tlb_flush(mem);
 	return 0;
@@ -283,9 +283,9 @@ static void nvidia_tlbflush(struct agp_memory *mem)
 
 	/* flush TLB entries */
 	for (i = 0; i < 32 + 1; i++)
-		temp = readl(nvidia_private.aperture+(i * PAGE_SIZE / sizeof(u32)));
+		temp = pete_readl("drivers/char/agp/nvidia-agp.c:286", nvidia_private.aperture+(i * PAGE_SIZE / sizeof(u32)));
 	for (i = 0; i < 32 + 1; i++)
-		temp = readl(nvidia_private.aperture+(i * PAGE_SIZE / sizeof(u32)));
+		temp = pete_readl("drivers/char/agp/nvidia-agp.c:288", nvidia_private.aperture+(i * PAGE_SIZE / sizeof(u32)));
 }
 
 

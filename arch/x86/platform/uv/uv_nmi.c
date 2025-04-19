@@ -315,20 +315,20 @@ static inline void uv_reassert_nmi(void)
 static void uv_init_hubless_pch_io(int offset, int mask, int data)
 {
 	int *addr = PCH_PCR_GPIO_ADDRESS(offset);
-	int readd = readl(addr);
+	int readd = pete_readl("arch/x86/platform/uv/uv_nmi.c:318", addr);
 
 	if (mask) {			/* OR in new data */
 		int writed = (readd & ~mask) | data;
 
 		nmi_debug("UV:PCH: %p = %x & %x | %x (%x)\n",
 			addr, readd, ~mask, data, writed);
-		writel(writed, addr);
+		pete_writel("arch/x86/platform/uv/uv_nmi.c:325", writed, addr);
 	} else if (readd & data) {	/* clear status bit */
 		nmi_debug("UV:PCH: %p = %x\n", addr, data);
-		writel(data, addr);
+		pete_writel("arch/x86/platform/uv/uv_nmi.c:328", data, addr);
 	}
 
-	(void)readl(addr);		/* flush write data */
+	(void)pete_readl("arch/x86/platform/uv/uv_nmi.c:331", addr);		/* flush write data */
 }
 
 static void uv_nmi_setup_hubless_intr(void)

@@ -144,22 +144,22 @@ static struct s3c_onenand *onenand;
 
 static inline int s3c_read_reg(int offset)
 {
-	return readl(onenand->base + offset);
+	return pete_readl("drivers/mtd/nand/onenand/onenand_samsung.c:147", onenand->base + offset);
 }
 
 static inline void s3c_write_reg(int value, int offset)
 {
-	writel(value, onenand->base + offset);
+	pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:152", value, onenand->base + offset);
 }
 
 static inline int s3c_read_cmd(unsigned int cmd)
 {
-	return readl(onenand->ahb_addr + cmd);
+	return pete_readl("drivers/mtd/nand/onenand/onenand_samsung.c:157", onenand->ahb_addr + cmd);
 }
 
 static inline void s3c_write_cmd(int value, unsigned int cmd)
 {
-	writel(value, onenand->ahb_addr + cmd);
+	pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:162", value, onenand->ahb_addr + cmd);
 }
 
 #ifdef SAMSUNG_DEBUG
@@ -521,21 +521,21 @@ static int s5pc110_dma_poll(dma_addr_t dst, dma_addr_t src, size_t count, int di
 	int status;
 	unsigned long timeout;
 
-	writel(src, base + S5PC110_DMA_SRC_ADDR);
-	writel(dst, base + S5PC110_DMA_DST_ADDR);
+	pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:524", src, base + S5PC110_DMA_SRC_ADDR);
+	pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:525", dst, base + S5PC110_DMA_DST_ADDR);
 
 	if (direction == S5PC110_DMA_DIR_READ) {
-		writel(S5PC110_DMA_SRC_CFG_READ, base + S5PC110_DMA_SRC_CFG);
-		writel(S5PC110_DMA_DST_CFG_READ, base + S5PC110_DMA_DST_CFG);
+		pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:528", S5PC110_DMA_SRC_CFG_READ, base + S5PC110_DMA_SRC_CFG);
+		pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:529", S5PC110_DMA_DST_CFG_READ, base + S5PC110_DMA_DST_CFG);
 	} else {
-		writel(S5PC110_DMA_SRC_CFG_WRITE, base + S5PC110_DMA_SRC_CFG);
-		writel(S5PC110_DMA_DST_CFG_WRITE, base + S5PC110_DMA_DST_CFG);
+		pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:531", S5PC110_DMA_SRC_CFG_WRITE, base + S5PC110_DMA_SRC_CFG);
+		pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:532", S5PC110_DMA_DST_CFG_WRITE, base + S5PC110_DMA_DST_CFG);
 	}
 
-	writel(count, base + S5PC110_DMA_TRANS_SIZE);
-	writel(direction, base + S5PC110_DMA_TRANS_DIR);
+	pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:535", count, base + S5PC110_DMA_TRANS_SIZE);
+	pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:536", direction, base + S5PC110_DMA_TRANS_DIR);
 
-	writel(S5PC110_DMA_TRANS_CMD_TR, base + S5PC110_DMA_TRANS_CMD);
+	pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:538", S5PC110_DMA_TRANS_CMD_TR, base + S5PC110_DMA_TRANS_CMD);
 
 	/*
 	 * There's no exact timeout values at Spec.
@@ -545,16 +545,16 @@ static int s5pc110_dma_poll(dma_addr_t dst, dma_addr_t src, size_t count, int di
 	timeout = jiffies + msecs_to_jiffies(20);
 
 	do {
-		status = readl(base + S5PC110_DMA_TRANS_STATUS);
+		status = pete_readl("drivers/mtd/nand/onenand/onenand_samsung.c:548", base + S5PC110_DMA_TRANS_STATUS);
 		if (status & S5PC110_DMA_TRANS_STATUS_TE) {
-			writel(S5PC110_DMA_TRANS_CMD_TEC,
+			pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:550", S5PC110_DMA_TRANS_CMD_TEC,
 					base + S5PC110_DMA_TRANS_CMD);
 			return -EIO;
 		}
 	} while (!(status & S5PC110_DMA_TRANS_STATUS_TD) &&
 		time_before(jiffies, timeout));
 
-	writel(S5PC110_DMA_TRANS_CMD_TDC, base + S5PC110_DMA_TRANS_CMD);
+	pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:557", S5PC110_DMA_TRANS_CMD_TDC, base + S5PC110_DMA_TRANS_CMD);
 
 	return 0;
 }
@@ -564,7 +564,7 @@ static irqreturn_t s5pc110_onenand_irq(int irq, void *data)
 	void __iomem *base = onenand->dma_addr;
 	int status, cmd = 0;
 
-	status = readl(base + S5PC110_INTC_DMA_STATUS);
+	status = pete_readl("drivers/mtd/nand/onenand/onenand_samsung.c:567", base + S5PC110_INTC_DMA_STATUS);
 
 	if (likely(status & S5PC110_INTC_DMA_TD))
 		cmd = S5PC110_DMA_TRANS_CMD_TDC;
@@ -572,8 +572,8 @@ static irqreturn_t s5pc110_onenand_irq(int irq, void *data)
 	if (unlikely(status & S5PC110_INTC_DMA_TE))
 		cmd = S5PC110_DMA_TRANS_CMD_TEC;
 
-	writel(cmd, base + S5PC110_DMA_TRANS_CMD);
-	writel(status, base + S5PC110_INTC_DMA_CLR);
+	pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:575", cmd, base + S5PC110_DMA_TRANS_CMD);
+	pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:576", status, base + S5PC110_INTC_DMA_CLR);
 
 	if (!onenand->complete.done)
 		complete(&onenand->complete);
@@ -586,27 +586,27 @@ static int s5pc110_dma_irq(dma_addr_t dst, dma_addr_t src, size_t count, int dir
 	void __iomem *base = onenand->dma_addr;
 	int status;
 
-	status = readl(base + S5PC110_INTC_DMA_MASK);
+	status = pete_readl("drivers/mtd/nand/onenand/onenand_samsung.c:589", base + S5PC110_INTC_DMA_MASK);
 	if (status) {
 		status &= ~(S5PC110_INTC_DMA_TD | S5PC110_INTC_DMA_TE);
-		writel(status, base + S5PC110_INTC_DMA_MASK);
+		pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:592", status, base + S5PC110_INTC_DMA_MASK);
 	}
 
-	writel(src, base + S5PC110_DMA_SRC_ADDR);
-	writel(dst, base + S5PC110_DMA_DST_ADDR);
+	pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:595", src, base + S5PC110_DMA_SRC_ADDR);
+	pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:596", dst, base + S5PC110_DMA_DST_ADDR);
 
 	if (direction == S5PC110_DMA_DIR_READ) {
-		writel(S5PC110_DMA_SRC_CFG_READ, base + S5PC110_DMA_SRC_CFG);
-		writel(S5PC110_DMA_DST_CFG_READ, base + S5PC110_DMA_DST_CFG);
+		pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:599", S5PC110_DMA_SRC_CFG_READ, base + S5PC110_DMA_SRC_CFG);
+		pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:600", S5PC110_DMA_DST_CFG_READ, base + S5PC110_DMA_DST_CFG);
 	} else {
-		writel(S5PC110_DMA_SRC_CFG_WRITE, base + S5PC110_DMA_SRC_CFG);
-		writel(S5PC110_DMA_DST_CFG_WRITE, base + S5PC110_DMA_DST_CFG);
+		pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:602", S5PC110_DMA_SRC_CFG_WRITE, base + S5PC110_DMA_SRC_CFG);
+		pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:603", S5PC110_DMA_DST_CFG_WRITE, base + S5PC110_DMA_DST_CFG);
 	}
 
-	writel(count, base + S5PC110_DMA_TRANS_SIZE);
-	writel(direction, base + S5PC110_DMA_TRANS_DIR);
+	pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:606", count, base + S5PC110_DMA_TRANS_SIZE);
+	pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:607", direction, base + S5PC110_DMA_TRANS_DIR);
 
-	writel(S5PC110_DMA_TRANS_CMD_TR, base + S5PC110_DMA_TRANS_CMD);
+	pete_writel("drivers/mtd/nand/onenand/onenand_samsung.c:609", S5PC110_DMA_TRANS_CMD_TR, base + S5PC110_DMA_TRANS_CMD);
 
 	wait_for_completion_timeout(&onenand->complete, msecs_to_jiffies(20));
 

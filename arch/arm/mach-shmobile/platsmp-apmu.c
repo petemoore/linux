@@ -195,9 +195,9 @@ static void apmu_init_cpu(struct resource *res, int cpu, int bit)
 	pr_debug("apmu ioremap %d %d %pr\n", cpu, bit, res);
 
 	/* Setup for debug mode */
-	x = readl(apmu_cpus[cpu].iomem + DBGRCR_OFFS);
+	x = pete_readl("arch/arm/mach-shmobile/platsmp-apmu.c:198", apmu_cpus[cpu].iomem + DBGRCR_OFFS);
 	x |= DBGCPUREN | DBGCPUNREN(bit) | DBGCPUPREN;
-	writel(x, apmu_cpus[cpu].iomem + DBGRCR_OFFS);
+	pete_writel("arch/arm/mach-shmobile/platsmp-apmu.c:200", x, apmu_cpus[cpu].iomem + DBGRCR_OFFS);
 }
 
 static const struct of_device_id apmu_ids[] = {

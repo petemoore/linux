@@ -100,14 +100,14 @@ static u16 dz_in(struct dz_port *dport, unsigned offset)
 {
 	void __iomem *addr = dport->port.membase + offset;
 
-	return readw(addr);
+	return pete_readw("drivers/tty/serial/dz.c:103", addr);
 }
 
 static void dz_out(struct dz_port *dport, unsigned offset, u16 value)
 {
 	void __iomem *addr = dport->port.membase + offset;
 
-	writew(value, addr);
+	pete_writew("drivers/tty/serial/dz.c:110", value, addr);
 }
 
 /*

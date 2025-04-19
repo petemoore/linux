@@ -140,9 +140,9 @@ static irqreturn_t cci_isr(int irq, void *dev)
 	u32 val, reset = 0;
 	int ret = IRQ_NONE;
 
-	val = readl(cci->base + CCI_IRQ_STATUS_0);
-	writel(val, cci->base + CCI_IRQ_CLEAR_0);
-	writel(0x1, cci->base + CCI_IRQ_GLOBAL_CLEAR_CMD);
+	val = pete_readl("drivers/i2c/busses/i2c-qcom-cci.c:143", cci->base + CCI_IRQ_STATUS_0);
+	pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:144", val, cci->base + CCI_IRQ_CLEAR_0);
+	pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:145", 0x1, cci->base + CCI_IRQ_GLOBAL_CLEAR_CMD);
 
 	if (val & CCI_IRQ_STATUS_0_RST_DONE_ACK) {
 		complete(&cci->master[0].irq_complete);
@@ -178,7 +178,7 @@ static irqreturn_t cci_isr(int irq, void *dev)
 	}
 
 	if (unlikely(reset))
-		writel(reset, cci->base + CCI_RESET_CMD);
+		pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:181", reset, cci->base + CCI_RESET_CMD);
 
 	if (unlikely(val & CCI_IRQ_STATUS_0_I2C_M0_ERROR)) {
 		if (val & CCI_IRQ_STATUS_0_I2C_M0_Q0_NACK_ERR ||
@@ -187,7 +187,7 @@ static irqreturn_t cci_isr(int irq, void *dev)
 		else
 			cci->master[0].status = -EIO;
 
-		writel(CCI_HALT_REQ_I2C_M0_Q0Q1, cci->base + CCI_HALT_REQ);
+		pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:190", CCI_HALT_REQ_I2C_M0_Q0Q1, cci->base + CCI_HALT_REQ);
 		ret = IRQ_HANDLED;
 	}
 
@@ -198,7 +198,7 @@ static irqreturn_t cci_isr(int irq, void *dev)
 		else
 			cci->master[1].status = -EIO;
 
-		writel(CCI_HALT_REQ_I2C_M1_Q0Q1, cci->base + CCI_HALT_REQ);
+		pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:201", CCI_HALT_REQ_I2C_M1_Q0Q1, cci->base + CCI_HALT_REQ);
 		ret = IRQ_HANDLED;
 	}
 
@@ -219,7 +219,7 @@ static int cci_halt(struct cci *cci, u8 master_num)
 	master = &cci->master[master_num];
 
 	reinit_completion(&master->irq_complete);
-	writel(val, cci->base + CCI_HALT_REQ);
+	pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:222", val, cci->base + CCI_HALT_REQ);
 
 	if (!wait_for_completion_timeout(&master->irq_complete, CCI_TIMEOUT)) {
 		dev_err(cci->dev, "CCI halt timeout\n");
@@ -236,7 +236,7 @@ static int cci_reset(struct cci *cci)
 	 * master[0].xxx for waiting on it.
 	 */
 	reinit_completion(&cci->master[0].irq_complete);
-	writel(CCI_RESET_CMD_MASK, cci->base + CCI_RESET_CMD);
+	pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:239", CCI_RESET_CMD_MASK, cci->base + CCI_RESET_CMD);
 
 	if (!wait_for_completion_timeout(&cci->master[0].irq_complete,
 					 CCI_TIMEOUT)) {
@@ -262,7 +262,7 @@ static int cci_init(struct cci *cci)
 			CCI_IRQ_MASK_0_I2C_M1_ERROR;
 	int i;
 
-	writel(val, cci->base + CCI_IRQ_MASK_0);
+	pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:265", val, cci->base + CCI_IRQ_MASK_0);
 
 	for (i = 0; i < cci->data->num_masters; i++) {
 		int mode = cci->master[i].mode;
@@ -274,19 +274,19 @@ static int cci_init(struct cci *cci)
 		hw = &cci->data->params[mode];
 
 		val = hw->thigh << 16 | hw->tlow;
-		writel(val, cci->base + CCI_I2C_Mm_SCL_CTL(i));
+		pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:277", val, cci->base + CCI_I2C_Mm_SCL_CTL(i));
 
 		val = hw->tsu_sto << 16 | hw->tsu_sta;
-		writel(val, cci->base + CCI_I2C_Mm_SDA_CTL_0(i));
+		pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:280", val, cci->base + CCI_I2C_Mm_SDA_CTL_0(i));
 
 		val = hw->thd_dat << 16 | hw->thd_sta;
-		writel(val, cci->base + CCI_I2C_Mm_SDA_CTL_1(i));
+		pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:283", val, cci->base + CCI_I2C_Mm_SDA_CTL_1(i));
 
 		val = hw->tbuf;
-		writel(val, cci->base + CCI_I2C_Mm_SDA_CTL_2(i));
+		pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:286", val, cci->base + CCI_I2C_Mm_SDA_CTL_2(i));
 
 		val = hw->scl_stretch_en << 8 | hw->trdhld << 4 | hw->tsp;
-		writel(val, cci->base + CCI_I2C_Mm_MISC_CTL(i));
+		pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:289", val, cci->base + CCI_I2C_Mm_MISC_CTL(i));
 	}
 
 	return 0;
@@ -296,12 +296,12 @@ static int cci_run_queue(struct cci *cci, u8 master, u8 queue)
 {
 	u32 val;
 
-	val = readl(cci->base + CCI_I2C_Mm_Qn_CUR_WORD_CNT(master, queue));
-	writel(val, cci->base + CCI_I2C_Mm_Qn_EXEC_WORD_CNT(master, queue));
+	val = pete_readl("drivers/i2c/busses/i2c-qcom-cci.c:299", cci->base + CCI_I2C_Mm_Qn_CUR_WORD_CNT(master, queue));
+	pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:300", val, cci->base + CCI_I2C_Mm_Qn_EXEC_WORD_CNT(master, queue));
 
 	reinit_completion(&cci->master[master].irq_complete);
 	val = BIT(master * 2 + queue);
-	writel(val, cci->base + CCI_QUEUE_START);
+	pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:304", val, cci->base + CCI_QUEUE_START);
 
 	if (!wait_for_completion_timeout(&cci->master[master].irq_complete,
 					 CCI_TIMEOUT)) {
@@ -319,7 +319,7 @@ static int cci_validate_queue(struct cci *cci, u8 master, u8 queue)
 {
 	u32 val;
 
-	val = readl(cci->base + CCI_I2C_Mm_Qn_CUR_WORD_CNT(master, queue));
+	val = pete_readl("drivers/i2c/busses/i2c-qcom-cci.c:322", cci->base + CCI_I2C_Mm_Qn_CUR_WORD_CNT(master, queue));
 	if (val == cci->data->queue_size[queue])
 		return -EINVAL;
 
@@ -327,7 +327,7 @@ static int cci_validate_queue(struct cci *cci, u8 master, u8 queue)
 		return 0;
 
 	val = CCI_I2C_REPORT | CCI_I2C_REPORT_IRQ_EN;
-	writel(val, cci->base + CCI_I2C_Mm_Qn_LOAD_DATA(master, queue));
+	pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:330", val, cci->base + CCI_I2C_Mm_Qn_LOAD_DATA(master, queue));
 
 	return cci_run_queue(cci, master, queue);
 }
@@ -349,16 +349,16 @@ static int cci_i2c_read(struct cci *cci, u16 master,
 		return ret;
 
 	val = CCI_I2C_SET_PARAM | (addr & 0x7f) << 4;
-	writel(val, cci->base + CCI_I2C_Mm_Qn_LOAD_DATA(master, queue));
+	pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:352", val, cci->base + CCI_I2C_Mm_Qn_LOAD_DATA(master, queue));
 
 	val = CCI_I2C_READ | len << 4;
-	writel(val, cci->base + CCI_I2C_Mm_Qn_LOAD_DATA(master, queue));
+	pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:355", val, cci->base + CCI_I2C_Mm_Qn_LOAD_DATA(master, queue));
 
 	ret = cci_run_queue(cci, master, queue);
 	if (ret < 0)
 		return ret;
 
-	words_read = readl(cci->base + CCI_I2C_Mm_READ_BUF_LEVEL(master));
+	words_read = pete_readl("drivers/i2c/busses/i2c-qcom-cci.c:361", cci->base + CCI_I2C_Mm_READ_BUF_LEVEL(master));
 	words_exp = len / 4 + 1;
 	if (words_read != words_exp) {
 		dev_err(cci->dev, "words read = %d, words expected = %d\n",
@@ -367,7 +367,7 @@ static int cci_i2c_read(struct cci *cci, u16 master,
 	}
 
 	do {
-		val = readl(cci->base + CCI_I2C_Mm_READ_DATA(master));
+		val = pete_readl("drivers/i2c/busses/i2c-qcom-cci.c:370", cci->base + CCI_I2C_Mm_READ_DATA(master));
 
 		for (i = 0; i < 4 && index < len; i++) {
 			if (first) {
@@ -402,7 +402,7 @@ static int cci_i2c_write(struct cci *cci, u16 master,
 		return ret;
 
 	val = CCI_I2C_SET_PARAM | (addr & 0x7f) << 4;
-	writel(val, cci->base + CCI_I2C_Mm_Qn_LOAD_DATA(master, queue));
+	pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:405", val, cci->base + CCI_I2C_Mm_Qn_LOAD_DATA(master, queue));
 
 	load[i++] = CCI_I2C_WRITE | len << 4;
 
@@ -414,11 +414,11 @@ static int cci_i2c_write(struct cci *cci, u16 master,
 		val |= load[j + 1] << 8;
 		val |= load[j + 2] << 16;
 		val |= load[j + 3] << 24;
-		writel(val, cci->base + CCI_I2C_Mm_Qn_LOAD_DATA(master, queue));
+		pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:417", val, cci->base + CCI_I2C_Mm_Qn_LOAD_DATA(master, queue));
 	}
 
 	val = CCI_I2C_REPORT | CCI_I2C_REPORT_IRQ_EN;
-	writel(val, cci->base + CCI_I2C_Mm_Qn_LOAD_DATA(master, queue));
+	pete_writel("drivers/i2c/busses/i2c-qcom-cci.c:421", val, cci->base + CCI_I2C_Mm_Qn_LOAD_DATA(master, queue));
 
 	return cci_run_queue(cci, master, queue);
 }
@@ -627,7 +627,7 @@ static int cci_probe(struct platform_device *pdev)
 		goto disable_clocks;
 	}
 
-	val = readl(cci->base + CCI_HW_VERSION);
+	val = pete_readl("drivers/i2c/busses/i2c-qcom-cci.c:630", cci->base + CCI_HW_VERSION);
 	dev_dbg(dev, "CCI HW version = 0x%08x", val);
 
 	ret = cci_reset(cci);

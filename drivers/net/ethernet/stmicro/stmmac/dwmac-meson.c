@@ -27,7 +27,7 @@ static void meson6_dwmac_fix_mac_speed(void *priv, unsigned int speed)
 	struct meson_dwmac *dwmac = priv;
 	unsigned int val;
 
-	val = readl(dwmac->reg);
+	val = pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-meson.c:30", dwmac->reg);
 
 	switch (speed) {
 	case SPEED_10:
@@ -38,7 +38,7 @@ static void meson6_dwmac_fix_mac_speed(void *priv, unsigned int speed)
 		break;
 	}
 
-	writel(val, dwmac->reg);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-meson.c:41", val, dwmac->reg);
 }
 
 static int meson6_dwmac_probe(struct platform_device *pdev)

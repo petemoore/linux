@@ -46,7 +46,7 @@ static u32 __init a370_get_tclk_freq(void __iomem *sar)
 {
 	u8 tclk_freq_select = 0;
 
-	tclk_freq_select = ((readl(sar) >> SARL_A370_TCLK_FREQ_OPT) &
+	tclk_freq_select = ((pete_readl("drivers/clk/mvebu/armada-370.c:49", sar) >> SARL_A370_TCLK_FREQ_OPT) &
 			    SARL_A370_TCLK_FREQ_OPT_MASK);
 	return a370_tclk_freqs[tclk_freq_select];
 }
@@ -66,7 +66,7 @@ static u32 __init a370_get_cpu_freq(void __iomem *sar)
 	u32 cpu_freq;
 	u8 cpu_freq_select = 0;
 
-	cpu_freq_select = ((readl(sar) >> SARL_A370_PCLK_FREQ_OPT) &
+	cpu_freq_select = ((pete_readl("drivers/clk/mvebu/armada-370.c:69", sar) >> SARL_A370_PCLK_FREQ_OPT) &
 			   SARL_A370_PCLK_FREQ_OPT_MASK);
 	if (cpu_freq_select >= ARRAY_SIZE(a370_cpu_freqs)) {
 		pr_err("CPU freq select unsupported %d\n", cpu_freq_select);
@@ -113,7 +113,7 @@ static const int a370_dramclk_ratios[32][2] __initconst = {
 static void __init a370_get_clk_ratio(
 	void __iomem *sar, int id, int *mult, int *div)
 {
-	u32 opt = ((readl(sar) >> SARL_A370_FAB_FREQ_OPT) &
+	u32 opt = ((pete_readl("drivers/clk/mvebu/armada-370.c:116", sar) >> SARL_A370_FAB_FREQ_OPT) &
 		SARL_A370_FAB_FREQ_OPT_MASK);
 
 	switch (id) {
@@ -134,7 +134,7 @@ static void __init a370_get_clk_ratio(
 
 static bool a370_is_sscg_enabled(void __iomem *sar)
 {
-	return !(readl(sar) & SARL_A370_SSCG_ENABLE);
+	return !(pete_readl("drivers/clk/mvebu/armada-370.c:137", sar) & SARL_A370_SSCG_ENABLE);
 }
 
 static const struct coreclk_soc_desc a370_coreclks = {

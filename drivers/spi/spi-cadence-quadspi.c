@@ -259,14 +259,14 @@ static int cqspi_wait_for_bit(void __iomem *reg, const u32 mask, bool clr)
 
 static bool cqspi_is_idle(struct cqspi_st *cqspi)
 {
-	u32 reg = readl(cqspi->iobase + CQSPI_REG_CONFIG);
+	u32 reg = pete_readl("drivers/spi/spi-cadence-quadspi.c:262", cqspi->iobase + CQSPI_REG_CONFIG);
 
 	return reg & (1UL << CQSPI_REG_CONFIG_IDLE_LSB);
 }
 
 static u32 cqspi_get_rd_sram_level(struct cqspi_st *cqspi)
 {
-	u32 reg = readl(cqspi->iobase + CQSPI_REG_SDRAMLEVEL);
+	u32 reg = pete_readl("drivers/spi/spi-cadence-quadspi.c:269", cqspi->iobase + CQSPI_REG_SDRAMLEVEL);
 
 	reg >>= CQSPI_REG_SDRAMLEVEL_RD_LSB;
 	return reg & CQSPI_REG_SDRAMLEVEL_RD_MASK;
@@ -278,10 +278,10 @@ static irqreturn_t cqspi_irq_handler(int this_irq, void *dev)
 	unsigned int irq_status;
 
 	/* Read interrupt status */
-	irq_status = readl(cqspi->iobase + CQSPI_REG_IRQSTATUS);
+	irq_status = pete_readl("drivers/spi/spi-cadence-quadspi.c:281", cqspi->iobase + CQSPI_REG_IRQSTATUS);
 
 	/* Clear interrupt */
-	writel(irq_status, cqspi->iobase + CQSPI_REG_IRQSTATUS);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:284", irq_status, cqspi->iobase + CQSPI_REG_IRQSTATUS);
 
 	irq_status &= CQSPI_IRQ_MASK_RD | CQSPI_IRQ_MASK_WR;
 
@@ -409,10 +409,10 @@ static int cqspi_exec_flash_cmd(struct cqspi_st *cqspi, unsigned int reg)
 	int ret;
 
 	/* Write the CMDCTRL without start execution. */
-	writel(reg, reg_base + CQSPI_REG_CMDCTRL);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:412", reg, reg_base + CQSPI_REG_CMDCTRL);
 	/* Start execute */
 	reg |= CQSPI_REG_CMDCTRL_EXECUTE_MASK;
-	writel(reg, reg_base + CQSPI_REG_CMDCTRL);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:415", reg, reg_base + CQSPI_REG_CMDCTRL);
 
 	/* Polling for completion. */
 	ret = cqspi_wait_for_bit(reg_base + CQSPI_REG_CMDCTRL,
@@ -442,10 +442,10 @@ static int cqspi_setup_opcode_ext(struct cqspi_flash_pdata *f_pdata,
 	/* Opcode extension is the LSB. */
 	ext = op->cmd.opcode & 0xff;
 
-	reg = readl(reg_base + CQSPI_REG_OP_EXT_LOWER);
+	reg = pete_readl("drivers/spi/spi-cadence-quadspi.c:445", reg_base + CQSPI_REG_OP_EXT_LOWER);
 	reg &= ~(0xff << shift);
 	reg |= ext << shift;
-	writel(reg, reg_base + CQSPI_REG_OP_EXT_LOWER);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:448", reg, reg_base + CQSPI_REG_OP_EXT_LOWER);
 
 	return 0;
 }
@@ -459,7 +459,7 @@ static int cqspi_enable_dtr(struct cqspi_flash_pdata *f_pdata,
 	unsigned int reg;
 	int ret;
 
-	reg = readl(reg_base + CQSPI_REG_CONFIG);
+	reg = pete_readl("drivers/spi/spi-cadence-quadspi.c:462", reg_base + CQSPI_REG_CONFIG);
 
 	/*
 	 * We enable dual byte opcode here. The callers have to set up the
@@ -478,7 +478,7 @@ static int cqspi_enable_dtr(struct cqspi_flash_pdata *f_pdata,
 		reg &= ~CQSPI_REG_CONFIG_DUAL_OPCODE;
 	}
 
-	writel(reg, reg_base + CQSPI_REG_CONFIG);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:481", reg, reg_base + CQSPI_REG_CONFIG);
 
 	return cqspi_wait_idle(cqspi);
 }
@@ -521,7 +521,7 @@ static int cqspi_command_read(struct cqspi_flash_pdata *f_pdata,
 	reg = opcode << CQSPI_REG_CMDCTRL_OPCODE_LSB;
 
 	rdreg = cqspi_calc_rdreg(f_pdata);
-	writel(rdreg, reg_base + CQSPI_REG_RD_INSTR);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:524", rdreg, reg_base + CQSPI_REG_RD_INSTR);
 
 	dummy_clk = cqspi_calc_dummy(op, f_pdata->dtr);
 	if (dummy_clk > CQSPI_DUMMY_CLKS_MAX)
@@ -540,7 +540,7 @@ static int cqspi_command_read(struct cqspi_flash_pdata *f_pdata,
 	if (status)
 		return status;
 
-	reg = readl(reg_base + CQSPI_REG_CMDREADDATALOWER);
+	reg = pete_readl("drivers/spi/spi-cadence-quadspi.c:543", reg_base + CQSPI_REG_CMDREADDATALOWER);
 
 	/* Put the read value into rx_buf */
 	read_len = (n_rx > 4) ? 4 : n_rx;
@@ -548,7 +548,7 @@ static int cqspi_command_read(struct cqspi_flash_pdata *f_pdata,
 	rxbuf += read_len;
 
 	if (n_rx > 4) {
-		reg = readl(reg_base + CQSPI_REG_CMDREADDATAUPPER);
+		reg = pete_readl("drivers/spi/spi-cadence-quadspi.c:551", reg_base + CQSPI_REG_CMDREADDATAUPPER);
 
 		read_len = n_rx - read_len;
 		memcpy(rxbuf, &reg, read_len);
@@ -587,7 +587,7 @@ static int cqspi_command_write(struct cqspi_flash_pdata *f_pdata,
 	}
 
 	reg = cqspi_calc_rdreg(f_pdata);
-	writel(reg, reg_base + CQSPI_REG_RD_INSTR);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:590", reg, reg_base + CQSPI_REG_RD_INSTR);
 
 	if (f_pdata->dtr)
 		opcode = op->cmd.opcode >> 8;
@@ -602,7 +602,7 @@ static int cqspi_command_write(struct cqspi_flash_pdata *f_pdata,
 			CQSPI_REG_CMDCTRL_ADD_BYTES_MASK)
 			<< CQSPI_REG_CMDCTRL_ADD_BYTES_LSB;
 
-		writel(op->addr.val, reg_base + CQSPI_REG_CMDADDRESS);
+		pete_writel("drivers/spi/spi-cadence-quadspi.c:605", op->addr.val, reg_base + CQSPI_REG_CMDADDRESS);
 	}
 
 	if (n_tx) {
@@ -613,13 +613,13 @@ static int cqspi_command_write(struct cqspi_flash_pdata *f_pdata,
 		write_len = (n_tx > 4) ? 4 : n_tx;
 		memcpy(&data, txbuf, write_len);
 		txbuf += write_len;
-		writel(data, reg_base + CQSPI_REG_CMDWRITEDATALOWER);
+		pete_writel("drivers/spi/spi-cadence-quadspi.c:616", data, reg_base + CQSPI_REG_CMDWRITEDATALOWER);
 
 		if (n_tx > 4) {
 			data = 0;
 			write_len = n_tx - 4;
 			memcpy(&data, txbuf, write_len);
-			writel(data, reg_base + CQSPI_REG_CMDWRITEDATAUPPER);
+			pete_writel("drivers/spi/spi-cadence-quadspi.c:622", data, reg_base + CQSPI_REG_CMDWRITEDATAUPPER);
 		}
 	}
 
@@ -659,13 +659,13 @@ static int cqspi_read_setup(struct cqspi_flash_pdata *f_pdata,
 		reg |= (dummy_clk & CQSPI_REG_RD_INSTR_DUMMY_MASK)
 		       << CQSPI_REG_RD_INSTR_DUMMY_LSB;
 
-	writel(reg, reg_base + CQSPI_REG_RD_INSTR);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:662", reg, reg_base + CQSPI_REG_RD_INSTR);
 
 	/* Set address width */
-	reg = readl(reg_base + CQSPI_REG_SIZE);
+	reg = pete_readl("drivers/spi/spi-cadence-quadspi.c:665", reg_base + CQSPI_REG_SIZE);
 	reg &= ~CQSPI_REG_SIZE_ADDRESS_MASK;
 	reg |= (op->addr.nbytes - 1);
-	writel(reg, reg_base + CQSPI_REG_SIZE);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:668", reg, reg_base + CQSPI_REG_SIZE);
 	return 0;
 }
 
@@ -683,16 +683,16 @@ static int cqspi_indirect_read_execute(struct cqspi_flash_pdata *f_pdata,
 	u8 *rxbuf_end = rxbuf + n_rx;
 	int ret = 0;
 
-	writel(from_addr, reg_base + CQSPI_REG_INDIRECTRDSTARTADDR);
-	writel(remaining, reg_base + CQSPI_REG_INDIRECTRDBYTES);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:686", from_addr, reg_base + CQSPI_REG_INDIRECTRDSTARTADDR);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:687", remaining, reg_base + CQSPI_REG_INDIRECTRDBYTES);
 
 	/* Clear all interrupts. */
-	writel(CQSPI_IRQ_STATUS_MASK, reg_base + CQSPI_REG_IRQSTATUS);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:690", CQSPI_IRQ_STATUS_MASK, reg_base + CQSPI_REG_IRQSTATUS);
 
-	writel(CQSPI_IRQ_MASK_RD, reg_base + CQSPI_REG_IRQMASK);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:692", CQSPI_IRQ_MASK_RD, reg_base + CQSPI_REG_IRQMASK);
 
 	reinit_completion(&cqspi->transfer_complete);
-	writel(CQSPI_REG_INDIRECTRD_START_MASK,
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:695", CQSPI_REG_INDIRECTRD_START_MASK,
 	       reg_base + CQSPI_REG_INDIRECTRD);
 
 	while (remaining > 0) {
@@ -744,19 +744,19 @@ static int cqspi_indirect_read_execute(struct cqspi_flash_pdata *f_pdata,
 	}
 
 	/* Disable interrupt */
-	writel(0, reg_base + CQSPI_REG_IRQMASK);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:747", 0, reg_base + CQSPI_REG_IRQMASK);
 
 	/* Clear indirect completion status */
-	writel(CQSPI_REG_INDIRECTRD_DONE_MASK, reg_base + CQSPI_REG_INDIRECTRD);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:750", CQSPI_REG_INDIRECTRD_DONE_MASK, reg_base + CQSPI_REG_INDIRECTRD);
 
 	return 0;
 
 failrd:
 	/* Disable interrupt */
-	writel(0, reg_base + CQSPI_REG_IRQMASK);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:756", 0, reg_base + CQSPI_REG_IRQMASK);
 
 	/* Cancel the indirect read */
-	writel(CQSPI_REG_INDIRECTWR_CANCEL_MASK,
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:759", CQSPI_REG_INDIRECTWR_CANCEL_MASK,
 	       reg_base + CQSPI_REG_INDIRECTRD);
 	return ret;
 }
@@ -784,9 +784,9 @@ static int cqspi_write_setup(struct cqspi_flash_pdata *f_pdata,
 	reg = opcode << CQSPI_REG_WR_INSTR_OPCODE_LSB;
 	reg |= f_pdata->data_width << CQSPI_REG_WR_INSTR_TYPE_DATA_LSB;
 	reg |= f_pdata->addr_width << CQSPI_REG_WR_INSTR_TYPE_ADDR_LSB;
-	writel(reg, reg_base + CQSPI_REG_WR_INSTR);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:787", reg, reg_base + CQSPI_REG_WR_INSTR);
 	reg = cqspi_calc_rdreg(f_pdata);
-	writel(reg, reg_base + CQSPI_REG_RD_INSTR);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:789", reg, reg_base + CQSPI_REG_RD_INSTR);
 
 	/*
 	 * SPI NAND flashes require the address of the status register to be
@@ -800,15 +800,15 @@ static int cqspi_write_setup(struct cqspi_flash_pdata *f_pdata,
 	 * care of polling the status register.
 	 */
 	if (cqspi->wr_completion) {
-		reg = readl(reg_base + CQSPI_REG_WR_COMPLETION_CTRL);
+		reg = pete_readl("drivers/spi/spi-cadence-quadspi.c:803", reg_base + CQSPI_REG_WR_COMPLETION_CTRL);
 		reg |= CQSPI_REG_WR_DISABLE_AUTO_POLL;
-		writel(reg, reg_base + CQSPI_REG_WR_COMPLETION_CTRL);
+		pete_writel("drivers/spi/spi-cadence-quadspi.c:805", reg, reg_base + CQSPI_REG_WR_COMPLETION_CTRL);
 	}
 
-	reg = readl(reg_base + CQSPI_REG_SIZE);
+	reg = pete_readl("drivers/spi/spi-cadence-quadspi.c:808", reg_base + CQSPI_REG_SIZE);
 	reg &= ~CQSPI_REG_SIZE_ADDRESS_MASK;
 	reg |= (op->addr.nbytes - 1);
-	writel(reg, reg_base + CQSPI_REG_SIZE);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:811", reg, reg_base + CQSPI_REG_SIZE);
 	return 0;
 }
 
@@ -823,16 +823,16 @@ static int cqspi_indirect_write_execute(struct cqspi_flash_pdata *f_pdata,
 	unsigned int write_bytes;
 	int ret;
 
-	writel(to_addr, reg_base + CQSPI_REG_INDIRECTWRSTARTADDR);
-	writel(remaining, reg_base + CQSPI_REG_INDIRECTWRBYTES);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:826", to_addr, reg_base + CQSPI_REG_INDIRECTWRSTARTADDR);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:827", remaining, reg_base + CQSPI_REG_INDIRECTWRBYTES);
 
 	/* Clear all interrupts. */
-	writel(CQSPI_IRQ_STATUS_MASK, reg_base + CQSPI_REG_IRQSTATUS);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:830", CQSPI_IRQ_STATUS_MASK, reg_base + CQSPI_REG_IRQSTATUS);
 
-	writel(CQSPI_IRQ_MASK_WR, reg_base + CQSPI_REG_IRQMASK);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:832", CQSPI_IRQ_MASK_WR, reg_base + CQSPI_REG_IRQMASK);
 
 	reinit_completion(&cqspi->transfer_complete);
-	writel(CQSPI_REG_INDIRECTWR_START_MASK,
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:835", CQSPI_REG_INDIRECTWR_START_MASK,
 	       reg_base + CQSPI_REG_INDIRECTWR);
 	/*
 	 * As per 66AK2G02 TRM SPRUHY8F section 11.15.5.3 Indirect Access
@@ -885,10 +885,10 @@ static int cqspi_indirect_write_execute(struct cqspi_flash_pdata *f_pdata,
 	}
 
 	/* Disable interrupt. */
-	writel(0, reg_base + CQSPI_REG_IRQMASK);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:888", 0, reg_base + CQSPI_REG_IRQMASK);
 
 	/* Clear indirect completion status */
-	writel(CQSPI_REG_INDIRECTWR_DONE_MASK, reg_base + CQSPI_REG_INDIRECTWR);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:891", CQSPI_REG_INDIRECTWR_DONE_MASK, reg_base + CQSPI_REG_INDIRECTWR);
 
 	cqspi_wait_idle(cqspi);
 
@@ -896,10 +896,10 @@ static int cqspi_indirect_write_execute(struct cqspi_flash_pdata *f_pdata,
 
 failwr:
 	/* Disable interrupt. */
-	writel(0, reg_base + CQSPI_REG_IRQMASK);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:899", 0, reg_base + CQSPI_REG_IRQMASK);
 
 	/* Cancel the indirect write */
-	writel(CQSPI_REG_INDIRECTWR_CANCEL_MASK,
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:902", CQSPI_REG_INDIRECTWR_CANCEL_MASK,
 	       reg_base + CQSPI_REG_INDIRECTWR);
 	return ret;
 }
@@ -911,7 +911,7 @@ static void cqspi_chipselect(struct cqspi_flash_pdata *f_pdata)
 	unsigned int chip_select = f_pdata->cs;
 	unsigned int reg;
 
-	reg = readl(reg_base + CQSPI_REG_CONFIG);
+	reg = pete_readl("drivers/spi/spi-cadence-quadspi.c:914", reg_base + CQSPI_REG_CONFIG);
 	if (cqspi->is_decoded_cs) {
 		reg |= CQSPI_REG_CONFIG_DECODE_MASK;
 	} else {
@@ -930,7 +930,7 @@ static void cqspi_chipselect(struct cqspi_flash_pdata *f_pdata)
 		 << CQSPI_REG_CONFIG_CHIPSELECT_LSB);
 	reg |= (chip_select & CQSPI_REG_CONFIG_CHIPSELECT_MASK)
 	    << CQSPI_REG_CONFIG_CHIPSELECT_LSB;
-	writel(reg, reg_base + CQSPI_REG_CONFIG);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:933", reg, reg_base + CQSPI_REG_CONFIG);
 }
 
 static unsigned int calculate_ticks_for_ns(const unsigned int ref_clk_hz,
@@ -973,7 +973,7 @@ static void cqspi_delay(struct cqspi_flash_pdata *f_pdata)
 		<< CQSPI_REG_DELAY_TSLCH_LSB;
 	reg |= (tsd2d & CQSPI_REG_DELAY_TSD2D_MASK)
 		<< CQSPI_REG_DELAY_TSD2D_LSB;
-	writel(reg, iobase + CQSPI_REG_DELAY);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:976", reg, iobase + CQSPI_REG_DELAY);
 }
 
 static void cqspi_config_baudrate_div(struct cqspi_st *cqspi)
@@ -985,10 +985,10 @@ static void cqspi_config_baudrate_div(struct cqspi_st *cqspi)
 	/* Recalculate the baudrate divisor based on QSPI specification. */
 	div = DIV_ROUND_UP(ref_clk_hz, 2 * cqspi->sclk) - 1;
 
-	reg = readl(reg_base + CQSPI_REG_CONFIG);
+	reg = pete_readl("drivers/spi/spi-cadence-quadspi.c:988", reg_base + CQSPI_REG_CONFIG);
 	reg &= ~(CQSPI_REG_CONFIG_BAUD_MASK << CQSPI_REG_CONFIG_BAUD_LSB);
 	reg |= (div & CQSPI_REG_CONFIG_BAUD_MASK) << CQSPI_REG_CONFIG_BAUD_LSB;
-	writel(reg, reg_base + CQSPI_REG_CONFIG);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:991", reg, reg_base + CQSPI_REG_CONFIG);
 }
 
 static void cqspi_readdata_capture(struct cqspi_st *cqspi,
@@ -998,7 +998,7 @@ static void cqspi_readdata_capture(struct cqspi_st *cqspi,
 	void __iomem *reg_base = cqspi->iobase;
 	unsigned int reg;
 
-	reg = readl(reg_base + CQSPI_REG_READCAPTURE);
+	reg = pete_readl("drivers/spi/spi-cadence-quadspi.c:1001", reg_base + CQSPI_REG_READCAPTURE);
 
 	if (bypass)
 		reg |= (1 << CQSPI_REG_READCAPTURE_BYPASS_LSB);
@@ -1011,7 +1011,7 @@ static void cqspi_readdata_capture(struct cqspi_st *cqspi,
 	reg |= (delay & CQSPI_REG_READCAPTURE_DELAY_MASK)
 		<< CQSPI_REG_READCAPTURE_DELAY_LSB;
 
-	writel(reg, reg_base + CQSPI_REG_READCAPTURE);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:1014", reg, reg_base + CQSPI_REG_READCAPTURE);
 }
 
 static void cqspi_controller_enable(struct cqspi_st *cqspi, bool enable)
@@ -1019,14 +1019,14 @@ static void cqspi_controller_enable(struct cqspi_st *cqspi, bool enable)
 	void __iomem *reg_base = cqspi->iobase;
 	unsigned int reg;
 
-	reg = readl(reg_base + CQSPI_REG_CONFIG);
+	reg = pete_readl("drivers/spi/spi-cadence-quadspi.c:1022", reg_base + CQSPI_REG_CONFIG);
 
 	if (enable)
 		reg |= CQSPI_REG_CONFIG_ENABLE_MASK;
 	else
 		reg &= ~CQSPI_REG_CONFIG_ENABLE_MASK;
 
-	writel(reg, reg_base + CQSPI_REG_CONFIG);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:1029", reg, reg_base + CQSPI_REG_CONFIG);
 }
 
 static void cqspi_configure(struct cqspi_flash_pdata *f_pdata,
@@ -1330,30 +1330,30 @@ static void cqspi_controller_init(struct cqspi_st *cqspi)
 	cqspi_controller_enable(cqspi, 0);
 
 	/* Configure the remap address register, no remap */
-	writel(0, cqspi->iobase + CQSPI_REG_REMAP);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:1333", 0, cqspi->iobase + CQSPI_REG_REMAP);
 
 	/* Disable all interrupts. */
-	writel(0, cqspi->iobase + CQSPI_REG_IRQMASK);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:1336", 0, cqspi->iobase + CQSPI_REG_IRQMASK);
 
 	/* Configure the SRAM split to 1:1 . */
-	writel(cqspi->fifo_depth / 2, cqspi->iobase + CQSPI_REG_SRAMPARTITION);
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:1339", cqspi->fifo_depth / 2, cqspi->iobase + CQSPI_REG_SRAMPARTITION);
 
 	/* Load indirect trigger address. */
-	writel(cqspi->trigger_address,
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:1342", cqspi->trigger_address,
 	       cqspi->iobase + CQSPI_REG_INDIRECTTRIGGER);
 
 	/* Program read watermark -- 1/2 of the FIFO. */
-	writel(cqspi->fifo_depth * cqspi->fifo_width / 2,
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:1346", cqspi->fifo_depth * cqspi->fifo_width / 2,
 	       cqspi->iobase + CQSPI_REG_INDIRECTRDWATERMARK);
 	/* Program write watermark -- 1/8 of the FIFO. */
-	writel(cqspi->fifo_depth * cqspi->fifo_width / 8,
+	pete_writel("drivers/spi/spi-cadence-quadspi.c:1349", cqspi->fifo_depth * cqspi->fifo_width / 8,
 	       cqspi->iobase + CQSPI_REG_INDIRECTWRWATERMARK);
 
 	/* Disable direct access controller */
 	if (!cqspi->use_direct_mode) {
-		reg = readl(cqspi->iobase + CQSPI_REG_CONFIG);
+		reg = pete_readl("drivers/spi/spi-cadence-quadspi.c:1354", cqspi->iobase + CQSPI_REG_CONFIG);
 		reg &= ~CQSPI_REG_CONFIG_ENB_DIR_ACC_CTRL;
-		writel(reg, cqspi->iobase + CQSPI_REG_CONFIG);
+		pete_writel("drivers/spi/spi-cadence-quadspi.c:1356", reg, cqspi->iobase + CQSPI_REG_CONFIG);
 	}
 
 	cqspi_controller_enable(cqspi, 1);

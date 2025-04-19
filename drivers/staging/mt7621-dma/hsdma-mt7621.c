@@ -182,13 +182,13 @@ static inline struct mtk_hsdma_desc *to_mtk_hsdma_desc(
 
 static inline u32 mtk_hsdma_read(struct mtk_hsdam_engine *hsdma, u32 reg)
 {
-	return readl(hsdma->base + reg);
+	return pete_readl("drivers/staging/mt7621-dma/hsdma-mt7621.c:185", hsdma->base + reg);
 }
 
 static inline void mtk_hsdma_write(struct mtk_hsdam_engine *hsdma,
 				   unsigned int reg, u32 val)
 {
-	writel(val, hsdma->base + reg);
+	pete_writel("drivers/staging/mt7621-dma/hsdma-mt7621.c:191", val, hsdma->base + reg);
 }
 
 static void mtk_hsdma_reset_chan(struct mtk_hsdam_engine *hsdma,

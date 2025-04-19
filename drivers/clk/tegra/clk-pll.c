@@ -237,7 +237,7 @@
 #define pll_writel(val, offset, p) writel_relaxed(val, p->clk_base + offset)
 #define pll_writel_base(val, p) pll_writel(val, p->params->base_reg, p)
 #define pll_writel_misc(val, p) pll_writel(val, p->params->misc_reg, p)
-#define pll_override_writel(val, offset, p) writel(val, p->pmc + offset)
+#define pll_override_writel(val, offset, p) pete_writel("drivers/clk/tegra/clk-pll.c:240", val, p->pmc + offset)
 #define pll_writel_sdm_din(val, p) pll_writel(val, p->params->sdm_din_reg, p)
 #define pll_writel_sdm_ctrl(val, p) pll_writel(val, p->params->sdm_ctrl_reg, p)
 
@@ -923,17 +923,17 @@ static int clk_plle_training(struct tegra_clk_pll *pll)
 	 * PLLE is already disabled, and setup cleared;
 	 * create falling edge on PLLE IDDQ input.
 	 */
-	val = readl(pll->pmc + PMC_SATA_PWRGT);
+	val = pete_readl("drivers/clk/tegra/clk-pll.c:926", pll->pmc + PMC_SATA_PWRGT);
 	val |= PMC_SATA_PWRGT_PLLE_IDDQ_VALUE;
-	writel(val, pll->pmc + PMC_SATA_PWRGT);
+	pete_writel("drivers/clk/tegra/clk-pll.c:928", val, pll->pmc + PMC_SATA_PWRGT);
 
-	val = readl(pll->pmc + PMC_SATA_PWRGT);
+	val = pete_readl("drivers/clk/tegra/clk-pll.c:930", pll->pmc + PMC_SATA_PWRGT);
 	val |= PMC_SATA_PWRGT_PLLE_IDDQ_SWCTL;
-	writel(val, pll->pmc + PMC_SATA_PWRGT);
+	pete_writel("drivers/clk/tegra/clk-pll.c:932", val, pll->pmc + PMC_SATA_PWRGT);
 
-	val = readl(pll->pmc + PMC_SATA_PWRGT);
+	val = pete_readl("drivers/clk/tegra/clk-pll.c:934", pll->pmc + PMC_SATA_PWRGT);
 	val &= ~PMC_SATA_PWRGT_PLLE_IDDQ_VALUE;
-	writel(val, pll->pmc + PMC_SATA_PWRGT);
+	pete_writel("drivers/clk/tegra/clk-pll.c:936", val, pll->pmc + PMC_SATA_PWRGT);
 
 	val = pll_readl_misc(pll);
 
@@ -999,10 +999,10 @@ static int clk_plle_enable(struct clk_hw *hw)
 	val |= PLLE_MISC_LOCK_ENABLE;
 	pll_writel_misc(val, pll);
 
-	val = readl(pll->clk_base + PLLE_SS_CTRL);
+	val = pete_readl("drivers/clk/tegra/clk-pll.c:1002", pll->clk_base + PLLE_SS_CTRL);
 	val &= ~PLLE_SS_COEFFICIENTS_MASK;
 	val |= PLLE_SS_DISABLE;
-	writel(val, pll->clk_base + PLLE_SS_CTRL);
+	pete_writel("drivers/clk/tegra/clk-pll.c:1005", val, pll->clk_base + PLLE_SS_CTRL);
 
 	val = pll_readl_base(pll);
 	val |= (PLL_BASE_BYPASS | PLL_BASE_ENABLE);

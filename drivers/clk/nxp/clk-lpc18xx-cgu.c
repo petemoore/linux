@@ -353,9 +353,9 @@ static unsigned long lpc18xx_pll0_recalc_rate(struct clk_hw *hw,
 	struct lpc18xx_pll *pll = to_lpc_pll(hw);
 	u32 ctrl, mdiv, msel, npdiv;
 
-	ctrl = readl(pll->reg + LPC18XX_CGU_PLL0USB_CTRL);
-	mdiv = readl(pll->reg + LPC18XX_CGU_PLL0USB_MDIV);
-	npdiv = readl(pll->reg + LPC18XX_CGU_PLL0USB_NP_DIV);
+	ctrl = pete_readl("drivers/clk/nxp/clk-lpc18xx-cgu.c:356", pll->reg + LPC18XX_CGU_PLL0USB_CTRL);
+	mdiv = pete_readl("drivers/clk/nxp/clk-lpc18xx-cgu.c:357", pll->reg + LPC18XX_CGU_PLL0USB_MDIV);
+	npdiv = pete_readl("drivers/clk/nxp/clk-lpc18xx-cgu.c:358", pll->reg + LPC18XX_CGU_PLL0USB_NP_DIV);
 
 	if (ctrl & LPC18XX_PLL0_CTRL_BYPASS)
 		return parent_rate;
@@ -416,25 +416,25 @@ static int lpc18xx_pll0_set_rate(struct clk_hw *hw, unsigned long rate,
 	m |= lpc18xx_pll0_msel2seli(m) << LPC18XX_PLL0_MDIV_SELI_SHIFT;
 
 	/* Power down PLL, disable clk output and dividers */
-	ctrl = readl(pll->reg + LPC18XX_CGU_PLL0USB_CTRL);
+	ctrl = pete_readl("drivers/clk/nxp/clk-lpc18xx-cgu.c:419", pll->reg + LPC18XX_CGU_PLL0USB_CTRL);
 	ctrl |= LPC18XX_PLL0_CTRL_PD;
 	ctrl &= ~(LPC18XX_PLL0_CTRL_BYPASS | LPC18XX_PLL0_CTRL_DIRECTI |
 		  LPC18XX_PLL0_CTRL_DIRECTO | LPC18XX_PLL0_CTRL_CLKEN);
-	writel(ctrl, pll->reg + LPC18XX_CGU_PLL0USB_CTRL);
+	pete_writel("drivers/clk/nxp/clk-lpc18xx-cgu.c:423", ctrl, pll->reg + LPC18XX_CGU_PLL0USB_CTRL);
 
 	/* Configure new PLL settings */
-	writel(m, pll->reg + LPC18XX_CGU_PLL0USB_MDIV);
-	writel(LPC18XX_PLL0_NP_DIVS_1, pll->reg + LPC18XX_CGU_PLL0USB_NP_DIV);
+	pete_writel("drivers/clk/nxp/clk-lpc18xx-cgu.c:426", m, pll->reg + LPC18XX_CGU_PLL0USB_MDIV);
+	pete_writel("drivers/clk/nxp/clk-lpc18xx-cgu.c:427", LPC18XX_PLL0_NP_DIVS_1, pll->reg + LPC18XX_CGU_PLL0USB_NP_DIV);
 
 	/* Power up PLL and wait for lock */
 	ctrl &= ~LPC18XX_PLL0_CTRL_PD;
-	writel(ctrl, pll->reg + LPC18XX_CGU_PLL0USB_CTRL);
+	pete_writel("drivers/clk/nxp/clk-lpc18xx-cgu.c:431", ctrl, pll->reg + LPC18XX_CGU_PLL0USB_CTRL);
 	do {
 		udelay(10);
-		stat = readl(pll->reg + LPC18XX_CGU_PLL0USB_STAT);
+		stat = pete_readl("drivers/clk/nxp/clk-lpc18xx-cgu.c:434", pll->reg + LPC18XX_CGU_PLL0USB_STAT);
 		if (stat & LPC18XX_PLL0_STAT_LOCK) {
 			ctrl |= LPC18XX_PLL0_CTRL_CLKEN;
-			writel(ctrl, pll->reg + LPC18XX_CGU_PLL0USB_CTRL);
+			pete_writel("drivers/clk/nxp/clk-lpc18xx-cgu.c:437", ctrl, pll->reg + LPC18XX_CGU_PLL0USB_CTRL);
 
 			return 0;
 		}
@@ -459,8 +459,8 @@ static unsigned long lpc18xx_pll1_recalc_rate(struct clk_hw *hw,
 	bool direct, fbsel;
 	u32 stat, ctrl;
 
-	stat = readl(pll->reg + LPC18XX_CGU_PLL1_STAT);
-	ctrl = readl(pll->reg + LPC18XX_CGU_PLL1_CTRL);
+	stat = pete_readl("drivers/clk/nxp/clk-lpc18xx-cgu.c:462", pll->reg + LPC18XX_CGU_PLL1_STAT);
+	ctrl = pete_readl("drivers/clk/nxp/clk-lpc18xx-cgu.c:463", pll->reg + LPC18XX_CGU_PLL1_CTRL);
 
 	direct = (ctrl & LPC18XX_PLL1_CTRL_DIRECT) ? true : false;
 	fbsel = (ctrl & LPC18XX_PLL1_CTRL_FBSEL) ? true : false;

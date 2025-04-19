@@ -105,19 +105,19 @@ struct xlp_spi_priv {
 static inline u32 xlp_spi_reg_read(struct xlp_spi_priv *priv,
 				int cs, int regoff)
 {
-	return readl(priv->base + regoff + cs * SPI_CS_OFFSET);
+	return pete_readl("drivers/spi/spi-xlp.c:108", priv->base + regoff + cs * SPI_CS_OFFSET);
 }
 
 static inline void xlp_spi_reg_write(struct xlp_spi_priv *priv, int cs,
 				int regoff, u32 val)
 {
-	writel(val, priv->base + regoff + cs * SPI_CS_OFFSET);
+	pete_writel("drivers/spi/spi-xlp.c:114", val, priv->base + regoff + cs * SPI_CS_OFFSET);
 }
 
 static inline void xlp_spi_sysctl_write(struct xlp_spi_priv *priv,
 				int regoff, u32 val)
 {
-	writel(val, priv->base + regoff);
+	pete_writel("drivers/spi/spi-xlp.c:120", val, priv->base + regoff);
 }
 
 /*

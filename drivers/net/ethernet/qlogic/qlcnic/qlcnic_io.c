@@ -876,7 +876,7 @@ static void qlcnic_post_rx_buffers_nodb(struct qlcnic_adapter *adapter,
 	}
 	if (count) {
 		rds_ring->producer = producer;
-		writel((producer - 1) & (rds_ring->num_desc - 1),
+		pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_io.c:879", (producer - 1) & (rds_ring->num_desc - 1),
 		       rds_ring->crb_rcv_producer);
 	}
 	spin_unlock(&rds_ring->lock);
@@ -1428,7 +1428,7 @@ skip:
 
 	if (count) {
 		sds_ring->consumer = consumer;
-		writel(consumer, sds_ring->crb_sts_consumer);
+		pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_io.c:1431", consumer, sds_ring->crb_sts_consumer);
 	}
 
 	return count;
@@ -1470,7 +1470,7 @@ void qlcnic_post_rx_buffers(struct qlcnic_adapter *adapter,
 
 	if (count) {
 		rds_ring->producer = producer;
-		writel((producer-1) & (rds_ring->num_desc-1),
+		pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_io.c:1473", (producer-1) & (rds_ring->num_desc-1),
 		       rds_ring->crb_rcv_producer);
 	}
 }
@@ -1567,7 +1567,7 @@ void qlcnic_82xx_process_rcv_ring_diag(struct qlcnic_host_sds_ring *sds_ring)
 	}
 
 	sds_ring->consumer = consumer;
-	writel(consumer, sds_ring->crb_sts_consumer);
+	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_io.c:1570", consumer, sds_ring->crb_sts_consumer);
 }
 
 int qlcnic_82xx_napi_add(struct qlcnic_adapter *adapter,
@@ -1942,7 +1942,7 @@ skip:
 	}
 	if (count) {
 		sds_ring->consumer = consumer;
-		writel(consumer, sds_ring->crb_sts_consumer);
+		pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_io.c:1945", consumer, sds_ring->crb_sts_consumer);
 	}
 	return count;
 }
@@ -2228,5 +2228,5 @@ void qlcnic_83xx_process_rcv_ring_diag(struct qlcnic_host_sds_ring *sds_ring)
 	desc->status_desc_data[0] = cpu_to_le64(STATUS_OWNER_PHANTOM);
 	consumer = get_next_index(consumer, sds_ring->num_desc);
 	sds_ring->consumer = consumer;
-	writel(consumer, sds_ring->crb_sts_consumer);
+	pete_writel("drivers/net/ethernet/qlogic/qlcnic/qlcnic_io.c:2231", consumer, sds_ring->crb_sts_consumer);
 }

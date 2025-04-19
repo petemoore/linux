@@ -861,7 +861,7 @@ static const struct sunxi_ccu_desc sun8i_a83t_ccu_desc = {
 
 static void sun8i_a83t_cpu_pll_fixup(void __iomem *reg)
 {
-	u32 val = readl(reg);
+	u32 val = pete_readl("drivers/clk/sunxi-ng/ccu-sun8i-a83t.c:864", reg);
 
 	/* bail out if P divider is not used */
 	if (!(val & BIT(SUN8I_A83T_PLL_P_SHIFT)))
@@ -882,7 +882,7 @@ static void sun8i_a83t_cpu_pll_fixup(void __iomem *reg)
 	/* And clear P */
 	val &= ~BIT(SUN8I_A83T_PLL_P_SHIFT);
 
-	writel(val, reg);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun8i-a83t.c:885", val, reg);
 }
 
 static int sun8i_a83t_ccu_probe(struct platform_device *pdev)
@@ -897,10 +897,10 @@ static int sun8i_a83t_ccu_probe(struct platform_device *pdev)
 		return PTR_ERR(reg);
 
 	/* Enforce d1 = 0, d2 = 1 for Audio PLL */
-	val = readl(reg + SUN8I_A83T_PLL_AUDIO_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun8i-a83t.c:900", reg + SUN8I_A83T_PLL_AUDIO_REG);
 	val &= ~BIT(16);
 	val |= BIT(18);
-	writel(val, reg + SUN8I_A83T_PLL_AUDIO_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun8i-a83t.c:903", val, reg + SUN8I_A83T_PLL_AUDIO_REG);
 
 	/* Enforce P = 1 for both CPU cluster PLLs */
 	sun8i_a83t_cpu_pll_fixup(reg + SUN8I_A83T_PLL_C0CPUX_REG);

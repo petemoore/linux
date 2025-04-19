@@ -305,14 +305,14 @@ static int renesas_sdhi_start_signal_voltage_switch(struct mmc_host *mmc,
 static inline u32 sd_scc_read32(struct tmio_mmc_host *host,
 				struct renesas_sdhi *priv, int addr)
 {
-	return readl(priv->scc_ctl + (addr << host->bus_shift));
+	return pete_readl("drivers/mmc/host/renesas_sdhi_core.c:308", priv->scc_ctl + (addr << host->bus_shift));
 }
 
 static inline void sd_scc_write32(struct tmio_mmc_host *host,
 				  struct renesas_sdhi *priv,
 				  int addr, u32 val)
 {
-	writel(val, priv->scc_ctl + (addr << host->bus_shift));
+	pete_writel("drivers/mmc/host/renesas_sdhi_core.c:315", val, priv->scc_ctl + (addr << host->bus_shift));
 }
 
 static unsigned int renesas_sdhi_init_tuning(struct tmio_mmc_host *host)

@@ -37,7 +37,7 @@
 #define MLX5_CQ_DOORBELL      0x20
 
 /* Assume that we can just write a 64-bit doorbell atomically.  s390
- * actually doesn't have writeq() but S/390 systems don't even have
+ * actually doesn't have pete_writeq("include/linux/mlx5/doorbell.h:40", ) but S/390 systems don't even have
  * PCI so we won't worry about it.
  *
  * Note that the write is not atomic on 32-bit systems! In contrast to 64-bit

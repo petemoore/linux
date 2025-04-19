@@ -99,20 +99,20 @@ static void mtk_spi_slave_disable_dma(struct mtk_spi_slave *mdata)
 {
 	u32 reg_val;
 
-	reg_val = readl(mdata->base + SPIS_DMA_CFG_REG);
+	reg_val = pete_readl("drivers/spi/spi-slave-mt27xx.c:102", mdata->base + SPIS_DMA_CFG_REG);
 	reg_val &= ~RX_DMA_EN;
 	reg_val &= ~TX_DMA_EN;
-	writel(reg_val, mdata->base + SPIS_DMA_CFG_REG);
+	pete_writel("drivers/spi/spi-slave-mt27xx.c:105", reg_val, mdata->base + SPIS_DMA_CFG_REG);
 }
 
 static void mtk_spi_slave_disable_xfer(struct mtk_spi_slave *mdata)
 {
 	u32 reg_val;
 
-	reg_val = readl(mdata->base + SPIS_CFG_REG);
+	reg_val = pete_readl("drivers/spi/spi-slave-mt27xx.c:112", mdata->base + SPIS_CFG_REG);
 	reg_val &= ~SPIS_TX_EN;
 	reg_val &= ~SPIS_RX_EN;
-	writel(reg_val, mdata->base + SPIS_CFG_REG);
+	pete_writel("drivers/spi/spi-slave-mt27xx.c:115", reg_val, mdata->base + SPIS_CFG_REG);
 }
 
 static int mtk_spi_slave_wait_for_completion(struct mtk_spi_slave *mdata)
@@ -137,7 +137,7 @@ static int mtk_spi_slave_prepare_message(struct spi_controller *ctlr,
 	cpha = spi->mode & SPI_CPHA ? 1 : 0;
 	cpol = spi->mode & SPI_CPOL ? 1 : 0;
 
-	reg_val = readl(mdata->base + SPIS_CFG_REG);
+	reg_val = pete_readl("drivers/spi/spi-slave-mt27xx.c:140", mdata->base + SPIS_CFG_REG);
 	if (cpha)
 		reg_val |= SPIS_CPHA;
 	else
@@ -154,7 +154,7 @@ static int mtk_spi_slave_prepare_message(struct spi_controller *ctlr,
 
 	reg_val &= ~SPIS_TX_ENDIAN;
 	reg_val &= ~SPIS_RX_ENDIAN;
-	writel(reg_val, mdata->base + SPIS_CFG_REG);
+	pete_writel("drivers/spi/spi-slave-mt27xx.c:157", reg_val, mdata->base + SPIS_CFG_REG);
 
 	return 0;
 }
@@ -166,14 +166,14 @@ static int mtk_spi_slave_fifo_transfer(struct spi_controller *ctlr,
 	struct mtk_spi_slave *mdata = spi_controller_get_devdata(ctlr);
 	int reg_val, cnt, remainder, ret;
 
-	writel(SPIS_SOFT_RST, mdata->base + SPIS_SOFT_RST_REG);
+	pete_writel("drivers/spi/spi-slave-mt27xx.c:169", SPIS_SOFT_RST, mdata->base + SPIS_SOFT_RST_REG);
 
-	reg_val = readl(mdata->base + SPIS_CFG_REG);
+	reg_val = pete_readl("drivers/spi/spi-slave-mt27xx.c:171", mdata->base + SPIS_CFG_REG);
 	if (xfer->rx_buf)
 		reg_val |= SPIS_RX_EN;
 	if (xfer->tx_buf)
 		reg_val |= SPIS_TX_EN;
-	writel(reg_val, mdata->base + SPIS_CFG_REG);
+	pete_writel("drivers/spi/spi-slave-mt27xx.c:176", reg_val, mdata->base + SPIS_CFG_REG);
 
 	cnt = xfer->len / 4;
 	if (xfer->tx_buf)
@@ -184,13 +184,13 @@ static int mtk_spi_slave_fifo_transfer(struct spi_controller *ctlr,
 	if (xfer->tx_buf && remainder > 0) {
 		reg_val = 0;
 		memcpy(&reg_val, xfer->tx_buf + cnt * 4, remainder);
-		writel(reg_val, mdata->base + SPIS_TX_DATA_REG);
+		pete_writel("drivers/spi/spi-slave-mt27xx.c:187", reg_val, mdata->base + SPIS_TX_DATA_REG);
 	}
 
 	ret = mtk_spi_slave_wait_for_completion(mdata);
 	if (ret) {
 		mtk_spi_slave_disable_xfer(mdata);
-		writel(SPIS_SOFT_RST, mdata->base + SPIS_SOFT_RST_REG);
+		pete_writel("drivers/spi/spi-slave-mt27xx.c:193", SPIS_SOFT_RST, mdata->base + SPIS_SOFT_RST_REG);
 	}
 
 	return ret;
@@ -204,7 +204,7 @@ static int mtk_spi_slave_dma_transfer(struct spi_controller *ctlr,
 	struct device *dev = mdata->dev;
 	int reg_val, ret;
 
-	writel(SPIS_SOFT_RST, mdata->base + SPIS_SOFT_RST_REG);
+	pete_writel("drivers/spi/spi-slave-mt27xx.c:207", SPIS_SOFT_RST, mdata->base + SPIS_SOFT_RST_REG);
 
 	if (xfer->tx_buf) {
 		/* tx_buf is a const void* where we need a void * for
@@ -229,31 +229,31 @@ static int mtk_spi_slave_dma_transfer(struct spi_controller *ctlr,
 		}
 	}
 
-	writel(xfer->tx_dma, mdata->base + SPIS_TX_SRC_REG);
-	writel(xfer->rx_dma, mdata->base + SPIS_RX_DST_REG);
+	pete_writel("drivers/spi/spi-slave-mt27xx.c:232", xfer->tx_dma, mdata->base + SPIS_TX_SRC_REG);
+	pete_writel("drivers/spi/spi-slave-mt27xx.c:233", xfer->rx_dma, mdata->base + SPIS_RX_DST_REG);
 
-	writel(SPIS_DMA_ADDR_EN, mdata->base + SPIS_SOFT_RST_REG);
+	pete_writel("drivers/spi/spi-slave-mt27xx.c:235", SPIS_DMA_ADDR_EN, mdata->base + SPIS_SOFT_RST_REG);
 
 	/* enable config reg tx rx_enable */
-	reg_val = readl(mdata->base + SPIS_CFG_REG);
+	reg_val = pete_readl("drivers/spi/spi-slave-mt27xx.c:238", mdata->base + SPIS_CFG_REG);
 	if (xfer->tx_buf)
 		reg_val |= SPIS_TX_EN;
 	if (xfer->rx_buf)
 		reg_val |= SPIS_RX_EN;
-	writel(reg_val, mdata->base + SPIS_CFG_REG);
+	pete_writel("drivers/spi/spi-slave-mt27xx.c:243", reg_val, mdata->base + SPIS_CFG_REG);
 
 	/* config dma */
 	reg_val = 0;
 	reg_val |= (xfer->len - 1) & TX_DMA_LEN;
-	writel(reg_val, mdata->base + SPIS_DMA_CFG_REG);
+	pete_writel("drivers/spi/spi-slave-mt27xx.c:248", reg_val, mdata->base + SPIS_DMA_CFG_REG);
 
-	reg_val = readl(mdata->base + SPIS_DMA_CFG_REG);
+	reg_val = pete_readl("drivers/spi/spi-slave-mt27xx.c:250", mdata->base + SPIS_DMA_CFG_REG);
 	if (xfer->tx_buf)
 		reg_val |= TX_DMA_EN;
 	if (xfer->rx_buf)
 		reg_val |= RX_DMA_EN;
 	reg_val |= TX_DMA_TRIG_EN;
-	writel(reg_val, mdata->base + SPIS_DMA_CFG_REG);
+	pete_writel("drivers/spi/spi-slave-mt27xx.c:256", reg_val, mdata->base + SPIS_DMA_CFG_REG);
 
 	ret = mtk_spi_slave_wait_for_completion(mdata);
 	if (ret)
@@ -274,7 +274,7 @@ unmap_txdma:
 disable_transfer:
 	mtk_spi_slave_disable_dma(mdata);
 	mtk_spi_slave_disable_xfer(mdata);
-	writel(SPIS_SOFT_RST, mdata->base + SPIS_SOFT_RST_REG);
+	pete_writel("drivers/spi/spi-slave-mt27xx.c:277", SPIS_SOFT_RST, mdata->base + SPIS_SOFT_RST_REG);
 
 	return ret;
 }
@@ -302,11 +302,11 @@ static int mtk_spi_slave_setup(struct spi_device *spi)
 
 	reg_val = DMA_DONE_EN | DATA_DONE_EN |
 		  RSTA_DONE_EN | CMD_INVALID_EN;
-	writel(reg_val, mdata->base + SPIS_IRQ_EN_REG);
+	pete_writel("drivers/spi/spi-slave-mt27xx.c:305", reg_val, mdata->base + SPIS_IRQ_EN_REG);
 
 	reg_val = DMA_DONE_MASK | DATA_DONE_MASK |
 		  RSTA_DONE_MASK | CMD_INVALID_MASK;
-	writel(reg_val, mdata->base + SPIS_IRQ_MASK_REG);
+	pete_writel("drivers/spi/spi-slave-mt27xx.c:309", reg_val, mdata->base + SPIS_IRQ_MASK_REG);
 
 	mtk_spi_slave_disable_dma(mdata);
 	mtk_spi_slave_disable_xfer(mdata);
@@ -331,8 +331,8 @@ static irqreturn_t mtk_spi_slave_interrupt(int irq, void *dev_id)
 	struct spi_transfer *trans = mdata->cur_transfer;
 	u32 int_status, reg_val, cnt, remainder;
 
-	int_status = readl(mdata->base + SPIS_IRQ_ST_REG);
-	writel(int_status, mdata->base + SPIS_IRQ_CLR_REG);
+	int_status = pete_readl("drivers/spi/spi-slave-mt27xx.c:334", mdata->base + SPIS_IRQ_ST_REG);
+	pete_writel("drivers/spi/spi-slave-mt27xx.c:335", int_status, mdata->base + SPIS_IRQ_CLR_REG);
 
 	if (!trans)
 		return IRQ_NONE;
@@ -340,7 +340,7 @@ static irqreturn_t mtk_spi_slave_interrupt(int irq, void *dev_id)
 	if ((int_status & DMA_DONE_ST) &&
 	    ((int_status & DATA_DONE_ST) ||
 	    (int_status & RSTA_DONE_ST))) {
-		writel(SPIS_SOFT_RST, mdata->base + SPIS_SOFT_RST_REG);
+		pete_writel("drivers/spi/spi-slave-mt27xx.c:343", SPIS_SOFT_RST, mdata->base + SPIS_SOFT_RST_REG);
 
 		if (trans->tx_buf)
 			dma_unmap_single(mdata->dev, trans->tx_dma,
@@ -362,7 +362,7 @@ static irqreturn_t mtk_spi_slave_interrupt(int irq, void *dev_id)
 				     trans->rx_buf, cnt);
 		remainder = trans->len % 4;
 		if (trans->rx_buf && remainder > 0) {
-			reg_val = readl(mdata->base + SPIS_RX_DATA_REG);
+			reg_val = pete_readl("drivers/spi/spi-slave-mt27xx.c:365", mdata->base + SPIS_RX_DATA_REG);
 			memcpy(trans->rx_buf + (cnt * 4),
 			       &reg_val, remainder);
 		}

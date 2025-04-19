@@ -25,8 +25,8 @@
 
 #include "aw2-tsl.c"
 
-#define WRITEREG(value, addr) writel((value), chip->base_addr + (addr))
-#define READREG(addr) readl(chip->base_addr + (addr))
+#define WRITEREG(value, addr) pete_writel("sound/pci/aw2/aw2-saa7146.c:28", (value), chip->base_addr + (addr))
+#define READREG(addr) pete_readl("sound/pci/aw2/aw2-saa7146.c:29", chip->base_addr + (addr))
 
 static struct snd_aw2_saa7146_cb_param
  arr_substream_it_playback_cb[NB_STREAM_PLAYBACK];

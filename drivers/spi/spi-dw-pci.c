@@ -41,7 +41,7 @@ static int spi_mid_init(struct dw_spi *dws)
 		return -ENOMEM;
 
 	/* Get SPI controller operating freq info */
-	clk_cdiv = readl(clk_reg + dws->bus_num * sizeof(u32));
+	clk_cdiv = pete_readl("drivers/spi/spi-dw-pci.c:44", clk_reg + dws->bus_num * sizeof(u32));
 	clk_cdiv &= CLK_SPI_CDIV_MASK;
 	clk_cdiv >>= CLK_SPI_CDIV_OFFSET;
 	dws->max_freq = MRST_SPI_CLK_BASE / (clk_cdiv + 1);

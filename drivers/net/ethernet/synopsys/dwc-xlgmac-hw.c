@@ -37,10 +37,10 @@ static int xlgmac_disable_rx_csum(struct xlgmac_pdata *pdata)
 {
 	u32 regval;
 
-	regval = readl(pdata->mac_regs + MAC_RCR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:40", pdata->mac_regs + MAC_RCR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_RCR_IPC_POS,
 				     MAC_RCR_IPC_LEN, 0);
-	writel(regval, pdata->mac_regs + MAC_RCR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:43", regval, pdata->mac_regs + MAC_RCR);
 
 	return 0;
 }
@@ -49,10 +49,10 @@ static int xlgmac_enable_rx_csum(struct xlgmac_pdata *pdata)
 {
 	u32 regval;
 
-	regval = readl(pdata->mac_regs + MAC_RCR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:52", pdata->mac_regs + MAC_RCR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_RCR_IPC_POS,
 				     MAC_RCR_IPC_LEN, 1);
-	writel(regval, pdata->mac_regs + MAC_RCR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:55", regval, pdata->mac_regs + MAC_RCR);
 
 	return 0;
 }
@@ -65,8 +65,8 @@ static int xlgmac_set_mac_address(struct xlgmac_pdata *pdata, u8 *addr)
 	mac_addr_lo = (addr[3] << 24) | (addr[2] << 16) |
 		      (addr[1] <<  8) | (addr[0] <<  0);
 
-	writel(mac_addr_hi, pdata->mac_regs + MAC_MACA0HR);
-	writel(mac_addr_lo, pdata->mac_regs + MAC_MACA0LR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:68", mac_addr_hi, pdata->mac_regs + MAC_MACA0HR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:69", mac_addr_lo, pdata->mac_regs + MAC_MACA0LR);
 
 	return 0;
 }
@@ -101,9 +101,9 @@ static void xlgmac_set_mac_reg(struct xlgmac_pdata *pdata,
 						1);
 	}
 
-	writel(mac_addr_hi, pdata->mac_regs + *mac_reg);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:104", mac_addr_hi, pdata->mac_regs + *mac_reg);
 	*mac_reg += MAC_MACA_INC;
-	writel(mac_addr_lo, pdata->mac_regs + *mac_reg);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:106", mac_addr_lo, pdata->mac_regs + *mac_reg);
 	*mac_reg += MAC_MACA_INC;
 }
 
@@ -111,7 +111,7 @@ static int xlgmac_enable_rx_vlan_stripping(struct xlgmac_pdata *pdata)
 {
 	u32 regval;
 
-	regval = readl(pdata->mac_regs + MAC_VLANTR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:114", pdata->mac_regs + MAC_VLANTR);
 	/* Put the VLAN tag in the Rx descriptor */
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_VLANTR_EVLRXS_POS,
 				     MAC_VLANTR_EVLRXS_LEN, 1);
@@ -127,7 +127,7 @@ static int xlgmac_enable_rx_vlan_stripping(struct xlgmac_pdata *pdata)
 	/* Enable VLAN tag stripping */
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_VLANTR_EVLS_POS,
 				     MAC_VLANTR_EVLS_LEN, 0x3);
-	writel(regval, pdata->mac_regs + MAC_VLANTR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:130", regval, pdata->mac_regs + MAC_VLANTR);
 
 	return 0;
 }
@@ -136,10 +136,10 @@ static int xlgmac_disable_rx_vlan_stripping(struct xlgmac_pdata *pdata)
 {
 	u32 regval;
 
-	regval = readl(pdata->mac_regs + MAC_VLANTR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:139", pdata->mac_regs + MAC_VLANTR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_VLANTR_EVLS_POS,
 				     MAC_VLANTR_EVLS_LEN, 0);
-	writel(regval, pdata->mac_regs + MAC_VLANTR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:142", regval, pdata->mac_regs + MAC_VLANTR);
 
 	return 0;
 }
@@ -148,13 +148,13 @@ static int xlgmac_enable_rx_vlan_filtering(struct xlgmac_pdata *pdata)
 {
 	u32 regval;
 
-	regval = readl(pdata->mac_regs + MAC_PFR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:151", pdata->mac_regs + MAC_PFR);
 	/* Enable VLAN filtering */
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_PFR_VTFE_POS,
 				     MAC_PFR_VTFE_LEN, 1);
-	writel(regval, pdata->mac_regs + MAC_PFR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:155", regval, pdata->mac_regs + MAC_PFR);
 
-	regval = readl(pdata->mac_regs + MAC_VLANTR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:157", pdata->mac_regs + MAC_VLANTR);
 	/* Enable VLAN Hash Table filtering */
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_VLANTR_VTHM_POS,
 				     MAC_VLANTR_VTHM_LEN, 1);
@@ -172,7 +172,7 @@ static int xlgmac_enable_rx_vlan_filtering(struct xlgmac_pdata *pdata)
 	 */
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_VLANTR_VL_POS,
 				     MAC_VLANTR_VL_LEN, 1);
-	writel(regval, pdata->mac_regs + MAC_VLANTR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:175", regval, pdata->mac_regs + MAC_VLANTR);
 
 	return 0;
 }
@@ -181,11 +181,11 @@ static int xlgmac_disable_rx_vlan_filtering(struct xlgmac_pdata *pdata)
 {
 	u32 regval;
 
-	regval = readl(pdata->mac_regs + MAC_PFR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:184", pdata->mac_regs + MAC_PFR);
 	/* Disable VLAN filtering */
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_PFR_VTFE_POS,
 				     MAC_PFR_VTFE_LEN, 0);
-	writel(regval, pdata->mac_regs + MAC_PFR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:188", regval, pdata->mac_regs + MAC_PFR);
 
 	return 0;
 }
@@ -231,11 +231,11 @@ static int xlgmac_update_vlan_hash_table(struct xlgmac_pdata *pdata)
 		vlan_hash_table |= (1 << crc);
 	}
 
-	regval = readl(pdata->mac_regs + MAC_VLANHTR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:234", pdata->mac_regs + MAC_VLANHTR);
 	/* Set the VLAN Hash Table filtering register */
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_VLANHTR_VLHT_POS,
 				     MAC_VLANHTR_VLHT_LEN, vlan_hash_table);
-	writel(regval, pdata->mac_regs + MAC_VLANHTR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:238", regval, pdata->mac_regs + MAC_VLANHTR);
 
 	return 0;
 }
@@ -246,7 +246,7 @@ static int xlgmac_set_promiscuous_mode(struct xlgmac_pdata *pdata,
 	unsigned int val = enable ? 1 : 0;
 	u32 regval;
 
-	regval = XLGMAC_GET_REG_BITS(readl(pdata->mac_regs + MAC_PFR),
+	regval = XLGMAC_GET_REG_BITS(pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:249", pdata->mac_regs + MAC_PFR),
 				     MAC_PFR_PR_POS, MAC_PFR_PR_LEN);
 	if (regval == val)
 		return 0;
@@ -254,10 +254,10 @@ static int xlgmac_set_promiscuous_mode(struct xlgmac_pdata *pdata,
 	netif_dbg(pdata, drv, pdata->netdev, "%s promiscuous mode\n",
 		  enable ? "entering" : "leaving");
 
-	regval = readl(pdata->mac_regs + MAC_PFR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:257", pdata->mac_regs + MAC_PFR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_PFR_PR_POS,
 				     MAC_PFR_PR_LEN, val);
-	writel(regval, pdata->mac_regs + MAC_PFR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:260", regval, pdata->mac_regs + MAC_PFR);
 
 	/* Hardware will still perform VLAN filtering in promiscuous mode */
 	if (enable) {
@@ -276,7 +276,7 @@ static int xlgmac_set_all_multicast_mode(struct xlgmac_pdata *pdata,
 	unsigned int val = enable ? 1 : 0;
 	u32 regval;
 
-	regval = XLGMAC_GET_REG_BITS(readl(pdata->mac_regs + MAC_PFR),
+	regval = XLGMAC_GET_REG_BITS(pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:279", pdata->mac_regs + MAC_PFR),
 				     MAC_PFR_PM_POS, MAC_PFR_PM_LEN);
 	if (regval == val)
 		return 0;
@@ -284,10 +284,10 @@ static int xlgmac_set_all_multicast_mode(struct xlgmac_pdata *pdata,
 	netif_dbg(pdata, drv, pdata->netdev, "%s allmulti mode\n",
 		  enable ? "entering" : "leaving");
 
-	regval = readl(pdata->mac_regs + MAC_PFR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:287", pdata->mac_regs + MAC_PFR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_PFR_PM_POS,
 				     MAC_PFR_PM_LEN, val);
-	writel(regval, pdata->mac_regs + MAC_PFR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:290", regval, pdata->mac_regs + MAC_PFR);
 
 	return 0;
 }
@@ -355,7 +355,7 @@ static void xlgmac_set_mac_hash_table(struct xlgmac_pdata *pdata)
 	/* Set the MAC Hash Table registers */
 	hash_reg = MAC_HTR0;
 	for (i = 0; i < hash_table_count; i++) {
-		writel(hash_table[i], pdata->mac_regs + hash_reg);
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:358", hash_table[i], pdata->mac_regs + hash_reg);
 		hash_reg += MAC_HTR_INC;
 	}
 }
@@ -378,14 +378,14 @@ static void xlgmac_config_mac_address(struct xlgmac_pdata *pdata)
 
 	/* Filtering is done using perfect filtering and hash filtering */
 	if (pdata->hw_feat.hash_table_size) {
-		regval = readl(pdata->mac_regs + MAC_PFR);
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:381", pdata->mac_regs + MAC_PFR);
 		regval = XLGMAC_SET_REG_BITS(regval, MAC_PFR_HPF_POS,
 					     MAC_PFR_HPF_LEN, 1);
 		regval = XLGMAC_SET_REG_BITS(regval, MAC_PFR_HUC_POS,
 					     MAC_PFR_HUC_LEN, 1);
 		regval = XLGMAC_SET_REG_BITS(regval, MAC_PFR_HMC_POS,
 					     MAC_PFR_HMC_LEN, 1);
-		writel(regval, pdata->mac_regs + MAC_PFR);
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:388", regval, pdata->mac_regs + MAC_PFR);
 	}
 }
 
@@ -396,10 +396,10 @@ static void xlgmac_config_jumbo_enable(struct xlgmac_pdata *pdata)
 
 	val = (pdata->netdev->mtu > XLGMAC_STD_PACKET_MTU) ? 1 : 0;
 
-	regval = readl(pdata->mac_regs + MAC_RCR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:399", pdata->mac_regs + MAC_RCR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_RCR_JE_POS,
 				     MAC_RCR_JE_LEN, val);
-	writel(regval, pdata->mac_regs + MAC_RCR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:402", regval, pdata->mac_regs + MAC_RCR);
 }
 
 static void xlgmac_config_checksum_offload(struct xlgmac_pdata *pdata)
@@ -414,13 +414,13 @@ static void xlgmac_config_vlan_support(struct xlgmac_pdata *pdata)
 {
 	u32 regval;
 
-	regval = readl(pdata->mac_regs + MAC_VLANIR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:417", pdata->mac_regs + MAC_VLANIR);
 	/* Indicate that VLAN Tx CTAGs come from context descriptors */
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_VLANIR_CSVL_POS,
 				     MAC_VLANIR_CSVL_LEN, 0);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_VLANIR_VLTI_POS,
 				     MAC_VLANIR_VLTI_LEN, 1);
-	writel(regval, pdata->mac_regs + MAC_VLANIR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:423", regval, pdata->mac_regs + MAC_VLANIR);
 
 	/* Set the current VLAN Hash Table register value */
 	xlgmac_update_vlan_hash_table(pdata);
@@ -478,7 +478,7 @@ static void xlgmac_prepare_tx_stop(struct xlgmac_pdata *pdata,
 	 */
 	tx_timeout = jiffies + (XLGMAC_DMA_STOP_TIMEOUT * HZ);
 	while (time_before(jiffies, tx_timeout)) {
-		tx_status = readl(pdata->mac_regs + tx_dsr);
+		tx_status = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:481", pdata->mac_regs + tx_dsr);
 		tx_status = XLGMAC_GET_REG_BITS(tx_status, tx_pos,
 						DMA_DSR_TPS_LEN);
 		if ((tx_status == DMA_TPS_STOPPED) ||
@@ -506,26 +506,26 @@ static void xlgmac_enable_tx(struct xlgmac_pdata *pdata)
 		if (!channel->tx_ring)
 			break;
 
-		regval = readl(XLGMAC_DMA_REG(channel, DMA_CH_TCR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:509", XLGMAC_DMA_REG(channel, DMA_CH_TCR));
 		regval = XLGMAC_SET_REG_BITS(regval, DMA_CH_TCR_ST_POS,
 					     DMA_CH_TCR_ST_LEN, 1);
-		writel(regval, XLGMAC_DMA_REG(channel, DMA_CH_TCR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:512", regval, XLGMAC_DMA_REG(channel, DMA_CH_TCR));
 	}
 
 	/* Enable each Tx queue */
 	for (i = 0; i < pdata->tx_q_count; i++) {
-		regval = readl(XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:517", XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
 		regval = XLGMAC_SET_REG_BITS(regval, MTL_Q_TQOMR_TXQEN_POS,
 					     MTL_Q_TQOMR_TXQEN_LEN,
 					MTL_Q_ENABLED);
-		writel(regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:521", regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
 	}
 
 	/* Enable MAC Tx */
-	regval = readl(pdata->mac_regs + MAC_TCR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:525", pdata->mac_regs + MAC_TCR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_TCR_TE_POS,
 				     MAC_TCR_TE_LEN, 1);
-	writel(regval, pdata->mac_regs + MAC_TCR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:528", regval, pdata->mac_regs + MAC_TCR);
 }
 
 static void xlgmac_disable_tx(struct xlgmac_pdata *pdata)
@@ -544,17 +544,17 @@ static void xlgmac_disable_tx(struct xlgmac_pdata *pdata)
 	}
 
 	/* Disable MAC Tx */
-	regval = readl(pdata->mac_regs + MAC_TCR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:547", pdata->mac_regs + MAC_TCR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_TCR_TE_POS,
 				     MAC_TCR_TE_LEN, 0);
-	writel(regval, pdata->mac_regs + MAC_TCR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:550", regval, pdata->mac_regs + MAC_TCR);
 
 	/* Disable each Tx queue */
 	for (i = 0; i < pdata->tx_q_count; i++) {
-		regval = readl(XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:554", XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
 		regval = XLGMAC_SET_REG_BITS(regval, MTL_Q_TQOMR_TXQEN_POS,
 					     MTL_Q_TQOMR_TXQEN_LEN, 0);
-		writel(regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:557", regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
 	}
 
 	/* Disable each Tx DMA channel */
@@ -563,10 +563,10 @@ static void xlgmac_disable_tx(struct xlgmac_pdata *pdata)
 		if (!channel->tx_ring)
 			break;
 
-		regval = readl(XLGMAC_DMA_REG(channel, DMA_CH_TCR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:566", XLGMAC_DMA_REG(channel, DMA_CH_TCR));
 		regval = XLGMAC_SET_REG_BITS(regval, DMA_CH_TCR_ST_POS,
 					     DMA_CH_TCR_ST_LEN, 0);
-		writel(regval, XLGMAC_DMA_REG(channel, DMA_CH_TCR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:569", regval, XLGMAC_DMA_REG(channel, DMA_CH_TCR));
 	}
 }
 
@@ -582,7 +582,7 @@ static void xlgmac_prepare_rx_stop(struct xlgmac_pdata *pdata,
 	 */
 	rx_timeout = jiffies + (XLGMAC_DMA_STOP_TIMEOUT * HZ);
 	while (time_before(jiffies, rx_timeout)) {
-		rx_status = readl(XLGMAC_MTL_REG(pdata, queue, MTL_Q_RQDR));
+		rx_status = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:585", XLGMAC_MTL_REG(pdata, queue, MTL_Q_RQDR));
 		prxq = XLGMAC_GET_REG_BITS(rx_status, MTL_Q_RQDR_PRXQ_POS,
 					   MTL_Q_RQDR_PRXQ_LEN);
 		rxqsts = XLGMAC_GET_REG_BITS(rx_status, MTL_Q_RQDR_RXQSTS_POS,
@@ -610,20 +610,20 @@ static void xlgmac_enable_rx(struct xlgmac_pdata *pdata)
 		if (!channel->rx_ring)
 			break;
 
-		regval = readl(XLGMAC_DMA_REG(channel, DMA_CH_RCR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:613", XLGMAC_DMA_REG(channel, DMA_CH_RCR));
 		regval = XLGMAC_SET_REG_BITS(regval, DMA_CH_RCR_SR_POS,
 					     DMA_CH_RCR_SR_LEN, 1);
-		writel(regval, XLGMAC_DMA_REG(channel, DMA_CH_RCR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:616", regval, XLGMAC_DMA_REG(channel, DMA_CH_RCR));
 	}
 
 	/* Enable each Rx queue */
 	regval = 0;
 	for (i = 0; i < pdata->rx_q_count; i++)
 		regval |= (0x02 << (i << 1));
-	writel(regval, pdata->mac_regs + MAC_RQC0R);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:623", regval, pdata->mac_regs + MAC_RQC0R);
 
 	/* Enable MAC Rx */
-	regval = readl(pdata->mac_regs + MAC_RCR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:626", pdata->mac_regs + MAC_RCR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_RCR_DCRCC_POS,
 				     MAC_RCR_DCRCC_LEN, 1);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_RCR_CST_POS,
@@ -632,7 +632,7 @@ static void xlgmac_enable_rx(struct xlgmac_pdata *pdata)
 				     MAC_RCR_ACS_LEN, 1);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_RCR_RE_POS,
 				     MAC_RCR_RE_LEN, 1);
-	writel(regval, pdata->mac_regs + MAC_RCR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:635", regval, pdata->mac_regs + MAC_RCR);
 }
 
 static void xlgmac_disable_rx(struct xlgmac_pdata *pdata)
@@ -642,7 +642,7 @@ static void xlgmac_disable_rx(struct xlgmac_pdata *pdata)
 	u32 regval;
 
 	/* Disable MAC Rx */
-	regval = readl(pdata->mac_regs + MAC_RCR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:645", pdata->mac_regs + MAC_RCR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_RCR_DCRCC_POS,
 				     MAC_RCR_DCRCC_LEN, 0);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_RCR_CST_POS,
@@ -651,14 +651,14 @@ static void xlgmac_disable_rx(struct xlgmac_pdata *pdata)
 				     MAC_RCR_ACS_LEN, 0);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_RCR_RE_POS,
 				     MAC_RCR_RE_LEN, 0);
-	writel(regval, pdata->mac_regs + MAC_RCR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:654", regval, pdata->mac_regs + MAC_RCR);
 
 	/* Prepare for Rx DMA channel stop */
 	for (i = 0; i < pdata->rx_q_count; i++)
 		xlgmac_prepare_rx_stop(pdata, i);
 
 	/* Disable each Rx queue */
-	writel(0, pdata->mac_regs + MAC_RQC0R);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:661", 0, pdata->mac_regs + MAC_RQC0R);
 
 	/* Disable each Rx DMA channel */
 	channel = pdata->channel_head;
@@ -666,10 +666,10 @@ static void xlgmac_disable_rx(struct xlgmac_pdata *pdata)
 		if (!channel->rx_ring)
 			break;
 
-		regval = readl(XLGMAC_DMA_REG(channel, DMA_CH_RCR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:669", XLGMAC_DMA_REG(channel, DMA_CH_RCR));
 		regval = XLGMAC_SET_REG_BITS(regval, DMA_CH_RCR_SR_POS,
 					     DMA_CH_RCR_SR_LEN, 0);
-		writel(regval, XLGMAC_DMA_REG(channel, DMA_CH_RCR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:672", regval, XLGMAC_DMA_REG(channel, DMA_CH_RCR));
 	}
 }
 
@@ -686,7 +686,7 @@ static void xlgmac_tx_start_xmit(struct xlgmac_channel *channel,
 	 * of next immediate free descriptor
 	 */
 	desc_data = XLGMAC_GET_DESC_DATA(ring, ring->cur);
-	writel(lower_32_bits(desc_data->dma_desc_addr),
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:689", lower_32_bits(desc_data->dma_desc_addr),
 	       XLGMAC_DMA_REG(channel, DMA_CH_TDTR_LO));
 
 	/* Start the Tx timer */
@@ -1069,13 +1069,13 @@ static void xlgmac_tx_desc_init(struct xlgmac_channel *channel)
 	}
 
 	/* Update the total number of Tx descriptors */
-	writel(ring->dma_desc_count - 1, XLGMAC_DMA_REG(channel, DMA_CH_TDRLR));
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1072", ring->dma_desc_count - 1, XLGMAC_DMA_REG(channel, DMA_CH_TDRLR));
 
 	/* Update the starting address of descriptor ring */
 	desc_data = XLGMAC_GET_DESC_DATA(ring, start_index);
-	writel(upper_32_bits(desc_data->dma_desc_addr),
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1076", upper_32_bits(desc_data->dma_desc_addr),
 	       XLGMAC_DMA_REG(channel, DMA_CH_TDLR_HI));
-	writel(lower_32_bits(desc_data->dma_desc_addr),
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1078", lower_32_bits(desc_data->dma_desc_addr),
 	       XLGMAC_DMA_REG(channel, DMA_CH_TDLR_LO));
 }
 
@@ -1153,19 +1153,19 @@ static void xlgmac_rx_desc_init(struct xlgmac_channel *channel)
 	}
 
 	/* Update the total number of Rx descriptors */
-	writel(ring->dma_desc_count - 1, XLGMAC_DMA_REG(channel, DMA_CH_RDRLR));
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1156", ring->dma_desc_count - 1, XLGMAC_DMA_REG(channel, DMA_CH_RDRLR));
 
 	/* Update the starting address of descriptor ring */
 	desc_data = XLGMAC_GET_DESC_DATA(ring, start_index);
-	writel(upper_32_bits(desc_data->dma_desc_addr),
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1160", upper_32_bits(desc_data->dma_desc_addr),
 	       XLGMAC_DMA_REG(channel, DMA_CH_RDLR_HI));
-	writel(lower_32_bits(desc_data->dma_desc_addr),
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1162", lower_32_bits(desc_data->dma_desc_addr),
 	       XLGMAC_DMA_REG(channel, DMA_CH_RDLR_LO));
 
 	/* Update the Rx Descriptor Tail Pointer */
 	desc_data = XLGMAC_GET_DESC_DATA(ring, start_index +
 					  ring->dma_desc_count - 1);
-	writel(lower_32_bits(desc_data->dma_desc_addr),
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1168", lower_32_bits(desc_data->dma_desc_addr),
 	       XLGMAC_DMA_REG(channel, DMA_CH_RDTR_LO));
 }
 
@@ -1193,10 +1193,10 @@ static int xlgmac_disable_tx_flow_control(struct xlgmac_pdata *pdata)
 
 	/* Clear MTL flow control */
 	for (i = 0; i < pdata->rx_q_count; i++) {
-		regval = readl(XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1196", XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
 		regval = XLGMAC_SET_REG_BITS(regval, MTL_Q_RQOMR_EHFC_POS,
 					     MTL_Q_RQOMR_EHFC_LEN, 0);
-		writel(regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1199", regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
 	}
 
 	/* Clear MAC flow control */
@@ -1204,12 +1204,12 @@ static int xlgmac_disable_tx_flow_control(struct xlgmac_pdata *pdata)
 	q_count = min_t(unsigned int, pdata->tx_q_count, max_q_count);
 	reg = MAC_Q0TFCR;
 	for (i = 0; i < q_count; i++) {
-		regval = readl(pdata->mac_regs + reg);
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1207", pdata->mac_regs + reg);
 		regval = XLGMAC_SET_REG_BITS(regval,
 					     MAC_Q0TFCR_TFE_POS,
 					MAC_Q0TFCR_TFE_LEN,
 					0);
-		writel(regval, pdata->mac_regs + reg);
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1212", regval, pdata->mac_regs + reg);
 
 		reg += MAC_QTFCR_INC;
 	}
@@ -1225,10 +1225,10 @@ static int xlgmac_enable_tx_flow_control(struct xlgmac_pdata *pdata)
 
 	/* Set MTL flow control */
 	for (i = 0; i < pdata->rx_q_count; i++) {
-		regval = readl(XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1228", XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
 		regval = XLGMAC_SET_REG_BITS(regval, MTL_Q_RQOMR_EHFC_POS,
 					     MTL_Q_RQOMR_EHFC_LEN, 1);
-		writel(regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1231", regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
 	}
 
 	/* Set MAC flow control */
@@ -1236,7 +1236,7 @@ static int xlgmac_enable_tx_flow_control(struct xlgmac_pdata *pdata)
 	q_count = min_t(unsigned int, pdata->tx_q_count, max_q_count);
 	reg = MAC_Q0TFCR;
 	for (i = 0; i < q_count; i++) {
-		regval = readl(pdata->mac_regs + reg);
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1239", pdata->mac_regs + reg);
 
 		/* Enable transmit flow control */
 		regval = XLGMAC_SET_REG_BITS(regval, MAC_Q0TFCR_TFE_POS,
@@ -1245,7 +1245,7 @@ static int xlgmac_enable_tx_flow_control(struct xlgmac_pdata *pdata)
 		regval = XLGMAC_SET_REG_BITS(regval, MAC_Q0TFCR_PT_POS,
 					     MAC_Q0TFCR_PT_LEN, 0xffff);
 
-		writel(regval, pdata->mac_regs + reg);
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1248", regval, pdata->mac_regs + reg);
 
 		reg += MAC_QTFCR_INC;
 	}
@@ -1257,10 +1257,10 @@ static int xlgmac_disable_rx_flow_control(struct xlgmac_pdata *pdata)
 {
 	u32 regval;
 
-	regval = readl(pdata->mac_regs + MAC_RFCR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1260", pdata->mac_regs + MAC_RFCR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_RFCR_RFE_POS,
 				     MAC_RFCR_RFE_LEN, 0);
-	writel(regval, pdata->mac_regs + MAC_RFCR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1263", regval, pdata->mac_regs + MAC_RFCR);
 
 	return 0;
 }
@@ -1269,10 +1269,10 @@ static int xlgmac_enable_rx_flow_control(struct xlgmac_pdata *pdata)
 {
 	u32 regval;
 
-	regval = readl(pdata->mac_regs + MAC_RFCR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1272", pdata->mac_regs + MAC_RFCR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_RFCR_RFE_POS,
 				     MAC_RFCR_RFE_LEN, 1);
-	writel(regval, pdata->mac_regs + MAC_RFCR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1275", regval, pdata->mac_regs + MAC_RFCR);
 
 	return 0;
 }
@@ -1308,11 +1308,11 @@ static int xlgmac_config_rx_coalesce(struct xlgmac_pdata *pdata)
 		if (!channel->rx_ring)
 			break;
 
-		regval = readl(XLGMAC_DMA_REG(channel, DMA_CH_RIWT));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1311", XLGMAC_DMA_REG(channel, DMA_CH_RIWT));
 		regval = XLGMAC_SET_REG_BITS(regval, DMA_CH_RIWT_RWT_POS,
 					     DMA_CH_RIWT_RWT_LEN,
 					     pdata->rx_riwt);
-		writel(regval, XLGMAC_DMA_REG(channel, DMA_CH_RIWT));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1315", regval, XLGMAC_DMA_REG(channel, DMA_CH_RIWT));
 	}
 
 	return 0;
@@ -1330,10 +1330,10 @@ static void xlgmac_config_rx_fep_enable(struct xlgmac_pdata *pdata)
 	u32 regval;
 
 	for (i = 0; i < pdata->rx_q_count; i++) {
-		regval = readl(XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1333", XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
 		regval = XLGMAC_SET_REG_BITS(regval, MTL_Q_RQOMR_FEP_POS,
 					     MTL_Q_RQOMR_FEP_LEN, 1);
-		writel(regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1336", regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
 	}
 }
 
@@ -1343,10 +1343,10 @@ static void xlgmac_config_rx_fup_enable(struct xlgmac_pdata *pdata)
 	u32 regval;
 
 	for (i = 0; i < pdata->rx_q_count; i++) {
-		regval = readl(XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1346", XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
 		regval = XLGMAC_SET_REG_BITS(regval, MTL_Q_RQOMR_FUP_POS,
 					     MTL_Q_RQOMR_FUP_LEN, 1);
-		writel(regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1349", regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
 	}
 }
 
@@ -1366,11 +1366,11 @@ static void xlgmac_config_rx_buffer_size(struct xlgmac_pdata *pdata)
 		if (!channel->rx_ring)
 			break;
 
-		regval = readl(XLGMAC_DMA_REG(channel, DMA_CH_RCR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1369", XLGMAC_DMA_REG(channel, DMA_CH_RCR));
 		regval = XLGMAC_SET_REG_BITS(regval, DMA_CH_RCR_RBSZ_POS,
 					     DMA_CH_RCR_RBSZ_LEN,
 					pdata->rx_buf_size);
-		writel(regval, XLGMAC_DMA_REG(channel, DMA_CH_RCR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1373", regval, XLGMAC_DMA_REG(channel, DMA_CH_RCR));
 	}
 }
 
@@ -1386,10 +1386,10 @@ static void xlgmac_config_tso_mode(struct xlgmac_pdata *pdata)
 			break;
 
 		if (pdata->hw_feat.tso) {
-			regval = readl(XLGMAC_DMA_REG(channel, DMA_CH_TCR));
+			regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1389", XLGMAC_DMA_REG(channel, DMA_CH_TCR));
 			regval = XLGMAC_SET_REG_BITS(regval, DMA_CH_TCR_TSE_POS,
 						     DMA_CH_TCR_TSE_LEN, 1);
-			writel(regval, XLGMAC_DMA_REG(channel, DMA_CH_TCR));
+			pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1392", regval, XLGMAC_DMA_REG(channel, DMA_CH_TCR));
 		}
 	}
 }
@@ -1405,17 +1405,17 @@ static void xlgmac_config_sph_mode(struct xlgmac_pdata *pdata)
 		if (!channel->rx_ring)
 			break;
 
-		regval = readl(XLGMAC_DMA_REG(channel, DMA_CH_CR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1408", XLGMAC_DMA_REG(channel, DMA_CH_CR));
 		regval = XLGMAC_SET_REG_BITS(regval, DMA_CH_CR_SPH_POS,
 					     DMA_CH_CR_SPH_LEN, 1);
-		writel(regval, XLGMAC_DMA_REG(channel, DMA_CH_CR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1411", regval, XLGMAC_DMA_REG(channel, DMA_CH_CR));
 	}
 
-	regval = readl(pdata->mac_regs + MAC_RCR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1414", pdata->mac_regs + MAC_RCR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_RCR_HDSMS_POS,
 				     MAC_RCR_HDSMS_LEN,
 				XLGMAC_SPH_HDSMS_SIZE);
-	writel(regval, pdata->mac_regs + MAC_RCR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1418", regval, pdata->mac_regs + MAC_RCR);
 }
 
 static unsigned int xlgmac_usec_to_riwt(struct xlgmac_pdata *pdata,
@@ -1461,10 +1461,10 @@ static int xlgmac_config_rx_threshold(struct xlgmac_pdata *pdata,
 	u32 regval;
 
 	for (i = 0; i < pdata->rx_q_count; i++) {
-		regval = readl(XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1464", XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
 		regval = XLGMAC_SET_REG_BITS(regval, MTL_Q_RQOMR_RTC_POS,
 					     MTL_Q_RQOMR_RTC_LEN, val);
-		writel(regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1467", regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
 	}
 
 	return 0;
@@ -1476,29 +1476,29 @@ static void xlgmac_config_mtl_mode(struct xlgmac_pdata *pdata)
 	u32 regval;
 
 	/* Set Tx to weighted round robin scheduling algorithm */
-	regval = readl(pdata->mac_regs + MTL_OMR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1479", pdata->mac_regs + MTL_OMR);
 	regval = XLGMAC_SET_REG_BITS(regval, MTL_OMR_ETSALG_POS,
 				     MTL_OMR_ETSALG_LEN, MTL_ETSALG_WRR);
-	writel(regval, pdata->mac_regs + MTL_OMR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1482", regval, pdata->mac_regs + MTL_OMR);
 
 	/* Set Tx traffic classes to use WRR algorithm with equal weights */
 	for (i = 0; i < pdata->hw_feat.tc_cnt; i++) {
-		regval = readl(XLGMAC_MTL_REG(pdata, i, MTL_TC_ETSCR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1486", XLGMAC_MTL_REG(pdata, i, MTL_TC_ETSCR));
 		regval = XLGMAC_SET_REG_BITS(regval, MTL_TC_ETSCR_TSA_POS,
 					     MTL_TC_ETSCR_TSA_LEN, MTL_TSA_ETS);
-		writel(regval, XLGMAC_MTL_REG(pdata, i, MTL_TC_ETSCR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1489", regval, XLGMAC_MTL_REG(pdata, i, MTL_TC_ETSCR));
 
-		regval = readl(XLGMAC_MTL_REG(pdata, i, MTL_TC_QWR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1491", XLGMAC_MTL_REG(pdata, i, MTL_TC_QWR));
 		regval = XLGMAC_SET_REG_BITS(regval, MTL_TC_QWR_QW_POS,
 					     MTL_TC_QWR_QW_LEN, 1);
-		writel(regval, XLGMAC_MTL_REG(pdata, i, MTL_TC_QWR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1494", regval, XLGMAC_MTL_REG(pdata, i, MTL_TC_QWR));
 	}
 
 	/* Set Rx to strict priority algorithm */
-	regval = readl(pdata->mac_regs + MTL_OMR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1498", pdata->mac_regs + MTL_OMR);
 	regval = XLGMAC_SET_REG_BITS(regval, MTL_OMR_RAA_POS,
 				     MTL_OMR_RAA_LEN, MTL_RAA_SP);
-	writel(regval, pdata->mac_regs + MTL_OMR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1501", regval, pdata->mac_regs + MTL_OMR);
 }
 
 static void xlgmac_config_queue_mapping(struct xlgmac_pdata *pdata)
@@ -1519,13 +1519,13 @@ static void xlgmac_config_queue_mapping(struct xlgmac_pdata *pdata)
 		for (j = 0; j < qptc; j++) {
 			netif_dbg(pdata, drv, pdata->netdev,
 				  "TXq%u mapped to TC%u\n", queue, i);
-			regval = readl(XLGMAC_MTL_REG(pdata, queue,
+			regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1522", XLGMAC_MTL_REG(pdata, queue,
 						      MTL_Q_TQOMR));
 			regval = XLGMAC_SET_REG_BITS(regval,
 						     MTL_Q_TQOMR_Q2TCMAP_POS,
 						     MTL_Q_TQOMR_Q2TCMAP_LEN,
 						     i);
-			writel(regval, XLGMAC_MTL_REG(pdata, queue,
+			pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1528", regval, XLGMAC_MTL_REG(pdata, queue,
 						      MTL_Q_TQOMR));
 			queue++;
 		}
@@ -1533,13 +1533,13 @@ static void xlgmac_config_queue_mapping(struct xlgmac_pdata *pdata)
 		if (i < qptc_extra) {
 			netif_dbg(pdata, drv, pdata->netdev,
 				  "TXq%u mapped to TC%u\n", queue, i);
-			regval = readl(XLGMAC_MTL_REG(pdata, queue,
+			regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1536", XLGMAC_MTL_REG(pdata, queue,
 						      MTL_Q_TQOMR));
 			regval = XLGMAC_SET_REG_BITS(regval,
 						     MTL_Q_TQOMR_Q2TCMAP_POS,
 						     MTL_Q_TQOMR_Q2TCMAP_LEN,
 						     i);
-			writel(regval, XLGMAC_MTL_REG(pdata, queue,
+			pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1542", regval, XLGMAC_MTL_REG(pdata, queue,
 						      MTL_Q_TQOMR));
 			queue++;
 		}
@@ -1574,7 +1574,7 @@ static void xlgmac_config_queue_mapping(struct xlgmac_pdata *pdata)
 		if ((i % MAC_RQC2_Q_PER_REG) && (i != prio_queues))
 			continue;
 
-		writel(regval, pdata->mac_regs + reg);
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1577", regval, pdata->mac_regs + reg);
 		reg += MAC_RQC2_INC;
 		regval = 0;
 	}
@@ -1583,22 +1583,22 @@ static void xlgmac_config_queue_mapping(struct xlgmac_pdata *pdata)
 	 *  ie Q0 <--> CH0, Q1 <--> CH1 ... Q11 <--> CH11
 	 */
 	reg = MTL_RQDCM0R;
-	regval = readl(pdata->mac_regs + reg);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1586", pdata->mac_regs + reg);
 	regval |= (MTL_RQDCM0R_Q0MDMACH | MTL_RQDCM0R_Q1MDMACH |
 		    MTL_RQDCM0R_Q2MDMACH | MTL_RQDCM0R_Q3MDMACH);
-	writel(regval, pdata->mac_regs + reg);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1589", regval, pdata->mac_regs + reg);
 
 	reg += MTL_RQDCM_INC;
-	regval = readl(pdata->mac_regs + reg);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1592", pdata->mac_regs + reg);
 	regval |= (MTL_RQDCM1R_Q4MDMACH | MTL_RQDCM1R_Q5MDMACH |
 		    MTL_RQDCM1R_Q6MDMACH | MTL_RQDCM1R_Q7MDMACH);
-	writel(regval, pdata->mac_regs + reg);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1595", regval, pdata->mac_regs + reg);
 
 	reg += MTL_RQDCM_INC;
-	regval = readl(pdata->mac_regs + reg);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1598", pdata->mac_regs + reg);
 	regval |= (MTL_RQDCM2R_Q8MDMACH | MTL_RQDCM2R_Q9MDMACH |
 		    MTL_RQDCM2R_Q10MDMACH | MTL_RQDCM2R_Q11MDMACH);
-	writel(regval, pdata->mac_regs + reg);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1601", regval, pdata->mac_regs + reg);
 }
 
 static unsigned int xlgmac_calculate_per_queue_fifo(
@@ -1638,10 +1638,10 @@ static void xlgmac_config_tx_fifo_size(struct xlgmac_pdata *pdata)
 				pdata->tx_q_count);
 
 	for (i = 0; i < pdata->tx_q_count; i++) {
-		regval = readl(XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1641", XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
 		regval = XLGMAC_SET_REG_BITS(regval, MTL_Q_TQOMR_TQS_POS,
 					     MTL_Q_TQOMR_TQS_LEN, fifo_size);
-		writel(regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1644", regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
 	}
 
 	netif_info(pdata, drv, pdata->netdev,
@@ -1660,10 +1660,10 @@ static void xlgmac_config_rx_fifo_size(struct xlgmac_pdata *pdata)
 					pdata->rx_q_count);
 
 	for (i = 0; i < pdata->rx_q_count; i++) {
-		regval = readl(XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1663", XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
 		regval = XLGMAC_SET_REG_BITS(regval, MTL_Q_RQOMR_RQS_POS,
 					     MTL_Q_RQOMR_RQS_LEN, fifo_size);
-		writel(regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1666", regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
 	}
 
 	netif_info(pdata, drv, pdata->netdev,
@@ -1677,14 +1677,14 @@ static void xlgmac_config_flow_control_threshold(struct xlgmac_pdata *pdata)
 	u32 regval;
 
 	for (i = 0; i < pdata->rx_q_count; i++) {
-		regval = readl(XLGMAC_MTL_REG(pdata, i, MTL_Q_RQFCR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1680", XLGMAC_MTL_REG(pdata, i, MTL_Q_RQFCR));
 		/* Activate flow control when less than 4k left in fifo */
 		regval = XLGMAC_SET_REG_BITS(regval, MTL_Q_RQFCR_RFA_POS,
 					     MTL_Q_RQFCR_RFA_LEN, 2);
 		/* De-activate flow control when more than 6k left in fifo */
 		regval = XLGMAC_SET_REG_BITS(regval, MTL_Q_RQFCR_RFD_POS,
 					     MTL_Q_RQFCR_RFD_LEN, 4);
-		writel(regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_RQFCR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1687", regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_RQFCR));
 	}
 }
 
@@ -1695,10 +1695,10 @@ static int xlgmac_config_tx_threshold(struct xlgmac_pdata *pdata,
 	u32 regval;
 
 	for (i = 0; i < pdata->tx_q_count; i++) {
-		regval = readl(XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1698", XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
 		regval = XLGMAC_SET_REG_BITS(regval, MTL_Q_TQOMR_TTC_POS,
 					     MTL_Q_TQOMR_TTC_LEN, val);
-		writel(regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1701", regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
 	}
 
 	return 0;
@@ -1711,10 +1711,10 @@ static int xlgmac_config_rsf_mode(struct xlgmac_pdata *pdata,
 	u32 regval;
 
 	for (i = 0; i < pdata->rx_q_count; i++) {
-		regval = readl(XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1714", XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
 		regval = XLGMAC_SET_REG_BITS(regval, MTL_Q_RQOMR_RSF_POS,
 					     MTL_Q_RQOMR_RSF_LEN, val);
-		writel(regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1717", regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_RQOMR));
 	}
 
 	return 0;
@@ -1727,10 +1727,10 @@ static int xlgmac_config_tsf_mode(struct xlgmac_pdata *pdata,
 	u32 regval;
 
 	for (i = 0; i < pdata->tx_q_count; i++) {
-		regval = readl(XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1730", XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
 		regval = XLGMAC_SET_REG_BITS(regval, MTL_Q_TQOMR_TSF_POS,
 					     MTL_Q_TQOMR_TSF_LEN, val);
-		writel(regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1733", regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
 	}
 
 	return 0;
@@ -1747,11 +1747,11 @@ static int xlgmac_config_osp_mode(struct xlgmac_pdata *pdata)
 		if (!channel->tx_ring)
 			break;
 
-		regval = readl(XLGMAC_DMA_REG(channel, DMA_CH_TCR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1750", XLGMAC_DMA_REG(channel, DMA_CH_TCR));
 		regval = XLGMAC_SET_REG_BITS(regval, DMA_CH_TCR_OSP_POS,
 					     DMA_CH_TCR_OSP_LEN,
 					pdata->tx_osp_mode);
-		writel(regval, XLGMAC_DMA_REG(channel, DMA_CH_TCR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1754", regval, XLGMAC_DMA_REG(channel, DMA_CH_TCR));
 	}
 
 	return 0;
@@ -1765,11 +1765,11 @@ static int xlgmac_config_pblx8(struct xlgmac_pdata *pdata)
 
 	channel = pdata->channel_head;
 	for (i = 0; i < pdata->channel_count; i++, channel++) {
-		regval = readl(XLGMAC_DMA_REG(channel, DMA_CH_CR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1768", XLGMAC_DMA_REG(channel, DMA_CH_CR));
 		regval = XLGMAC_SET_REG_BITS(regval, DMA_CH_CR_PBLX8_POS,
 					     DMA_CH_CR_PBLX8_LEN,
 					pdata->pblx8);
-		writel(regval, XLGMAC_DMA_REG(channel, DMA_CH_CR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1772", regval, XLGMAC_DMA_REG(channel, DMA_CH_CR));
 	}
 
 	return 0;
@@ -1779,7 +1779,7 @@ static int xlgmac_get_tx_pbl_val(struct xlgmac_pdata *pdata)
 {
 	u32 regval;
 
-	regval = readl(XLGMAC_DMA_REG(pdata->channel_head, DMA_CH_TCR));
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1782", XLGMAC_DMA_REG(pdata->channel_head, DMA_CH_TCR));
 	regval = XLGMAC_GET_REG_BITS(regval, DMA_CH_TCR_PBL_POS,
 				     DMA_CH_TCR_PBL_LEN);
 	return regval;
@@ -1796,11 +1796,11 @@ static int xlgmac_config_tx_pbl_val(struct xlgmac_pdata *pdata)
 		if (!channel->tx_ring)
 			break;
 
-		regval = readl(XLGMAC_DMA_REG(channel, DMA_CH_TCR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1799", XLGMAC_DMA_REG(channel, DMA_CH_TCR));
 		regval = XLGMAC_SET_REG_BITS(regval, DMA_CH_TCR_PBL_POS,
 					     DMA_CH_TCR_PBL_LEN,
 					pdata->tx_pbl);
-		writel(regval, XLGMAC_DMA_REG(channel, DMA_CH_TCR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1803", regval, XLGMAC_DMA_REG(channel, DMA_CH_TCR));
 	}
 
 	return 0;
@@ -1810,7 +1810,7 @@ static int xlgmac_get_rx_pbl_val(struct xlgmac_pdata *pdata)
 {
 	u32 regval;
 
-	regval = readl(XLGMAC_DMA_REG(pdata->channel_head, DMA_CH_RCR));
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1813", XLGMAC_DMA_REG(pdata->channel_head, DMA_CH_RCR));
 	regval = XLGMAC_GET_REG_BITS(regval, DMA_CH_RCR_PBL_POS,
 				     DMA_CH_RCR_PBL_LEN);
 	return regval;
@@ -1827,11 +1827,11 @@ static int xlgmac_config_rx_pbl_val(struct xlgmac_pdata *pdata)
 		if (!channel->rx_ring)
 			break;
 
-		regval = readl(XLGMAC_DMA_REG(channel, DMA_CH_RCR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1830", XLGMAC_DMA_REG(channel, DMA_CH_RCR));
 		regval = XLGMAC_SET_REG_BITS(regval, DMA_CH_RCR_PBL_POS,
 					     DMA_CH_RCR_PBL_LEN,
 					pdata->rx_pbl);
-		writel(regval, XLGMAC_DMA_REG(channel, DMA_CH_RCR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1834", regval, XLGMAC_DMA_REG(channel, DMA_CH_RCR));
 	}
 
 	return 0;
@@ -1855,17 +1855,17 @@ static u64 xlgmac_mmc_read(struct xlgmac_pdata *pdata, unsigned int reg_lo)
 		read_hi = false;
 	}
 
-	val = (u64)readl(pdata->mac_regs + reg_lo);
+	val = (u64)pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1858", pdata->mac_regs + reg_lo);
 
 	if (read_hi)
-		val |= ((u64)readl(pdata->mac_regs + reg_lo + 4) << 32);
+		val |= ((u64)pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1861", pdata->mac_regs + reg_lo + 4) << 32);
 
 	return val;
 }
 
 static void xlgmac_tx_mmc_int(struct xlgmac_pdata *pdata)
 {
-	unsigned int mmc_isr = readl(pdata->mac_regs + MMC_TISR);
+	unsigned int mmc_isr = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1868", pdata->mac_regs + MMC_TISR);
 	struct xlgmac_stats *stats = &pdata->stats;
 
 	if (XLGMAC_GET_REG_BITS(mmc_isr,
@@ -1979,7 +1979,7 @@ static void xlgmac_tx_mmc_int(struct xlgmac_pdata *pdata)
 
 static void xlgmac_rx_mmc_int(struct xlgmac_pdata *pdata)
 {
-	unsigned int mmc_isr = readl(pdata->mac_regs + MMC_RISR);
+	unsigned int mmc_isr = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:1982", pdata->mac_regs + MMC_RISR);
 	struct xlgmac_stats *stats = &pdata->stats;
 
 	if (XLGMAC_GET_REG_BITS(mmc_isr,
@@ -2127,10 +2127,10 @@ static void xlgmac_read_mmc_stats(struct xlgmac_pdata *pdata)
 	u32 regval;
 
 	/* Freeze counters */
-	regval = readl(pdata->mac_regs + MMC_CR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2130", pdata->mac_regs + MMC_CR);
 	regval = XLGMAC_SET_REG_BITS(regval, MMC_CR_MCF_POS,
 				     MMC_CR_MCF_LEN, 1);
-	writel(regval, pdata->mac_regs + MMC_CR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2133", regval, pdata->mac_regs + MMC_CR);
 
 	stats->txoctetcount_gb +=
 		xlgmac_mmc_read(pdata, MMC_TXOCTETCOUNT_GB_LO);
@@ -2256,24 +2256,24 @@ static void xlgmac_read_mmc_stats(struct xlgmac_pdata *pdata)
 		xlgmac_mmc_read(pdata, MMC_RXWATCHDOGERROR);
 
 	/* Un-freeze counters */
-	regval = readl(pdata->mac_regs + MMC_CR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2259", pdata->mac_regs + MMC_CR);
 	regval = XLGMAC_SET_REG_BITS(regval, MMC_CR_MCF_POS,
 				     MMC_CR_MCF_LEN, 0);
-	writel(regval, pdata->mac_regs + MMC_CR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2262", regval, pdata->mac_regs + MMC_CR);
 }
 
 static void xlgmac_config_mmc(struct xlgmac_pdata *pdata)
 {
 	u32 regval;
 
-	regval = readl(pdata->mac_regs + MMC_CR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2269", pdata->mac_regs + MMC_CR);
 	/* Set counters to reset on read */
 	regval = XLGMAC_SET_REG_BITS(regval, MMC_CR_ROR_POS,
 				     MMC_CR_ROR_LEN, 1);
 	/* Reset the counters */
 	regval = XLGMAC_SET_REG_BITS(regval, MMC_CR_CR_POS,
 				     MMC_CR_CR_LEN, 1);
-	writel(regval, pdata->mac_regs + MMC_CR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2276", regval, pdata->mac_regs + MMC_CR);
 }
 
 static int xlgmac_write_rss_reg(struct xlgmac_pdata *pdata, unsigned int type,
@@ -2285,16 +2285,16 @@ static int xlgmac_write_rss_reg(struct xlgmac_pdata *pdata, unsigned int type,
 
 	mutex_lock(&pdata->rss_mutex);
 
-	regval = XLGMAC_GET_REG_BITS(readl(pdata->mac_regs + MAC_RSSAR),
+	regval = XLGMAC_GET_REG_BITS(pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2288", pdata->mac_regs + MAC_RSSAR),
 				     MAC_RSSAR_OB_POS, MAC_RSSAR_OB_LEN);
 	if (regval) {
 		ret = -EBUSY;
 		goto unlock;
 	}
 
-	writel(val, pdata->mac_regs + MAC_RSSDR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2295", val, pdata->mac_regs + MAC_RSSDR);
 
-	regval = readl(pdata->mac_regs + MAC_RSSAR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2297", pdata->mac_regs + MAC_RSSAR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_RSSAR_RSSIA_POS,
 				     MAC_RSSAR_RSSIA_LEN, index);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_RSSAR_ADDRT_POS,
@@ -2303,11 +2303,11 @@ static int xlgmac_write_rss_reg(struct xlgmac_pdata *pdata, unsigned int type,
 				     MAC_RSSAR_CT_LEN, 0);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_RSSAR_OB_POS,
 				     MAC_RSSAR_OB_LEN, 1);
-	writel(regval, pdata->mac_regs + MAC_RSSAR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2306", regval, pdata->mac_regs + MAC_RSSAR);
 
 	wait = 1000;
 	while (wait--) {
-		regval = XLGMAC_GET_REG_BITS(readl(pdata->mac_regs + MAC_RSSAR),
+		regval = XLGMAC_GET_REG_BITS(pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2310", pdata->mac_regs + MAC_RSSAR),
 					     MAC_RSSAR_OB_POS,
 					     MAC_RSSAR_OB_LEN);
 		if (!regval)
@@ -2400,13 +2400,13 @@ static int xlgmac_enable_rss(struct xlgmac_pdata *pdata)
 		return ret;
 
 	/* Set the RSS options */
-	writel(pdata->rss_options, pdata->mac_regs + MAC_RSSCR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2403", pdata->rss_options, pdata->mac_regs + MAC_RSSCR);
 
 	/* Enable RSS */
-	regval = readl(pdata->mac_regs + MAC_RSSCR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2406", pdata->mac_regs + MAC_RSSCR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_RSSCR_RSSE_POS,
 				     MAC_RSSCR_RSSE_LEN, 1);
-	writel(regval, pdata->mac_regs + MAC_RSSCR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2409", regval, pdata->mac_regs + MAC_RSSCR);
 
 	return 0;
 }
@@ -2418,10 +2418,10 @@ static int xlgmac_disable_rss(struct xlgmac_pdata *pdata)
 	if (!pdata->hw_feat.rss)
 		return -EOPNOTSUPP;
 
-	regval = readl(pdata->mac_regs + MAC_RSSCR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2421", pdata->mac_regs + MAC_RSSCR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_RSSCR_RSSE_POS,
 				     MAC_RSSCR_RSSE_LEN, 0);
-	writel(regval, pdata->mac_regs + MAC_RSSCR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2424", regval, pdata->mac_regs + MAC_RSSCR);
 
 	return 0;
 }
@@ -2452,8 +2452,8 @@ static void xlgmac_enable_dma_interrupts(struct xlgmac_pdata *pdata)
 	channel = pdata->channel_head;
 	for (i = 0; i < pdata->channel_count; i++, channel++) {
 		/* Clear all the interrupts which are set */
-		dma_ch_isr = readl(XLGMAC_DMA_REG(channel, DMA_CH_SR));
-		writel(dma_ch_isr, XLGMAC_DMA_REG(channel, DMA_CH_SR));
+		dma_ch_isr = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2455", XLGMAC_DMA_REG(channel, DMA_CH_SR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2456", dma_ch_isr, XLGMAC_DMA_REG(channel, DMA_CH_SR));
 
 		/* Clear all interrupt enable bits */
 		dma_ch_ier = 0;
@@ -2504,7 +2504,7 @@ static void xlgmac_enable_dma_interrupts(struct xlgmac_pdata *pdata)
 						1);
 		}
 
-		writel(dma_ch_isr, XLGMAC_DMA_REG(channel, DMA_CH_IER));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2507", dma_ch_isr, XLGMAC_DMA_REG(channel, DMA_CH_IER));
 	}
 }
 
@@ -2516,11 +2516,11 @@ static void xlgmac_enable_mtl_interrupts(struct xlgmac_pdata *pdata)
 	q_count = max(pdata->hw_feat.tx_q_cnt, pdata->hw_feat.rx_q_cnt);
 	for (i = 0; i < q_count; i++) {
 		/* Clear all the interrupts which are set */
-		mtl_q_isr = readl(XLGMAC_MTL_REG(pdata, i, MTL_Q_ISR));
-		writel(mtl_q_isr, XLGMAC_MTL_REG(pdata, i, MTL_Q_ISR));
+		mtl_q_isr = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2519", XLGMAC_MTL_REG(pdata, i, MTL_Q_ISR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2520", mtl_q_isr, XLGMAC_MTL_REG(pdata, i, MTL_Q_ISR));
 
 		/* No MTL interrupts to be enabled */
-		writel(0, XLGMAC_MTL_REG(pdata, i, MTL_Q_IER));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2523", 0, XLGMAC_MTL_REG(pdata, i, MTL_Q_IER));
 	}
 }
 
@@ -2533,32 +2533,32 @@ static void xlgmac_enable_mac_interrupts(struct xlgmac_pdata *pdata)
 	mac_ier = XLGMAC_SET_REG_BITS(mac_ier, MAC_IER_TSIE_POS,
 				      MAC_IER_TSIE_LEN, 1);
 
-	writel(mac_ier, pdata->mac_regs + MAC_IER);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2536", mac_ier, pdata->mac_regs + MAC_IER);
 
 	/* Enable all counter interrupts */
-	regval = readl(pdata->mac_regs + MMC_RIER);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2539", pdata->mac_regs + MMC_RIER);
 	regval = XLGMAC_SET_REG_BITS(regval, MMC_RIER_ALL_INTERRUPTS_POS,
 				     MMC_RIER_ALL_INTERRUPTS_LEN, 0xffffffff);
-	writel(regval, pdata->mac_regs + MMC_RIER);
-	regval = readl(pdata->mac_regs + MMC_TIER);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2542", regval, pdata->mac_regs + MMC_RIER);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2543", pdata->mac_regs + MMC_TIER);
 	regval = XLGMAC_SET_REG_BITS(regval, MMC_TIER_ALL_INTERRUPTS_POS,
 				     MMC_TIER_ALL_INTERRUPTS_LEN, 0xffffffff);
-	writel(regval, pdata->mac_regs + MMC_TIER);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2546", regval, pdata->mac_regs + MMC_TIER);
 }
 
 static int xlgmac_set_xlgmii_25000_speed(struct xlgmac_pdata *pdata)
 {
 	u32 regval;
 
-	regval = XLGMAC_GET_REG_BITS(readl(pdata->mac_regs + MAC_TCR),
+	regval = XLGMAC_GET_REG_BITS(pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2553", pdata->mac_regs + MAC_TCR),
 				     MAC_TCR_SS_POS, MAC_TCR_SS_LEN);
 	if (regval == 0x1)
 		return 0;
 
-	regval = readl(pdata->mac_regs + MAC_TCR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2558", pdata->mac_regs + MAC_TCR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_TCR_SS_POS,
 				     MAC_TCR_SS_LEN, 0x1);
-	writel(regval, pdata->mac_regs + MAC_TCR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2561", regval, pdata->mac_regs + MAC_TCR);
 
 	return 0;
 }
@@ -2567,15 +2567,15 @@ static int xlgmac_set_xlgmii_40000_speed(struct xlgmac_pdata *pdata)
 {
 	u32 regval;
 
-	regval = XLGMAC_GET_REG_BITS(readl(pdata->mac_regs + MAC_TCR),
+	regval = XLGMAC_GET_REG_BITS(pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2570", pdata->mac_regs + MAC_TCR),
 				     MAC_TCR_SS_POS, MAC_TCR_SS_LEN);
 	if (regval == 0)
 		return 0;
 
-	regval = readl(pdata->mac_regs + MAC_TCR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2575", pdata->mac_regs + MAC_TCR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_TCR_SS_POS,
 				     MAC_TCR_SS_LEN, 0);
-	writel(regval, pdata->mac_regs + MAC_TCR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2578", regval, pdata->mac_regs + MAC_TCR);
 
 	return 0;
 }
@@ -2584,15 +2584,15 @@ static int xlgmac_set_xlgmii_50000_speed(struct xlgmac_pdata *pdata)
 {
 	u32 regval;
 
-	regval = XLGMAC_GET_REG_BITS(readl(pdata->mac_regs + MAC_TCR),
+	regval = XLGMAC_GET_REG_BITS(pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2587", pdata->mac_regs + MAC_TCR),
 				     MAC_TCR_SS_POS, MAC_TCR_SS_LEN);
 	if (regval == 0x2)
 		return 0;
 
-	regval = readl(pdata->mac_regs + MAC_TCR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2592", pdata->mac_regs + MAC_TCR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_TCR_SS_POS,
 				     MAC_TCR_SS_LEN, 0x2);
-	writel(regval, pdata->mac_regs + MAC_TCR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2595", regval, pdata->mac_regs + MAC_TCR);
 
 	return 0;
 }
@@ -2601,15 +2601,15 @@ static int xlgmac_set_xlgmii_100000_speed(struct xlgmac_pdata *pdata)
 {
 	u32 regval;
 
-	regval = XLGMAC_GET_REG_BITS(readl(pdata->mac_regs + MAC_TCR),
+	regval = XLGMAC_GET_REG_BITS(pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2604", pdata->mac_regs + MAC_TCR),
 				     MAC_TCR_SS_POS, MAC_TCR_SS_LEN);
 	if (regval == 0x3)
 		return 0;
 
-	regval = readl(pdata->mac_regs + MAC_TCR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2609", pdata->mac_regs + MAC_TCR);
 	regval = XLGMAC_SET_REG_BITS(regval, MAC_TCR_SS_POS,
 				     MAC_TCR_SS_LEN, 0x3);
-	writel(regval, pdata->mac_regs + MAC_TCR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2612", regval, pdata->mac_regs + MAC_TCR);
 
 	return 0;
 }
@@ -2818,7 +2818,7 @@ static int xlgmac_enable_int(struct xlgmac_channel *channel,
 {
 	unsigned int dma_ch_ier;
 
-	dma_ch_ier = readl(XLGMAC_DMA_REG(channel, DMA_CH_IER));
+	dma_ch_ier = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2821", XLGMAC_DMA_REG(channel, DMA_CH_IER));
 
 	switch (int_id) {
 	case XLGMAC_INT_DMA_CH_SR_TI:
@@ -2871,7 +2871,7 @@ static int xlgmac_enable_int(struct xlgmac_channel *channel,
 		return -1;
 	}
 
-	writel(dma_ch_ier, XLGMAC_DMA_REG(channel, DMA_CH_IER));
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2874", dma_ch_ier, XLGMAC_DMA_REG(channel, DMA_CH_IER));
 
 	return 0;
 }
@@ -2881,7 +2881,7 @@ static int xlgmac_disable_int(struct xlgmac_channel *channel,
 {
 	unsigned int dma_ch_ier;
 
-	dma_ch_ier = readl(XLGMAC_DMA_REG(channel, DMA_CH_IER));
+	dma_ch_ier = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2884", XLGMAC_DMA_REG(channel, DMA_CH_IER));
 
 	switch (int_id) {
 	case XLGMAC_INT_DMA_CH_SR_TI:
@@ -2935,7 +2935,7 @@ static int xlgmac_disable_int(struct xlgmac_channel *channel,
 		return -1;
 	}
 
-	writel(dma_ch_ier, XLGMAC_DMA_REG(channel, DMA_CH_IER));
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2938", dma_ch_ier, XLGMAC_DMA_REG(channel, DMA_CH_IER));
 
 	return 0;
 }
@@ -2946,16 +2946,16 @@ static int xlgmac_flush_tx_queues(struct xlgmac_pdata *pdata)
 	u32 regval;
 
 	for (i = 0; i < pdata->tx_q_count; i++) {
-		regval = readl(XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2949", XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
 		regval = XLGMAC_SET_REG_BITS(regval, MTL_Q_TQOMR_FTQ_POS,
 					     MTL_Q_TQOMR_FTQ_LEN, 1);
-		writel(regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
+		pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2952", regval, XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
 	}
 
 	/* Poll Until Poll Condition */
 	for (i = 0; i < pdata->tx_q_count; i++) {
 		count = 2000;
-		regval = readl(XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
+		regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2958", XLGMAC_MTL_REG(pdata, i, MTL_Q_TQOMR));
 		regval = XLGMAC_GET_REG_BITS(regval, MTL_Q_TQOMR_FTQ_POS,
 					     MTL_Q_TQOMR_FTQ_LEN);
 		while (--count && regval)
@@ -2972,7 +2972,7 @@ static void xlgmac_config_dma_bus(struct xlgmac_pdata *pdata)
 {
 	u32 regval;
 
-	regval = readl(pdata->mac_regs + DMA_SBMR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2975", pdata->mac_regs + DMA_SBMR);
 	/* Set enhanced addressing mode */
 	regval = XLGMAC_SET_REG_BITS(regval, DMA_SBMR_EAME_POS,
 				     DMA_SBMR_EAME_LEN, 1);
@@ -2981,7 +2981,7 @@ static void xlgmac_config_dma_bus(struct xlgmac_pdata *pdata)
 				     DMA_SBMR_UNDEF_LEN, 1);
 	regval = XLGMAC_SET_REG_BITS(regval, DMA_SBMR_BLEN_256_POS,
 				     DMA_SBMR_BLEN_256_LEN, 1);
-	writel(regval, pdata->mac_regs + DMA_SBMR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:2984", regval, pdata->mac_regs + DMA_SBMR);
 }
 
 static int xlgmac_hw_init(struct xlgmac_pdata *pdata)
@@ -3044,15 +3044,15 @@ static int xlgmac_hw_exit(struct xlgmac_pdata *pdata)
 	u32 regval;
 
 	/* Issue a software reset */
-	regval = readl(pdata->mac_regs + DMA_MR);
+	regval = pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:3047", pdata->mac_regs + DMA_MR);
 	regval = XLGMAC_SET_REG_BITS(regval, DMA_MR_SWR_POS,
 				     DMA_MR_SWR_LEN, 1);
-	writel(regval, pdata->mac_regs + DMA_MR);
+	pete_writel("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:3050", regval, pdata->mac_regs + DMA_MR);
 	usleep_range(10, 15);
 
 	/* Poll Until Poll Condition */
 	while (--count &&
-	       XLGMAC_GET_REG_BITS(readl(pdata->mac_regs + DMA_MR),
+	       XLGMAC_GET_REG_BITS(pete_readl("drivers/net/ethernet/synopsys/dwc-xlgmac-hw.c:3055", pdata->mac_regs + DMA_MR),
 				   DMA_MR_SWR_POS, DMA_MR_SWR_LEN))
 		usleep_range(500, 600);
 

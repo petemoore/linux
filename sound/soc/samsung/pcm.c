@@ -156,8 +156,8 @@ static void s3c_pcm_snd_txctrl(struct s3c_pcm_info *pcm, int on)
 	void __iomem *regs = pcm->regs;
 	u32 ctl, clkctl;
 
-	clkctl = readl(regs + S3C_PCM_CLKCTL);
-	ctl = readl(regs + S3C_PCM_CTL);
+	clkctl = pete_readl("sound/soc/samsung/pcm.c:159", regs + S3C_PCM_CLKCTL);
+	ctl = pete_readl("sound/soc/samsung/pcm.c:160", regs + S3C_PCM_CTL);
 	ctl &= ~(S3C_PCM_CTL_TXDIPSTICK_MASK
 			 << S3C_PCM_CTL_TXDIPSTICK_SHIFT);
 
@@ -178,8 +178,8 @@ static void s3c_pcm_snd_txctrl(struct s3c_pcm_info *pcm, int on)
 		}
 	}
 
-	writel(clkctl, regs + S3C_PCM_CLKCTL);
-	writel(ctl, regs + S3C_PCM_CTL);
+	pete_writel("sound/soc/samsung/pcm.c:181", clkctl, regs + S3C_PCM_CLKCTL);
+	pete_writel("sound/soc/samsung/pcm.c:182", ctl, regs + S3C_PCM_CTL);
 }
 
 static void s3c_pcm_snd_rxctrl(struct s3c_pcm_info *pcm, int on)
@@ -187,8 +187,8 @@ static void s3c_pcm_snd_rxctrl(struct s3c_pcm_info *pcm, int on)
 	void __iomem *regs = pcm->regs;
 	u32 ctl, clkctl;
 
-	ctl = readl(regs + S3C_PCM_CTL);
-	clkctl = readl(regs + S3C_PCM_CLKCTL);
+	ctl = pete_readl("sound/soc/samsung/pcm.c:190", regs + S3C_PCM_CTL);
+	clkctl = pete_readl("sound/soc/samsung/pcm.c:191", regs + S3C_PCM_CLKCTL);
 	ctl &= ~(S3C_PCM_CTL_RXDIPSTICK_MASK
 			 << S3C_PCM_CTL_RXDIPSTICK_SHIFT);
 
@@ -209,8 +209,8 @@ static void s3c_pcm_snd_rxctrl(struct s3c_pcm_info *pcm, int on)
 		}
 	}
 
-	writel(clkctl, regs + S3C_PCM_CLKCTL);
-	writel(ctl, regs + S3C_PCM_CTL);
+	pete_writel("sound/soc/samsung/pcm.c:212", clkctl, regs + S3C_PCM_CLKCTL);
+	pete_writel("sound/soc/samsung/pcm.c:213", ctl, regs + S3C_PCM_CTL);
 }
 
 static int s3c_pcm_trigger(struct snd_pcm_substream *substream, int cmd,
@@ -281,7 +281,7 @@ static int s3c_pcm_hw_params(struct snd_pcm_substream *substream,
 	spin_lock_irqsave(&pcm->lock, flags);
 
 	/* Get hold of the PCMSOURCE_CLK */
-	clkctl = readl(regs + S3C_PCM_CLKCTL);
+	clkctl = pete_readl("sound/soc/samsung/pcm.c:284", regs + S3C_PCM_CLKCTL);
 	if (clkctl & S3C_PCM_CLKCTL_SERCLKSEL_PCLK)
 		clk = pcm->pclk;
 	else
@@ -304,7 +304,7 @@ static int s3c_pcm_hw_params(struct snd_pcm_substream *substream,
 	clkctl |= ((sync_div & S3C_PCM_CLKCTL_SYNCDIV_MASK)
 				<< S3C_PCM_CLKCTL_SYNCDIV_SHIFT);
 
-	writel(clkctl, regs + S3C_PCM_CLKCTL);
+	pete_writel("sound/soc/samsung/pcm.c:307", clkctl, regs + S3C_PCM_CLKCTL);
 
 	spin_unlock_irqrestore(&pcm->lock, flags);
 
@@ -328,7 +328,7 @@ static int s3c_pcm_set_fmt(struct snd_soc_dai *cpu_dai,
 
 	spin_lock_irqsave(&pcm->lock, flags);
 
-	ctl = readl(regs + S3C_PCM_CTL);
+	ctl = pete_readl("sound/soc/samsung/pcm.c:331", regs + S3C_PCM_CTL);
 
 	switch (fmt & SND_SOC_DAIFMT_INV_MASK) {
 	case SND_SOC_DAIFMT_IB_NF:
@@ -378,7 +378,7 @@ static int s3c_pcm_set_fmt(struct snd_soc_dai *cpu_dai,
 		goto exit;
 	}
 
-	writel(ctl, regs + S3C_PCM_CTL);
+	pete_writel("sound/soc/samsung/pcm.c:381", ctl, regs + S3C_PCM_CTL);
 
 exit:
 	spin_unlock_irqrestore(&pcm->lock, flags);
@@ -408,7 +408,7 @@ static int s3c_pcm_set_sysclk(struct snd_soc_dai *cpu_dai,
 {
 	struct s3c_pcm_info *pcm = snd_soc_dai_get_drvdata(cpu_dai);
 	void __iomem *regs = pcm->regs;
-	u32 clkctl = readl(regs + S3C_PCM_CLKCTL);
+	u32 clkctl = pete_readl("sound/soc/samsung/pcm.c:411", regs + S3C_PCM_CLKCTL);
 
 	switch (clk_id) {
 	case S3C_PCM_CLKSRC_PCLK:
@@ -427,7 +427,7 @@ static int s3c_pcm_set_sysclk(struct snd_soc_dai *cpu_dai,
 		return -EINVAL;
 	}
 
-	writel(clkctl, regs + S3C_PCM_CLKCTL);
+	pete_writel("sound/soc/samsung/pcm.c:430", clkctl, regs + S3C_PCM_CLKCTL);
 
 	return 0;
 }

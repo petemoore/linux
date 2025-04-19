@@ -95,23 +95,23 @@ static const struct hellcreek_counter hellcreek_counter[] = {
 
 static u16 hellcreek_read(struct hellcreek *hellcreek, unsigned int offset)
 {
-	return readw(hellcreek->base + offset);
+	return pete_readw("drivers/net/dsa/hirschmann/hellcreek.c:98", hellcreek->base + offset);
 }
 
 static u16 hellcreek_read_ctrl(struct hellcreek *hellcreek)
 {
-	return readw(hellcreek->base + HR_CTRL_C);
+	return pete_readw("drivers/net/dsa/hirschmann/hellcreek.c:103", hellcreek->base + HR_CTRL_C);
 }
 
 static u16 hellcreek_read_stat(struct hellcreek *hellcreek)
 {
-	return readw(hellcreek->base + HR_SWSTAT);
+	return pete_readw("drivers/net/dsa/hirschmann/hellcreek.c:108", hellcreek->base + HR_SWSTAT);
 }
 
 static void hellcreek_write(struct hellcreek *hellcreek, u16 data,
 			    unsigned int offset)
 {
-	writew(data, hellcreek->base + offset);
+	pete_writew("drivers/net/dsa/hirschmann/hellcreek.c:114", data, hellcreek->base + offset);
 }
 
 static void hellcreek_select_port(struct hellcreek *hellcreek, int port)

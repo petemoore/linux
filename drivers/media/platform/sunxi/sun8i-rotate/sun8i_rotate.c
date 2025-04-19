@@ -25,17 +25,17 @@
 
 static inline u32 rotate_read(struct rotate_dev *dev, u32 reg)
 {
-	return readl(dev->base + reg);
+	return pete_readl("drivers/media/platform/sunxi/sun8i-rotate/sun8i_rotate.c:28", dev->base + reg);
 }
 
 static inline void rotate_write(struct rotate_dev *dev, u32 reg, u32 value)
 {
-	writel(value, dev->base + reg);
+	pete_writel("drivers/media/platform/sunxi/sun8i-rotate/sun8i_rotate.c:33", value, dev->base + reg);
 }
 
 static inline void rotate_set_bits(struct rotate_dev *dev, u32 reg, u32 bits)
 {
-	writel(readl(dev->base + reg) | bits, dev->base + reg);
+	pete_writel("drivers/media/platform/sunxi/sun8i-rotate/sun8i_rotate.c:38", pete_readl("drivers/media/platform/sunxi/sun8i-rotate/sun8i_rotate.c:38", dev->base + reg) | bits, dev->base + reg);
 }
 
 static void rotate_calc_addr_pitch(dma_addr_t buffer,

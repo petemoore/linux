@@ -27,22 +27,22 @@
 
 static inline u32 ddblreadl(struct ddb_link *link, u32 adr)
 {
-	return readl(link->dev->regs + adr);
+	return pete_readl("drivers/media/pci/ddbridge/ddbridge-io.h:30", link->dev->regs + adr);
 }
 
 static inline void ddblwritel(struct ddb_link *link, u32 val, u32 adr)
 {
-	writel(val, link->dev->regs + adr);
+	pete_writel("drivers/media/pci/ddbridge/ddbridge-io.h:35", val, link->dev->regs + adr);
 }
 
 static inline u32 ddbreadl(struct ddb *dev, u32 adr)
 {
-	return readl(dev->regs + adr);
+	return pete_readl("drivers/media/pci/ddbridge/ddbridge-io.h:40", dev->regs + adr);
 }
 
 static inline void ddbwritel(struct ddb *dev, u32 val, u32 adr)
 {
-	writel(val, dev->regs + adr);
+	pete_writel("drivers/media/pci/ddbridge/ddbridge-io.h:45", val, dev->regs + adr);
 }
 
 static inline void ddbcpyto(struct ddb *dev, u32 adr, void *src, long count)

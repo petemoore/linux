@@ -37,36 +37,36 @@
 
 void host1x_hypervisor_writel(struct host1x *host1x, u32 v, u32 r)
 {
-	writel(v, host1x->hv_regs + r);
+	pete_writel("drivers/gpu/host1x/dev.c:40", v, host1x->hv_regs + r);
 }
 
 u32 host1x_hypervisor_readl(struct host1x *host1x, u32 r)
 {
-	return readl(host1x->hv_regs + r);
+	return pete_readl("drivers/gpu/host1x/dev.c:45", host1x->hv_regs + r);
 }
 
 void host1x_sync_writel(struct host1x *host1x, u32 v, u32 r)
 {
 	void __iomem *sync_regs = host1x->regs + host1x->info->sync_offset;
 
-	writel(v, sync_regs + r);
+	pete_writel("drivers/gpu/host1x/dev.c:52", v, sync_regs + r);
 }
 
 u32 host1x_sync_readl(struct host1x *host1x, u32 r)
 {
 	void __iomem *sync_regs = host1x->regs + host1x->info->sync_offset;
 
-	return readl(sync_regs + r);
+	return pete_readl("drivers/gpu/host1x/dev.c:59", sync_regs + r);
 }
 
 void host1x_ch_writel(struct host1x_channel *ch, u32 v, u32 r)
 {
-	writel(v, ch->regs + r);
+	pete_writel("drivers/gpu/host1x/dev.c:64", v, ch->regs + r);
 }
 
 u32 host1x_ch_readl(struct host1x_channel *ch, u32 r)
 {
-	return readl(ch->regs + r);
+	return pete_readl("drivers/gpu/host1x/dev.c:69", ch->regs + r);
 }
 
 static const struct host1x_info host1x01_info = {

@@ -518,8 +518,8 @@ struct tegra_emc {
 static void emc_ccfifo_writel(struct tegra_emc *emc, u32 value,
 			      unsigned long offset)
 {
-	writel(value, emc->regs + EMC_CCFIFO_DATA);
-	writel(offset, emc->regs + EMC_CCFIFO_ADDR);
+	pete_writel("drivers/memory/tegra/tegra124-emc.c:521", value, emc->regs + EMC_CCFIFO_DATA);
+	pete_writel("drivers/memory/tegra/tegra124-emc.c:522", offset, emc->regs + EMC_CCFIFO_ADDR);
 }
 
 static void emc_seq_update_timing(struct tegra_emc *emc)
@@ -527,10 +527,10 @@ static void emc_seq_update_timing(struct tegra_emc *emc)
 	unsigned int i;
 	u32 value;
 
-	writel(1, emc->regs + EMC_TIMING_CONTROL);
+	pete_writel("drivers/memory/tegra/tegra124-emc.c:530", 1, emc->regs + EMC_TIMING_CONTROL);
 
 	for (i = 0; i < EMC_STATUS_UPDATE_TIMEOUT; ++i) {
-		value = readl(emc->regs + EMC_STATUS);
+		value = pete_readl("drivers/memory/tegra/tegra124-emc.c:533", emc->regs + EMC_STATUS);
 		if ((value & EMC_STATUS_TIMING_UPDATE_STALLED) == 0)
 			return;
 		udelay(1);
@@ -544,10 +544,10 @@ static void emc_seq_disable_auto_cal(struct tegra_emc *emc)
 	unsigned int i;
 	u32 value;
 
-	writel(0, emc->regs + EMC_AUTO_CAL_INTERVAL);
+	pete_writel("drivers/memory/tegra/tegra124-emc.c:547", 0, emc->regs + EMC_AUTO_CAL_INTERVAL);
 
 	for (i = 0; i < EMC_STATUS_UPDATE_TIMEOUT; ++i) {
-		value = readl(emc->regs + EMC_AUTO_CAL_STATUS);
+		value = pete_readl("drivers/memory/tegra/tegra124-emc.c:550", emc->regs + EMC_AUTO_CAL_STATUS);
 		if ((value & EMC_AUTO_CAL_STATUS_ACTIVE) == 0)
 			return;
 		udelay(1);
@@ -562,7 +562,7 @@ static void emc_seq_wait_clkchange(struct tegra_emc *emc)
 	u32 value;
 
 	for (i = 0; i < EMC_STATUS_UPDATE_TIMEOUT; ++i) {
-		value = readl(emc->regs + EMC_INTSTATUS);
+		value = pete_readl("drivers/memory/tegra/tegra124-emc.c:565", emc->regs + EMC_INTSTATUS);
 		if (value & EMC_INTSTATUS_CLKCHANGE_COMPLETE)
 			return;
 		udelay(1);
@@ -614,13 +614,13 @@ static int tegra_emc_prepare_timing_change(struct tegra_emc *emc,
 		dll_change = DLL_CHANGE_OFF;
 
 	/* Clear CLKCHANGE_COMPLETE interrupts */
-	writel(EMC_INTSTATUS_CLKCHANGE_COMPLETE, emc->regs + EMC_INTSTATUS);
+	pete_writel("drivers/memory/tegra/tegra124-emc.c:617", EMC_INTSTATUS_CLKCHANGE_COMPLETE, emc->regs + EMC_INTSTATUS);
 
 	/* Disable dynamic self-refresh */
-	val = readl(emc->regs + EMC_CFG);
+	val = pete_readl("drivers/memory/tegra/tegra124-emc.c:620", emc->regs + EMC_CFG);
 	if (val & EMC_CFG_PWR_MASK) {
 		val &= ~EMC_CFG_POWER_FEATURES_MASK;
-		writel(val, emc->regs + EMC_CFG);
+		pete_writel("drivers/memory/tegra/tegra124-emc.c:623", val, emc->regs + EMC_CFG);
 
 		pre_wait = 5;
 	}
@@ -631,14 +631,14 @@ static int tegra_emc_prepare_timing_change(struct tegra_emc *emc,
 	else
 		mask = EMC_SEL_DPD_CTRL_MASK;
 
-	val = readl(emc->regs + EMC_SEL_DPD_CTRL);
+	val = pete_readl("drivers/memory/tegra/tegra124-emc.c:634", emc->regs + EMC_SEL_DPD_CTRL);
 	if (val & mask) {
 		val &= ~mask;
-		writel(val, emc->regs + EMC_SEL_DPD_CTRL);
+		pete_writel("drivers/memory/tegra/tegra124-emc.c:637", val, emc->regs + EMC_SEL_DPD_CTRL);
 	}
 
 	/* Prepare DQ/DQS for clock change */
-	val = readl(emc->regs + EMC_BGBIAS_CTL0);
+	val = pete_readl("drivers/memory/tegra/tegra124-emc.c:641", emc->regs + EMC_BGBIAS_CTL0);
 	val2 = last->emc_bgbias_ctl0;
 	if (!(timing->emc_bgbias_ctl0 &
 	      EMC_BGBIAS_CTL0_BIAS0_DSC_E_PWRD_IBIAS_RX) &&
@@ -653,13 +653,13 @@ static int tegra_emc_prepare_timing_change(struct tegra_emc *emc,
 	}
 
 	if (update) {
-		writel(val2, emc->regs + EMC_BGBIAS_CTL0);
+		pete_writel("drivers/memory/tegra/tegra124-emc.c:656", val2, emc->regs + EMC_BGBIAS_CTL0);
 		if (pre_wait < 5)
 			pre_wait = 5;
 	}
 
 	update = false;
-	val = readl(emc->regs + EMC_XM2DQSPADCTRL2);
+	val = pete_readl("drivers/memory/tegra/tegra124-emc.c:662", emc->regs + EMC_XM2DQSPADCTRL2);
 	if (timing->emc_xm2dqspadctrl2 & EMC_XM2DQSPADCTRL2_VREF_ENABLE &&
 	    !(val & EMC_XM2DQSPADCTRL2_VREF_ENABLE)) {
 		val |= EMC_XM2DQSPADCTRL2_VREF_ENABLE;
@@ -673,7 +673,7 @@ static int tegra_emc_prepare_timing_change(struct tegra_emc *emc,
 	}
 
 	if (update) {
-		writel(val, emc->regs + EMC_XM2DQSPADCTRL2);
+		pete_writel("drivers/memory/tegra/tegra124-emc.c:676", val, emc->regs + EMC_XM2DQSPADCTRL2);
 		if (pre_wait < 30)
 			pre_wait = 30;
 	}
@@ -687,18 +687,18 @@ static int tegra_emc_prepare_timing_change(struct tegra_emc *emc,
 	/* Program CTT_TERM control */
 	if (last->emc_ctt_term_ctrl != timing->emc_ctt_term_ctrl) {
 		emc_seq_disable_auto_cal(emc);
-		writel(timing->emc_ctt_term_ctrl,
+		pete_writel("drivers/memory/tegra/tegra124-emc.c:690", timing->emc_ctt_term_ctrl,
 		       emc->regs + EMC_CTT_TERM_CTRL);
 		emc_seq_update_timing(emc);
 	}
 
 	/* Program burst shadow registers */
 	for (i = 0; i < ARRAY_SIZE(timing->emc_burst_data); ++i)
-		writel(timing->emc_burst_data[i],
+		pete_writel("drivers/memory/tegra/tegra124-emc.c:697", timing->emc_burst_data[i],
 		       emc->regs + emc_burst_regs[i]);
 
-	writel(timing->emc_xm2dqspadctrl2, emc->regs + EMC_XM2DQSPADCTRL2);
-	writel(timing->emc_zcal_interval, emc->regs + EMC_ZCAL_INTERVAL);
+	pete_writel("drivers/memory/tegra/tegra124-emc.c:700", timing->emc_xm2dqspadctrl2, emc->regs + EMC_XM2DQSPADCTRL2);
+	pete_writel("drivers/memory/tegra/tegra124-emc.c:701", timing->emc_zcal_interval, emc->regs + EMC_ZCAL_INTERVAL);
 
 	tegra_mc_write_emem_configuration(emc->mc, timing->rate);
 
@@ -740,7 +740,7 @@ static int tegra_emc_prepare_timing_change(struct tegra_emc *emc,
 		val |= (cnt << EMC_MRS_WAIT_CNT_LONG_WAIT_SHIFT)
 			& EMC_MRS_WAIT_CNT_LONG_WAIT_MASK;
 
-		writel(val, emc->regs + EMC_MRS_WAIT_CNT);
+		pete_writel("drivers/memory/tegra/tegra124-emc.c:743", val, emc->regs + EMC_MRS_WAIT_CNT);
 	}
 
 	val = timing->emc_cfg_2;
@@ -815,7 +815,7 @@ static int tegra_emc_prepare_timing_change(struct tegra_emc *emc,
 	emc_seq_disable_auto_cal(emc);
 
 	/* Read register to wait until programming has settled */
-	readl(emc->regs + EMC_INTSTATUS);
+	pete_readl("drivers/memory/tegra/tegra124-emc.c:818", emc->regs + EMC_INTSTATUS);
 
 	return 0;
 }
@@ -835,15 +835,15 @@ static void tegra_emc_complete_timing_change(struct tegra_emc *emc,
 
 	/* Restore AUTO_CAL */
 	if (timing->emc_ctt_term_ctrl != last->emc_ctt_term_ctrl)
-		writel(timing->emc_auto_cal_interval,
+		pete_writel("drivers/memory/tegra/tegra124-emc.c:838", timing->emc_auto_cal_interval,
 		       emc->regs + EMC_AUTO_CAL_INTERVAL);
 
 	/* Restore dynamic self-refresh */
 	if (timing->emc_cfg & EMC_CFG_PWR_MASK)
-		writel(timing->emc_cfg, emc->regs + EMC_CFG);
+		pete_writel("drivers/memory/tegra/tegra124-emc.c:843", timing->emc_cfg, emc->regs + EMC_CFG);
 
 	/* Set ZCAL wait count */
-	writel(timing->emc_zcal_cnt_long, emc->regs + EMC_ZCAL_WAIT_CNT);
+	pete_writel("drivers/memory/tegra/tegra124-emc.c:846", timing->emc_zcal_cnt_long, emc->regs + EMC_ZCAL_WAIT_CNT);
 
 	/* LPDDR3: Turn off BGBIAS if low frequency */
 	if (emc->dram_type == DRAM_TYPE_LPDDR3 &&
@@ -852,16 +852,16 @@ static void tegra_emc_complete_timing_change(struct tegra_emc *emc,
 		val = timing->emc_bgbias_ctl0;
 		val |= EMC_BGBIAS_CTL0_BIAS0_DSC_E_PWRD_IBIAS_VTTGEN;
 		val |= EMC_BGBIAS_CTL0_BIAS0_DSC_E_PWRD;
-		writel(val, emc->regs + EMC_BGBIAS_CTL0);
+		pete_writel("drivers/memory/tegra/tegra124-emc.c:855", val, emc->regs + EMC_BGBIAS_CTL0);
 	} else {
 		if (emc->dram_type == DRAM_TYPE_DDR3 &&
-		    readl(emc->regs + EMC_BGBIAS_CTL0) !=
+		    pete_readl("drivers/memory/tegra/tegra124-emc.c:858", emc->regs + EMC_BGBIAS_CTL0) !=
 		      timing->emc_bgbias_ctl0) {
-			writel(timing->emc_bgbias_ctl0,
+			pete_writel("drivers/memory/tegra/tegra124-emc.c:860", timing->emc_bgbias_ctl0,
 			       emc->regs + EMC_BGBIAS_CTL0);
 		}
 
-		writel(timing->emc_auto_cal_interval,
+		pete_writel("drivers/memory/tegra/tegra124-emc.c:864", timing->emc_auto_cal_interval,
 		       emc->regs + EMC_AUTO_CAL_INTERVAL);
 	}
 
@@ -869,7 +869,7 @@ static void tegra_emc_complete_timing_change(struct tegra_emc *emc,
 	udelay(2);
 
 	/* Reprogram SEL_DPD_CTRL */
-	writel(timing->emc_sel_dpd_ctrl, emc->regs + EMC_SEL_DPD_CTRL);
+	pete_writel("drivers/memory/tegra/tegra124-emc.c:872", timing->emc_sel_dpd_ctrl, emc->regs + EMC_SEL_DPD_CTRL);
 	emc_seq_update_timing(emc);
 
 	emc->last_timing = *timing;
@@ -884,9 +884,9 @@ static void emc_read_current_timing(struct tegra_emc *emc,
 
 	for (i = 0; i < ARRAY_SIZE(emc_burst_regs); ++i)
 		timing->emc_burst_data[i] =
-			readl(emc->regs + emc_burst_regs[i]);
+			pete_readl("drivers/memory/tegra/tegra124-emc.c:887", emc->regs + emc_burst_regs[i]);
 
-	timing->emc_cfg = readl(emc->regs + EMC_CFG);
+	timing->emc_cfg = pete_readl("drivers/memory/tegra/tegra124-emc.c:889", emc->regs + EMC_CFG);
 
 	timing->emc_auto_cal_interval = 0;
 	timing->emc_zcal_cnt_long = 0;
@@ -898,7 +898,7 @@ static void emc_read_current_timing(struct tegra_emc *emc,
 
 static int emc_init(struct tegra_emc *emc)
 {
-	emc->dram_type = readl(emc->regs + EMC_FBIO_CFG5);
+	emc->dram_type = pete_readl("drivers/memory/tegra/tegra124-emc.c:901", emc->regs + EMC_FBIO_CFG5);
 
 	if (emc->dram_type & EMC_FBIO_CFG5_DRAM_WIDTH_X64)
 		emc->dram_bus_width = 64;

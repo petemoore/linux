@@ -24,7 +24,7 @@ static void reset_cpu(void)
 	 * reset cpu to full speed, this is needed when enabling cpu frequency
 	 * scalling
 	 */
-	writel(readl(LOONGSON_CHIPCFG) | 0x7, LOONGSON_CHIPCFG);
+	pete_writel("arch/mips/loongson2ef/lemote-2f/reset.c:27", pete_readl("arch/mips/loongson2ef/lemote-2f/reset.c:27", LOONGSON_CHIPCFG) | 0x7, LOONGSON_CHIPCFG);
 }
 
 /* reset support for fuloong2f */

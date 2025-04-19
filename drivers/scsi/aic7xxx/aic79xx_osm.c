@@ -403,7 +403,7 @@ ahd_inb(struct ahd_softc * ahd, long port)
 	uint8_t x;
 
 	if (ahd->tags[0] == BUS_SPACE_MEMIO) {
-		x = readb(ahd->bshs[0].maddr + port);
+		x = pete_readb("drivers/scsi/aic7xxx/aic79xx_osm.c:406", ahd->bshs[0].maddr + port);
 	} else {
 		x = inb(ahd->bshs[(port) >> 8].ioport + ((port) & 0xFF));
 	}
@@ -418,7 +418,7 @@ ahd_inw_atomic(struct ahd_softc * ahd, long port)
 	uint8_t x;
 
 	if (ahd->tags[0] == BUS_SPACE_MEMIO) {
-		x = readw(ahd->bshs[0].maddr + port);
+		x = pete_readw("drivers/scsi/aic7xxx/aic79xx_osm.c:421", ahd->bshs[0].maddr + port);
 	} else {
 		x = inw(ahd->bshs[(port) >> 8].ioport + ((port) & 0xFF));
 	}
@@ -431,7 +431,7 @@ void
 ahd_outb(struct ahd_softc * ahd, long port, uint8_t val)
 {
 	if (ahd->tags[0] == BUS_SPACE_MEMIO) {
-		writeb(val, ahd->bshs[0].maddr + port);
+		pete_writeb("drivers/scsi/aic7xxx/aic79xx_osm.c:434", val, ahd->bshs[0].maddr + port);
 	} else {
 		outb(val, ahd->bshs[(port) >> 8].ioport + (port & 0xFF));
 	}
@@ -442,7 +442,7 @@ void
 ahd_outw_atomic(struct ahd_softc * ahd, long port, uint16_t val)
 {
 	if (ahd->tags[0] == BUS_SPACE_MEMIO) {
-		writew(val, ahd->bshs[0].maddr + port);
+		pete_writew("drivers/scsi/aic7xxx/aic79xx_osm.c:445", val, ahd->bshs[0].maddr + port);
 	} else {
 		outw(val, ahd->bshs[(port) >> 8].ioport + (port & 0xFF));
 	}

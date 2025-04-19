@@ -117,12 +117,12 @@ static inline void tegra_dc_writel(struct tegra_dc *dc, u32 value,
 				   unsigned int offset)
 {
 	trace_dc_writel(dc->dev, offset, value);
-	writel(value, dc->regs + (offset << 2));
+	pete_writel("drivers/gpu/drm/tegra/dc.h:120", value, dc->regs + (offset << 2));
 }
 
 static inline u32 tegra_dc_readl(struct tegra_dc *dc, unsigned int offset)
 {
-	u32 value = readl(dc->regs + (offset << 2));
+	u32 value = pete_readl("drivers/gpu/drm/tegra/dc.h:125", dc->regs + (offset << 2));
 
 	trace_dc_readl(dc->dev, offset, value);
 

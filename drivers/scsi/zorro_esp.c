@@ -171,12 +171,12 @@ struct zorro_esp_priv {
 
 static void zorro_esp_write8(struct esp *esp, u8 val, unsigned long reg)
 {
-	writeb(val, esp->regs + (reg * 4UL));
+	pete_writeb("drivers/scsi/zorro_esp.c:174", val, esp->regs + (reg * 4UL));
 }
 
 static u8 zorro_esp_read8(struct esp *esp, unsigned long reg)
 {
-	return readb(esp->regs + (reg * 4UL));
+	return pete_readb("drivers/scsi/zorro_esp.c:179", esp->regs + (reg * 4UL));
 }
 
 static int zorro_esp_irq_pending(struct esp *esp)
@@ -191,7 +191,7 @@ static int zorro_esp_irq_pending(struct esp *esp)
 static int cyber_esp_irq_pending(struct esp *esp)
 {
 	struct cyber_dma_registers __iomem *dregs = esp->dma_regs;
-	unsigned char dma_status = readb(&dregs->cond_reg);
+	unsigned char dma_status = pete_readb("drivers/scsi/zorro_esp.c:194", &dregs->cond_reg);
 
 	/* It's important to check the DMA IRQ bit in the correct way! */
 	return ((zorro_esp_read8(esp, ESP_STATUS) & ESP_STAT_INTR) &&
@@ -203,7 +203,7 @@ static int fastlane_esp_irq_pending(struct esp *esp)
 	struct fastlane_dma_registers __iomem *dregs = esp->dma_regs;
 	unsigned char dma_status;
 
-	dma_status = readb(&dregs->cond_reg);
+	dma_status = pete_readb("drivers/scsi/zorro_esp.c:206", &dregs->cond_reg);
 
 	if (dma_status & FASTLANE_DMA_IACT)
 		return 0;	/* not our IRQ */
@@ -250,7 +250,7 @@ static void fastlane_esp_dma_invalidate(struct esp *esp)
 	unsigned char *ctrl_data = &zep->ctrl_data;
 
 	*ctrl_data = (*ctrl_data & FASTLANE_DMA_MASK);
-	writeb(0, &dregs->clear_strobe);
+	pete_writeb("drivers/scsi/zorro_esp.c:253", 0, &dregs->clear_strobe);
 	z_writel(0, zep->board_base);
 }
 
@@ -292,11 +292,11 @@ static void zorro_esp_send_blz1230_dma_cmd(struct esp *esp, u32 addr,
 	else
 		addr |= DMA_WRITE;
 
-	writeb((addr >> 24) & 0xff, &dregs->dma_latch);
-	writeb((addr >> 24) & 0xff, &dregs->dma_addr);
-	writeb((addr >> 16) & 0xff, &dregs->dma_addr);
-	writeb((addr >>  8) & 0xff, &dregs->dma_addr);
-	writeb(addr & 0xff, &dregs->dma_addr);
+	pete_writeb("drivers/scsi/zorro_esp.c:295", (addr >> 24) & 0xff, &dregs->dma_latch);
+	pete_writeb("drivers/scsi/zorro_esp.c:296", (addr >> 24) & 0xff, &dregs->dma_addr);
+	pete_writeb("drivers/scsi/zorro_esp.c:297", (addr >> 16) & 0xff, &dregs->dma_addr);
+	pete_writeb("drivers/scsi/zorro_esp.c:298", (addr >>  8) & 0xff, &dregs->dma_addr);
+	pete_writeb("drivers/scsi/zorro_esp.c:299", addr & 0xff, &dregs->dma_addr);
 
 	scsi_esp_cmd(esp, ESP_CMD_DMA);
 	zorro_esp_write8(esp, (esp_count >> 0) & 0xff, ESP_TCLOW);
@@ -338,10 +338,10 @@ static void zorro_esp_send_blz1230II_dma_cmd(struct esp *esp, u32 addr,
 	else
 		addr |= DMA_WRITE;
 
-	writeb((addr >> 24) & 0xff, &dregs->dma_latch);
-	writeb((addr >> 16) & 0xff, &dregs->dma_addr);
-	writeb((addr >>  8) & 0xff, &dregs->dma_addr);
-	writeb(addr & 0xff, &dregs->dma_addr);
+	pete_writeb("drivers/scsi/zorro_esp.c:341", (addr >> 24) & 0xff, &dregs->dma_latch);
+	pete_writeb("drivers/scsi/zorro_esp.c:342", (addr >> 16) & 0xff, &dregs->dma_addr);
+	pete_writeb("drivers/scsi/zorro_esp.c:343", (addr >>  8) & 0xff, &dregs->dma_addr);
+	pete_writeb("drivers/scsi/zorro_esp.c:344", addr & 0xff, &dregs->dma_addr);
 
 	scsi_esp_cmd(esp, ESP_CMD_DMA);
 	zorro_esp_write8(esp, (esp_count >> 0) & 0xff, ESP_TCLOW);
@@ -383,10 +383,10 @@ static void zorro_esp_send_blz2060_dma_cmd(struct esp *esp, u32 addr,
 	else
 		addr |= DMA_WRITE;
 
-	writeb(addr & 0xff, &dregs->dma_addr3);
-	writeb((addr >>  8) & 0xff, &dregs->dma_addr2);
-	writeb((addr >> 16) & 0xff, &dregs->dma_addr1);
-	writeb((addr >> 24) & 0xff, &dregs->dma_addr0);
+	pete_writeb("drivers/scsi/zorro_esp.c:386", addr & 0xff, &dregs->dma_addr3);
+	pete_writeb("drivers/scsi/zorro_esp.c:387", (addr >>  8) & 0xff, &dregs->dma_addr2);
+	pete_writeb("drivers/scsi/zorro_esp.c:388", (addr >> 16) & 0xff, &dregs->dma_addr1);
+	pete_writeb("drivers/scsi/zorro_esp.c:389", (addr >> 24) & 0xff, &dregs->dma_addr0);
 
 	scsi_esp_cmd(esp, ESP_CMD_DMA);
 	zorro_esp_write8(esp, (esp_count >> 0) & 0xff, ESP_TCLOW);
@@ -430,10 +430,10 @@ static void zorro_esp_send_cyber_dma_cmd(struct esp *esp, u32 addr,
 		addr |= 1;
 	}
 
-	writeb((addr >> 24) & 0xff, &dregs->dma_addr0);
-	writeb((addr >> 16) & 0xff, &dregs->dma_addr1);
-	writeb((addr >>  8) & 0xff, &dregs->dma_addr2);
-	writeb(addr & 0xff, &dregs->dma_addr3);
+	pete_writeb("drivers/scsi/zorro_esp.c:433", (addr >> 24) & 0xff, &dregs->dma_addr0);
+	pete_writeb("drivers/scsi/zorro_esp.c:434", (addr >> 16) & 0xff, &dregs->dma_addr1);
+	pete_writeb("drivers/scsi/zorro_esp.c:435", (addr >>  8) & 0xff, &dregs->dma_addr2);
+	pete_writeb("drivers/scsi/zorro_esp.c:436", addr & 0xff, &dregs->dma_addr3);
 
 	if (write)
 		*ctrl_data &= ~(CYBER_DMA_WRITE);
@@ -442,7 +442,7 @@ static void zorro_esp_send_cyber_dma_cmd(struct esp *esp, u32 addr,
 
 	*ctrl_data &= ~(CYBER_DMA_Z3);	/* Z2, do 16 bit DMA */
 
-	writeb(*ctrl_data, &dregs->ctrl_reg);
+	pete_writeb("drivers/scsi/zorro_esp.c:445", *ctrl_data, &dregs->ctrl_reg);
 
 	scsi_esp_cmd(esp, cmd);
 }
@@ -480,10 +480,10 @@ static void zorro_esp_send_cyberII_dma_cmd(struct esp *esp, u32 addr,
 		addr |= 1;
 	}
 
-	writeb((addr >> 24) & 0xff, &dregs->dma_addr0);
-	writeb((addr >> 16) & 0xff, &dregs->dma_addr1);
-	writeb((addr >>  8) & 0xff, &dregs->dma_addr2);
-	writeb(addr & 0xff, &dregs->dma_addr3);
+	pete_writeb("drivers/scsi/zorro_esp.c:483", (addr >> 24) & 0xff, &dregs->dma_addr0);
+	pete_writeb("drivers/scsi/zorro_esp.c:484", (addr >> 16) & 0xff, &dregs->dma_addr1);
+	pete_writeb("drivers/scsi/zorro_esp.c:485", (addr >>  8) & 0xff, &dregs->dma_addr2);
+	pete_writeb("drivers/scsi/zorro_esp.c:486", addr & 0xff, &dregs->dma_addr3);
 
 	scsi_esp_cmd(esp, cmd);
 }
@@ -523,7 +523,7 @@ static void zorro_esp_send_fastlane_dma_cmd(struct esp *esp, u32 addr,
 		addr |= 1;
 	}
 
-	writeb(0, &dregs->clear_strobe);
+	pete_writeb("drivers/scsi/zorro_esp.c:526", 0, &dregs->clear_strobe);
 	z_writel(addr, ((addr & 0x00ffffff) + zep->board_base));
 
 	if (write) {
@@ -535,7 +535,7 @@ static void zorro_esp_send_fastlane_dma_cmd(struct esp *esp, u32 addr,
 				FASTLANE_DMA_WRITE);
 	}
 
-	writeb(*ctrl_data, &dregs->ctrl_reg);
+	pete_writeb("drivers/scsi/zorro_esp.c:538", *ctrl_data, &dregs->ctrl_reg);
 
 	scsi_esp_cmd(esp, cmd);
 }

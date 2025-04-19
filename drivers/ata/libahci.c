@@ -192,7 +192,7 @@ static void ahci_enable_ahci(void __iomem *mmio)
 	u32 tmp;
 
 	/* turn on AHCI_EN */
-	tmp = readl(mmio + HOST_CTL);
+	tmp = pete_readl("drivers/ata/libahci.c:195", mmio + HOST_CTL);
 	if (tmp & HOST_AHCI_EN)
 		return;
 
@@ -201,8 +201,8 @@ static void ahci_enable_ahci(void __iomem *mmio)
 	 */
 	for (i = 0; i < 5; i++) {
 		tmp |= HOST_AHCI_EN;
-		writel(tmp, mmio + HOST_CTL);
-		tmp = readl(mmio + HOST_CTL);	/* flush && sanity check */
+		pete_writel("drivers/ata/libahci.c:204", tmp, mmio + HOST_CTL);
+		tmp = pete_readl("drivers/ata/libahci.c:205", mmio + HOST_CTL);	/* flush && sanity check */
 		if (tmp & HOST_AHCI_EN)
 			return;
 		msleep(10);
@@ -275,7 +275,7 @@ static ssize_t ahci_show_port_cmd(struct device *dev,
 	ssize_t ret;
 
 	ahci_rpm_get_port(ap);
-	ret = sprintf(buf, "%x\n", readl(port_mmio + PORT_CMD));
+	ret = sprintf(buf, "%x\n", pete_readl("drivers/ata/libahci.c:278", port_mmio + PORT_CMD));
 	ahci_rpm_put_port(ap);
 
 	return ret;
@@ -297,7 +297,7 @@ static ssize_t ahci_read_em_buffer(struct device *dev,
 	ahci_rpm_get_port(ap);
 	spin_lock_irqsave(ap->lock, flags);
 
-	em_ctl = readl(mmio + HOST_EM_CTL);
+	em_ctl = pete_readl("drivers/ata/libahci.c:300", mmio + HOST_EM_CTL);
 	if (!(ap->flags & ATA_FLAG_EM) || em_ctl & EM_CTL_XMT ||
 	    !(hpriv->em_msg_type & EM_MSG_TYPE_SGPIO)) {
 		spin_unlock_irqrestore(ap->lock, flags);
@@ -327,7 +327,7 @@ static ssize_t ahci_read_em_buffer(struct device *dev,
 	}
 
 	for (i = 0; i < count; i += 4) {
-		msg = readl(em_mmio + i);
+		msg = pete_readl("drivers/ata/libahci.c:330", em_mmio + i);
 		buf[i] = msg & 0xff;
 		buf[i + 1] = (msg >> 8) & 0xff;
 		buf[i + 2] = (msg >> 16) & 0xff;
@@ -363,7 +363,7 @@ static ssize_t ahci_store_em_buffer(struct device *dev,
 	ahci_rpm_get_port(ap);
 	spin_lock_irqsave(ap->lock, flags);
 
-	em_ctl = readl(mmio + HOST_EM_CTL);
+	em_ctl = pete_readl("drivers/ata/libahci.c:366", mmio + HOST_EM_CTL);
 	if (em_ctl & EM_CTL_TM) {
 		spin_unlock_irqrestore(ap->lock, flags);
 		ahci_rpm_put_port(ap);
@@ -373,10 +373,10 @@ static ssize_t ahci_store_em_buffer(struct device *dev,
 	for (i = 0; i < size; i += 4) {
 		msg = msg_buf[i] | msg_buf[i + 1] << 8 |
 		      msg_buf[i + 2] << 16 | msg_buf[i + 3] << 24;
-		writel(msg, em_mmio + i);
+		pete_writel("drivers/ata/libahci.c:376", msg, em_mmio + i);
 	}
 
-	writel(em_ctl | EM_CTL_TM, mmio + HOST_EM_CTL);
+	pete_writel("drivers/ata/libahci.c:379", em_ctl | EM_CTL_TM, mmio + HOST_EM_CTL);
 
 	spin_unlock_irqrestore(ap->lock, flags);
 	ahci_rpm_put_port(ap);
@@ -394,7 +394,7 @@ static ssize_t ahci_show_em_supported(struct device *dev,
 	u32 em_ctl;
 
 	ahci_rpm_get_port(ap);
-	em_ctl = readl(mmio + HOST_EM_CTL);
+	em_ctl = pete_readl("drivers/ata/libahci.c:397", mmio + HOST_EM_CTL);
 	ahci_rpm_put_port(ap);
 
 	return sprintf(buf, "%s%s%s%s\n",
@@ -434,14 +434,14 @@ void ahci_save_initial_config(struct device *dev, struct ahci_host_priv *hpriv)
 	/* Values prefixed with saved_ are written back to host after
 	 * reset.  Values without are used for driver operation.
 	 */
-	hpriv->saved_cap = cap = readl(mmio + HOST_CAP);
-	hpriv->saved_port_map = port_map = readl(mmio + HOST_PORTS_IMPL);
+	hpriv->saved_cap = cap = pete_readl("drivers/ata/libahci.c:437", mmio + HOST_CAP);
+	hpriv->saved_port_map = port_map = pete_readl("drivers/ata/libahci.c:438", mmio + HOST_PORTS_IMPL);
 
 	/* CAP2 register is only defined for AHCI 1.2 and later */
-	vers = readl(mmio + HOST_VERSION);
+	vers = pete_readl("drivers/ata/libahci.c:441", mmio + HOST_VERSION);
 	if ((vers >> 16) > 1 ||
 	   ((vers >> 16) == 1 && (vers & 0xFFFF) >= 0x200))
-		hpriv->saved_cap2 = cap2 = readl(mmio + HOST_CAP2);
+		hpriv->saved_cap2 = cap2 = pete_readl("drivers/ata/libahci.c:444", mmio + HOST_CAP2);
 	else
 		hpriv->saved_cap2 = cap2 = 0;
 
@@ -544,7 +544,7 @@ void ahci_save_initial_config(struct device *dev, struct ahci_host_priv *hpriv)
 	/* record values to use during operation */
 	hpriv->cap = cap;
 	hpriv->cap2 = cap2;
-	hpriv->version = readl(mmio + HOST_VERSION);
+	hpriv->version = pete_readl("drivers/ata/libahci.c:547", mmio + HOST_VERSION);
 	hpriv->port_map = port_map;
 
 	if (!hpriv->start_engine)
@@ -572,11 +572,11 @@ static void ahci_restore_initial_config(struct ata_host *host)
 	struct ahci_host_priv *hpriv = host->private_data;
 	void __iomem *mmio = hpriv->mmio;
 
-	writel(hpriv->saved_cap, mmio + HOST_CAP);
+	pete_writel("drivers/ata/libahci.c:575", hpriv->saved_cap, mmio + HOST_CAP);
 	if (hpriv->saved_cap2)
-		writel(hpriv->saved_cap2, mmio + HOST_CAP2);
-	writel(hpriv->saved_port_map, mmio + HOST_PORTS_IMPL);
-	(void) readl(mmio + HOST_PORTS_IMPL);	/* flush */
+		pete_writel("drivers/ata/libahci.c:577", hpriv->saved_cap2, mmio + HOST_CAP2);
+	pete_writel("drivers/ata/libahci.c:578", hpriv->saved_port_map, mmio + HOST_PORTS_IMPL);
+	(void) pete_readl("drivers/ata/libahci.c:579", mmio + HOST_PORTS_IMPL);	/* flush */
 }
 
 static unsigned ahci_scr_offset(struct ata_port *ap, unsigned int sc_reg)
@@ -602,7 +602,7 @@ static int ahci_scr_read(struct ata_link *link, unsigned int sc_reg, u32 *val)
 	int offset = ahci_scr_offset(link->ap, sc_reg);
 
 	if (offset) {
-		*val = readl(port_mmio + offset);
+		*val = pete_readl("drivers/ata/libahci.c:605", port_mmio + offset);
 		return 0;
 	}
 	return -EINVAL;
@@ -614,7 +614,7 @@ static int ahci_scr_write(struct ata_link *link, unsigned int sc_reg, u32 val)
 	int offset = ahci_scr_offset(link->ap, sc_reg);
 
 	if (offset) {
-		writel(val, port_mmio + offset);
+		pete_writel("drivers/ata/libahci.c:617", val, port_mmio + offset);
 		return 0;
 	}
 	return -EINVAL;
@@ -626,10 +626,10 @@ void ahci_start_engine(struct ata_port *ap)
 	u32 tmp;
 
 	/* start DMA */
-	tmp = readl(port_mmio + PORT_CMD);
+	tmp = pete_readl("drivers/ata/libahci.c:629", port_mmio + PORT_CMD);
 	tmp |= PORT_CMD_START;
-	writel(tmp, port_mmio + PORT_CMD);
-	readl(port_mmio + PORT_CMD); /* flush */
+	pete_writel("drivers/ata/libahci.c:631", tmp, port_mmio + PORT_CMD);
+	pete_readl("drivers/ata/libahci.c:632", port_mmio + PORT_CMD); /* flush */
 }
 EXPORT_SYMBOL_GPL(ahci_start_engine);
 
@@ -652,7 +652,7 @@ int ahci_stop_engine(struct ata_port *ap)
 		return -EIO;
 	}
 
-	tmp = readl(port_mmio + PORT_CMD);
+	tmp = pete_readl("drivers/ata/libahci.c:655", port_mmio + PORT_CMD);
 
 	/* check if the HBA is idle */
 	if ((tmp & (PORT_CMD_START | PORT_CMD_LIST_ON)) == 0)
@@ -670,7 +670,7 @@ int ahci_stop_engine(struct ata_port *ap)
 
 	/* setting HBA to idle */
 	tmp &= ~PORT_CMD_START;
-	writel(tmp, port_mmio + PORT_CMD);
+	pete_writel("drivers/ata/libahci.c:673", tmp, port_mmio + PORT_CMD);
 
 	/* wait for engine to stop. This could be as long as 500 msec */
 	tmp = ata_wait_register(ap, port_mmio + PORT_CMD,
@@ -691,22 +691,22 @@ void ahci_start_fis_rx(struct ata_port *ap)
 
 	/* set FIS registers */
 	if (hpriv->cap & HOST_CAP_64)
-		writel((pp->cmd_slot_dma >> 16) >> 16,
+		pete_writel("drivers/ata/libahci.c:694", (pp->cmd_slot_dma >> 16) >> 16,
 		       port_mmio + PORT_LST_ADDR_HI);
-	writel(pp->cmd_slot_dma & 0xffffffff, port_mmio + PORT_LST_ADDR);
+	pete_writel("drivers/ata/libahci.c:696", pp->cmd_slot_dma & 0xffffffff, port_mmio + PORT_LST_ADDR);
 
 	if (hpriv->cap & HOST_CAP_64)
-		writel((pp->rx_fis_dma >> 16) >> 16,
+		pete_writel("drivers/ata/libahci.c:699", (pp->rx_fis_dma >> 16) >> 16,
 		       port_mmio + PORT_FIS_ADDR_HI);
-	writel(pp->rx_fis_dma & 0xffffffff, port_mmio + PORT_FIS_ADDR);
+	pete_writel("drivers/ata/libahci.c:701", pp->rx_fis_dma & 0xffffffff, port_mmio + PORT_FIS_ADDR);
 
 	/* enable FIS reception */
-	tmp = readl(port_mmio + PORT_CMD);
+	tmp = pete_readl("drivers/ata/libahci.c:704", port_mmio + PORT_CMD);
 	tmp |= PORT_CMD_FIS_RX;
-	writel(tmp, port_mmio + PORT_CMD);
+	pete_writel("drivers/ata/libahci.c:706", tmp, port_mmio + PORT_CMD);
 
 	/* flush */
-	readl(port_mmio + PORT_CMD);
+	pete_readl("drivers/ata/libahci.c:709", port_mmio + PORT_CMD);
 }
 EXPORT_SYMBOL_GPL(ahci_start_fis_rx);
 
@@ -716,9 +716,9 @@ static int ahci_stop_fis_rx(struct ata_port *ap)
 	u32 tmp;
 
 	/* disable FIS reception */
-	tmp = readl(port_mmio + PORT_CMD);
+	tmp = pete_readl("drivers/ata/libahci.c:719", port_mmio + PORT_CMD);
 	tmp &= ~PORT_CMD_FIS_RX;
-	writel(tmp, port_mmio + PORT_CMD);
+	pete_writel("drivers/ata/libahci.c:721", tmp, port_mmio + PORT_CMD);
 
 	/* wait for completion, spec says 500ms, give it 1000 */
 	tmp = ata_wait_register(ap, port_mmio + PORT_CMD, PORT_CMD_FIS_ON,
@@ -735,16 +735,16 @@ static void ahci_power_up(struct ata_port *ap)
 	void __iomem *port_mmio = ahci_port_base(ap);
 	u32 cmd;
 
-	cmd = readl(port_mmio + PORT_CMD) & ~PORT_CMD_ICC_MASK;
+	cmd = pete_readl("drivers/ata/libahci.c:738", port_mmio + PORT_CMD) & ~PORT_CMD_ICC_MASK;
 
 	/* spin up device */
 	if (hpriv->cap & HOST_CAP_SSS) {
 		cmd |= PORT_CMD_SPIN_UP;
-		writel(cmd, port_mmio + PORT_CMD);
+		pete_writel("drivers/ata/libahci.c:743", cmd, port_mmio + PORT_CMD);
 	}
 
 	/* wake up link */
-	writel(cmd | PORT_CMD_ICC_ACTIVE, port_mmio + PORT_CMD);
+	pete_writel("drivers/ata/libahci.c:747", cmd | PORT_CMD_ICC_ACTIVE, port_mmio + PORT_CMD);
 }
 
 static int ahci_set_lpm(struct ata_link *link, enum ata_lpm_policy policy,
@@ -765,21 +765,21 @@ static int ahci_set_lpm(struct ata_link *link, enum ata_lpm_policy policy,
 		 * interrupts.
 		 */
 		pp->intr_mask &= ~PORT_IRQ_PHYRDY;
-		writel(pp->intr_mask, port_mmio + PORT_IRQ_MASK);
+		pete_writel("drivers/ata/libahci.c:768", pp->intr_mask, port_mmio + PORT_IRQ_MASK);
 
 		sata_link_scr_lpm(link, policy, false);
 	}
 
 	if (hpriv->cap & HOST_CAP_ALPM) {
-		u32 cmd = readl(port_mmio + PORT_CMD);
+		u32 cmd = pete_readl("drivers/ata/libahci.c:774", port_mmio + PORT_CMD);
 
 		if (policy == ATA_LPM_MAX_POWER || !(hints & ATA_LPM_HIPM)) {
 			if (!(hints & ATA_LPM_WAKE_ONLY))
 				cmd &= ~(PORT_CMD_ASP | PORT_CMD_ALPE);
 			cmd |= PORT_CMD_ICC_ACTIVE;
 
-			writel(cmd, port_mmio + PORT_CMD);
-			readl(port_mmio + PORT_CMD);
+			pete_writel("drivers/ata/libahci.c:781", cmd, port_mmio + PORT_CMD);
+			pete_readl("drivers/ata/libahci.c:782", port_mmio + PORT_CMD);
 
 			/* wait 10ms to be sure we've come out of LPM state */
 			ata_msleep(ap, 10);
@@ -794,7 +794,7 @@ static int ahci_set_lpm(struct ata_link *link, enum ata_lpm_policy policy,
 				cmd &= ~PORT_CMD_ASP;
 
 			/* write out new cmd value */
-			writel(cmd, port_mmio + PORT_CMD);
+			pete_writel("drivers/ata/libahci.c:797", cmd, port_mmio + PORT_CMD);
 		}
 	}
 
@@ -814,7 +814,7 @@ static int ahci_set_lpm(struct ata_link *link, enum ata_lpm_policy policy,
 
 		/* turn PHYRDY IRQ back on */
 		pp->intr_mask |= PORT_IRQ_PHYRDY;
-		writel(pp->intr_mask, port_mmio + PORT_IRQ_MASK);
+		pete_writel("drivers/ata/libahci.c:817", pp->intr_mask, port_mmio + PORT_IRQ_MASK);
 	}
 
 	return 0;
@@ -831,14 +831,14 @@ static void ahci_power_down(struct ata_port *ap)
 		return;
 
 	/* put device into listen mode, first set PxSCTL.DET to 0 */
-	scontrol = readl(port_mmio + PORT_SCR_CTL);
+	scontrol = pete_readl("drivers/ata/libahci.c:834", port_mmio + PORT_SCR_CTL);
 	scontrol &= ~0xf;
-	writel(scontrol, port_mmio + PORT_SCR_CTL);
+	pete_writel("drivers/ata/libahci.c:836", scontrol, port_mmio + PORT_SCR_CTL);
 
 	/* then set PxCMD.SUD to 0 */
-	cmd = readl(port_mmio + PORT_CMD) & ~PORT_CMD_ICC_MASK;
+	cmd = pete_readl("drivers/ata/libahci.c:839", port_mmio + PORT_CMD) & ~PORT_CMD_ICC_MASK;
 	cmd &= ~PORT_CMD_SPIN_UP;
-	writel(cmd, port_mmio + PORT_CMD);
+	pete_writel("drivers/ata/libahci.c:841", cmd, port_mmio + PORT_CMD);
 }
 #endif
 
@@ -925,10 +925,10 @@ int ahci_reset_controller(struct ata_host *host)
 
 	/* global controller reset */
 	if (!ahci_skip_host_reset) {
-		tmp = readl(mmio + HOST_CTL);
+		tmp = pete_readl("drivers/ata/libahci.c:928", mmio + HOST_CTL);
 		if ((tmp & HOST_RESET) == 0) {
-			writel(tmp | HOST_RESET, mmio + HOST_CTL);
-			readl(mmio + HOST_CTL); /* flush */
+			pete_writel("drivers/ata/libahci.c:930", tmp | HOST_RESET, mmio + HOST_CTL);
+			pete_readl("drivers/ata/libahci.c:931", mmio + HOST_CTL); /* flush */
 		}
 
 		/*
@@ -1041,11 +1041,11 @@ int ahci_reset_em(struct ata_host *host)
 	void __iomem *mmio = hpriv->mmio;
 	u32 em_ctl;
 
-	em_ctl = readl(mmio + HOST_EM_CTL);
+	em_ctl = pete_readl("drivers/ata/libahci.c:1044", mmio + HOST_EM_CTL);
 	if ((em_ctl & EM_CTL_TM) || (em_ctl & EM_CTL_RST))
 		return -EINVAL;
 
-	writel(em_ctl | EM_CTL_RST, mmio + HOST_EM_CTL);
+	pete_writel("drivers/ata/libahci.c:1048", em_ctl | EM_CTL_RST, mmio + HOST_EM_CTL);
 	return 0;
 }
 EXPORT_SYMBOL_GPL(ahci_reset_em);
@@ -1076,7 +1076,7 @@ static ssize_t ahci_transmit_led_message(struct ata_port *ap, u32 state,
 	 * if we are still busy transmitting a previous message,
 	 * do not allow
 	 */
-	em_ctl = readl(mmio + HOST_EM_CTL);
+	em_ctl = pete_readl("drivers/ata/libahci.c:1079", mmio + HOST_EM_CTL);
 	if (em_ctl & EM_CTL_TM) {
 		spin_unlock_irqrestore(ap->lock, flags);
 		ahci_rpm_put_port(ap);
@@ -1094,13 +1094,13 @@ static ssize_t ahci_transmit_led_message(struct ata_port *ap, u32 state,
 		message[1] = ((state & ~EM_MSG_LED_HBA_PORT) | ap->port_no);
 
 		/* write message to EM_LOC */
-		writel(message[0], mmio + hpriv->em_loc);
-		writel(message[1], mmio + hpriv->em_loc+4);
+		pete_writel("drivers/ata/libahci.c:1097", message[0], mmio + hpriv->em_loc);
+		pete_writel("drivers/ata/libahci.c:1098", message[1], mmio + hpriv->em_loc+4);
 
 		/*
 		 * tell hardware to transmit the message
 		 */
-		writel(em_ctl | EM_CTL_TM, mmio + HOST_EM_CTL);
+		pete_writel("drivers/ata/libahci.c:1103", em_ctl | EM_CTL_TM, mmio + HOST_EM_CTL);
 	}
 
 	/* save off new led state for port/slot */
@@ -1215,20 +1215,20 @@ static void ahci_port_init(struct device *dev, struct ata_port *ap,
 		dev_warn(dev, "%s (%d)\n", emsg, rc);
 
 	/* clear SError */
-	tmp = readl(port_mmio + PORT_SCR_ERR);
+	tmp = pete_readl("drivers/ata/libahci.c:1218", port_mmio + PORT_SCR_ERR);
 	VPRINTK("PORT_SCR_ERR 0x%x\n", tmp);
-	writel(tmp, port_mmio + PORT_SCR_ERR);
+	pete_writel("drivers/ata/libahci.c:1220", tmp, port_mmio + PORT_SCR_ERR);
 
 	/* clear port IRQ */
-	tmp = readl(port_mmio + PORT_IRQ_STAT);
+	tmp = pete_readl("drivers/ata/libahci.c:1223", port_mmio + PORT_IRQ_STAT);
 	VPRINTK("PORT_IRQ_STAT 0x%x\n", tmp);
 	if (tmp)
-		writel(tmp, port_mmio + PORT_IRQ_STAT);
+		pete_writel("drivers/ata/libahci.c:1226", tmp, port_mmio + PORT_IRQ_STAT);
 
-	writel(1 << port_no, mmio + HOST_IRQ_STAT);
+	pete_writel("drivers/ata/libahci.c:1228", 1 << port_no, mmio + HOST_IRQ_STAT);
 
 	/* mark esata ports */
-	tmp = readl(port_mmio + PORT_CMD);
+	tmp = pete_readl("drivers/ata/libahci.c:1231", port_mmio + PORT_CMD);
 	if ((tmp & PORT_CMD_ESP) && (hpriv->cap & HOST_CAP_SXS))
 		ap->pflags |= ATA_PFLAG_EXTERNAL;
 }
@@ -1251,10 +1251,10 @@ void ahci_init_controller(struct ata_host *host)
 		ahci_port_init(host->dev, ap, i, mmio, port_mmio);
 	}
 
-	tmp = readl(mmio + HOST_CTL);
+	tmp = pete_readl("drivers/ata/libahci.c:1254", mmio + HOST_CTL);
 	VPRINTK("HOST_CTL 0x%x\n", tmp);
-	writel(tmp | HOST_IRQ_EN, mmio + HOST_CTL);
-	tmp = readl(mmio + HOST_CTL);
+	pete_writel("drivers/ata/libahci.c:1256", tmp | HOST_IRQ_EN, mmio + HOST_CTL);
+	tmp = pete_readl("drivers/ata/libahci.c:1257", mmio + HOST_CTL);
 	VPRINTK("HOST_CTL 0x%x\n", tmp);
 }
 EXPORT_SYMBOL_GPL(ahci_init_controller);
@@ -1276,7 +1276,7 @@ unsigned int ahci_dev_classify(struct ata_port *ap)
 	struct ata_taskfile tf;
 	u32 tmp;
 
-	tmp = readl(port_mmio + PORT_SIG);
+	tmp = pete_readl("drivers/ata/libahci.c:1279", port_mmio + PORT_SIG);
 	tf.lbah		= (tmp >> 24)	& 0xff;
 	tf.lbam		= (tmp >> 16)	& 0xff;
 	tf.lbal		= (tmp >> 8)	& 0xff;
@@ -1304,7 +1304,7 @@ int ahci_kick_engine(struct ata_port *ap)
 {
 	void __iomem *port_mmio = ahci_port_base(ap);
 	struct ahci_host_priv *hpriv = ap->host->private_data;
-	u8 status = readl(port_mmio + PORT_TFDATA) & 0xFF;
+	u8 status = pete_readl("drivers/ata/libahci.c:1307", port_mmio + PORT_TFDATA) & 0xFF;
 	u32 tmp;
 	int busy, rc;
 
@@ -1328,9 +1328,9 @@ int ahci_kick_engine(struct ata_port *ap)
 	}
 
 	/* perform CLO */
-	tmp = readl(port_mmio + PORT_CMD);
+	tmp = pete_readl("drivers/ata/libahci.c:1331", port_mmio + PORT_CMD);
 	tmp |= PORT_CMD_CLO;
-	writel(tmp, port_mmio + PORT_CMD);
+	pete_writel("drivers/ata/libahci.c:1333", tmp, port_mmio + PORT_CMD);
 
 	rc = 0;
 	tmp = ata_wait_register(ap, port_mmio + PORT_CMD,
@@ -1361,15 +1361,15 @@ static int ahci_exec_polled_cmd(struct ata_port *ap, int pmp,
 
 	/* set port value for softreset of Port Multiplier */
 	if (pp->fbs_enabled && pp->fbs_last_dev != pmp) {
-		tmp = readl(port_mmio + PORT_FBS);
+		tmp = pete_readl("drivers/ata/libahci.c:1364", port_mmio + PORT_FBS);
 		tmp &= ~(PORT_FBS_DEV_MASK | PORT_FBS_DEC);
 		tmp |= pmp << PORT_FBS_DEV_OFFSET;
-		writel(tmp, port_mmio + PORT_FBS);
+		pete_writel("drivers/ata/libahci.c:1367", tmp, port_mmio + PORT_FBS);
 		pp->fbs_last_dev = pmp;
 	}
 
 	/* issue & wait */
-	writel(1, port_mmio + PORT_CMD_ISSUE);
+	pete_writel("drivers/ata/libahci.c:1372", 1, port_mmio + PORT_CMD_ISSUE);
 
 	if (timeout_msec) {
 		tmp = ata_wait_register(ap, port_mmio + PORT_CMD_ISSUE,
@@ -1379,7 +1379,7 @@ static int ahci_exec_polled_cmd(struct ata_port *ap, int pmp,
 			return -EBUSY;
 		}
 	} else
-		readl(port_mmio + PORT_CMD_ISSUE);	/* flush */
+		pete_readl("drivers/ata/libahci.c:1382", port_mmio + PORT_CMD_ISSUE);	/* flush */
 
 	return 0;
 }
@@ -1469,7 +1469,7 @@ int ahci_do_softreset(struct ata_link *link, unsigned int *class,
 int ahci_check_ready(struct ata_link *link)
 {
 	void __iomem *port_mmio = ahci_port_base(link->ap);
-	u8 status = readl(port_mmio + PORT_TFDATA) & 0xFF;
+	u8 status = pete_readl("drivers/ata/libahci.c:1472", port_mmio + PORT_TFDATA) & 0xFF;
 
 	return ata_check_ready(status);
 }
@@ -1489,8 +1489,8 @@ EXPORT_SYMBOL_GPL(ahci_do_softreset);
 static int ahci_bad_pmp_check_ready(struct ata_link *link)
 {
 	void __iomem *port_mmio = ahci_port_base(link->ap);
-	u8 status = readl(port_mmio + PORT_TFDATA) & 0xFF;
-	u32 irq_status = readl(port_mmio + PORT_IRQ_STAT);
+	u8 status = pete_readl("drivers/ata/libahci.c:1492", port_mmio + PORT_TFDATA) & 0xFF;
+	u32 irq_status = pete_readl("drivers/ata/libahci.c:1493", port_mmio + PORT_IRQ_STAT);
 
 	/*
 	 * There is no need to check TFDATA if BAD PMP is found due to HW bug,
@@ -1522,7 +1522,7 @@ static int ahci_pmp_retry_softreset(struct ata_link *link, unsigned int *class,
 	 * again to port 0.
 	 */
 	if (rc == -EIO) {
-		irq_sts = readl(port_mmio + PORT_IRQ_STAT);
+		irq_sts = pete_readl("drivers/ata/libahci.c:1525", port_mmio + PORT_IRQ_STAT);
 		if (irq_sts & PORT_IRQ_BAD_PMP) {
 			ata_link_warn(link,
 					"applying PMP SRST workaround "
@@ -1585,14 +1585,14 @@ static void ahci_postreset(struct ata_link *link, unsigned int *class)
 	ata_std_postreset(link, class);
 
 	/* Make sure port's ATAPI bit is set appropriately */
-	new_tmp = tmp = readl(port_mmio + PORT_CMD);
+	new_tmp = tmp = pete_readl("drivers/ata/libahci.c:1588", port_mmio + PORT_CMD);
 	if (*class == ATA_DEV_ATAPI)
 		new_tmp |= PORT_CMD_ATAPI;
 	else
 		new_tmp &= ~PORT_CMD_ATAPI;
 	if (new_tmp != tmp) {
-		writel(new_tmp, port_mmio + PORT_CMD);
-		readl(port_mmio + PORT_CMD); /* flush */
+		pete_writel("drivers/ata/libahci.c:1594", new_tmp, port_mmio + PORT_CMD);
+		pete_readl("drivers/ata/libahci.c:1595", port_mmio + PORT_CMD); /* flush */
 	}
 }
 
@@ -1674,7 +1674,7 @@ static void ahci_fbs_dec_intr(struct ata_port *ap)
 {
 	struct ahci_port_priv *pp = ap->private_data;
 	void __iomem *port_mmio = ahci_port_base(ap);
-	u32 fbs = readl(port_mmio + PORT_FBS);
+	u32 fbs = pete_readl("drivers/ata/libahci.c:1677", port_mmio + PORT_FBS);
 	int retries = 3;
 
 	DPRINTK("ENTER\n");
@@ -1683,11 +1683,11 @@ static void ahci_fbs_dec_intr(struct ata_port *ap)
 	/* time to wait for DEC is not specified by AHCI spec,
 	 * add a retry loop for safety.
 	 */
-	writel(fbs | PORT_FBS_DEC, port_mmio + PORT_FBS);
-	fbs = readl(port_mmio + PORT_FBS);
+	pete_writel("drivers/ata/libahci.c:1686", fbs | PORT_FBS_DEC, port_mmio + PORT_FBS);
+	fbs = pete_readl("drivers/ata/libahci.c:1687", port_mmio + PORT_FBS);
 	while ((fbs & PORT_FBS_DEC) && retries--) {
 		udelay(1);
-		fbs = readl(port_mmio + PORT_FBS);
+		fbs = pete_readl("drivers/ata/libahci.c:1690", port_mmio + PORT_FBS);
 	}
 
 	if (fbs & PORT_FBS_DEC)
@@ -1708,7 +1708,7 @@ static void ahci_error_intr(struct ata_port *ap, u32 irq_stat)
 	/* determine active link with error */
 	if (pp->fbs_enabled) {
 		void __iomem *port_mmio = ahci_port_base(ap);
-		u32 fbs = readl(port_mmio + PORT_FBS);
+		u32 fbs = pete_readl("drivers/ata/libahci.c:1711", port_mmio + PORT_FBS);
 		int pmp = fbs >> PORT_FBS_DWE_OFFSET;
 
 		if ((fbs & PORT_FBS_SDE) && (pmp < ap->nr_pmp_links)) {
@@ -1867,15 +1867,15 @@ static void ahci_handle_port_interrupt(struct ata_port *ap,
 	 */
 	if (pp->fbs_enabled) {
 		if (ap->qc_active) {
-			qc_active = readl(port_mmio + PORT_SCR_ACT);
-			qc_active |= readl(port_mmio + PORT_CMD_ISSUE);
+			qc_active = pete_readl("drivers/ata/libahci.c:1870", port_mmio + PORT_SCR_ACT);
+			qc_active |= pete_readl("drivers/ata/libahci.c:1871", port_mmio + PORT_CMD_ISSUE);
 		}
 	} else {
 		/* pp->active_link is valid iff any command is in flight */
 		if (ap->qc_active && pp->active_link->sactive)
-			qc_active = readl(port_mmio + PORT_SCR_ACT);
+			qc_active = pete_readl("drivers/ata/libahci.c:1876", port_mmio + PORT_SCR_ACT);
 		else
-			qc_active = readl(port_mmio + PORT_CMD_ISSUE);
+			qc_active = pete_readl("drivers/ata/libahci.c:1878", port_mmio + PORT_CMD_ISSUE);
 	}
 
 
@@ -1894,8 +1894,8 @@ static void ahci_port_intr(struct ata_port *ap)
 	void __iomem *port_mmio = ahci_port_base(ap);
 	u32 status;
 
-	status = readl(port_mmio + PORT_IRQ_STAT);
-	writel(status, port_mmio + PORT_IRQ_STAT);
+	status = pete_readl("drivers/ata/libahci.c:1897", port_mmio + PORT_IRQ_STAT);
+	pete_writel("drivers/ata/libahci.c:1898", status, port_mmio + PORT_IRQ_STAT);
 
 	ahci_handle_port_interrupt(ap, port_mmio, status);
 }
@@ -1908,8 +1908,8 @@ static irqreturn_t ahci_multi_irqs_intr_hard(int irq, void *dev_instance)
 
 	VPRINTK("ENTER\n");
 
-	status = readl(port_mmio + PORT_IRQ_STAT);
-	writel(status, port_mmio + PORT_IRQ_STAT);
+	status = pete_readl("drivers/ata/libahci.c:1911", port_mmio + PORT_IRQ_STAT);
+	pete_writel("drivers/ata/libahci.c:1912", status, port_mmio + PORT_IRQ_STAT);
 
 	spin_lock(ap->lock);
 	ahci_handle_port_interrupt(ap, port_mmio, status);
@@ -1962,7 +1962,7 @@ static irqreturn_t ahci_single_level_irq_intr(int irq, void *dev_instance)
 	mmio = hpriv->mmio;
 
 	/* sigh.  0xffffffff is a valid return from h/w */
-	irq_stat = readl(mmio + HOST_IRQ_STAT);
+	irq_stat = pete_readl("drivers/ata/libahci.c:1965", mmio + HOST_IRQ_STAT);
 	if (!irq_stat)
 		return IRQ_NONE;
 
@@ -1981,7 +1981,7 @@ static irqreturn_t ahci_single_level_irq_intr(int irq, void *dev_instance)
 	 * Also, use the unmasked value to clear interrupt as spurious
 	 * pending event on a dummy port might cause screaming IRQ.
 	 */
-	writel(irq_stat, mmio + HOST_IRQ_STAT);
+	pete_writel("drivers/ata/libahci.c:1984", irq_stat, mmio + HOST_IRQ_STAT);
 
 	spin_unlock(&host->lock);
 
@@ -2003,17 +2003,17 @@ unsigned int ahci_qc_issue(struct ata_queued_cmd *qc)
 	pp->active_link = qc->dev->link;
 
 	if (ata_is_ncq(qc->tf.protocol))
-		writel(1 << qc->hw_tag, port_mmio + PORT_SCR_ACT);
+		pete_writel("drivers/ata/libahci.c:2006", 1 << qc->hw_tag, port_mmio + PORT_SCR_ACT);
 
 	if (pp->fbs_enabled && pp->fbs_last_dev != qc->dev->link->pmp) {
-		u32 fbs = readl(port_mmio + PORT_FBS);
+		u32 fbs = pete_readl("drivers/ata/libahci.c:2009", port_mmio + PORT_FBS);
 		fbs &= ~(PORT_FBS_DEV_MASK | PORT_FBS_DEC);
 		fbs |= qc->dev->link->pmp << PORT_FBS_DEV_OFFSET;
-		writel(fbs, port_mmio + PORT_FBS);
+		pete_writel("drivers/ata/libahci.c:2012", fbs, port_mmio + PORT_FBS);
 		pp->fbs_last_dev = qc->dev->link->pmp;
 	}
 
-	writel(1 << qc->hw_tag, port_mmio + PORT_CMD_ISSUE);
+	pete_writel("drivers/ata/libahci.c:2016", 1 << qc->hw_tag, port_mmio + PORT_CMD_ISSUE);
 
 	ahci_sw_activity(qc->dev->link);
 
@@ -2050,7 +2050,7 @@ static void ahci_freeze(struct ata_port *ap)
 	void __iomem *port_mmio = ahci_port_base(ap);
 
 	/* turn IRQ off */
-	writel(0, port_mmio + PORT_IRQ_MASK);
+	pete_writel("drivers/ata/libahci.c:2053", 0, port_mmio + PORT_IRQ_MASK);
 }
 
 static void ahci_thaw(struct ata_port *ap)
@@ -2062,12 +2062,12 @@ static void ahci_thaw(struct ata_port *ap)
 	struct ahci_port_priv *pp = ap->private_data;
 
 	/* clear IRQ */
-	tmp = readl(port_mmio + PORT_IRQ_STAT);
-	writel(tmp, port_mmio + PORT_IRQ_STAT);
-	writel(1 << ap->port_no, mmio + HOST_IRQ_STAT);
+	tmp = pete_readl("drivers/ata/libahci.c:2065", port_mmio + PORT_IRQ_STAT);
+	pete_writel("drivers/ata/libahci.c:2066", tmp, port_mmio + PORT_IRQ_STAT);
+	pete_writel("drivers/ata/libahci.c:2067", 1 << ap->port_no, mmio + HOST_IRQ_STAT);
 
 	/* turn IRQ back on */
-	writel(pp->intr_mask, port_mmio + PORT_IRQ_MASK);
+	pete_writel("drivers/ata/libahci.c:2070", pp->intr_mask, port_mmio + PORT_IRQ_MASK);
 }
 
 void ahci_error_handler(struct ata_port *ap)
@@ -2105,7 +2105,7 @@ static void ahci_set_aggressive_devslp(struct ata_port *ap, bool sleep)
 	int rc;
 	unsigned int err_mask;
 
-	devslp = readl(port_mmio + PORT_DEVSLP);
+	devslp = pete_readl("drivers/ata/libahci.c:2108", port_mmio + PORT_DEVSLP);
 	if (!(devslp & PORT_DEVSLP_DSP)) {
 		dev_info(ap->host->dev, "port does not support device sleep\n");
 		return;
@@ -2114,7 +2114,7 @@ static void ahci_set_aggressive_devslp(struct ata_port *ap, bool sleep)
 	/* disable device sleep */
 	if (!sleep) {
 		if (devslp & PORT_DEVSLP_ADSE) {
-			writel(devslp & ~PORT_DEVSLP_ADSE,
+			pete_writel("drivers/ata/libahci.c:2117", devslp & ~PORT_DEVSLP_ADSE,
 			       port_mmio + PORT_DEVSLP);
 			err_mask = ata_dev_set_feature(dev,
 						       SETFEATURES_SATA_DISABLE,
@@ -2164,7 +2164,7 @@ static void ahci_set_aggressive_devslp(struct ata_port *ap, bool sleep)
 		   (mdat << PORT_DEVSLP_MDAT_OFFSET) |
 		   (deto << PORT_DEVSLP_DETO_OFFSET) |
 		   PORT_DEVSLP_ADSE);
-	writel(devslp, port_mmio + PORT_DEVSLP);
+	pete_writel("drivers/ata/libahci.c:2167", devslp, port_mmio + PORT_DEVSLP);
 
 	hpriv->start_engine(ap);
 
@@ -2187,7 +2187,7 @@ static void ahci_enable_fbs(struct ata_port *ap)
 	if (!pp->fbs_supported)
 		return;
 
-	fbs = readl(port_mmio + PORT_FBS);
+	fbs = pete_readl("drivers/ata/libahci.c:2190", port_mmio + PORT_FBS);
 	if (fbs & PORT_FBS_EN) {
 		pp->fbs_enabled = true;
 		pp->fbs_last_dev = -1; /* initialization */
@@ -2198,8 +2198,8 @@ static void ahci_enable_fbs(struct ata_port *ap)
 	if (rc)
 		return;
 
-	writel(fbs | PORT_FBS_EN, port_mmio + PORT_FBS);
-	fbs = readl(port_mmio + PORT_FBS);
+	pete_writel("drivers/ata/libahci.c:2201", fbs | PORT_FBS_EN, port_mmio + PORT_FBS);
+	fbs = pete_readl("drivers/ata/libahci.c:2202", port_mmio + PORT_FBS);
 	if (fbs & PORT_FBS_EN) {
 		dev_info(ap->host->dev, "FBS is enabled\n");
 		pp->fbs_enabled = true;
@@ -2221,7 +2221,7 @@ static void ahci_disable_fbs(struct ata_port *ap)
 	if (!pp->fbs_supported)
 		return;
 
-	fbs = readl(port_mmio + PORT_FBS);
+	fbs = pete_readl("drivers/ata/libahci.c:2224", port_mmio + PORT_FBS);
 	if ((fbs & PORT_FBS_EN) == 0) {
 		pp->fbs_enabled = false;
 		return;
@@ -2231,8 +2231,8 @@ static void ahci_disable_fbs(struct ata_port *ap)
 	if (rc)
 		return;
 
-	writel(fbs & ~PORT_FBS_EN, port_mmio + PORT_FBS);
-	fbs = readl(port_mmio + PORT_FBS);
+	pete_writel("drivers/ata/libahci.c:2234", fbs & ~PORT_FBS_EN, port_mmio + PORT_FBS);
+	fbs = pete_readl("drivers/ata/libahci.c:2235", port_mmio + PORT_FBS);
 	if (fbs & PORT_FBS_EN)
 		dev_err(ap->host->dev, "Failed to disable FBS\n");
 	else {
@@ -2249,9 +2249,9 @@ static void ahci_pmp_attach(struct ata_port *ap)
 	struct ahci_port_priv *pp = ap->private_data;
 	u32 cmd;
 
-	cmd = readl(port_mmio + PORT_CMD);
+	cmd = pete_readl("drivers/ata/libahci.c:2252", port_mmio + PORT_CMD);
 	cmd |= PORT_CMD_PMP;
-	writel(cmd, port_mmio + PORT_CMD);
+	pete_writel("drivers/ata/libahci.c:2254", cmd, port_mmio + PORT_CMD);
 
 	ahci_enable_fbs(ap);
 
@@ -2266,7 +2266,7 @@ static void ahci_pmp_attach(struct ata_port *ap)
 	 * frozen since the irq handler is not yet registered.
 	 */
 	if (!(ap->pflags & ATA_PFLAG_FROZEN))
-		writel(pp->intr_mask, port_mmio + PORT_IRQ_MASK);
+		pete_writel("drivers/ata/libahci.c:2269", pp->intr_mask, port_mmio + PORT_IRQ_MASK);
 }
 
 static void ahci_pmp_detach(struct ata_port *ap)
@@ -2277,15 +2277,15 @@ static void ahci_pmp_detach(struct ata_port *ap)
 
 	ahci_disable_fbs(ap);
 
-	cmd = readl(port_mmio + PORT_CMD);
+	cmd = pete_readl("drivers/ata/libahci.c:2280", port_mmio + PORT_CMD);
 	cmd &= ~PORT_CMD_PMP;
-	writel(cmd, port_mmio + PORT_CMD);
+	pete_writel("drivers/ata/libahci.c:2282", cmd, port_mmio + PORT_CMD);
 
 	pp->intr_mask &= ~PORT_IRQ_BAD_PMP;
 
 	/* see comment above in ahci_pmp_attach() */
 	if (!(ap->pflags & ATA_PFLAG_FROZEN))
-		writel(pp->intr_mask, port_mmio + PORT_IRQ_MASK);
+		pete_writel("drivers/ata/libahci.c:2288", pp->intr_mask, port_mmio + PORT_IRQ_MASK);
 }
 
 int ahci_port_resume(struct ata_port *ap)
@@ -2312,7 +2312,7 @@ static void ahci_handle_s2idle(struct ata_port *ap)
 
 	if (pm_suspend_via_firmware())
 		return;
-	devslp = readl(port_mmio + PORT_DEVSLP);
+	devslp = pete_readl("drivers/ata/libahci.c:2315", port_mmio + PORT_DEVSLP);
 	if ((devslp & PORT_DEVSLP_ADSE))
 		ata_msleep(ap, devslp_idle_timeout);
 }
@@ -2364,7 +2364,7 @@ static int ahci_port_start(struct ata_port *ap)
 	/* check FBS capability */
 	if ((hpriv->cap & HOST_CAP_FBS) && sata_pmp_supported(ap)) {
 		void __iomem *port_mmio = ahci_port_base(ap);
-		u32 cmd = readl(port_mmio + PORT_CMD);
+		u32 cmd = pete_readl("drivers/ata/libahci.c:2367", port_mmio + PORT_CMD);
 		if (cmd & PORT_CMD_FBSCP)
 			pp->fbs_supported = true;
 		else if (hpriv->flags & AHCI_HFLAG_YES_FBS) {
@@ -2450,7 +2450,7 @@ static void ahci_port_stop(struct ata_port *ap)
 	 * Clear GHC.IS to prevent stuck INTx after disabling MSI and
 	 * re-enabling INTx.
 	 */
-	writel(1 << ap->port_no, host_mmio + HOST_IRQ_STAT);
+	pete_writel("drivers/ata/libahci.c:2453", 1 << ap->port_no, host_mmio + HOST_IRQ_STAT);
 
 	ahci_rpm_put_port(ap);
 }
@@ -2532,8 +2532,8 @@ void ahci_set_em_messages(struct ahci_host_priv *hpriv,
 {
 	u8 messages;
 	void __iomem *mmio = hpriv->mmio;
-	u32 em_loc = readl(mmio + HOST_EM_LOC);
-	u32 em_ctl = readl(mmio + HOST_EM_CTL);
+	u32 em_loc = pete_readl("drivers/ata/libahci.c:2535", mmio + HOST_EM_LOC);
+	u32 em_ctl = pete_readl("drivers/ata/libahci.c:2536", mmio + HOST_EM_CTL);
 
 	if (!ahci_em_messages || !(hpriv->cap & HOST_CAP_EMS))
 		return;

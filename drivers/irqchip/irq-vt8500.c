@@ -75,16 +75,16 @@ static void vt8500_irq_mask(struct irq_data *d)
 	u8 edge, dctr;
 	u32 status;
 
-	edge = readb(base + VT8500_ICDC + d->hwirq) & VT8500_EDGE;
+	edge = pete_readb("drivers/irqchip/irq-vt8500.c:78", base + VT8500_ICDC + d->hwirq) & VT8500_EDGE;
 	if (edge) {
-		status = readl(stat_reg);
+		status = pete_readl("drivers/irqchip/irq-vt8500.c:80", stat_reg);
 
 		status |= (1 << (d->hwirq & 0x1f));
-		writel(status, stat_reg);
+		pete_writel("drivers/irqchip/irq-vt8500.c:83", status, stat_reg);
 	} else {
-		dctr = readb(base + VT8500_ICDC + d->hwirq);
+		dctr = pete_readb("drivers/irqchip/irq-vt8500.c:85", base + VT8500_ICDC + d->hwirq);
 		dctr &= ~VT8500_INT_ENABLE;
-		writeb(dctr, base + VT8500_ICDC + d->hwirq);
+		pete_writeb("drivers/irqchip/irq-vt8500.c:87", dctr, base + VT8500_ICDC + d->hwirq);
 	}
 }
 
@@ -94,9 +94,9 @@ static void vt8500_irq_unmask(struct irq_data *d)
 	void __iomem *base = priv->base;
 	u8 dctr;
 
-	dctr = readb(base + VT8500_ICDC + d->hwirq);
+	dctr = pete_readb("drivers/irqchip/irq-vt8500.c:97", base + VT8500_ICDC + d->hwirq);
 	dctr |= VT8500_INT_ENABLE;
-	writeb(dctr, base + VT8500_ICDC + d->hwirq);
+	pete_writeb("drivers/irqchip/irq-vt8500.c:99", dctr, base + VT8500_ICDC + d->hwirq);
 }
 
 static int vt8500_irq_set_type(struct irq_data *d, unsigned int flow_type)
@@ -105,7 +105,7 @@ static int vt8500_irq_set_type(struct irq_data *d, unsigned int flow_type)
 	void __iomem *base = priv->base;
 	u8 dctr;
 
-	dctr = readb(base + VT8500_ICDC + d->hwirq);
+	dctr = pete_readb("drivers/irqchip/irq-vt8500.c:108", base + VT8500_ICDC + d->hwirq);
 	dctr &= ~VT8500_EDGE;
 
 	switch (flow_type) {
@@ -124,7 +124,7 @@ static int vt8500_irq_set_type(struct irq_data *d, unsigned int flow_type)
 		irq_set_handler_locked(d, handle_edge_irq);
 		break;
 	}
-	writeb(dctr, base + VT8500_ICDC + d->hwirq);
+	pete_writeb("drivers/irqchip/irq-vt8500.c:127", dctr, base + VT8500_ICDC + d->hwirq);
 
 	return 0;
 }
@@ -142,12 +142,12 @@ static void __init vt8500_init_irq_hw(void __iomem *base)
 	u32 i;
 
 	/* Enable rotating priority for IRQ */
-	writel(ICPC_ROTATE, base + VT8500_ICPC_IRQ);
-	writel(0x00, base + VT8500_ICPC_FIQ);
+	pete_writel("drivers/irqchip/irq-vt8500.c:145", ICPC_ROTATE, base + VT8500_ICPC_IRQ);
+	pete_writel("drivers/irqchip/irq-vt8500.c:146", 0x00, base + VT8500_ICPC_FIQ);
 
 	/* Disable all interrupts and route them to IRQ */
 	for (i = 0; i < 64; i++)
-		writeb(VT8500_INT_DISABLE | ICDC_IRQ, base + VT8500_ICDC + i);
+		pete_writeb("drivers/irqchip/irq-vt8500.c:150", VT8500_INT_DISABLE | ICDC_IRQ, base + VT8500_ICDC + i);
 }
 
 static int vt8500_irq_map(struct irq_domain *h, unsigned int virq,

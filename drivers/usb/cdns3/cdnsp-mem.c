@@ -1125,12 +1125,12 @@ static void cdnsp_add_in_port(struct cdnsp_device *pdev,
 {
 	u32 temp, port_offset, port_count;
 
-	temp = readl(addr);
+	temp = pete_readl("drivers/usb/cdns3/cdnsp-mem.c:1128", addr);
 	port->maj_rev = CDNSP_EXT_PORT_MAJOR(temp);
 	port->min_rev = CDNSP_EXT_PORT_MINOR(temp);
 
 	/* Port offset and count in the third dword.*/
-	temp = readl(addr + 2);
+	temp = pete_readl("drivers/usb/cdns3/cdnsp-mem.c:1133", addr + 2);
 	port_offset = CDNSP_EXT_PORT_OFF(temp);
 	port_count = CDNSP_EXT_PORT_COUNT(temp);
 
@@ -1167,7 +1167,7 @@ static int cdnsp_setup_port_arrays(struct cdnsp_device *pdev)
 
 		offset = cdnsp_find_next_ext_cap(base, offset,
 						 EXT_CAPS_PROTOCOL);
-		temp = readl(base + offset);
+		temp = pete_readl("drivers/usb/cdns3/cdnsp-mem.c:1170", base + offset);
 
 		if (CDNSP_EXT_PORT_MAJOR(temp) == 0x03 &&
 		    !pdev->usb3_port.port_num)
@@ -1220,9 +1220,9 @@ int cdnsp_mem_init(struct cdnsp_device *pdev)
 	 */
 	page_size = 1 << 12;
 
-	val = readl(&pdev->op_regs->config_reg);
+	val = pete_readl("drivers/usb/cdns3/cdnsp-mem.c:1223", &pdev->op_regs->config_reg);
 	val |= ((val & ~MAX_DEVS) | CDNSP_DEV_MAX_SLOTS) | CONFIG_U3E;
-	writel(val, &pdev->op_regs->config_reg);
+	pete_writel("drivers/usb/cdns3/cdnsp-mem.c:1225", val, &pdev->op_regs->config_reg);
 
 	/*
 	 * Doorbell array must be physically contiguous
@@ -1269,7 +1269,7 @@ int cdnsp_mem_init(struct cdnsp_device *pdev)
 		 pdev->cmd_ring->cycle_state;
 	cdnsp_write_64(val_64, &pdev->op_regs->cmd_ring);
 
-	val = readl(&pdev->cap_regs->db_off);
+	val = pete_readl("drivers/usb/cdns3/cdnsp-mem.c:1272", &pdev->cap_regs->db_off);
 	val &= DBOFF_MASK;
 	pdev->dba = (void __iomem *)pdev->cap_regs + val;
 
@@ -1290,10 +1290,10 @@ int cdnsp_mem_init(struct cdnsp_device *pdev)
 		goto free_event_ring;
 
 	/* Set ERST count with the number of entries in the segment table. */
-	val = readl(&pdev->ir_set->erst_size);
+	val = pete_readl("drivers/usb/cdns3/cdnsp-mem.c:1293", &pdev->ir_set->erst_size);
 	val &= ERST_SIZE_MASK;
 	val |= ERST_NUM_SEGS;
-	writel(val, &pdev->ir_set->erst_size);
+	pete_writel("drivers/usb/cdns3/cdnsp-mem.c:1296", val, &pdev->ir_set->erst_size);
 
 	/* Set the segment table base address. */
 	val_64 = cdnsp_read_64(&pdev->ir_set->erst_base);

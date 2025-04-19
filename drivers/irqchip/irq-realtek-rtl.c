@@ -33,9 +33,9 @@ static void realtek_ictl_unmask_irq(struct irq_data *i)
 
 	raw_spin_lock_irqsave(&irq_lock, flags);
 
-	value = readl(REG(RTL_ICTL_GIMR));
+	value = pete_readl("drivers/irqchip/irq-realtek-rtl.c:36", REG(RTL_ICTL_GIMR));
 	value |= BIT(i->hwirq);
-	writel(value, REG(RTL_ICTL_GIMR));
+	pete_writel("drivers/irqchip/irq-realtek-rtl.c:38", value, REG(RTL_ICTL_GIMR));
 
 	raw_spin_unlock_irqrestore(&irq_lock, flags);
 }
@@ -47,9 +47,9 @@ static void realtek_ictl_mask_irq(struct irq_data *i)
 
 	raw_spin_lock_irqsave(&irq_lock, flags);
 
-	value = readl(REG(RTL_ICTL_GIMR));
+	value = pete_readl("drivers/irqchip/irq-realtek-rtl.c:50", REG(RTL_ICTL_GIMR));
 	value &= ~BIT(i->hwirq);
-	writel(value, REG(RTL_ICTL_GIMR));
+	pete_writel("drivers/irqchip/irq-realtek-rtl.c:52", value, REG(RTL_ICTL_GIMR));
 
 	raw_spin_unlock_irqrestore(&irq_lock, flags);
 }
@@ -80,7 +80,7 @@ static void realtek_irq_dispatch(struct irq_desc *desc)
 	unsigned int soc_int;
 
 	chained_irq_enter(chip, desc);
-	pending = readl(REG(RTL_ICTL_GIMR)) & readl(REG(RTL_ICTL_GISR));
+	pending = pete_readl("drivers/irqchip/irq-realtek-rtl.c:83", REG(RTL_ICTL_GIMR)) & pete_readl("drivers/irqchip/irq-realtek-rtl.c:83", REG(RTL_ICTL_GISR));
 
 	if (unlikely(!pending)) {
 		spurious_interrupt();
@@ -154,7 +154,7 @@ static int __init map_interrupts(struct device_node *node, struct irq_domain *do
 	}
 
 	for (i = 0; i < 4; i++)
-		writel(regs[i], REG(irr_regs[i]));
+		pete_writel("drivers/irqchip/irq-realtek-rtl.c:157", regs[i], REG(irr_regs[i]));
 
 	return 0;
 }
@@ -169,7 +169,7 @@ static int __init realtek_rtl_of_init(struct device_node *node, struct device_no
 		return -ENXIO;
 
 	/* Disable all cascaded interrupts */
-	writel(0, REG(RTL_ICTL_GIMR));
+	pete_writel("drivers/irqchip/irq-realtek-rtl.c:172", 0, REG(RTL_ICTL_GIMR));
 
 	domain = irq_domain_add_simple(node, 32, 0,
 				       &irq_domain_ops, NULL);

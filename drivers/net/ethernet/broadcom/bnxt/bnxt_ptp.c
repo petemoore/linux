@@ -66,14 +66,14 @@ static int bnxt_refclk_read(struct bnxt *bp, struct ptp_system_timestamp *sts,
 	if (test_bit(BNXT_STATE_IN_FW_RESET, &bp->state))
 		return -EIO;
 
-	high_before = readl(bp->bar0 + ptp->refclk_mapped_regs[1]);
+	high_before = pete_readl("drivers/net/ethernet/broadcom/bnxt/bnxt_ptp.c:69", bp->bar0 + ptp->refclk_mapped_regs[1]);
 	ptp_read_system_prets(sts);
-	low = readl(bp->bar0 + ptp->refclk_mapped_regs[0]);
+	low = pete_readl("drivers/net/ethernet/broadcom/bnxt/bnxt_ptp.c:71", bp->bar0 + ptp->refclk_mapped_regs[0]);
 	ptp_read_system_postts(sts);
-	high_now = readl(bp->bar0 + ptp->refclk_mapped_regs[1]);
+	high_now = pete_readl("drivers/net/ethernet/broadcom/bnxt/bnxt_ptp.c:73", bp->bar0 + ptp->refclk_mapped_regs[1]);
 	if (high_now != high_before) {
 		ptp_read_system_prets(sts);
-		low = readl(bp->bar0 + ptp->refclk_mapped_regs[0]);
+		low = pete_readl("drivers/net/ethernet/broadcom/bnxt/bnxt_ptp.c:76", bp->bar0 + ptp->refclk_mapped_regs[0]);
 		ptp_read_system_postts(sts);
 	}
 	*ns = ((u64)high_now << 32) | low;
@@ -518,7 +518,7 @@ static int bnxt_map_regs(struct bnxt *bp, u32 *reg_arr, int count, int reg_win)
 			return -ERANGE;
 	}
 	win_off = BNXT_GRCPF_REG_WINDOW_BASE_OUT + (reg_win - 1) * 4;
-	writel(reg_base, bp->bar0 + win_off);
+	pete_writel("drivers/net/ethernet/broadcom/bnxt/bnxt_ptp.c:521", reg_base, bp->bar0 + win_off);
 	return 0;
 }
 
@@ -543,7 +543,7 @@ static int bnxt_map_ptp_regs(struct bnxt *bp)
 
 static void bnxt_unmap_ptp_regs(struct bnxt *bp)
 {
-	writel(0, bp->bar0 + BNXT_GRCPF_REG_WINDOW_BASE_OUT +
+	pete_writel("drivers/net/ethernet/broadcom/bnxt/bnxt_ptp.c:546", 0, bp->bar0 + BNXT_GRCPF_REG_WINDOW_BASE_OUT +
 		  (BNXT_PTP_GRC_WIN - 1) * 4);
 }
 

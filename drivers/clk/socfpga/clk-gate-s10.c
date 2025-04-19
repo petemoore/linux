@@ -27,7 +27,7 @@ static unsigned long socfpga_gate_clk_recalc_rate(struct clk_hw *hwclk,
 	if (socfpgaclk->fixed_div) {
 		div = socfpgaclk->fixed_div;
 	} else if (socfpgaclk->div_reg) {
-		val = readl(socfpgaclk->div_reg) >> socfpgaclk->shift;
+		val = pete_readl("drivers/clk/socfpga/clk-gate-s10.c:30", socfpgaclk->div_reg) >> socfpgaclk->shift;
 		val &= GENMASK(socfpgaclk->width - 1, 0);
 		div = (1 << val);
 	}
@@ -40,7 +40,7 @@ static unsigned long socfpga_dbg_clk_recalc_rate(struct clk_hw *hwclk,
 	struct socfpga_gate_clk *socfpgaclk = to_socfpga_gate_clk(hwclk);
 	u32 div, val;
 
-	val = readl(socfpgaclk->div_reg) >> socfpgaclk->shift;
+	val = pete_readl("drivers/clk/socfpga/clk-gate-s10.c:43", socfpgaclk->div_reg) >> socfpgaclk->shift;
 	val &= GENMASK(socfpgaclk->width - 1, 0);
 	div = (1 << val);
 	div = div ? 4 : 1;
@@ -57,14 +57,14 @@ static u8 socfpga_gate_get_parent(struct clk_hw *hwclk)
 
 	if (socfpgaclk->bypass_reg) {
 		mask = (0x1 << socfpgaclk->bypass_shift);
-		parent = ((readl(socfpgaclk->bypass_reg) & mask) >>
+		parent = ((pete_readl("drivers/clk/socfpga/clk-gate-s10.c:60", socfpgaclk->bypass_reg) & mask) >>
 			  socfpgaclk->bypass_shift);
 	}
 
 	if (streq(name, SOCFPGA_EMAC0_CLK) ||
 	    streq(name, SOCFPGA_EMAC1_CLK) ||
 	    streq(name, SOCFPGA_EMAC2_CLK)) {
-		second_bypass = readl(socfpgaclk->bypass_reg -
+		second_bypass = pete_readl("drivers/clk/socfpga/clk-gate-s10.c:67", socfpgaclk->bypass_reg -
 				      STRATIX10_BYPASS_OFFSET);
 		/* EMACA bypass to bootclk @0xB0 offset */
 		if (second_bypass & 0x1)
@@ -87,14 +87,14 @@ static u8 socfpga_agilex_gate_get_parent(struct clk_hw *hwclk)
 
 	if (socfpgaclk->bypass_reg) {
 		mask = (0x1 << socfpgaclk->bypass_shift);
-		parent = ((readl(socfpgaclk->bypass_reg) & mask) >>
+		parent = ((pete_readl("drivers/clk/socfpga/clk-gate-s10.c:90", socfpgaclk->bypass_reg) & mask) >>
 			  socfpgaclk->bypass_shift);
 	}
 
 	if (streq(name, SOCFPGA_EMAC0_CLK) ||
 	    streq(name, SOCFPGA_EMAC1_CLK) ||
 	    streq(name, SOCFPGA_EMAC2_CLK)) {
-		second_bypass = readl(socfpgaclk->bypass_reg -
+		second_bypass = pete_readl("drivers/clk/socfpga/clk-gate-s10.c:97", socfpgaclk->bypass_reg -
 				      AGILEX_BYPASS_OFFSET);
 		/* EMACA bypass to bootclk @0x88 offset */
 		if (second_bypass & 0x1)

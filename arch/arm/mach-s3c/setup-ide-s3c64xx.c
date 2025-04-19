@@ -20,10 +20,10 @@ void s3c64xx_ide_setup_gpio(void)
 {
 	u32 reg;
 
-	reg = readl(S3C_MEM_SYS_CFG) & (~0x3f);
+	reg = pete_readl("arch/arm/mach-s3c/setup-ide-s3c64xx.c:23", S3C_MEM_SYS_CFG) & (~0x3f);
 
 	/* Independent CF interface, CF chip select configuration */
-	writel(reg | MEM_SYS_CFG_INDEP_CF |
+	pete_writel("arch/arm/mach-s3c/setup-ide-s3c64xx.c:26", reg | MEM_SYS_CFG_INDEP_CF |
 		MEM_SYS_CFG_EBI_FIX_PRI_CFCON, S3C_MEM_SYS_CFG);
 
 	s3c_gpio_cfgpin(S3C64XX_GPB(4), S3C_GPIO_SFN(4));

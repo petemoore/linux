@@ -138,7 +138,7 @@ static int sunxi_sram_show(struct seq_file *s, void *data)
 				   be32_to_cpu(*section_addr_p),
 				   sram_data->name);
 
-			val = readl(base + sram_data->reg);
+			val = pete_readl("drivers/soc/sunxi/sunxi_sram.c:141", base + sram_data->reg);
 			val >>= sram_data->offset;
 			val &= GENMASK(sram_data->width - 1, 0);
 
@@ -249,9 +249,9 @@ int sunxi_sram_claim(struct device *dev)
 
 	mask = GENMASK(sram_data->offset + sram_data->width - 1,
 		       sram_data->offset);
-	val = readl(base + sram_data->reg);
+	val = pete_readl("drivers/soc/sunxi/sunxi_sram.c:252", base + sram_data->reg);
 	val &= ~mask;
-	writel(val | ((device << sram_data->offset) & mask),
+	pete_writel("drivers/soc/sunxi/sunxi_sram.c:254", val | ((device << sram_data->offset) & mask),
 	       base + sram_data->reg);
 
 	sram_desc->claimed = true;

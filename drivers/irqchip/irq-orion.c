@@ -92,7 +92,7 @@ static int __init orion_irq_init(struct device_node *np,
 		gc->chip_types[0].chip.irq_unmask = irq_gc_mask_set_bit;
 
 		/* mask all interrupts */
-		writel(0, gc->reg_base + ORION_IRQ_MASK);
+		pete_writel("drivers/irqchip/irq-orion.c:95", 0, gc->reg_base + ORION_IRQ_MASK);
 	}
 
 	set_handle_irq(orion_handle_irq);
@@ -194,8 +194,8 @@ static int __init orion_bridge_irq_init(struct device_node *np,
 	gc->chip_types[0].chip.irq_unmask = irq_gc_mask_set_bit;
 
 	/* mask and clear all interrupts */
-	writel(0, gc->reg_base + ORION_BRIDGE_IRQ_MASK);
-	writel(0, gc->reg_base + ORION_BRIDGE_IRQ_CAUSE);
+	pete_writel("drivers/irqchip/irq-orion.c:197", 0, gc->reg_base + ORION_BRIDGE_IRQ_MASK);
+	pete_writel("drivers/irqchip/irq-orion.c:198", 0, gc->reg_base + ORION_BRIDGE_IRQ_CAUSE);
 
 	irq_set_chained_handler_and_data(irq, orion_bridge_irq_handler,
 					 domain);

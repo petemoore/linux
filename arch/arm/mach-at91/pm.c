@@ -193,7 +193,7 @@ static int at91_pm_config_ws(unsigned int pm_mode, bool set)
 		return -EPERM;
 
 	if (!set) {
-		writel(mode, soc_pm.data.pmc + AT91_PMC_FSMR);
+		pete_writel("arch/arm/mach-at91/pm.c:196", mode, soc_pm.data.pmc + AT91_PMC_FSMR);
 		return 0;
 	}
 
@@ -201,7 +201,7 @@ static int at91_pm_config_ws(unsigned int pm_mode, bool set)
 		soc_pm.config_shdwc_ws(soc_pm.data.shdwc, &mode, &polarity);
 
 	/* SHDWC.MR */
-	val = readl(soc_pm.data.shdwc + 0x04);
+	val = pete_readl("arch/arm/mach-at91/pm.c:204", soc_pm.data.shdwc + 0x04);
 
 	/* Loop through defined wakeup sources. */
 	for_each_matching_node_and_match(np, soc_pm.ws_ids, &match) {
@@ -241,7 +241,7 @@ static int at91_sama5d2_config_shdwc_ws(void __iomem *shdwc, u32 *mode,
 	u32 val;
 
 	/* SHDWC.WUIR */
-	val = readl(shdwc + 0x0c);
+	val = pete_readl("arch/arm/mach-at91/pm.c:244", shdwc + 0x0c);
 	*mode |= (val & 0x3ff);
 	*polarity |= ((val >> 16) & 0x3ff);
 
@@ -250,15 +250,15 @@ static int at91_sama5d2_config_shdwc_ws(void __iomem *shdwc, u32 *mode,
 
 static int at91_sama5d2_config_pmc_ws(void __iomem *pmc, u32 mode, u32 polarity)
 {
-	writel(mode, pmc + AT91_PMC_FSMR);
-	writel(polarity, pmc + AT91_PMC_FSPR);
+	pete_writel("arch/arm/mach-at91/pm.c:253", mode, pmc + AT91_PMC_FSMR);
+	pete_writel("arch/arm/mach-at91/pm.c:254", polarity, pmc + AT91_PMC_FSPR);
 
 	return 0;
 }
 
 static int at91_sam9x60_config_pmc_ws(void __iomem *pmc, u32 mode, u32 polarity)
 {
-	writel(mode, pmc + AT91_PMC_FSMR);
+	pete_writel("arch/arm/mach-at91/pm.c:261", mode, pmc + AT91_PMC_FSMR);
 
 	return 0;
 }
@@ -304,7 +304,7 @@ static int at91_pm_verify_clocks(void)
 	unsigned long scsr;
 	int i;
 
-	scsr = readl(soc_pm.data.pmc + AT91_PMC_SCSR);
+	scsr = pete_readl("arch/arm/mach-at91/pm.c:307", soc_pm.data.pmc + AT91_PMC_SCSR);
 
 	/* USB must not be using PLLB */
 	if ((scsr & soc_pm.data.uhp_udp_mask) != 0) {
@@ -318,7 +318,7 @@ static int at91_pm_verify_clocks(void)
 
 		if ((scsr & (AT91_PMC_PCK0 << i)) == 0)
 			continue;
-		css = readl(soc_pm.data.pmc + AT91_PMC_PCKR(i)) & AT91_PMC_CSS;
+		css = pete_readl("arch/arm/mach-at91/pm.c:321", soc_pm.data.pmc + AT91_PMC_PCKR(i)) & AT91_PMC_CSS;
 		if (css != AT91_PMC_CSS_SLOW) {
 			pr_err("AT91: PM - Suspend-to-RAM with PCK%d src %d\n", i, css);
 			return 0;
@@ -367,7 +367,7 @@ static int at91_suspend_finish(unsigned long val)
 		 * is forbidden and risky thus we need to provide processed
 		 * values for these (modified gray code values).
 		 */
-		tmp = readl(soc_pm.data.ramc_phy + DDR3PHY_ZQ0SR0);
+		tmp = pete_readl("arch/arm/mach-at91/pm.c:370", soc_pm.data.ramc_phy + DDR3PHY_ZQ0SR0);
 
 		/* Store pull-down output impedance select. */
 		index = (tmp >> DDR3PHY_ZQ0SR0_PDO_OFF) & 0x1f;
@@ -412,7 +412,7 @@ static void at91_pm_switch_ba_to_vbat(void)
 	if (!soc_pm.data.sfrbu)
 		return;
 
-	val = readl(soc_pm.data.sfrbu + offset);
+	val = pete_readl("arch/arm/mach-at91/pm.c:415", soc_pm.data.sfrbu + offset);
 
 	/* Already on VBAT. */
 	if (!(val & soc_pm.sfrbu_regs.pswbu.state))
@@ -420,12 +420,12 @@ static void at91_pm_switch_ba_to_vbat(void)
 
 	val &= ~soc_pm.sfrbu_regs.pswbu.softsw;
 	val |= soc_pm.sfrbu_regs.pswbu.key | soc_pm.sfrbu_regs.pswbu.ctrl;
-	writel(val, soc_pm.data.sfrbu + offset);
+	pete_writel("arch/arm/mach-at91/pm.c:423", val, soc_pm.data.sfrbu + offset);
 
 	/* Wait for update. */
-	val = readl(soc_pm.data.sfrbu + offset);
+	val = pete_readl("arch/arm/mach-at91/pm.c:426", soc_pm.data.sfrbu + offset);
 	while (val & soc_pm.sfrbu_regs.pswbu.state)
-		val = readl(soc_pm.data.sfrbu + offset);
+		val = pete_readl("arch/arm/mach-at91/pm.c:428", soc_pm.data.sfrbu + offset);
 }
 
 static void at91_pm_suspend(suspend_state_t state)
@@ -734,12 +734,12 @@ static void at91rm9200_idle(void)
 	 * Disable the processor clock.  The processor will be automatically
 	 * re-enabled by an interrupt or by a reset.
 	 */
-	writel(AT91_PMC_PCK, soc_pm.data.pmc + AT91_PMC_SCDR);
+	pete_writel("arch/arm/mach-at91/pm.c:737", AT91_PMC_PCK, soc_pm.data.pmc + AT91_PMC_SCDR);
 }
 
 static void at91sam9_idle(void)
 {
-	writel(AT91_PMC_PCK, soc_pm.data.pmc + AT91_PMC_SCDR);
+	pete_writel("arch/arm/mach-at91/pm.c:742", AT91_PMC_PCK, soc_pm.data.pmc + AT91_PMC_SCDR);
 	cpu_do_idle();
 }
 

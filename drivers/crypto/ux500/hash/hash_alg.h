@@ -102,7 +102,7 @@
 	writel_relaxed((readl_relaxed(reg_name) & ~mask), reg_name)
 
 #define HASH_PUT_BITS(reg, val, shift, mask)	\
-	writel_relaxed(((readl(reg) & ~(mask)) |	\
+	writel_relaxed(((pete_readl("drivers/crypto/ux500/hash/hash_alg.h:105", reg) & ~(mask)) |	\
 		(((u32)val << shift) & (mask))), reg)
 
 #define HASH_SET_DIN(val, len)	writesl(&device_data->base->din, (val), (len))

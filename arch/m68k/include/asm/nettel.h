@@ -88,12 +88,12 @@ static __inline__ void mcf_setppdata(unsigned int mask, unsigned int bits)
  */
 static __inline__ unsigned int mcf_getppdata(void)
 {
-	return readw(MCFSIM_PBDAT);
+	return pete_readw("arch/m68k/include/asm/nettel.h:91", MCFSIM_PBDAT);
 }
 
 static __inline__ void mcf_setppdata(unsigned int mask, unsigned int bits)
 {
-	writew((readw(MCFSIM_PBDAT) & ~mask) | bits, MCFSIM_PBDAT);
+	pete_writew("arch/m68k/include/asm/nettel.h:96", (pete_readw("arch/m68k/include/asm/nettel.h:96", MCFSIM_PBDAT) & ~mask) | bits, MCFSIM_PBDAT);
 }
 #endif
 

@@ -110,25 +110,25 @@ struct tegra_hsp {
 
 static inline u32 tegra_hsp_readl(struct tegra_hsp *hsp, unsigned int offset)
 {
-	return readl(hsp->regs + offset);
+	return pete_readl("drivers/mailbox/tegra-hsp.c:113", hsp->regs + offset);
 }
 
 static inline void tegra_hsp_writel(struct tegra_hsp *hsp, u32 value,
 				    unsigned int offset)
 {
-	writel(value, hsp->regs + offset);
+	pete_writel("drivers/mailbox/tegra-hsp.c:119", value, hsp->regs + offset);
 }
 
 static inline u32 tegra_hsp_channel_readl(struct tegra_hsp_channel *channel,
 					  unsigned int offset)
 {
-	return readl(channel->regs + offset);
+	return pete_readl("drivers/mailbox/tegra-hsp.c:125", channel->regs + offset);
 }
 
 static inline void tegra_hsp_channel_writel(struct tegra_hsp_channel *channel,
 					    u32 value, unsigned int offset)
 {
-	writel(value, channel->regs + offset);
+	pete_writel("drivers/mailbox/tegra-hsp.c:131", value, channel->regs + offset);
 }
 
 static bool tegra_hsp_doorbell_can_ring(struct tegra_hsp_doorbell *db)

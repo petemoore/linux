@@ -67,13 +67,13 @@ struct cc10001_adc_device {
 static inline void cc10001_adc_write_reg(struct cc10001_adc_device *adc_dev,
 					 u32 reg, u32 val)
 {
-	writel(val, adc_dev->reg_base + reg);
+	pete_writel("drivers/iio/adc/cc10001_adc.c:70", val, adc_dev->reg_base + reg);
 }
 
 static inline u32 cc10001_adc_read_reg(struct cc10001_adc_device *adc_dev,
 				       u32 reg)
 {
-	return readl(adc_dev->reg_base + reg);
+	return pete_readl("drivers/iio/adc/cc10001_adc.c:76", adc_dev->reg_base + reg);
 }
 
 static void cc10001_adc_power_up(struct cc10001_adc_device *adc_dev)

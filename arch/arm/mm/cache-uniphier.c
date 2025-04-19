@@ -395,7 +395,7 @@ static int __init __uniphier_cache_init(struct device_node *np,
 	data->way_ctrl_base = data->ctrl_base + 0xc00;
 
 	if (*cache_level == 2) {
-		u32 revision = readl(data->rev_base + UNIPHIER_SSCID);
+		u32 revision = pete_readl("arch/arm/mm/cache-uniphier.c:398", data->rev_base + UNIPHIER_SSCID);
 		/*
 		 * The size of range operation is limited to (1 << 22) or less
 		 * for PH-sLD8 or older SoCs.

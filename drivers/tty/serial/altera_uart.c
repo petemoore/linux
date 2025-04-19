@@ -83,12 +83,12 @@ struct altera_uart {
 
 static u32 altera_uart_readl(struct uart_port *port, int reg)
 {
-	return readl(port->membase + (reg << port->regshift));
+	return pete_readl("drivers/tty/serial/altera_uart.c:86", port->membase + (reg << port->regshift));
 }
 
 static void altera_uart_writel(struct uart_port *port, u32 dat, int reg)
 {
-	writel(dat, port->membase + (reg << port->regshift));
+	pete_writel("drivers/tty/serial/altera_uart.c:91", dat, port->membase + (reg << port->regshift));
 }
 
 static unsigned int altera_uart_tx_empty(struct uart_port *port)

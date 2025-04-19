@@ -19,7 +19,7 @@ static int ccu_phase_get_phase(struct clk_hw *hw)
 	u32 reg;
 	u8 delay;
 
-	reg = readl(phase->common.base + phase->common.reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_phase.c:22", phase->common.base + phase->common.reg);
 	delay = (reg >> phase->shift);
 	delay &= (1 << phase->width) - 1;
 
@@ -108,9 +108,9 @@ static int ccu_phase_set_phase(struct clk_hw *hw, int degrees)
 	}
 
 	spin_lock_irqsave(phase->common.lock, flags);
-	reg = readl(phase->common.base + phase->common.reg);
+	reg = pete_readl("drivers/clk/sunxi-ng/ccu_phase.c:111", phase->common.base + phase->common.reg);
 	reg &= ~GENMASK(phase->width + phase->shift - 1, phase->shift);
-	writel(reg | (delay << phase->shift),
+	pete_writel("drivers/clk/sunxi-ng/ccu_phase.c:113", reg | (delay << phase->shift),
 	       phase->common.base + phase->common.reg);
 	spin_unlock_irqrestore(phase->common.lock, flags);
 

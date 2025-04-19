@@ -94,13 +94,13 @@ struct qcom_ethqos {
 
 static int rgmii_readl(struct qcom_ethqos *ethqos, unsigned int offset)
 {
-	return readl(ethqos->rgmii_base + offset);
+	return pete_readl("drivers/net/ethernet/stmicro/stmmac/dwmac-qcom-ethqos.c:97", ethqos->rgmii_base + offset);
 }
 
 static void rgmii_writel(struct qcom_ethqos *ethqos,
 			 int value, unsigned int offset)
 {
-	writel(value, ethqos->rgmii_base + offset);
+	pete_writel("drivers/net/ethernet/stmicro/stmmac/dwmac-qcom-ethqos.c:103", value, ethqos->rgmii_base + offset);
 }
 
 static void rgmii_updatel(struct qcom_ethqos *ethqos,

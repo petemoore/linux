@@ -364,7 +364,7 @@ static void __iomem *v3_map_bus(struct pci_bus *bus,
 	 * prefetchable), this frees up base1 for re-use by
 	 * configuration memory
 	 */
-	writel(v3_addr_to_lb_base(v3->non_pre_mem) |
+	pete_writel("drivers/pci/controller/pci-v3-semi.c:367", v3_addr_to_lb_base(v3->non_pre_mem) |
 	       V3_LB_BASE_ADR_SIZE_512MB | V3_LB_BASE_ENABLE,
 	       v3->base + V3_LB_BASE0);
 
@@ -372,10 +372,10 @@ static void __iomem *v3_map_bus(struct pci_bus *bus,
 	 * Set up base1/map1 to point into configuration space.
 	 * The config mem is always 16MB.
 	 */
-	writel(v3_addr_to_lb_base(v3->config_mem) |
+	pete_writel("drivers/pci/controller/pci-v3-semi.c:375", v3_addr_to_lb_base(v3->config_mem) |
 	       V3_LB_BASE_ADR_SIZE_16MB | V3_LB_BASE_ENABLE,
 	       v3->base + V3_LB_BASE1);
-	writew(mapaddress, v3->base + V3_LB_MAP1);
+	pete_writew("drivers/pci/controller/pci-v3-semi.c:378", mapaddress, v3->base + V3_LB_MAP1);
 
 	return v3->config_base + address + offset;
 }
@@ -385,18 +385,18 @@ static void v3_unmap_bus(struct v3_pci *v3)
 	/*
 	 * Reassign base1 for use by prefetchable PCI memory
 	 */
-	writel(v3_addr_to_lb_base(v3->pre_mem) |
+	pete_writel("drivers/pci/controller/pci-v3-semi.c:388", v3_addr_to_lb_base(v3->pre_mem) |
 	       V3_LB_BASE_ADR_SIZE_256MB | V3_LB_BASE_PREFETCH |
 	       V3_LB_BASE_ENABLE,
 	       v3->base + V3_LB_BASE1);
-	writew(v3_addr_to_lb_map(v3->pre_bus_addr) |
+	pete_writew("drivers/pci/controller/pci-v3-semi.c:392", v3_addr_to_lb_map(v3->pre_bus_addr) |
 	       V3_LB_MAP_TYPE_MEM, /* was V3_LB_MAP_TYPE_MEM_MULTIPLE */
 	       v3->base + V3_LB_MAP1);
 
 	/*
 	 * And shrink base0 back to a 256M window (NOTE: MAP0 already correct)
 	 */
-	writel(v3_addr_to_lb_base(v3->non_pre_mem) |
+	pete_writel("drivers/pci/controller/pci-v3-semi.c:399", v3_addr_to_lb_base(v3->non_pre_mem) |
 	       V3_LB_BASE_ADR_SIZE_256MB | V3_LB_BASE_ENABLE,
 	       v3->base + V3_LB_BASE0);
 }
@@ -441,7 +441,7 @@ static irqreturn_t v3_irq(int irq, void *data)
 	struct device *dev = v3->dev;
 	u32 status;
 
-	status = readw(v3->base + V3_PCI_STAT);
+	status = pete_readw("drivers/pci/controller/pci-v3-semi.c:444", v3->base + V3_PCI_STAT);
 	if (status & V3_PCI_STAT_PAR_ERR)
 		dev_err(dev, "parity error interrupt\n");
 	if (status & V3_PCI_STAT_SYS_ERR)
@@ -450,9 +450,9 @@ static irqreturn_t v3_irq(int irq, void *data)
 		dev_err(dev, "master abort error interrupt\n");
 	if (status & V3_PCI_STAT_T_ABORT_ERR)
 		dev_err(dev, "target abort error interrupt\n");
-	writew(status, v3->base + V3_PCI_STAT);
+	pete_writew("drivers/pci/controller/pci-v3-semi.c:453", status, v3->base + V3_PCI_STAT);
 
-	status = readb(v3->base + V3_LB_ISTAT);
+	status = pete_readb("drivers/pci/controller/pci-v3-semi.c:455", v3->base + V3_LB_ISTAT);
 	if (status & V3_LB_ISTAT_MAILBOX)
 		dev_info(dev, "PCI mailbox interrupt\n");
 	if (status & V3_LB_ISTAT_PCI_RD)
@@ -470,7 +470,7 @@ static irqreturn_t v3_irq(int irq, void *data)
 	if (status & V3_LB_ISTAT_DMA0)
 		dev_info(dev, "DMA channel 0 interrupt\n");
 	/* Clear all possible interrupts on the local bus */
-	writeb(0, v3->base + V3_LB_ISTAT);
+	pete_writeb("drivers/pci/controller/pci-v3-semi.c:473", 0, v3->base + V3_LB_ISTAT);
 	if (v3->map)
 		regmap_write(v3->map, INTEGRATOR_SC_PCI_OFFSET,
 			     INTEGRATOR_SC_PCI_ENABLE |
@@ -501,14 +501,14 @@ static int v3_integrator_init(struct v3_pci *v3)
 		msleep(230);
 
 		/* Set the physical base for the controller itself */
-		writel(0x6200, v3->base + V3_LB_IO_BASE);
+		pete_writel("drivers/pci/controller/pci-v3-semi.c:504", 0x6200, v3->base + V3_LB_IO_BASE);
 
 		/* Wait for the mailbox to settle after reset */
 		do {
-			writeb(0xaa, v3->base + V3_MAIL_DATA);
-			writeb(0x55, v3->base + V3_MAIL_DATA + 4);
-		} while (readb(v3->base + V3_MAIL_DATA) != 0xaa &&
-			 readb(v3->base + V3_MAIL_DATA) != 0x55);
+			pete_writeb("drivers/pci/controller/pci-v3-semi.c:508", 0xaa, v3->base + V3_MAIL_DATA);
+			pete_writeb("drivers/pci/controller/pci-v3-semi.c:509", 0x55, v3->base + V3_MAIL_DATA + 4);
+		} while (pete_readb("drivers/pci/controller/pci-v3-semi.c:510", v3->base + V3_MAIL_DATA) != 0xaa &&
+			 pete_readb("drivers/pci/controller/pci-v3-semi.c:511", v3->base + V3_MAIL_DATA) != 0x55);
 	}
 
 	dev_info(v3->dev, "initialized PCI V3 Integrator/AP integration\n");
@@ -529,10 +529,10 @@ static int v3_pci_setup_resource(struct v3_pci *v3,
 		io = win->res;
 
 		/* Setup window 2 - PCI I/O */
-		writel(v3_addr_to_lb_base2(pci_pio_to_address(io->start)) |
+		pete_writel("drivers/pci/controller/pci-v3-semi.c:532", v3_addr_to_lb_base2(pci_pio_to_address(io->start)) |
 		       V3_LB_BASE2_ENABLE,
 		       v3->base + V3_LB_BASE2);
-		writew(v3_addr_to_lb_map2(io->start - win->offset),
+		pete_writew("drivers/pci/controller/pci-v3-semi.c:535", v3_addr_to_lb_map2(io->start - win->offset),
 		       v3->base + V3_LB_MAP2);
 		break;
 	case IORESOURCE_MEM:
@@ -554,12 +554,12 @@ static int v3_pci_setup_resource(struct v3_pci *v3,
 				return -EINVAL;
 			}
 			/* Setup window 1 - PCI prefetchable memory */
-			writel(v3_addr_to_lb_base(v3->pre_mem) |
+			pete_writel("drivers/pci/controller/pci-v3-semi.c:557", v3_addr_to_lb_base(v3->pre_mem) |
 			       V3_LB_BASE_ADR_SIZE_256MB |
 			       V3_LB_BASE_PREFETCH |
 			       V3_LB_BASE_ENABLE,
 			       v3->base + V3_LB_BASE1);
-			writew(v3_addr_to_lb_map(v3->pre_bus_addr) |
+			pete_writew("drivers/pci/controller/pci-v3-semi.c:562", v3_addr_to_lb_map(v3->pre_bus_addr) |
 			       V3_LB_MAP_TYPE_MEM, /* Was V3_LB_MAP_TYPE_MEM_MULTIPLE */
 			       v3->base + V3_LB_MAP1);
 		} else {
@@ -574,11 +574,11 @@ static int v3_pci_setup_resource(struct v3_pci *v3,
 				return -EINVAL;
 			}
 			/* Setup window 0 - PCI non-prefetchable memory */
-			writel(v3_addr_to_lb_base(v3->non_pre_mem) |
+			pete_writel("drivers/pci/controller/pci-v3-semi.c:577", v3_addr_to_lb_base(v3->non_pre_mem) |
 			       V3_LB_BASE_ADR_SIZE_256MB |
 			       V3_LB_BASE_ENABLE,
 			       v3->base + V3_LB_BASE0);
-			writew(v3_addr_to_lb_map(v3->non_pre_bus_addr) |
+			pete_writew("drivers/pci/controller/pci-v3-semi.c:581", v3_addr_to_lb_map(v3->non_pre_bus_addr) |
 			       V3_LB_MAP_TYPE_MEM,
 			       v3->base + V3_LB_MAP0);
 		}
@@ -689,11 +689,11 @@ static int v3_pci_parse_map_dma_ranges(struct v3_pci *v3,
 			return ret;
 
 		if (i == 0) {
-			writel(pci_base, v3->base + V3_PCI_BASE0);
-			writel(pci_map, v3->base + V3_PCI_MAP0);
+			pete_writel("drivers/pci/controller/pci-v3-semi.c:692", pci_base, v3->base + V3_PCI_BASE0);
+			pete_writel("drivers/pci/controller/pci-v3-semi.c:693", pci_map, v3->base + V3_PCI_MAP0);
 		} else if (i == 1) {
-			writel(pci_base, v3->base + V3_PCI_BASE1);
-			writel(pci_map, v3->base + V3_PCI_MAP1);
+			pete_writel("drivers/pci/controller/pci-v3-semi.c:695", pci_base, v3->base + V3_PCI_BASE1);
+			pete_writel("drivers/pci/controller/pci-v3-semi.c:696", pci_map, v3->base + V3_PCI_MAP1);
 		} else {
 			dev_err(dev, "too many ranges, only two supported\n");
 			dev_err(dev, "range %d ignored\n", i);
@@ -746,9 +746,9 @@ static int v3_pci_probe(struct platform_device *pdev)
 	 * of the V3 controller itself, verify that this is the same
 	 * as the physical memory we've remapped it from.
 	 */
-	if (readl(v3->base + V3_LB_IO_BASE) != (regs->start >> 16))
+	if (pete_readl("drivers/pci/controller/pci-v3-semi.c:749", v3->base + V3_LB_IO_BASE) != (regs->start >> 16))
 		dev_err(dev, "V3_LB_IO_BASE = %08x but device is @%pR\n",
-			readl(v3->base + V3_LB_IO_BASE), regs);
+			pete_readl("drivers/pci/controller/pci-v3-semi.c:751", v3->base + V3_LB_IO_BASE), regs);
 
 	/* Configuration space is 16MB directly mapped */
 	regs = platform_get_resource(pdev, IORESOURCE_MEM, 1);
@@ -778,36 +778,36 @@ static int v3_pci_probe(struct platform_device *pdev)
 	/*
 	 * Unlock V3 registers, but only if they were previously locked.
 	 */
-	if (readw(v3->base + V3_SYSTEM) & V3_SYSTEM_M_LOCK)
-		writew(V3_SYSTEM_UNLOCK, v3->base + V3_SYSTEM);
+	if (pete_readw("drivers/pci/controller/pci-v3-semi.c:781", v3->base + V3_SYSTEM) & V3_SYSTEM_M_LOCK)
+		pete_writew("drivers/pci/controller/pci-v3-semi.c:782", V3_SYSTEM_UNLOCK, v3->base + V3_SYSTEM);
 
 	/* Disable all slave access while we set up the windows */
-	val = readw(v3->base + V3_PCI_CMD);
+	val = pete_readw("drivers/pci/controller/pci-v3-semi.c:785", v3->base + V3_PCI_CMD);
 	val &= ~(PCI_COMMAND_IO | PCI_COMMAND_MEMORY | PCI_COMMAND_MASTER);
-	writew(val, v3->base + V3_PCI_CMD);
+	pete_writew("drivers/pci/controller/pci-v3-semi.c:787", val, v3->base + V3_PCI_CMD);
 
 	/* Put the PCI bus into reset */
-	val = readw(v3->base + V3_SYSTEM);
+	val = pete_readw("drivers/pci/controller/pci-v3-semi.c:790", v3->base + V3_SYSTEM);
 	val &= ~V3_SYSTEM_M_RST_OUT;
-	writew(val, v3->base + V3_SYSTEM);
+	pete_writew("drivers/pci/controller/pci-v3-semi.c:792", val, v3->base + V3_SYSTEM);
 
 	/* Retry until we're ready */
-	val = readw(v3->base + V3_PCI_CFG);
+	val = pete_readw("drivers/pci/controller/pci-v3-semi.c:795", v3->base + V3_PCI_CFG);
 	val |= V3_PCI_CFG_M_RETRY_EN;
-	writew(val, v3->base + V3_PCI_CFG);
+	pete_writew("drivers/pci/controller/pci-v3-semi.c:797", val, v3->base + V3_PCI_CFG);
 
 	/* Set up the local bus protocol */
-	val = readw(v3->base + V3_LB_CFG);
+	val = pete_readw("drivers/pci/controller/pci-v3-semi.c:800", v3->base + V3_LB_CFG);
 	val |= V3_LB_CFG_LB_BE_IMODE; /* Byte enable input */
 	val |= V3_LB_CFG_LB_BE_OMODE; /* Byte enable output */
 	val &= ~V3_LB_CFG_LB_ENDIAN; /* Little endian */
 	val &= ~V3_LB_CFG_LB_PPC_RDY; /* TODO: when using on PPC403Gx, set to 1 */
-	writew(val, v3->base + V3_LB_CFG);
+	pete_writew("drivers/pci/controller/pci-v3-semi.c:805", val, v3->base + V3_LB_CFG);
 
 	/* Enable the PCI bus master */
-	val = readw(v3->base + V3_PCI_CMD);
+	val = pete_readw("drivers/pci/controller/pci-v3-semi.c:808", v3->base + V3_PCI_CMD);
 	val |= PCI_COMMAND_MASTER;
-	writew(val, v3->base + V3_PCI_CMD);
+	pete_writew("drivers/pci/controller/pci-v3-semi.c:810", val, v3->base + V3_PCI_CMD);
 
 	/* Get the I/O and memory ranges from DT */
 	resource_list_for_each_entry(win, &host->windows) {
@@ -826,7 +826,7 @@ static int v3_pci_probe(struct platform_device *pdev)
 	 * set AD_LOW0 to 1 if one of the LB_MAP registers choose
 	 * to use this (should be unused).
 	 */
-	writel(0x00000000, v3->base + V3_PCI_IO_BASE);
+	pete_writel("drivers/pci/controller/pci-v3-semi.c:829", 0x00000000, v3->base + V3_PCI_IO_BASE);
 	val = V3_PCI_CFG_M_IO_REG_DIS | V3_PCI_CFG_M_IO_DIS |
 		V3_PCI_CFG_M_EN3V | V3_PCI_CFG_M_AD_LOW0;
 	/*
@@ -834,14 +834,14 @@ static int v3_pci_probe(struct platform_device *pdev)
 	 */
 	val |=  V3_PCI_CFG_TYPE_DEFAULT << V3_PCI_CFG_M_RTYPE_SHIFT;
 	val |=  V3_PCI_CFG_TYPE_DEFAULT << V3_PCI_CFG_M_WTYPE_SHIFT;
-	writew(val, v3->base + V3_PCI_CFG);
+	pete_writew("drivers/pci/controller/pci-v3-semi.c:837", val, v3->base + V3_PCI_CFG);
 
 	/*
 	 * Set the V3 FIFO such that writes have higher priority than
 	 * reads, and local bus write causes local bus read fifo flush
 	 * on aperture 1. Same for PCI.
 	 */
-	writew(V3_FIFO_PRIO_LB_RD1_FLUSH_AP1 |
+	pete_writew("drivers/pci/controller/pci-v3-semi.c:844", V3_FIFO_PRIO_LB_RD1_FLUSH_AP1 |
 	       V3_FIFO_PRIO_LB_RD0_FLUSH_AP1 |
 	       V3_FIFO_PRIO_PCI_RD1_FLUSH_AP1 |
 	       V3_FIFO_PRIO_PCI_RD0_FLUSH_AP1,
@@ -852,11 +852,11 @@ static int v3_pci_probe(struct platform_device *pdev)
 	 * Clear any error interrupts, and enable parity and write error
 	 * interrupts
 	 */
-	writeb(0, v3->base + V3_LB_ISTAT);
-	val = readw(v3->base + V3_LB_CFG);
+	pete_writeb("drivers/pci/controller/pci-v3-semi.c:855", 0, v3->base + V3_LB_ISTAT);
+	val = pete_readw("drivers/pci/controller/pci-v3-semi.c:856", v3->base + V3_LB_CFG);
 	val |= V3_LB_CFG_LB_LB_INT;
-	writew(val, v3->base + V3_LB_CFG);
-	writeb(V3_LB_ISTAT_PCI_WR | V3_LB_ISTAT_PCI_PERR,
+	pete_writew("drivers/pci/controller/pci-v3-semi.c:858", val, v3->base + V3_LB_CFG);
+	pete_writeb("drivers/pci/controller/pci-v3-semi.c:859", V3_LB_ISTAT_PCI_WR | V3_LB_ISTAT_PCI_PERR,
 	       v3->base + V3_LB_IMASK);
 
 	/* Special Integrator initialization */
@@ -867,27 +867,27 @@ static int v3_pci_probe(struct platform_device *pdev)
 	}
 
 	/* Post-init: enable PCI memory and invalidate (master already on) */
-	val = readw(v3->base + V3_PCI_CMD);
+	val = pete_readw("drivers/pci/controller/pci-v3-semi.c:870", v3->base + V3_PCI_CMD);
 	val |= PCI_COMMAND_MEMORY | PCI_COMMAND_INVALIDATE;
-	writew(val, v3->base + V3_PCI_CMD);
+	pete_writew("drivers/pci/controller/pci-v3-semi.c:872", val, v3->base + V3_PCI_CMD);
 
 	/* Clear pending interrupts */
-	writeb(0, v3->base + V3_LB_ISTAT);
+	pete_writeb("drivers/pci/controller/pci-v3-semi.c:875", 0, v3->base + V3_LB_ISTAT);
 	/* Read or write errors and parity errors cause interrupts */
-	writeb(V3_LB_ISTAT_PCI_RD | V3_LB_ISTAT_PCI_WR | V3_LB_ISTAT_PCI_PERR,
+	pete_writeb("drivers/pci/controller/pci-v3-semi.c:877", V3_LB_ISTAT_PCI_RD | V3_LB_ISTAT_PCI_WR | V3_LB_ISTAT_PCI_PERR,
 	       v3->base + V3_LB_IMASK);
 
 	/* Take the PCI bus out of reset so devices can initialize */
-	val = readw(v3->base + V3_SYSTEM);
+	val = pete_readw("drivers/pci/controller/pci-v3-semi.c:881", v3->base + V3_SYSTEM);
 	val |= V3_SYSTEM_M_RST_OUT;
-	writew(val, v3->base + V3_SYSTEM);
+	pete_writew("drivers/pci/controller/pci-v3-semi.c:883", val, v3->base + V3_SYSTEM);
 
 	/*
 	 * Re-lock the system register.
 	 */
-	val = readw(v3->base + V3_SYSTEM);
+	val = pete_readw("drivers/pci/controller/pci-v3-semi.c:888", v3->base + V3_SYSTEM);
 	val |= V3_SYSTEM_M_LOCK;
-	writew(val, v3->base + V3_SYSTEM);
+	pete_writew("drivers/pci/controller/pci-v3-semi.c:890", val, v3->base + V3_SYSTEM);
 
 	return pci_host_probe(host);
 }

@@ -20,7 +20,7 @@
 #include <asm/byteorder.h>
 #include <asm/machdep.h>
 #include <asm/blinken.h>
-#include <asm/io.h>                               /* readb() and writeb() */
+#include <asm/io.h>                               /* pete_readb("arch/m68k/hp300/config.c:23", ) and pete_writeb("arch/m68k/hp300/config.c:23", ) */
 #include <asm/hp300hw.h>
 
 #include "time.h"

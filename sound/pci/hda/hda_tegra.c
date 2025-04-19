@@ -100,24 +100,24 @@ static void hda_tegra_init(struct hda_tegra *hda)
 	u32 v;
 
 	/* Enable PCI access */
-	v = readl(hda->regs + HDA_IPFS_CONFIG);
+	v = pete_readl("sound/pci/hda/hda_tegra.c:103", hda->regs + HDA_IPFS_CONFIG);
 	v |= HDA_IPFS_EN_FPCI;
-	writel(v, hda->regs + HDA_IPFS_CONFIG);
+	pete_writel("sound/pci/hda/hda_tegra.c:105", v, hda->regs + HDA_IPFS_CONFIG);
 
 	/* Enable MEM/IO space and bus master */
-	v = readl(hda->regs + HDA_CFG_CMD);
+	v = pete_readl("sound/pci/hda/hda_tegra.c:108", hda->regs + HDA_CFG_CMD);
 	v &= ~HDA_DISABLE_INTR;
 	v |= HDA_ENABLE_MEM_SPACE | HDA_ENABLE_IO_SPACE |
 		HDA_ENABLE_BUS_MASTER | HDA_ENABLE_SERR;
-	writel(v, hda->regs + HDA_CFG_CMD);
+	pete_writel("sound/pci/hda/hda_tegra.c:112", v, hda->regs + HDA_CFG_CMD);
 
-	writel(HDA_BAR0_INIT_PROGRAM, hda->regs + HDA_CFG_BAR0);
-	writel(HDA_BAR0_FINAL_PROGRAM, hda->regs + HDA_CFG_BAR0);
-	writel(HDA_FPCI_BAR0_START, hda->regs + HDA_IPFS_FPCI_BAR0);
+	pete_writel("sound/pci/hda/hda_tegra.c:114", HDA_BAR0_INIT_PROGRAM, hda->regs + HDA_CFG_BAR0);
+	pete_writel("sound/pci/hda/hda_tegra.c:115", HDA_BAR0_FINAL_PROGRAM, hda->regs + HDA_CFG_BAR0);
+	pete_writel("sound/pci/hda/hda_tegra.c:116", HDA_FPCI_BAR0_START, hda->regs + HDA_IPFS_FPCI_BAR0);
 
-	v = readl(hda->regs + HDA_IPFS_INTR_MASK);
+	v = pete_readl("sound/pci/hda/hda_tegra.c:118", hda->regs + HDA_IPFS_INTR_MASK);
 	v |= HDA_IPFS_EN_INTR;
-	writel(v, hda->regs + HDA_IPFS_INTR_MASK);
+	pete_writel("sound/pci/hda/hda_tegra.c:120", v, hda->regs + HDA_IPFS_INTR_MASK);
 }
 
 /*
@@ -300,9 +300,9 @@ static int hda_tegra_first_init(struct azx *chip, struct platform_device *pdev)
 		dev_info(card->dev, "Override SDO lines to %u\n",
 			 TEGRA194_NUM_SDO_LINES);
 
-		val = readl(hda->regs + FPCI_DBG_CFG_2) & ~FPCI_GCAP_NSDO_MASK;
+		val = pete_readl("sound/pci/hda/hda_tegra.c:303", hda->regs + FPCI_DBG_CFG_2) & ~FPCI_GCAP_NSDO_MASK;
 		val |= (TEGRA194_NUM_SDO_LINES >> 1) << FPCI_GCAP_NSDO_SHIFT;
-		writel(val, hda->regs + FPCI_DBG_CFG_2);
+		pete_writel("sound/pci/hda/hda_tegra.c:305", val, hda->regs + FPCI_DBG_CFG_2);
 	}
 
 	gcap = azx_readw(chip, GCAP);

@@ -20,7 +20,7 @@ static int mcde_clk_div_enable(struct clk_hw *hw)
 	u32 val;
 
 	spin_lock(&mcde->fifo_crx1_lock);
-	val = readl(mcde->regs + cdiv->cr);
+	val = pete_readl("drivers/gpu/drm/mcde/mcde_clk_div.c:23", mcde->regs + cdiv->cr);
 	/*
 	 * Select the PLL72 (LCD) clock as parent
 	 * FIXME: implement other parents.
@@ -34,7 +34,7 @@ static int mcde_clk_div_enable(struct clk_hw *hw)
 	val &= ~(MCDE_CRX1_BCD | MCDE_CRX1_PCD_MASK);
 	val |= cdiv->cr_div;
 
-	writel(val, mcde->regs + cdiv->cr);
+	pete_writel("drivers/gpu/drm/mcde/mcde_clk_div.c:37", val, mcde->regs + cdiv->cr);
 	spin_unlock(&mcde->fifo_crx1_lock);
 
 	return 0;
@@ -94,7 +94,7 @@ static unsigned long mcde_clk_div_recalc_rate(struct clk_hw *hw,
 	if (!regulator_is_enabled(mcde->epod))
 		return DIV_ROUND_UP_ULL(prate, 2);
 
-	cr = readl(mcde->regs + cdiv->cr);
+	cr = pete_readl("drivers/gpu/drm/mcde/mcde_clk_div.c:97", mcde->regs + cdiv->cr);
 	if (cr & MCDE_CRX1_BCD)
 		return prate;
 

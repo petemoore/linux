@@ -78,7 +78,7 @@ static unsigned long zynq_pll_recalc_rate(struct clk_hw *hw,
 	 * makes probably sense to redundantly save fbdiv in the struct
 	 * zynq_pll to save the IO access.
 	 */
-	fbdiv = (readl(clk->pll_ctrl) & PLLCTRL_FBDIV_MASK) >>
+	fbdiv = (pete_readl("drivers/clk/zynq/pll.c:81", clk->pll_ctrl) & PLLCTRL_FBDIV_MASK) >>
 			PLLCTRL_FBDIV_SHIFT;
 
 	return parent_rate * fbdiv;
@@ -100,7 +100,7 @@ static int zynq_pll_is_enabled(struct clk_hw *hw)
 
 	spin_lock_irqsave(clk->lock, flags);
 
-	reg = readl(clk->pll_ctrl);
+	reg = pete_readl("drivers/clk/zynq/pll.c:103", clk->pll_ctrl);
 
 	spin_unlock_irqrestore(clk->lock, flags);
 
@@ -126,10 +126,10 @@ static int zynq_pll_enable(struct clk_hw *hw)
 	/* Power up PLL and wait for lock */
 	spin_lock_irqsave(clk->lock, flags);
 
-	reg = readl(clk->pll_ctrl);
+	reg = pete_readl("drivers/clk/zynq/pll.c:129", clk->pll_ctrl);
 	reg &= ~(PLLCTRL_RESET_MASK | PLLCTRL_PWRDWN_MASK);
-	writel(reg, clk->pll_ctrl);
-	while (!(readl(clk->pll_status) & (1 << clk->lockbit)))
+	pete_writel("drivers/clk/zynq/pll.c:131", reg, clk->pll_ctrl);
+	while (!(pete_readl("drivers/clk/zynq/pll.c:132", clk->pll_status) & (1 << clk->lockbit)))
 		;
 
 	spin_unlock_irqrestore(clk->lock, flags);
@@ -156,9 +156,9 @@ static void zynq_pll_disable(struct clk_hw *hw)
 	/* shut down PLL */
 	spin_lock_irqsave(clk->lock, flags);
 
-	reg = readl(clk->pll_ctrl);
+	reg = pete_readl("drivers/clk/zynq/pll.c:159", clk->pll_ctrl);
 	reg |= PLLCTRL_RESET_MASK | PLLCTRL_PWRDWN_MASK;
-	writel(reg, clk->pll_ctrl);
+	pete_writel("drivers/clk/zynq/pll.c:161", reg, clk->pll_ctrl);
 
 	spin_unlock_irqrestore(clk->lock, flags);
 }
@@ -211,9 +211,9 @@ struct clk *clk_register_zynq_pll(const char *name, const char *parent,
 
 	spin_lock_irqsave(pll->lock, flags);
 
-	reg = readl(pll->pll_ctrl);
+	reg = pete_readl("drivers/clk/zynq/pll.c:214", pll->pll_ctrl);
 	reg &= ~PLLCTRL_BPQUAL_MASK;
-	writel(reg, pll->pll_ctrl);
+	pete_writel("drivers/clk/zynq/pll.c:216", reg, pll->pll_ctrl);
 
 	spin_unlock_irqrestore(pll->lock, flags);
 

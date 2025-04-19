@@ -75,16 +75,16 @@ irqreturn_t netup_spi_interrupt(struct netup_spi *spi)
 		return IRQ_NONE;
 
 	spin_lock_irqsave(&spi->lock, flags);
-	reg = readw(&spi->regs->control_stat);
+	reg = pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_spi.c:78", &spi->regs->control_stat);
 	if (!(reg & NETUP_SPI_CTRL_IRQ)) {
 		spin_unlock_irqrestore(&spi->lock, flags);
 		dev_dbg(&spi->master->dev,
 			"%s(): not mine interrupt\n", __func__);
 		return IRQ_NONE;
 	}
-	writew(reg | NETUP_SPI_CTRL_IRQ, &spi->regs->control_stat);
-	reg = readw(&spi->regs->control_stat);
-	writew(reg & ~NETUP_SPI_CTRL_IMASK, &spi->regs->control_stat);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_spi.c:85", reg | NETUP_SPI_CTRL_IRQ, &spi->regs->control_stat);
+	reg = pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_spi.c:86", &spi->regs->control_stat);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_spi.c:87", reg & ~NETUP_SPI_CTRL_IMASK, &spi->regs->control_stat);
 	spi->state = SPI_STATE_DONE;
 	wake_up(&spi->waitq);
 	spin_unlock_irqrestore(&spi->lock, flags);
@@ -102,8 +102,8 @@ static int netup_spi_transfer(struct spi_master *master,
 	u32 tr_size;
 
 	/* reset CS */
-	writew(NETUP_SPI_CTRL_LAST_CS, &spi->regs->control_stat);
-	writew(0, &spi->regs->control_stat);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_spi.c:105", NETUP_SPI_CTRL_LAST_CS, &spi->regs->control_stat);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_spi.c:106", 0, &spi->regs->control_stat);
 	list_for_each_entry(t, &msg->transfers, transfer_list) {
 		tr_size = t->len;
 		while (tr_size) {
@@ -126,14 +126,14 @@ static int netup_spi_transfer(struct spi_master *master,
 					0, frag_size);
 			}
 			spi->state = SPI_STATE_START;
-			writew((frag_size & 0x3ff) |
+			pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_spi.c:129", (frag_size & 0x3ff) |
 				NETUP_SPI_CTRL_IMASK |
 				NETUP_SPI_CTRL_START |
 				(frag_last ? NETUP_SPI_CTRL_LAST_CS : 0),
 				&spi->regs->control_stat);
 			dev_dbg(&spi->master->dev,
 				"%s(): control_stat 0x%04x\n",
-				__func__, readw(&spi->regs->control_stat));
+				__func__, pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_spi.c:136", &spi->regs->control_stat));
 			wait_event_timeout(spi->waitq,
 				spi->state != SPI_STATE_START,
 				msecs_to_jiffies(NETUP_SPI_TIMEOUT));
@@ -192,8 +192,8 @@ int netup_spi_init(struct netup_unidvb_dev *ndev)
 	init_waitqueue_head(&nspi->waitq);
 	nspi->master = master;
 	nspi->regs = (struct netup_spi_regs __iomem *)(ndev->bmmio0 + 0x4000);
-	writew(2, &nspi->regs->clock_divider);
-	writew(NETUP_UNIDVB_IRQ_SPI, ndev->bmmio0 + REG_IMASK_SET);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_spi.c:195", 2, &nspi->regs->clock_divider);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_spi.c:196", NETUP_UNIDVB_IRQ_SPI, ndev->bmmio0 + REG_IMASK_SET);
 	ndev->spi = nspi;
 	if (spi_register_master(master)) {
 		ndev->spi = NULL;
@@ -229,10 +229,10 @@ void netup_spi_release(struct netup_unidvb_dev *ndev)
 
 	spi_unregister_master(spi->master);
 	spin_lock_irqsave(&spi->lock, flags);
-	reg = readw(&spi->regs->control_stat);
-	writew(reg | NETUP_SPI_CTRL_IRQ, &spi->regs->control_stat);
-	reg = readw(&spi->regs->control_stat);
-	writew(reg & ~NETUP_SPI_CTRL_IMASK, &spi->regs->control_stat);
+	reg = pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_spi.c:232", &spi->regs->control_stat);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_spi.c:233", reg | NETUP_SPI_CTRL_IRQ, &spi->regs->control_stat);
+	reg = pete_readw("drivers/media/pci/netup_unidvb/netup_unidvb_spi.c:234", &spi->regs->control_stat);
+	pete_writew("drivers/media/pci/netup_unidvb/netup_unidvb_spi.c:235", reg & ~NETUP_SPI_CTRL_IMASK, &spi->regs->control_stat);
 	spin_unlock_irqrestore(&spi->lock, flags);
 	ndev->spi = NULL;
 }

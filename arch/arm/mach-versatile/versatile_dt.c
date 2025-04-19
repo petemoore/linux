@@ -63,7 +63,7 @@ unsigned int mmc_status(struct device *dev)
 	else
 		mask = 2;
 
-	return readl(versatile_sys_base + VERSATILE_SYS_MCI_OFFSET) & mask;
+	return pete_readl("arch/arm/mach-versatile/versatile_dt.c:66", versatile_sys_base + VERSATILE_SYS_MCI_OFFSET) & mask;
 }
 
 static struct mmci_platform_data mmc0_plat_data = {
@@ -112,8 +112,8 @@ static void __init versatile_init_early(void)
 	 *	VERSATILE_REFCLK is 32KHz
 	 *	VERSATILE_TIMCLK is 1MHz
 	 */
-	val = readl(__io_address(VERSATILE_SCTL_BASE));
-	writel((VERSATILE_TIMCLK << VERSATILE_TIMER1_EnSel) |
+	val = pete_readl("arch/arm/mach-versatile/versatile_dt.c:115", __io_address(VERSATILE_SCTL_BASE));
+	pete_writel("arch/arm/mach-versatile/versatile_dt.c:116", (VERSATILE_TIMCLK << VERSATILE_TIMER1_EnSel) |
 	       (VERSATILE_TIMCLK << VERSATILE_TIMER2_EnSel) |
 	       (VERSATILE_TIMCLK << VERSATILE_TIMER3_EnSel) |
 	       (VERSATILE_TIMCLK << VERSATILE_TIMER4_EnSel) | val,
@@ -131,14 +131,14 @@ static void __init versatile_dt_pci_init(void)
 		return;
 
 	/* Check if PCI backplane is detected */
-	val = readl(versatile_sys_base + VERSATILE_SYS_PCICTL_OFFSET);
+	val = pete_readl("arch/arm/mach-versatile/versatile_dt.c:134", versatile_sys_base + VERSATILE_SYS_PCICTL_OFFSET);
 	if (val & 1) {
 		/*
 		 * Enable PCI accesses. Note that the documentaton is
 		 * inconsistent whether or not this is needed, but the old
 		 * driver had it so we will keep it.
 		 */
-		writel(1, versatile_sys_base + VERSATILE_SYS_PCICTL_OFFSET);
+		pete_writel("arch/arm/mach-versatile/versatile_dt.c:141", 1, versatile_sys_base + VERSATILE_SYS_PCICTL_OFFSET);
 		goto out_put_node;
 	}
 

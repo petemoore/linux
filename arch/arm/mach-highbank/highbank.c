@@ -96,8 +96,8 @@ static int highbank_platform_notifier(struct notifier_block *nb,
 		return NOTIFY_DONE;
 
 	if (of_property_read_bool(dev->of_node, "dma-coherent")) {
-		val = readl(sregs_base + reg);
-		writel(val | 0xff01, sregs_base + reg);
+		val = pete_readl("arch/arm/mach-highbank/highbank.c:99", sregs_base + reg);
+		pete_writel("arch/arm/mach-highbank/highbank.c:100", val | 0xff01, sregs_base + reg);
 		set_dma_ops(dev, &arm_coherent_dma_ops);
 	}
 

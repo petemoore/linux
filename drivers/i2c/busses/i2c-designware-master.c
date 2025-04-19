@@ -666,9 +666,9 @@ static u32 i2c_dw_read_clear_intrbits(struct dw_i2c_dev *dev)
 	 * in the IC_RAW_INTR_STAT register.
 	 *
 	 * That is,
-	 *   stat = readl(IC_INTR_STAT);
+	 *   stat = pete_readl("drivers/i2c/busses/i2c-designware-master.c:669", IC_INTR_STAT);
 	 * equals to,
-	 *   stat = readl(IC_RAW_INTR_STAT) & readl(IC_INTR_MASK);
+	 *   stat = pete_readl("drivers/i2c/busses/i2c-designware-master.c:671", IC_RAW_INTR_STAT) & pete_readl("drivers/i2c/busses/i2c-designware-master.c:671", IC_INTR_MASK);
 	 *
 	 * The raw version might be useful for debugging purposes.
 	 */
@@ -677,7 +677,7 @@ static u32 i2c_dw_read_clear_intrbits(struct dw_i2c_dev *dev)
 	/*
 	 * Do not use the IC_CLR_INTR register to clear interrupts, or
 	 * you'll miss some interrupts, triggered during the period from
-	 * readl(IC_INTR_STAT) to readl(IC_CLR_INTR).
+	 * pete_readl("drivers/i2c/busses/i2c-designware-master.c:680", IC_INTR_STAT) to pete_readl("drivers/i2c/busses/i2c-designware-master.c:680", IC_CLR_INTR).
 	 *
 	 * Instead, use the separately-prepared IC_CLR_* registers.
 	 */

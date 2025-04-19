@@ -85,12 +85,12 @@ static unsigned long clk_pllclk_recalc(struct clk_hw *hw,
 	 * if has_pllctrl is non zero
 	 */
 	if (pll_data->has_pllctrl) {
-		val = readl(pll_data->pllm);
+		val = pete_readl("drivers/clk/keystone/pll.c:88", pll_data->pllm);
 		mult = (val & pll_data->pllm_lower_mask);
 	}
 
 	/* bit6-12 of PLLM is in Main PLL control register */
-	val = readl(pll_data->pll_ctl0);
+	val = pete_readl("drivers/clk/keystone/pll.c:93", pll_data->pll_ctl0);
 	mult |= ((val & pll_data->pllm_upper_mask)
 			>> pll_data->pllm_upper_shift);
 	prediv = (val & pll_data->plld_mask);
@@ -100,7 +100,7 @@ static unsigned long clk_pllclk_recalc(struct clk_hw *hw,
 		postdiv = ((val & pll_data->clkod_mask) >>
 				 pll_data->clkod_shift) + 1;
 	else if (pll_data->pllod) {
-		postdiv = readl(pll_data->pllod);
+		postdiv = pete_readl("drivers/clk/keystone/pll.c:103", pll_data->pllod);
 		postdiv = ((postdiv & pll_data->clkod_mask) >>
 				pll_data->clkod_shift) + 1;
 	} else

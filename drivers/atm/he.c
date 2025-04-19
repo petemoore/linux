@@ -173,8 +173,8 @@ static const struct atmdev_ops he_ops =
 	.owner =	THIS_MODULE
 };
 
-#define he_writel(dev, val, reg)	do { writel(val, (dev)->membase + (reg)); wmb(); } while (0)
-#define he_readl(dev, reg)		readl((dev)->membase + (reg))
+#define he_writel(dev, val, reg)	do { pete_writel("drivers/atm/he.c:176", val, (dev)->membase + (reg)); wmb(); } while (0)
+#define he_readl(dev, reg)		pete_readl("drivers/atm/he.c:177", (dev)->membase + (reg))
 
 /* section 2.12 connection memory access */
 
@@ -2790,7 +2790,7 @@ static u8 read_prom_byte(struct he_dev *he_dev, int addr)
 	int i, j = 0;
 	u8 byte_read = 0;
 
-	val = readl(he_dev->membase + HOST_CNTL);
+	val = pete_readl("drivers/atm/he.c:2793", he_dev->membase + HOST_CNTL);
 	val &= 0xFFFFE0FF;
        
 	/* Turn on write enable */

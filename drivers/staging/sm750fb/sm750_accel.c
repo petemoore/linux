@@ -20,17 +20,17 @@
 #include "sm750_accel.h"
 static inline void write_dpr(struct lynx_accel *accel, int offset, u32 regValue)
 {
-	writel(regValue, accel->dprBase + offset);
+	pete_writel("drivers/staging/sm750fb/sm750_accel.c:23", regValue, accel->dprBase + offset);
 }
 
 static inline u32 read_dpr(struct lynx_accel *accel, int offset)
 {
-	return readl(accel->dprBase + offset);
+	return pete_readl("drivers/staging/sm750fb/sm750_accel.c:28", accel->dprBase + offset);
 }
 
 static inline void write_dpPort(struct lynx_accel *accel, u32 data)
 {
-	writel(data, accel->dpPortBase);
+	pete_writel("drivers/staging/sm750fb/sm750_accel.c:33", data, accel->dpPortBase);
 }
 
 void sm750_hw_de_init(struct lynx_accel *accel)

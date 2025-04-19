@@ -21,8 +21,8 @@
 #if defined(__KERNEL__)
 #include <asm/page.h>
 #include <asm/io.h>
-#define STG_WRITE_REG(reg,data) (writel(data,&pSTGReg->reg))
-#define STG_READ_REG(reg)      (readl(&pSTGReg->reg))
+#define STG_WRITE_REG(reg,data) (pete_writel("drivers/video/fbdev/kyro/STG4000Reg.h:24", data,&pSTGReg->reg))
+#define STG_READ_REG(reg)      (pete_readl("drivers/video/fbdev/kyro/STG4000Reg.h:25", &pSTGReg->reg))
 #else
 #define STG_WRITE_REG(reg,data) (pSTGReg->reg = data)
 #define STG_READ_REG(reg)      (pSTGReg->reg)

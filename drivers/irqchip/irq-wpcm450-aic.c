@@ -45,19 +45,19 @@ static void wpcm450_aic_init_hw(void)
 	int i;
 
 	/* Disable (mask) all interrupts */
-	writel(0xffffffff, aic->regs + AIC_MDCR);
+	pete_writel("drivers/irqchip/irq-wpcm450-aic.c:48", 0xffffffff, aic->regs + AIC_MDCR);
 
 	/*
 	 * Make sure the interrupt controller is ready to serve new interrupts.
 	 * Reading from IPER indicates that the nIRQ signal may be deasserted,
 	 * and writing to EOSCR indicates that interrupt handling has finished.
 	 */
-	readl(aic->regs + AIC_IPER);
-	writel(0, aic->regs + AIC_EOSCR);
+	pete_readl("drivers/irqchip/irq-wpcm450-aic.c:55", aic->regs + AIC_IPER);
+	pete_writel("drivers/irqchip/irq-wpcm450-aic.c:56", 0, aic->regs + AIC_EOSCR);
 
 	/* Initialize trigger mode and priority of each interrupt source */
 	for (i = 0; i < AIC_NUM_IRQS; i++)
-		writel(AIC_SCR_SRCTYPE_HIGH_LEVEL | AIC_SCR_PRIORITY(7),
+		pete_writel("drivers/irqchip/irq-wpcm450-aic.c:60", AIC_SCR_SRCTYPE_HIGH_LEVEL | AIC_SCR_PRIORITY(7),
 		       aic->regs + AIC_SCR(i));
 }
 
@@ -67,7 +67,7 @@ static void __exception_irq_entry wpcm450_aic_handle_irq(struct pt_regs *regs)
 
 	/* Determine the interrupt source */
 	/* Read IPER to signal that nIRQ can be de-asserted */
-	hwirq = readl(aic->regs + AIC_IPER) / 4;
+	hwirq = pete_readl("drivers/irqchip/irq-wpcm450-aic.c:70", aic->regs + AIC_IPER) / 4;
 
 	handle_domain_irq(aic->domain, hwirq, regs);
 }
@@ -75,7 +75,7 @@ static void __exception_irq_entry wpcm450_aic_handle_irq(struct pt_regs *regs)
 static void wpcm450_aic_eoi(struct irq_data *d)
 {
 	/* Signal end-of-service */
-	writel(0, aic->regs + AIC_EOSCR);
+	pete_writel("drivers/irqchip/irq-wpcm450-aic.c:78", 0, aic->regs + AIC_EOSCR);
 }
 
 static void wpcm450_aic_mask(struct irq_data *d)
@@ -83,7 +83,7 @@ static void wpcm450_aic_mask(struct irq_data *d)
 	unsigned int mask = BIT(d->hwirq);
 
 	/* Disable (mask) the interrupt */
-	writel(mask, aic->regs + AIC_MDCR);
+	pete_writel("drivers/irqchip/irq-wpcm450-aic.c:86", mask, aic->regs + AIC_MDCR);
 }
 
 static void wpcm450_aic_unmask(struct irq_data *d)
@@ -91,7 +91,7 @@ static void wpcm450_aic_unmask(struct irq_data *d)
 	unsigned int mask = BIT(d->hwirq);
 
 	/* Enable (unmask) the interrupt */
-	writel(mask, aic->regs + AIC_MECR);
+	pete_writel("drivers/irqchip/irq-wpcm450-aic.c:94", mask, aic->regs + AIC_MECR);
 }
 
 static int wpcm450_aic_set_type(struct irq_data *d, unsigned int flow_type)

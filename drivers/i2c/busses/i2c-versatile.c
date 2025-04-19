@@ -30,26 +30,26 @@ static void i2c_versatile_setsda(void *data, int state)
 {
 	struct i2c_versatile *i2c = data;
 
-	writel(SDA, i2c->base + (state ? I2C_CONTROLS : I2C_CONTROLC));
+	pete_writel("drivers/i2c/busses/i2c-versatile.c:33", SDA, i2c->base + (state ? I2C_CONTROLS : I2C_CONTROLC));
 }
 
 static void i2c_versatile_setscl(void *data, int state)
 {
 	struct i2c_versatile *i2c = data;
 
-	writel(SCL, i2c->base + (state ? I2C_CONTROLS : I2C_CONTROLC));
+	pete_writel("drivers/i2c/busses/i2c-versatile.c:40", SCL, i2c->base + (state ? I2C_CONTROLS : I2C_CONTROLC));
 }
 
 static int i2c_versatile_getsda(void *data)
 {
 	struct i2c_versatile *i2c = data;
-	return !!(readl(i2c->base + I2C_CONTROL) & SDA);
+	return !!(pete_readl("drivers/i2c/busses/i2c-versatile.c:46", i2c->base + I2C_CONTROL) & SDA);
 }
 
 static int i2c_versatile_getscl(void *data)
 {
 	struct i2c_versatile *i2c = data;
-	return !!(readl(i2c->base + I2C_CONTROL) & SCL);
+	return !!(pete_readl("drivers/i2c/busses/i2c-versatile.c:52", i2c->base + I2C_CONTROL) & SCL);
 }
 
 static const struct i2c_algo_bit_data i2c_versatile_algo = {
@@ -76,7 +76,7 @@ static int i2c_versatile_probe(struct platform_device *dev)
 	if (IS_ERR(i2c->base))
 		return PTR_ERR(i2c->base);
 
-	writel(SCL | SDA, i2c->base + I2C_CONTROLS);
+	pete_writel("drivers/i2c/busses/i2c-versatile.c:79", SCL | SDA, i2c->base + I2C_CONTROLS);
 
 	i2c->adap.owner = THIS_MODULE;
 	strlcpy(i2c->adap.name, "Versatile I2C adapter", sizeof(i2c->adap.name));

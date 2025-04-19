@@ -59,7 +59,7 @@ struct mcf_uart {
 
 static unsigned int mcf_tx_empty(struct uart_port *port)
 {
-	return (readb(port->membase + MCFUART_USR) & MCFUART_USR_TXEMPTY) ?
+	return (pete_readb("drivers/tty/serial/mcf.c:62", port->membase + MCFUART_USR) & MCFUART_USR_TXEMPTY) ?
 		TIOCSER_TEMT : 0;
 }
 
@@ -70,7 +70,7 @@ static unsigned int mcf_get_mctrl(struct uart_port *port)
 	struct mcf_uart *pp = container_of(port, struct mcf_uart, port);
 	unsigned int sigs;
 
-	sigs = (readb(port->membase + MCFUART_UIPR) & MCFUART_UIPR_CTS) ?
+	sigs = (pete_readb("drivers/tty/serial/mcf.c:73", port->membase + MCFUART_UIPR) & MCFUART_UIPR_CTS) ?
 		0 : TIOCM_CTS;
 	sigs |= (pp->sigs & TIOCM_RTS);
 	sigs |= (mcf_getppdcd(port->line) ? TIOCM_CD : 0);
@@ -88,9 +88,9 @@ static void mcf_set_mctrl(struct uart_port *port, unsigned int sigs)
 	pp->sigs = sigs;
 	mcf_setppdtr(port->line, (sigs & TIOCM_DTR));
 	if (sigs & TIOCM_RTS)
-		writeb(MCFUART_UOP_RTS, port->membase + MCFUART_UOP1);
+		pete_writeb("drivers/tty/serial/mcf.c:91", MCFUART_UOP_RTS, port->membase + MCFUART_UOP1);
 	else
-		writeb(MCFUART_UOP_RTS, port->membase + MCFUART_UOP0);
+		pete_writeb("drivers/tty/serial/mcf.c:93", MCFUART_UOP_RTS, port->membase + MCFUART_UOP0);
 }
 
 /****************************************************************************/
@@ -101,12 +101,12 @@ static void mcf_start_tx(struct uart_port *port)
 
 	if (port->rs485.flags & SER_RS485_ENABLED) {
 		/* Enable Transmitter */
-		writeb(MCFUART_UCR_TXENABLE, port->membase + MCFUART_UCR);
+		pete_writeb("drivers/tty/serial/mcf.c:104", MCFUART_UCR_TXENABLE, port->membase + MCFUART_UCR);
 		/* Manually assert RTS */
-		writeb(MCFUART_UOP_RTS, port->membase + MCFUART_UOP1);
+		pete_writeb("drivers/tty/serial/mcf.c:106", MCFUART_UOP_RTS, port->membase + MCFUART_UOP1);
 	}
 	pp->imr |= MCFUART_UIR_TXREADY;
-	writeb(pp->imr, port->membase + MCFUART_UIMR);
+	pete_writeb("drivers/tty/serial/mcf.c:109", pp->imr, port->membase + MCFUART_UIMR);
 }
 
 /****************************************************************************/
@@ -116,7 +116,7 @@ static void mcf_stop_tx(struct uart_port *port)
 	struct mcf_uart *pp = container_of(port, struct mcf_uart, port);
 
 	pp->imr &= ~MCFUART_UIR_TXREADY;
-	writeb(pp->imr, port->membase + MCFUART_UIMR);
+	pete_writeb("drivers/tty/serial/mcf.c:119", pp->imr, port->membase + MCFUART_UIMR);
 }
 
 /****************************************************************************/
@@ -126,7 +126,7 @@ static void mcf_stop_rx(struct uart_port *port)
 	struct mcf_uart *pp = container_of(port, struct mcf_uart, port);
 
 	pp->imr &= ~MCFUART_UIR_RXREADY;
-	writeb(pp->imr, port->membase + MCFUART_UIMR);
+	pete_writeb("drivers/tty/serial/mcf.c:129", pp->imr, port->membase + MCFUART_UIMR);
 }
 
 /****************************************************************************/
@@ -137,9 +137,9 @@ static void mcf_break_ctl(struct uart_port *port, int break_state)
 
 	spin_lock_irqsave(&port->lock, flags);
 	if (break_state == -1)
-		writeb(MCFUART_UCR_CMDBREAKSTART, port->membase + MCFUART_UCR);
+		pete_writeb("drivers/tty/serial/mcf.c:140", MCFUART_UCR_CMDBREAKSTART, port->membase + MCFUART_UCR);
 	else
-		writeb(MCFUART_UCR_CMDBREAKSTOP, port->membase + MCFUART_UCR);
+		pete_writeb("drivers/tty/serial/mcf.c:142", MCFUART_UCR_CMDBREAKSTOP, port->membase + MCFUART_UCR);
 	spin_unlock_irqrestore(&port->lock, flags);
 }
 
@@ -153,16 +153,16 @@ static int mcf_startup(struct uart_port *port)
 	spin_lock_irqsave(&port->lock, flags);
 
 	/* Reset UART, get it into known state... */
-	writeb(MCFUART_UCR_CMDRESETRX, port->membase + MCFUART_UCR);
-	writeb(MCFUART_UCR_CMDRESETTX, port->membase + MCFUART_UCR);
+	pete_writeb("drivers/tty/serial/mcf.c:156", MCFUART_UCR_CMDRESETRX, port->membase + MCFUART_UCR);
+	pete_writeb("drivers/tty/serial/mcf.c:157", MCFUART_UCR_CMDRESETTX, port->membase + MCFUART_UCR);
 
 	/* Enable the UART transmitter and receiver */
-	writeb(MCFUART_UCR_RXENABLE | MCFUART_UCR_TXENABLE,
+	pete_writeb("drivers/tty/serial/mcf.c:160", MCFUART_UCR_RXENABLE | MCFUART_UCR_TXENABLE,
 		port->membase + MCFUART_UCR);
 
 	/* Enable RX interrupts now */
 	pp->imr = MCFUART_UIR_RXREADY;
-	writeb(pp->imr, port->membase + MCFUART_UIMR);
+	pete_writeb("drivers/tty/serial/mcf.c:165", pp->imr, port->membase + MCFUART_UIMR);
 
 	spin_unlock_irqrestore(&port->lock, flags);
 
@@ -180,11 +180,11 @@ static void mcf_shutdown(struct uart_port *port)
 
 	/* Disable all interrupts now */
 	pp->imr = 0;
-	writeb(pp->imr, port->membase + MCFUART_UIMR);
+	pete_writeb("drivers/tty/serial/mcf.c:183", pp->imr, port->membase + MCFUART_UIMR);
 
 	/* Disable UART transmitter and receiver */
-	writeb(MCFUART_UCR_CMDRESETRX, port->membase + MCFUART_UCR);
-	writeb(MCFUART_UCR_CMDRESETTX, port->membase + MCFUART_UCR);
+	pete_writeb("drivers/tty/serial/mcf.c:186", MCFUART_UCR_CMDRESETRX, port->membase + MCFUART_UCR);
+	pete_writeb("drivers/tty/serial/mcf.c:187", MCFUART_UCR_CMDRESETTX, port->membase + MCFUART_UCR);
 
 	spin_unlock_irqrestore(&port->lock, flags);
 }
@@ -259,19 +259,19 @@ static void mcf_set_termios(struct uart_port *port, struct ktermios *termios,
 	}
 
 	uart_update_timeout(port, termios->c_cflag, baud);
-	writeb(MCFUART_UCR_CMDRESETRX, port->membase + MCFUART_UCR);
-	writeb(MCFUART_UCR_CMDRESETTX, port->membase + MCFUART_UCR);
-	writeb(MCFUART_UCR_CMDRESETMRPTR, port->membase + MCFUART_UCR);
-	writeb(mr1, port->membase + MCFUART_UMR);
-	writeb(mr2, port->membase + MCFUART_UMR);
-	writeb((baudclk & 0xff00) >> 8, port->membase + MCFUART_UBG1);
-	writeb((baudclk & 0xff), port->membase + MCFUART_UBG2);
+	pete_writeb("drivers/tty/serial/mcf.c:262", MCFUART_UCR_CMDRESETRX, port->membase + MCFUART_UCR);
+	pete_writeb("drivers/tty/serial/mcf.c:263", MCFUART_UCR_CMDRESETTX, port->membase + MCFUART_UCR);
+	pete_writeb("drivers/tty/serial/mcf.c:264", MCFUART_UCR_CMDRESETMRPTR, port->membase + MCFUART_UCR);
+	pete_writeb("drivers/tty/serial/mcf.c:265", mr1, port->membase + MCFUART_UMR);
+	pete_writeb("drivers/tty/serial/mcf.c:266", mr2, port->membase + MCFUART_UMR);
+	pete_writeb("drivers/tty/serial/mcf.c:267", (baudclk & 0xff00) >> 8, port->membase + MCFUART_UBG1);
+	pete_writeb("drivers/tty/serial/mcf.c:268", (baudclk & 0xff), port->membase + MCFUART_UBG2);
 #if defined(CONFIG_M5272)
-	writeb((baudfr & 0x0f), port->membase + MCFUART_UFPD);
+	pete_writeb("drivers/tty/serial/mcf.c:270", (baudfr & 0x0f), port->membase + MCFUART_UFPD);
 #endif
-	writeb(MCFUART_UCSR_RXCLKTIMER | MCFUART_UCSR_TXCLKTIMER,
+	pete_writeb("drivers/tty/serial/mcf.c:272", MCFUART_UCSR_RXCLKTIMER | MCFUART_UCSR_TXCLKTIMER,
 		port->membase + MCFUART_UCSR);
-	writeb(MCFUART_UCR_RXENABLE | MCFUART_UCR_TXENABLE,
+	pete_writeb("drivers/tty/serial/mcf.c:274", MCFUART_UCR_RXENABLE | MCFUART_UCR_TXENABLE,
 		port->membase + MCFUART_UCR);
 	spin_unlock_irqrestore(&port->lock, flags);
 }
@@ -283,13 +283,13 @@ static void mcf_rx_chars(struct mcf_uart *pp)
 	struct uart_port *port = &pp->port;
 	unsigned char status, ch, flag;
 
-	while ((status = readb(port->membase + MCFUART_USR)) & MCFUART_USR_RXREADY) {
-		ch = readb(port->membase + MCFUART_URB);
+	while ((status = pete_readb("drivers/tty/serial/mcf.c:286", port->membase + MCFUART_USR)) & MCFUART_USR_RXREADY) {
+		ch = pete_readb("drivers/tty/serial/mcf.c:287", port->membase + MCFUART_URB);
 		flag = TTY_NORMAL;
 		port->icount.rx++;
 
 		if (status & MCFUART_USR_RXERR) {
-			writeb(MCFUART_UCR_CMDRESETERR,
+			pete_writeb("drivers/tty/serial/mcf.c:292", MCFUART_UCR_CMDRESETERR,
 				port->membase + MCFUART_UCR);
 
 			if (status & MCFUART_USR_RXBREAK) {
@@ -331,16 +331,16 @@ static void mcf_tx_chars(struct mcf_uart *pp)
 
 	if (port->x_char) {
 		/* Send special char - probably flow control */
-		writeb(port->x_char, port->membase + MCFUART_UTB);
+		pete_writeb("drivers/tty/serial/mcf.c:334", port->x_char, port->membase + MCFUART_UTB);
 		port->x_char = 0;
 		port->icount.tx++;
 		return;
 	}
 
-	while (readb(port->membase + MCFUART_USR) & MCFUART_USR_TXREADY) {
+	while (pete_readb("drivers/tty/serial/mcf.c:340", port->membase + MCFUART_USR) & MCFUART_USR_TXREADY) {
 		if (xmit->head == xmit->tail)
 			break;
-		writeb(xmit->buf[xmit->tail], port->membase + MCFUART_UTB);
+		pete_writeb("drivers/tty/serial/mcf.c:343", xmit->buf[xmit->tail], port->membase + MCFUART_UTB);
 		xmit->tail = (xmit->tail + 1) & (UART_XMIT_SIZE -1);
 		port->icount.tx++;
 	}
@@ -350,10 +350,10 @@ static void mcf_tx_chars(struct mcf_uart *pp)
 
 	if (xmit->head == xmit->tail) {
 		pp->imr &= ~MCFUART_UIR_TXREADY;
-		writeb(pp->imr, port->membase + MCFUART_UIMR);
+		pete_writeb("drivers/tty/serial/mcf.c:353", pp->imr, port->membase + MCFUART_UIMR);
 		/* Disable TX to negate RTS automatically */
 		if (port->rs485.flags & SER_RS485_ENABLED)
-			writeb(MCFUART_UCR_TXDISABLE,
+			pete_writeb("drivers/tty/serial/mcf.c:356", MCFUART_UCR_TXDISABLE,
 				port->membase + MCFUART_UCR);
 	}
 }
@@ -367,7 +367,7 @@ static irqreturn_t mcf_interrupt(int irq, void *data)
 	unsigned int isr;
 	irqreturn_t ret = IRQ_NONE;
 
-	isr = readb(port->membase + MCFUART_UISR) & pp->imr;
+	isr = pete_readb("drivers/tty/serial/mcf.c:370", port->membase + MCFUART_UISR) & pp->imr;
 
 	spin_lock(&port->lock);
 	if (isr & MCFUART_UIR_RXREADY) {
@@ -391,7 +391,7 @@ static void mcf_config_port(struct uart_port *port, int flags)
 	port->fifosize = MCFUART_TXFIFOSIZE;
 
 	/* Clear mask, so no surprise interrupts. */
-	writeb(0, port->membase + MCFUART_UIMR);
+	pete_writeb("drivers/tty/serial/mcf.c:394", 0, port->membase + MCFUART_UIMR);
 
 	if (request_irq(port->irq, mcf_interrupt, 0, "UART", port))
 		printk(KERN_ERR "MCF: unable to attach ColdFire UART %d "
@@ -437,8 +437,8 @@ static int mcf_config_rs485(struct uart_port *port, struct serial_rs485 *rs485)
 	unsigned char mr1, mr2;
 
 	/* Get mode registers */
-	mr1 = readb(port->membase + MCFUART_UMR);
-	mr2 = readb(port->membase + MCFUART_UMR);
+	mr1 = pete_readb("drivers/tty/serial/mcf.c:440", port->membase + MCFUART_UMR);
+	mr2 = pete_readb("drivers/tty/serial/mcf.c:441", port->membase + MCFUART_UMR);
 	if (rs485->flags & SER_RS485_ENABLED) {
 		dev_dbg(port->dev, "Setting UART to RS485\n");
 		/* Automatically negate RTS after TX completes */
@@ -447,8 +447,8 @@ static int mcf_config_rs485(struct uart_port *port, struct serial_rs485 *rs485)
 		dev_dbg(port->dev, "Setting UART to RS232\n");
 		mr2 &= ~MCFUART_MR2_TXRTS;
 	}
-	writeb(mr1, port->membase + MCFUART_UMR);
-	writeb(mr2, port->membase + MCFUART_UMR);
+	pete_writeb("drivers/tty/serial/mcf.c:450", mr1, port->membase + MCFUART_UMR);
+	pete_writeb("drivers/tty/serial/mcf.c:451", mr2, port->membase + MCFUART_UMR);
 	port->rs485 = *rs485;
 
 	return 0;
@@ -517,12 +517,12 @@ static void mcf_console_putc(struct console *co, const char c)
 	int i;
 
 	for (i = 0; (i < 0x10000); i++) {
-		if (readb(port->membase + MCFUART_USR) & MCFUART_USR_TXREADY)
+		if (pete_readb("drivers/tty/serial/mcf.c:520", port->membase + MCFUART_USR) & MCFUART_USR_TXREADY)
 			break;
 	}
-	writeb(c, port->membase + MCFUART_UTB);
+	pete_writeb("drivers/tty/serial/mcf.c:523", c, port->membase + MCFUART_UTB);
 	for (i = 0; (i < 0x10000); i++) {
-		if (readb(port->membase + MCFUART_USR) & MCFUART_USR_TXREADY)
+		if (pete_readb("drivers/tty/serial/mcf.c:525", port->membase + MCFUART_USR) & MCFUART_USR_TXREADY)
 			break;
 	}
 }

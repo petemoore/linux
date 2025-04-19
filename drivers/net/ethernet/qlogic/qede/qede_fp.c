@@ -293,7 +293,7 @@ static inline void qede_update_tx_producer(struct qede_tx_queue *txq)
 	 */
 	wmb();
 	barrier();
-	writel(txq->tx_db.raw, txq->doorbell_addr);
+	pete_writel("drivers/net/ethernet/qlogic/qede/qede_fp.c:296", txq->tx_db.raw, txq->doorbell_addr);
 
 	/* Fence required to flush the write combined buffer, since another
 	 * CPU may write to the same doorbell address and data may be lost

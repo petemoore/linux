@@ -29,8 +29,8 @@ int pcibios_map_platform_irq(const struct pci_dev *, u8 slot, u8 pin)
  * Only long word accesses of the PCIC's internal local registers and the
  * configuration registers from the CPU is supported.
  */
-#define PCIC_WRITE(x,v) writel((v), PCI_REG(x))
-#define PCIC_READ(x) readl(PCI_REG(x))
+#define PCIC_WRITE(x,v) pete_writel("arch/sh/drivers/pci/fixups-se7751.c:32", (v), PCI_REG(x))
+#define PCIC_READ(x) pete_readl("arch/sh/drivers/pci/fixups-se7751.c:33", PCI_REG(x))
 
 /*
  * Description:  This function sets up and initializes the pcic, sets

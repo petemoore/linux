@@ -90,28 +90,28 @@ static void imx_keypad_scan_matrix(struct imx_keypad *keypad,
 		 * 3. configure columns as totem-pole to discharge capacitance.
 		 * 4. configure columns as open-drain.
 		 */
-		reg_val = readw(keypad->mmio_base + KPDR);
+		reg_val = pete_readw("drivers/input/keyboard/imx_keypad.c:93", keypad->mmio_base + KPDR);
 		reg_val |= 0xff00;
-		writew(reg_val, keypad->mmio_base + KPDR);
+		pete_writew("drivers/input/keyboard/imx_keypad.c:95", reg_val, keypad->mmio_base + KPDR);
 
-		reg_val = readw(keypad->mmio_base + KPCR);
+		reg_val = pete_readw("drivers/input/keyboard/imx_keypad.c:97", keypad->mmio_base + KPCR);
 		reg_val &= ~((keypad->cols_en_mask & 0xff) << 8);
-		writew(reg_val, keypad->mmio_base + KPCR);
+		pete_writew("drivers/input/keyboard/imx_keypad.c:99", reg_val, keypad->mmio_base + KPCR);
 
 		udelay(2);
 
-		reg_val = readw(keypad->mmio_base + KPCR);
+		reg_val = pete_readw("drivers/input/keyboard/imx_keypad.c:103", keypad->mmio_base + KPCR);
 		reg_val |= (keypad->cols_en_mask & 0xff) << 8;
-		writew(reg_val, keypad->mmio_base + KPCR);
+		pete_writew("drivers/input/keyboard/imx_keypad.c:105", reg_val, keypad->mmio_base + KPCR);
 
 		/*
 		 * 5. Write a single column to 0, others to 1.
 		 * 6. Sample row inputs and save data.
 		 * 7. Repeat steps 2 - 6 for remaining columns.
 		 */
-		reg_val = readw(keypad->mmio_base + KPDR);
+		reg_val = pete_readw("drivers/input/keyboard/imx_keypad.c:112", keypad->mmio_base + KPDR);
 		reg_val &= ~(1 << (8 + col));
-		writew(reg_val, keypad->mmio_base + KPDR);
+		pete_writew("drivers/input/keyboard/imx_keypad.c:114", reg_val, keypad->mmio_base + KPDR);
 
 		/*
 		 * Delay added to avoid propagating the 0 from column to row
@@ -123,7 +123,7 @@ static void imx_keypad_scan_matrix(struct imx_keypad *keypad,
 		 * 1s in matrix_volatile_state[col] means key pressures
 		 * throw data from non enabled rows.
 		 */
-		reg_val = readw(keypad->mmio_base + KPDR);
+		reg_val = pete_readw("drivers/input/keyboard/imx_keypad.c:126", keypad->mmio_base + KPDR);
 		matrix_volatile_state[col] = (~reg_val) & keypad->rows_en_mask;
 	}
 
@@ -131,9 +131,9 @@ static void imx_keypad_scan_matrix(struct imx_keypad *keypad,
 	 * Return in standby mode:
 	 * 9. write 0s to columns
 	 */
-	reg_val = readw(keypad->mmio_base + KPDR);
+	reg_val = pete_readw("drivers/input/keyboard/imx_keypad.c:134", keypad->mmio_base + KPDR);
 	reg_val &= 0x00ff;
-	writew(reg_val, keypad->mmio_base + KPDR);
+	pete_writew("drivers/input/keyboard/imx_keypad.c:136", reg_val, keypad->mmio_base + KPDR);
 }
 
 /*
@@ -255,14 +255,14 @@ static void imx_keypad_check_for_events(struct timer_list *t)
 		 * interrupt for future key presses (clear the KDI
 		 * status bit and its sync chain before that).
 		 */
-		reg_val = readw(keypad->mmio_base + KPSR);
+		reg_val = pete_readw("drivers/input/keyboard/imx_keypad.c:258", keypad->mmio_base + KPSR);
 		reg_val |= KBD_STAT_KPKD | KBD_STAT_KDSC;
-		writew(reg_val, keypad->mmio_base + KPSR);
+		pete_writew("drivers/input/keyboard/imx_keypad.c:260", reg_val, keypad->mmio_base + KPSR);
 
-		reg_val = readw(keypad->mmio_base + KPSR);
+		reg_val = pete_readw("drivers/input/keyboard/imx_keypad.c:262", keypad->mmio_base + KPSR);
 		reg_val |= KBD_STAT_KDIE;
 		reg_val &= ~KBD_STAT_KRIE;
-		writew(reg_val, keypad->mmio_base + KPSR);
+		pete_writew("drivers/input/keyboard/imx_keypad.c:265", reg_val, keypad->mmio_base + KPSR);
 	} else {
 		/*
 		 * Some keys are still pressed. Schedule a rescan in
@@ -273,14 +273,14 @@ static void imx_keypad_check_for_events(struct timer_list *t)
 		mod_timer(&keypad->check_matrix_timer,
 			  jiffies + msecs_to_jiffies(60));
 
-		reg_val = readw(keypad->mmio_base + KPSR);
+		reg_val = pete_readw("drivers/input/keyboard/imx_keypad.c:276", keypad->mmio_base + KPSR);
 		reg_val |= KBD_STAT_KPKR | KBD_STAT_KRSS;
-		writew(reg_val, keypad->mmio_base + KPSR);
+		pete_writew("drivers/input/keyboard/imx_keypad.c:278", reg_val, keypad->mmio_base + KPSR);
 
-		reg_val = readw(keypad->mmio_base + KPSR);
+		reg_val = pete_readw("drivers/input/keyboard/imx_keypad.c:280", keypad->mmio_base + KPSR);
 		reg_val |= KBD_STAT_KRIE;
 		reg_val &= ~KBD_STAT_KDIE;
-		writew(reg_val, keypad->mmio_base + KPSR);
+		pete_writew("drivers/input/keyboard/imx_keypad.c:283", reg_val, keypad->mmio_base + KPSR);
 	}
 }
 
@@ -289,13 +289,13 @@ static irqreturn_t imx_keypad_irq_handler(int irq, void *dev_id)
 	struct imx_keypad *keypad = dev_id;
 	unsigned short reg_val;
 
-	reg_val = readw(keypad->mmio_base + KPSR);
+	reg_val = pete_readw("drivers/input/keyboard/imx_keypad.c:292", keypad->mmio_base + KPSR);
 
 	/* Disable both interrupt types */
 	reg_val &= ~(KBD_STAT_KRIE | KBD_STAT_KDIE);
 	/* Clear interrupts status bits */
 	reg_val |= KBD_STAT_KPKR | KBD_STAT_KPKD;
-	writew(reg_val, keypad->mmio_base + KPSR);
+	pete_writew("drivers/input/keyboard/imx_keypad.c:298", reg_val, keypad->mmio_base + KPSR);
 
 	if (keypad->enabled) {
 		/* The matrix is supposed to be changed */
@@ -317,32 +317,32 @@ static void imx_keypad_config(struct imx_keypad *keypad)
 	 * Include enabled rows in interrupt generation (KPCR[7:0])
 	 * Configure keypad columns as open-drain (KPCR[15:8])
 	 */
-	reg_val = readw(keypad->mmio_base + KPCR);
+	reg_val = pete_readw("drivers/input/keyboard/imx_keypad.c:320", keypad->mmio_base + KPCR);
 	reg_val |= keypad->rows_en_mask & 0xff;		/* rows */
 	reg_val |= (keypad->cols_en_mask & 0xff) << 8;	/* cols */
-	writew(reg_val, keypad->mmio_base + KPCR);
+	pete_writew("drivers/input/keyboard/imx_keypad.c:323", reg_val, keypad->mmio_base + KPCR);
 
 	/* Write 0's to KPDR[15:8] (Colums) */
-	reg_val = readw(keypad->mmio_base + KPDR);
+	reg_val = pete_readw("drivers/input/keyboard/imx_keypad.c:326", keypad->mmio_base + KPDR);
 	reg_val &= 0x00ff;
-	writew(reg_val, keypad->mmio_base + KPDR);
+	pete_writew("drivers/input/keyboard/imx_keypad.c:328", reg_val, keypad->mmio_base + KPDR);
 
 	/* Configure columns as output, rows as input (KDDR[15:0]) */
-	writew(0xff00, keypad->mmio_base + KDDR);
+	pete_writew("drivers/input/keyboard/imx_keypad.c:331", 0xff00, keypad->mmio_base + KDDR);
 
 	/*
 	 * Clear Key Depress and Key Release status bit.
 	 * Clear both synchronizer chain.
 	 */
-	reg_val = readw(keypad->mmio_base + KPSR);
+	reg_val = pete_readw("drivers/input/keyboard/imx_keypad.c:337", keypad->mmio_base + KPSR);
 	reg_val |= KBD_STAT_KPKR | KBD_STAT_KPKD |
 		   KBD_STAT_KDSC | KBD_STAT_KRSS;
-	writew(reg_val, keypad->mmio_base + KPSR);
+	pete_writew("drivers/input/keyboard/imx_keypad.c:340", reg_val, keypad->mmio_base + KPSR);
 
 	/* Enable KDI and disable KRI (avoid false release events). */
 	reg_val |= KBD_STAT_KDIE;
 	reg_val &= ~KBD_STAT_KRIE;
-	writew(reg_val, keypad->mmio_base + KPSR);
+	pete_writew("drivers/input/keyboard/imx_keypad.c:345", reg_val, keypad->mmio_base + KPSR);
 }
 
 static void imx_keypad_inhibit(struct imx_keypad *keypad)
@@ -350,14 +350,14 @@ static void imx_keypad_inhibit(struct imx_keypad *keypad)
 	unsigned short reg_val;
 
 	/* Inhibit KDI and KRI interrupts. */
-	reg_val = readw(keypad->mmio_base + KPSR);
+	reg_val = pete_readw("drivers/input/keyboard/imx_keypad.c:353", keypad->mmio_base + KPSR);
 	reg_val &= ~(KBD_STAT_KRIE | KBD_STAT_KDIE);
 	reg_val |= KBD_STAT_KPKR | KBD_STAT_KPKD;
-	writew(reg_val, keypad->mmio_base + KPSR);
+	pete_writew("drivers/input/keyboard/imx_keypad.c:356", reg_val, keypad->mmio_base + KPSR);
 
 	/* Colums as open drain and disable all rows */
 	reg_val = (keypad->cols_en_mask & 0xff) << 8;
-	writew(reg_val, keypad->mmio_base + KPCR);
+	pete_writew("drivers/input/keyboard/imx_keypad.c:360", reg_val, keypad->mmio_base + KPCR);
 }
 
 static void imx_keypad_close(struct input_dev *dev)
@@ -395,7 +395,7 @@ static int imx_keypad_open(struct input_dev *dev)
 	imx_keypad_config(keypad);
 
 	/* Sanity control, not all the rows must be actived now. */
-	if ((readw(keypad->mmio_base + KPDR) & keypad->rows_en_mask) == 0) {
+	if ((pete_readw("drivers/input/keyboard/imx_keypad.c:398", keypad->mmio_base + KPDR) & keypad->rows_en_mask) == 0) {
 		dev_err(&dev->dev,
 			"too many keys pressed, control pins initialisation\n");
 		goto open_err;
@@ -518,7 +518,7 @@ static int __maybe_unused imx_kbd_noirq_suspend(struct device *dev)
 	struct platform_device *pdev = to_platform_device(dev);
 	struct imx_keypad *kbd = platform_get_drvdata(pdev);
 	struct input_dev *input_dev = kbd->input_dev;
-	unsigned short reg_val = readw(kbd->mmio_base + KPSR);
+	unsigned short reg_val = pete_readw("drivers/input/keyboard/imx_keypad.c:521", kbd->mmio_base + KPSR);
 
 	/* imx kbd can wake up system even clock is disabled */
 	mutex_lock(&input_dev->mutex);
@@ -533,7 +533,7 @@ static int __maybe_unused imx_kbd_noirq_suspend(struct device *dev)
 			reg_val |= KBD_STAT_KRIE;
 		if (reg_val & KBD_STAT_KPKR)
 			reg_val |= KBD_STAT_KDIE;
-		writew(reg_val, kbd->mmio_base + KPSR);
+		pete_writew("drivers/input/keyboard/imx_keypad.c:536", reg_val, kbd->mmio_base + KPSR);
 
 		enable_irq_wake(kbd->irq);
 	}

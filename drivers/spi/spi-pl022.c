@@ -441,12 +441,12 @@ static void internal_cs_control(struct pl022 *pl022, u32 command)
 {
 	u32 tmp;
 
-	tmp = readw(SSP_CSR(pl022->virtbase));
+	tmp = pete_readw("drivers/spi/spi-pl022.c:444", SSP_CSR(pl022->virtbase));
 	if (command == SSP_CHIP_SELECT)
 		tmp &= ~BIT(pl022->cur_cs);
 	else
 		tmp |= BIT(pl022->cur_cs);
-	writew(tmp, SSP_CSR(pl022->virtbase));
+	pete_writew("drivers/spi/spi-pl022.c:449", tmp, SSP_CSR(pl022->virtbase));
 }
 
 static void pl022_cs_control(struct pl022 *pl022, u32 command)
@@ -520,7 +520,7 @@ static void giveback(struct pl022 *pl022)
 	pl022->cur_chip = NULL;
 
 	/* disable the SPI/SSP operation */
-	writew((readw(SSP_CR1(pl022->virtbase)) &
+	pete_writew("drivers/spi/spi-pl022.c:523", (pete_readw("drivers/spi/spi-pl022.c:523", SSP_CR1(pl022->virtbase)) &
 		(~SSP_CR1_MASK_SSE)), SSP_CR1(pl022->virtbase));
 
 	spi_finalize_current_message(pl022->master);
@@ -536,9 +536,9 @@ static int flush(struct pl022 *pl022)
 
 	dev_dbg(&pl022->adev->dev, "flush\n");
 	do {
-		while (readw(SSP_SR(pl022->virtbase)) & SSP_SR_MASK_RNE)
-			readw(SSP_DR(pl022->virtbase));
-	} while ((readw(SSP_SR(pl022->virtbase)) & SSP_SR_MASK_BSY) && limit--);
+		while (pete_readw("drivers/spi/spi-pl022.c:539", SSP_SR(pl022->virtbase)) & SSP_SR_MASK_RNE)
+			pete_readw("drivers/spi/spi-pl022.c:540", SSP_DR(pl022->virtbase));
+	} while ((pete_readw("drivers/spi/spi-pl022.c:541", SSP_SR(pl022->virtbase)) & SSP_SR_MASK_BSY) && limit--);
 
 	pl022->exp_fifo_level = 0;
 
@@ -554,14 +554,14 @@ static void restore_state(struct pl022 *pl022)
 	struct chip_data *chip = pl022->cur_chip;
 
 	if (pl022->vendor->extended_cr)
-		writel(chip->cr0, SSP_CR0(pl022->virtbase));
+		pete_writel("drivers/spi/spi-pl022.c:557", chip->cr0, SSP_CR0(pl022->virtbase));
 	else
-		writew(chip->cr0, SSP_CR0(pl022->virtbase));
-	writew(chip->cr1, SSP_CR1(pl022->virtbase));
-	writew(chip->dmacr, SSP_DMACR(pl022->virtbase));
-	writew(chip->cpsr, SSP_CPSR(pl022->virtbase));
-	writew(DISABLE_ALL_INTERRUPTS, SSP_IMSC(pl022->virtbase));
-	writew(CLEAR_ALL_INTERRUPTS, SSP_ICR(pl022->virtbase));
+		pete_writew("drivers/spi/spi-pl022.c:559", chip->cr0, SSP_CR0(pl022->virtbase));
+	pete_writew("drivers/spi/spi-pl022.c:560", chip->cr1, SSP_CR1(pl022->virtbase));
+	pete_writew("drivers/spi/spi-pl022.c:561", chip->dmacr, SSP_DMACR(pl022->virtbase));
+	pete_writew("drivers/spi/spi-pl022.c:562", chip->cpsr, SSP_CPSR(pl022->virtbase));
+	pete_writew("drivers/spi/spi-pl022.c:563", DISABLE_ALL_INTERRUPTS, SSP_IMSC(pl022->virtbase));
+	pete_writew("drivers/spi/spi-pl022.c:564", CLEAR_ALL_INTERRUPTS, SSP_ICR(pl022->virtbase));
 }
 
 /*
@@ -642,19 +642,19 @@ static void restore_state(struct pl022 *pl022)
 static void load_ssp_default_config(struct pl022 *pl022)
 {
 	if (pl022->vendor->pl023) {
-		writel(DEFAULT_SSP_REG_CR0_ST_PL023, SSP_CR0(pl022->virtbase));
-		writew(DEFAULT_SSP_REG_CR1_ST_PL023, SSP_CR1(pl022->virtbase));
+		pete_writel("drivers/spi/spi-pl022.c:645", DEFAULT_SSP_REG_CR0_ST_PL023, SSP_CR0(pl022->virtbase));
+		pete_writew("drivers/spi/spi-pl022.c:646", DEFAULT_SSP_REG_CR1_ST_PL023, SSP_CR1(pl022->virtbase));
 	} else if (pl022->vendor->extended_cr) {
-		writel(DEFAULT_SSP_REG_CR0_ST, SSP_CR0(pl022->virtbase));
-		writew(DEFAULT_SSP_REG_CR1_ST, SSP_CR1(pl022->virtbase));
+		pete_writel("drivers/spi/spi-pl022.c:648", DEFAULT_SSP_REG_CR0_ST, SSP_CR0(pl022->virtbase));
+		pete_writew("drivers/spi/spi-pl022.c:649", DEFAULT_SSP_REG_CR1_ST, SSP_CR1(pl022->virtbase));
 	} else {
-		writew(DEFAULT_SSP_REG_CR0, SSP_CR0(pl022->virtbase));
-		writew(DEFAULT_SSP_REG_CR1, SSP_CR1(pl022->virtbase));
+		pete_writew("drivers/spi/spi-pl022.c:651", DEFAULT_SSP_REG_CR0, SSP_CR0(pl022->virtbase));
+		pete_writew("drivers/spi/spi-pl022.c:652", DEFAULT_SSP_REG_CR1, SSP_CR1(pl022->virtbase));
 	}
-	writew(DEFAULT_SSP_REG_DMACR, SSP_DMACR(pl022->virtbase));
-	writew(DEFAULT_SSP_REG_CPSR, SSP_CPSR(pl022->virtbase));
-	writew(DISABLE_ALL_INTERRUPTS, SSP_IMSC(pl022->virtbase));
-	writew(CLEAR_ALL_INTERRUPTS, SSP_ICR(pl022->virtbase));
+	pete_writew("drivers/spi/spi-pl022.c:654", DEFAULT_SSP_REG_DMACR, SSP_DMACR(pl022->virtbase));
+	pete_writew("drivers/spi/spi-pl022.c:655", DEFAULT_SSP_REG_CPSR, SSP_CPSR(pl022->virtbase));
+	pete_writew("drivers/spi/spi-pl022.c:656", DISABLE_ALL_INTERRUPTS, SSP_IMSC(pl022->virtbase));
+	pete_writew("drivers/spi/spi-pl022.c:657", CLEAR_ALL_INTERRUPTS, SSP_ICR(pl022->virtbase));
 }
 
 /*
@@ -679,23 +679,23 @@ static void readwriter(struct pl022 *pl022)
 		__func__, pl022->rx, pl022->rx_end, pl022->tx, pl022->tx_end);
 
 	/* Read as much as you can */
-	while ((readw(SSP_SR(pl022->virtbase)) & SSP_SR_MASK_RNE)
+	while ((pete_readw("drivers/spi/spi-pl022.c:682", SSP_SR(pl022->virtbase)) & SSP_SR_MASK_RNE)
 	       && (pl022->rx < pl022->rx_end)) {
 		switch (pl022->read) {
 		case READING_NULL:
-			readw(SSP_DR(pl022->virtbase));
+			pete_readw("drivers/spi/spi-pl022.c:686", SSP_DR(pl022->virtbase));
 			break;
 		case READING_U8:
 			*(u8 *) (pl022->rx) =
-				readw(SSP_DR(pl022->virtbase)) & 0xFFU;
+				pete_readw("drivers/spi/spi-pl022.c:690", SSP_DR(pl022->virtbase)) & 0xFFU;
 			break;
 		case READING_U16:
 			*(u16 *) (pl022->rx) =
-				(u16) readw(SSP_DR(pl022->virtbase));
+				(u16) pete_readw("drivers/spi/spi-pl022.c:694", SSP_DR(pl022->virtbase));
 			break;
 		case READING_U32:
 			*(u32 *) (pl022->rx) =
-				readl(SSP_DR(pl022->virtbase));
+				pete_readl("drivers/spi/spi-pl022.c:698", SSP_DR(pl022->virtbase));
 			break;
 		}
 		pl022->rx += (pl022->cur_chip->n_bytes);
@@ -708,16 +708,16 @@ static void readwriter(struct pl022 *pl022)
 	       && (pl022->tx < pl022->tx_end)) {
 		switch (pl022->write) {
 		case WRITING_NULL:
-			writew(0x0, SSP_DR(pl022->virtbase));
+			pete_writew("drivers/spi/spi-pl022.c:711", 0x0, SSP_DR(pl022->virtbase));
 			break;
 		case WRITING_U8:
-			writew(*(u8 *) (pl022->tx), SSP_DR(pl022->virtbase));
+			pete_writew("drivers/spi/spi-pl022.c:714", *(u8 *) (pl022->tx), SSP_DR(pl022->virtbase));
 			break;
 		case WRITING_U16:
-			writew((*(u16 *) (pl022->tx)), SSP_DR(pl022->virtbase));
+			pete_writew("drivers/spi/spi-pl022.c:717", (*(u16 *) (pl022->tx)), SSP_DR(pl022->virtbase));
 			break;
 		case WRITING_U32:
-			writel(*(u32 *) (pl022->tx), SSP_DR(pl022->virtbase));
+			pete_writel("drivers/spi/spi-pl022.c:720", *(u32 *) (pl022->tx), SSP_DR(pl022->virtbase));
 			break;
 		}
 		pl022->tx += (pl022->cur_chip->n_bytes);
@@ -728,23 +728,23 @@ static void readwriter(struct pl022 *pl022)
 		 * clock starts running when you put things into the TX FIFO,
 		 * and then things are continuously clocked into the RX FIFO.
 		 */
-		while ((readw(SSP_SR(pl022->virtbase)) & SSP_SR_MASK_RNE)
+		while ((pete_readw("drivers/spi/spi-pl022.c:731", SSP_SR(pl022->virtbase)) & SSP_SR_MASK_RNE)
 		       && (pl022->rx < pl022->rx_end)) {
 			switch (pl022->read) {
 			case READING_NULL:
-				readw(SSP_DR(pl022->virtbase));
+				pete_readw("drivers/spi/spi-pl022.c:735", SSP_DR(pl022->virtbase));
 				break;
 			case READING_U8:
 				*(u8 *) (pl022->rx) =
-					readw(SSP_DR(pl022->virtbase)) & 0xFFU;
+					pete_readw("drivers/spi/spi-pl022.c:739", SSP_DR(pl022->virtbase)) & 0xFFU;
 				break;
 			case READING_U16:
 				*(u16 *) (pl022->rx) =
-					(u16) readw(SSP_DR(pl022->virtbase));
+					(u16) pete_readw("drivers/spi/spi-pl022.c:743", SSP_DR(pl022->virtbase));
 				break;
 			case READING_U32:
 				*(u32 *) (pl022->rx) =
-					readl(SSP_DR(pl022->virtbase));
+					pete_readl("drivers/spi/spi-pl022.c:747", SSP_DR(pl022->virtbase));
 				break;
 			}
 			pl022->rx += (pl022->cur_chip->n_bytes);
@@ -1257,7 +1257,7 @@ static irqreturn_t pl022_interrupt_handler(int irq, void *dev_id)
 	}
 
 	/* Read the Interrupt Status Register */
-	irq_status = readw(SSP_MIS(pl022->virtbase));
+	irq_status = pete_readw("drivers/spi/spi-pl022.c:1260", SSP_MIS(pl022->virtbase));
 
 	if (unlikely(!irq_status))
 		return IRQ_NONE;
@@ -1273,7 +1273,7 @@ static irqreturn_t pl022_interrupt_handler(int irq, void *dev_id)
 		 * corrupted
 		 */
 		dev_err(&pl022->adev->dev, "FIFO overrun\n");
-		if (readw(SSP_SR(pl022->virtbase)) & SSP_SR_MASK_RFF)
+		if (pete_readw("drivers/spi/spi-pl022.c:1276", SSP_SR(pl022->virtbase)) & SSP_SR_MASK_RFF)
 			dev_err(&pl022->adev->dev,
 				"RXFIFO is full\n");
 
@@ -1282,10 +1282,10 @@ static irqreturn_t pl022_interrupt_handler(int irq, void *dev_id)
 		 * mark message with bad status so it can be
 		 * retried.
 		 */
-		writew(DISABLE_ALL_INTERRUPTS,
+		pete_writew("drivers/spi/spi-pl022.c:1285", DISABLE_ALL_INTERRUPTS,
 		       SSP_IMSC(pl022->virtbase));
-		writew(CLEAR_ALL_INTERRUPTS, SSP_ICR(pl022->virtbase));
-		writew((readw(SSP_CR1(pl022->virtbase)) &
+		pete_writew("drivers/spi/spi-pl022.c:1287", CLEAR_ALL_INTERRUPTS, SSP_ICR(pl022->virtbase));
+		pete_writew("drivers/spi/spi-pl022.c:1288", (pete_readw("drivers/spi/spi-pl022.c:1288", SSP_CR1(pl022->virtbase)) &
 			(~SSP_CR1_MASK_SSE)), SSP_CR1(pl022->virtbase));
 		msg->state = STATE_ERROR;
 
@@ -1298,7 +1298,7 @@ static irqreturn_t pl022_interrupt_handler(int irq, void *dev_id)
 
 	if (pl022->tx == pl022->tx_end) {
 		/* Disable Transmit interrupt, enable receive interrupt */
-		writew((readw(SSP_IMSC(pl022->virtbase)) &
+		pete_writew("drivers/spi/spi-pl022.c:1301", (pete_readw("drivers/spi/spi-pl022.c:1301", SSP_IMSC(pl022->virtbase)) &
 		       ~SSP_IMSC_MASK_TXIM) | SSP_IMSC_MASK_RXIM,
 		       SSP_IMSC(pl022->virtbase));
 	}
@@ -1309,9 +1309,9 @@ static irqreturn_t pl022_interrupt_handler(int irq, void *dev_id)
 	 * At this point, all TX will always be finished.
 	 */
 	if (pl022->rx >= pl022->rx_end) {
-		writew(DISABLE_ALL_INTERRUPTS,
+		pete_writew("drivers/spi/spi-pl022.c:1312", DISABLE_ALL_INTERRUPTS,
 		       SSP_IMSC(pl022->virtbase));
-		writew(CLEAR_ALL_INTERRUPTS, SSP_ICR(pl022->virtbase));
+		pete_writew("drivers/spi/spi-pl022.c:1314", CLEAR_ALL_INTERRUPTS, SSP_ICR(pl022->virtbase));
 		if (unlikely(pl022->rx > pl022->rx_end)) {
 			dev_warn(&pl022->adev->dev, "read %u surplus "
 				 "bytes (did you request an odd "
@@ -1431,7 +1431,7 @@ static void pump_transfers(unsigned long data)
 
 err_config_dma:
 	/* enable all interrupts except RX */
-	writew(ENABLE_ALL_INTERRUPTS & ~SSP_IMSC_MASK_RXIM, SSP_IMSC(pl022->virtbase));
+	pete_writew("drivers/spi/spi-pl022.c:1434", ENABLE_ALL_INTERRUPTS & ~SSP_IMSC_MASK_RXIM, SSP_IMSC(pl022->virtbase));
 }
 
 static void do_interrupt_dma_transfer(struct pl022 *pl022)
@@ -1466,9 +1466,9 @@ static void do_interrupt_dma_transfer(struct pl022 *pl022)
 	}
 err_config_dma:
 	/* Enable SSP, turn on interrupts */
-	writew((readw(SSP_CR1(pl022->virtbase)) | SSP_CR1_MASK_SSE),
+	pete_writew("drivers/spi/spi-pl022.c:1469", (pete_readw("drivers/spi/spi-pl022.c:1469", SSP_CR1(pl022->virtbase)) | SSP_CR1_MASK_SSE),
 	       SSP_CR1(pl022->virtbase));
-	writew(irqflags, SSP_IMSC(pl022->virtbase));
+	pete_writew("drivers/spi/spi-pl022.c:1471", irqflags, SSP_IMSC(pl022->virtbase));
 }
 
 static void print_current_status(struct pl022 *pl022)
@@ -1477,12 +1477,12 @@ static void print_current_status(struct pl022 *pl022)
 	u16 read_cr1, read_dmacr, read_sr;
 
 	if (pl022->vendor->extended_cr)
-		read_cr0 = readl(SSP_CR0(pl022->virtbase));
+		read_cr0 = pete_readl("drivers/spi/spi-pl022.c:1480", SSP_CR0(pl022->virtbase));
 	else
-		read_cr0 = readw(SSP_CR0(pl022->virtbase));
-	read_cr1 = readw(SSP_CR1(pl022->virtbase));
-	read_dmacr = readw(SSP_DMACR(pl022->virtbase));
-	read_sr = readw(SSP_SR(pl022->virtbase));
+		read_cr0 = pete_readw("drivers/spi/spi-pl022.c:1482", SSP_CR0(pl022->virtbase));
+	read_cr1 = pete_readw("drivers/spi/spi-pl022.c:1483", SSP_CR1(pl022->virtbase));
+	read_dmacr = pete_readw("drivers/spi/spi-pl022.c:1484", SSP_DMACR(pl022->virtbase));
+	read_sr = pete_readw("drivers/spi/spi-pl022.c:1485", SSP_SR(pl022->virtbase));
 
 	dev_warn(&pl022->adev->dev, "spi-pl022 CR0: %x\n", read_cr0);
 	dev_warn(&pl022->adev->dev, "spi-pl022 CR1: %x\n", read_cr1);
@@ -1533,7 +1533,7 @@ static void do_polling_transfer(struct pl022 *pl022)
 		}
 		/* Flush FIFOs and enable SSP */
 		flush(pl022);
-		writew((readw(SSP_CR1(pl022->virtbase)) | SSP_CR1_MASK_SSE),
+		pete_writew("drivers/spi/spi-pl022.c:1536", (pete_readw("drivers/spi/spi-pl022.c:1536", SSP_CR1(pl022->virtbase)) | SSP_CR1_MASK_SSE),
 		       SSP_CR1(pl022->virtbase));
 
 		dev_dbg(&pl022->adev->dev, "polling transfer ongoing ...\n");
@@ -1607,7 +1607,7 @@ static int pl022_unprepare_transfer_hardware(struct spi_master *master)
 	struct pl022 *pl022 = spi_master_get_devdata(master);
 
 	/* nothing more to do - disable spi/ssp and power off */
-	writew((readw(SSP_CR1(pl022->virtbase)) &
+	pete_writew("drivers/spi/spi-pl022.c:1610", (pete_readw("drivers/spi/spi-pl022.c:1610", SSP_CR1(pl022->virtbase)) &
 		(~SSP_CR1_MASK_SSE)), SSP_CR1(pl022->virtbase));
 
 	return 0;
@@ -2187,7 +2187,7 @@ static int pl022_probe(struct amba_device *adev, const struct amba_id *id)
 		     (unsigned long)pl022);
 
 	/* Disable SSP */
-	writew((readw(SSP_CR1(pl022->virtbase)) & (~SSP_CR1_MASK_SSE)),
+	pete_writew("drivers/spi/spi-pl022.c:2190", (pete_readw("drivers/spi/spi-pl022.c:2190", SSP_CR1(pl022->virtbase)) & (~SSP_CR1_MASK_SSE)),
 	       SSP_CR1(pl022->virtbase));
 	load_ssp_default_config(pl022);
 

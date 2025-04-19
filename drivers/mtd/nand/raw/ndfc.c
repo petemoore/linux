@@ -61,9 +61,9 @@ static void ndfc_hwcontrol(struct nand_chip *chip, int cmd, unsigned int ctrl)
 		return;
 
 	if (ctrl & NAND_CLE)
-		writel(cmd & 0xFF, ndfc->ndfcbase + NDFC_CMD);
+		pete_writel("drivers/mtd/nand/raw/ndfc.c:64", cmd & 0xFF, ndfc->ndfcbase + NDFC_CMD);
 	else
-		writel(cmd & 0xFF, ndfc->ndfcbase + NDFC_ALE);
+		pete_writel("drivers/mtd/nand/raw/ndfc.c:66", cmd & 0xFF, ndfc->ndfcbase + NDFC_ALE);
 }
 
 static int ndfc_ready(struct nand_chip *chip)

@@ -1820,9 +1820,9 @@ out:
 #define QCOM_ICE_REG_ADVANCED_CONTROL		0x1000
 
 #define sdhci_msm_ice_writel(host, val, reg)	\
-	writel((val), (host)->ice_mem + (reg))
+	pete_writel("drivers/mmc/host/sdhci-msm.c:1823", (val), (host)->ice_mem + (reg))
 #define sdhci_msm_ice_readl(host, reg)	\
-	readl((host)->ice_mem + (reg))
+	pete_readl("drivers/mmc/host/sdhci-msm.c:1825", (host)->ice_mem + (reg))
 
 static bool sdhci_msm_ice_supported(struct sdhci_msm_host *msm_host)
 {

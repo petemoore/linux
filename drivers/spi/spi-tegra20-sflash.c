@@ -139,13 +139,13 @@ static int tegra_sflash_runtime_resume(struct device *dev);
 static inline u32 tegra_sflash_readl(struct tegra_sflash_data *tsd,
 		unsigned long reg)
 {
-	return readl(tsd->base + reg);
+	return pete_readl("drivers/spi/spi-tegra20-sflash.c:142", tsd->base + reg);
 }
 
 static inline void tegra_sflash_writel(struct tegra_sflash_data *tsd,
 		u32 val, unsigned long reg)
 {
-	writel(val, tsd->base + reg);
+	pete_writel("drivers/spi/spi-tegra20-sflash.c:148", val, tsd->base + reg);
 }
 
 static void tegra_sflash_clear_status(struct tegra_sflash_data *tsd)

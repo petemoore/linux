@@ -574,21 +574,21 @@ static void xhci_ssic_port_unused_quirk(struct usb_hcd *hcd, bool suspend)
 				i * SSIC_PORT_CFG2_OFFSET;
 
 		/* Notify SSIC that SSIC profile programming is not done. */
-		val = readl(reg) & ~PROG_DONE;
-		writel(val, reg);
+		val = pete_readl("drivers/usb/host/xhci-pci.c:577", reg) & ~PROG_DONE;
+		pete_writel("drivers/usb/host/xhci-pci.c:578", val, reg);
 
 		/* Mark SSIC port as unused(suspend) or used(resume) */
-		val = readl(reg);
+		val = pete_readl("drivers/usb/host/xhci-pci.c:581", reg);
 		if (suspend)
 			val |= SSIC_PORT_UNUSED;
 		else
 			val &= ~SSIC_PORT_UNUSED;
-		writel(val, reg);
+		pete_writel("drivers/usb/host/xhci-pci.c:586", val, reg);
 
 		/* Notify SSIC that SSIC profile programming is done */
-		val = readl(reg) | PROG_DONE;
-		writel(val, reg);
-		readl(reg);
+		val = pete_readl("drivers/usb/host/xhci-pci.c:589", reg) | PROG_DONE;
+		pete_writel("drivers/usb/host/xhci-pci.c:590", val, reg);
+		pete_readl("drivers/usb/host/xhci-pci.c:591", reg);
 	}
 }
 
@@ -603,18 +603,18 @@ static void xhci_pme_quirk(struct usb_hcd *hcd)
 	u32 val;
 
 	reg = (void __iomem *) xhci->cap_regs + 0x80a4;
-	val = readl(reg);
-	writel(val | BIT(28), reg);
-	readl(reg);
+	val = pete_readl("drivers/usb/host/xhci-pci.c:606", reg);
+	pete_writel("drivers/usb/host/xhci-pci.c:607", val | BIT(28), reg);
+	pete_readl("drivers/usb/host/xhci-pci.c:608", reg);
 }
 
 static void xhci_sparse_control_quirk(struct usb_hcd *hcd)
 {
 	u32 reg;
 
-	reg = readl(hcd->regs + SPARSE_CNTL_ENABLE);
+	reg = pete_readl("drivers/usb/host/xhci-pci.c:615", hcd->regs + SPARSE_CNTL_ENABLE);
 	reg &= ~BIT(SPARSE_DISABLE_BIT);
-	writel(reg, hcd->regs + SPARSE_CNTL_ENABLE);
+	pete_writel("drivers/usb/host/xhci-pci.c:617", reg, hcd->regs + SPARSE_CNTL_ENABLE);
 }
 
 static int xhci_pci_suspend(struct usb_hcd *hcd, bool do_wakeup)

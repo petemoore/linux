@@ -206,7 +206,7 @@ int drm_ati_pcigart_init(struct drm_device *dev, struct drm_ati_pcigart_info *ga
 				pci_gart[gart_idx] = cpu_to_le32(val);
 			} else {
 				offset = gart_idx * sizeof(u32);
-				writel(val, (void __iomem *)map->handle + offset);
+				pete_writel("drivers/gpu/drm/r128/ati_pcigart.c:209", val, (void __iomem *)map->handle + offset);
 			}
 			gart_idx++;
 			page_base += ATI_PCIGART_PAGE_SIZE;

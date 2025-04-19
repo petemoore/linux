@@ -353,7 +353,7 @@ static void venus_set_registers(struct venus_hfi_device *hdev)
 	unsigned int i;
 
 	for (i = 0; i < count; i++)
-		writel(tbl[i].value, hdev->core->base + tbl[i].reg);
+		pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:356", tbl[i].value, hdev->core->base + tbl[i].reg);
 }
 
 static void venus_soft_int(struct venus_hfi_device *hdev)
@@ -366,7 +366,7 @@ static void venus_soft_int(struct venus_hfi_device *hdev)
 	else
 		clear_bit = BIT(CPU_IC_SOFTINT_H2A_SHIFT);
 
-	writel(clear_bit, cpu_ic_base + CPU_IC_SOFTINT);
+	pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:369", clear_bit, cpu_ic_base + CPU_IC_SOFTINT);
 }
 
 static int venus_iface_cmdq_write_nolock(struct venus_hfi_device *hdev,
@@ -454,19 +454,19 @@ static int venus_boot_core(struct venus_hfi_device *hdev)
 	void __iomem *wrapper_base = hdev->core->wrapper_base;
 	int ret = 0;
 
-	writel(BIT(VIDC_CTRL_INIT_CTRL_SHIFT), cpu_cs_base + VIDC_CTRL_INIT);
+	pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:457", BIT(VIDC_CTRL_INIT_CTRL_SHIFT), cpu_cs_base + VIDC_CTRL_INIT);
 	if (IS_V6(hdev->core)) {
-		mask_val = readl(wrapper_base + WRAPPER_INTR_MASK);
+		mask_val = pete_readl("drivers/media/platform/qcom/venus/hfi_venus.c:459", wrapper_base + WRAPPER_INTR_MASK);
 		mask_val &= ~(WRAPPER_INTR_MASK_A2HWD_BASK_V6 |
 			      WRAPPER_INTR_MASK_A2HCPU_MASK);
 	} else {
 		mask_val = WRAPPER_INTR_MASK_A2HVCODEC_MASK;
 	}
-	writel(mask_val, wrapper_base + WRAPPER_INTR_MASK);
-	writel(1, cpu_cs_base + CPU_CS_SCIACMDARG3);
+	pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:465", mask_val, wrapper_base + WRAPPER_INTR_MASK);
+	pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:466", 1, cpu_cs_base + CPU_CS_SCIACMDARG3);
 
 	while (!ctrl_status && count < max_tries) {
-		ctrl_status = readl(cpu_cs_base + CPU_CS_SCIACMDARG0);
+		ctrl_status = pete_readl("drivers/media/platform/qcom/venus/hfi_venus.c:469", cpu_cs_base + CPU_CS_SCIACMDARG0);
 		if ((ctrl_status & CPU_CS_SCIACMDARG0_ERROR_STATUS_MASK) == 4) {
 			dev_err(dev, "invalid setting for UC_REGION\n");
 			ret = -EINVAL;
@@ -481,8 +481,8 @@ static int venus_boot_core(struct venus_hfi_device *hdev)
 		ret = -ETIMEDOUT;
 
 	if (IS_V6(hdev->core)) {
-		writel(0x1, cpu_cs_base + CPU_CS_H2XSOFTINTEN_V6);
-		writel(0x0, cpu_cs_base + CPU_CS_X2RPMH_V6);
+		pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:484", 0x1, cpu_cs_base + CPU_CS_H2XSOFTINTEN_V6);
+		pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:485", 0x0, cpu_cs_base + CPU_CS_X2RPMH_V6);
 	}
 
 	return ret;
@@ -495,7 +495,7 @@ static u32 venus_hwversion(struct venus_hfi_device *hdev)
 	u32 ver;
 	u32 major, minor, step;
 
-	ver = readl(wrapper_base + WRAPPER_HW_VERSION);
+	ver = pete_readl("drivers/media/platform/qcom/venus/hfi_venus.c:498", wrapper_base + WRAPPER_HW_VERSION);
 	major = ver & WRAPPER_HW_VERSION_MAJOR_VERSION_MASK;
 	major = major >> WRAPPER_HW_VERSION_MAJOR_VERSION_SHIFT;
 	minor = ver & WRAPPER_HW_VERSION_MINOR_VERSION_MASK;
@@ -519,12 +519,12 @@ static int venus_run(struct venus_hfi_device *hdev)
 	 */
 	venus_set_registers(hdev);
 
-	writel(hdev->ifaceq_table.da, cpu_cs_base + UC_REGION_ADDR);
-	writel(SHARED_QSIZE, cpu_cs_base + UC_REGION_SIZE);
-	writel(hdev->ifaceq_table.da, cpu_cs_base + CPU_CS_SCIACMDARG2);
-	writel(0x01, cpu_cs_base + CPU_CS_SCIACMDARG1);
+	pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:522", hdev->ifaceq_table.da, cpu_cs_base + UC_REGION_ADDR);
+	pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:523", SHARED_QSIZE, cpu_cs_base + UC_REGION_SIZE);
+	pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:524", hdev->ifaceq_table.da, cpu_cs_base + CPU_CS_SCIACMDARG2);
+	pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:525", 0x01, cpu_cs_base + CPU_CS_SCIACMDARG1);
 	if (hdev->sfr.da)
-		writel(hdev->sfr.da, cpu_cs_base + SFR_ADDR);
+		pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:527", hdev->sfr.da, cpu_cs_base + SFR_ADDR);
 
 	ret = venus_boot_core(hdev);
 	if (ret) {
@@ -549,9 +549,9 @@ static int venus_halt_axi(struct venus_hfi_device *hdev)
 	int ret;
 
 	if (IS_V6(hdev->core)) {
-		writel(0x3, cpu_cs_base + CPU_CS_X2RPMH_V6);
+		pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:552", 0x3, cpu_cs_base + CPU_CS_X2RPMH_V6);
 
-		writel(0x1, aon_base + AON_WRAPPER_MVP_NOC_LPI_CONTROL);
+		pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:554", 0x1, aon_base + AON_WRAPPER_MVP_NOC_LPI_CONTROL);
 		ret = readl_poll_timeout(aon_base + AON_WRAPPER_MVP_NOC_LPI_STATUS,
 					 val,
 					 val & BIT(0),
@@ -561,9 +561,9 @@ static int venus_halt_axi(struct venus_hfi_device *hdev)
 			return -ETIMEDOUT;
 
 		mask_val = (BIT(2) | BIT(1) | BIT(0));
-		writel(mask_val, wrapper_base + WRAPPER_DEBUG_BRIDGE_LPI_CONTROL_V6);
+		pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:564", mask_val, wrapper_base + WRAPPER_DEBUG_BRIDGE_LPI_CONTROL_V6);
 
-		writel(0x00, wrapper_base + WRAPPER_DEBUG_BRIDGE_LPI_CONTROL_V6);
+		pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:566", 0x00, wrapper_base + WRAPPER_DEBUG_BRIDGE_LPI_CONTROL_V6);
 		ret = readl_poll_timeout(wrapper_base + WRAPPER_DEBUG_BRIDGE_LPI_STATUS_V6,
 					 val,
 					 val == 0,
@@ -578,9 +578,9 @@ static int venus_halt_axi(struct venus_hfi_device *hdev)
 	}
 
 	if (IS_V4(hdev->core)) {
-		val = readl(wrapper_base + WRAPPER_CPU_AXI_HALT);
+		val = pete_readl("drivers/media/platform/qcom/venus/hfi_venus.c:581", wrapper_base + WRAPPER_CPU_AXI_HALT);
 		val |= WRAPPER_CPU_AXI_HALT_HALT;
-		writel(val, wrapper_base + WRAPPER_CPU_AXI_HALT);
+		pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:583", val, wrapper_base + WRAPPER_CPU_AXI_HALT);
 
 		ret = readl_poll_timeout(wrapper_base + WRAPPER_CPU_AXI_HALT_STATUS,
 					 val,
@@ -596,9 +596,9 @@ static int venus_halt_axi(struct venus_hfi_device *hdev)
 	}
 
 	/* Halt AXI and AXI IMEM VBIF Access */
-	val = readl(vbif_base + VBIF_AXI_HALT_CTRL0);
+	val = pete_readl("drivers/media/platform/qcom/venus/hfi_venus.c:599", vbif_base + VBIF_AXI_HALT_CTRL0);
 	val |= VBIF_AXI_HALT_CTRL0_HALT_REQ;
-	writel(val, vbif_base + VBIF_AXI_HALT_CTRL0);
+	pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:601", val, vbif_base + VBIF_AXI_HALT_CTRL0);
 
 	/* Request for AXI bus port halt */
 	ret = readl_poll_timeout(vbif_base + VBIF_AXI_HALT_CTRL1, val,
@@ -1103,7 +1103,7 @@ static irqreturn_t venus_isr(struct venus_core *core)
 	cpu_cs_base = hdev->core->cpu_cs_base;
 	wrapper_base = hdev->core->wrapper_base;
 
-	status = readl(wrapper_base + WRAPPER_INTR_STATUS);
+	status = pete_readl("drivers/media/platform/qcom/venus/hfi_venus.c:1106", wrapper_base + WRAPPER_INTR_STATUS);
 	if (IS_V6(core)) {
 		if (status & WRAPPER_INTR_STATUS_A2H_MASK ||
 		    status & WRAPPER_INTR_STATUS_A2HWD_MASK_V6 ||
@@ -1115,9 +1115,9 @@ static irqreturn_t venus_isr(struct venus_core *core)
 		    status & CPU_CS_SCIACMDARG0_INIT_IDLE_MSG_MASK)
 			hdev->irq_status = status;
 	}
-	writel(1, cpu_cs_base + CPU_CS_A2HSOFTINTCLR);
+	pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:1118", 1, cpu_cs_base + CPU_CS_A2HSOFTINTCLR);
 	if (!IS_V6(core))
-		writel(status, wrapper_base + WRAPPER_INTR_CLEAR);
+		pete_writel("drivers/media/platform/qcom/venus/hfi_venus.c:1120", status, wrapper_base + WRAPPER_INTR_CLEAR);
 
 	return IRQ_WAKE_THREAD;
 }
@@ -1485,7 +1485,7 @@ static int venus_suspend_1xx(struct venus_core *core)
 		return -EINVAL;
 	}
 
-	ctrl_status = readl(cpu_cs_base + CPU_CS_SCIACMDARG0);
+	ctrl_status = pete_readl("drivers/media/platform/qcom/venus/hfi_venus.c:1488", cpu_cs_base + CPU_CS_SCIACMDARG0);
 	if (!(ctrl_status & CPU_CS_SCIACMDARG0_PC_READY)) {
 		mutex_unlock(&hdev->lock);
 		return -EINVAL;
@@ -1512,10 +1512,10 @@ static bool venus_cpu_and_video_core_idle(struct venus_hfi_device *hdev)
 	u32 ctrl_status, cpu_status;
 
 	if (IS_V6(hdev->core))
-		cpu_status = readl(wrapper_tz_base + WRAPPER_TZ_CPU_STATUS_V6);
+		cpu_status = pete_readl("drivers/media/platform/qcom/venus/hfi_venus.c:1515", wrapper_tz_base + WRAPPER_TZ_CPU_STATUS_V6);
 	else
-		cpu_status = readl(wrapper_base + WRAPPER_CPU_STATUS);
-	ctrl_status = readl(cpu_cs_base + CPU_CS_SCIACMDARG0);
+		cpu_status = pete_readl("drivers/media/platform/qcom/venus/hfi_venus.c:1517", wrapper_base + WRAPPER_CPU_STATUS);
+	ctrl_status = pete_readl("drivers/media/platform/qcom/venus/hfi_venus.c:1518", cpu_cs_base + CPU_CS_SCIACMDARG0);
 
 	if (cpu_status & WRAPPER_CPU_STATUS_WFI &&
 	    ctrl_status & CPU_CS_SCIACMDARG0_INIT_IDLE_MSG_MASK)
@@ -1532,10 +1532,10 @@ static bool venus_cpu_idle_and_pc_ready(struct venus_hfi_device *hdev)
 	u32 ctrl_status, cpu_status;
 
 	if (IS_V6(hdev->core))
-		cpu_status = readl(wrapper_tz_base + WRAPPER_TZ_CPU_STATUS_V6);
+		cpu_status = pete_readl("drivers/media/platform/qcom/venus/hfi_venus.c:1535", wrapper_tz_base + WRAPPER_TZ_CPU_STATUS_V6);
 	else
-		cpu_status = readl(wrapper_base + WRAPPER_CPU_STATUS);
-	ctrl_status = readl(cpu_cs_base + CPU_CS_SCIACMDARG0);
+		cpu_status = pete_readl("drivers/media/platform/qcom/venus/hfi_venus.c:1537", wrapper_base + WRAPPER_CPU_STATUS);
+	ctrl_status = pete_readl("drivers/media/platform/qcom/venus/hfi_venus.c:1538", cpu_cs_base + CPU_CS_SCIACMDARG0);
 
 	if (cpu_status & WRAPPER_CPU_STATUS_WFI &&
 	    ctrl_status & CPU_CS_SCIACMDARG0_PC_READY)
@@ -1565,7 +1565,7 @@ static int venus_suspend_3xx(struct venus_core *core)
 		return -EINVAL;
 	}
 
-	ctrl_status = readl(cpu_cs_base + CPU_CS_SCIACMDARG0);
+	ctrl_status = pete_readl("drivers/media/platform/qcom/venus/hfi_venus.c:1568", cpu_cs_base + CPU_CS_SCIACMDARG0);
 	if (ctrl_status & CPU_CS_SCIACMDARG0_PC_READY)
 		goto power_off;
 

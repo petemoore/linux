@@ -3506,10 +3506,10 @@ retry_probe:
 	QEDF_INFO(&(qedf->dbg_ctx), QEDF_LOG_DISC,
 	    "Writing %d to primary and secondary BDQ doorbell registers.\n",
 	    qedf->bdq_prod_idx);
-	writew(qedf->bdq_prod_idx, qedf->bdq_primary_prod);
-	readw(qedf->bdq_primary_prod);
-	writew(qedf->bdq_prod_idx, qedf->bdq_secondary_prod);
-	readw(qedf->bdq_secondary_prod);
+	pete_writew("drivers/scsi/qedf/qedf_main.c:3509", qedf->bdq_prod_idx, qedf->bdq_primary_prod);
+	pete_readw("drivers/scsi/qedf/qedf_main.c:3510", qedf->bdq_primary_prod);
+	pete_writew("drivers/scsi/qedf/qedf_main.c:3511", qedf->bdq_prod_idx, qedf->bdq_secondary_prod);
+	pete_readw("drivers/scsi/qedf/qedf_main.c:3512", qedf->bdq_secondary_prod);
 
 	qed_ops->common->set_power_state(qedf->cdev, PCI_D0);
 

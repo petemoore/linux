@@ -74,7 +74,7 @@ static irqreturn_t mtk_disp_rdma_irq_handler(int irq, void *dev_id)
 	struct mtk_disp_rdma *priv = dev_id;
 
 	/* Clear frame completion interrupt */
-	writel(0x0, priv->regs + DISP_REG_RDMA_INT_STATUS);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_disp_rdma.c:77", 0x0, priv->regs + DISP_REG_RDMA_INT_STATUS);
 
 	if (!priv->vblank_cb)
 		return IRQ_NONE;
@@ -88,10 +88,10 @@ static void rdma_update_bits(struct device *dev, unsigned int reg,
 			     unsigned int mask, unsigned int val)
 {
 	struct mtk_disp_rdma *rdma = dev_get_drvdata(dev);
-	unsigned int tmp = readl(rdma->regs + reg);
+	unsigned int tmp = pete_readl("drivers/gpu/drm/mediatek/mtk_disp_rdma.c:91", rdma->regs + reg);
 
 	tmp = (tmp & ~mask) | (val & mask);
-	writel(tmp, rdma->regs + reg);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_disp_rdma.c:94", tmp, rdma->regs + reg);
 }
 
 void mtk_rdma_register_vblank_cb(struct device *dev,
@@ -321,8 +321,8 @@ static int mtk_disp_rdma_probe(struct platform_device *pdev)
 	}
 
 	/* Disable and clear pending interrupts */
-	writel(0x0, priv->regs + DISP_REG_RDMA_INT_ENABLE);
-	writel(0x0, priv->regs + DISP_REG_RDMA_INT_STATUS);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_disp_rdma.c:324", 0x0, priv->regs + DISP_REG_RDMA_INT_ENABLE);
+	pete_writel("drivers/gpu/drm/mediatek/mtk_disp_rdma.c:325", 0x0, priv->regs + DISP_REG_RDMA_INT_STATUS);
 
 	ret = devm_request_irq(dev, irq, mtk_disp_rdma_irq_handler,
 			       IRQF_TRIGGER_NONE, dev_name(dev), priv);

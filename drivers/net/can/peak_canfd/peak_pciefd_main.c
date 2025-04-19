@@ -210,27 +210,27 @@ MODULE_DEVICE_TABLE(pci, peak_pciefd_tbl);
 /* read a 32 bits value from a SYS block register */
 static inline u32 pciefd_sys_readreg(const struct pciefd_board *priv, u16 reg)
 {
-	return readl(priv->reg_base + reg);
+	return pete_readl("drivers/net/can/peak_canfd/peak_pciefd_main.c:213", priv->reg_base + reg);
 }
 
 /* write a 32 bits value into a SYS block register */
 static inline void pciefd_sys_writereg(const struct pciefd_board *priv,
 				       u32 val, u16 reg)
 {
-	writel(val, priv->reg_base + reg);
+	pete_writel("drivers/net/can/peak_canfd/peak_pciefd_main.c:220", val, priv->reg_base + reg);
 }
 
 /* read a 32 bits value from CAN-FD block register */
 static inline u32 pciefd_can_readreg(const struct pciefd_can *priv, u16 reg)
 {
-	return readl(priv->reg_base + reg);
+	return pete_readl("drivers/net/can/peak_canfd/peak_pciefd_main.c:226", priv->reg_base + reg);
 }
 
 /* write a 32 bits value into a CAN-FD block register */
 static inline void pciefd_can_writereg(const struct pciefd_can *priv,
 				       u32 val, u16 reg)
 {
-	writel(val, priv->reg_base + reg);
+	pete_writel("drivers/net/can/peak_canfd/peak_pciefd_main.c:233", val, priv->reg_base + reg);
 }
 
 /* give a channel logical Rx DMA address to the board */

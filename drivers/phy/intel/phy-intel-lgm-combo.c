@@ -132,10 +132,10 @@ static inline void combo_phy_w32_off_mask(void __iomem *base, unsigned int reg,
 {
 	u32 reg_val;
 
-	reg_val = readl(base + reg);
+	reg_val = pete_readl("drivers/phy/intel/phy-intel-lgm-combo.c:135", base + reg);
 	reg_val &= ~mask;
 	reg_val |= val;
-	writel(reg_val, base + reg);
+	pete_writel("drivers/phy/intel/phy-intel-lgm-combo.c:138", reg_val, base + reg);
 }
 
 static int intel_cbphy_iphy_cfg(struct intel_cbphy_iphy *iphy,

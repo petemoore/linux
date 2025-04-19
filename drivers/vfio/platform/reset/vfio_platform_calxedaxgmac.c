@@ -36,14 +36,14 @@
 
 static inline void xgmac_mac_disable(void __iomem *ioaddr)
 {
-	u32 value = readl(ioaddr + XGMAC_DMA_CONTROL);
+	u32 value = pete_readl("drivers/vfio/platform/reset/vfio_platform_calxedaxgmac.c:39", ioaddr + XGMAC_DMA_CONTROL);
 
 	value &= ~(DMA_CONTROL_ST | DMA_CONTROL_SR);
-	writel(value, ioaddr + XGMAC_DMA_CONTROL);
+	pete_writel("drivers/vfio/platform/reset/vfio_platform_calxedaxgmac.c:42", value, ioaddr + XGMAC_DMA_CONTROL);
 
-	value = readl(ioaddr + XGMAC_CONTROL);
+	value = pete_readl("drivers/vfio/platform/reset/vfio_platform_calxedaxgmac.c:44", ioaddr + XGMAC_CONTROL);
 	value &= ~(MAC_ENABLE_TX | MAC_ENABLE_RX);
-	writel(value, ioaddr + XGMAC_CONTROL);
+	pete_writel("drivers/vfio/platform/reset/vfio_platform_calxedaxgmac.c:46", value, ioaddr + XGMAC_CONTROL);
 }
 
 static int vfio_platform_calxedaxgmac_reset(struct vfio_platform_device *vdev)
@@ -58,7 +58,7 @@ static int vfio_platform_calxedaxgmac_reset(struct vfio_platform_device *vdev)
 	}
 
 	/* disable IRQ */
-	writel(0, reg->ioaddr + XGMAC_DMA_INTR_ENA);
+	pete_writel("drivers/vfio/platform/reset/vfio_platform_calxedaxgmac.c:61", 0, reg->ioaddr + XGMAC_DMA_INTR_ENA);
 
 	/* Disable the MAC core */
 	xgmac_mac_disable(reg->ioaddr);

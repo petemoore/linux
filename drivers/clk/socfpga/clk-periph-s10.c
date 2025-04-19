@@ -23,7 +23,7 @@ static unsigned long n5x_clk_peri_c_clk_recalc_rate(struct clk_hw *hwclk,
 	unsigned long shift = socfpgaclk->shift;
 	u32 val;
 
-	val = readl(socfpgaclk->hw.reg);
+	val = pete_readl("drivers/clk/socfpga/clk-periph-s10.c:26", socfpgaclk->hw.reg);
 	val &= (0x1f << shift);
 	div = (val >> shift) + 1;
 
@@ -37,7 +37,7 @@ static unsigned long clk_peri_c_clk_recalc_rate(struct clk_hw *hwclk,
 	unsigned long div = 1;
 	u32 val;
 
-	val = readl(socfpgaclk->hw.reg);
+	val = pete_readl("drivers/clk/socfpga/clk-periph-s10.c:40", socfpgaclk->hw.reg);
 	val &= GENMASK(SWCTRLBTCLKSEN_SHIFT - 1, 0);
 	parent_rate /= val;
 
@@ -54,7 +54,7 @@ static unsigned long clk_peri_cnt_clk_recalc_rate(struct clk_hw *hwclk,
 		div = socfpgaclk->fixed_div;
 	} else {
 		if (socfpgaclk->hw.reg)
-			div = ((readl(socfpgaclk->hw.reg) & 0x7ff) + 1);
+			div = ((pete_readl("drivers/clk/socfpga/clk-periph-s10.c:57", socfpgaclk->hw.reg) & 0x7ff) + 1);
 	}
 
 	return parent_rate / div;
@@ -69,14 +69,14 @@ static u8 clk_periclk_get_parent(struct clk_hw *hwclk)
 	/* handle the bypass first */
 	if (socfpgaclk->bypass_reg) {
 		mask = (0x1 << socfpgaclk->bypass_shift);
-		parent = ((readl(socfpgaclk->bypass_reg) & mask) >>
+		parent = ((pete_readl("drivers/clk/socfpga/clk-periph-s10.c:72", socfpgaclk->bypass_reg) & mask) >>
 			   socfpgaclk->bypass_shift);
 		if (parent)
 			return parent;
 	}
 
 	if (socfpgaclk->hw.reg) {
-		clk_src = readl(socfpgaclk->hw.reg);
+		clk_src = pete_readl("drivers/clk/socfpga/clk-periph-s10.c:79", socfpgaclk->hw.reg);
 		parent = (clk_src >> CLK_MGR_FREE_SHIFT) &
 			  CLK_MGR_FREE_MASK;
 	}

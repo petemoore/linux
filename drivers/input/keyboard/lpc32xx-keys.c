@@ -75,7 +75,7 @@ static void lpc32xx_mod_states(struct lpc32xx_kscan_drv *kscandat, int col)
 	unsigned row, changed, scancode, keycode;
 	u8 key;
 
-	key = readl(LPC32XX_KS_DATA(kscandat->kscan_base, col));
+	key = pete_readl("drivers/input/keyboard/lpc32xx-keys.c:78", LPC32XX_KS_DATA(kscandat->kscan_base, col));
 	changed = key ^ kscandat->lastkeystates[col];
 	kscandat->lastkeystates[col] = key;
 
@@ -99,7 +99,7 @@ static irqreturn_t lpc32xx_kscan_irq(int irq, void *dev_id)
 	for (i = 0; i < kscandat->matrix_sz; i++)
 		lpc32xx_mod_states(kscandat, i);
 
-	writel(1, LPC32XX_KS_IRQ(kscandat->kscan_base));
+	pete_writel("drivers/input/keyboard/lpc32xx-keys.c:102", 1, LPC32XX_KS_IRQ(kscandat->kscan_base));
 
 	input_sync(kscandat->input);
 
@@ -115,7 +115,7 @@ static int lpc32xx_kscan_open(struct input_dev *dev)
 	if (error)
 		return error;
 
-	writel(1, LPC32XX_KS_IRQ(kscandat->kscan_base));
+	pete_writel("drivers/input/keyboard/lpc32xx-keys.c:118", 1, LPC32XX_KS_IRQ(kscandat->kscan_base));
 
 	return 0;
 }
@@ -124,7 +124,7 @@ static void lpc32xx_kscan_close(struct input_dev *dev)
 {
 	struct lpc32xx_kscan_drv *kscandat = input_get_drvdata(dev);
 
-	writel(1, LPC32XX_KS_IRQ(kscandat->kscan_base));
+	pete_writel("drivers/input/keyboard/lpc32xx-keys.c:127", 1, LPC32XX_KS_IRQ(kscandat->kscan_base));
 	clk_disable_unprepare(kscandat->clk);
 }
 
@@ -237,13 +237,13 @@ static int lpc32xx_kscan_probe(struct platform_device *pdev)
 	if (error)
 		return error;
 
-	writel(kscandat->deb_clks, LPC32XX_KS_DEB(kscandat->kscan_base));
-	writel(kscandat->scan_delay, LPC32XX_KS_SCAN_CTL(kscandat->kscan_base));
-	writel(LPC32XX_KSCAN_FTST_USE32K_CLK,
+	pete_writel("drivers/input/keyboard/lpc32xx-keys.c:240", kscandat->deb_clks, LPC32XX_KS_DEB(kscandat->kscan_base));
+	pete_writel("drivers/input/keyboard/lpc32xx-keys.c:241", kscandat->scan_delay, LPC32XX_KS_SCAN_CTL(kscandat->kscan_base));
+	pete_writel("drivers/input/keyboard/lpc32xx-keys.c:242", LPC32XX_KSCAN_FTST_USE32K_CLK,
 	       LPC32XX_KS_FAST_TST(kscandat->kscan_base));
-	writel(kscandat->matrix_sz,
+	pete_writel("drivers/input/keyboard/lpc32xx-keys.c:244", kscandat->matrix_sz,
 	       LPC32XX_KS_MATRIX_DIM(kscandat->kscan_base));
-	writel(1, LPC32XX_KS_IRQ(kscandat->kscan_base));
+	pete_writel("drivers/input/keyboard/lpc32xx-keys.c:246", 1, LPC32XX_KS_IRQ(kscandat->kscan_base));
 	clk_disable_unprepare(kscandat->clk);
 
 	error = devm_request_irq(&pdev->dev, irq, lpc32xx_kscan_irq, 0,
@@ -275,7 +275,7 @@ static int lpc32xx_kscan_suspend(struct device *dev)
 
 	if (input_device_enabled(input)) {
 		/* Clear IRQ and disable clock */
-		writel(1, LPC32XX_KS_IRQ(kscandat->kscan_base));
+		pete_writel("drivers/input/keyboard/lpc32xx-keys.c:278", 1, LPC32XX_KS_IRQ(kscandat->kscan_base));
 		clk_disable_unprepare(kscandat->clk);
 	}
 
@@ -296,7 +296,7 @@ static int lpc32xx_kscan_resume(struct device *dev)
 		/* Enable clock and clear IRQ */
 		retval = clk_prepare_enable(kscandat->clk);
 		if (retval == 0)
-			writel(1, LPC32XX_KS_IRQ(kscandat->kscan_base));
+			pete_writel("drivers/input/keyboard/lpc32xx-keys.c:299", 1, LPC32XX_KS_IRQ(kscandat->kscan_base));
 	}
 
 	mutex_unlock(&input->mutex);

@@ -321,10 +321,10 @@ clk_rdesc_set(struct r9a06g032_priv *clocks,
 	      u16 one, unsigned int on)
 {
 	u32 __iomem *reg = clocks->reg + (4 * (one >> 5));
-	u32 val = readl(reg);
+	u32 val = pete_readl("drivers/clk/renesas/r9a06g032-clocks.c:324", reg);
 
 	val = (val & ~(1U << (one & 0x1f))) | ((!!on) << (one & 0x1f));
-	writel(val, reg);
+	pete_writel("drivers/clk/renesas/r9a06g032-clocks.c:327", val, reg);
 }
 
 static int
@@ -332,7 +332,7 @@ clk_rdesc_get(struct r9a06g032_priv *clocks,
 	      uint16_t one)
 {
 	u32 __iomem *reg = clocks->reg + (4 * (one >> 5));
-	u32 val = readl(reg);
+	u32 val = pete_readl("drivers/clk/renesas/r9a06g032-clocks.c:335", reg);
 
 	return !!(val & (1U << (one & 0x1f)));
 }
@@ -557,7 +557,7 @@ r9a06g032_div_recalc_rate(struct clk_hw *hw,
 {
 	struct r9a06g032_clk_div *clk = to_r9a06g032_div(hw);
 	u32 __iomem *reg = clk->clocks->reg + (4 * clk->reg);
-	u32 div = readl(reg);
+	u32 div = pete_readl("drivers/clk/renesas/r9a06g032-clocks.c:560", reg);
 
 	if (div < clk->min)
 		div = clk->min;
@@ -656,7 +656,7 @@ r9a06g032_div_set_rate(struct clk_hw *hw,
 	 * TODO: Find whether this callback is sleepable, in case
 	 * the hardware /does/ require some sort of spinloop here.
 	 */
-	writel(div | BIT(31), reg);
+	pete_writel("drivers/clk/renesas/r9a06g032-clocks.c:659", div | BIT(31), reg);
 
 	return 0;
 }

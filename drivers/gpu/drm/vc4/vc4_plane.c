@@ -1388,7 +1388,7 @@ u32 vc4_plane_write_dlist(struct drm_plane *plane, u32 __iomem *dlist)
 
 	/* Can't memcpy_toio() because it needs to be 32-bit writes. */
 	for (i = 0; i < vc4_state->dlist_count; i++)
-		writel(vc4_state->dlist[i], &dlist[i]);
+		pete_writel("drivers/gpu/drm/vc4/vc4_plane.c:1391", vc4_state->dlist[i], &dlist[i]);
 
 	return vc4_state->dlist_count;
 }
@@ -1420,7 +1420,7 @@ void vc4_plane_async_set_fb(struct drm_plane *plane, struct drm_framebuffer *fb)
 	 * scanout will start from this address as soon as the FIFO
 	 * needs to refill with pixels.
 	 */
-	writel(addr, &vc4_state->hw_dlist[vc4_state->ptr0_offset]);
+	pete_writel("drivers/gpu/drm/vc4/vc4_plane.c:1423", addr, &vc4_state->hw_dlist[vc4_state->ptr0_offset]);
 
 	/* Also update the CPU-side dlist copy, so that any later
 	 * atomic updates that don't do a new modeset on our plane
@@ -1491,11 +1491,11 @@ static void vc4_plane_atomic_async_update(struct drm_plane *plane,
 	 * because that would smash the context data that the HVS is
 	 * currently using.
 	 */
-	writel(vc4_state->dlist[vc4_state->pos0_offset],
+	pete_writel("drivers/gpu/drm/vc4/vc4_plane.c:1494", vc4_state->dlist[vc4_state->pos0_offset],
 	       &vc4_state->hw_dlist[vc4_state->pos0_offset]);
-	writel(vc4_state->dlist[vc4_state->pos2_offset],
+	pete_writel("drivers/gpu/drm/vc4/vc4_plane.c:1496", vc4_state->dlist[vc4_state->pos2_offset],
 	       &vc4_state->hw_dlist[vc4_state->pos2_offset]);
-	writel(vc4_state->dlist[vc4_state->ptr0_offset],
+	pete_writel("drivers/gpu/drm/vc4/vc4_plane.c:1498", vc4_state->dlist[vc4_state->ptr0_offset],
 	       &vc4_state->hw_dlist[vc4_state->ptr0_offset]);
 }
 

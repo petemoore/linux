@@ -327,22 +327,22 @@ static void geni_se_select_gpi_mode(struct geni_se *se)
 
 	geni_se_irq_clear(se);
 
-	writel(0, se->base + SE_IRQ_EN);
+	pete_writel("drivers/soc/qcom/qcom-geni-se.c:330", 0, se->base + SE_IRQ_EN);
 
-	val = readl(se->base + SE_GENI_S_IRQ_EN);
+	val = pete_readl("drivers/soc/qcom/qcom-geni-se.c:332", se->base + SE_GENI_S_IRQ_EN);
 	val &= ~S_CMD_DONE_EN;
-	writel(val, se->base + SE_GENI_S_IRQ_EN);
+	pete_writel("drivers/soc/qcom/qcom-geni-se.c:334", val, se->base + SE_GENI_S_IRQ_EN);
 
-	val = readl(se->base + SE_GENI_M_IRQ_EN);
+	val = pete_readl("drivers/soc/qcom/qcom-geni-se.c:336", se->base + SE_GENI_M_IRQ_EN);
 	val &= ~(M_CMD_DONE_EN | M_TX_FIFO_WATERMARK_EN |
 		 M_RX_FIFO_WATERMARK_EN | M_RX_FIFO_LAST_EN);
-	writel(val, se->base + SE_GENI_M_IRQ_EN);
+	pete_writel("drivers/soc/qcom/qcom-geni-se.c:339", val, se->base + SE_GENI_M_IRQ_EN);
 
-	writel(GENI_DMA_MODE_EN, se->base + SE_GENI_DMA_MODE_EN);
+	pete_writel("drivers/soc/qcom/qcom-geni-se.c:341", GENI_DMA_MODE_EN, se->base + SE_GENI_DMA_MODE_EN);
 
-	val = readl(se->base + SE_GSI_EVENT_EN);
+	val = pete_readl("drivers/soc/qcom/qcom-geni-se.c:343", se->base + SE_GSI_EVENT_EN);
 	val |= (DMA_RX_EVENT_EN | DMA_TX_EVENT_EN | GENI_M_EVENT_EN | GENI_S_EVENT_EN);
-	writel(val, se->base + SE_GSI_EVENT_EN);
+	pete_writel("drivers/soc/qcom/qcom-geni-se.c:345", val, se->base + SE_GSI_EVENT_EN);
 }
 
 /**
@@ -701,7 +701,7 @@ int geni_se_tx_dma_prep(struct geni_se *se, void *buf, size_t len,
 	writel_relaxed(lower_32_bits(*iova), se->base + SE_DMA_TX_PTR_L);
 	writel_relaxed(upper_32_bits(*iova), se->base + SE_DMA_TX_PTR_H);
 	writel_relaxed(GENI_SE_DMA_EOT_BUF, se->base + SE_DMA_TX_ATTR);
-	writel(len, se->base + SE_DMA_TX_LEN);
+	pete_writel("drivers/soc/qcom/qcom-geni-se.c:704", len, se->base + SE_DMA_TX_LEN);
 	return 0;
 }
 EXPORT_SYMBOL(geni_se_tx_dma_prep);
@@ -738,7 +738,7 @@ int geni_se_rx_dma_prep(struct geni_se *se, void *buf, size_t len,
 	writel_relaxed(upper_32_bits(*iova), se->base + SE_DMA_RX_PTR_H);
 	/* RX does not have EOT buffer type bit. So just reset RX_ATTR */
 	writel_relaxed(0, se->base + SE_DMA_RX_ATTR);
-	writel(len, se->base + SE_DMA_RX_LEN);
+	pete_writel("drivers/soc/qcom/qcom-geni-se.c:741", len, se->base + SE_DMA_RX_LEN);
 	return 0;
 }
 EXPORT_SYMBOL(geni_se_rx_dma_prep);

@@ -46,12 +46,12 @@ static void clint_send_ipi(const struct cpumask *target)
 	unsigned int cpu;
 
 	for_each_cpu(cpu, target)
-		writel(1, clint_ipi_base + cpuid_to_hartid_map(cpu));
+		pete_writel("drivers/clocksource/timer-clint.c:49", 1, clint_ipi_base + cpuid_to_hartid_map(cpu));
 }
 
 static void clint_clear_ipi(void)
 {
-	writel(0, clint_ipi_base + cpuid_to_hartid_map(smp_processor_id()));
+	pete_writel("drivers/clocksource/timer-clint.c:54", 0, clint_ipi_base + cpuid_to_hartid_map(smp_processor_id()));
 }
 
 static struct riscv_ipi_ops clint_ipi_ops = {

@@ -2827,14 +2827,14 @@ static s32 e1000_read_phy_reg_ex(struct e1000_hw *hw, u32 reg_addr,
 				(INTEL_CE_GBE_MDIC_OP_READ) |
 				(INTEL_CE_GBE_MDIC_GO));
 
-			writel(mdic, E1000_MDIO_CMD);
+			pete_writel("drivers/net/ethernet/intel/e1000/e1000_hw.c:2830", mdic, E1000_MDIO_CMD);
 
 			/* Poll the ready bit to see if the MDI read
 			 * completed
 			 */
 			for (i = 0; i < 64; i++) {
 				udelay(50);
-				mdic = readl(E1000_MDIO_CMD);
+				mdic = pete_readl("drivers/net/ethernet/intel/e1000/e1000_hw.c:2837", E1000_MDIO_CMD);
 				if (!(mdic & INTEL_CE_GBE_MDIC_GO))
 					break;
 			}
@@ -2844,7 +2844,7 @@ static s32 e1000_read_phy_reg_ex(struct e1000_hw *hw, u32 reg_addr,
 				return -E1000_ERR_PHY;
 			}
 
-			mdic = readl(E1000_MDIO_STS);
+			mdic = pete_readl("drivers/net/ethernet/intel/e1000/e1000_hw.c:2847", E1000_MDIO_STS);
 			if (mdic & INTEL_CE_GBE_MDIC_READ_ERROR) {
 				e_dbg("MDI Read Error\n");
 				return -E1000_ERR_PHY;
@@ -2967,14 +2967,14 @@ static s32 e1000_write_phy_reg_ex(struct e1000_hw *hw, u32 reg_addr,
 				(INTEL_CE_GBE_MDIC_OP_WRITE) |
 				(INTEL_CE_GBE_MDIC_GO));
 
-			writel(mdic, E1000_MDIO_CMD);
+			pete_writel("drivers/net/ethernet/intel/e1000/e1000_hw.c:2970", mdic, E1000_MDIO_CMD);
 
 			/* Poll the ready bit to see if the MDI read
 			 * completed
 			 */
 			for (i = 0; i < 640; i++) {
 				udelay(5);
-				mdic = readl(E1000_MDIO_CMD);
+				mdic = pete_readl("drivers/net/ethernet/intel/e1000/e1000_hw.c:2977", E1000_MDIO_CMD);
 				if (!(mdic & INTEL_CE_GBE_MDIC_GO))
 					break;
 			}

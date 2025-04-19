@@ -796,14 +796,14 @@ static void __init sun8i_a33_ccu_setup(struct device_node *node)
 	}
 
 	/* Force the PLL-Audio-1x divider to 1 */
-	val = readl(reg + SUN8I_A33_PLL_AUDIO_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun8i-a33.c:799", reg + SUN8I_A33_PLL_AUDIO_REG);
 	val &= ~GENMASK(19, 16);
-	writel(val | (0 << 16), reg + SUN8I_A33_PLL_AUDIO_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun8i-a33.c:801", val | (0 << 16), reg + SUN8I_A33_PLL_AUDIO_REG);
 
 	/* Force PLL-MIPI to MIPI mode */
-	val = readl(reg + SUN8I_A33_PLL_MIPI_REG);
+	val = pete_readl("drivers/clk/sunxi-ng/ccu-sun8i-a33.c:804", reg + SUN8I_A33_PLL_MIPI_REG);
 	val &= ~BIT(16);
-	writel(val, reg + SUN8I_A33_PLL_MIPI_REG);
+	pete_writel("drivers/clk/sunxi-ng/ccu-sun8i-a33.c:806", val, reg + SUN8I_A33_PLL_MIPI_REG);
 
 	of_sunxi_ccu_probe(node, reg, &sun8i_a33_ccu_desc);
 

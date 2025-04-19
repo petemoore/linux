@@ -30,25 +30,25 @@ static void imx8m_soft_reset(struct hantro_dev *vpu, u32 reset_bits)
 	u32 val;
 
 	/* Assert */
-	val = readl(vpu->ctrl_base + CTRL_SOFT_RESET);
+	val = pete_readl("drivers/staging/media/hantro/imx8m_vpu_hw.c:33", vpu->ctrl_base + CTRL_SOFT_RESET);
 	val &= ~reset_bits;
-	writel(val, vpu->ctrl_base + CTRL_SOFT_RESET);
+	pete_writel("drivers/staging/media/hantro/imx8m_vpu_hw.c:35", val, vpu->ctrl_base + CTRL_SOFT_RESET);
 
 	udelay(2);
 
 	/* Release */
-	val = readl(vpu->ctrl_base + CTRL_SOFT_RESET);
+	val = pete_readl("drivers/staging/media/hantro/imx8m_vpu_hw.c:40", vpu->ctrl_base + CTRL_SOFT_RESET);
 	val |= reset_bits;
-	writel(val, vpu->ctrl_base + CTRL_SOFT_RESET);
+	pete_writel("drivers/staging/media/hantro/imx8m_vpu_hw.c:42", val, vpu->ctrl_base + CTRL_SOFT_RESET);
 }
 
 static void imx8m_clk_enable(struct hantro_dev *vpu, u32 clock_bits)
 {
 	u32 val;
 
-	val = readl(vpu->ctrl_base + CTRL_CLOCK_ENABLE);
+	val = pete_readl("drivers/staging/media/hantro/imx8m_vpu_hw.c:49", vpu->ctrl_base + CTRL_CLOCK_ENABLE);
 	val |= clock_bits;
-	writel(val, vpu->ctrl_base + CTRL_CLOCK_ENABLE);
+	pete_writel("drivers/staging/media/hantro/imx8m_vpu_hw.c:51", val, vpu->ctrl_base + CTRL_CLOCK_ENABLE);
 }
 
 static int imx8mq_runtime_resume(struct hantro_dev *vpu)
@@ -65,9 +65,9 @@ static int imx8mq_runtime_resume(struct hantro_dev *vpu)
 	imx8m_clk_enable(vpu, CLOCK_G1 | CLOCK_G2);
 
 	/* Set values of the fuse registers */
-	writel(0xffffffff, vpu->ctrl_base + CTRL_G1_DEC_FUSE);
-	writel(0xffffffff, vpu->ctrl_base + CTRL_G1_PP_FUSE);
-	writel(0xffffffff, vpu->ctrl_base + CTRL_G2_DEC_FUSE);
+	pete_writel("drivers/staging/media/hantro/imx8m_vpu_hw.c:68", 0xffffffff, vpu->ctrl_base + CTRL_G1_DEC_FUSE);
+	pete_writel("drivers/staging/media/hantro/imx8m_vpu_hw.c:69", 0xffffffff, vpu->ctrl_base + CTRL_G1_PP_FUSE);
+	pete_writel("drivers/staging/media/hantro/imx8m_vpu_hw.c:70", 0xffffffff, vpu->ctrl_base + CTRL_G2_DEC_FUSE);
 
 	clk_bulk_disable_unprepare(vpu->variant->num_clocks, vpu->clocks);
 

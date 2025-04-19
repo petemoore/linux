@@ -43,10 +43,10 @@
 
 void snd_msnd_init_queue(void __iomem *base, int start, int size)
 {
-	writew(PCTODSP_BASED(start), base + JQS_wStart);
-	writew(PCTODSP_OFFSET(size) - 1, base + JQS_wSize);
-	writew(0, base + JQS_wHead);
-	writew(0, base + JQS_wTail);
+	pete_writew("sound/isa/msnd/msnd.c:46", PCTODSP_BASED(start), base + JQS_wStart);
+	pete_writew("sound/isa/msnd/msnd.c:47", PCTODSP_OFFSET(size) - 1, base + JQS_wSize);
+	pete_writew("sound/isa/msnd/msnd.c:48", 0, base + JQS_wHead);
+	pete_writew("sound/isa/msnd/msnd.c:49", 0, base + JQS_wTail);
 }
 EXPORT_SYMBOL(snd_msnd_init_queue);
 
@@ -250,10 +250,10 @@ int snd_msnd_DARQ(struct snd_msnd *chip, int bank)
 	/* void *DAQD; */
 
 	/* Increment the tail and check for queue wrap */
-	wTmp = readw(chip->DARQ + JQS_wTail) + PCTODSP_OFFSET(DAQDS__size);
-	if (wTmp > readw(chip->DARQ + JQS_wSize))
+	wTmp = pete_readw("sound/isa/msnd/msnd.c:253", chip->DARQ + JQS_wTail) + PCTODSP_OFFSET(DAQDS__size);
+	if (wTmp > pete_readw("sound/isa/msnd/msnd.c:254", chip->DARQ + JQS_wSize))
 		wTmp = 0;
-	while (wTmp == readw(chip->DARQ + JQS_wHead) && timeout--)
+	while (wTmp == pete_readw("sound/isa/msnd/msnd.c:256", chip->DARQ + JQS_wHead) && timeout--)
 		udelay(1);
 
 	if (chip->capturePeriods == 2) {
@@ -261,19 +261,19 @@ int snd_msnd_DARQ(struct snd_msnd *chip, int bank)
 			     bank * DAQDS__size + DAQDS_wStart;
 		unsigned short offset = 0x3000 + chip->capturePeriodBytes;
 
-		if (readw(pDAQ) != PCTODSP_BASED(0x3000))
+		if (pete_readw("sound/isa/msnd/msnd.c:264", pDAQ) != PCTODSP_BASED(0x3000))
 			offset = 0x3000;
-		writew(PCTODSP_BASED(offset), pDAQ);
+		pete_writew("sound/isa/msnd/msnd.c:266", PCTODSP_BASED(offset), pDAQ);
 	}
 
-	writew(wTmp, chip->DARQ + JQS_wTail);
+	pete_writew("sound/isa/msnd/msnd.c:269", wTmp, chip->DARQ + JQS_wTail);
 
 #if 0
 	/* Get our digital audio queue struct */
 	DAQD = bank * DAQDS__size + chip->mappedbase + DARQ_DATA_BUFF;
 
 	/* Get length of data */
-	size = readw(DAQD + DAQDS_wSize);
+	size = pete_readw("sound/isa/msnd/msnd.c:276", DAQD + DAQDS_wSize);
 
 	/* Read data from the head (unprotected bank 1 access okay
 	   since this is only called inside an interrupt) */
@@ -301,8 +301,8 @@ int snd_msnd_DAPQ(struct snd_msnd *chip, int start)
 	/* unsigned long flags;
 	spin_lock_irqsave(&chip->lock, flags); not necessary */
 
-	DAPQ_tail = readw(chip->DAPQ + JQS_wTail);
-	while (DAPQ_tail != readw(chip->DAPQ + JQS_wHead) || start) {
+	DAPQ_tail = pete_readw("sound/isa/msnd/msnd.c:304", chip->DAPQ + JQS_wTail);
+	while (DAPQ_tail != pete_readw("sound/isa/msnd/msnd.c:305", chip->DAPQ + JQS_wHead) || start) {
 		int bank_num = DAPQ_tail / PCTODSP_OFFSET(DAQDS__size);
 
 		if (start) {
@@ -315,16 +315,16 @@ int snd_msnd_DAPQ(struct snd_msnd *chip, int start)
 			DAPQ_DATA_BUFF;
 
 		/* Write size of this bank */
-		writew(chip->play_period_bytes, DAQD + DAQDS_wSize);
+		pete_writew("sound/isa/msnd/msnd.c:318", chip->play_period_bytes, DAQD + DAQDS_wSize);
 		if (play_banks_submitted < 3)
 			++play_banks_submitted;
 		else if (chip->playPeriods == 2) {
 			unsigned short offset = chip->play_period_bytes;
 
-			if (readw(DAQD + DAQDS_wStart) != PCTODSP_BASED(0x0))
+			if (pete_readw("sound/isa/msnd/msnd.c:324", DAQD + DAQDS_wStart) != PCTODSP_BASED(0x0))
 				offset = 0;
 
-			writew(PCTODSP_BASED(offset), DAQD + DAQDS_wStart);
+			pete_writew("sound/isa/msnd/msnd.c:327", PCTODSP_BASED(offset), DAQD + DAQDS_wStart);
 		}
 		++nbanks;
 
@@ -336,7 +336,7 @@ int snd_msnd_DAPQ(struct snd_msnd *chip, int start)
 		*/
 
 		DAPQ_tail = (++bank_num % 3) * PCTODSP_OFFSET(DAQDS__size);
-		writew(DAPQ_tail, chip->DAPQ + JQS_wTail);
+		pete_writew("sound/isa/msnd/msnd.c:339", DAPQ_tail, chip->DAPQ + JQS_wTail);
 		/* Tell the DSP to play the bank */
 		snd_msnd_send_dsp_cmd(chip, HDEX_PLAY_START);
 		if (protect)
@@ -362,21 +362,21 @@ static void snd_msnd_play_reset_queue(struct snd_msnd *chip,
 	chip->last_playbank = -1;
 	chip->playLimit = pcm_count * (pcm_periods - 1);
 	chip->playPeriods = pcm_periods;
-	writew(PCTODSP_OFFSET(0 * DAQDS__size), chip->DAPQ + JQS_wHead);
-	writew(PCTODSP_OFFSET(0 * DAQDS__size), chip->DAPQ + JQS_wTail);
+	pete_writew("sound/isa/msnd/msnd.c:365", PCTODSP_OFFSET(0 * DAQDS__size), chip->DAPQ + JQS_wHead);
+	pete_writew("sound/isa/msnd/msnd.c:366", PCTODSP_OFFSET(0 * DAQDS__size), chip->DAPQ + JQS_wTail);
 
 	chip->play_period_bytes = pcm_count;
 
 	for (n = 0; n < pcm_periods; ++n, pDAQ += DAQDS__size) {
-		writew(PCTODSP_BASED((u32)(pcm_count * n)),
+		pete_writew("sound/isa/msnd/msnd.c:371", PCTODSP_BASED((u32)(pcm_count * n)),
 			pDAQ + DAQDS_wStart);
-		writew(0, pDAQ + DAQDS_wSize);
-		writew(1, pDAQ + DAQDS_wFormat);
-		writew(chip->play_sample_size, pDAQ + DAQDS_wSampleSize);
-		writew(chip->play_channels, pDAQ + DAQDS_wChannels);
-		writew(chip->play_sample_rate, pDAQ + DAQDS_wSampleRate);
-		writew(HIMT_PLAY_DONE * 0x100 + n, pDAQ + DAQDS_wIntMsg);
-		writew(n, pDAQ + DAQDS_wFlags);
+		pete_writew("sound/isa/msnd/msnd.c:373", 0, pDAQ + DAQDS_wSize);
+		pete_writew("sound/isa/msnd/msnd.c:374", 1, pDAQ + DAQDS_wFormat);
+		pete_writew("sound/isa/msnd/msnd.c:375", chip->play_sample_size, pDAQ + DAQDS_wSampleSize);
+		pete_writew("sound/isa/msnd/msnd.c:376", chip->play_channels, pDAQ + DAQDS_wChannels);
+		pete_writew("sound/isa/msnd/msnd.c:377", chip->play_sample_rate, pDAQ + DAQDS_wSampleRate);
+		pete_writew("sound/isa/msnd/msnd.c:378", HIMT_PLAY_DONE * 0x100 + n, pDAQ + DAQDS_wIntMsg);
+		pete_writew("sound/isa/msnd/msnd.c:379", n, pDAQ + DAQDS_wFlags);
 	}
 }
 
@@ -393,8 +393,8 @@ static void snd_msnd_capture_reset_queue(struct snd_msnd *chip,
 	chip->last_recbank = 2;
 	chip->captureLimit = pcm_count * (pcm_periods - 1);
 	chip->capturePeriods = pcm_periods;
-	writew(PCTODSP_OFFSET(0 * DAQDS__size), chip->DARQ + JQS_wHead);
-	writew(PCTODSP_OFFSET(chip->last_recbank * DAQDS__size),
+	pete_writew("sound/isa/msnd/msnd.c:396", PCTODSP_OFFSET(0 * DAQDS__size), chip->DARQ + JQS_wHead);
+	pete_writew("sound/isa/msnd/msnd.c:397", PCTODSP_OFFSET(chip->last_recbank * DAQDS__size),
 		chip->DARQ + JQS_wTail);
 
 #if 0 /* Critical section: bank 1 access. this is how the OSS driver does it:*/
@@ -413,14 +413,14 @@ static void snd_msnd_capture_reset_queue(struct snd_msnd *chip,
 	for (n = 0; n < pcm_periods; ++n, pDAQ += DAQDS__size) {
 		u32 tmp = pcm_count * n;
 
-		writew(PCTODSP_BASED(tmp + 0x3000), pDAQ + DAQDS_wStart);
-		writew(pcm_count, pDAQ + DAQDS_wSize);
-		writew(1, pDAQ + DAQDS_wFormat);
-		writew(chip->capture_sample_size, pDAQ + DAQDS_wSampleSize);
-		writew(chip->capture_channels, pDAQ + DAQDS_wChannels);
-		writew(chip->capture_sample_rate, pDAQ + DAQDS_wSampleRate);
-		writew(HIMT_RECORD_DONE * 0x100 + n, pDAQ + DAQDS_wIntMsg);
-		writew(n, pDAQ + DAQDS_wFlags);
+		pete_writew("sound/isa/msnd/msnd.c:416", PCTODSP_BASED(tmp + 0x3000), pDAQ + DAQDS_wStart);
+		pete_writew("sound/isa/msnd/msnd.c:417", pcm_count, pDAQ + DAQDS_wSize);
+		pete_writew("sound/isa/msnd/msnd.c:418", 1, pDAQ + DAQDS_wFormat);
+		pete_writew("sound/isa/msnd/msnd.c:419", chip->capture_sample_size, pDAQ + DAQDS_wSampleSize);
+		pete_writew("sound/isa/msnd/msnd.c:420", chip->capture_channels, pDAQ + DAQDS_wChannels);
+		pete_writew("sound/isa/msnd/msnd.c:421", chip->capture_sample_rate, pDAQ + DAQDS_wSampleRate);
+		pete_writew("sound/isa/msnd/msnd.c:422", HIMT_RECORD_DONE * 0x100 + n, pDAQ + DAQDS_wIntMsg);
+		pete_writew("sound/isa/msnd/msnd.c:423", n, pDAQ + DAQDS_wFlags);
 	}
 }
 
@@ -503,9 +503,9 @@ static int snd_msnd_playback_hw_params(struct snd_pcm_substream *substream,
 	chip->play_sample_rate = params_rate(params);
 
 	for (i = 0; i < 3; ++i, pDAQ += DAQDS__size) {
-		writew(chip->play_sample_size, pDAQ + DAQDS_wSampleSize);
-		writew(chip->play_channels, pDAQ + DAQDS_wChannels);
-		writew(chip->play_sample_rate, pDAQ + DAQDS_wSampleRate);
+		pete_writew("sound/isa/msnd/msnd.c:506", chip->play_sample_size, pDAQ + DAQDS_wSampleSize);
+		pete_writew("sound/isa/msnd/msnd.c:507", chip->play_channels, pDAQ + DAQDS_wChannels);
+		pete_writew("sound/isa/msnd/msnd.c:508", chip->play_sample_rate, pDAQ + DAQDS_wSampleRate);
 	}
 	/* dont do this here:
 	 * snd_msnd_calibrate_adc(chip->play_sample_rate);
@@ -650,9 +650,9 @@ static int snd_msnd_capture_hw_params(struct snd_pcm_substream *substream,
 	chip->capture_sample_rate = params_rate(params);
 
 	for (i = 0; i < 3; ++i, pDAQ += DAQDS__size) {
-		writew(chip->capture_sample_size, pDAQ + DAQDS_wSampleSize);
-		writew(chip->capture_channels, pDAQ + DAQDS_wChannels);
-		writew(chip->capture_sample_rate, pDAQ + DAQDS_wSampleRate);
+		pete_writew("sound/isa/msnd/msnd.c:653", chip->capture_sample_size, pDAQ + DAQDS_wSampleSize);
+		pete_writew("sound/isa/msnd/msnd.c:654", chip->capture_channels, pDAQ + DAQDS_wChannels);
+		pete_writew("sound/isa/msnd/msnd.c:655", chip->capture_sample_rate, pDAQ + DAQDS_wSampleRate);
 	}
 	return 0;
 }

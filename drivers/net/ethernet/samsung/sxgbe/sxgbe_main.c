@@ -1692,9 +1692,9 @@ static irqreturn_t sxgbe_rx_interrupt(int irq, void *dev_id)
 
 static inline u64 sxgbe_get_stat64(void __iomem *ioaddr, int reg_lo, int reg_hi)
 {
-	u64 val = readl(ioaddr + reg_lo);
+	u64 val = pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_main.c:1695", ioaddr + reg_lo);
 
-	val |= ((u64)readl(ioaddr + reg_hi)) << 32;
+	val |= ((u64)pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_main.c:1697", ioaddr + reg_hi)) << 32;
 
 	return val;
 }
@@ -1719,7 +1719,7 @@ static void sxgbe_get_stats64(struct net_device *dev,
 	/* Freeze the counter registers before reading value otherwise it may
 	 * get updated by hardware while we are reading them
 	 */
-	writel(SXGBE_MMC_CTRL_CNT_FRZ, ioaddr + SXGBE_MMC_CTL_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_main.c:1722", SXGBE_MMC_CTRL_CNT_FRZ, ioaddr + SXGBE_MMC_CTL_REG);
 
 	stats->rx_bytes = sxgbe_get_stat64(ioaddr,
 					   SXGBE_MMC_RXOCTETLO_GCNT_REG,
@@ -1758,7 +1758,7 @@ static void sxgbe_get_stats64(struct net_device *dev,
 	stats->tx_packets = count;
 	stats->tx_fifo_errors = sxgbe_get_stat64(ioaddr, SXGBE_MMC_TXUFLWLO_GBCNT_REG,
 						 SXGBE_MMC_TXUFLWHI_GBCNT_REG);
-	writel(0, ioaddr + SXGBE_MMC_CTL_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_main.c:1761", 0, ioaddr + SXGBE_MMC_CTL_REG);
 	spin_unlock(&priv->stats_lock);
 }
 
@@ -1825,9 +1825,9 @@ static void sxgbe_set_umac_addr(void __iomem *ioaddr, unsigned char *addr,
 	 * bit that has no effect on the High Reg 0 where the bit 31 (MO)
 	 * is RO.
 	 */
-	writel(data | SXGBE_HI_REG_AE, ioaddr + SXGBE_ADDR_HIGH(reg_n));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_main.c:1828", data | SXGBE_HI_REG_AE, ioaddr + SXGBE_ADDR_HIGH(reg_n));
 	data = (addr[3] << 24) | (addr[2] << 16) | (addr[1] << 8) | addr[0];
-	writel(data, ioaddr + SXGBE_ADDR_LOW(reg_n));
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_main.c:1830", data, ioaddr + SXGBE_ADDR_LOW(reg_n));
 }
 
 /**
@@ -1859,8 +1859,8 @@ static void sxgbe_set_rx_mode(struct net_device *dev)
 	} else if ((netdev_mc_count(dev) > SXGBE_HASH_TABLE_SIZE) ||
 		   (dev->flags & IFF_ALLMULTI)) {
 		value = SXGBE_FRAME_FILTER_PM;	/* pass all multi */
-		writel(0xffffffff, ioaddr + SXGBE_HASH_HIGH);
-		writel(0xffffffff, ioaddr + SXGBE_HASH_LOW);
+		pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_main.c:1862", 0xffffffff, ioaddr + SXGBE_HASH_HIGH);
+		pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_main.c:1863", 0xffffffff, ioaddr + SXGBE_HASH_LOW);
 
 	} else if (!netdev_mc_empty(dev)) {
 		/* Hash filter for multicast */
@@ -1879,8 +1879,8 @@ static void sxgbe_set_rx_mode(struct net_device *dev)
 			 */
 			mc_filter[bit_nr >> 5] |= 1 << (bit_nr & 31);
 		}
-		writel(mc_filter[0], ioaddr + SXGBE_HASH_LOW);
-		writel(mc_filter[1], ioaddr + SXGBE_HASH_HIGH);
+		pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_main.c:1882", mc_filter[0], ioaddr + SXGBE_HASH_LOW);
+		pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_main.c:1883", mc_filter[1], ioaddr + SXGBE_HASH_HIGH);
 	}
 
 	/* Handle multiple unicast addresses (perfect filtering) */
@@ -1899,12 +1899,12 @@ static void sxgbe_set_rx_mode(struct net_device *dev)
 	/* Enable Receive all mode (to debug filtering_fail errors) */
 	value |= SXGBE_FRAME_FILTER_RA;
 #endif
-	writel(value, ioaddr + SXGBE_FRAME_FILTER);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_main.c:1902", value, ioaddr + SXGBE_FRAME_FILTER);
 
 	netdev_dbg(dev, "Filter: 0x%08x\n\tHash: HI 0x%08x, LO 0x%08x\n",
-		   readl(ioaddr + SXGBE_FRAME_FILTER),
-		   readl(ioaddr + SXGBE_HASH_HIGH),
-		   readl(ioaddr + SXGBE_HASH_LOW));
+		   pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_main.c:1905", ioaddr + SXGBE_FRAME_FILTER),
+		   pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_main.c:1906", ioaddr + SXGBE_HASH_HIGH),
+		   pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_main.c:1907", ioaddr + SXGBE_HASH_LOW));
 }
 
 #ifdef CONFIG_NET_POLL_CONTROLLER
@@ -2033,9 +2033,9 @@ static int sxgbe_sw_reset(void __iomem *addr)
 {
 	int retry_count = 10;
 
-	writel(SXGBE_DMA_SOFT_RESET, addr + SXGBE_DMA_MODE_REG);
+	pete_writel("drivers/net/ethernet/samsung/sxgbe/sxgbe_main.c:2036", SXGBE_DMA_SOFT_RESET, addr + SXGBE_DMA_MODE_REG);
 	while (retry_count--) {
-		if (!(readl(addr + SXGBE_DMA_MODE_REG) &
+		if (!(pete_readl("drivers/net/ethernet/samsung/sxgbe/sxgbe_main.c:2038", addr + SXGBE_DMA_MODE_REG) &
 		      SXGBE_DMA_SOFT_RESET))
 			break;
 		mdelay(10);

@@ -67,7 +67,7 @@ static int meson_wdt_restart(struct watchdog_device *wdt_dev,
 	tc_reboot |= meson_wdt->data->enable;
 
 	while (1) {
-		writel(tc_reboot, meson_wdt->wdt_base + MESON_WDT_TC);
+		pete_writel("drivers/watchdog/meson_wdt.c:70", tc_reboot, meson_wdt->wdt_base + MESON_WDT_TC);
 		mdelay(5);
 	}
 
@@ -78,7 +78,7 @@ static int meson_wdt_ping(struct watchdog_device *wdt_dev)
 {
 	struct meson_wdt_dev *meson_wdt = watchdog_get_drvdata(wdt_dev);
 
-	writel(0, meson_wdt->wdt_base + MESON_WDT_RESET);
+	pete_writel("drivers/watchdog/meson_wdt.c:81", 0, meson_wdt->wdt_base + MESON_WDT_RESET);
 
 	return 0;
 }
@@ -89,10 +89,10 @@ static void meson_wdt_change_timeout(struct watchdog_device *wdt_dev,
 	struct meson_wdt_dev *meson_wdt = watchdog_get_drvdata(wdt_dev);
 	u32 reg;
 
-	reg = readl(meson_wdt->wdt_base + MESON_WDT_TC);
+	reg = pete_readl("drivers/watchdog/meson_wdt.c:92", meson_wdt->wdt_base + MESON_WDT_TC);
 	reg &= ~meson_wdt->data->terminal_count_mask;
 	reg |= MESON_SEC_TO_TC(timeout, meson_wdt->data->count_unit);
-	writel(reg, meson_wdt->wdt_base + MESON_WDT_TC);
+	pete_writel("drivers/watchdog/meson_wdt.c:95", reg, meson_wdt->wdt_base + MESON_WDT_TC);
 }
 
 static int meson_wdt_set_timeout(struct watchdog_device *wdt_dev,
@@ -111,9 +111,9 @@ static int meson_wdt_stop(struct watchdog_device *wdt_dev)
 	struct meson_wdt_dev *meson_wdt = watchdog_get_drvdata(wdt_dev);
 	u32 reg;
 
-	reg = readl(meson_wdt->wdt_base + MESON_WDT_TC);
+	reg = pete_readl("drivers/watchdog/meson_wdt.c:114", meson_wdt->wdt_base + MESON_WDT_TC);
 	reg &= ~meson_wdt->data->enable;
-	writel(reg, meson_wdt->wdt_base + MESON_WDT_TC);
+	pete_writel("drivers/watchdog/meson_wdt.c:116", reg, meson_wdt->wdt_base + MESON_WDT_TC);
 
 	return 0;
 }
@@ -126,9 +126,9 @@ static int meson_wdt_start(struct watchdog_device *wdt_dev)
 	meson_wdt_change_timeout(wdt_dev, meson_wdt->wdt_dev.timeout);
 	meson_wdt_ping(wdt_dev);
 
-	reg = readl(meson_wdt->wdt_base + MESON_WDT_TC);
+	reg = pete_readl("drivers/watchdog/meson_wdt.c:129", meson_wdt->wdt_base + MESON_WDT_TC);
 	reg |= meson_wdt->data->enable;
-	writel(reg, meson_wdt->wdt_base + MESON_WDT_TC);
+	pete_writel("drivers/watchdog/meson_wdt.c:131", reg, meson_wdt->wdt_base + MESON_WDT_TC);
 
 	return 0;
 }

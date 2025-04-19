@@ -194,8 +194,8 @@ static int __send_message(struct bnxt_qplib_rcfw *rcfw, struct cmdq_base *req,
 
 	/* ring CMDQ DB */
 	wmb();
-	writel(cmdq_prod, cmdq->cmdq_mbox.prod);
-	writel(RCFW_CMDQ_TRIG_VAL, cmdq->cmdq_mbox.db);
+	pete_writel("drivers/infiniband/hw/bnxt_re/qplib_rcfw.c:197", cmdq_prod, cmdq->cmdq_mbox.prod);
+	pete_writel("drivers/infiniband/hw/bnxt_re/qplib_rcfw.c:198", RCFW_CMDQ_TRIG_VAL, cmdq->cmdq_mbox.db);
 done:
 	spin_unlock_irqrestore(&hwq->lock, flags);
 	/* Return the CREQ response pointer */

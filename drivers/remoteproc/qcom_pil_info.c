@@ -106,10 +106,10 @@ int qcom_pil_info_store(const char *image, phys_addr_t base, size_t size)
 found_unused:
 	memcpy_toio(entry, image, strnlen(image, PIL_RELOC_NAME_LEN));
 found_existing:
-	/* Use two writel() as base is only aligned to 4 bytes on odd entries */
-	writel(base, entry + PIL_RELOC_NAME_LEN);
-	writel((u64)base >> 32, entry + PIL_RELOC_NAME_LEN + 4);
-	writel(size, entry + PIL_RELOC_NAME_LEN + sizeof(__le64));
+	/* Use two pete_writel("drivers/remoteproc/qcom_pil_info.c:109", ) as base is only aligned to 4 bytes on odd entries */
+	pete_writel("drivers/remoteproc/qcom_pil_info.c:110", base, entry + PIL_RELOC_NAME_LEN);
+	pete_writel("drivers/remoteproc/qcom_pil_info.c:111", (u64)base >> 32, entry + PIL_RELOC_NAME_LEN + 4);
+	pete_writel("drivers/remoteproc/qcom_pil_info.c:112", size, entry + PIL_RELOC_NAME_LEN + sizeof(__le64));
 	mutex_unlock(&pil_reloc_lock);
 
 	return 0;

@@ -86,7 +86,7 @@ static int vsc_sata_scr_read(struct ata_link *link,
 {
 	if (sc_reg > SCR_CONTROL)
 		return -EINVAL;
-	*val = readl(link->ap->ioaddr.scr_addr + (sc_reg * 4));
+	*val = pete_readl("drivers/ata/sata_vsc.c:89", link->ap->ioaddr.scr_addr + (sc_reg * 4));
 	return 0;
 }
 
@@ -96,7 +96,7 @@ static int vsc_sata_scr_write(struct ata_link *link,
 {
 	if (sc_reg > SCR_CONTROL)
 		return -EINVAL;
-	writel(val, link->ap->ioaddr.scr_addr + (sc_reg * 4));
+	pete_writel("drivers/ata/sata_vsc.c:99", val, link->ap->ioaddr.scr_addr + (sc_reg * 4));
 	return 0;
 }
 
@@ -108,7 +108,7 @@ static void vsc_freeze(struct ata_port *ap)
 	mask_addr = ap->host->iomap[VSC_MMIO_BAR] +
 		VSC_SATA_INT_MASK_OFFSET + ap->port_no;
 
-	writeb(0, mask_addr);
+	pete_writeb("drivers/ata/sata_vsc.c:111", 0, mask_addr);
 }
 
 
@@ -119,7 +119,7 @@ static void vsc_thaw(struct ata_port *ap)
 	mask_addr = ap->host->iomap[VSC_MMIO_BAR] +
 		VSC_SATA_INT_MASK_OFFSET + ap->port_no;
 
-	writeb(0xff, mask_addr);
+	pete_writeb("drivers/ata/sata_vsc.c:122", 0xff, mask_addr);
 }
 
 
@@ -130,12 +130,12 @@ static void vsc_intr_mask_update(struct ata_port *ap, u8 ctl)
 
 	mask_addr = ap->host->iomap[VSC_MMIO_BAR] +
 		VSC_SATA_INT_MASK_OFFSET + ap->port_no;
-	mask = readb(mask_addr);
+	mask = pete_readb("drivers/ata/sata_vsc.c:133", mask_addr);
 	if (ctl & ATA_NIEN)
 		mask |= 0x80;
 	else
 		mask &= 0x7F;
-	writeb(mask, mask_addr);
+	pete_writeb("drivers/ata/sata_vsc.c:138", mask, mask_addr);
 }
 
 
@@ -155,26 +155,26 @@ static void vsc_sata_tf_load(struct ata_port *ap, const struct ata_taskfile *tf)
 		vsc_intr_mask_update(ap, tf->ctl & ATA_NIEN);
 	}
 	if (is_addr && (tf->flags & ATA_TFLAG_LBA48)) {
-		writew(tf->feature | (((u16)tf->hob_feature) << 8),
+		pete_writew("drivers/ata/sata_vsc.c:158", tf->feature | (((u16)tf->hob_feature) << 8),
 		       ioaddr->feature_addr);
-		writew(tf->nsect | (((u16)tf->hob_nsect) << 8),
+		pete_writew("drivers/ata/sata_vsc.c:160", tf->nsect | (((u16)tf->hob_nsect) << 8),
 		       ioaddr->nsect_addr);
-		writew(tf->lbal | (((u16)tf->hob_lbal) << 8),
+		pete_writew("drivers/ata/sata_vsc.c:162", tf->lbal | (((u16)tf->hob_lbal) << 8),
 		       ioaddr->lbal_addr);
-		writew(tf->lbam | (((u16)tf->hob_lbam) << 8),
+		pete_writew("drivers/ata/sata_vsc.c:164", tf->lbam | (((u16)tf->hob_lbam) << 8),
 		       ioaddr->lbam_addr);
-		writew(tf->lbah | (((u16)tf->hob_lbah) << 8),
+		pete_writew("drivers/ata/sata_vsc.c:166", tf->lbah | (((u16)tf->hob_lbah) << 8),
 		       ioaddr->lbah_addr);
 	} else if (is_addr) {
-		writew(tf->feature, ioaddr->feature_addr);
-		writew(tf->nsect, ioaddr->nsect_addr);
-		writew(tf->lbal, ioaddr->lbal_addr);
-		writew(tf->lbam, ioaddr->lbam_addr);
-		writew(tf->lbah, ioaddr->lbah_addr);
+		pete_writew("drivers/ata/sata_vsc.c:169", tf->feature, ioaddr->feature_addr);
+		pete_writew("drivers/ata/sata_vsc.c:170", tf->nsect, ioaddr->nsect_addr);
+		pete_writew("drivers/ata/sata_vsc.c:171", tf->lbal, ioaddr->lbal_addr);
+		pete_writew("drivers/ata/sata_vsc.c:172", tf->lbam, ioaddr->lbam_addr);
+		pete_writew("drivers/ata/sata_vsc.c:173", tf->lbah, ioaddr->lbah_addr);
 	}
 
 	if (tf->flags & ATA_TFLAG_DEVICE)
-		writeb(tf->device, ioaddr->device_addr);
+		pete_writeb("drivers/ata/sata_vsc.c:177", tf->device, ioaddr->device_addr);
 
 	ata_wait_idle(ap);
 }
@@ -186,12 +186,12 @@ static void vsc_sata_tf_read(struct ata_port *ap, struct ata_taskfile *tf)
 	u16 nsect, lbal, lbam, lbah, error;
 
 	tf->status = ata_sff_check_status(ap);
-	tf->device = readw(ioaddr->device_addr);
-	error = readw(ioaddr->error_addr);
-	nsect = readw(ioaddr->nsect_addr);
-	lbal = readw(ioaddr->lbal_addr);
-	lbam = readw(ioaddr->lbam_addr);
-	lbah = readw(ioaddr->lbah_addr);
+	tf->device = pete_readw("drivers/ata/sata_vsc.c:189", ioaddr->device_addr);
+	error = pete_readw("drivers/ata/sata_vsc.c:190", ioaddr->error_addr);
+	nsect = pete_readw("drivers/ata/sata_vsc.c:191", ioaddr->nsect_addr);
+	lbal = pete_readw("drivers/ata/sata_vsc.c:192", ioaddr->lbal_addr);
+	lbam = pete_readw("drivers/ata/sata_vsc.c:193", ioaddr->lbam_addr);
+	lbah = pete_readw("drivers/ata/sata_vsc.c:194", ioaddr->lbah_addr);
 
 	tf->error = error;
 	tf->nsect = nsect;
@@ -252,7 +252,7 @@ static irqreturn_t vsc_sata_interrupt(int irq, void *dev_instance)
 	unsigned int handled = 0;
 	u32 status;
 
-	status = readl(host->iomap[VSC_MMIO_BAR] + VSC_SATA_INT_STAT_OFFSET);
+	status = pete_readl("drivers/ata/sata_vsc.c:255", host->iomap[VSC_MMIO_BAR] + VSC_SATA_INT_STAT_OFFSET);
 
 	if (unlikely(status == 0xffffffff || status == 0)) {
 		if (status)
@@ -312,8 +312,8 @@ static void vsc_sata_setup_port(struct ata_ioports *port, void __iomem *base)
 	port->ctl_addr		= base + VSC_SATA_TF_CTL_OFFSET;
 	port->bmdma_addr	= base + VSC_SATA_DMA_CMD_OFFSET;
 	port->scr_addr		= base + VSC_SATA_SCR_STATUS_OFFSET;
-	writel(0, base + VSC_SATA_UP_DESCRIPTOR_OFFSET);
-	writel(0, base + VSC_SATA_UP_DATA_BUFFER_OFFSET);
+	pete_writel("drivers/ata/sata_vsc.c:315", 0, base + VSC_SATA_UP_DESCRIPTOR_OFFSET);
+	pete_writel("drivers/ata/sata_vsc.c:316", 0, base + VSC_SATA_UP_DATA_BUFFER_OFFSET);
 }
 
 

@@ -62,14 +62,14 @@ static void am65_cpsw_est_enable(struct am65_cpsw_common *common, int enable)
 {
 	u32 val;
 
-	val = readl(common->cpsw_base + AM65_CPSW_REG_CTL);
+	val = pete_readl("drivers/net/ethernet/ti/am65-cpsw-qos.c:65", common->cpsw_base + AM65_CPSW_REG_CTL);
 
 	if (enable)
 		val |= AM65_CPSW_CTL_EST_EN;
 	else
 		val &= ~AM65_CPSW_CTL_EST_EN;
 
-	writel(val, common->cpsw_base + AM65_CPSW_REG_CTL);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-qos.c:72", val, common->cpsw_base + AM65_CPSW_REG_CTL);
 	common->est_enabled = enable;
 }
 
@@ -77,13 +77,13 @@ static void am65_cpsw_port_est_enable(struct am65_cpsw_port *port, int enable)
 {
 	u32 val;
 
-	val = readl(port->port_base + AM65_CPSW_PN_REG_CTL);
+	val = pete_readl("drivers/net/ethernet/ti/am65-cpsw-qos.c:80", port->port_base + AM65_CPSW_PN_REG_CTL);
 	if (enable)
 		val |= AM65_CPSW_PN_CTL_EST_PORT_EN;
 	else
 		val &= ~AM65_CPSW_PN_CTL_EST_PORT_EN;
 
-	writel(val, port->port_base + AM65_CPSW_PN_REG_CTL);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-qos.c:86", val, port->port_base + AM65_CPSW_PN_REG_CTL);
 }
 
 /* target new EST RAM buffer, actual toggle happens after cycle completion */
@@ -93,13 +93,13 @@ static void am65_cpsw_port_est_assign_buf_num(struct net_device *ndev,
 	struct am65_cpsw_port *port = am65_ndev_to_port(ndev);
 	u32 val;
 
-	val = readl(port->port_base + AM65_CPSW_PN_REG_EST_CTL);
+	val = pete_readl("drivers/net/ethernet/ti/am65-cpsw-qos.c:96", port->port_base + AM65_CPSW_PN_REG_EST_CTL);
 	if (buf_num)
 		val |= AM65_CPSW_PN_EST_BUFSEL;
 	else
 		val &= ~AM65_CPSW_PN_EST_BUFSEL;
 
-	writel(val, port->port_base + AM65_CPSW_PN_REG_EST_CTL);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-qos.c:102", val, port->port_base + AM65_CPSW_PN_REG_EST_CTL);
 }
 
 /* am65_cpsw_port_est_is_swapped() - Indicate if h/w is transitioned
@@ -117,10 +117,10 @@ static int am65_cpsw_port_est_is_swapped(struct net_device *ndev, int *oper,
 	struct am65_cpsw_port *port = am65_ndev_to_port(ndev);
 	u32 val;
 
-	val = readl(port->port_base + AM65_CPSW_PN_REG_FIFO_STATUS);
+	val = pete_readl("drivers/net/ethernet/ti/am65-cpsw-qos.c:120", port->port_base + AM65_CPSW_PN_REG_FIFO_STATUS);
 	*oper = !!(val & AM65_CPSW_PN_FST_EST_BUFACT);
 
-	val = readl(port->port_base + AM65_CPSW_PN_REG_EST_CTL);
+	val = pete_readl("drivers/net/ethernet/ti/am65-cpsw-qos.c:123", port->port_base + AM65_CPSW_PN_REG_EST_CTL);
 	*admin = !!(val & AM65_CPSW_PN_EST_BUFSEL);
 
 	return *admin == *oper;
@@ -177,9 +177,9 @@ static void am65_cpsw_port_est_get_buf_num(struct net_device *ndev,
 	struct am65_cpsw_port *port = am65_ndev_to_port(ndev);
 	u32 val;
 
-	val = readl(port->port_base + AM65_CPSW_PN_REG_EST_CTL);
+	val = pete_readl("drivers/net/ethernet/ti/am65-cpsw-qos.c:180", port->port_base + AM65_CPSW_PN_REG_EST_CTL);
 	val &= ~AM65_CPSW_PN_EST_ONEBUF;
-	writel(val, port->port_base + AM65_CPSW_PN_REG_EST_CTL);
+	pete_writel("drivers/net/ethernet/ti/am65-cpsw-qos.c:182", val, port->port_base + AM65_CPSW_PN_REG_EST_CTL);
 
 	est_new->buf = am65_cpsw_port_est_get_free_buf_num(ndev);
 
@@ -260,7 +260,7 @@ static void __iomem *am65_cpsw_est_set_sched_cmds(void __iomem *addr,
 		prio_mask = fetch_allow & AM65_CPSW_FETCH_ALLOW_MSK;
 		cmd = (cmd_fetch_cnt << AM65_CPSW_FETCH_CNT_OFFSET) | prio_mask;
 
-		writel(cmd, addr);
+		pete_writel("drivers/net/ethernet/ti/am65-cpsw-qos.c:263", cmd, addr);
 		addr += 4;
 	} while (fetch_cnt);
 
@@ -353,7 +353,7 @@ static void am65_cpsw_est_set_sched_list(struct net_device *ndev,
 
 	/* end cmd, enabling non-timed queues for potential over cycle time */
 	if (ram_addr < max_ram_addr)
-		writel(~all_fetch_allow & AM65_CPSW_FETCH_ALLOW_MSK, ram_addr);
+		pete_writel("drivers/net/ethernet/ti/am65-cpsw-qos.c:356", ~all_fetch_allow & AM65_CPSW_FETCH_ALLOW_MSK, ram_addr);
 }
 
 /*

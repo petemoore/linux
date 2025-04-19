@@ -166,7 +166,7 @@ static int tsp2_miconread(unsigned char *buf, int count)
 	for (i = 0; i < count; i++) {
 		timeout = 10;
 
-		while (!(readl(UART1_REG(LSR)) & UART_LSR_DR)) {
+		while (!(pete_readl("arch/arm/mach-orion5x/terastation_pro2-setup.c:169", UART1_REG(LSR)) & UART_LSR_DR)) {
 			if (--timeout == 0)
 				break;
 			udelay(1000);
@@ -174,7 +174,7 @@ static int tsp2_miconread(unsigned char *buf, int count)
 
 		if (timeout == 0)
 			break;
-		buf[i] = readl(UART1_REG(RX));
+		buf[i] = pete_readl("arch/arm/mach-orion5x/terastation_pro2-setup.c:177", UART1_REG(RX));
 	}
 
 	/* return read bytes */
@@ -186,9 +186,9 @@ static int tsp2_miconwrite(const unsigned char *buf, int count)
 	int i = 0;
 
 	while (count--) {
-		while (!(readl(UART1_REG(LSR)) & UART_LSR_THRE))
+		while (!(pete_readl("arch/arm/mach-orion5x/terastation_pro2-setup.c:189", UART1_REG(LSR)) & UART_LSR_THRE))
 			barrier();
-		writel(buf[i++], UART1_REG(TX));
+		pete_writel("arch/arm/mach-orion5x/terastation_pro2-setup.c:191", buf[i++], UART1_REG(TX));
 	}
 
 	return 0;
@@ -272,13 +272,13 @@ static void tsp2_power_off(void)
 	pr_info("%s: triggering power-off...\n", __func__);
 
 	/* hijack uart1 and reset into sane state (38400,8n1,even parity) */
-	writel(0x83, UART1_REG(LCR));
-	writel(divisor & 0xff, UART1_REG(DLL));
-	writel((divisor >> 8) & 0xff, UART1_REG(DLM));
-	writel(0x1b, UART1_REG(LCR));
-	writel(0x00, UART1_REG(IER));
-	writel(0x07, UART1_REG(FCR));
-	writel(0x00, UART1_REG(MCR));
+	pete_writel("arch/arm/mach-orion5x/terastation_pro2-setup.c:275", 0x83, UART1_REG(LCR));
+	pete_writel("arch/arm/mach-orion5x/terastation_pro2-setup.c:276", divisor & 0xff, UART1_REG(DLL));
+	pete_writel("arch/arm/mach-orion5x/terastation_pro2-setup.c:277", (divisor >> 8) & 0xff, UART1_REG(DLM));
+	pete_writel("arch/arm/mach-orion5x/terastation_pro2-setup.c:278", 0x1b, UART1_REG(LCR));
+	pete_writel("arch/arm/mach-orion5x/terastation_pro2-setup.c:279", 0x00, UART1_REG(IER));
+	pete_writel("arch/arm/mach-orion5x/terastation_pro2-setup.c:280", 0x07, UART1_REG(FCR));
+	pete_writel("arch/arm/mach-orion5x/terastation_pro2-setup.c:281", 0x00, UART1_REG(MCR));
 
 	/* Send the commands to shutdown the Terastation Pro II */
 	tsp2_miconsend(watchdogkill, sizeof(watchdogkill)) ;

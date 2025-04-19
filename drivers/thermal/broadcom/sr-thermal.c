@@ -36,7 +36,7 @@ static int sr_get_temp(void *data, int *temp)
 	struct sr_tmon *tmon = data;
 	struct sr_thermal *sr_thermal = tmon->priv;
 
-	*temp = readl(sr_thermal->regs + SR_TMON_TEMP_BASE(tmon->tmon_id));
+	*temp = pete_readl("drivers/thermal/broadcom/sr-thermal.c:39", sr_thermal->regs + SR_TMON_TEMP_BASE(tmon->tmon_id));
 
 	return 0;
 }
@@ -81,7 +81,7 @@ static int sr_thermal_probe(struct platform_device *pdev)
 			continue;
 
 		/* Flush temperature registers */
-		writel(0, sr_thermal->regs + SR_TMON_TEMP_BASE(i));
+		pete_writel("drivers/thermal/broadcom/sr-thermal.c:84", 0, sr_thermal->regs + SR_TMON_TEMP_BASE(i));
 		tmon->tmon_id = i;
 		tmon->priv = sr_thermal;
 		tmon->tz = devm_thermal_zone_of_sensor_register(dev, i, tmon,

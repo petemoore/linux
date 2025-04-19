@@ -127,18 +127,18 @@ static void uniphier_mdmac_handle(struct uniphier_mdmac_chan *mc,
 
 	chunk_size = sg_dma_len(sg);
 
-	writel(src_mode, mc->reg_ch_base + UNIPHIER_MDMAC_CH_SRC_MODE);
-	writel(dest_mode, mc->reg_ch_base + UNIPHIER_MDMAC_CH_DEST_MODE);
-	writel(src_addr, mc->reg_ch_base + UNIPHIER_MDMAC_CH_SRC_ADDR);
-	writel(dest_addr, mc->reg_ch_base + UNIPHIER_MDMAC_CH_DEST_ADDR);
-	writel(chunk_size, mc->reg_ch_base + UNIPHIER_MDMAC_CH_SIZE);
+	pete_writel("drivers/dma/uniphier-mdmac.c:130", src_mode, mc->reg_ch_base + UNIPHIER_MDMAC_CH_SRC_MODE);
+	pete_writel("drivers/dma/uniphier-mdmac.c:131", dest_mode, mc->reg_ch_base + UNIPHIER_MDMAC_CH_DEST_MODE);
+	pete_writel("drivers/dma/uniphier-mdmac.c:132", src_addr, mc->reg_ch_base + UNIPHIER_MDMAC_CH_SRC_ADDR);
+	pete_writel("drivers/dma/uniphier-mdmac.c:133", dest_addr, mc->reg_ch_base + UNIPHIER_MDMAC_CH_DEST_ADDR);
+	pete_writel("drivers/dma/uniphier-mdmac.c:134", chunk_size, mc->reg_ch_base + UNIPHIER_MDMAC_CH_SIZE);
 
 	/* write 1 to clear */
-	writel(irq_flag, mc->reg_ch_base + UNIPHIER_MDMAC_CH_IRQ_REQ);
+	pete_writel("drivers/dma/uniphier-mdmac.c:137", irq_flag, mc->reg_ch_base + UNIPHIER_MDMAC_CH_IRQ_REQ);
 
-	writel(irq_flag, mc->reg_ch_base + UNIPHIER_MDMAC_CH_IRQ_EN);
+	pete_writel("drivers/dma/uniphier-mdmac.c:139", irq_flag, mc->reg_ch_base + UNIPHIER_MDMAC_CH_IRQ_EN);
 
-	writel(BIT(mc->chan_id), mdev->reg_base + UNIPHIER_MDMAC_CMD);
+	pete_writel("drivers/dma/uniphier-mdmac.c:141", BIT(mc->chan_id), mdev->reg_base + UNIPHIER_MDMAC_CMD);
 }
 
 /* mc->vc.lock must be held by caller */
@@ -159,9 +159,9 @@ static int uniphier_mdmac_abort(struct uniphier_mdmac_chan *mc)
 	u32 val;
 
 	/* write 1 to clear */
-	writel(irq_flag, mc->reg_ch_base + UNIPHIER_MDMAC_CH_IRQ_REQ);
+	pete_writel("drivers/dma/uniphier-mdmac.c:162", irq_flag, mc->reg_ch_base + UNIPHIER_MDMAC_CH_IRQ_REQ);
 
-	writel(UNIPHIER_MDMAC_CMD_ABORT | BIT(mc->chan_id),
+	pete_writel("drivers/dma/uniphier-mdmac.c:164", UNIPHIER_MDMAC_CMD_ABORT | BIT(mc->chan_id),
 	       mdev->reg_base + UNIPHIER_MDMAC_CMD);
 
 	/*
@@ -181,7 +181,7 @@ static irqreturn_t uniphier_mdmac_interrupt(int irq, void *dev_id)
 
 	spin_lock(&mc->vc.lock);
 
-	irq_stat = readl(mc->reg_ch_base + UNIPHIER_MDMAC_CH_IRQ_DET);
+	irq_stat = pete_readl("drivers/dma/uniphier-mdmac.c:184", mc->reg_ch_base + UNIPHIER_MDMAC_CH_IRQ_DET);
 
 	/*
 	 * Some channels share a single interrupt line. If the IRQ status is 0,
@@ -193,7 +193,7 @@ static irqreturn_t uniphier_mdmac_interrupt(int irq, void *dev_id)
 	}
 
 	/* write 1 to clear */
-	writel(irq_stat, mc->reg_ch_base + UNIPHIER_MDMAC_CH_IRQ_REQ);
+	pete_writel("drivers/dma/uniphier-mdmac.c:196", irq_stat, mc->reg_ch_base + UNIPHIER_MDMAC_CH_IRQ_REQ);
 
 	/*
 	 * UNIPHIER_MDMAC_CH_IRQ__DONE interrupt is asserted even when the DMA
@@ -303,7 +303,7 @@ static enum dma_status uniphier_mdmac_tx_status(struct dma_chan *chan,
 
 	if (mc->md && mc->md->vd.tx.cookie == cookie) {
 		/* residue from the on-flight chunk */
-		txstate->residue = readl(mc->reg_ch_base +
+		txstate->residue = pete_readl("drivers/dma/uniphier-mdmac.c:306", mc->reg_ch_base +
 					 UNIPHIER_MDMAC_CH_SIZE);
 		md = mc->md;
 	}

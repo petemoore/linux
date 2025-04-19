@@ -256,7 +256,7 @@ static const unsigned char snd_cs4231_original_image[32] =
 static u8 __cs4231_readb(struct snd_cs4231 *cp, void __iomem *reg_addr)
 {
 	if (cp->flags & CS4231_FLAG_EBUS)
-		return readb(reg_addr);
+		return pete_readb("sound/sparc/cs4231.c:259", reg_addr);
 	else
 		return sbus_readb(reg_addr);
 }
@@ -265,7 +265,7 @@ static void __cs4231_writeb(struct snd_cs4231 *cp, u8 val,
 			    void __iomem *reg_addr)
 {
 	if (cp->flags & CS4231_FLAG_EBUS)
-		return writeb(val, reg_addr);
+		return pete_writeb("sound/sparc/cs4231.c:268", val, reg_addr);
 	else
 		return sbus_writeb(val, reg_addr);
 }

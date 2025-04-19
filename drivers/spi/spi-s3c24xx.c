@@ -100,11 +100,11 @@ static void s3c24xx_spi_chipsel(struct spi_device *spi, int value)
 	switch (value) {
 	case BITBANG_CS_INACTIVE:
 		hw->set_cs(hw->pdata, spi->chip_select, cspol^1);
-		writeb(cs->spcon, hw->regs + S3C2410_SPCON);
+		pete_writeb("drivers/spi/spi-s3c24xx.c:103", cs->spcon, hw->regs + S3C2410_SPCON);
 		break;
 
 	case BITBANG_CS_ACTIVE:
-		writeb(cs->spcon | S3C2410_SPCON_ENSCK,
+		pete_writeb("drivers/spi/spi-s3c24xx.c:107", cs->spcon | S3C2410_SPCON_ENSCK,
 		       hw->regs + S3C2410_SPCON);
 		hw->set_cs(hw->pdata, spi->chip_select, cspol);
 		break;
@@ -164,7 +164,7 @@ static int s3c24xx_spi_setupxfer(struct spi_device *spi,
 
 	ret = s3c24xx_spi_update_state(spi, t);
 	if (!ret)
-		writeb(cs->sppre, hw->regs + S3C2410_SPPRE);
+		pete_writeb("drivers/spi/spi-s3c24xx.c:167", cs->sppre, hw->regs + S3C2410_SPPRE);
 
 	return ret;
 }
@@ -391,7 +391,7 @@ static int s3c24xx_spi_txrx(struct spi_device *spi, struct spi_transfer *t)
 		s3c24xx_spi_tryfiq(hw);
 
 	/* send the first byte */
-	writeb(hw_txbyte(hw, 0), hw->regs + S3C2410_SPTDAT);
+	pete_writeb("drivers/spi/spi-s3c24xx.c:394", hw_txbyte(hw, 0), hw->regs + S3C2410_SPTDAT);
 
 	wait_for_completion(&hw->done);
 	return hw->count;
@@ -400,7 +400,7 @@ static int s3c24xx_spi_txrx(struct spi_device *spi, struct spi_transfer *t)
 static irqreturn_t s3c24xx_spi_irq(int irq, void *dev)
 {
 	struct s3c24xx_spi *hw = dev;
-	unsigned int spsta = readb(hw->regs + S3C2410_SPSTA);
+	unsigned int spsta = pete_readb("drivers/spi/spi-s3c24xx.c:403", hw->regs + S3C2410_SPSTA);
 	unsigned int count = hw->count;
 
 	if (spsta & S3C2410_SPSTA_DCOL) {
@@ -419,12 +419,12 @@ static irqreturn_t s3c24xx_spi_irq(int irq, void *dev)
 		hw->count++;
 
 		if (hw->rx)
-			hw->rx[count] = readb(hw->regs + S3C2410_SPRDAT);
+			hw->rx[count] = pete_readb("drivers/spi/spi-s3c24xx.c:422", hw->regs + S3C2410_SPRDAT);
 
 		count++;
 
 		if (count < hw->len)
-			writeb(hw_txbyte(hw, count), hw->regs + S3C2410_SPTDAT);
+			pete_writeb("drivers/spi/spi-s3c24xx.c:427", hw_txbyte(hw, count), hw->regs + S3C2410_SPTDAT);
 		else
 			complete(&hw->done);
 	} else {
@@ -432,7 +432,7 @@ static irqreturn_t s3c24xx_spi_irq(int irq, void *dev)
 		hw->fiq_inuse = 0;
 
 		if (hw->rx)
-			hw->rx[hw->len-1] = readb(hw->regs + S3C2410_SPRDAT);
+			hw->rx[hw->len-1] = pete_readb("drivers/spi/spi-s3c24xx.c:435", hw->regs + S3C2410_SPRDAT);
 
 		complete(&hw->done);
 	}
@@ -449,9 +449,9 @@ static void s3c24xx_spi_initialsetup(struct s3c24xx_spi *hw)
 
 	/* program defaults into the registers */
 
-	writeb(0xff, hw->regs + S3C2410_SPPRE);
-	writeb(SPPIN_DEFAULT, hw->regs + S3C2410_SPPIN);
-	writeb(SPCON_DEFAULT, hw->regs + S3C2410_SPCON);
+	pete_writeb("drivers/spi/spi-s3c24xx.c:452", 0xff, hw->regs + S3C2410_SPPRE);
+	pete_writeb("drivers/spi/spi-s3c24xx.c:453", SPPIN_DEFAULT, hw->regs + S3C2410_SPPIN);
+	pete_writeb("drivers/spi/spi-s3c24xx.c:454", SPCON_DEFAULT, hw->regs + S3C2410_SPCON);
 
 	if (hw->pdata) {
 		if (hw->set_cs == s3c24xx_spi_gpiocs)

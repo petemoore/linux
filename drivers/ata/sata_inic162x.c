@@ -273,19 +273,19 @@ static void inic_reset_port(void __iomem *port_base)
 	void __iomem *idma_ctl = port_base + PORT_IDMA_CTL;
 
 	/* stop IDMA engine */
-	readw(idma_ctl); /* flush */
+	pete_readw("drivers/ata/sata_inic162x.c:276", idma_ctl); /* flush */
 	msleep(1);
 
 	/* mask IRQ and assert reset */
-	writew(IDMA_CTL_RST_IDMA, idma_ctl);
-	readw(idma_ctl); /* flush */
+	pete_writew("drivers/ata/sata_inic162x.c:280", IDMA_CTL_RST_IDMA, idma_ctl);
+	pete_readw("drivers/ata/sata_inic162x.c:281", idma_ctl); /* flush */
 	msleep(1);
 
 	/* release reset */
-	writew(0, idma_ctl);
+	pete_writew("drivers/ata/sata_inic162x.c:285", 0, idma_ctl);
 
 	/* clear irq */
-	writeb(0xff, port_base + PORT_IRQ_STAT);
+	pete_writeb("drivers/ata/sata_inic162x.c:288", 0xff, port_base + PORT_IRQ_STAT);
 }
 
 static int inic_scr_read(struct ata_link *link, unsigned sc_reg, u32 *val)
@@ -295,7 +295,7 @@ static int inic_scr_read(struct ata_link *link, unsigned sc_reg, u32 *val)
 	if (unlikely(sc_reg >= ARRAY_SIZE(scr_map)))
 		return -EINVAL;
 
-	*val = readl(scr_addr + scr_map[sc_reg] * 4);
+	*val = pete_readl("drivers/ata/sata_inic162x.c:298", scr_addr + scr_map[sc_reg] * 4);
 
 	/* this controller has stuck DIAG.N, ignore it */
 	if (sc_reg == SCR_ERROR)
@@ -310,7 +310,7 @@ static int inic_scr_write(struct ata_link *link, unsigned sc_reg, u32 val)
 	if (unlikely(sc_reg >= ARRAY_SIZE(scr_map)))
 		return -EINVAL;
 
-	writel(val, scr_addr + scr_map[sc_reg] * 4);
+	pete_writel("drivers/ata/sata_inic162x.c:313", val, scr_addr + scr_map[sc_reg] * 4);
 	return 0;
 }
 
@@ -318,9 +318,9 @@ static void inic_stop_idma(struct ata_port *ap)
 {
 	void __iomem *port_base = inic_port_base(ap);
 
-	readb(port_base + PORT_RPQ_FIFO);
-	readb(port_base + PORT_RPQ_CNT);
-	writew(0, port_base + PORT_IDMA_CTL);
+	pete_readb("drivers/ata/sata_inic162x.c:321", port_base + PORT_RPQ_FIFO);
+	pete_readb("drivers/ata/sata_inic162x.c:322", port_base + PORT_RPQ_CNT);
+	pete_writew("drivers/ata/sata_inic162x.c:323", 0, port_base + PORT_IDMA_CTL);
 }
 
 static void inic_host_err_intr(struct ata_port *ap, u8 irq_stat, u16 idma_stat)
@@ -387,9 +387,9 @@ static void inic_host_intr(struct ata_port *ap)
 	u16 idma_stat;
 
 	/* read and clear IRQ status */
-	irq_stat = readb(port_base + PORT_IRQ_STAT);
-	writeb(irq_stat, port_base + PORT_IRQ_STAT);
-	idma_stat = readw(port_base + PORT_IDMA_STAT);
+	irq_stat = pete_readb("drivers/ata/sata_inic162x.c:390", port_base + PORT_IRQ_STAT);
+	pete_writeb("drivers/ata/sata_inic162x.c:391", irq_stat, port_base + PORT_IRQ_STAT);
+	idma_stat = pete_readw("drivers/ata/sata_inic162x.c:392", port_base + PORT_IDMA_STAT);
 
 	if (unlikely((irq_stat & PIRQ_ERR) || (idma_stat & IDMA_STAT_ERR)))
 		inic_host_err_intr(ap, irq_stat, idma_stat);
@@ -403,7 +403,7 @@ static void inic_host_intr(struct ata_port *ap)
 		/* Depending on circumstances, device error
 		 * isn't reported by IDMA, check it explicitly.
 		 */
-		if (unlikely(readb(port_base + PORT_TF_COMMAND) &
+		if (unlikely(pete_readb("drivers/ata/sata_inic162x.c:406", port_base + PORT_TF_COMMAND) &
 			     (ATA_DF | ATA_ERR)))
 			qc->err_mask |= AC_ERR_DEV;
 
@@ -423,7 +423,7 @@ static irqreturn_t inic_interrupt(int irq, void *dev_instance)
 	u16 host_irq_stat;
 	int i, handled = 0;
 
-	host_irq_stat = readw(hpriv->mmio_base + HOST_IRQ_STAT);
+	host_irq_stat = pete_readw("drivers/ata/sata_inic162x.c:426", hpriv->mmio_base + HOST_IRQ_STAT);
 
 	if (unlikely(!(host_irq_stat & HIRQ_GLOBAL)))
 		goto out;
@@ -548,9 +548,9 @@ static unsigned int inic_qc_issue(struct ata_queued_cmd *qc)
 	void __iomem *port_base = inic_port_base(ap);
 
 	/* fire up the ADMA engine */
-	writew(HCTL_FTHD0 | HCTL_LEDEN, port_base + HOST_CTL);
-	writew(IDMA_CTL_GO, port_base + PORT_IDMA_CTL);
-	writeb(0, port_base + PORT_CPB_PTQFIFO);
+	pete_writew("drivers/ata/sata_inic162x.c:551", HCTL_FTHD0 | HCTL_LEDEN, port_base + HOST_CTL);
+	pete_writew("drivers/ata/sata_inic162x.c:552", IDMA_CTL_GO, port_base + PORT_IDMA_CTL);
+	pete_writeb("drivers/ata/sata_inic162x.c:553", 0, port_base + PORT_CPB_PTQFIFO);
 
 	return 0;
 }
@@ -559,13 +559,13 @@ static void inic_tf_read(struct ata_port *ap, struct ata_taskfile *tf)
 {
 	void __iomem *port_base = inic_port_base(ap);
 
-	tf->error	= readb(port_base + PORT_TF_FEATURE);
-	tf->nsect	= readb(port_base + PORT_TF_NSECT);
-	tf->lbal	= readb(port_base + PORT_TF_LBAL);
-	tf->lbam	= readb(port_base + PORT_TF_LBAM);
-	tf->lbah	= readb(port_base + PORT_TF_LBAH);
-	tf->device	= readb(port_base + PORT_TF_DEVICE);
-	tf->status	= readb(port_base + PORT_TF_COMMAND);
+	tf->error	= pete_readb("drivers/ata/sata_inic162x.c:562", port_base + PORT_TF_FEATURE);
+	tf->nsect	= pete_readb("drivers/ata/sata_inic162x.c:563", port_base + PORT_TF_NSECT);
+	tf->lbal	= pete_readb("drivers/ata/sata_inic162x.c:564", port_base + PORT_TF_LBAL);
+	tf->lbam	= pete_readb("drivers/ata/sata_inic162x.c:565", port_base + PORT_TF_LBAM);
+	tf->lbah	= pete_readb("drivers/ata/sata_inic162x.c:566", port_base + PORT_TF_LBAH);
+	tf->device	= pete_readb("drivers/ata/sata_inic162x.c:567", port_base + PORT_TF_DEVICE);
+	tf->status	= pete_readb("drivers/ata/sata_inic162x.c:568", port_base + PORT_TF_COMMAND);
 }
 
 static bool inic_qc_fill_rtf(struct ata_queued_cmd *qc)
@@ -594,23 +594,23 @@ static void inic_freeze(struct ata_port *ap)
 {
 	void __iomem *port_base = inic_port_base(ap);
 
-	writeb(PIRQ_MASK_FREEZE, port_base + PORT_IRQ_MASK);
-	writeb(0xff, port_base + PORT_IRQ_STAT);
+	pete_writeb("drivers/ata/sata_inic162x.c:597", PIRQ_MASK_FREEZE, port_base + PORT_IRQ_MASK);
+	pete_writeb("drivers/ata/sata_inic162x.c:598", 0xff, port_base + PORT_IRQ_STAT);
 }
 
 static void inic_thaw(struct ata_port *ap)
 {
 	void __iomem *port_base = inic_port_base(ap);
 
-	writeb(0xff, port_base + PORT_IRQ_STAT);
-	writeb(PIRQ_MASK_DEFAULT, port_base + PORT_IRQ_MASK);
+	pete_writeb("drivers/ata/sata_inic162x.c:605", 0xff, port_base + PORT_IRQ_STAT);
+	pete_writeb("drivers/ata/sata_inic162x.c:606", PIRQ_MASK_DEFAULT, port_base + PORT_IRQ_MASK);
 }
 
 static int inic_check_ready(struct ata_link *link)
 {
 	void __iomem *port_base = inic_port_base(link->ap);
 
-	return ata_check_ready(readb(port_base + PORT_TF_COMMAND));
+	return ata_check_ready(pete_readb("drivers/ata/sata_inic162x.c:613", port_base + PORT_TF_COMMAND));
 }
 
 /*
@@ -629,10 +629,10 @@ static int inic_hardreset(struct ata_link *link, unsigned int *class,
 	/* hammer it into sane state */
 	inic_reset_port(port_base);
 
-	writew(IDMA_CTL_RST_ATA, idma_ctl);
-	readw(idma_ctl);	/* flush */
+	pete_writew("drivers/ata/sata_inic162x.c:632", IDMA_CTL_RST_ATA, idma_ctl);
+	pete_readw("drivers/ata/sata_inic162x.c:633", idma_ctl);	/* flush */
 	ata_msleep(ap, 1);
-	writew(0, idma_ctl);
+	pete_writew("drivers/ata/sata_inic162x.c:635", 0, idma_ctl);
 
 	rc = sata_link_resume(link, timing, deadline);
 	if (rc) {
@@ -688,7 +688,7 @@ static void init_port(struct ata_port *ap)
 	memset(pp->cpb_tbl, 0, IDMA_CPB_TBL_SIZE);
 
 	/* setup CPB lookup table addresses */
-	writel(pp->cpb_tbl_dma, port_base + PORT_CPB_CPBLAR);
+	pete_writel("drivers/ata/sata_inic162x.c:691", pp->cpb_tbl_dma, port_base + PORT_CPB_CPBLAR);
 }
 
 static int inic_port_resume(struct ata_port *ap)
@@ -763,12 +763,12 @@ static int init_controller(void __iomem *mmio_base, u16 hctl)
 	/* Soft reset whole controller.  Spec says reset duration is 3
 	 * PCI clocks, be generous and give it 10ms.
 	 */
-	writew(hctl | HCTL_SOFTRST, mmio_base + HOST_CTL);
-	readw(mmio_base + HOST_CTL); /* flush */
+	pete_writew("drivers/ata/sata_inic162x.c:766", hctl | HCTL_SOFTRST, mmio_base + HOST_CTL);
+	pete_readw("drivers/ata/sata_inic162x.c:767", mmio_base + HOST_CTL); /* flush */
 
 	for (i = 0; i < 10; i++) {
 		msleep(1);
-		val = readw(mmio_base + HOST_CTL);
+		val = pete_readw("drivers/ata/sata_inic162x.c:771", mmio_base + HOST_CTL);
 		if (!(val & HCTL_SOFTRST))
 			break;
 	}
@@ -780,15 +780,15 @@ static int init_controller(void __iomem *mmio_base, u16 hctl)
 	for (i = 0; i < NR_PORTS; i++) {
 		void __iomem *port_base = mmio_base + i * PORT_SIZE;
 
-		writeb(0xff, port_base + PORT_IRQ_MASK);
+		pete_writeb("drivers/ata/sata_inic162x.c:783", 0xff, port_base + PORT_IRQ_MASK);
 		inic_reset_port(port_base);
 	}
 
 	/* port IRQ is masked now, unmask global IRQ */
-	writew(hctl & ~HCTL_IRQOFF, mmio_base + HOST_CTL);
-	val = readw(mmio_base + HOST_IRQ_MASK);
+	pete_writew("drivers/ata/sata_inic162x.c:788", hctl & ~HCTL_IRQOFF, mmio_base + HOST_CTL);
+	val = pete_readw("drivers/ata/sata_inic162x.c:789", mmio_base + HOST_IRQ_MASK);
 	val &= ~(HIRQ_PORT0 | HIRQ_PORT1);
-	writew(val, mmio_base + HOST_IRQ_MASK);
+	pete_writew("drivers/ata/sata_inic162x.c:791", val, mmio_base + HOST_IRQ_MASK);
 
 	return 0;
 }
@@ -854,7 +854,7 @@ static int inic_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		return rc;
 	host->iomap = iomap = pcim_iomap_table(pdev);
 	hpriv->mmio_base = iomap[mmio_bar];
-	hpriv->cached_hctl = readw(hpriv->mmio_base + HOST_CTL);
+	hpriv->cached_hctl = pete_readw("drivers/ata/sata_inic162x.c:857", hpriv->mmio_base + HOST_CTL);
 
 	for (i = 0; i < NR_PORTS; i++) {
 		struct ata_port *ap = host->ports[i];

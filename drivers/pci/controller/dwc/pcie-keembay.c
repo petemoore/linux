@@ -93,12 +93,12 @@ static void keembay_pcie_ltssm_set(struct keembay_pcie *pcie, bool enable)
 {
 	u32 val;
 
-	val = readl(pcie->apb_base + PCIE_REGS_PCIE_APP_CNTRL);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-keembay.c:96", pcie->apb_base + PCIE_REGS_PCIE_APP_CNTRL);
 	if (enable)
 		val |= APP_LTSSM_ENABLE;
 	else
 		val &= ~APP_LTSSM_ENABLE;
-	writel(val, pcie->apb_base + PCIE_REGS_PCIE_APP_CNTRL);
+	pete_writel("drivers/pci/controller/dwc/pcie-keembay.c:101", val, pcie->apb_base + PCIE_REGS_PCIE_APP_CNTRL);
 }
 
 static int keembay_pcie_link_up(struct dw_pcie *pci)
@@ -106,7 +106,7 @@ static int keembay_pcie_link_up(struct dw_pcie *pci)
 	struct keembay_pcie *pcie = dev_get_drvdata(pci->dev);
 	u32 val;
 
-	val = readl(pcie->apb_base + PCIE_REGS_PCIE_SII_PM_STATE);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-keembay.c:109", pcie->apb_base + PCIE_REGS_PCIE_SII_PM_STATE);
 
 	return (val & PCIE_REGS_PCIE_SII_LINK_UP) == PCIE_REGS_PCIE_SII_LINK_UP;
 }
@@ -208,14 +208,14 @@ static int keembay_pcie_pll_init(struct keembay_pcie *pcie)
 	int ret;
 
 	val = FIELD_PREP(LJPLL_REF_DIV, 0) | FIELD_PREP(LJPLL_FB_DIV, 0x32);
-	writel(val, pcie->apb_base + PCIE_REGS_LJPLL_CNTRL_2);
+	pete_writel("drivers/pci/controller/dwc/pcie-keembay.c:211", val, pcie->apb_base + PCIE_REGS_LJPLL_CNTRL_2);
 
 	val = FIELD_PREP(LJPLL_POST_DIV3A, 0x2) |
 		FIELD_PREP(LJPLL_POST_DIV2A, 0x2);
-	writel(val, pcie->apb_base + PCIE_REGS_LJPLL_CNTRL_3);
+	pete_writel("drivers/pci/controller/dwc/pcie-keembay.c:215", val, pcie->apb_base + PCIE_REGS_LJPLL_CNTRL_3);
 
 	val = FIELD_PREP(LJPLL_EN, 0x1) | FIELD_PREP(LJPLL_FOUT_EN, 0xc);
-	writel(val, pcie->apb_base + PCIE_REGS_LJPLL_CNTRL_0);
+	pete_writel("drivers/pci/controller/dwc/pcie-keembay.c:218", val, pcie->apb_base + PCIE_REGS_LJPLL_CNTRL_0);
 
 	ret = readl_poll_timeout(pcie->apb_base + PCIE_REGS_LJPLL_STA,
 				 val, val & LJPLL_LOCK, 20,
@@ -245,14 +245,14 @@ static void keembay_pcie_msi_irq_handler(struct irq_desc *desc)
 	chained_irq_enter(chip, desc);
 
 	pp = &pcie->pci.pp;
-	val = readl(pcie->apb_base + PCIE_REGS_INTERRUPT_STATUS);
-	mask = readl(pcie->apb_base + PCIE_REGS_INTERRUPT_ENABLE);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-keembay.c:248", pcie->apb_base + PCIE_REGS_INTERRUPT_STATUS);
+	mask = pete_readl("drivers/pci/controller/dwc/pcie-keembay.c:249", pcie->apb_base + PCIE_REGS_INTERRUPT_ENABLE);
 
 	status = val & mask;
 
 	if (status & MSI_CTRL_INT) {
 		dw_handle_msi_irq(pp);
-		writel(status, pcie->apb_base + PCIE_REGS_INTERRUPT_STATUS);
+		pete_writel("drivers/pci/controller/dwc/pcie-keembay.c:255", status, pcie->apb_base + PCIE_REGS_INTERRUPT_STATUS);
 	}
 
 	chained_irq_exit(chip, desc);
@@ -280,7 +280,7 @@ static void keembay_pcie_ep_init(struct dw_pcie_ep *ep)
 	struct dw_pcie *pci = to_dw_pcie_from_ep(ep);
 	struct keembay_pcie *pcie = dev_get_drvdata(pci->dev);
 
-	writel(EDMA_INT_EN, pcie->apb_base + PCIE_REGS_INTERRUPT_ENABLE);
+	pete_writel("drivers/pci/controller/dwc/pcie-keembay.c:283", EDMA_INT_EN, pcie->apb_base + PCIE_REGS_INTERRUPT_ENABLE);
 }
 
 static int keembay_pcie_ep_raise_irq(struct dw_pcie_ep *ep, u8 func_no,
@@ -352,18 +352,18 @@ static int keembay_pcie_add_pcie_port(struct keembay_pcie *pcie,
 	if (ret)
 		return ret;
 
-	val = readl(pcie->apb_base + PCIE_REGS_PCIE_PHY_CNTL);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-keembay.c:355", pcie->apb_base + PCIE_REGS_PCIE_PHY_CNTL);
 	val |= PHY0_SRAM_BYPASS;
-	writel(val, pcie->apb_base + PCIE_REGS_PCIE_PHY_CNTL);
+	pete_writel("drivers/pci/controller/dwc/pcie-keembay.c:357", val, pcie->apb_base + PCIE_REGS_PCIE_PHY_CNTL);
 
-	writel(PCIE_DEVICE_TYPE, pcie->apb_base + PCIE_REGS_PCIE_CFG);
+	pete_writel("drivers/pci/controller/dwc/pcie-keembay.c:359", PCIE_DEVICE_TYPE, pcie->apb_base + PCIE_REGS_PCIE_CFG);
 
 	ret = keembay_pcie_pll_init(pcie);
 	if (ret)
 		return ret;
 
-	val = readl(pcie->apb_base + PCIE_REGS_PCIE_CFG);
-	writel(val | PCIE_RSTN, pcie->apb_base + PCIE_REGS_PCIE_CFG);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-keembay.c:365", pcie->apb_base + PCIE_REGS_PCIE_CFG);
+	pete_writel("drivers/pci/controller/dwc/pcie-keembay.c:366", val | PCIE_RSTN, pcie->apb_base + PCIE_REGS_PCIE_CFG);
 	keembay_ep_reset_deassert(pcie);
 
 	ret = dw_pcie_host_init(pp);
@@ -373,10 +373,10 @@ static int keembay_pcie_add_pcie_port(struct keembay_pcie *pcie,
 		return ret;
 	}
 
-	val = readl(pcie->apb_base + PCIE_REGS_INTERRUPT_ENABLE);
+	val = pete_readl("drivers/pci/controller/dwc/pcie-keembay.c:376", pcie->apb_base + PCIE_REGS_INTERRUPT_ENABLE);
 	if (IS_ENABLED(CONFIG_PCI_MSI))
 		val |= MSI_CTRL_INT_EN;
-	writel(val, pcie->apb_base + PCIE_REGS_INTERRUPT_ENABLE);
+	pete_writel("drivers/pci/controller/dwc/pcie-keembay.c:379", val, pcie->apb_base + PCIE_REGS_INTERRUPT_ENABLE);
 
 	return 0;
 }

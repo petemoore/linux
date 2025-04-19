@@ -493,13 +493,13 @@ static u32 depth_to_dst(u32 depth);
 static void aty128_bl_set_power(struct fb_info *info, int power);
 #endif
 
-#define BIOS_IN8(v)  	(readb(bios + (v)))
-#define BIOS_IN16(v) 	(readb(bios + (v)) | \
-			  (readb(bios + (v) + 1) << 8))
-#define BIOS_IN32(v) 	(readb(bios + (v)) | \
-			  (readb(bios + (v) + 1) << 8) | \
-			  (readb(bios + (v) + 2) << 16) | \
-			  (readb(bios + (v) + 3) << 24))
+#define BIOS_IN8(v)  	(pete_readb("drivers/video/fbdev/aty/aty128fb.c:496", bios + (v)))
+#define BIOS_IN16(v) 	(pete_readb("drivers/video/fbdev/aty/aty128fb.c:497", bios + (v)) | \
+			  (pete_readb("drivers/video/fbdev/aty/aty128fb.c:498", bios + (v) + 1) << 8))
+#define BIOS_IN32(v) 	(pete_readb("drivers/video/fbdev/aty/aty128fb.c:499", bios + (v)) | \
+			  (pete_readb("drivers/video/fbdev/aty/aty128fb.c:500", bios + (v) + 1) << 8) | \
+			  (pete_readb("drivers/video/fbdev/aty/aty128fb.c:501", bios + (v) + 2) << 16) | \
+			  (pete_readb("drivers/video/fbdev/aty/aty128fb.c:502", bios + (v) + 3) << 24))
 
 
 static const struct fb_ops aty128fb_ops = {
@@ -931,7 +931,7 @@ static void __iomem *aty128_find_mem_vbios(struct aty128fb_par *par)
                 rom_base = ioremap(segstart, 0x10000);
 		if (rom_base == NULL)
 			return NULL;
-		if (readb(rom_base) == 0x55 && readb(rom_base + 1) == 0xaa)
+		if (pete_readb("drivers/video/fbdev/aty/aty128fb.c:934", rom_base) == 0x55 && pete_readb("drivers/video/fbdev/aty/aty128fb.c:934", rom_base + 1) == 0xaa)
 	                break;
                 iounmap(rom_base);
 		rom_base = NULL;

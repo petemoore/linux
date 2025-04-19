@@ -186,23 +186,23 @@ static int mxs_dcp_start_dma(struct dcp_async_ctx *actx)
 	reinit_completion(&sdcp->completion[chan]);
 
 	/* Clear status register. */
-	writel(0xffffffff, sdcp->base + MXS_DCP_CH_N_STAT_CLR(chan));
+	pete_writel("drivers/crypto/mxs-dcp.c:189", 0xffffffff, sdcp->base + MXS_DCP_CH_N_STAT_CLR(chan));
 
 	/* Load the DMA descriptor. */
-	writel(desc_phys, sdcp->base + MXS_DCP_CH_N_CMDPTR(chan));
+	pete_writel("drivers/crypto/mxs-dcp.c:192", desc_phys, sdcp->base + MXS_DCP_CH_N_CMDPTR(chan));
 
 	/* Increment the semaphore to start the DMA transfer. */
-	writel(1, sdcp->base + MXS_DCP_CH_N_SEMA(chan));
+	pete_writel("drivers/crypto/mxs-dcp.c:195", 1, sdcp->base + MXS_DCP_CH_N_SEMA(chan));
 
 	ret = wait_for_completion_timeout(&sdcp->completion[chan],
 					  msecs_to_jiffies(1000));
 	if (!ret) {
 		dev_err(sdcp->dev, "Channel %i timeout (DCP_STAT=0x%08x)\n",
-			chan, readl(sdcp->base + MXS_DCP_STAT));
+			chan, pete_readl("drivers/crypto/mxs-dcp.c:201", sdcp->base + MXS_DCP_STAT));
 		return -ETIMEDOUT;
 	}
 
-	stat = readl(sdcp->base + MXS_DCP_CH_N_STAT(chan));
+	stat = pete_readl("drivers/crypto/mxs-dcp.c:205", sdcp->base + MXS_DCP_CH_N_STAT(chan));
 	if (stat & 0xff) {
 		dev_err(sdcp->dev, "Channel %i error (CH_STAT=0x%08x)\n",
 			chan, stat);
@@ -952,13 +952,13 @@ static irqreturn_t mxs_dcp_irq(int irq, void *context)
 	uint32_t stat;
 	int i;
 
-	stat = readl(sdcp->base + MXS_DCP_STAT);
+	stat = pete_readl("drivers/crypto/mxs-dcp.c:955", sdcp->base + MXS_DCP_STAT);
 	stat &= MXS_DCP_STAT_IRQ_MASK;
 	if (!stat)
 		return IRQ_NONE;
 
 	/* Clear the interrupts. */
-	writel(stat, sdcp->base + MXS_DCP_STAT_CLR);
+	pete_writel("drivers/crypto/mxs-dcp.c:961", stat, sdcp->base + MXS_DCP_STAT_CLR);
 
 	/* Complete the DMA requests that finished. */
 	for (i = 0; i < DCP_MAX_CHANS; i++)
@@ -1040,12 +1040,12 @@ static int mxs_dcp_probe(struct platform_device *pdev)
 	}
 
 	/* Initialize control register. */
-	writel(MXS_DCP_CTRL_GATHER_RESIDUAL_WRITES |
+	pete_writel("drivers/crypto/mxs-dcp.c:1043", MXS_DCP_CTRL_GATHER_RESIDUAL_WRITES |
 	       MXS_DCP_CTRL_ENABLE_CONTEXT_CACHING | 0xf,
 	       sdcp->base + MXS_DCP_CTRL);
 
 	/* Enable all DCP DMA channels. */
-	writel(MXS_DCP_CHANNELCTRL_ENABLE_CHANNEL_MASK,
+	pete_writel("drivers/crypto/mxs-dcp.c:1048", MXS_DCP_CHANNELCTRL_ENABLE_CHANNEL_MASK,
 	       sdcp->base + MXS_DCP_CHANNELCTRL);
 
 	/*
@@ -1055,10 +1055,10 @@ static int mxs_dcp_probe(struct platform_device *pdev)
 	 * trashing good memory. The DCP DMA cannot access ROM, so any ROM
 	 * address will do.
 	 */
-	writel(0xffff0000, sdcp->base + MXS_DCP_CONTEXT);
+	pete_writel("drivers/crypto/mxs-dcp.c:1058", 0xffff0000, sdcp->base + MXS_DCP_CONTEXT);
 	for (i = 0; i < DCP_MAX_CHANS; i++)
-		writel(0xffffffff, sdcp->base + MXS_DCP_CH_N_STAT_CLR(i));
-	writel(0xffffffff, sdcp->base + MXS_DCP_STAT_CLR);
+		pete_writel("drivers/crypto/mxs-dcp.c:1060", 0xffffffff, sdcp->base + MXS_DCP_CH_N_STAT_CLR(i));
+	pete_writel("drivers/crypto/mxs-dcp.c:1061", 0xffffffff, sdcp->base + MXS_DCP_STAT_CLR);
 
 	global_sdcp = sdcp;
 
@@ -1088,7 +1088,7 @@ static int mxs_dcp_probe(struct platform_device *pdev)
 	}
 
 	/* Register the various crypto algorithms. */
-	sdcp->caps = readl(sdcp->base + MXS_DCP_CAPABILITY1);
+	sdcp->caps = pete_readl("drivers/crypto/mxs-dcp.c:1091", sdcp->base + MXS_DCP_CAPABILITY1);
 
 	if (sdcp->caps & MXS_DCP_CAPABILITY1_AES128) {
 		ret = crypto_register_skciphers(dcp_aes_algs,

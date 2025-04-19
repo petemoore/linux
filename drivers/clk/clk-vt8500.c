@@ -68,7 +68,7 @@ static __init void vtwm_set_pmc_base(void)
 
 static void vt8500_pmc_wait_busy(void)
 {
-	while (readl(pmc_base) & VT8500_PMC_BUSY_MASK)
+	while (pete_readl("drivers/clk/clk-vt8500.c:71", pmc_base) & VT8500_PMC_BUSY_MASK)
 		cpu_relax();
 }
 
@@ -80,9 +80,9 @@ static int vt8500_dclk_enable(struct clk_hw *hw)
 
 	spin_lock_irqsave(cdev->lock, flags);
 
-	en_val = readl(cdev->en_reg);
+	en_val = pete_readl("drivers/clk/clk-vt8500.c:83", cdev->en_reg);
 	en_val |= BIT(cdev->en_bit);
-	writel(en_val, cdev->en_reg);
+	pete_writel("drivers/clk/clk-vt8500.c:85", en_val, cdev->en_reg);
 
 	spin_unlock_irqrestore(cdev->lock, flags);
 	return 0;
@@ -96,9 +96,9 @@ static void vt8500_dclk_disable(struct clk_hw *hw)
 
 	spin_lock_irqsave(cdev->lock, flags);
 
-	en_val = readl(cdev->en_reg);
+	en_val = pete_readl("drivers/clk/clk-vt8500.c:99", cdev->en_reg);
 	en_val &= ~BIT(cdev->en_bit);
-	writel(en_val, cdev->en_reg);
+	pete_writel("drivers/clk/clk-vt8500.c:101", en_val, cdev->en_reg);
 
 	spin_unlock_irqrestore(cdev->lock, flags);
 }
@@ -106,7 +106,7 @@ static void vt8500_dclk_disable(struct clk_hw *hw)
 static int vt8500_dclk_is_enabled(struct clk_hw *hw)
 {
 	struct clk_device *cdev = to_clk_device(hw);
-	u32 en_val = (readl(cdev->en_reg) & BIT(cdev->en_bit));
+	u32 en_val = (pete_readl("drivers/clk/clk-vt8500.c:109", cdev->en_reg) & BIT(cdev->en_bit));
 
 	return en_val ? 1 : 0;
 }
@@ -115,7 +115,7 @@ static unsigned long vt8500_dclk_recalc_rate(struct clk_hw *hw,
 				unsigned long parent_rate)
 {
 	struct clk_device *cdev = to_clk_device(hw);
-	u32 div = readl(cdev->div_reg) & cdev->div_mask;
+	u32 div = pete_readl("drivers/clk/clk-vt8500.c:118", cdev->div_reg) & cdev->div_mask;
 
 	/* Special case for SDMMC devices */
 	if ((cdev->div_mask == 0x3F) && (div & BIT(5)))
@@ -186,7 +186,7 @@ static int vt8500_dclk_set_rate(struct clk_hw *hw, unsigned long rate,
 	spin_lock_irqsave(cdev->lock, flags);
 
 	vt8500_pmc_wait_busy();
-	writel(divisor, cdev->div_reg);
+	pete_writel("drivers/clk/clk-vt8500.c:189", divisor, cdev->div_reg);
 	vt8500_pmc_wait_busy();
 
 	spin_unlock_irqrestore(cdev->lock, flags);
@@ -586,7 +586,7 @@ static int vtwm_pll_set_rate(struct clk_hw *hw, unsigned long rate,
 	spin_lock_irqsave(pll->lock, flags);
 
 	vt8500_pmc_wait_busy();
-	writel(pll_val, pll->reg);
+	pete_writel("drivers/clk/clk-vt8500.c:589", pll_val, pll->reg);
 	vt8500_pmc_wait_busy();
 
 	spin_unlock_irqrestore(pll->lock, flags);
@@ -637,7 +637,7 @@ static unsigned long vtwm_pll_recalc_rate(struct clk_hw *hw,
 				unsigned long parent_rate)
 {
 	struct clk_pll *pll = to_clk_pll(hw);
-	u32 pll_val = readl(pll->reg);
+	u32 pll_val = pete_readl("drivers/clk/clk-vt8500.c:640", pll->reg);
 	unsigned long pll_freq;
 
 	switch (pll->type) {

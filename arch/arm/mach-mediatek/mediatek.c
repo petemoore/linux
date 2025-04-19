@@ -28,7 +28,7 @@ static void __init mediatek_timer_init(void)
 		gpt_base = ioremap(GPT6_CON_MT65xx, 0x04);
 
 		/* enable clock and set to free-run */
-		writel(GPT_ENABLE, gpt_base);
+		pete_writel("arch/arm/mach-mediatek/mediatek.c:31", GPT_ENABLE, gpt_base);
 		iounmap(gpt_base);
 	}
 

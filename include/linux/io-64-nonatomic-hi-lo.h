@@ -10,16 +10,16 @@ static inline __u64 hi_lo_readq(const volatile void __iomem *addr)
 	const volatile u32 __iomem *p = addr;
 	u32 low, high;
 
-	high = readl(p + 1);
-	low = readl(p);
+	high = pete_readl("include/linux/io-64-nonatomic-hi-lo.h:13", p + 1);
+	low = pete_readl("include/linux/io-64-nonatomic-hi-lo.h:14", p);
 
 	return low + ((u64)high << 32);
 }
 
 static inline void hi_lo_writeq(__u64 val, volatile void __iomem *addr)
 {
-	writel(val >> 32, addr + 4);
-	writel(val, addr);
+	pete_writel("include/linux/io-64-nonatomic-hi-lo.h:21", val >> 32, addr + 4);
+	pete_writel("include/linux/io-64-nonatomic-hi-lo.h:22", val, addr);
 }
 
 static inline __u64 hi_lo_readq_relaxed(const volatile void __iomem *addr)

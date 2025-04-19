@@ -100,7 +100,7 @@ void vnic_wq_copy_init(struct vnic_wq_copy *wq, unsigned int cq_index,
 	u64 paddr;
 
 	paddr = (u64)wq->ring.base_addr | VNIC_PADDR_TARGET;
-	writeq(paddr, &wq->ctrl->ring_base);
+	pete_writeq("drivers/scsi/fnic/vnic_wq_copy.c:103", paddr, &wq->ctrl->ring_base);
 	iowrite32(wq->ring.desc_count, &wq->ctrl->ring_size);
 	iowrite32(0, &wq->ctrl->fetch_index);
 	iowrite32(0, &wq->ctrl->posted_index);

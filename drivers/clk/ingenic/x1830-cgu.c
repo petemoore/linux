@@ -59,8 +59,8 @@ static int x1830_usb_phy_enable(struct clk_hw *hw)
 	void __iomem *reg_opcr		= cgu->base + CGU_REG_OPCR;
 	void __iomem *reg_usbpcr	= cgu->base + CGU_REG_USBPCR;
 
-	writel((readl(reg_opcr) | OPCR_SPENDN0) & ~OPCR_GATE_USBPHYCLK, reg_opcr);
-	writel(readl(reg_usbpcr) & ~USBPCR_OTG_DISABLE & ~USBPCR_SIDDQ, reg_usbpcr);
+	pete_writel("drivers/clk/ingenic/x1830-cgu.c:62", (pete_readl("drivers/clk/ingenic/x1830-cgu.c:62", reg_opcr) | OPCR_SPENDN0) & ~OPCR_GATE_USBPHYCLK, reg_opcr);
+	pete_writel("drivers/clk/ingenic/x1830-cgu.c:63", pete_readl("drivers/clk/ingenic/x1830-cgu.c:63", reg_usbpcr) & ~USBPCR_OTG_DISABLE & ~USBPCR_SIDDQ, reg_usbpcr);
 	return 0;
 }
 
@@ -69,8 +69,8 @@ static void x1830_usb_phy_disable(struct clk_hw *hw)
 	void __iomem *reg_opcr		= cgu->base + CGU_REG_OPCR;
 	void __iomem *reg_usbpcr	= cgu->base + CGU_REG_USBPCR;
 
-	writel((readl(reg_opcr) & ~OPCR_SPENDN0) | OPCR_GATE_USBPHYCLK, reg_opcr);
-	writel(readl(reg_usbpcr) | USBPCR_OTG_DISABLE | USBPCR_SIDDQ, reg_usbpcr);
+	pete_writel("drivers/clk/ingenic/x1830-cgu.c:72", (pete_readl("drivers/clk/ingenic/x1830-cgu.c:72", reg_opcr) & ~OPCR_SPENDN0) | OPCR_GATE_USBPHYCLK, reg_opcr);
+	pete_writel("drivers/clk/ingenic/x1830-cgu.c:73", pete_readl("drivers/clk/ingenic/x1830-cgu.c:73", reg_usbpcr) | USBPCR_OTG_DISABLE | USBPCR_SIDDQ, reg_usbpcr);
 }
 
 static int x1830_usb_phy_is_enabled(struct clk_hw *hw)
@@ -78,9 +78,9 @@ static int x1830_usb_phy_is_enabled(struct clk_hw *hw)
 	void __iomem *reg_opcr		= cgu->base + CGU_REG_OPCR;
 	void __iomem *reg_usbpcr	= cgu->base + CGU_REG_USBPCR;
 
-	return (readl(reg_opcr) & OPCR_SPENDN0) &&
-		!(readl(reg_usbpcr) & USBPCR_SIDDQ) &&
-		!(readl(reg_usbpcr) & USBPCR_OTG_DISABLE);
+	return (pete_readl("drivers/clk/ingenic/x1830-cgu.c:81", reg_opcr) & OPCR_SPENDN0) &&
+		!(pete_readl("drivers/clk/ingenic/x1830-cgu.c:82", reg_usbpcr) & USBPCR_SIDDQ) &&
+		!(pete_readl("drivers/clk/ingenic/x1830-cgu.c:83", reg_usbpcr) & USBPCR_OTG_DISABLE);
 }
 
 static const struct clk_ops x1830_otg_phy_ops = {

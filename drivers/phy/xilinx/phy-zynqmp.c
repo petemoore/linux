@@ -254,12 +254,12 @@ static const struct xpsgtr_ssc ssc_lookup[] = {
 
 static inline u32 xpsgtr_read(struct xpsgtr_dev *gtr_dev, u32 reg)
 {
-	return readl(gtr_dev->serdes + reg);
+	return pete_readl("drivers/phy/xilinx/phy-zynqmp.c:257", gtr_dev->serdes + reg);
 }
 
 static inline void xpsgtr_write(struct xpsgtr_dev *gtr_dev, u32 reg, u32 value)
 {
-	writel(value, gtr_dev->serdes + reg);
+	pete_writel("drivers/phy/xilinx/phy-zynqmp.c:262", value, gtr_dev->serdes + reg);
 }
 
 static inline void xpsgtr_clr_set(struct xpsgtr_dev *gtr_dev, u32 reg,
@@ -277,7 +277,7 @@ static inline u32 xpsgtr_read_phy(struct xpsgtr_phy *gtr_phy, u32 reg)
 	void __iomem *addr = gtr_phy->dev->serdes
 			   + gtr_phy->lane * PHY_REG_OFFSET + reg;
 
-	return readl(addr);
+	return pete_readl("drivers/phy/xilinx/phy-zynqmp.c:280", addr);
 }
 
 static inline void xpsgtr_write_phy(struct xpsgtr_phy *gtr_phy,
@@ -286,7 +286,7 @@ static inline void xpsgtr_write_phy(struct xpsgtr_phy *gtr_phy,
 	void __iomem *addr = gtr_phy->dev->serdes
 			   + gtr_phy->lane * PHY_REG_OFFSET + reg;
 
-	writel(value, addr);
+	pete_writel("drivers/phy/xilinx/phy-zynqmp.c:289", value, addr);
 }
 
 static inline void xpsgtr_clr_set_phy(struct xpsgtr_phy *gtr_phy,
@@ -295,7 +295,7 @@ static inline void xpsgtr_clr_set_phy(struct xpsgtr_phy *gtr_phy,
 	void __iomem *addr = gtr_phy->dev->serdes
 			   + gtr_phy->lane * PHY_REG_OFFSET + reg;
 
-	writel((readl(addr) & ~clr) | set, addr);
+	pete_writel("drivers/phy/xilinx/phy-zynqmp.c:298", (pete_readl("drivers/phy/xilinx/phy-zynqmp.c:298", addr) & ~clr) | set, addr);
 }
 
 /*
@@ -439,7 +439,7 @@ static void xpsgtr_phy_init_sata(struct xpsgtr_phy *gtr_phy)
 
 	xpsgtr_bypass_scrambler_8b10b(gtr_phy);
 
-	writel(gtr_phy->lane, gtr_dev->siou + SATA_CONTROL_OFFSET);
+	pete_writel("drivers/phy/xilinx/phy-zynqmp.c:442", gtr_phy->lane, gtr_dev->siou + SATA_CONTROL_OFFSET);
 }
 
 /* SGMII-specific initialization. */

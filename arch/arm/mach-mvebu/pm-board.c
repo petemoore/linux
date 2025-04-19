@@ -32,14 +32,14 @@ static void mvebu_armada_pm_enter(void __iomem *sdram_reg, u32 srcmd)
 	int i;
 
 	/* Put 001 as value on the GPIOs */
-	reg = readl(gpio_ctrl);
+	reg = pete_readl("arch/arm/mach-mvebu/pm-board.c:35", gpio_ctrl);
 	for (i = 0; i < ARMADA_PIC_NR_GPIOS; i++)
 		reg &= ~BIT(pic_raw_gpios[i]);
 	reg |= BIT(pic_raw_gpios[0]);
-	writel(reg, gpio_ctrl);
+	pete_writel("arch/arm/mach-mvebu/pm-board.c:39", reg, gpio_ctrl);
 
 	/* Prepare writing 111 to the GPIOs */
-	ackcmd = readl(gpio_ctrl);
+	ackcmd = pete_readl("arch/arm/mach-mvebu/pm-board.c:42", gpio_ctrl);
 	for (i = 0; i < ARMADA_PIC_NR_GPIOS; i++)
 		ackcmd |= BIT(pic_raw_gpios[i]);
 

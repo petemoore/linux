@@ -163,7 +163,7 @@ int amdgpu_gmc_set_pte_pde(struct amdgpu_device *adev, void *cpu_pt_addr,
 	*/
 	value = addr & 0x0000FFFFFFFFF000ULL;
 	value |= flags;
-	writeq(value, ptr + (gpu_page_idx * 8));
+	pete_writeq("drivers/gpu/drm/amd/amdgpu/amdgpu_gmc.c:166", value, ptr + (gpu_page_idx * 8));
 
 	drm_dev_exit(idx);
 

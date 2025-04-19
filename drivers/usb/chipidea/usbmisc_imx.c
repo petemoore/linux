@@ -172,7 +172,7 @@ static int usbmisc_imx25_init(struct imx_usbmisc_data *data)
 	spin_lock_irqsave(&usbmisc->lock, flags);
 	switch (data->index) {
 	case 0:
-		val = readl(usbmisc->base);
+		val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:175", usbmisc->base);
 		val &= ~(MX25_OTG_SIC_MASK | MX25_OTG_PP_BIT);
 		val |= (MX25_EHCI_INTERFACE_DIFF_UNI & MX25_EHCI_INTERFACE_MASK) << MX25_OTG_SIC_SHIFT;
 		val |= (MX25_OTG_PM_BIT | MX25_OTG_OCPOL_BIT);
@@ -184,10 +184,10 @@ static int usbmisc_imx25_init(struct imx_usbmisc_data *data)
 		if (data->oc_pol_configured && data->oc_pol_active_low)
 			val &= ~MX25_OTG_OCPOL_BIT;
 
-		writel(val, usbmisc->base);
+		pete_writel("drivers/usb/chipidea/usbmisc_imx.c:187", val, usbmisc->base);
 		break;
 	case 1:
-		val = readl(usbmisc->base);
+		val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:190", usbmisc->base);
 		val &= ~(MX25_H1_SIC_MASK | MX25_H1_PP_BIT |  MX25_H1_IPPUE_UP_BIT);
 		val |= (MX25_EHCI_INTERFACE_SINGLE_UNI & MX25_EHCI_INTERFACE_MASK) << MX25_H1_SIC_SHIFT;
 		val |= (MX25_H1_PM_BIT | MX25_H1_OCPOL_BIT | MX25_H1_TLL_BIT |
@@ -200,7 +200,7 @@ static int usbmisc_imx25_init(struct imx_usbmisc_data *data)
 		if (data->oc_pol_configured && data->oc_pol_active_low)
 			val &= ~MX25_H1_OCPOL_BIT;
 
-		writel(val, usbmisc->base);
+		pete_writel("drivers/usb/chipidea/usbmisc_imx.c:203", val, usbmisc->base);
 
 		break;
 	}
@@ -224,14 +224,14 @@ static int usbmisc_imx25_post(struct imx_usbmisc_data *data)
 
 	spin_lock_irqsave(&usbmisc->lock, flags);
 	reg = usbmisc->base + MX25_USB_PHY_CTRL_OFFSET;
-	val = readl(reg);
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:227", reg);
 
 	if (data->evdo)
 		val |= MX25_BM_EXTERNAL_VBUS_DIVIDER;
 	else
 		val &= ~MX25_BM_EXTERNAL_VBUS_DIVIDER;
 
-	writel(val, reg);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:234", val, reg);
 	spin_unlock_irqrestore(&usbmisc->lock, flags);
 	usleep_range(5000, 10000); /* needed to stabilize voltage */
 
@@ -260,10 +260,10 @@ static int usbmisc_imx27_init(struct imx_usbmisc_data *data)
 
 	spin_lock_irqsave(&usbmisc->lock, flags);
 	if (data->disable_oc)
-		val = readl(usbmisc->base) | val;
+		val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:263", usbmisc->base) | val;
 	else
-		val = readl(usbmisc->base) & ~val;
-	writel(val, usbmisc->base);
+		val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:265", usbmisc->base) & ~val;
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:266", val, usbmisc->base);
 	spin_unlock_irqrestore(&usbmisc->lock, flags);
 
 	return 0;
@@ -280,10 +280,10 @@ static int usbmisc_imx53_init(struct imx_usbmisc_data *data)
 		return -EINVAL;
 
 	/* Select a 24 MHz reference clock for the PHY  */
-	val = readl(usbmisc->base + MX53_USB_OTG_PHY_CTRL_1_OFFSET);
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:283", usbmisc->base + MX53_USB_OTG_PHY_CTRL_1_OFFSET);
 	val &= ~MX53_USB_PHYCTRL1_PLLDIV_MASK;
 	val |= MX53_USB_PLL_DIV_24_MHZ;
-	writel(val, usbmisc->base + MX53_USB_OTG_PHY_CTRL_1_OFFSET);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:286", val, usbmisc->base + MX53_USB_OTG_PHY_CTRL_1_OFFSET);
 
 	spin_lock_irqsave(&usbmisc->lock, flags);
 
@@ -291,75 +291,75 @@ static int usbmisc_imx53_init(struct imx_usbmisc_data *data)
 	case 0:
 		if (data->disable_oc) {
 			reg = usbmisc->base + MX53_USB_OTG_PHY_CTRL_0_OFFSET;
-			val = readl(reg) | MX53_BM_OVER_CUR_DIS_OTG;
-			writel(val, reg);
+			val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:294", reg) | MX53_BM_OVER_CUR_DIS_OTG;
+			pete_writel("drivers/usb/chipidea/usbmisc_imx.c:295", val, reg);
 		}
 		break;
 	case 1:
 		if (data->disable_oc) {
 			reg = usbmisc->base + MX53_USB_OTG_PHY_CTRL_0_OFFSET;
-			val = readl(reg) | MX53_BM_OVER_CUR_DIS_H1;
-			writel(val, reg);
+			val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:301", reg) | MX53_BM_OVER_CUR_DIS_H1;
+			pete_writel("drivers/usb/chipidea/usbmisc_imx.c:302", val, reg);
 		}
 		break;
 	case 2:
 		if (data->ulpi) {
 			/* set USBH2 into ULPI-mode. */
 			reg = usbmisc->base + MX53_USB_CTRL_1_OFFSET;
-			val = readl(reg) | MX53_USB_CTRL_1_UH2_ULPI_EN;
+			val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:309", reg) | MX53_USB_CTRL_1_UH2_ULPI_EN;
 			/* select ULPI clock */
 			val &= ~MX53_USB_CTRL_1_H2_XCVR_CLK_SEL_MASK;
 			val |= MX53_USB_CTRL_1_H2_XCVR_CLK_SEL_ULPI;
-			writel(val, reg);
+			pete_writel("drivers/usb/chipidea/usbmisc_imx.c:313", val, reg);
 			/* Set interrupt wake up enable */
 			reg = usbmisc->base + MX53_USB_UH2_CTRL_OFFSET;
-			val = readl(reg) | MX53_USB_UHx_CTRL_WAKE_UP_EN
+			val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:316", reg) | MX53_USB_UHx_CTRL_WAKE_UP_EN
 				| MX53_USB_UHx_CTRL_ULPI_INT_EN;
-			writel(val, reg);
+			pete_writel("drivers/usb/chipidea/usbmisc_imx.c:318", val, reg);
 			if (is_imx53_usbmisc(data)) {
 				/* Disable internal 60Mhz clock */
 				reg = usbmisc->base +
 					MX53_USB_CLKONOFF_CTRL_OFFSET;
-				val = readl(reg) |
+				val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:323", reg) |
 					MX53_USB_CLKONOFF_CTRL_H2_INT60CKOFF;
-				writel(val, reg);
+				pete_writel("drivers/usb/chipidea/usbmisc_imx.c:325", val, reg);
 			}
 
 		}
 		if (data->disable_oc) {
 			reg = usbmisc->base + MX53_USB_UH2_CTRL_OFFSET;
-			val = readl(reg) | MX53_BM_OVER_CUR_DIS_UHx;
-			writel(val, reg);
+			val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:331", reg) | MX53_BM_OVER_CUR_DIS_UHx;
+			pete_writel("drivers/usb/chipidea/usbmisc_imx.c:332", val, reg);
 		}
 		break;
 	case 3:
 		if (data->ulpi) {
 			/* set USBH3 into ULPI-mode. */
 			reg = usbmisc->base + MX53_USB_CTRL_1_OFFSET;
-			val = readl(reg) | MX53_USB_CTRL_1_UH3_ULPI_EN;
+			val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:339", reg) | MX53_USB_CTRL_1_UH3_ULPI_EN;
 			/* select ULPI clock */
 			val &= ~MX53_USB_CTRL_1_H3_XCVR_CLK_SEL_MASK;
 			val |= MX53_USB_CTRL_1_H3_XCVR_CLK_SEL_ULPI;
-			writel(val, reg);
+			pete_writel("drivers/usb/chipidea/usbmisc_imx.c:343", val, reg);
 			/* Set interrupt wake up enable */
 			reg = usbmisc->base + MX53_USB_UH3_CTRL_OFFSET;
-			val = readl(reg) | MX53_USB_UHx_CTRL_WAKE_UP_EN
+			val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:346", reg) | MX53_USB_UHx_CTRL_WAKE_UP_EN
 				| MX53_USB_UHx_CTRL_ULPI_INT_EN;
-			writel(val, reg);
+			pete_writel("drivers/usb/chipidea/usbmisc_imx.c:348", val, reg);
 
 			if (is_imx53_usbmisc(data)) {
 				/* Disable internal 60Mhz clock */
 				reg = usbmisc->base +
 					MX53_USB_CLKONOFF_CTRL_OFFSET;
-				val = readl(reg) |
+				val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:354", reg) |
 					MX53_USB_CLKONOFF_CTRL_H3_INT60CKOFF;
-				writel(val, reg);
+				pete_writel("drivers/usb/chipidea/usbmisc_imx.c:356", val, reg);
 			}
 		}
 		if (data->disable_oc) {
 			reg = usbmisc->base + MX53_USB_UH3_CTRL_OFFSET;
-			val = readl(reg) | MX53_BM_OVER_CUR_DIS_UHx;
-			writel(val, reg);
+			val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:361", reg) | MX53_BM_OVER_CUR_DIS_UHx;
+			pete_writel("drivers/usb/chipidea/usbmisc_imx.c:362", val, reg);
 		}
 		break;
 	}
@@ -394,7 +394,7 @@ static int usbmisc_imx6q_set_wakeup
 		return -EINVAL;
 
 	spin_lock_irqsave(&usbmisc->lock, flags);
-	val = readl(usbmisc->base + data->index * 4);
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:397", usbmisc->base + data->index * 4);
 	if (enabled) {
 		val &= ~MX6_USB_OTG_WAKEUP_BITS;
 		val |= usbmisc_wakeup_setting(data);
@@ -403,7 +403,7 @@ static int usbmisc_imx6q_set_wakeup
 			pr_debug("wakeup int at ci_hdrc.%d\n", data->index);
 		val &= ~MX6_USB_OTG_WAKEUP_BITS;
 	}
-	writel(val, usbmisc->base + data->index * 4);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:406", val, usbmisc->base + data->index * 4);
 	spin_unlock_irqrestore(&usbmisc->lock, flags);
 
 	return ret;
@@ -420,7 +420,7 @@ static int usbmisc_imx6q_init(struct imx_usbmisc_data *data)
 
 	spin_lock_irqsave(&usbmisc->lock, flags);
 
-	reg = readl(usbmisc->base + data->index * 4);
+	reg = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:423", usbmisc->base + data->index * 4);
 	if (data->disable_oc) {
 		reg |= MX6_BM_OVER_CUR_DIS;
 	} else {
@@ -438,22 +438,22 @@ static int usbmisc_imx6q_init(struct imx_usbmisc_data *data)
 	/* If the polarity is not set keep it as setup by the bootlader */
 	if (data->pwr_pol == 1)
 		reg |= MX6_BM_PWR_POLARITY;
-	writel(reg, usbmisc->base + data->index * 4);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:441", reg, usbmisc->base + data->index * 4);
 
 	/* SoC non-burst setting */
-	reg = readl(usbmisc->base + data->index * 4);
-	writel(reg | MX6_BM_NON_BURST_SETTING,
+	reg = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:444", usbmisc->base + data->index * 4);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:445", reg | MX6_BM_NON_BURST_SETTING,
 			usbmisc->base + data->index * 4);
 
 	/* For HSIC controller */
 	if (data->hsic) {
-		reg = readl(usbmisc->base + data->index * 4);
-		writel(reg | MX6_BM_UTMI_ON_CLOCK,
+		reg = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:450", usbmisc->base + data->index * 4);
+		pete_writel("drivers/usb/chipidea/usbmisc_imx.c:451", reg | MX6_BM_UTMI_ON_CLOCK,
 			usbmisc->base + data->index * 4);
-		reg = readl(usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET
+		reg = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:453", usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET
 			+ (data->index - 2) * 4);
 		reg |= MX6_BM_HSIC_EN | MX6_BM_HSIC_CLK_ON;
-		writel(reg, usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET
+		pete_writel("drivers/usb/chipidea/usbmisc_imx.c:456", reg, usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET
 			+ (data->index - 2) * 4);
 	}
 
@@ -499,9 +499,9 @@ static int usbmisc_imx6_hsic_set_connect(struct imx_usbmisc_data *data)
 		return offset;
 	}
 
-	val = readl(usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET + offset);
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:502", usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET + offset);
 	if (!(val & MX6_BM_HSIC_DEV_CONN))
-		writel(val | MX6_BM_HSIC_DEV_CONN,
+		pete_writel("drivers/usb/chipidea/usbmisc_imx.c:504", val | MX6_BM_HSIC_DEV_CONN,
 			usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET + offset);
 
 	spin_unlock_irqrestore(&usbmisc->lock, flags);
@@ -523,14 +523,14 @@ static int usbmisc_imx6_hsic_set_clk(struct imx_usbmisc_data *data, bool on)
 		return offset;
 	}
 
-	val = readl(usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET + offset);
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:526", usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET + offset);
 	val |= MX6_BM_HSIC_EN | MX6_BM_HSIC_CLK_ON;
 	if (on)
 		val |= MX6_BM_HSIC_CLK_ON;
 	else
 		val &= ~MX6_BM_HSIC_CLK_ON;
 
-	writel(val, usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET + offset);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:533", val, usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET + offset);
 	spin_unlock_irqrestore(&usbmisc->lock, flags);
 
 	return 0;
@@ -550,23 +550,23 @@ static int usbmisc_imx6sx_init(struct imx_usbmisc_data *data)
 		reg = usbmisc->base + MX6_USB_OTG1_PHY_CTRL + data->index * 4;
 		spin_lock_irqsave(&usbmisc->lock, flags);
 		/* Set vbus wakeup source as bvalid */
-		val = readl(reg);
-		writel(val | MX6SX_USB_VBUS_WAKEUP_SOURCE_BVALID, reg);
+		val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:553", reg);
+		pete_writel("drivers/usb/chipidea/usbmisc_imx.c:554", val | MX6SX_USB_VBUS_WAKEUP_SOURCE_BVALID, reg);
 		/*
 		 * Disable dp/dm wakeup in device mode when vbus is
 		 * not there.
 		 */
-		val = readl(usbmisc->base + data->index * 4);
-		writel(val & ~MX6SX_BM_DPDM_WAKEUP_EN,
+		val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:559", usbmisc->base + data->index * 4);
+		pete_writel("drivers/usb/chipidea/usbmisc_imx.c:560", val & ~MX6SX_BM_DPDM_WAKEUP_EN,
 			usbmisc->base + data->index * 4);
 		spin_unlock_irqrestore(&usbmisc->lock, flags);
 	}
 
 	/* For HSIC controller */
 	if (data->hsic) {
-		val = readl(usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET);
+		val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:567", usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET);
 		val |= MX6SX_BM_HSIC_AUTO_RESUME;
-		writel(val, usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET);
+		pete_writel("drivers/usb/chipidea/usbmisc_imx.c:569", val, usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET);
 	}
 
 	return 0;
@@ -585,8 +585,8 @@ static int usbmisc_vf610_init(struct imx_usbmisc_data *data)
 		return -EINVAL;
 
 	if (data->disable_oc) {
-		reg = readl(usbmisc->base);
-		writel(reg | VF610_OVER_CUR_DIS, usbmisc->base);
+		reg = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:588", usbmisc->base);
+		pete_writel("drivers/usb/chipidea/usbmisc_imx.c:589", reg | VF610_OVER_CUR_DIS, usbmisc->base);
 	}
 
 	return 0;
@@ -600,15 +600,15 @@ static int usbmisc_imx7d_set_wakeup
 	u32 val;
 
 	spin_lock_irqsave(&usbmisc->lock, flags);
-	val = readl(usbmisc->base);
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:603", usbmisc->base);
 	if (enabled) {
 		val &= ~MX6_USB_OTG_WAKEUP_BITS;
 		val |= usbmisc_wakeup_setting(data);
-		writel(val, usbmisc->base);
+		pete_writel("drivers/usb/chipidea/usbmisc_imx.c:607", val, usbmisc->base);
 	} else {
 		if (val & MX6_BM_WAKEUP_INTR)
 			dev_dbg(data->dev, "wakeup int\n");
-		writel(val & ~MX6_USB_OTG_WAKEUP_BITS, usbmisc->base);
+		pete_writel("drivers/usb/chipidea/usbmisc_imx.c:611", val & ~MX6_USB_OTG_WAKEUP_BITS, usbmisc->base);
 	}
 	spin_unlock_irqrestore(&usbmisc->lock, flags);
 
@@ -625,7 +625,7 @@ static int usbmisc_imx7d_init(struct imx_usbmisc_data *data)
 		return -EINVAL;
 
 	spin_lock_irqsave(&usbmisc->lock, flags);
-	reg = readl(usbmisc->base);
+	reg = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:628", usbmisc->base);
 	if (data->disable_oc) {
 		reg |= MX6_BM_OVER_CUR_DIS;
 	} else {
@@ -643,20 +643,20 @@ static int usbmisc_imx7d_init(struct imx_usbmisc_data *data)
 	/* If the polarity is not set keep it as setup by the bootlader */
 	if (data->pwr_pol == 1)
 		reg |= MX6_BM_PWR_POLARITY;
-	writel(reg, usbmisc->base);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:646", reg, usbmisc->base);
 
 	/* SoC non-burst setting */
-	reg = readl(usbmisc->base);
-	writel(reg | MX6_BM_NON_BURST_SETTING, usbmisc->base);
+	reg = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:649", usbmisc->base);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:650", reg | MX6_BM_NON_BURST_SETTING, usbmisc->base);
 
 	if (!data->hsic) {
-		reg = readl(usbmisc->base + MX7D_USBNC_USB_CTRL2);
+		reg = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:653", usbmisc->base + MX7D_USBNC_USB_CTRL2);
 		reg &= ~MX7D_USB_VBUS_WAKEUP_SOURCE_MASK;
-		writel(reg | MX7D_USB_VBUS_WAKEUP_SOURCE_BVALID
+		pete_writel("drivers/usb/chipidea/usbmisc_imx.c:655", reg | MX7D_USB_VBUS_WAKEUP_SOURCE_BVALID
 			| MX7D_USBNC_AUTO_RESUME,
 			usbmisc->base + MX7D_USBNC_USB_CTRL2);
 		/* PHY tuning for signal quality */
-		reg = readl(usbmisc->base + MX7D_USB_OTG_PHY_CFG1);
+		reg = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:659", usbmisc->base + MX7D_USB_OTG_PHY_CFG1);
 		if (data->emp_curr_control && data->emp_curr_control <=
 			(TXPREEMPAMPTUNE0_MASK >> TXPREEMPAMPTUNE0_BIT)) {
 			reg &= ~TXPREEMPAMPTUNE0_MASK;
@@ -669,7 +669,7 @@ static int usbmisc_imx7d_init(struct imx_usbmisc_data *data)
 			reg |= (data->dc_vol_level_adjust << TXVREFTUNE0_BIT);
 		}
 
-		writel(reg, usbmisc->base + MX7D_USB_OTG_PHY_CFG1);
+		pete_writel("drivers/usb/chipidea/usbmisc_imx.c:672", reg, usbmisc->base + MX7D_USB_OTG_PHY_CFG1);
 	}
 
 	spin_unlock_irqrestore(&usbmisc->lock, flags);
@@ -688,9 +688,9 @@ static int imx7d_charger_secondary_detection(struct imx_usbmisc_data *data)
 
 	/* Clear VDATSRCENB0 to disable VDP_SRC and IDM_SNK required by BC 1.2 spec */
 	spin_lock_irqsave(&usbmisc->lock, flags);
-	val = readl(usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:691", usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
 	val &= ~MX7D_USB_OTG_PHY_CFG2_CHRG_VDATSRCENB0;
-	writel(val, usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:693", val, usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
 	spin_unlock_irqrestore(&usbmisc->lock, flags);
 
 	/* TVDMSRC_DIS */
@@ -698,8 +698,8 @@ static int imx7d_charger_secondary_detection(struct imx_usbmisc_data *data)
 
 	/* VDM_SRC is connected to D- and IDP_SINK is connected to D+ */
 	spin_lock_irqsave(&usbmisc->lock, flags);
-	val = readl(usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
-	writel(val | MX7D_USB_OTG_PHY_CFG2_CHRG_VDATSRCENB0 |
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:701", usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:702", val | MX7D_USB_OTG_PHY_CFG2_CHRG_VDATSRCENB0 |
 			MX7D_USB_OTG_PHY_CFG2_CHRG_VDATDETENB0 |
 			MX7D_USB_OTG_PHY_CFG2_CHRG_CHRGSEL,
 				usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
@@ -713,7 +713,7 @@ static int imx7d_charger_secondary_detection(struct imx_usbmisc_data *data)
 	 * DCP: if greater than VDAT_REF;
 	 * CDP: if less than VDAT_REF.
 	 */
-	val = readl(usbmisc->base + MX7D_USB_OTG_PHY_STATUS);
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:716", usbmisc->base + MX7D_USB_OTG_PHY_STATUS);
 	if (val & MX7D_USB_OTG_PHY_STATUS_CHRGDET) {
 		dev_dbg(data->dev, "It is a dedicate charging port\n");
 		usb_phy->chg_type = DCP_TYPE;
@@ -732,20 +732,20 @@ static void imx7_disable_charger_detector(struct imx_usbmisc_data *data)
 	u32 val;
 
 	spin_lock_irqsave(&usbmisc->lock, flags);
-	val = readl(usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:735", usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
 	val &= ~(MX7D_USB_OTG_PHY_CFG2_CHRG_DCDENB |
 			MX7D_USB_OTG_PHY_CFG2_CHRG_VDATSRCENB0 |
 			MX7D_USB_OTG_PHY_CFG2_CHRG_VDATDETENB0 |
 			MX7D_USB_OTG_PHY_CFG2_CHRG_CHRGSEL);
-	writel(val, usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:740", val, usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
 
 	/* Set OPMODE to be 2'b00 and disable its override */
-	val = readl(usbmisc->base + MX7D_USBNC_USB_CTRL2);
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:743", usbmisc->base + MX7D_USBNC_USB_CTRL2);
 	val &= ~MX7D_USBNC_USB_CTRL2_OPMODE_OVERRIDE_MASK;
-	writel(val, usbmisc->base + MX7D_USBNC_USB_CTRL2);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:745", val, usbmisc->base + MX7D_USBNC_USB_CTRL2);
 
-	val = readl(usbmisc->base + MX7D_USBNC_USB_CTRL2);
-	writel(val & ~MX7D_USBNC_USB_CTRL2_OPMODE_OVERRIDE_EN,
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:747", usbmisc->base + MX7D_USBNC_USB_CTRL2);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:748", val & ~MX7D_USBNC_USB_CTRL2_OPMODE_OVERRIDE_EN,
 			usbmisc->base + MX7D_USBNC_USB_CTRL2);
 	spin_unlock_irqrestore(&usbmisc->lock, flags);
 }
@@ -759,13 +759,13 @@ static int imx7d_charger_data_contact_detect(struct imx_usbmisc_data *data)
 
 	/* Enable Data Contact Detect (DCD) per the USB BC 1.2 */
 	spin_lock_irqsave(&usbmisc->lock, flags);
-	val = readl(usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
-	writel(val | MX7D_USB_OTG_PHY_CFG2_CHRG_DCDENB,
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:762", usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:763", val | MX7D_USB_OTG_PHY_CFG2_CHRG_DCDENB,
 			usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
 	spin_unlock_irqrestore(&usbmisc->lock, flags);
 
 	for (i = 0; i < 100; i = i + 1) {
-		val = readl(usbmisc->base + MX7D_USB_OTG_PHY_STATUS);
+		val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:768", usbmisc->base + MX7D_USB_OTG_PHY_STATUS);
 		if (!(val & MX7D_USB_OTG_PHY_STATUS_LINE_STATE0)) {
 			if (data_pin_contact_count++ > 5)
 				/* Data pin makes contact */
@@ -779,8 +779,8 @@ static int imx7d_charger_data_contact_detect(struct imx_usbmisc_data *data)
 
 	/* Disable DCD after finished data contact check */
 	spin_lock_irqsave(&usbmisc->lock, flags);
-	val = readl(usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
-	writel(val & ~MX7D_USB_OTG_PHY_CFG2_CHRG_DCDENB,
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:782", usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:783", val & ~MX7D_USB_OTG_PHY_CFG2_CHRG_DCDENB,
 			usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
 	spin_unlock_irqrestore(&usbmisc->lock, flags);
 
@@ -802,9 +802,9 @@ static int imx7d_charger_primary_detection(struct imx_usbmisc_data *data)
 
 	/* VDP_SRC is connected to D+ and IDM_SINK is connected to D- */
 	spin_lock_irqsave(&usbmisc->lock, flags);
-	val = readl(usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:805", usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
 	val &= ~MX7D_USB_OTG_PHY_CFG2_CHRG_CHRGSEL;
-	writel(val | MX7D_USB_OTG_PHY_CFG2_CHRG_VDATSRCENB0 |
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:807", val | MX7D_USB_OTG_PHY_CFG2_CHRG_VDATSRCENB0 |
 			MX7D_USB_OTG_PHY_CFG2_CHRG_VDATDETENB0,
 				usbmisc->base + MX7D_USB_OTG_PHY_CFG2);
 	spin_unlock_irqrestore(&usbmisc->lock, flags);
@@ -813,7 +813,7 @@ static int imx7d_charger_primary_detection(struct imx_usbmisc_data *data)
 	msleep(40);
 
 	/* Check if D- is less than VDAT_REF to determine an SDP per BC 1.2 */
-	val = readl(usbmisc->base + MX7D_USB_OTG_PHY_STATUS);
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:816", usbmisc->base + MX7D_USB_OTG_PHY_STATUS);
 	if (!(val & MX7D_USB_OTG_PHY_STATUS_CHRGDET)) {
 		dev_dbg(data->dev, "It is a standard downstream port\n");
 		usb_phy->chg_type = SDP_TYPE;
@@ -839,7 +839,7 @@ static int imx7d_charger_detection(struct imx_usbmisc_data *data)
 	int ret;
 
 	/* Check if vbus is valid */
-	val = readl(usbmisc->base + MX7D_USB_OTG_PHY_STATUS);
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:842", usbmisc->base + MX7D_USB_OTG_PHY_STATUS);
 	if (!(val & MX7D_USB_OTG_PHY_STATUS_VBUS_VLD)) {
 		dev_err(data->dev, "vbus is error\n");
 		return -EINVAL;
@@ -850,13 +850,13 @@ static int imx7d_charger_detection(struct imx_usbmisc_data *data)
 	 * charger detection process.
 	 */
 	spin_lock_irqsave(&usbmisc->lock, flags);
-	val = readl(usbmisc->base + MX7D_USBNC_USB_CTRL2);
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:853", usbmisc->base + MX7D_USBNC_USB_CTRL2);
 	val &= ~MX7D_USBNC_USB_CTRL2_OPMODE_OVERRIDE_MASK;
 	val |= MX7D_USBNC_USB_CTRL2_OPMODE_NON_DRIVING;
-	writel(val, usbmisc->base + MX7D_USBNC_USB_CTRL2);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:856", val, usbmisc->base + MX7D_USBNC_USB_CTRL2);
 
-	val = readl(usbmisc->base + MX7D_USBNC_USB_CTRL2);
-	writel(val | MX7D_USBNC_USB_CTRL2_OPMODE_OVERRIDE_EN,
+	val = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:858", usbmisc->base + MX7D_USBNC_USB_CTRL2);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:859", val | MX7D_USBNC_USB_CTRL2_OPMODE_OVERRIDE_EN,
 			usbmisc->base + MX7D_USBNC_USB_CTRL2);
 	spin_unlock_irqrestore(&usbmisc->lock, flags);
 
@@ -883,7 +883,7 @@ static int usbmisc_imx7ulp_init(struct imx_usbmisc_data *data)
 		return -EINVAL;
 
 	spin_lock_irqsave(&usbmisc->lock, flags);
-	reg = readl(usbmisc->base);
+	reg = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:886", usbmisc->base);
 	if (data->disable_oc) {
 		reg |= MX6_BM_OVER_CUR_DIS;
 	} else {
@@ -902,31 +902,31 @@ static int usbmisc_imx7ulp_init(struct imx_usbmisc_data *data)
 	if (data->pwr_pol == 1)
 		reg |= MX6_BM_PWR_POLARITY;
 
-	writel(reg, usbmisc->base);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:905", reg, usbmisc->base);
 
 	/* SoC non-burst setting */
-	reg = readl(usbmisc->base);
-	writel(reg | MX6_BM_NON_BURST_SETTING, usbmisc->base);
+	reg = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:908", usbmisc->base);
+	pete_writel("drivers/usb/chipidea/usbmisc_imx.c:909", reg | MX6_BM_NON_BURST_SETTING, usbmisc->base);
 
 	if (data->hsic) {
-		reg = readl(usbmisc->base);
-		writel(reg | MX6_BM_UTMI_ON_CLOCK, usbmisc->base);
+		reg = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:912", usbmisc->base);
+		pete_writel("drivers/usb/chipidea/usbmisc_imx.c:913", reg | MX6_BM_UTMI_ON_CLOCK, usbmisc->base);
 
-		reg = readl(usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET);
+		reg = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:915", usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET);
 		reg |= MX6_BM_HSIC_EN | MX6_BM_HSIC_CLK_ON;
-		writel(reg, usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET);
+		pete_writel("drivers/usb/chipidea/usbmisc_imx.c:917", reg, usbmisc->base + MX6_USB_HSIC_CTRL_OFFSET);
 
 		/*
 		 * For non-HSIC controller, the autoresume is enabled
 		 * at MXS PHY driver (usbphy_ctrl bit18).
 		 */
-		reg = readl(usbmisc->base + MX7D_USBNC_USB_CTRL2);
-		writel(reg | MX7D_USBNC_AUTO_RESUME,
+		reg = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:923", usbmisc->base + MX7D_USBNC_USB_CTRL2);
+		pete_writel("drivers/usb/chipidea/usbmisc_imx.c:924", reg | MX7D_USBNC_AUTO_RESUME,
 			usbmisc->base + MX7D_USBNC_USB_CTRL2);
 	} else {
-		reg = readl(usbmisc->base + MX7D_USBNC_USB_CTRL2);
+		reg = pete_readl("drivers/usb/chipidea/usbmisc_imx.c:927", usbmisc->base + MX7D_USBNC_USB_CTRL2);
 		reg &= ~MX7D_USB_VBUS_WAKEUP_SOURCE_MASK;
-		writel(reg | MX7D_USB_VBUS_WAKEUP_SOURCE_BVALID,
+		pete_writel("drivers/usb/chipidea/usbmisc_imx.c:929", reg | MX7D_USB_VBUS_WAKEUP_SOURCE_BVALID,
 			 usbmisc->base + MX7D_USBNC_USB_CTRL2);
 	}
 

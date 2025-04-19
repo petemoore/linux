@@ -357,7 +357,7 @@ u32 igb_rd32(struct e1000_hw *hw, u32 reg);
 do { \
 	u8 __iomem *hw_addr = READ_ONCE((hw)->hw_addr); \
 	if (!E1000_REMOVED(hw_addr)) \
-		writel((val), &hw_addr[(reg)]); \
+		pete_writel("drivers/net/ethernet/intel/igb/e1000_regs.h:360", (val), &hw_addr[(reg)]); \
 } while (0)
 
 #define rd32(reg) (igb_rd32(hw, reg))

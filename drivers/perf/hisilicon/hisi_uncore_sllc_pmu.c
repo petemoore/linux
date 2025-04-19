@@ -61,9 +61,9 @@ static void hisi_sllc_pmu_enable_tracetag(struct perf_event *event)
 	if (tt_en) {
 		u32 val;
 
-		val = readl(sllc_pmu->base + SLLC_PERF_CTRL);
+		val = pete_readl("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:64", sllc_pmu->base + SLLC_PERF_CTRL);
 		val |= SLLC_TRACETAG_EN | SLLC_FILT_EN;
-		writel(val, sllc_pmu->base + SLLC_PERF_CTRL);
+		pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:66", val, sllc_pmu->base + SLLC_PERF_CTRL);
 	}
 }
 
@@ -75,9 +75,9 @@ static void hisi_sllc_pmu_disable_tracetag(struct perf_event *event)
 	if (tt_en) {
 		u32 val;
 
-		val = readl(sllc_pmu->base + SLLC_PERF_CTRL);
+		val = pete_readl("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:78", sllc_pmu->base + SLLC_PERF_CTRL);
 		val &= ~(SLLC_TRACETAG_EN | SLLC_FILT_EN);
-		writel(val, sllc_pmu->base + SLLC_PERF_CTRL);
+		pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:80", val, sllc_pmu->base + SLLC_PERF_CTRL);
 	}
 }
 
@@ -90,11 +90,11 @@ static void hisi_sllc_pmu_config_tgtid(struct perf_event *event)
 	if (tgtid_is_valid(max, min)) {
 		u32 val = (max << SLLC_TGTID_MAX_SHIFT) | (min << SLLC_TGTID_MIN_SHIFT);
 
-		writel(val, sllc_pmu->base + SLLC_TGTID_CTRL);
+		pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:93", val, sllc_pmu->base + SLLC_TGTID_CTRL);
 		/* Enable the tgtid */
-		val = readl(sllc_pmu->base + SLLC_PERF_CTRL);
+		val = pete_readl("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:95", sllc_pmu->base + SLLC_PERF_CTRL);
 		val |= SLLC_TGTID_EN | SLLC_FILT_EN;
-		writel(val, sllc_pmu->base + SLLC_PERF_CTRL);
+		pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:97", val, sllc_pmu->base + SLLC_PERF_CTRL);
 	}
 }
 
@@ -107,11 +107,11 @@ static void hisi_sllc_pmu_clear_tgtid(struct perf_event *event)
 	if (tgtid_is_valid(max, min)) {
 		u32 val;
 
-		writel(SLLC_TGTID_NONE, sllc_pmu->base + SLLC_TGTID_CTRL);
+		pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:110", SLLC_TGTID_NONE, sllc_pmu->base + SLLC_TGTID_CTRL);
 		/* Disable the tgtid */
-		val = readl(sllc_pmu->base + SLLC_PERF_CTRL);
+		val = pete_readl("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:112", sllc_pmu->base + SLLC_PERF_CTRL);
 		val &= ~(SLLC_TGTID_EN | SLLC_FILT_EN);
-		writel(val, sllc_pmu->base + SLLC_PERF_CTRL);
+		pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:114", val, sllc_pmu->base + SLLC_PERF_CTRL);
 	}
 }
 
@@ -125,11 +125,11 @@ static void hisi_sllc_pmu_config_srcid(struct perf_event *event)
 
 		msk = hisi_get_srcid_msk(event);
 		val = (cmd << SLLC_SRCID_CMD_SHIFT) | (msk << SLLC_SRCID_MSK_SHIFT);
-		writel(val, sllc_pmu->base + SLLC_SRCID_CTRL);
+		pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:128", val, sllc_pmu->base + SLLC_SRCID_CTRL);
 		/* Enable the srcid */
-		val = readl(sllc_pmu->base + SLLC_PERF_CTRL);
+		val = pete_readl("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:130", sllc_pmu->base + SLLC_PERF_CTRL);
 		val |= SLLC_SRCID_EN | SLLC_FILT_EN;
-		writel(val, sllc_pmu->base + SLLC_PERF_CTRL);
+		pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:132", val, sllc_pmu->base + SLLC_PERF_CTRL);
 	}
 }
 
@@ -141,11 +141,11 @@ static void hisi_sllc_pmu_clear_srcid(struct perf_event *event)
 	if (cmd) {
 		u32 val;
 
-		writel(SLLC_SRCID_NONE, sllc_pmu->base + SLLC_SRCID_CTRL);
+		pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:144", SLLC_SRCID_NONE, sllc_pmu->base + SLLC_SRCID_CTRL);
 		/* Disable the srcid */
-		val = readl(sllc_pmu->base + SLLC_PERF_CTRL);
+		val = pete_readl("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:146", sllc_pmu->base + SLLC_PERF_CTRL);
 		val &= ~(SLLC_SRCID_EN | SLLC_FILT_EN);
-		writel(val, sllc_pmu->base + SLLC_PERF_CTRL);
+		pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:148", val, sllc_pmu->base + SLLC_PERF_CTRL);
 	}
 }
 
@@ -175,14 +175,14 @@ static u32 hisi_sllc_pmu_get_counter_offset(int idx)
 static u64 hisi_sllc_pmu_read_counter(struct hisi_pmu *sllc_pmu,
 				      struct hw_perf_event *hwc)
 {
-	return readq(sllc_pmu->base +
+	return pete_readq("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:178", sllc_pmu->base +
 		     hisi_sllc_pmu_get_counter_offset(hwc->idx));
 }
 
 static void hisi_sllc_pmu_write_counter(struct hisi_pmu *sllc_pmu,
 					struct hw_perf_event *hwc, u64 val)
 {
-	writeq(val, sllc_pmu->base +
+	pete_writeq("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:185", val, sllc_pmu->base +
 	       hisi_sllc_pmu_get_counter_offset(hwc->idx));
 }
 
@@ -203,28 +203,28 @@ static void hisi_sllc_pmu_write_evtype(struct hisi_pmu *sllc_pmu, int idx,
 	shift = 8 * reg_idx;
 
 	/* Write event code to SLLC_EVENT_TYPEx Register */
-	val = readl(sllc_pmu->base + reg);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:206", sllc_pmu->base + reg);
 	val &= ~(SLLC_EVTYPE_MASK << shift);
 	val |= (type << shift);
-	writel(val, sllc_pmu->base + reg);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:209", val, sllc_pmu->base + reg);
 }
 
 static void hisi_sllc_pmu_start_counters(struct hisi_pmu *sllc_pmu)
 {
 	u32 val;
 
-	val = readl(sllc_pmu->base + SLLC_PERF_CTRL);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:216", sllc_pmu->base + SLLC_PERF_CTRL);
 	val |= SLLC_PERF_CTRL_EN;
-	writel(val, sllc_pmu->base + SLLC_PERF_CTRL);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:218", val, sllc_pmu->base + SLLC_PERF_CTRL);
 }
 
 static void hisi_sllc_pmu_stop_counters(struct hisi_pmu *sllc_pmu)
 {
 	u32 val;
 
-	val = readl(sllc_pmu->base + SLLC_PERF_CTRL);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:225", sllc_pmu->base + SLLC_PERF_CTRL);
 	val &= ~(SLLC_PERF_CTRL_EN);
-	writel(val, sllc_pmu->base + SLLC_PERF_CTRL);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:227", val, sllc_pmu->base + SLLC_PERF_CTRL);
 }
 
 static void hisi_sllc_pmu_enable_counter(struct hisi_pmu *sllc_pmu,
@@ -232,9 +232,9 @@ static void hisi_sllc_pmu_enable_counter(struct hisi_pmu *sllc_pmu,
 {
 	u32 val;
 
-	val = readl(sllc_pmu->base + SLLC_EVENT_CTRL);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:235", sllc_pmu->base + SLLC_EVENT_CTRL);
 	val |= 1 << hwc->idx;
-	writel(val, sllc_pmu->base + SLLC_EVENT_CTRL);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:237", val, sllc_pmu->base + SLLC_EVENT_CTRL);
 }
 
 static void hisi_sllc_pmu_disable_counter(struct hisi_pmu *sllc_pmu,
@@ -242,9 +242,9 @@ static void hisi_sllc_pmu_disable_counter(struct hisi_pmu *sllc_pmu,
 {
 	u32 val;
 
-	val = readl(sllc_pmu->base + SLLC_EVENT_CTRL);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:245", sllc_pmu->base + SLLC_EVENT_CTRL);
 	val &= ~(1 << hwc->idx);
-	writel(val, sllc_pmu->base + SLLC_EVENT_CTRL);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:247", val, sllc_pmu->base + SLLC_EVENT_CTRL);
 }
 
 static void hisi_sllc_pmu_enable_counter_int(struct hisi_pmu *sllc_pmu,
@@ -252,10 +252,10 @@ static void hisi_sllc_pmu_enable_counter_int(struct hisi_pmu *sllc_pmu,
 {
 	u32 val;
 
-	val = readl(sllc_pmu->base + SLLC_INT_MASK);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:255", sllc_pmu->base + SLLC_INT_MASK);
 	/* Write 0 to enable interrupt */
 	val &= ~(1 << hwc->idx);
-	writel(val, sllc_pmu->base + SLLC_INT_MASK);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:258", val, sllc_pmu->base + SLLC_INT_MASK);
 }
 
 static void hisi_sllc_pmu_disable_counter_int(struct hisi_pmu *sllc_pmu,
@@ -263,20 +263,20 @@ static void hisi_sllc_pmu_disable_counter_int(struct hisi_pmu *sllc_pmu,
 {
 	u32 val;
 
-	val = readl(sllc_pmu->base + SLLC_INT_MASK);
+	val = pete_readl("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:266", sllc_pmu->base + SLLC_INT_MASK);
 	/* Write 1 to mask interrupt */
 	val |= 1 << hwc->idx;
-	writel(val, sllc_pmu->base + SLLC_INT_MASK);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:269", val, sllc_pmu->base + SLLC_INT_MASK);
 }
 
 static u32 hisi_sllc_pmu_get_int_status(struct hisi_pmu *sllc_pmu)
 {
-	return readl(sllc_pmu->base + SLLC_INT_STATUS);
+	return pete_readl("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:274", sllc_pmu->base + SLLC_INT_STATUS);
 }
 
 static void hisi_sllc_pmu_clear_int_status(struct hisi_pmu *sllc_pmu, int idx)
 {
-	writel(1 << idx, sllc_pmu->base + SLLC_INT_CLEAR);
+	pete_writel("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:279", 1 << idx, sllc_pmu->base + SLLC_INT_CLEAR);
 }
 
 static const struct acpi_device_id hisi_sllc_pmu_acpi_match[] = {
@@ -313,7 +313,7 @@ static int hisi_sllc_pmu_init_data(struct platform_device *pdev,
 		return PTR_ERR(sllc_pmu->base);
 	}
 
-	sllc_pmu->identifier = readl(sllc_pmu->base + SLLC_VERSION);
+	sllc_pmu->identifier = pete_readl("drivers/perf/hisilicon/hisi_uncore_sllc_pmu.c:316", sllc_pmu->base + SLLC_VERSION);
 
 	return 0;
 }

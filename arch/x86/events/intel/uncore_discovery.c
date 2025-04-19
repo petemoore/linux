@@ -475,7 +475,7 @@ void intel_generic_uncore_mmio_init_box(struct intel_uncore_box *box)
 		return;
 	}
 
-	writel(GENERIC_PMON_BOX_CTL_INT, box->io_addr);
+	pete_writel("arch/x86/events/intel/uncore_discovery.c:478", GENERIC_PMON_BOX_CTL_INT, box->io_addr);
 }
 
 void intel_generic_uncore_mmio_disable_box(struct intel_uncore_box *box)
@@ -483,7 +483,7 @@ void intel_generic_uncore_mmio_disable_box(struct intel_uncore_box *box)
 	if (!box->io_addr)
 		return;
 
-	writel(GENERIC_PMON_BOX_CTL_FRZ, box->io_addr);
+	pete_writel("arch/x86/events/intel/uncore_discovery.c:486", GENERIC_PMON_BOX_CTL_FRZ, box->io_addr);
 }
 
 void intel_generic_uncore_mmio_enable_box(struct intel_uncore_box *box)
@@ -491,7 +491,7 @@ void intel_generic_uncore_mmio_enable_box(struct intel_uncore_box *box)
 	if (!box->io_addr)
 		return;
 
-	writel(0, box->io_addr);
+	pete_writel("arch/x86/events/intel/uncore_discovery.c:494", 0, box->io_addr);
 }
 
 static void intel_generic_uncore_mmio_enable_event(struct intel_uncore_box *box,
@@ -502,7 +502,7 @@ static void intel_generic_uncore_mmio_enable_event(struct intel_uncore_box *box,
 	if (!box->io_addr)
 		return;
 
-	writel(hwc->config, box->io_addr + hwc->config_base);
+	pete_writel("arch/x86/events/intel/uncore_discovery.c:505", hwc->config, box->io_addr + hwc->config_base);
 }
 
 void intel_generic_uncore_mmio_disable_event(struct intel_uncore_box *box,
@@ -513,7 +513,7 @@ void intel_generic_uncore_mmio_disable_event(struct intel_uncore_box *box,
 	if (!box->io_addr)
 		return;
 
-	writel(0, box->io_addr + hwc->config_base);
+	pete_writel("arch/x86/events/intel/uncore_discovery.c:516", 0, box->io_addr + hwc->config_base);
 }
 
 static struct intel_uncore_ops generic_uncore_mmio_ops = {

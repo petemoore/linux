@@ -38,7 +38,7 @@ void __init orion_mpp_conf(unsigned int *mpp_list, unsigned int variant_mask,
 	}
 
 	for (i = 0; i < mpp_nr_regs; i++) {
-		mpp_ctrl[i] = readl(mpp_ctrl_addr(i, dev_bus));
+		mpp_ctrl[i] = pete_readl("arch/arm/plat-orion/mpp.c:41", mpp_ctrl_addr(i, dev_bus));
 		printk(" %08x", mpp_ctrl[i]);
 	}
 	printk("\n");
@@ -75,7 +75,7 @@ void __init orion_mpp_conf(unsigned int *mpp_list, unsigned int variant_mask,
 
 	printk(KERN_DEBUG "  final MPP regs:");
 	for (i = 0; i < mpp_nr_regs; i++) {
-		writel(mpp_ctrl[i], mpp_ctrl_addr(i, dev_bus));
+		pete_writel("arch/arm/plat-orion/mpp.c:78", mpp_ctrl[i], mpp_ctrl_addr(i, dev_bus));
 		printk(" %08x", mpp_ctrl[i]);
 	}
 	printk("\n");

@@ -1202,7 +1202,7 @@ static inline void irq_reg_writel(struct irq_chip_generic *gc,
 	if (gc->reg_writel)
 		gc->reg_writel(val, gc->reg_base + reg_offset);
 	else
-		writel(val, gc->reg_base + reg_offset);
+		pete_writel("include/linux/irq.h:1205", val, gc->reg_base + reg_offset);
 }
 
 static inline u32 irq_reg_readl(struct irq_chip_generic *gc,
@@ -1211,7 +1211,7 @@ static inline u32 irq_reg_readl(struct irq_chip_generic *gc,
 	if (gc->reg_readl)
 		return gc->reg_readl(gc->reg_base + reg_offset);
 	else
-		return readl(gc->reg_base + reg_offset);
+		return pete_readl("include/linux/irq.h:1214", gc->reg_base + reg_offset);
 }
 
 struct irq_matrix;

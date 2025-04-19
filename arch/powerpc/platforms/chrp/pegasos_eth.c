@@ -108,8 +108,8 @@ static struct platform_device *mv643xx_eth_pd_devs[] __initdata = {
 
 /***********/
 /***********/
-#define MV_READ(offset,val) 	{ val = readl(mv643xx_reg_base + offset); }
-#define MV_WRITE(offset,data) writel(data, mv643xx_reg_base + offset)
+#define MV_READ(offset,val) 	{ val = pete_readl("arch/powerpc/platforms/chrp/pegasos_eth.c:111", mv643xx_reg_base + offset); }
+#define MV_WRITE(offset,data) pete_writel("arch/powerpc/platforms/chrp/pegasos_eth.c:112", data, mv643xx_reg_base + offset)
 
 static void __iomem *mv643xx_reg_base;
 

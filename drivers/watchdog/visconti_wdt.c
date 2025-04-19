@@ -42,11 +42,11 @@ static int visconti_wdt_start(struct watchdog_device *wdev)
 	struct visconti_wdt_priv *priv = watchdog_get_drvdata(wdev);
 	u32 timeout = wdev->timeout * VISCONTI_WDT_FREQ;
 
-	writel(priv->div, priv->base + WDT_DIV);
-	writel(0, priv->base + WDT_MIN);
-	writel(timeout, priv->base + WDT_MAX);
-	writel(0, priv->base + WDT_CTL);
-	writel(WDT_CMD_START_STOP, priv->base + WDT_CMD);
+	pete_writel("drivers/watchdog/visconti_wdt.c:45", priv->div, priv->base + WDT_DIV);
+	pete_writel("drivers/watchdog/visconti_wdt.c:46", 0, priv->base + WDT_MIN);
+	pete_writel("drivers/watchdog/visconti_wdt.c:47", timeout, priv->base + WDT_MAX);
+	pete_writel("drivers/watchdog/visconti_wdt.c:48", 0, priv->base + WDT_CTL);
+	pete_writel("drivers/watchdog/visconti_wdt.c:49", WDT_CMD_START_STOP, priv->base + WDT_CMD);
 
 	return 0;
 }
@@ -55,8 +55,8 @@ static int visconti_wdt_stop(struct watchdog_device *wdev)
 {
 	struct visconti_wdt_priv *priv = watchdog_get_drvdata(wdev);
 
-	writel(1, priv->base + WDT_CTL);
-	writel(WDT_CMD_START_STOP, priv->base + WDT_CMD);
+	pete_writel("drivers/watchdog/visconti_wdt.c:58", 1, priv->base + WDT_CTL);
+	pete_writel("drivers/watchdog/visconti_wdt.c:59", WDT_CMD_START_STOP, priv->base + WDT_CMD);
 
 	return 0;
 }
@@ -65,7 +65,7 @@ static int visconti_wdt_ping(struct watchdog_device *wdd)
 {
 	struct visconti_wdt_priv *priv = watchdog_get_drvdata(wdd);
 
-	writel(WDT_CMD_CLEAR, priv->base + WDT_CMD);
+	pete_writel("drivers/watchdog/visconti_wdt.c:68", WDT_CMD_CLEAR, priv->base + WDT_CMD);
 
 	return 0;
 }
@@ -74,7 +74,7 @@ static unsigned int visconti_wdt_get_timeleft(struct watchdog_device *wdev)
 {
 	struct visconti_wdt_priv *priv = watchdog_get_drvdata(wdev);
 	u32 timeout = wdev->timeout * VISCONTI_WDT_FREQ;
-	u32 cnt = readl(priv->base + WDT_CNT);
+	u32 cnt = pete_readl("drivers/watchdog/visconti_wdt.c:77", priv->base + WDT_CNT);
 
 	if (timeout <= cnt)
 		return 0;
@@ -92,8 +92,8 @@ static int visconti_wdt_set_timeout(struct watchdog_device *wdev, unsigned int t
 	val = wdev->timeout * VISCONTI_WDT_FREQ;
 
 	/* Clear counter before setting timeout because WDT expires */
-	writel(WDT_CMD_CLEAR, priv->base + WDT_CMD);
-	writel(val, priv->base + WDT_MAX);
+	pete_writel("drivers/watchdog/visconti_wdt.c:95", WDT_CMD_CLEAR, priv->base + WDT_CMD);
+	pete_writel("drivers/watchdog/visconti_wdt.c:96", val, priv->base + WDT_MAX);
 
 	return 0;
 }

@@ -136,7 +136,7 @@ static int skl_init_chip(struct hdac_bus *bus, bool full_reset)
 
 	/* Reset stream-to-link mapping */
 	list_for_each_entry(hlink, &bus->hlink_list, list)
-		writel(0, hlink->ml_addr + AZX_REG_ML_LOSIDV);
+		pete_writel("sound/soc/intel/skylake/skl.c:139", 0, hlink->ml_addr + AZX_REG_ML_LOSIDV);
 
 	skl_enable_miscbdcge(bus->dev, true);
 	snd_hdac_set_codec_wakeup(bus, false);

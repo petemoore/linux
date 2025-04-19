@@ -128,10 +128,10 @@ static int acard_ahci_pci_device_suspend(struct pci_dev *pdev, pm_message_t mesg
 		 * Software must disable interrupts prior to requesting a
 		 * transition of the HBA to D3 state.
 		 */
-		ctl = readl(mmio + HOST_CTL);
+		ctl = pete_readl("drivers/ata/acard-ahci.c:131", mmio + HOST_CTL);
 		ctl &= ~HOST_IRQ_EN;
-		writel(ctl, mmio + HOST_CTL);
-		readl(mmio + HOST_CTL); /* flush */
+		pete_writel("drivers/ata/acard-ahci.c:133", ctl, mmio + HOST_CTL);
+		pete_readl("drivers/ata/acard-ahci.c:134", mmio + HOST_CTL); /* flush */
 	}
 
 	return ata_pci_device_suspend(pdev, mesg);
@@ -290,7 +290,7 @@ static int acard_ahci_port_start(struct ata_port *ap)
 	/* check FBS capability */
 	if ((hpriv->cap & HOST_CAP_FBS) && sata_pmp_supported(ap)) {
 		void __iomem *port_mmio = ahci_port_base(ap);
-		u32 cmd = readl(port_mmio + PORT_CMD);
+		u32 cmd = pete_readl("drivers/ata/acard-ahci.c:293", port_mmio + PORT_CMD);
 		if (cmd & PORT_CMD_FBSCP)
 			pp->fbs_supported = true;
 		else if (hpriv->flags & AHCI_HFLAG_YES_FBS) {

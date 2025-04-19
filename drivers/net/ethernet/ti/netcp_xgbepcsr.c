@@ -19,7 +19,7 @@
 #define POR_EN				BIT(29)
 
 #define reg_rmw(addr, value, mask) \
-	writel(((readl(addr) & (~(mask))) | \
+	pete_writel("drivers/net/ethernet/ti/netcp_xgbepcsr.c:22", ((pete_readl("drivers/net/ethernet/ti/netcp_xgbepcsr.c:22", addr) & (~(mask))) | \
 			(value & (mask))), (addr))
 
 /* bit mask of width w at offset s */
@@ -182,7 +182,7 @@ static void netcp_xgbe_serdes_lane_enable(
 			void __iomem *serdes_regs, int lane)
 {
 	/* Set Lane Control Rate */
-	writel(0xe0e9e038, serdes_regs + 0x1fe0 + (4 * lane));
+	pete_writel("drivers/net/ethernet/ti/netcp_xgbepcsr.c:185", 0xe0e9e038, serdes_regs + 0x1fe0 + (4 * lane));
 }
 
 static void netcp_xgbe_serdes_phyb_rst_clr(void __iomem *serdes_regs)
@@ -192,13 +192,13 @@ static void netcp_xgbe_serdes_phyb_rst_clr(void __iomem *serdes_regs)
 
 static void netcp_xgbe_serdes_pll_disable(void __iomem *serdes_regs)
 {
-	writel(0x88000000, serdes_regs + 0x1ff4);
+	pete_writel("drivers/net/ethernet/ti/netcp_xgbepcsr.c:195", 0x88000000, serdes_regs + 0x1ff4);
 }
 
 static void netcp_xgbe_serdes_pll_enable(void __iomem *serdes_regs)
 {
 	netcp_xgbe_serdes_phyb_rst_clr(serdes_regs);
-	writel(0xee000000, serdes_regs + 0x1ff4);
+	pete_writel("drivers/net/ethernet/ti/netcp_xgbepcsr.c:201", 0xee000000, serdes_regs + 0x1ff4);
 }
 
 static int netcp_xgbe_wait_pll_locked(void __iomem *sw_regs)
@@ -209,8 +209,8 @@ static int netcp_xgbe_wait_pll_locked(void __iomem *sw_regs)
 
 	timeout = jiffies + msecs_to_jiffies(500);
 	do {
-		val_0 = (readl(sw_regs + XGBE_SGMII_1_OFFSET) & BIT(4));
-		val_1 = (readl(sw_regs + XGBE_SGMII_2_OFFSET) & BIT(4));
+		val_0 = (pete_readl("drivers/net/ethernet/ti/netcp_xgbepcsr.c:212", sw_regs + XGBE_SGMII_1_OFFSET) & BIT(4));
+		val_1 = (pete_readl("drivers/net/ethernet/ti/netcp_xgbepcsr.c:213", sw_regs + XGBE_SGMII_2_OFFSET) & BIT(4));
 
 		if (val_1 && val_0)
 			return 0;
@@ -229,7 +229,7 @@ static int netcp_xgbe_wait_pll_locked(void __iomem *sw_regs)
 
 static void netcp_xgbe_serdes_enable_xgmii_port(void __iomem *sw_regs)
 {
-	writel(0x03, sw_regs + XGBE_CTRL_OFFSET);
+	pete_writel("drivers/net/ethernet/ti/netcp_xgbepcsr.c:232", 0x03, sw_regs + XGBE_CTRL_OFFSET);
 }
 
 static u32 netcp_xgbe_serdes_read_tbus_val(void __iomem *serdes_regs)
@@ -237,10 +237,10 @@ static u32 netcp_xgbe_serdes_read_tbus_val(void __iomem *serdes_regs)
 	u32 tmp;
 
 	if (PHY_A(serdes_regs)) {
-		tmp  = (readl(serdes_regs + 0x0ec) >> 24) & 0x0ff;
-		tmp |= ((readl(serdes_regs + 0x0fc) >> 16) & 0x00f00);
+		tmp  = (pete_readl("drivers/net/ethernet/ti/netcp_xgbepcsr.c:240", serdes_regs + 0x0ec) >> 24) & 0x0ff;
+		tmp |= ((pete_readl("drivers/net/ethernet/ti/netcp_xgbepcsr.c:241", serdes_regs + 0x0fc) >> 16) & 0x00f00);
 	} else {
-		tmp  = (readl(serdes_regs + 0x0f8) >> 16) & 0x0fff;
+		tmp  = (pete_readl("drivers/net/ethernet/ti/netcp_xgbepcsr.c:243", serdes_regs + 0x0f8) >> 16) & 0x0fff;
 	}
 
 	return tmp;
@@ -315,10 +315,10 @@ static int netcp_xgbe_check_link_status(void __iomem *serdes_regs,
 
 	for (i = 0; i < lanes; i++) {
 		/* Get the Loss bit */
-		loss = readl(serdes_regs + 0x1fc0 + 0x20 + (i * 0x04)) & 0x1;
+		loss = pete_readl("drivers/net/ethernet/ti/netcp_xgbepcsr.c:318", serdes_regs + 0x1fc0 + 0x20 + (i * 0x04)) & 0x1;
 
 		/* Get Block Errors and Block Lock bits */
-		pcsr_rx_stat = readl(pcsr_base + 0x0c + (i * 0x80));
+		pcsr_rx_stat = pete_readl("drivers/net/ethernet/ti/netcp_xgbepcsr.c:321", pcsr_base + 0x0c + (i * 0x80));
 		blk_lock = (pcsr_rx_stat >> 30) & 0x1;
 		blk_errs = (pcsr_rx_stat >> 16) & 0x0ff;
 
@@ -485,7 +485,7 @@ int netcp_xgbe_serdes_init(void __iomem *serdes_regs, void __iomem *xgbe_regs)
 	u32 val;
 
 	/* read COMLANE bits 4:0 */
-	val = readl(serdes_regs + 0xa00);
+	val = pete_readl("drivers/net/ethernet/ti/netcp_xgbepcsr.c:488", serdes_regs + 0xa00);
 	if (val & 0x1f) {
 		pr_debug("XGBE: serdes already in operation - reset\n");
 		netcp_xgbe_reset_serdes(serdes_regs);

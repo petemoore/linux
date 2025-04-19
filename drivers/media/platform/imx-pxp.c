@@ -485,11 +485,11 @@ static void pxp_setup_csc(struct pxp_ctx *ctx)
 				csc1_coef = csc1_coef_smpte240m_lim;
 		}
 
-		writel(csc1_coef[0], dev->mmio + HW_PXP_CSC1_COEF0);
-		writel(csc1_coef[1], dev->mmio + HW_PXP_CSC1_COEF1);
-		writel(csc1_coef[2], dev->mmio + HW_PXP_CSC1_COEF2);
+		pete_writel("drivers/media/platform/imx-pxp.c:488", csc1_coef[0], dev->mmio + HW_PXP_CSC1_COEF0);
+		pete_writel("drivers/media/platform/imx-pxp.c:489", csc1_coef[1], dev->mmio + HW_PXP_CSC1_COEF1);
+		pete_writel("drivers/media/platform/imx-pxp.c:490", csc1_coef[2], dev->mmio + HW_PXP_CSC1_COEF2);
 	} else {
-		writel(BM_PXP_CSC1_COEF0_BYPASS, dev->mmio + HW_PXP_CSC1_COEF0);
+		pete_writel("drivers/media/platform/imx-pxp.c:492", BM_PXP_CSC1_COEF0_BYPASS, dev->mmio + HW_PXP_CSC1_COEF0);
 	}
 
 	if (!pxp_v4l2_pix_fmt_is_yuv(ctx->q_data[V4L2_M2M_SRC].fmt->fourcc) &&
@@ -705,15 +705,15 @@ static void pxp_setup_csc(struct pxp_ctx *ctx)
 				    BP_PXP_CSC2_CTRL_CSC_MODE;
 		}
 
-		writel(csc2_ctrl, dev->mmio + HW_PXP_CSC2_CTRL);
-		writel(csc2_coef[0], dev->mmio + HW_PXP_CSC2_COEF0);
-		writel(csc2_coef[1], dev->mmio + HW_PXP_CSC2_COEF1);
-		writel(csc2_coef[2], dev->mmio + HW_PXP_CSC2_COEF2);
-		writel(csc2_coef[3], dev->mmio + HW_PXP_CSC2_COEF3);
-		writel(csc2_coef[4], dev->mmio + HW_PXP_CSC2_COEF4);
-		writel(csc2_coef[5], dev->mmio + HW_PXP_CSC2_COEF5);
+		pete_writel("drivers/media/platform/imx-pxp.c:708", csc2_ctrl, dev->mmio + HW_PXP_CSC2_CTRL);
+		pete_writel("drivers/media/platform/imx-pxp.c:709", csc2_coef[0], dev->mmio + HW_PXP_CSC2_COEF0);
+		pete_writel("drivers/media/platform/imx-pxp.c:710", csc2_coef[1], dev->mmio + HW_PXP_CSC2_COEF1);
+		pete_writel("drivers/media/platform/imx-pxp.c:711", csc2_coef[2], dev->mmio + HW_PXP_CSC2_COEF2);
+		pete_writel("drivers/media/platform/imx-pxp.c:712", csc2_coef[3], dev->mmio + HW_PXP_CSC2_COEF3);
+		pete_writel("drivers/media/platform/imx-pxp.c:713", csc2_coef[4], dev->mmio + HW_PXP_CSC2_COEF4);
+		pete_writel("drivers/media/platform/imx-pxp.c:714", csc2_coef[5], dev->mmio + HW_PXP_CSC2_COEF5);
 	} else {
-		writel(BM_PXP_CSC2_CTRL_BYPASS, dev->mmio + HW_PXP_CSC2_CTRL);
+		pete_writel("drivers/media/platform/imx-pxp.c:716", BM_PXP_CSC2_CTRL_BYPASS, dev->mmio + HW_PXP_CSC2_CTRL);
 	}
 }
 
@@ -864,40 +864,40 @@ static int pxp_start(struct pxp_ctx *ctx, struct vb2_v4l2_buffer *in_vb,
 		   BF_PXP_PS_SCALE_XSCALE(xscale);
 	ps_offset = BF_PXP_PS_OFFSET_YOFFSET(0) | BF_PXP_PS_OFFSET_XOFFSET(0);
 
-	writel(ctrl, dev->mmio + HW_PXP_CTRL);
+	pete_writel("drivers/media/platform/imx-pxp.c:867", ctrl, dev->mmio + HW_PXP_CTRL);
 	/* skip STAT */
-	writel(out_ctrl, dev->mmio + HW_PXP_OUT_CTRL);
-	writel(out_buf, dev->mmio + HW_PXP_OUT_BUF);
-	writel(out_buf2, dev->mmio + HW_PXP_OUT_BUF2);
-	writel(out_pitch, dev->mmio + HW_PXP_OUT_PITCH);
-	writel(out_lrc, dev->mmio + HW_PXP_OUT_LRC);
-	writel(out_ps_ulc, dev->mmio + HW_PXP_OUT_PS_ULC);
-	writel(out_ps_lrc, dev->mmio + HW_PXP_OUT_PS_LRC);
-	writel(as_ulc, dev->mmio + HW_PXP_OUT_AS_ULC);
-	writel(as_lrc, dev->mmio + HW_PXP_OUT_AS_LRC);
-	writel(ps_ctrl, dev->mmio + HW_PXP_PS_CTRL);
-	writel(ps_buf, dev->mmio + HW_PXP_PS_BUF);
-	writel(ps_ubuf, dev->mmio + HW_PXP_PS_UBUF);
-	writel(ps_vbuf, dev->mmio + HW_PXP_PS_VBUF);
-	writel(ps_pitch, dev->mmio + HW_PXP_PS_PITCH);
-	writel(0x00ffffff, dev->mmio + HW_PXP_PS_BACKGROUND_0);
-	writel(ps_scale, dev->mmio + HW_PXP_PS_SCALE);
-	writel(ps_offset, dev->mmio + HW_PXP_PS_OFFSET);
+	pete_writel("drivers/media/platform/imx-pxp.c:869", out_ctrl, dev->mmio + HW_PXP_OUT_CTRL);
+	pete_writel("drivers/media/platform/imx-pxp.c:870", out_buf, dev->mmio + HW_PXP_OUT_BUF);
+	pete_writel("drivers/media/platform/imx-pxp.c:871", out_buf2, dev->mmio + HW_PXP_OUT_BUF2);
+	pete_writel("drivers/media/platform/imx-pxp.c:872", out_pitch, dev->mmio + HW_PXP_OUT_PITCH);
+	pete_writel("drivers/media/platform/imx-pxp.c:873", out_lrc, dev->mmio + HW_PXP_OUT_LRC);
+	pete_writel("drivers/media/platform/imx-pxp.c:874", out_ps_ulc, dev->mmio + HW_PXP_OUT_PS_ULC);
+	pete_writel("drivers/media/platform/imx-pxp.c:875", out_ps_lrc, dev->mmio + HW_PXP_OUT_PS_LRC);
+	pete_writel("drivers/media/platform/imx-pxp.c:876", as_ulc, dev->mmio + HW_PXP_OUT_AS_ULC);
+	pete_writel("drivers/media/platform/imx-pxp.c:877", as_lrc, dev->mmio + HW_PXP_OUT_AS_LRC);
+	pete_writel("drivers/media/platform/imx-pxp.c:878", ps_ctrl, dev->mmio + HW_PXP_PS_CTRL);
+	pete_writel("drivers/media/platform/imx-pxp.c:879", ps_buf, dev->mmio + HW_PXP_PS_BUF);
+	pete_writel("drivers/media/platform/imx-pxp.c:880", ps_ubuf, dev->mmio + HW_PXP_PS_UBUF);
+	pete_writel("drivers/media/platform/imx-pxp.c:881", ps_vbuf, dev->mmio + HW_PXP_PS_VBUF);
+	pete_writel("drivers/media/platform/imx-pxp.c:882", ps_pitch, dev->mmio + HW_PXP_PS_PITCH);
+	pete_writel("drivers/media/platform/imx-pxp.c:883", 0x00ffffff, dev->mmio + HW_PXP_PS_BACKGROUND_0);
+	pete_writel("drivers/media/platform/imx-pxp.c:884", ps_scale, dev->mmio + HW_PXP_PS_SCALE);
+	pete_writel("drivers/media/platform/imx-pxp.c:885", ps_offset, dev->mmio + HW_PXP_PS_OFFSET);
 	/* disable processed surface color keying */
-	writel(0x00ffffff, dev->mmio + HW_PXP_PS_CLRKEYLOW_0);
-	writel(0x00000000, dev->mmio + HW_PXP_PS_CLRKEYHIGH_0);
+	pete_writel("drivers/media/platform/imx-pxp.c:887", 0x00ffffff, dev->mmio + HW_PXP_PS_CLRKEYLOW_0);
+	pete_writel("drivers/media/platform/imx-pxp.c:888", 0x00000000, dev->mmio + HW_PXP_PS_CLRKEYHIGH_0);
 
 	/* disable alpha surface color keying */
-	writel(0x00ffffff, dev->mmio + HW_PXP_AS_CLRKEYLOW_0);
-	writel(0x00000000, dev->mmio + HW_PXP_AS_CLRKEYHIGH_0);
+	pete_writel("drivers/media/platform/imx-pxp.c:891", 0x00ffffff, dev->mmio + HW_PXP_AS_CLRKEYLOW_0);
+	pete_writel("drivers/media/platform/imx-pxp.c:892", 0x00000000, dev->mmio + HW_PXP_AS_CLRKEYHIGH_0);
 
 	/* setup CSC */
 	pxp_setup_csc(ctx);
 
 	/* bypass LUT */
-	writel(BM_PXP_LUT_CTRL_BYPASS, dev->mmio + HW_PXP_LUT_CTRL);
+	pete_writel("drivers/media/platform/imx-pxp.c:898", BM_PXP_LUT_CTRL_BYPASS, dev->mmio + HW_PXP_LUT_CTRL);
 
-	writel(BF_PXP_DATA_PATH_CTRL0_MUX15_SEL(0)|
+	pete_writel("drivers/media/platform/imx-pxp.c:900", BF_PXP_DATA_PATH_CTRL0_MUX15_SEL(0)|
 	       BF_PXP_DATA_PATH_CTRL0_MUX14_SEL(1)|
 	       BF_PXP_DATA_PATH_CTRL0_MUX13_SEL(0)|
 	       BF_PXP_DATA_PATH_CTRL0_MUX12_SEL(0)|
@@ -914,15 +914,15 @@ static int pxp_start(struct pxp_ctx *ctx, struct vb2_v4l2_buffer *in_vb,
 	       BF_PXP_DATA_PATH_CTRL0_MUX1_SEL(0)|
 	       BF_PXP_DATA_PATH_CTRL0_MUX0_SEL(0),
 	       dev->mmio + HW_PXP_DATA_PATH_CTRL0);
-	writel(BF_PXP_DATA_PATH_CTRL1_MUX17_SEL(1) |
+	pete_writel("drivers/media/platform/imx-pxp.c:917", BF_PXP_DATA_PATH_CTRL1_MUX17_SEL(1) |
 	       BF_PXP_DATA_PATH_CTRL1_MUX16_SEL(1),
 	       dev->mmio + HW_PXP_DATA_PATH_CTRL1);
 
-	writel(0xffff, dev->mmio + HW_PXP_IRQ_MASK);
+	pete_writel("drivers/media/platform/imx-pxp.c:921", 0xffff, dev->mmio + HW_PXP_IRQ_MASK);
 
 	/* ungate, enable PS/AS/OUT and PXP operation */
-	writel(BM_PXP_CTRL_IRQ_ENABLE, dev->mmio + HW_PXP_CTRL_SET);
-	writel(BM_PXP_CTRL_ENABLE | BM_PXP_CTRL_ENABLE_CSC2 |
+	pete_writel("drivers/media/platform/imx-pxp.c:924", BM_PXP_CTRL_IRQ_ENABLE, dev->mmio + HW_PXP_CTRL_SET);
+	pete_writel("drivers/media/platform/imx-pxp.c:925", BM_PXP_CTRL_ENABLE | BM_PXP_CTRL_ENABLE_CSC2 |
 	       BM_PXP_CTRL_ENABLE_LUT | BM_PXP_CTRL_ENABLE_ROTATE0 |
 	       BM_PXP_CTRL_ENABLE_PS_AS_OUT, dev->mmio + HW_PXP_CTRL_SET);
 
@@ -997,23 +997,23 @@ static irqreturn_t pxp_irq_handler(int irq, void *dev_id)
 	struct pxp_dev *dev = dev_id;
 	u32 stat;
 
-	stat = readl(dev->mmio + HW_PXP_STAT);
+	stat = pete_readl("drivers/media/platform/imx-pxp.c:1000", dev->mmio + HW_PXP_STAT);
 
 	if (stat & BM_PXP_STAT_IRQ0) {
 		/* we expect x = 0, y = height, irq0 = 1 */
 		if (stat & ~(BM_PXP_STAT_BLOCKX | BM_PXP_STAT_BLOCKY |
 			     BM_PXP_STAT_IRQ0))
 			dprintk(dev, "%s: stat = 0x%08x\n", __func__, stat);
-		writel(BM_PXP_STAT_IRQ0, dev->mmio + HW_PXP_STAT_CLR);
+		pete_writel("drivers/media/platform/imx-pxp.c:1007", BM_PXP_STAT_IRQ0, dev->mmio + HW_PXP_STAT_CLR);
 
 		pxp_job_finish(dev);
 	} else {
-		u32 irq = readl(dev->mmio + HW_PXP_IRQ);
+		u32 irq = pete_readl("drivers/media/platform/imx-pxp.c:1011", dev->mmio + HW_PXP_IRQ);
 
 		dprintk(dev, "%s: stat = 0x%08x\n", __func__, stat);
 		dprintk(dev, "%s: irq = 0x%08x\n", __func__, irq);
 
-		writel(irq, dev->mmio + HW_PXP_IRQ_CLR);
+		pete_writel("drivers/media/platform/imx-pxp.c:1016", irq, dev->mmio + HW_PXP_IRQ_CLR);
 	}
 
 	return IRQ_HANDLED;
@@ -1617,18 +1617,18 @@ static int pxp_soft_reset(struct pxp_dev *dev)
 	int ret;
 	u32 val;
 
-	writel(BM_PXP_CTRL_SFTRST, dev->mmio + HW_PXP_CTRL_CLR);
-	writel(BM_PXP_CTRL_CLKGATE, dev->mmio + HW_PXP_CTRL_CLR);
+	pete_writel("drivers/media/platform/imx-pxp.c:1620", BM_PXP_CTRL_SFTRST, dev->mmio + HW_PXP_CTRL_CLR);
+	pete_writel("drivers/media/platform/imx-pxp.c:1621", BM_PXP_CTRL_CLKGATE, dev->mmio + HW_PXP_CTRL_CLR);
 
-	writel(BM_PXP_CTRL_SFTRST, dev->mmio + HW_PXP_CTRL_SET);
+	pete_writel("drivers/media/platform/imx-pxp.c:1623", BM_PXP_CTRL_SFTRST, dev->mmio + HW_PXP_CTRL_SET);
 
 	ret = readl_poll_timeout(dev->mmio + HW_PXP_CTRL, val,
 				 val & BM_PXP_CTRL_CLKGATE, 0, 100);
 	if (ret < 0)
 		return ret;
 
-	writel(BM_PXP_CTRL_SFTRST, dev->mmio + HW_PXP_CTRL_CLR);
-	writel(BM_PXP_CTRL_CLKGATE, dev->mmio + HW_PXP_CTRL_CLR);
+	pete_writel("drivers/media/platform/imx-pxp.c:1630", BM_PXP_CTRL_SFTRST, dev->mmio + HW_PXP_CTRL_CLR);
+	pete_writel("drivers/media/platform/imx-pxp.c:1631", BM_PXP_CTRL_CLKGATE, dev->mmio + HW_PXP_CTRL_CLR);
 
 	return 0;
 }
@@ -1728,8 +1728,8 @@ static int pxp_remove(struct platform_device *pdev)
 {
 	struct pxp_dev *dev = platform_get_drvdata(pdev);
 
-	writel(BM_PXP_CTRL_CLKGATE, dev->mmio + HW_PXP_CTRL_SET);
-	writel(BM_PXP_CTRL_SFTRST, dev->mmio + HW_PXP_CTRL_SET);
+	pete_writel("drivers/media/platform/imx-pxp.c:1731", BM_PXP_CTRL_CLKGATE, dev->mmio + HW_PXP_CTRL_SET);
+	pete_writel("drivers/media/platform/imx-pxp.c:1732", BM_PXP_CTRL_SFTRST, dev->mmio + HW_PXP_CTRL_SET);
 
 	clk_disable_unprepare(dev->clk);
 

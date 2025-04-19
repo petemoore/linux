@@ -919,7 +919,7 @@ extern const struct il_debugfs_ops il4965_debugfs_ops;
 /****************************/
 
 /**
- * This I/O area is directly read/writable by driver (e.g. Linux uses writel())
+ * This I/O area is directly read/writable by driver (e.g. Linux uses pete_writel("drivers/net/wireless/intel/iwlegacy/4965.h:922", ))
  * Addresses are offsets from device's PCI hardware base address.
  */
 #define FH49_MEM_LOWER_BOUND                   (0x1000)

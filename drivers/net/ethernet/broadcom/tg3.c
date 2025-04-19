@@ -467,22 +467,22 @@ static const struct {
 
 static void tg3_write32(struct tg3 *tp, u32 off, u32 val)
 {
-	writel(val, tp->regs + off);
+	pete_writel("drivers/net/ethernet/broadcom/tg3.c:470", val, tp->regs + off);
 }
 
 static u32 tg3_read32(struct tg3 *tp, u32 off)
 {
-	return readl(tp->regs + off);
+	return pete_readl("drivers/net/ethernet/broadcom/tg3.c:475", tp->regs + off);
 }
 
 static void tg3_ape_write32(struct tg3 *tp, u32 off, u32 val)
 {
-	writel(val, tp->aperegs + off);
+	pete_writel("drivers/net/ethernet/broadcom/tg3.c:480", val, tp->aperegs + off);
 }
 
 static u32 tg3_ape_read32(struct tg3 *tp, u32 off)
 {
-	return readl(tp->aperegs + off);
+	return pete_readl("drivers/net/ethernet/broadcom/tg3.c:485", tp->aperegs + off);
 }
 
 static void tg3_write_indirect_reg32(struct tg3 *tp, u32 off, u32 val)
@@ -497,8 +497,8 @@ static void tg3_write_indirect_reg32(struct tg3 *tp, u32 off, u32 val)
 
 static void tg3_write_flush_reg32(struct tg3 *tp, u32 off, u32 val)
 {
-	writel(val, tp->regs + off);
-	readl(tp->regs + off);
+	pete_writel("drivers/net/ethernet/broadcom/tg3.c:500", val, tp->regs + off);
+	pete_readl("drivers/net/ethernet/broadcom/tg3.c:501", tp->regs + off);
 }
 
 static u32 tg3_read_indirect_reg32(struct tg3 *tp, u32 off)
@@ -591,22 +591,22 @@ static inline void tw32_mailbox_flush(struct tg3 *tp, u32 off, u32 val)
 static void tg3_write32_tx_mbox(struct tg3 *tp, u32 off, u32 val)
 {
 	void __iomem *mbox = tp->regs + off;
-	writel(val, mbox);
+	pete_writel("drivers/net/ethernet/broadcom/tg3.c:594", val, mbox);
 	if (tg3_flag(tp, TXD_MBOX_HWBUG))
-		writel(val, mbox);
+		pete_writel("drivers/net/ethernet/broadcom/tg3.c:596", val, mbox);
 	if (tg3_flag(tp, MBOX_WRITE_REORDER) ||
 	    tg3_flag(tp, FLUSH_POSTED_WRITES))
-		readl(mbox);
+		pete_readl("drivers/net/ethernet/broadcom/tg3.c:599", mbox);
 }
 
 static u32 tg3_read32_mbox_5906(struct tg3 *tp, u32 off)
 {
-	return readl(tp->regs + off + GRCMBOX_BASE);
+	return pete_readl("drivers/net/ethernet/broadcom/tg3.c:604", tp->regs + off + GRCMBOX_BASE);
 }
 
 static void tg3_write32_mbox_5906(struct tg3 *tp, u32 off, u32 val)
 {
-	writel(val, tp->regs + off + GRCMBOX_BASE);
+	pete_writel("drivers/net/ethernet/broadcom/tg3.c:609", val, tp->regs + off + GRCMBOX_BASE);
 }
 
 #define tw32_mailbox(reg, val)		tp->write32_mbox(tp, reg, val)
@@ -9077,7 +9077,7 @@ static int tg3_chip_reset(struct tg3 *tp)
 		tw32(GRC_FASTBOOT_PC, 0);
 
 	/*
-	 * We must avoid the readl() that normally takes place.
+	 * We must avoid the pete_readl("drivers/net/ethernet/broadcom/tg3.c:9080", ) that normally takes place.
 	 * It locks machines, causes machine checks, and other
 	 * fun things.  So, temporarily disable the 5701
 	 * hardware workaround, while we do the reset.
@@ -16791,10 +16791,10 @@ static int tg3_get_invariants(struct tg3 *tp, const struct pci_device_id *ent)
 			 */
 			sram_base = tp->regs + NIC_SRAM_WIN_BASE + NIC_SRAM_STATS_BLK;
 
-			writel(0x00000000, sram_base);
-			writel(0x00000000, sram_base + 4);
-			writel(0xffffffff, sram_base + 4);
-			if (readl(sram_base) != 0x00000000)
+			pete_writel("drivers/net/ethernet/broadcom/tg3.c:16794", 0x00000000, sram_base);
+			pete_writel("drivers/net/ethernet/broadcom/tg3.c:16795", 0x00000000, sram_base + 4);
+			pete_writel("drivers/net/ethernet/broadcom/tg3.c:16796", 0xffffffff, sram_base + 4);
+			if (pete_readl("drivers/net/ethernet/broadcom/tg3.c:16797", sram_base) != 0x00000000)
 				tg3_flag_set(tp, PCIX_TARGET_HWBUG);
 		}
 	}

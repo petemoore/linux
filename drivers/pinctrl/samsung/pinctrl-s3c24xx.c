@@ -147,10 +147,10 @@ static void s3c24xx_eint_set_function(struct samsung_pinctrl_drv_data *d,
 
 	raw_spin_lock_irqsave(&bank->slock, flags);
 
-	val = readl(reg);
+	val = pete_readl("drivers/pinctrl/samsung/pinctrl-s3c24xx.c:150", reg);
 	val &= ~(mask << shift);
 	val |= bank->eint_func << shift;
-	writel(val, reg);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-s3c24xx.c:153", val, reg);
 
 	raw_spin_unlock_irqrestore(&bank->slock, flags);
 }
@@ -177,10 +177,10 @@ static int s3c24xx_eint_type(struct irq_data *data, unsigned int type)
 	reg = d->virt_base + EINT_REG(index);
 	shift = EINT_OFFS(index);
 
-	val = readl(reg);
+	val = pete_readl("drivers/pinctrl/samsung/pinctrl-s3c24xx.c:180", reg);
 	val &= ~(EINT_MASK << shift);
 	val |= trigger << shift;
-	writel(val, reg);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-s3c24xx.c:183", val, reg);
 
 	s3c24xx_eint_set_function(d, bank, data->hwirq);
 
@@ -250,7 +250,7 @@ static void s3c2412_eint0_3_ack(struct irq_data *data)
 	struct samsung_pinctrl_drv_data *d = bank->drvdata;
 
 	unsigned long bitval = 1UL << data->hwirq;
-	writel(bitval, d->virt_base + EINTPEND_REG);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-s3c24xx.c:253", bitval, d->virt_base + EINTPEND_REG);
 }
 
 static void s3c2412_eint0_3_mask(struct irq_data *data)
@@ -259,9 +259,9 @@ static void s3c2412_eint0_3_mask(struct irq_data *data)
 	struct samsung_pinctrl_drv_data *d = bank->drvdata;
 	unsigned long mask;
 
-	mask = readl(d->virt_base + EINTMASK_REG);
+	mask = pete_readl("drivers/pinctrl/samsung/pinctrl-s3c24xx.c:262", d->virt_base + EINTMASK_REG);
 	mask |= (1UL << data->hwirq);
-	writel(mask, d->virt_base + EINTMASK_REG);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-s3c24xx.c:264", mask, d->virt_base + EINTMASK_REG);
 }
 
 static void s3c2412_eint0_3_unmask(struct irq_data *data)
@@ -270,9 +270,9 @@ static void s3c2412_eint0_3_unmask(struct irq_data *data)
 	struct samsung_pinctrl_drv_data *d = bank->drvdata;
 	unsigned long mask;
 
-	mask = readl(d->virt_base + EINTMASK_REG);
+	mask = pete_readl("drivers/pinctrl/samsung/pinctrl-s3c24xx.c:273", d->virt_base + EINTMASK_REG);
 	mask &= ~(1UL << data->hwirq);
-	writel(mask, d->virt_base + EINTMASK_REG);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-s3c24xx.c:275", mask, d->virt_base + EINTMASK_REG);
 }
 
 static struct irq_chip s3c2412_eint0_3_chip = {
@@ -308,7 +308,7 @@ static void s3c24xx_eint_ack(struct irq_data *data)
 	struct samsung_pinctrl_drv_data *d = bank->drvdata;
 	unsigned char index = bank->eint_offset + data->hwirq;
 
-	writel(1UL << index, d->virt_base + EINTPEND_REG);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-s3c24xx.c:311", 1UL << index, d->virt_base + EINTPEND_REG);
 }
 
 static void s3c24xx_eint_mask(struct irq_data *data)
@@ -318,9 +318,9 @@ static void s3c24xx_eint_mask(struct irq_data *data)
 	unsigned char index = bank->eint_offset + data->hwirq;
 	unsigned long mask;
 
-	mask = readl(d->virt_base + EINTMASK_REG);
+	mask = pete_readl("drivers/pinctrl/samsung/pinctrl-s3c24xx.c:321", d->virt_base + EINTMASK_REG);
 	mask |= (1UL << index);
-	writel(mask, d->virt_base + EINTMASK_REG);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-s3c24xx.c:323", mask, d->virt_base + EINTMASK_REG);
 }
 
 static void s3c24xx_eint_unmask(struct irq_data *data)
@@ -330,9 +330,9 @@ static void s3c24xx_eint_unmask(struct irq_data *data)
 	unsigned char index = bank->eint_offset + data->hwirq;
 	unsigned long mask;
 
-	mask = readl(d->virt_base + EINTMASK_REG);
+	mask = pete_readl("drivers/pinctrl/samsung/pinctrl-s3c24xx.c:333", d->virt_base + EINTMASK_REG);
 	mask &= ~(1UL << index);
-	writel(mask, d->virt_base + EINTMASK_REG);
+	pete_writel("drivers/pinctrl/samsung/pinctrl-s3c24xx.c:335", mask, d->virt_base + EINTMASK_REG);
 }
 
 static struct irq_chip s3c24xx_eint_chip = {
@@ -353,8 +353,8 @@ static inline void s3c24xx_demux_eint(struct irq_desc *desc,
 
 	chained_irq_enter(chip, desc);
 
-	pend = readl(d->virt_base + EINTPEND_REG);
-	mask = readl(d->virt_base + EINTMASK_REG);
+	pend = pete_readl("drivers/pinctrl/samsung/pinctrl-s3c24xx.c:356", d->virt_base + EINTPEND_REG);
+	mask = pete_readl("drivers/pinctrl/samsung/pinctrl-s3c24xx.c:357", d->virt_base + EINTMASK_REG);
 
 	pend &= ~mask;
 	pend &= range;

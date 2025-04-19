@@ -22,40 +22,40 @@ void flite_hw_reset(struct fimc_lite *dev)
 	unsigned long end = jiffies + msecs_to_jiffies(FLITE_RESET_TIMEOUT);
 	u32 cfg;
 
-	cfg = readl(dev->regs + FLITE_REG_CIGCTRL);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:25", dev->regs + FLITE_REG_CIGCTRL);
 	cfg |= FLITE_REG_CIGCTRL_SWRST_REQ;
-	writel(cfg, dev->regs + FLITE_REG_CIGCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:27", cfg, dev->regs + FLITE_REG_CIGCTRL);
 
 	while (time_is_after_jiffies(end)) {
-		cfg = readl(dev->regs + FLITE_REG_CIGCTRL);
+		cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:30", dev->regs + FLITE_REG_CIGCTRL);
 		if (cfg & FLITE_REG_CIGCTRL_SWRST_RDY)
 			break;
 		usleep_range(1000, 5000);
 	}
 
 	cfg |= FLITE_REG_CIGCTRL_SWRST;
-	writel(cfg, dev->regs + FLITE_REG_CIGCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:37", cfg, dev->regs + FLITE_REG_CIGCTRL);
 }
 
 void flite_hw_clear_pending_irq(struct fimc_lite *dev)
 {
-	u32 cfg = readl(dev->regs + FLITE_REG_CISTATUS);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:42", dev->regs + FLITE_REG_CISTATUS);
 	cfg &= ~FLITE_REG_CISTATUS_IRQ_CAM;
-	writel(cfg, dev->regs + FLITE_REG_CISTATUS);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:44", cfg, dev->regs + FLITE_REG_CISTATUS);
 }
 
 u32 flite_hw_get_interrupt_source(struct fimc_lite *dev)
 {
-	u32 intsrc = readl(dev->regs + FLITE_REG_CISTATUS);
+	u32 intsrc = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:49", dev->regs + FLITE_REG_CISTATUS);
 	return intsrc & FLITE_REG_CISTATUS_IRQ_MASK;
 }
 
 void flite_hw_clear_last_capture_end(struct fimc_lite *dev)
 {
 
-	u32 cfg = readl(dev->regs + FLITE_REG_CISTATUS2);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:56", dev->regs + FLITE_REG_CISTATUS2);
 	cfg &= ~FLITE_REG_CISTATUS2_LASTCAPEND;
-	writel(cfg, dev->regs + FLITE_REG_CISTATUS2);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:58", cfg, dev->regs + FLITE_REG_CISTATUS2);
 }
 
 void flite_hw_set_interrupt_mask(struct fimc_lite *dev)
@@ -74,24 +74,24 @@ void flite_hw_set_interrupt_mask(struct fimc_lite *dev)
 			 FLITE_REG_CIGCTRL_IRQ_LASTEN;
 	}
 
-	cfg = readl(dev->regs + FLITE_REG_CIGCTRL);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:77", dev->regs + FLITE_REG_CIGCTRL);
 	cfg |= FLITE_REG_CIGCTRL_IRQ_DISABLE_MASK;
 	cfg &= ~intsrc;
-	writel(cfg, dev->regs + FLITE_REG_CIGCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:80", cfg, dev->regs + FLITE_REG_CIGCTRL);
 }
 
 void flite_hw_capture_start(struct fimc_lite *dev)
 {
-	u32 cfg = readl(dev->regs + FLITE_REG_CIIMGCPT);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:85", dev->regs + FLITE_REG_CIIMGCPT);
 	cfg |= FLITE_REG_CIIMGCPT_IMGCPTEN;
-	writel(cfg, dev->regs + FLITE_REG_CIIMGCPT);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:87", cfg, dev->regs + FLITE_REG_CIIMGCPT);
 }
 
 void flite_hw_capture_stop(struct fimc_lite *dev)
 {
-	u32 cfg = readl(dev->regs + FLITE_REG_CIIMGCPT);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:92", dev->regs + FLITE_REG_CIIMGCPT);
 	cfg &= ~FLITE_REG_CIIMGCPT_IMGCPTEN;
-	writel(cfg, dev->regs + FLITE_REG_CIIMGCPT);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:94", cfg, dev->regs + FLITE_REG_CIIMGCPT);
 }
 
 /*
@@ -100,12 +100,12 @@ void flite_hw_capture_stop(struct fimc_lite *dev)
  */
 void flite_hw_set_test_pattern(struct fimc_lite *dev, bool on)
 {
-	u32 cfg = readl(dev->regs + FLITE_REG_CIGCTRL);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:103", dev->regs + FLITE_REG_CIGCTRL);
 	if (on)
 		cfg |= FLITE_REG_CIGCTRL_TEST_PATTERN_COLORBAR;
 	else
 		cfg &= ~FLITE_REG_CIGCTRL_TEST_PATTERN_COLORBAR;
-	writel(cfg, dev->regs + FLITE_REG_CIGCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:108", cfg, dev->regs + FLITE_REG_CIGCTRL);
 }
 
 static const u32 src_pixfmt_map[8][3] = {
@@ -141,17 +141,17 @@ void flite_hw_set_source_format(struct fimc_lite *dev, struct flite_frame *f)
 			 src_pixfmt_map[i][0]);
 	}
 
-	cfg = readl(dev->regs + FLITE_REG_CIGCTRL);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:144", dev->regs + FLITE_REG_CIGCTRL);
 	cfg &= ~FLITE_REG_CIGCTRL_FMT_MASK;
 	cfg |= src_pixfmt_map[i][2];
-	writel(cfg, dev->regs + FLITE_REG_CIGCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:147", cfg, dev->regs + FLITE_REG_CIGCTRL);
 
-	cfg = readl(dev->regs + FLITE_REG_CISRCSIZE);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:149", dev->regs + FLITE_REG_CISRCSIZE);
 	cfg &= ~(FLITE_REG_CISRCSIZE_ORDER422_MASK |
 		 FLITE_REG_CISRCSIZE_SIZE_CAM_MASK);
 	cfg |= (f->f_width << 16) | f->f_height;
 	cfg |= src_pixfmt_map[i][1];
-	writel(cfg, dev->regs + FLITE_REG_CISRCSIZE);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:154", cfg, dev->regs + FLITE_REG_CISRCSIZE);
 }
 
 /* Set the camera host input window offsets (cropping) */
@@ -160,35 +160,35 @@ void flite_hw_set_window_offset(struct fimc_lite *dev, struct flite_frame *f)
 	u32 hoff2, voff2;
 	u32 cfg;
 
-	cfg = readl(dev->regs + FLITE_REG_CIWDOFST);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:163", dev->regs + FLITE_REG_CIWDOFST);
 	cfg &= ~FLITE_REG_CIWDOFST_OFST_MASK;
 	cfg |= (f->rect.left << 16) | f->rect.top;
 	cfg |= FLITE_REG_CIWDOFST_WINOFSEN;
-	writel(cfg, dev->regs + FLITE_REG_CIWDOFST);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:167", cfg, dev->regs + FLITE_REG_CIWDOFST);
 
 	hoff2 = f->f_width - f->rect.width - f->rect.left;
 	voff2 = f->f_height - f->rect.height - f->rect.top;
 
 	cfg = (hoff2 << 16) | voff2;
-	writel(cfg, dev->regs + FLITE_REG_CIWDOFST2);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:173", cfg, dev->regs + FLITE_REG_CIWDOFST2);
 }
 
 /* Select camera port (A, B) */
 static void flite_hw_set_camera_port(struct fimc_lite *dev, int id)
 {
-	u32 cfg = readl(dev->regs + FLITE_REG_CIGENERAL);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:179", dev->regs + FLITE_REG_CIGENERAL);
 	if (id == 0)
 		cfg &= ~FLITE_REG_CIGENERAL_CAM_B;
 	else
 		cfg |= FLITE_REG_CIGENERAL_CAM_B;
-	writel(cfg, dev->regs + FLITE_REG_CIGENERAL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:184", cfg, dev->regs + FLITE_REG_CIGENERAL);
 }
 
 /* Select serial or parallel bus, camera port (A,B) and set signals polarity */
 void flite_hw_set_camera_bus(struct fimc_lite *dev,
 			     struct fimc_source_info *si)
 {
-	u32 cfg = readl(dev->regs + FLITE_REG_CIGCTRL);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:191", dev->regs + FLITE_REG_CIGCTRL);
 	unsigned int flags = si->flags;
 
 	if (si->sensor_bus_type != FIMC_BUS_TYPE_MIPI_CSI2) {
@@ -209,21 +209,21 @@ void flite_hw_set_camera_bus(struct fimc_lite *dev,
 		cfg |= FLITE_REG_CIGCTRL_SELCAM_MIPI;
 	}
 
-	writel(cfg, dev->regs + FLITE_REG_CIGCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:212", cfg, dev->regs + FLITE_REG_CIGCTRL);
 
 	flite_hw_set_camera_port(dev, si->mux_id);
 }
 
 static void flite_hw_set_pack12(struct fimc_lite *dev, int on)
 {
-	u32 cfg = readl(dev->regs + FLITE_REG_CIODMAFMT);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:219", dev->regs + FLITE_REG_CIODMAFMT);
 
 	cfg &= ~FLITE_REG_CIODMAFMT_PACK12;
 
 	if (on)
 		cfg |= FLITE_REG_CIODMAFMT_PACK12;
 
-	writel(cfg, dev->regs + FLITE_REG_CIODMAFMT);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:226", cfg, dev->regs + FLITE_REG_CIODMAFMT);
 }
 
 static void flite_hw_set_out_order(struct fimc_lite *dev, struct flite_frame *f)
@@ -234,14 +234,14 @@ static void flite_hw_set_out_order(struct fimc_lite *dev, struct flite_frame *f)
 		{ MEDIA_BUS_FMT_UYVY8_2X8, FLITE_REG_CIODMAFMT_CBYCRY },
 		{ MEDIA_BUS_FMT_VYUY8_2X8, FLITE_REG_CIODMAFMT_CRYCBY },
 	};
-	u32 cfg = readl(dev->regs + FLITE_REG_CIODMAFMT);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:237", dev->regs + FLITE_REG_CIODMAFMT);
 	int i = ARRAY_SIZE(pixcode);
 
 	while (--i)
 		if (pixcode[i][0] == f->fmt->mbus_code)
 			break;
 	cfg &= ~FLITE_REG_CIODMAFMT_YCBCR_ORDER_MASK;
-	writel(cfg | pixcode[i][1], dev->regs + FLITE_REG_CIODMAFMT);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:244", cfg | pixcode[i][1], dev->regs + FLITE_REG_CIODMAFMT);
 }
 
 void flite_hw_set_dma_window(struct fimc_lite *dev, struct flite_frame *f)
@@ -249,16 +249,16 @@ void flite_hw_set_dma_window(struct fimc_lite *dev, struct flite_frame *f)
 	u32 cfg;
 
 	/* Maximum output pixel size */
-	cfg = readl(dev->regs + FLITE_REG_CIOCAN);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:252", dev->regs + FLITE_REG_CIOCAN);
 	cfg &= ~FLITE_REG_CIOCAN_MASK;
 	cfg |= (f->f_height << 16) | f->f_width;
-	writel(cfg, dev->regs + FLITE_REG_CIOCAN);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:255", cfg, dev->regs + FLITE_REG_CIOCAN);
 
 	/* DMA offsets */
-	cfg = readl(dev->regs + FLITE_REG_CIOOFF);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:258", dev->regs + FLITE_REG_CIOOFF);
 	cfg &= ~FLITE_REG_CIOOFF_MASK;
 	cfg |= (f->rect.top << 16) | f->rect.left;
-	writel(cfg, dev->regs + FLITE_REG_CIOOFF);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:261", cfg, dev->regs + FLITE_REG_CIOOFF);
 }
 
 void flite_hw_set_dma_buffer(struct fimc_lite *dev, struct flite_buffer *buf)
@@ -272,13 +272,13 @@ void flite_hw_set_dma_buffer(struct fimc_lite *dev, struct flite_buffer *buf)
 		index = buf->index;
 
 	if (index == 0)
-		writel(buf->addr, dev->regs + FLITE_REG_CIOSA);
+		pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:275", buf->addr, dev->regs + FLITE_REG_CIOSA);
 	else
-		writel(buf->addr, dev->regs + FLITE_REG_CIOSAN(index - 1));
+		pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:277", buf->addr, dev->regs + FLITE_REG_CIOSAN(index - 1));
 
-	cfg = readl(dev->regs + FLITE_REG_CIFCNTSEQ);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:279", dev->regs + FLITE_REG_CIFCNTSEQ);
 	cfg |= BIT(index);
-	writel(cfg, dev->regs + FLITE_REG_CIFCNTSEQ);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:281", cfg, dev->regs + FLITE_REG_CIFCNTSEQ);
 }
 
 void flite_hw_mask_dma_buffer(struct fimc_lite *dev, u32 index)
@@ -288,25 +288,25 @@ void flite_hw_mask_dma_buffer(struct fimc_lite *dev, u32 index)
 	if (dev->dd->max_dma_bufs == 1)
 		index = 0;
 
-	cfg = readl(dev->regs + FLITE_REG_CIFCNTSEQ);
+	cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:291", dev->regs + FLITE_REG_CIFCNTSEQ);
 	cfg &= ~BIT(index);
-	writel(cfg, dev->regs + FLITE_REG_CIFCNTSEQ);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:293", cfg, dev->regs + FLITE_REG_CIFCNTSEQ);
 }
 
 /* Enable/disable output DMA, set output pixel size and offsets (composition) */
 void flite_hw_set_output_dma(struct fimc_lite *dev, struct flite_frame *f,
 			     bool enable)
 {
-	u32 cfg = readl(dev->regs + FLITE_REG_CIGCTRL);
+	u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:300", dev->regs + FLITE_REG_CIGCTRL);
 
 	if (!enable) {
 		cfg |= FLITE_REG_CIGCTRL_ODMA_DISABLE;
-		writel(cfg, dev->regs + FLITE_REG_CIGCTRL);
+		pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:304", cfg, dev->regs + FLITE_REG_CIGCTRL);
 		return;
 	}
 
 	cfg &= ~FLITE_REG_CIGCTRL_ODMA_DISABLE;
-	writel(cfg, dev->regs + FLITE_REG_CIGCTRL);
+	pete_writel("drivers/media/platform/exynos4-is/fimc-lite-reg.c:309", cfg, dev->regs + FLITE_REG_CIGCTRL);
 
 	flite_hw_set_out_order(dev, f);
 	flite_hw_set_dma_window(dev, f);
@@ -339,7 +339,7 @@ void flite_hw_dump_regs(struct fimc_lite *dev, const char *label)
 	v4l2_info(&dev->subdev, "--- %s ---\n", label);
 
 	for (i = 0; i < ARRAY_SIZE(registers); i++) {
-		u32 cfg = readl(dev->regs + registers[i].offset);
+		u32 cfg = pete_readl("drivers/media/platform/exynos4-is/fimc-lite-reg.c:342", dev->regs + registers[i].offset);
 		v4l2_info(&dev->subdev, "%9s: 0x%08x\n",
 			  registers[i].name, cfg);
 	}

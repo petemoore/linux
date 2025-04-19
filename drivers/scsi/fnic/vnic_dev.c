@@ -278,8 +278,8 @@ static int vnic_dev_cmd1(struct vnic_dev *vdev, enum vnic_devcmd_cmd cmd, int wa
 	}
 
 	if (_CMD_DIR(cmd) & _CMD_DIR_WRITE) {
-		writeq(*a0, &devcmd->args[0]);
-		writeq(*a1, &devcmd->args[1]);
+		pete_writeq("drivers/scsi/fnic/vnic_dev.c:281", *a0, &devcmd->args[0]);
+		pete_writeq("drivers/scsi/fnic/vnic_dev.c:282", *a1, &devcmd->args[1]);
 		wmb();
 	}
 
@@ -296,7 +296,7 @@ static int vnic_dev_cmd1(struct vnic_dev *vdev, enum vnic_devcmd_cmd cmd, int wa
 		if (!(status & STAT_BUSY)) {
 
 			if (status & STAT_ERROR) {
-				err = dev_cmd_err[(int)readq(&devcmd->args[0])];
+				err = dev_cmd_err[(int)pete_readq("drivers/scsi/fnic/vnic_dev.c:299", &devcmd->args[0])];
 				printk(KERN_ERR "Error %d devcmd %d\n",
 					err, _CMD_N(cmd));
 				return -err;
@@ -304,8 +304,8 @@ static int vnic_dev_cmd1(struct vnic_dev *vdev, enum vnic_devcmd_cmd cmd, int wa
 
 			if (_CMD_DIR(cmd) & _CMD_DIR_READ) {
 				rmb();
-				*a0 = readq(&devcmd->args[0]);
-				*a1 = readq(&devcmd->args[1]);
+				*a0 = pete_readq("drivers/scsi/fnic/vnic_dev.c:307", &devcmd->args[0]);
+				*a1 = pete_readq("drivers/scsi/fnic/vnic_dev.c:308", &devcmd->args[1]);
 			}
 
 			return 0;

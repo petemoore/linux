@@ -145,7 +145,7 @@ static inline void __raw_writeq(u64 value, volatile void __iomem *addr)
 
 #ifndef readb
 #define readb readb
-static inline u8 readb(const volatile void __iomem *addr)
+static inline u8 pete_readb("include/asm-generic/io.h:148", const volatile void __iomem *addr)
 {
 	u8 val;
 
@@ -158,7 +158,7 @@ static inline u8 readb(const volatile void __iomem *addr)
 
 #ifndef readw
 #define readw readw
-static inline u16 readw(const volatile void __iomem *addr)
+static inline u16 pete_readw("include/asm-generic/io.h:161", const volatile void __iomem *addr)
 {
 	u16 val;
 
@@ -171,7 +171,7 @@ static inline u16 readw(const volatile void __iomem *addr)
 
 #ifndef readl
 #define readl readl
-static inline u32 readl(const volatile void __iomem *addr)
+static inline u32 pete_readl("include/asm-generic/io.h:174", const volatile void __iomem *addr)
 {
 	u32 val;
 
@@ -185,7 +185,7 @@ static inline u32 readl(const volatile void __iomem *addr)
 #ifdef CONFIG_64BIT
 #ifndef readq
 #define readq readq
-static inline u64 readq(const volatile void __iomem *addr)
+static inline u64 pete_readq("include/asm-generic/io.h:188", const volatile void __iomem *addr)
 {
 	u64 val;
 
@@ -199,7 +199,7 @@ static inline u64 readq(const volatile void __iomem *addr)
 
 #ifndef writeb
 #define writeb writeb
-static inline void writeb(u8 value, volatile void __iomem *addr)
+static inline void pete_writeb("include/asm-generic/io.h:202", u8 value, volatile void __iomem *addr)
 {
 	__io_bw();
 	__raw_writeb(value, addr);
@@ -209,7 +209,7 @@ static inline void writeb(u8 value, volatile void __iomem *addr)
 
 #ifndef writew
 #define writew writew
-static inline void writew(u16 value, volatile void __iomem *addr)
+static inline void pete_writew("include/asm-generic/io.h:212", u16 value, volatile void __iomem *addr)
 {
 	__io_bw();
 	__raw_writew((u16 __force)cpu_to_le16(value), addr);
@@ -219,7 +219,7 @@ static inline void writew(u16 value, volatile void __iomem *addr)
 
 #ifndef writel
 #define writel writel
-static inline void writel(u32 value, volatile void __iomem *addr)
+static inline void pete_writel("include/asm-generic/io.h:222", u32 value, volatile void __iomem *addr)
 {
 	__io_bw();
 	__raw_writel((u32 __force)__cpu_to_le32(value), addr);
@@ -230,7 +230,7 @@ static inline void writel(u32 value, volatile void __iomem *addr)
 #ifdef CONFIG_64BIT
 #ifndef writeq
 #define writeq writeq
-static inline void writeq(u64 value, volatile void __iomem *addr)
+static inline void pete_writeq("include/asm-generic/io.h:233", u64 value, volatile void __iomem *addr)
 {
 	__io_bw();
 	__raw_writeq(__cpu_to_le64(value), addr);
@@ -709,7 +709,7 @@ static inline void outsl_p(unsigned long addr, const void *buffer,
 #define ioread8 ioread8
 static inline u8 ioread8(const volatile void __iomem *addr)
 {
-	return readb(addr);
+	return pete_readb("include/asm-generic/io.h:712", addr);
 }
 #endif
 
@@ -717,7 +717,7 @@ static inline u8 ioread8(const volatile void __iomem *addr)
 #define ioread16 ioread16
 static inline u16 ioread16(const volatile void __iomem *addr)
 {
-	return readw(addr);
+	return pete_readw("include/asm-generic/io.h:720", addr);
 }
 #endif
 
@@ -725,7 +725,7 @@ static inline u16 ioread16(const volatile void __iomem *addr)
 #define ioread32 ioread32
 static inline u32 ioread32(const volatile void __iomem *addr)
 {
-	return readl(addr);
+	return pete_readl("include/asm-generic/io.h:728", addr);
 }
 #endif
 
@@ -734,7 +734,7 @@ static inline u32 ioread32(const volatile void __iomem *addr)
 #define ioread64 ioread64
 static inline u64 ioread64(const volatile void __iomem *addr)
 {
-	return readq(addr);
+	return pete_readq("include/asm-generic/io.h:737", addr);
 }
 #endif
 #endif /* CONFIG_64BIT */
@@ -743,7 +743,7 @@ static inline u64 ioread64(const volatile void __iomem *addr)
 #define iowrite8 iowrite8
 static inline void iowrite8(u8 value, volatile void __iomem *addr)
 {
-	writeb(value, addr);
+	pete_writeb("include/asm-generic/io.h:746", value, addr);
 }
 #endif
 
@@ -751,7 +751,7 @@ static inline void iowrite8(u8 value, volatile void __iomem *addr)
 #define iowrite16 iowrite16
 static inline void iowrite16(u16 value, volatile void __iomem *addr)
 {
-	writew(value, addr);
+	pete_writew("include/asm-generic/io.h:754", value, addr);
 }
 #endif
 
@@ -759,7 +759,7 @@ static inline void iowrite16(u16 value, volatile void __iomem *addr)
 #define iowrite32 iowrite32
 static inline void iowrite32(u32 value, volatile void __iomem *addr)
 {
-	writel(value, addr);
+	pete_writel("include/asm-generic/io.h:762", value, addr);
 }
 #endif
 
@@ -768,7 +768,7 @@ static inline void iowrite32(u32 value, volatile void __iomem *addr)
 #define iowrite64 iowrite64
 static inline void iowrite64(u64 value, volatile void __iomem *addr)
 {
-	writeq(value, addr);
+	pete_writeq("include/asm-generic/io.h:771", value, addr);
 }
 #endif
 #endif /* CONFIG_64BIT */
@@ -777,7 +777,7 @@ static inline void iowrite64(u64 value, volatile void __iomem *addr)
 #define ioread16be ioread16be
 static inline u16 ioread16be(const volatile void __iomem *addr)
 {
-	return swab16(readw(addr));
+	return swab16(pete_readw("include/asm-generic/io.h:780", addr));
 }
 #endif
 
@@ -785,7 +785,7 @@ static inline u16 ioread16be(const volatile void __iomem *addr)
 #define ioread32be ioread32be
 static inline u32 ioread32be(const volatile void __iomem *addr)
 {
-	return swab32(readl(addr));
+	return swab32(pete_readl("include/asm-generic/io.h:788", addr));
 }
 #endif
 
@@ -794,7 +794,7 @@ static inline u32 ioread32be(const volatile void __iomem *addr)
 #define ioread64be ioread64be
 static inline u64 ioread64be(const volatile void __iomem *addr)
 {
-	return swab64(readq(addr));
+	return swab64(pete_readq("include/asm-generic/io.h:797", addr));
 }
 #endif
 #endif /* CONFIG_64BIT */
@@ -803,7 +803,7 @@ static inline u64 ioread64be(const volatile void __iomem *addr)
 #define iowrite16be iowrite16be
 static inline void iowrite16be(u16 value, void volatile __iomem *addr)
 {
-	writew(swab16(value), addr);
+	pete_writew("include/asm-generic/io.h:806", swab16(value), addr);
 }
 #endif
 
@@ -811,7 +811,7 @@ static inline void iowrite16be(u16 value, void volatile __iomem *addr)
 #define iowrite32be iowrite32be
 static inline void iowrite32be(u32 value, volatile void __iomem *addr)
 {
-	writel(swab32(value), addr);
+	pete_writel("include/asm-generic/io.h:814", swab32(value), addr);
 }
 #endif
 
@@ -820,7 +820,7 @@ static inline void iowrite32be(u32 value, volatile void __iomem *addr)
 #define iowrite64be iowrite64be
 static inline void iowrite64be(u64 value, volatile void __iomem *addr)
 {
-	writeq(swab64(value), addr);
+	pete_writeq("include/asm-generic/io.h:823", swab64(value), addr);
 }
 #endif
 #endif /* CONFIG_64BIT */

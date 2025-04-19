@@ -90,7 +90,7 @@ static void
 cumanascsi_2_irqenable(struct expansion_card *ec, int irqnr)
 {
 	struct cumanascsi2_info *info = ec->irq_data;
-	writeb(ALATCH_ENA_INT, info->base + CUMANASCSI2_ALATCH);
+	pete_writeb("drivers/scsi/arm/cumana_2.c:93", ALATCH_ENA_INT, info->base + CUMANASCSI2_ALATCH);
 }
 
 /* Prototype: void cumanascsi_2_irqdisable(ec, irqnr)
@@ -102,7 +102,7 @@ static void
 cumanascsi_2_irqdisable(struct expansion_card *ec, int irqnr)
 {
 	struct cumanascsi2_info *info = ec->irq_data;
-	writeb(ALATCH_DIS_INT, info->base + CUMANASCSI2_ALATCH);
+	pete_writeb("drivers/scsi/arm/cumana_2.c:105", ALATCH_DIS_INT, info->base + CUMANASCSI2_ALATCH);
 }
 
 static const expansioncard_ops_t cumanascsi_2_ops = {
@@ -122,10 +122,10 @@ cumanascsi_2_terminator_ctl(struct Scsi_Host *host, int on_off)
 
 	if (on_off) {
 		info->terms = 1;
-		writeb(ALATCH_ENA_TERM, info->base + CUMANASCSI2_ALATCH);
+		pete_writeb("drivers/scsi/arm/cumana_2.c:125", ALATCH_ENA_TERM, info->base + CUMANASCSI2_ALATCH);
 	} else {
 		info->terms = 0;
-		writeb(ALATCH_DIS_TERM, info->base + CUMANASCSI2_ALATCH);
+		pete_writeb("drivers/scsi/arm/cumana_2.c:128", ALATCH_DIS_TERM, info->base + CUMANASCSI2_ALATCH);
 	}
 }
 
@@ -158,7 +158,7 @@ cumanascsi_2_dma_setup(struct Scsi_Host *host, struct scsi_pointer *SCp,
 	struct device *dev = scsi_get_device(host);
 	int dmach = info->info.scsi.dma;
 
-	writeb(ALATCH_DIS_DMA, info->base + CUMANASCSI2_ALATCH);
+	pete_writeb("drivers/scsi/arm/cumana_2.c:161", ALATCH_DIS_DMA, info->base + CUMANASCSI2_ALATCH);
 
 	if (dmach != NO_DMA &&
 	    (min_type == fasdma_real_all || SCp->this_residual >= 512)) {
@@ -180,11 +180,11 @@ cumanascsi_2_dma_setup(struct Scsi_Host *host, struct scsi_pointer *SCp,
 
 		disable_dma(dmach);
 		set_dma_sg(dmach, info->sg, bufs);
-		writeb(alatch_dir, info->base + CUMANASCSI2_ALATCH);
+		pete_writeb("drivers/scsi/arm/cumana_2.c:183", alatch_dir, info->base + CUMANASCSI2_ALATCH);
 		set_dma_mode(dmach, dma_dir);
 		enable_dma(dmach);
-		writeb(ALATCH_ENA_DMA, info->base + CUMANASCSI2_ALATCH);
-		writeb(ALATCH_DIS_BIT32, info->base + CUMANASCSI2_ALATCH);
+		pete_writeb("drivers/scsi/arm/cumana_2.c:186", ALATCH_ENA_DMA, info->base + CUMANASCSI2_ALATCH);
+		pete_writeb("drivers/scsi/arm/cumana_2.c:187", ALATCH_DIS_BIT32, info->base + CUMANASCSI2_ALATCH);
 		return fasdma_real_all;
 	}
 
@@ -218,7 +218,7 @@ cumanascsi_2_dma_pseudo(struct Scsi_Host *host, struct scsi_pointer *SCp,
 #if 0
 		while (length > 1) {
 			unsigned long word;
-			unsigned int status = readb(info->base + CUMANASCSI2_STATUS);
+			unsigned int status = pete_readb("drivers/scsi/arm/cumana_2.c:221", info->base + CUMANASCSI2_STATUS);
 
 			if (status & STATUS_INT)
 				goto end;
@@ -227,7 +227,7 @@ cumanascsi_2_dma_pseudo(struct Scsi_Host *host, struct scsi_pointer *SCp,
 				continue;
 
 			word = *addr | *(addr + 1) << 8;
-			writew(word, info->base + CUMANASCSI2_PSEUDODMA);
+			pete_writew("drivers/scsi/arm/cumana_2.c:230", word, info->base + CUMANASCSI2_PSEUDODMA);
 			addr += 2;
 			length -= 2;
 		}
@@ -237,7 +237,7 @@ cumanascsi_2_dma_pseudo(struct Scsi_Host *host, struct scsi_pointer *SCp,
 	else {
 		if (transfer && (transfer & 255)) {
 			while (length >= 256) {
-				unsigned int status = readb(info->base + CUMANASCSI2_STATUS);
+				unsigned int status = pete_readb("drivers/scsi/arm/cumana_2.c:240", info->base + CUMANASCSI2_STATUS);
 
 				if (status & STATUS_INT)
 					return;
@@ -254,7 +254,7 @@ cumanascsi_2_dma_pseudo(struct Scsi_Host *host, struct scsi_pointer *SCp,
 
 		while (length > 0) {
 			unsigned long word;
-			unsigned int status = readb(info->base + CUMANASCSI2_STATUS);
+			unsigned int status = pete_readb("drivers/scsi/arm/cumana_2.c:257", info->base + CUMANASCSI2_STATUS);
 
 			if (status & STATUS_INT)
 				return;
@@ -262,7 +262,7 @@ cumanascsi_2_dma_pseudo(struct Scsi_Host *host, struct scsi_pointer *SCp,
 			if (!(status & STATUS_DRQ))
 				continue;
 
-			word = readw(info->base + CUMANASCSI2_PSEUDODMA);
+			word = pete_readw("drivers/scsi/arm/cumana_2.c:265", info->base + CUMANASCSI2_PSEUDODMA);
 			*addr++ = word;
 			if (--length > 0) {
 				*addr++ = word >> 8;
@@ -282,7 +282,7 @@ cumanascsi_2_dma_stop(struct Scsi_Host *host, struct scsi_pointer *SCp)
 {
 	struct cumanascsi2_info *info = (struct cumanascsi2_info *)host->hostdata;
 	if (info->info.scsi.dma != NO_DMA) {
-		writeb(ALATCH_DIS_DMA, info->base + CUMANASCSI2_ALATCH);
+		pete_writeb("drivers/scsi/arm/cumana_2.c:285", ALATCH_DIS_DMA, info->base + CUMANASCSI2_ALATCH);
 		disable_dma(info->info.scsi.dma);
 	}
 }

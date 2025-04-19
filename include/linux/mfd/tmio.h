@@ -10,19 +10,19 @@
 #include <linux/platform_device.h>
 #include <linux/pm_runtime.h>
 
-#define tmio_ioread8(addr) readb(addr)
-#define tmio_ioread16(addr) readw(addr)
+#define tmio_ioread8(addr) pete_readb("include/linux/mfd/tmio.h:13", addr)
+#define tmio_ioread16(addr) pete_readw("include/linux/mfd/tmio.h:14", addr)
 #define tmio_ioread16_rep(r, b, l) readsw(r, b, l)
 #define tmio_ioread32(addr) \
-	(((u32)readw((addr))) | (((u32)readw((addr) + 2)) << 16))
+	(((u32)pete_readw("include/linux/mfd/tmio.h:17", (addr))) | (((u32)pete_readw("include/linux/mfd/tmio.h:17", (addr) + 2)) << 16))
 
-#define tmio_iowrite8(val, addr) writeb((val), (addr))
-#define tmio_iowrite16(val, addr) writew((val), (addr))
+#define tmio_iowrite8(val, addr) pete_writeb("include/linux/mfd/tmio.h:19", (val), (addr))
+#define tmio_iowrite16(val, addr) pete_writew("include/linux/mfd/tmio.h:20", (val), (addr))
 #define tmio_iowrite16_rep(r, b, l) writesw(r, b, l)
 #define tmio_iowrite32(val, addr) \
 	do { \
-		writew((val),       (addr)); \
-		writew((val) >> 16, (addr) + 2); \
+		pete_writew("include/linux/mfd/tmio.h:24", (val),       (addr)); \
+		pete_writew("include/linux/mfd/tmio.h:25", (val) >> 16, (addr) + 2); \
 	} while (0)
 
 #define sd_config_write8(base, shift, reg, val) \

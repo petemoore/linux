@@ -69,12 +69,12 @@ static int clk_slow_osc_prepare(struct clk_hw *hw)
 {
 	struct clk_slow_osc *osc = to_clk_slow_osc(hw);
 	void __iomem *sckcr = osc->sckcr;
-	u32 tmp = readl(sckcr);
+	u32 tmp = pete_readl("drivers/clk/at91/sckc.c:72", sckcr);
 
 	if (tmp & (osc->bits->cr_osc32byp | osc->bits->cr_osc32en))
 		return 0;
 
-	writel(tmp | osc->bits->cr_osc32en, sckcr);
+	pete_writel("drivers/clk/at91/sckc.c:77", tmp | osc->bits->cr_osc32en, sckcr);
 
 	if (system_state < SYSTEM_RUNNING)
 		udelay(osc->startup_usec);
@@ -88,19 +88,19 @@ static void clk_slow_osc_unprepare(struct clk_hw *hw)
 {
 	struct clk_slow_osc *osc = to_clk_slow_osc(hw);
 	void __iomem *sckcr = osc->sckcr;
-	u32 tmp = readl(sckcr);
+	u32 tmp = pete_readl("drivers/clk/at91/sckc.c:91", sckcr);
 
 	if (tmp & osc->bits->cr_osc32byp)
 		return;
 
-	writel(tmp & ~osc->bits->cr_osc32en, sckcr);
+	pete_writel("drivers/clk/at91/sckc.c:96", tmp & ~osc->bits->cr_osc32en, sckcr);
 }
 
 static int clk_slow_osc_is_prepared(struct clk_hw *hw)
 {
 	struct clk_slow_osc *osc = to_clk_slow_osc(hw);
 	void __iomem *sckcr = osc->sckcr;
-	u32 tmp = readl(sckcr);
+	u32 tmp = pete_readl("drivers/clk/at91/sckc.c:103", sckcr);
 
 	if (tmp & osc->bits->cr_osc32byp)
 		return 1;
@@ -146,7 +146,7 @@ at91_clk_register_slow_osc(void __iomem *sckcr,
 	osc->bits = bits;
 
 	if (bypass)
-		writel((readl(sckcr) & ~osc->bits->cr_osc32en) |
+		pete_writel("drivers/clk/at91/sckc.c:149", (pete_readl("drivers/clk/at91/sckc.c:149", sckcr) & ~osc->bits->cr_osc32en) |
 					osc->bits->cr_osc32byp, sckcr);
 
 	hw = &osc->hw;
@@ -188,7 +188,7 @@ static int clk_slow_rc_osc_prepare(struct clk_hw *hw)
 	struct clk_slow_rc_osc *osc = to_clk_slow_rc_osc(hw);
 	void __iomem *sckcr = osc->sckcr;
 
-	writel(readl(sckcr) | osc->bits->cr_rcen, sckcr);
+	pete_writel("drivers/clk/at91/sckc.c:191", pete_readl("drivers/clk/at91/sckc.c:191", sckcr) | osc->bits->cr_rcen, sckcr);
 
 	if (system_state < SYSTEM_RUNNING)
 		udelay(osc->startup_usec);
@@ -203,14 +203,14 @@ static void clk_slow_rc_osc_unprepare(struct clk_hw *hw)
 	struct clk_slow_rc_osc *osc = to_clk_slow_rc_osc(hw);
 	void __iomem *sckcr = osc->sckcr;
 
-	writel(readl(sckcr) & ~osc->bits->cr_rcen, sckcr);
+	pete_writel("drivers/clk/at91/sckc.c:206", pete_readl("drivers/clk/at91/sckc.c:206", sckcr) & ~osc->bits->cr_rcen, sckcr);
 }
 
 static int clk_slow_rc_osc_is_prepared(struct clk_hw *hw)
 {
 	struct clk_slow_rc_osc *osc = to_clk_slow_rc_osc(hw);
 
-	return !!(readl(osc->sckcr) & osc->bits->cr_rcen);
+	return !!(pete_readl("drivers/clk/at91/sckc.c:213", osc->sckcr) & osc->bits->cr_rcen);
 }
 
 static const struct clk_ops slow_rc_osc_ops = {
@@ -281,7 +281,7 @@ static int clk_sam9x5_slow_set_parent(struct clk_hw *hw, u8 index)
 	if (index > 1)
 		return -EINVAL;
 
-	tmp = readl(sckcr);
+	tmp = pete_readl("drivers/clk/at91/sckc.c:284", sckcr);
 
 	if ((!index && !(tmp & slowck->bits->cr_oscsel)) ||
 	    (index && (tmp & slowck->bits->cr_oscsel)))
@@ -292,7 +292,7 @@ static int clk_sam9x5_slow_set_parent(struct clk_hw *hw, u8 index)
 	else
 		tmp &= ~slowck->bits->cr_oscsel;
 
-	writel(tmp, sckcr);
+	pete_writel("drivers/clk/at91/sckc.c:295", tmp, sckcr);
 
 	if (system_state < SYSTEM_RUNNING)
 		udelay(SLOWCK_SW_TIME_USEC);
@@ -306,7 +306,7 @@ static u8 clk_sam9x5_slow_get_parent(struct clk_hw *hw)
 {
 	struct clk_sam9x5_slow *slowck = to_clk_sam9x5_slow(hw);
 
-	return !!(readl(slowck->sckcr) & slowck->bits->cr_oscsel);
+	return !!(pete_readl("drivers/clk/at91/sckc.c:309", slowck->sckcr) & slowck->bits->cr_oscsel);
 }
 
 static const struct clk_ops sam9x5_slow_ops = {
@@ -342,7 +342,7 @@ at91_clk_register_sam9x5_slow(void __iomem *sckcr,
 	slowck->hw.init = &init;
 	slowck->sckcr = sckcr;
 	slowck->bits = bits;
-	slowck->parent = !!(readl(sckcr) & slowck->bits->cr_oscsel);
+	slowck->parent = !!(pete_readl("drivers/clk/at91/sckc.c:345", sckcr) & slowck->bits->cr_oscsel);
 
 	hw = &slowck->hw;
 	ret = clk_hw_register(NULL, &slowck->hw);
@@ -537,7 +537,7 @@ static int clk_sama5d4_slow_osc_prepare(struct clk_hw *hw)
 	 * Assume that if it has already been selected (for example by the
 	 * bootloader), enough time has aready passed.
 	 */
-	if ((readl(osc->sckcr) & osc->bits->cr_oscsel)) {
+	if ((pete_readl("drivers/clk/at91/sckc.c:540", osc->sckcr) & osc->bits->cr_oscsel)) {
 		osc->prepared = true;
 		return 0;
 	}

@@ -26,7 +26,7 @@ static int ns_thermal_get_temp(void *data, int *temp)
 	int slope = thermal_zone_get_slope(ns_thermal->tz);
 	u32 val;
 
-	val = readl(ns_thermal->pvtmon + PVTMON_CONTROL0);
+	val = pete_readl("drivers/thermal/broadcom/ns-thermal.c:29", ns_thermal->pvtmon + PVTMON_CONTROL0);
 	if ((val & PVTMON_CONTROL0_SEL_MASK) != PVTMON_CONTROL0_SEL_TEMP_MONITOR) {
 		/* Clear current mode selection */
 		val &= ~PVTMON_CONTROL0_SEL_MASK;
@@ -34,10 +34,10 @@ static int ns_thermal_get_temp(void *data, int *temp)
 		/* Set temp monitor mode (it's the default actually) */
 		val |= PVTMON_CONTROL0_SEL_TEMP_MONITOR;
 
-		writel(val, ns_thermal->pvtmon + PVTMON_CONTROL0);
+		pete_writel("drivers/thermal/broadcom/ns-thermal.c:37", val, ns_thermal->pvtmon + PVTMON_CONTROL0);
 	}
 
-	val = readl(ns_thermal->pvtmon + PVTMON_STATUS);
+	val = pete_readl("drivers/thermal/broadcom/ns-thermal.c:40", ns_thermal->pvtmon + PVTMON_STATUS);
 	*temp = slope * val + offset;
 
 	return 0;

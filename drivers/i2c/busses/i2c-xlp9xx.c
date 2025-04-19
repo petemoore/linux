@@ -101,13 +101,13 @@ struct xlp9xx_i2c_dev {
 static inline void xlp9xx_write_i2c_reg(struct xlp9xx_i2c_dev *priv,
 					unsigned long reg, u32 val)
 {
-	writel(val, priv->base + reg);
+	pete_writel("drivers/i2c/busses/i2c-xlp9xx.c:104", val, priv->base + reg);
 }
 
 static inline u32 xlp9xx_read_i2c_reg(struct xlp9xx_i2c_dev *priv,
 				      unsigned long reg)
 {
-	return readl(priv->base + reg);
+	return pete_readl("drivers/i2c/busses/i2c-xlp9xx.c:110", priv->base + reg);
 }
 
 static void xlp9xx_i2c_mask_irq(struct xlp9xx_i2c_dev *priv, u32 mask)

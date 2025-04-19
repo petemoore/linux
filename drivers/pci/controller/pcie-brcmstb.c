@@ -334,14 +334,14 @@ static int brcm_pcie_mdio_read(void __iomem *base, u8 port, u8 regad, u32 *val)
 	int tries;
 	u32 data;
 
-	writel(brcm_pcie_mdio_form_pkt(port, regad, MDIO_CMD_READ),
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:337", brcm_pcie_mdio_form_pkt(port, regad, MDIO_CMD_READ),
 		   base + PCIE_RC_DL_MDIO_ADDR);
-	readl(base + PCIE_RC_DL_MDIO_ADDR);
+	pete_readl("drivers/pci/controller/pcie-brcmstb.c:339", base + PCIE_RC_DL_MDIO_ADDR);
 
-	data = readl(base + PCIE_RC_DL_MDIO_RD_DATA);
+	data = pete_readl("drivers/pci/controller/pcie-brcmstb.c:341", base + PCIE_RC_DL_MDIO_RD_DATA);
 	for (tries = 0; !MDIO_RD_DONE(data) && tries < 10; tries++) {
 		udelay(10);
-		data = readl(base + PCIE_RC_DL_MDIO_RD_DATA);
+		data = pete_readl("drivers/pci/controller/pcie-brcmstb.c:344", base + PCIE_RC_DL_MDIO_RD_DATA);
 	}
 
 	*val = FIELD_GET(MDIO_DATA_MASK, data);
@@ -355,15 +355,15 @@ static int brcm_pcie_mdio_write(void __iomem *base, u8 port,
 	int tries;
 	u32 data;
 
-	writel(brcm_pcie_mdio_form_pkt(port, regad, MDIO_CMD_WRITE),
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:358", brcm_pcie_mdio_form_pkt(port, regad, MDIO_CMD_WRITE),
 		   base + PCIE_RC_DL_MDIO_ADDR);
-	readl(base + PCIE_RC_DL_MDIO_ADDR);
-	writel(MDIO_DATA_DONE_MASK | wrdata, base + PCIE_RC_DL_MDIO_WR_DATA);
+	pete_readl("drivers/pci/controller/pcie-brcmstb.c:360", base + PCIE_RC_DL_MDIO_ADDR);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:361", MDIO_DATA_DONE_MASK | wrdata, base + PCIE_RC_DL_MDIO_WR_DATA);
 
-	data = readl(base + PCIE_RC_DL_MDIO_WR_DATA);
+	data = pete_readl("drivers/pci/controller/pcie-brcmstb.c:363", base + PCIE_RC_DL_MDIO_WR_DATA);
 	for (tries = 0; !MDIO_WT_DONE(data) && tries < 10; tries++) {
 		udelay(10);
-		data = readl(base + PCIE_RC_DL_MDIO_WR_DATA);
+		data = pete_readl("drivers/pci/controller/pcie-brcmstb.c:366", base + PCIE_RC_DL_MDIO_WR_DATA);
 	}
 
 	return MDIO_WT_DONE(data) ? 0 : -EIO;
@@ -411,14 +411,14 @@ static int brcm_pcie_set_ssc(struct brcm_pcie *pcie)
 /* Limits operation to a specific generation (1, 2, or 3) */
 static void brcm_pcie_set_gen(struct brcm_pcie *pcie, int gen)
 {
-	u16 lnkctl2 = readw(pcie->base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKCTL2);
-	u32 lnkcap = readl(pcie->base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKCAP);
+	u16 lnkctl2 = pete_readw("drivers/pci/controller/pcie-brcmstb.c:414", pcie->base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKCTL2);
+	u32 lnkcap = pete_readl("drivers/pci/controller/pcie-brcmstb.c:415", pcie->base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKCAP);
 
 	lnkcap = (lnkcap & ~PCI_EXP_LNKCAP_SLS) | gen;
-	writel(lnkcap, pcie->base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKCAP);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:418", lnkcap, pcie->base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKCAP);
 
 	lnkctl2 = (lnkctl2 & ~0xf) | gen;
-	writew(lnkctl2, pcie->base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKCTL2);
+	pete_writew("drivers/pci/controller/pcie-brcmstb.c:421", lnkctl2, pcie->base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKCTL2);
 }
 
 static void brcm_pcie_set_outbound_win(struct brcm_pcie *pcie,
@@ -437,8 +437,8 @@ static void brcm_pcie_set_outbound_win(struct brcm_pcie *pcie,
 	dev_info(dev, "pmoore: win: %#010x\n", win);
 
 	/* Set the base of the pcie_addr window */
-	writel(lower_32_bits(pcie_addr), pcie->base + PCIE_MEM_WIN0_LO(win));
-	writel(upper_32_bits(pcie_addr), pcie->base + PCIE_MEM_WIN0_HI(win));
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:440", lower_32_bits(pcie_addr), pcie->base + PCIE_MEM_WIN0_LO(win));
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:441", upper_32_bits(pcie_addr), pcie->base + PCIE_MEM_WIN0_HI(win));
 
 	/* Write the addr base & limit lower bits (in MBs) */
 	cpu_addr_mb = cpu_addr / SZ_1M;
@@ -446,12 +446,12 @@ static void brcm_pcie_set_outbound_win(struct brcm_pcie *pcie,
 	limit_addr_mb = (cpu_addr + size - 1) / SZ_1M;
 	dev_info(dev, "pmoore: limit_addr_mb: %#018llx\n", limit_addr_mb);
 
-	tmp = readl(pcie->base + PCIE_MEM_WIN0_BASE_LIMIT(win));
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:449", pcie->base + PCIE_MEM_WIN0_BASE_LIMIT(win));
 	u32p_replace_bits(&tmp, cpu_addr_mb,
 			  PCIE_MISC_CPU_2_PCIE_MEM_WIN0_BASE_LIMIT_BASE_MASK);
 	u32p_replace_bits(&tmp, limit_addr_mb,
 			  PCIE_MISC_CPU_2_PCIE_MEM_WIN0_BASE_LIMIT_LIMIT_MASK);
-	writel(tmp, pcie->base + PCIE_MEM_WIN0_BASE_LIMIT(win));
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:454", tmp, pcie->base + PCIE_MEM_WIN0_BASE_LIMIT(win));
 
 	/* Write the cpu & limit addr upper bits */
 	high_addr_shift =
@@ -459,16 +459,16 @@ static void brcm_pcie_set_outbound_win(struct brcm_pcie *pcie,
 	dev_info(dev, "pmoore: high_addr_shift: %#010x\n", high_addr_shift);
 
 	cpu_addr_mb_high = cpu_addr_mb >> high_addr_shift;
-	tmp = readl(pcie->base + PCIE_MEM_WIN0_BASE_HI(win));
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:462", pcie->base + PCIE_MEM_WIN0_BASE_HI(win));
 	u32p_replace_bits(&tmp, cpu_addr_mb_high,
 			  PCIE_MISC_CPU_2_PCIE_MEM_WIN0_BASE_HI_BASE_MASK);
-	writel(tmp, pcie->base + PCIE_MEM_WIN0_BASE_HI(win));
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:465", tmp, pcie->base + PCIE_MEM_WIN0_BASE_HI(win));
 
 	limit_addr_mb_high = limit_addr_mb >> high_addr_shift;
-	tmp = readl(pcie->base + PCIE_MEM_WIN0_LIMIT_HI(win));
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:468", pcie->base + PCIE_MEM_WIN0_LIMIT_HI(win));
 	u32p_replace_bits(&tmp, limit_addr_mb_high,
 			  PCIE_MISC_CPU_2_PCIE_MEM_WIN0_LIMIT_HI_LIMIT_MASK);
-	writel(tmp, pcie->base + PCIE_MEM_WIN0_LIMIT_HI(win));
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:471", tmp, pcie->base + PCIE_MEM_WIN0_LIMIT_HI(win));
 }
 
 static struct irq_chip brcm_msi_irq_chip = {
@@ -497,7 +497,7 @@ static void brcm_pcie_msi_isr(struct irq_desc *desc)
 	msi = irq_desc_get_handler_data(desc);
 	dev = msi->dev;
 
-	status = readl(msi->intr_base + MSI_INT_STATUS);
+	status = pete_readl("drivers/pci/controller/pcie-brcmstb.c:500", msi->intr_base + MSI_INT_STATUS);
 	status >>= msi->legacy_shift;
 
 	for_each_set_bit(bit, &status, msi->nr) {
@@ -530,7 +530,7 @@ static void brcm_msi_ack_irq(struct irq_data *data)
 	struct brcm_msi *msi = irq_data_get_irq_chip_data(data);
 	const int shift_amt = data->hwirq + msi->legacy_shift;
 
-	writel(1 << shift_amt, msi->intr_base + MSI_INT_CLR);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:533", 1 << shift_amt, msi->intr_base + MSI_INT_CLR);
 }
 
 
@@ -633,20 +633,20 @@ static void brcm_msi_set_regs(struct brcm_msi *msi)
 {
 	u32 val = __GENMASK(31, msi->legacy_shift);
 
-	writel(val, msi->intr_base + MSI_INT_MASK_CLR);
-	writel(val, msi->intr_base + MSI_INT_CLR);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:636", val, msi->intr_base + MSI_INT_MASK_CLR);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:637", val, msi->intr_base + MSI_INT_CLR);
 
 	/*
 	 * The 0 bit of PCIE_MISC_MSI_BAR_CONFIG_LO is repurposed to MSI
 	 * enable, which we set to 1.
 	 */
-	writel(lower_32_bits(msi->target_addr) | 0x1,
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:643", lower_32_bits(msi->target_addr) | 0x1,
 	       msi->base + PCIE_MISC_MSI_BAR_CONFIG_LO);
-	writel(upper_32_bits(msi->target_addr),
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:645", upper_32_bits(msi->target_addr),
 	       msi->base + PCIE_MISC_MSI_BAR_CONFIG_HI);
 
 	val = msi->legacy ? PCIE_MISC_MSI_DATA_CONFIG_VAL_8 : PCIE_MISC_MSI_DATA_CONFIG_VAL_32;
-	writel(val, msi->base + PCIE_MISC_MSI_DATA_CONFIG);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:649", val, msi->base + PCIE_MISC_MSI_DATA_CONFIG);
 }
 
 static int brcm_pcie_enable_msi(struct brcm_pcie *pcie)
@@ -699,14 +699,14 @@ static int brcm_pcie_enable_msi(struct brcm_pcie *pcie)
 static bool brcm_pcie_rc_mode(struct brcm_pcie *pcie)
 {
 	void __iomem *base = pcie->base;
-	u32 val = readl(base + PCIE_MISC_PCIE_STATUS);
+	u32 val = pete_readl("drivers/pci/controller/pcie-brcmstb.c:702", base + PCIE_MISC_PCIE_STATUS);
 
 	return !!FIELD_GET(PCIE_MISC_PCIE_STATUS_PCIE_PORT_MASK, val);
 }
 
 static bool brcm_pcie_link_up(struct brcm_pcie *pcie)
 {
-	u32 val = readl(pcie->base + PCIE_MISC_PCIE_STATUS);
+	u32 val = pete_readl("drivers/pci/controller/pcie-brcmstb.c:709", pcie->base + PCIE_MISC_PCIE_STATUS);
 	u32 dla = FIELD_GET(PCIE_MISC_PCIE_STATUS_PCIE_DL_ACTIVE_MASK, val);
 	u32 plu = FIELD_GET(PCIE_MISC_PCIE_STATUS_PCIE_PHYLINKUP_MASK, val);
 
@@ -726,7 +726,7 @@ static void __iomem *brcm_pcie_map_conf(struct pci_bus *bus, unsigned int devfn,
 
 	/* For devices, write to the config space index register */
 	idx = PCIE_ECAM_OFFSET(bus->number, devfn, 0);
-	writel(idx, pcie->base + PCIE_EXT_CFG_INDEX);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:729", idx, pcie->base + PCIE_EXT_CFG_INDEX);
 	return base + PCIE_EXT_CFG_DATA + where;
 }
 
@@ -741,9 +741,9 @@ static inline void brcm_pcie_bridge_sw_init_set_generic(struct brcm_pcie *pcie, 
 	u32 tmp, mask =  RGR1_SW_INIT_1_INIT_GENERIC_MASK;
 	u32 shift = RGR1_SW_INIT_1_INIT_GENERIC_SHIFT;
 
-	tmp = readl(pcie->base + PCIE_RGR1_SW_INIT_1(pcie));
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:744", pcie->base + PCIE_RGR1_SW_INIT_1(pcie));
 	tmp = (tmp & ~mask) | ((val << shift) & mask);
-	writel(tmp, pcie->base + PCIE_RGR1_SW_INIT_1(pcie));
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:746", tmp, pcie->base + PCIE_RGR1_SW_INIT_1(pcie));
 }
 
 static inline void brcm_pcie_bridge_sw_init_set_7278(struct brcm_pcie *pcie, u32 val)
@@ -751,9 +751,9 @@ static inline void brcm_pcie_bridge_sw_init_set_7278(struct brcm_pcie *pcie, u32
 	u32 tmp, mask =  RGR1_SW_INIT_1_INIT_7278_MASK;
 	u32 shift = RGR1_SW_INIT_1_INIT_7278_SHIFT;
 
-	tmp = readl(pcie->base + PCIE_RGR1_SW_INIT_1(pcie));
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:754", pcie->base + PCIE_RGR1_SW_INIT_1(pcie));
 	tmp = (tmp & ~mask) | ((val << shift) & mask);
-	writel(tmp, pcie->base + PCIE_RGR1_SW_INIT_1(pcie));
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:756", tmp, pcie->base + PCIE_RGR1_SW_INIT_1(pcie));
 }
 
 static inline void brcm_pcie_perst_set_4908(struct brcm_pcie *pcie, u32 val)
@@ -772,18 +772,18 @@ static inline void brcm_pcie_perst_set_7278(struct brcm_pcie *pcie, u32 val)
 	u32 tmp;
 
 	/* Perst bit has moved and assert value is 0 */
-	tmp = readl(pcie->base + PCIE_MISC_PCIE_CTRL);
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:775", pcie->base + PCIE_MISC_PCIE_CTRL);
 	u32p_replace_bits(&tmp, !val, PCIE_MISC_PCIE_CTRL_PCIE_PERSTB_MASK);
-	writel(tmp, pcie->base +  PCIE_MISC_PCIE_CTRL);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:777", tmp, pcie->base +  PCIE_MISC_PCIE_CTRL);
 }
 
 static inline void brcm_pcie_perst_set_generic(struct brcm_pcie *pcie, u32 val)
 {
 	u32 tmp;
 
-	tmp = readl(pcie->base + PCIE_RGR1_SW_INIT_1(pcie));
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:784", pcie->base + PCIE_RGR1_SW_INIT_1(pcie));
 	u32p_replace_bits(&tmp, val, PCIE_RGR1_SW_INIT_1_PERST_MASK);
-	writel(tmp, pcie->base + PCIE_RGR1_SW_INIT_1(pcie)); // set bit 0 to val
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:786", tmp, pcie->base + PCIE_RGR1_SW_INIT_1(pcie)); // set bit 0 to val
 }
 
 static inline int brcm_pcie_get_rc_bar2_size_and_offset(struct brcm_pcie *pcie,
@@ -907,9 +907,9 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 	/* Take the bridge out of reset */
 	pcie->bridge_sw_init_set(pcie, 0); // calls brcm_pcie_bridge_sw_init_set_generic: clear bit 1 of [pcie->base + 0x9210]
 
-	tmp = readl(base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:910", base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
 	tmp &= ~PCIE_MISC_HARD_PCIE_HARD_DEBUG_SERDES_IDDQ_MASK;
-	writel(tmp, base + PCIE_MISC_HARD_PCIE_HARD_DEBUG); // clear bit 27 of [pcie->base + 0x4204]
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:912", tmp, base + PCIE_MISC_HARD_PCIE_HARD_DEBUG); // clear bit 27 of [pcie->base + 0x4204]
 	/* Wait for SerDes to be stable */
 	usleep_range(100, 200);
 
@@ -926,11 +926,11 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 		burst = 0x2; /* 512 bytes */
 
 	/* Set SCB_MAX_BURST_SIZE, CFG_READ_UR_MODE, SCB_ACCESS_EN */
-	tmp = readl(base + PCIE_MISC_MISC_CTRL);
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:929", base + PCIE_MISC_MISC_CTRL);
 	u32p_replace_bits(&tmp, 1, PCIE_MISC_MISC_CTRL_SCB_ACCESS_EN_MASK); // set bit 12
 	u32p_replace_bits(&tmp, 1, PCIE_MISC_MISC_CTRL_CFG_READ_UR_MODE_MASK); // set bit 13
 	u32p_replace_bits(&tmp, burst, PCIE_MISC_MISC_CTRL_MAX_BURST_SIZE_MASK); // clear bits 20/21
-	writel(tmp, base + PCIE_MISC_MISC_CTRL);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:933", tmp, base + PCIE_MISC_MISC_CTRL);
 
 	ret = brcm_pcie_get_rc_bar2_size_and_offset(pcie, &rc_bar2_size,
 						    &rc_bar2_offset);
@@ -940,11 +940,11 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 	tmp = lower_32_bits(rc_bar2_offset);
 	u32p_replace_bits(&tmp, brcm_pcie_encode_ibar_size(rc_bar2_size),
 			  PCIE_MISC_RC_BAR2_CONFIG_LO_SIZE_MASK);
-	writel(tmp, base + PCIE_MISC_RC_BAR2_CONFIG_LO);
-	writel(upper_32_bits(rc_bar2_offset),
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:943", tmp, base + PCIE_MISC_RC_BAR2_CONFIG_LO);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:944", upper_32_bits(rc_bar2_offset),
 	       base + PCIE_MISC_RC_BAR2_CONFIG_HI);
 
-	tmp = readl(base + PCIE_MISC_MISC_CTRL);
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:947", base + PCIE_MISC_MISC_CTRL);
 	for (memc = 0; memc < pcie->num_memc; memc++) {
 		u32 scb_size_val = ilog2(pcie->memc_size[memc]) - 15; // ilog2(pcie->memc_size[0]) = 32
 
@@ -955,7 +955,7 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 		else if (memc == 2)
 			u32p_replace_bits(&tmp, scb_size_val, SCB_SIZE_MASK(2));
 	}
-	writel(tmp, base + PCIE_MISC_MISC_CTRL); // set bits 27-31 to 0b10001
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:958", tmp, base + PCIE_MISC_MISC_CTRL); // set bits 27-31 to 0b10001
 
 	/*
 	 * We ideally want the MSI target address to be located in the 32bit
@@ -970,14 +970,14 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 		pcie->msi_target_addr = BRCM_MSI_TARGET_ADDR_GT_4GB;
 
 	/* disable the PCIe->GISB memory window (RC_BAR1) */
-	tmp = readl(base + PCIE_MISC_RC_BAR1_CONFIG_LO);
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:973", base + PCIE_MISC_RC_BAR1_CONFIG_LO);
 	tmp &= ~PCIE_MISC_RC_BAR1_CONFIG_LO_SIZE_MASK;
-	writel(tmp, base + PCIE_MISC_RC_BAR1_CONFIG_LO); // clear bits 0-4
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:975", tmp, base + PCIE_MISC_RC_BAR1_CONFIG_LO); // clear bits 0-4
 
 	/* disable the PCIe->SCB memory window (RC_BAR3) */
-	tmp = readl(base + PCIE_MISC_RC_BAR3_CONFIG_LO);
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:978", base + PCIE_MISC_RC_BAR3_CONFIG_LO);
 	tmp &= ~PCIE_MISC_RC_BAR3_CONFIG_LO_SIZE_MASK;
-	writel(tmp, base + PCIE_MISC_RC_BAR3_CONFIG_LO); // clear bits 0-4
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:980", tmp, base + PCIE_MISC_RC_BAR3_CONFIG_LO); // clear bits 0-4
 
 	if (pcie->gen)
 		brcm_pcie_set_gen(pcie, pcie->gen); // not called
@@ -1023,19 +1023,19 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 	aspm_support = PCIE_LINK_STATE_L1;
 	if (!of_property_read_bool(pcie->np, "aspm-no-l0s"))
 		aspm_support |= PCIE_LINK_STATE_L0S;
-	tmp = readl(base + PCIE_RC_CFG_PRIV1_LINK_CAPABILITY);
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:1026", base + PCIE_RC_CFG_PRIV1_LINK_CAPABILITY);
 	u32p_replace_bits(&tmp, aspm_support,
 		PCIE_RC_CFG_PRIV1_LINK_CAPABILITY_ASPM_SUPPORT_MASK);
-	writel(tmp, base + PCIE_RC_CFG_PRIV1_LINK_CAPABILITY);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:1029", tmp, base + PCIE_RC_CFG_PRIV1_LINK_CAPABILITY);
 
 	/*
 	 * For config space accesses on the RC, show the right class for
 	 * a PCIe-PCIe bridge (the default setting is to be EP mode).
 	 */
-	tmp = readl(base + PCIE_RC_CFG_PRIV1_ID_VAL3);
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:1035", base + PCIE_RC_CFG_PRIV1_ID_VAL3);
 	u32p_replace_bits(&tmp, 0x060400,
 			  PCIE_RC_CFG_PRIV1_ID_VAL3_CLASS_CODE_MASK);
-	writel(tmp, base + PCIE_RC_CFG_PRIV1_ID_VAL3);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:1038", tmp, base + PCIE_RC_CFG_PRIV1_ID_VAL3);
 
 	if (pcie->ssc) {
 		ret = brcm_pcie_set_ssc(pcie);
@@ -1045,7 +1045,7 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 			dev_err(dev, "failed attempt to enter ssc mode\n");
 	}
 
-	lnksta = readw(base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKSTA);
+	lnksta = pete_readw("drivers/pci/controller/pcie-brcmstb.c:1048", base + BRCM_PCIE_CAP_REGS + PCI_EXP_LNKSTA);
 	cls = FIELD_GET(PCI_EXP_LNKSTA_CLS, lnksta);
 	nlw = FIELD_GET(PCI_EXP_LNKSTA_NLW, lnksta);
 	dev_info(dev, "link up, %s x%u %s\n",
@@ -1053,12 +1053,12 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 		 ssc_good ? "(SSC)" : "(!SSC)");
 
 	/* PCIe->SCB endian mode for BAR */
-	tmp = readl(base + PCIE_RC_CFG_VENDOR_VENDOR_SPECIFIC_REG1);
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:1056", base + PCIE_RC_CFG_VENDOR_VENDOR_SPECIFIC_REG1);
 	u32p_replace_bits(&tmp, PCIE_RC_CFG_VENDOR_SPCIFIC_REG1_LITTLE_ENDIAN,
 		PCIE_RC_CFG_VENDOR_VENDOR_SPECIFIC_REG1_ENDIAN_MODE_BAR2_MASK);
-	writel(tmp, base + PCIE_RC_CFG_VENDOR_VENDOR_SPECIFIC_REG1);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:1059", tmp, base + PCIE_RC_CFG_VENDOR_VENDOR_SPECIFIC_REG1);
 
-	tmp = readl(base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:1061", base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
 	if (pcie->l1ss) {
 		/*
 		 * Enable CLKREQ# signalling include L1 Substate control of
@@ -1077,7 +1077,7 @@ static int brcm_pcie_setup(struct brcm_pcie *pcie)
 		tmp &= ~PCIE_MISC_HARD_PCIE_HARD_DEBUG_CLKREQ_L1SS_ENABLE_MASK;
 		tmp |= PCIE_MISC_HARD_PCIE_HARD_DEBUG_CLKREQ_DEBUG_ENABLE_MASK;
 	}
-	writel(tmp, base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:1080", tmp, base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
 
 	return 0;
 }
@@ -1090,16 +1090,16 @@ static void brcm_pcie_enter_l23(struct brcm_pcie *pcie)
 	u32 tmp;
 
 	/* Assert request for L23 */
-	tmp = readl(base + PCIE_MISC_PCIE_CTRL);
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:1093", base + PCIE_MISC_PCIE_CTRL);
 	u32p_replace_bits(&tmp, 1, PCIE_MISC_PCIE_CTRL_PCIE_L23_REQUEST_MASK);
-	writel(tmp, base + PCIE_MISC_PCIE_CTRL);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:1095", tmp, base + PCIE_MISC_PCIE_CTRL);
 
 	/* Wait up to 36 msec for L23 */
-	tmp = readl(base + PCIE_MISC_PCIE_STATUS);
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:1098", base + PCIE_MISC_PCIE_STATUS);
 	l23 = FIELD_GET(PCIE_MISC_PCIE_STATUS_PCIE_LINK_IN_L23_MASK, tmp);
 	for (i = 0; i < 15 && !l23; i++) {
 		usleep_range(2000, 2400);
-		tmp = readl(base + PCIE_MISC_PCIE_STATUS);
+		tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:1102", base + PCIE_MISC_PCIE_STATUS);
 		l23 = FIELD_GET(PCIE_MISC_PCIE_STATUS_PCIE_LINK_IN_L23_MASK,
 				tmp);
 	}
@@ -1127,14 +1127,14 @@ static int brcm_phy_cntl(struct brcm_pcie *pcie, const int start)
 
 	for (i = beg; i != end; start ? i++ : i--) {
 		val = start ? BIT_MASK(shifts[i]) : 0;
-		tmp = readl(base + PCIE_DVT_PMU_PCIE_PHY_CTRL);
+		tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:1130", base + PCIE_DVT_PMU_PCIE_PHY_CTRL);
 		tmp = (tmp & ~masks[i]) | (val & masks[i]);
-		writel(tmp, base + PCIE_DVT_PMU_PCIE_PHY_CTRL);
+		pete_writel("drivers/pci/controller/pcie-brcmstb.c:1132", tmp, base + PCIE_DVT_PMU_PCIE_PHY_CTRL);
 		usleep_range(50, 200);
 		combined_mask |= masks[i];
 	}
 
-	tmp = readl(base + PCIE_DVT_PMU_PCIE_PHY_CTRL);
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:1137", base + PCIE_DVT_PMU_PCIE_PHY_CTRL);
 	val = start ? combined_mask : 0;
 
 	ret = (tmp & combined_mask) == val ? 0 : -EIO;
@@ -1165,14 +1165,14 @@ static void brcm_pcie_turn_off(struct brcm_pcie *pcie)
 	pcie->perst_set(pcie, 1);
 
 	/* Deassert request for L23 in case it was asserted */
-	tmp = readl(base + PCIE_MISC_PCIE_CTRL);
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:1168", base + PCIE_MISC_PCIE_CTRL);
 	u32p_replace_bits(&tmp, 0, PCIE_MISC_PCIE_CTRL_PCIE_L23_REQUEST_MASK);
-	writel(tmp, base + PCIE_MISC_PCIE_CTRL);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:1170", tmp, base + PCIE_MISC_PCIE_CTRL);
 
 	/* Turn off SerDes */
-	tmp = readl(base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:1173", base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
 	u32p_replace_bits(&tmp, 1, PCIE_MISC_HARD_PCIE_HARD_DEBUG_SERDES_IDDQ_MASK);
-	writel(tmp, base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:1175", tmp, base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
 
 	/* Shutdown PCIe bridge */
 	pcie->bridge_sw_init_set(pcie, 1);
@@ -1213,9 +1213,9 @@ static int brcm_pcie_resume(struct device *dev)
 	pcie->bridge_sw_init_set(pcie, 0);
 
 	/* SERDES_IDDQ = 0 */
-	tmp = readl(base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
+	tmp = pete_readl("drivers/pci/controller/pcie-brcmstb.c:1216", base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
 	u32p_replace_bits(&tmp, 0, PCIE_MISC_HARD_PCIE_HARD_DEBUG_SERDES_IDDQ_MASK);
-	writel(tmp, base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
+	pete_writel("drivers/pci/controller/pcie-brcmstb.c:1218", tmp, base + PCIE_MISC_HARD_PCIE_HARD_DEBUG);
 
 	/* wait for serdes to be stable */
 	udelay(100);
@@ -1373,7 +1373,7 @@ static int brcm_pcie_probe(struct platform_device *pdev)
 	if (ret)
 		goto fail;
 
-	pcie->hw_rev = readl(pcie->base + PCIE_MISC_REVISION);
+	pcie->hw_rev = pete_readl("drivers/pci/controller/pcie-brcmstb.c:1376", pcie->base + PCIE_MISC_REVISION);
 	if (pcie->type == BCM4908 && pcie->hw_rev >= BRCM_PCIE_HW_REV_3_20) {
 		dev_err(pcie->dev, "hardware revision with unsupported PERST# setup\n");
 		ret = -ENODEV;

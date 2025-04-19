@@ -126,42 +126,42 @@ static void u2_phy_slew_rate_calibrate(struct mtk_xsphy *xsphy,
 		return;
 
 	/* enable USB ring oscillator */
-	tmp = readl(pbase + XSP_USBPHYACR5);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:129", pbase + XSP_USBPHYACR5);
 	tmp |= P2A5_RG_HSTX_SRCAL_EN;
-	writel(tmp, pbase + XSP_USBPHYACR5);
+	pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:131", tmp, pbase + XSP_USBPHYACR5);
 	udelay(1);	/* wait clock stable */
 
 	/* enable free run clock */
-	tmp = readl(pbase + XSP_U2FREQ_FMMONR1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:135", pbase + XSP_U2FREQ_FMMONR1);
 	tmp |= P2F_RG_FRCK_EN;
-	writel(tmp, pbase + XSP_U2FREQ_FMMONR1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:137", tmp, pbase + XSP_U2FREQ_FMMONR1);
 
 	/* set cycle count as 1024 */
-	tmp = readl(pbase + XSP_U2FREQ_FMCR0);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:140", pbase + XSP_U2FREQ_FMCR0);
 	tmp &= ~(P2F_RG_CYCLECNT);
 	tmp |= P2F_RG_CYCLECNT_VAL(XSP_FM_DET_CYCLE_CNT);
-	writel(tmp, pbase + XSP_U2FREQ_FMCR0);
+	pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:143", tmp, pbase + XSP_U2FREQ_FMCR0);
 
 	/* enable frequency meter */
-	tmp = readl(pbase + XSP_U2FREQ_FMCR0);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:146", pbase + XSP_U2FREQ_FMCR0);
 	tmp |= P2F_RG_FREQDET_EN;
-	writel(tmp, pbase + XSP_U2FREQ_FMCR0);
+	pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:148", tmp, pbase + XSP_U2FREQ_FMCR0);
 
 	/* ignore return value */
 	readl_poll_timeout(pbase + XSP_U2FREQ_FMMONR1, tmp,
 			   (tmp & P2F_USB_FM_VALID), 10, 200);
 
-	fm_out = readl(pbase + XSP_U2FREQ_MMONR0);
+	fm_out = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:154", pbase + XSP_U2FREQ_MMONR0);
 
 	/* disable frequency meter */
-	tmp = readl(pbase + XSP_U2FREQ_FMCR0);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:157", pbase + XSP_U2FREQ_FMCR0);
 	tmp &= ~P2F_RG_FREQDET_EN;
-	writel(tmp, pbase + XSP_U2FREQ_FMCR0);
+	pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:159", tmp, pbase + XSP_U2FREQ_FMCR0);
 
 	/* disable free run clock */
-	tmp = readl(pbase + XSP_U2FREQ_FMMONR1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:162", pbase + XSP_U2FREQ_FMMONR1);
 	tmp &= ~P2F_RG_FRCK_EN;
-	writel(tmp, pbase + XSP_U2FREQ_FMMONR1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:164", tmp, pbase + XSP_U2FREQ_FMMONR1);
 
 	if (fm_out) {
 		/* (1024 / FM_OUT) x reference clock frequency x coefficient */
@@ -177,15 +177,15 @@ static void u2_phy_slew_rate_calibrate(struct mtk_xsphy *xsphy,
 		xsphy->src_ref_clk, xsphy->src_coef);
 
 	/* set HS slew rate */
-	tmp = readl(pbase + XSP_USBPHYACR5);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:180", pbase + XSP_USBPHYACR5);
 	tmp &= ~P2A5_RG_HSTX_SRCTRL;
 	tmp |= P2A5_RG_HSTX_SRCTRL_VAL(calib_val);
-	writel(tmp, pbase + XSP_USBPHYACR5);
+	pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:183", tmp, pbase + XSP_USBPHYACR5);
 
 	/* disable USB ring oscillator */
-	tmp = readl(pbase + XSP_USBPHYACR5);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:186", pbase + XSP_USBPHYACR5);
 	tmp &= ~P2A5_RG_HSTX_SRCAL_EN;
-	writel(tmp, pbase + XSP_USBPHYACR5);
+	pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:188", tmp, pbase + XSP_USBPHYACR5);
 }
 
 static void u2_phy_instance_init(struct mtk_xsphy *xsphy,
@@ -195,13 +195,13 @@ static void u2_phy_instance_init(struct mtk_xsphy *xsphy,
 	u32 tmp;
 
 	/* DP/DM BC1.1 path Disable */
-	tmp = readl(pbase + XSP_USBPHYACR6);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:198", pbase + XSP_USBPHYACR6);
 	tmp &= ~P2A6_RG_BC11_SW_EN;
-	writel(tmp, pbase + XSP_USBPHYACR6);
+	pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:200", tmp, pbase + XSP_USBPHYACR6);
 
-	tmp = readl(pbase + XSP_USBPHYACR0);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:202", pbase + XSP_USBPHYACR0);
 	tmp |= P2A0_RG_INTR_EN;
-	writel(tmp, pbase + XSP_USBPHYACR0);
+	pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:204", tmp, pbase + XSP_USBPHYACR0);
 }
 
 static void u2_phy_instance_power_on(struct mtk_xsphy *xsphy,
@@ -211,14 +211,14 @@ static void u2_phy_instance_power_on(struct mtk_xsphy *xsphy,
 	u32 index = inst->index;
 	u32 tmp;
 
-	tmp = readl(pbase + XSP_USBPHYACR6);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:214", pbase + XSP_USBPHYACR6);
 	tmp |= P2A6_RG_OTG_VBUSCMP_EN;
-	writel(tmp, pbase + XSP_USBPHYACR6);
+	pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:216", tmp, pbase + XSP_USBPHYACR6);
 
-	tmp = readl(pbase + XSP_U2PHYDTM1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:218", pbase + XSP_U2PHYDTM1);
 	tmp |= P2D_RG_VBUSVALID | P2D_RG_AVALID;
 	tmp &= ~P2D_RG_SESSEND;
-	writel(tmp, pbase + XSP_U2PHYDTM1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:221", tmp, pbase + XSP_U2PHYDTM1);
 
 	dev_dbg(xsphy->dev, "%s(%d)\n", __func__, index);
 }
@@ -230,14 +230,14 @@ static void u2_phy_instance_power_off(struct mtk_xsphy *xsphy,
 	u32 index = inst->index;
 	u32 tmp;
 
-	tmp = readl(pbase + XSP_USBPHYACR6);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:233", pbase + XSP_USBPHYACR6);
 	tmp &= ~P2A6_RG_OTG_VBUSCMP_EN;
-	writel(tmp, pbase + XSP_USBPHYACR6);
+	pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:235", tmp, pbase + XSP_USBPHYACR6);
 
-	tmp = readl(pbase + XSP_U2PHYDTM1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:237", pbase + XSP_U2PHYDTM1);
 	tmp &= ~(P2D_RG_VBUSVALID | P2D_RG_AVALID);
 	tmp |= P2D_RG_SESSEND;
-	writel(tmp, pbase + XSP_U2PHYDTM1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:240", tmp, pbase + XSP_U2PHYDTM1);
 
 	dev_dbg(xsphy->dev, "%s(%d)\n", __func__, index);
 }
@@ -248,7 +248,7 @@ static void u2_phy_instance_set_mode(struct mtk_xsphy *xsphy,
 {
 	u32 tmp;
 
-	tmp = readl(inst->port_base + XSP_U2PHYDTM1);
+	tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:251", inst->port_base + XSP_U2PHYDTM1);
 	switch (mode) {
 	case PHY_MODE_USB_DEVICE:
 		tmp |= P2D_FORCE_IDDIG | P2D_RG_IDDIG;
@@ -263,7 +263,7 @@ static void u2_phy_instance_set_mode(struct mtk_xsphy *xsphy,
 	default:
 		return;
 	}
-	writel(tmp, inst->port_base + XSP_U2PHYDTM1);
+	pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:266", tmp, inst->port_base + XSP_U2PHYDTM1);
 }
 
 static void phy_parse_property(struct mtk_xsphy *xsphy,
@@ -309,31 +309,31 @@ static void u2_phy_props_set(struct mtk_xsphy *xsphy,
 	u32 tmp;
 
 	if (inst->efuse_intr) {
-		tmp = readl(pbase + XSP_USBPHYACR1);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:312", pbase + XSP_USBPHYACR1);
 		tmp &= ~P2A1_RG_INTR_CAL;
 		tmp |= P2A1_RG_INTR_CAL_VAL(inst->efuse_intr);
-		writel(tmp, pbase + XSP_USBPHYACR1);
+		pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:315", tmp, pbase + XSP_USBPHYACR1);
 	}
 
 	if (inst->eye_src) {
-		tmp = readl(pbase + XSP_USBPHYACR5);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:319", pbase + XSP_USBPHYACR5);
 		tmp &= ~P2A5_RG_HSTX_SRCTRL;
 		tmp |= P2A5_RG_HSTX_SRCTRL_VAL(inst->eye_src);
-		writel(tmp, pbase + XSP_USBPHYACR5);
+		pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:322", tmp, pbase + XSP_USBPHYACR5);
 	}
 
 	if (inst->eye_vrt) {
-		tmp = readl(pbase + XSP_USBPHYACR1);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:326", pbase + XSP_USBPHYACR1);
 		tmp &= ~P2A1_RG_VRT_SEL;
 		tmp |= P2A1_RG_VRT_SEL_VAL(inst->eye_vrt);
-		writel(tmp, pbase + XSP_USBPHYACR1);
+		pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:329", tmp, pbase + XSP_USBPHYACR1);
 	}
 
 	if (inst->eye_term) {
-		tmp = readl(pbase + XSP_USBPHYACR1);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:333", pbase + XSP_USBPHYACR1);
 		tmp &= ~P2A1_RG_TERM_SEL;
 		tmp |= P2A1_RG_TERM_SEL_VAL(inst->eye_term);
-		writel(tmp, pbase + XSP_USBPHYACR1);
+		pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:336", tmp, pbase + XSP_USBPHYACR1);
 	}
 }
 
@@ -344,24 +344,24 @@ static void u3_phy_props_set(struct mtk_xsphy *xsphy,
 	u32 tmp;
 
 	if (inst->efuse_intr) {
-		tmp = readl(xsphy->glb_base + SSPXTP_PHYA_GLB_00);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:347", xsphy->glb_base + SSPXTP_PHYA_GLB_00);
 		tmp &= ~RG_XTP_GLB_BIAS_INTR_CTRL;
 		tmp |= RG_XTP_GLB_BIAS_INTR_CTRL_VAL(inst->efuse_intr);
-		writel(tmp, xsphy->glb_base + SSPXTP_PHYA_GLB_00);
+		pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:350", tmp, xsphy->glb_base + SSPXTP_PHYA_GLB_00);
 	}
 
 	if (inst->efuse_tx_imp) {
-		tmp = readl(pbase + SSPXTP_PHYA_LN_04);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:354", pbase + SSPXTP_PHYA_LN_04);
 		tmp &= ~RG_XTP_LN0_TX_IMPSEL;
 		tmp |= RG_XTP_LN0_TX_IMPSEL_VAL(inst->efuse_tx_imp);
-		writel(tmp, pbase + SSPXTP_PHYA_LN_04);
+		pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:357", tmp, pbase + SSPXTP_PHYA_LN_04);
 	}
 
 	if (inst->efuse_rx_imp) {
-		tmp = readl(pbase + SSPXTP_PHYA_LN_14);
+		tmp = pete_readl("drivers/phy/mediatek/phy-mtk-xsphy.c:361", pbase + SSPXTP_PHYA_LN_14);
 		tmp &= ~RG_XTP_LN0_RX_IMPSEL;
 		tmp |= RG_XTP_LN0_RX_IMPSEL_VAL(inst->efuse_rx_imp);
-		writel(tmp, pbase + SSPXTP_PHYA_LN_14);
+		pete_writel("drivers/phy/mediatek/phy-mtk-xsphy.c:364", tmp, pbase + SSPXTP_PHYA_LN_14);
 	}
 }
 

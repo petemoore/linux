@@ -96,12 +96,12 @@ struct cdns_imx {
 
 static inline u32 cdns_imx_readl(struct cdns_imx *data, u32 offset)
 {
-	return readl(data->noncore + offset);
+	return pete_readl("drivers/usb/cdns3/cdns3-imx.c:99", data->noncore + offset);
 }
 
 static inline void cdns_imx_writel(struct cdns_imx *data, u32 offset, u32 value)
 {
-	writel(value, data->noncore + offset);
+	pete_writel("drivers/usb/cdns3/cdns3-imx.c:104", value, data->noncore + offset);
 }
 
 static const struct clk_bulk_data imx_cdns3_core_clks[] = {
@@ -263,10 +263,10 @@ static int cdns_imx_platform_suspend(struct device *dev,
 
 	if (suspend) {
 		/* SW request low power when all usb ports allow to it ??? */
-		value = readl(xhci_regs + XECP_PM_PMCSR);
+		value = pete_readl("drivers/usb/cdns3/cdns3-imx.c:266", xhci_regs + XECP_PM_PMCSR);
 		value &= ~PS_MASK;
 		value |= PS_D1;
-		writel(value, xhci_regs + XECP_PM_PMCSR);
+		pete_writel("drivers/usb/cdns3/cdns3-imx.c:269", value, xhci_regs + XECP_PM_PMCSR);
 
 		/* mdctrl_clk_sel */
 		value = cdns_imx_readl(data, USB3_CORE_CTRL1);
@@ -302,15 +302,15 @@ static int cdns_imx_platform_suspend(struct device *dev,
 		cdns3_set_wakeup(data, false);
 
 		/* SW request D0 */
-		value = readl(xhci_regs + XECP_PM_PMCSR);
+		value = pete_readl("drivers/usb/cdns3/cdns3-imx.c:305", xhci_regs + XECP_PM_PMCSR);
 		value &= ~PS_MASK;
 		value |= PS_D0;
-		writel(value, xhci_regs + XECP_PM_PMCSR);
+		pete_writel("drivers/usb/cdns3/cdns3-imx.c:308", value, xhci_regs + XECP_PM_PMCSR);
 
 		/* clr CFG_RXDET_P3_EN */
-		value = readl(xhci_regs + XECP_AUX_CTRL_REG1);
+		value = pete_readl("drivers/usb/cdns3/cdns3-imx.c:311", xhci_regs + XECP_AUX_CTRL_REG1);
 		value &= ~CFG_RXDET_P3_EN;
-		writel(value, xhci_regs + XECP_AUX_CTRL_REG1);
+		pete_writel("drivers/usb/cdns3/cdns3-imx.c:313", value, xhci_regs + XECP_AUX_CTRL_REG1);
 
 		/* clear mdctrl_clk_sel */
 		value = cdns_imx_readl(data, USB3_CORE_CTRL1);
@@ -334,7 +334,7 @@ static int cdns_imx_platform_suspend(struct device *dev,
 			dev_warn(parent, "wait mdctrl_clk_status cleared timeout\n");
 
 		/* Wait until OTG_NRDY is 0 */
-		value = readl(otg_regs + OTGSTS);
+		value = pete_readl("drivers/usb/cdns3/cdns3-imx.c:337", otg_regs + OTGSTS);
 		ret = readl_poll_timeout(otg_regs + OTGSTS, value,
 			(value & OTG_NRDY) != OTG_NRDY,
 			10, 100000);

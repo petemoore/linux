@@ -47,13 +47,13 @@ static void savage4_gpio_setscl(void *data, int val)
 	struct savagefb_i2c_chan *chan = data;
 	unsigned int r;
 
-	r = readl(chan->ioaddr + chan->reg);
+	r = pete_readl("drivers/video/fbdev/savage/savagefb-i2c.c:50", chan->ioaddr + chan->reg);
 	if(val)
 		r |= SAVAGE4_I2C_SCL_OUT;
 	else
 		r &= ~SAVAGE4_I2C_SCL_OUT;
-	writel(r, chan->ioaddr + chan->reg);
-	readl(chan->ioaddr + chan->reg);	/* flush posted write */
+	pete_writel("drivers/video/fbdev/savage/savagefb-i2c.c:55", r, chan->ioaddr + chan->reg);
+	pete_readl("drivers/video/fbdev/savage/savagefb-i2c.c:56", chan->ioaddr + chan->reg);	/* flush posted write */
 }
 
 static void savage4_gpio_setsda(void *data, int val)
@@ -61,27 +61,27 @@ static void savage4_gpio_setsda(void *data, int val)
 	struct savagefb_i2c_chan *chan = data;
 
 	unsigned int r;
-	r = readl(chan->ioaddr + chan->reg);
+	r = pete_readl("drivers/video/fbdev/savage/savagefb-i2c.c:64", chan->ioaddr + chan->reg);
 	if(val)
 		r |= SAVAGE4_I2C_SDA_OUT;
 	else
 		r &= ~SAVAGE4_I2C_SDA_OUT;
-	writel(r, chan->ioaddr + chan->reg);
-	readl(chan->ioaddr + chan->reg);	/* flush posted write */
+	pete_writel("drivers/video/fbdev/savage/savagefb-i2c.c:69", r, chan->ioaddr + chan->reg);
+	pete_readl("drivers/video/fbdev/savage/savagefb-i2c.c:70", chan->ioaddr + chan->reg);	/* flush posted write */
 }
 
 static int savage4_gpio_getscl(void *data)
 {
 	struct savagefb_i2c_chan *chan = data;
 
-	return (0 != (readl(chan->ioaddr + chan->reg) & SAVAGE4_I2C_SCL_IN));
+	return (0 != (pete_readl("drivers/video/fbdev/savage/savagefb-i2c.c:77", chan->ioaddr + chan->reg) & SAVAGE4_I2C_SCL_IN));
 }
 
 static int savage4_gpio_getsda(void *data)
 {
 	struct savagefb_i2c_chan *chan = data;
 
-	return (0 != (readl(chan->ioaddr + chan->reg) & SAVAGE4_I2C_SDA_IN));
+	return (0 != (pete_readl("drivers/video/fbdev/savage/savagefb-i2c.c:84", chan->ioaddr + chan->reg) & SAVAGE4_I2C_SDA_IN));
 }
 
 static void prosavage_gpio_setscl(void* data, int val)

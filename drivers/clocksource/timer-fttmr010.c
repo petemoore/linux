@@ -121,12 +121,12 @@ static inline struct fttmr010 *to_fttmr010(struct clock_event_device *evt)
 
 static unsigned long fttmr010_read_current_timer_up(void)
 {
-	return readl(local_fttmr->base + TIMER2_COUNT);
+	return pete_readl("drivers/clocksource/timer-fttmr010.c:124", local_fttmr->base + TIMER2_COUNT);
 }
 
 static unsigned long fttmr010_read_current_timer_down(void)
 {
-	return ~readl(local_fttmr->base + TIMER2_COUNT);
+	return ~pete_readl("drivers/clocksource/timer-fttmr010.c:129", local_fttmr->base + TIMER2_COUNT);
 }
 
 static u64 notrace fttmr010_read_sched_clock_up(void)
@@ -153,17 +153,17 @@ static int fttmr010_timer_set_next_event(unsigned long cycles,
 		 * ASPEED Timer Controller will load TIMER1_LOAD register
 		 * into TIMER1_COUNT register when the timer is re-enabled.
 		 */
-		writel(cycles, fttmr010->base + TIMER1_LOAD);
+		pete_writel("drivers/clocksource/timer-fttmr010.c:156", cycles, fttmr010->base + TIMER1_LOAD);
 	} else {
 		/* Setup the match register forward in time */
-		cr = readl(fttmr010->base + TIMER1_COUNT);
-		writel(cr + cycles, fttmr010->base + TIMER1_MATCH1);
+		cr = pete_readl("drivers/clocksource/timer-fttmr010.c:159", fttmr010->base + TIMER1_COUNT);
+		pete_writel("drivers/clocksource/timer-fttmr010.c:160", cr + cycles, fttmr010->base + TIMER1_MATCH1);
 	}
 
 	/* Start */
-	cr = readl(fttmr010->base + TIMER_CR);
+	cr = pete_readl("drivers/clocksource/timer-fttmr010.c:164", fttmr010->base + TIMER_CR);
 	cr |= fttmr010->t1_enable_val;
-	writel(cr, fttmr010->base + TIMER_CR);
+	pete_writel("drivers/clocksource/timer-fttmr010.c:166", cr, fttmr010->base + TIMER_CR);
 
 	return 0;
 }
@@ -173,7 +173,7 @@ static int ast2600_timer_shutdown(struct clock_event_device *evt)
 	struct fttmr010 *fttmr010 = to_fttmr010(evt);
 
 	/* Stop */
-	writel(fttmr010->t1_enable_val, fttmr010->base + AST2600_TIMER_CR_CLR);
+	pete_writel("drivers/clocksource/timer-fttmr010.c:176", fttmr010->t1_enable_val, fttmr010->base + AST2600_TIMER_CR_CLR);
 
 	return 0;
 }
@@ -184,9 +184,9 @@ static int fttmr010_timer_shutdown(struct clock_event_device *evt)
 	u32 cr;
 
 	/* Stop */
-	cr = readl(fttmr010->base + TIMER_CR);
+	cr = pete_readl("drivers/clocksource/timer-fttmr010.c:187", fttmr010->base + TIMER_CR);
 	cr &= ~fttmr010->t1_enable_val;
-	writel(cr, fttmr010->base + TIMER_CR);
+	pete_writel("drivers/clocksource/timer-fttmr010.c:189", cr, fttmr010->base + TIMER_CR);
 
 	return 0;
 }
@@ -200,17 +200,17 @@ static int fttmr010_timer_set_oneshot(struct clock_event_device *evt)
 	fttmr010->timer_shutdown(evt);
 
 	/* Setup counter start from 0 or ~0 */
-	writel(0, fttmr010->base + TIMER1_COUNT);
+	pete_writel("drivers/clocksource/timer-fttmr010.c:203", 0, fttmr010->base + TIMER1_COUNT);
 	if (fttmr010->is_aspeed) {
-		writel(~0, fttmr010->base + TIMER1_LOAD);
+		pete_writel("drivers/clocksource/timer-fttmr010.c:205", ~0, fttmr010->base + TIMER1_LOAD);
 	} else {
-		writel(0, fttmr010->base + TIMER1_LOAD);
+		pete_writel("drivers/clocksource/timer-fttmr010.c:207", 0, fttmr010->base + TIMER1_LOAD);
 
 		/* Enable interrupt */
-		cr = readl(fttmr010->base + TIMER_INTR_MASK);
+		cr = pete_readl("drivers/clocksource/timer-fttmr010.c:210", fttmr010->base + TIMER_INTR_MASK);
 		cr &= ~(TIMER_1_INT_OVERFLOW | TIMER_1_INT_MATCH2);
 		cr |= TIMER_1_INT_MATCH1;
-		writel(cr, fttmr010->base + TIMER_INTR_MASK);
+		pete_writel("drivers/clocksource/timer-fttmr010.c:213", cr, fttmr010->base + TIMER_INTR_MASK);
 	}
 
 	return 0;
@@ -227,23 +227,23 @@ static int fttmr010_timer_set_periodic(struct clock_event_device *evt)
 
 	/* Setup timer to fire at 1/HZ intervals. */
 	if (fttmr010->is_aspeed) {
-		writel(period, fttmr010->base + TIMER1_LOAD);
+		pete_writel("drivers/clocksource/timer-fttmr010.c:230", period, fttmr010->base + TIMER1_LOAD);
 	} else {
 		cr = 0xffffffff - (period - 1);
-		writel(cr, fttmr010->base + TIMER1_COUNT);
-		writel(cr, fttmr010->base + TIMER1_LOAD);
+		pete_writel("drivers/clocksource/timer-fttmr010.c:233", cr, fttmr010->base + TIMER1_COUNT);
+		pete_writel("drivers/clocksource/timer-fttmr010.c:234", cr, fttmr010->base + TIMER1_LOAD);
 
 		/* Enable interrupt on overflow */
-		cr = readl(fttmr010->base + TIMER_INTR_MASK);
+		cr = pete_readl("drivers/clocksource/timer-fttmr010.c:237", fttmr010->base + TIMER_INTR_MASK);
 		cr &= ~(TIMER_1_INT_MATCH1 | TIMER_1_INT_MATCH2);
 		cr |= TIMER_1_INT_OVERFLOW;
-		writel(cr, fttmr010->base + TIMER_INTR_MASK);
+		pete_writel("drivers/clocksource/timer-fttmr010.c:240", cr, fttmr010->base + TIMER_INTR_MASK);
 	}
 
 	/* Start the timer */
-	cr = readl(fttmr010->base + TIMER_CR);
+	cr = pete_readl("drivers/clocksource/timer-fttmr010.c:244", fttmr010->base + TIMER_CR);
 	cr |= fttmr010->t1_enable_val;
-	writel(cr, fttmr010->base + TIMER_CR);
+	pete_writel("drivers/clocksource/timer-fttmr010.c:246", cr, fttmr010->base + TIMER_CR);
 
 	return 0;
 }
@@ -264,7 +264,7 @@ static irqreturn_t ast2600_timer_interrupt(int irq, void *dev_id)
 	struct clock_event_device *evt = dev_id;
 	struct fttmr010 *fttmr010 = to_fttmr010(evt);
 
-	writel(0x1, fttmr010->base + TIMER_INTR_STATE);
+	pete_writel("drivers/clocksource/timer-fttmr010.c:267", 0x1, fttmr010->base + TIMER_INTR_STATE);
 
 	evt->event_handler(evt);
 	return IRQ_HANDLED;
@@ -329,8 +329,8 @@ static int __init fttmr010_common_init(struct device_node *np,
 		/*
 		 * Reset the interrupt mask and status
 		 */
-		writel(TIMER_INT_ALL_MASK, fttmr010->base + TIMER_INTR_MASK);
-		writel(0, fttmr010->base + TIMER_INTR_STATE);
+		pete_writel("drivers/clocksource/timer-fttmr010.c:332", TIMER_INT_ALL_MASK, fttmr010->base + TIMER_INTR_MASK);
+		pete_writel("drivers/clocksource/timer-fttmr010.c:333", 0, fttmr010->base + TIMER_INTR_STATE);
 	}
 
 	/*
@@ -343,19 +343,19 @@ static int __init fttmr010_common_init(struct device_node *np,
 		val = TIMER_2_CR_ENABLE | TIMER_1_CR_UPDOWN |
 			TIMER_2_CR_UPDOWN;
 	}
-	writel(val, fttmr010->base + TIMER_CR);
+	pete_writel("drivers/clocksource/timer-fttmr010.c:346", val, fttmr010->base + TIMER_CR);
 
 	/*
 	 * Setup free-running clocksource timer (interrupts
 	 * disabled.)
 	 */
 	local_fttmr = fttmr010;
-	writel(0, fttmr010->base + TIMER2_COUNT);
-	writel(0, fttmr010->base + TIMER2_MATCH1);
-	writel(0, fttmr010->base + TIMER2_MATCH2);
+	pete_writel("drivers/clocksource/timer-fttmr010.c:353", 0, fttmr010->base + TIMER2_COUNT);
+	pete_writel("drivers/clocksource/timer-fttmr010.c:354", 0, fttmr010->base + TIMER2_MATCH1);
+	pete_writel("drivers/clocksource/timer-fttmr010.c:355", 0, fttmr010->base + TIMER2_MATCH2);
 
 	if (fttmr010->is_aspeed) {
-		writel(~0, fttmr010->base + TIMER2_LOAD);
+		pete_writel("drivers/clocksource/timer-fttmr010.c:358", ~0, fttmr010->base + TIMER2_LOAD);
 		clocksource_mmio_init(fttmr010->base + TIMER2_COUNT,
 				      "FTTMR010-TIMER2",
 				      fttmr010->tick_rate,
@@ -363,7 +363,7 @@ static int __init fttmr010_common_init(struct device_node *np,
 		sched_clock_register(fttmr010_read_sched_clock_down, 32,
 				     fttmr010->tick_rate);
 	} else {
-		writel(0, fttmr010->base + TIMER2_LOAD);
+		pete_writel("drivers/clocksource/timer-fttmr010.c:366", 0, fttmr010->base + TIMER2_LOAD);
 		clocksource_mmio_init(fttmr010->base + TIMER2_COUNT,
 				      "FTTMR010-TIMER2",
 				      fttmr010->tick_rate,
@@ -375,10 +375,10 @@ static int __init fttmr010_common_init(struct device_node *np,
 	/*
 	 * Setup clockevent timer (interrupt-driven) on timer 1.
 	 */
-	writel(0, fttmr010->base + TIMER1_COUNT);
-	writel(0, fttmr010->base + TIMER1_LOAD);
-	writel(0, fttmr010->base + TIMER1_MATCH1);
-	writel(0, fttmr010->base + TIMER1_MATCH2);
+	pete_writel("drivers/clocksource/timer-fttmr010.c:378", 0, fttmr010->base + TIMER1_COUNT);
+	pete_writel("drivers/clocksource/timer-fttmr010.c:379", 0, fttmr010->base + TIMER1_LOAD);
+	pete_writel("drivers/clocksource/timer-fttmr010.c:380", 0, fttmr010->base + TIMER1_MATCH1);
+	pete_writel("drivers/clocksource/timer-fttmr010.c:381", 0, fttmr010->base + TIMER1_MATCH2);
 
 	if (is_ast2600) {
 		fttmr010->timer_shutdown = ast2600_timer_shutdown;

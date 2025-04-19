@@ -24,25 +24,25 @@
 
 void sof_io_write(struct snd_sof_dev *sdev, void __iomem *addr, u32 value)
 {
-	writel(value, addr);
+	pete_writel("sound/soc/sof/utils.c:27", value, addr);
 }
 EXPORT_SYMBOL(sof_io_write);
 
 u32 sof_io_read(struct snd_sof_dev *sdev, void __iomem *addr)
 {
-	return readl(addr);
+	return pete_readl("sound/soc/sof/utils.c:33", addr);
 }
 EXPORT_SYMBOL(sof_io_read);
 
 void sof_io_write64(struct snd_sof_dev *sdev, void __iomem *addr, u64 value)
 {
-	writeq(value, addr);
+	pete_writeq("sound/soc/sof/utils.c:39", value, addr);
 }
 EXPORT_SYMBOL(sof_io_write64);
 
 u64 sof_io_read64(struct snd_sof_dev *sdev, void __iomem *addr)
 {
-	return readq(addr);
+	return pete_readq("sound/soc/sof/utils.c:45", addr);
 }
 EXPORT_SYMBOL(sof_io_read64);
 

@@ -23,9 +23,9 @@
 
 static int hci_extcap_hardware_id(struct i3c_hci *hci, void __iomem *base)
 {
-	hci->vendor_mipi_id	= readl(base + 0x04);
-	hci->vendor_version_id	= readl(base + 0x08);
-	hci->vendor_product_id	= readl(base + 0x0c);
+	hci->vendor_mipi_id	= pete_readl("drivers/i3c/master/mipi-i3c-hci/ext_caps.c:26", base + 0x04);
+	hci->vendor_version_id	= pete_readl("drivers/i3c/master/mipi-i3c-hci/ext_caps.c:27", base + 0x08);
+	hci->vendor_product_id	= pete_readl("drivers/i3c/master/mipi-i3c-hci/ext_caps.c:28", base + 0x0c);
 
 	dev_info(&hci->master.dev, "vendor MIPI ID: %#x\n", hci->vendor_mipi_id);
 	dev_info(&hci->master.dev, "vendor version ID: %#x\n", hci->vendor_version_id);
@@ -44,7 +44,7 @@ static int hci_extcap_hardware_id(struct i3c_hci *hci, void __iomem *base)
 
 static int hci_extcap_master_config(struct i3c_hci *hci, void __iomem *base)
 {
-	u32 master_config = readl(base + 0x04);
+	u32 master_config = pete_readl("drivers/i3c/master/mipi-i3c-hci/ext_caps.c:47", base + 0x04);
 	unsigned int operation_mode = FIELD_GET(GENMASK(5, 4), master_config);
 	static const char * const functionality[] = {
 		"(unknown)", "master only", "target only",
@@ -58,7 +58,7 @@ static int hci_extcap_master_config(struct i3c_hci *hci, void __iomem *base)
 
 static int hci_extcap_multi_bus(struct i3c_hci *hci, void __iomem *base)
 {
-	u32 bus_instance = readl(base + 0x04);
+	u32 bus_instance = pete_readl("drivers/i3c/master/mipi-i3c-hci/ext_caps.c:61", base + 0x04);
 	unsigned int count = FIELD_GET(GENMASK(3, 0), bus_instance);
 
 	dev_info(&hci->master.dev, "%d bus instances\n", count);
@@ -67,7 +67,7 @@ static int hci_extcap_multi_bus(struct i3c_hci *hci, void __iomem *base)
 
 static int hci_extcap_xfer_modes(struct i3c_hci *hci, void __iomem *base)
 {
-	u32 header = readl(base);
+	u32 header = pete_readl("drivers/i3c/master/mipi-i3c-hci/ext_caps.c:70", base);
 	u32 entries = FIELD_GET(CAP_HEADER_LENGTH, header) - 1;
 	unsigned int index;
 
@@ -75,7 +75,7 @@ static int hci_extcap_xfer_modes(struct i3c_hci *hci, void __iomem *base)
 		 entries);
 	base += 4;  /* skip header */
 	for (index = 0; index < entries; index++) {
-		u32 mode_entry = readl(base);
+		u32 mode_entry = pete_readl("drivers/i3c/master/mipi-i3c-hci/ext_caps.c:78", base);
 
 		DBG("mode %d: 0x%08x", index, mode_entry);
 		/* TODO: will be needed when I3C core does more than SDR */
@@ -87,7 +87,7 @@ static int hci_extcap_xfer_modes(struct i3c_hci *hci, void __iomem *base)
 
 static int hci_extcap_xfer_rates(struct i3c_hci *hci, void __iomem *base)
 {
-	u32 header = readl(base);
+	u32 header = pete_readl("drivers/i3c/master/mipi-i3c-hci/ext_caps.c:90", base);
 	u32 entries = FIELD_GET(CAP_HEADER_LENGTH, header) - 1;
 	u32 rate_entry;
 	unsigned int index, rate, rate_id, mode_id;
@@ -96,7 +96,7 @@ static int hci_extcap_xfer_rates(struct i3c_hci *hci, void __iomem *base)
 
 	dev_info(&hci->master.dev, "available data rates:\n");
 	for (index = 0; index < entries; index++) {
-		rate_entry = readl(base);
+		rate_entry = pete_readl("drivers/i3c/master/mipi-i3c-hci/ext_caps.c:99", base);
 		DBG("entry %d: 0x%08x", index, rate_entry);
 		rate = FIELD_GET(XFERRATE_ACTUAL_RATE_KHZ, rate_entry);
 		rate_id = FIELD_GET(XFERRATE_RATE_ID, rate_entry);
@@ -115,9 +115,9 @@ static int hci_extcap_xfer_rates(struct i3c_hci *hci, void __iomem *base)
 
 static int hci_extcap_auto_command(struct i3c_hci *hci, void __iomem *base)
 {
-	u32 autocmd_ext_caps = readl(base + 0x04);
+	u32 autocmd_ext_caps = pete_readl("drivers/i3c/master/mipi-i3c-hci/ext_caps.c:118", base + 0x04);
 	unsigned int max_count = FIELD_GET(GENMASK(3, 0), autocmd_ext_caps);
-	u32 autocmd_ext_config = readl(base + 0x08);
+	u32 autocmd_ext_config = pete_readl("drivers/i3c/master/mipi-i3c-hci/ext_caps.c:120", base + 0x08);
 	unsigned int count = FIELD_GET(GENMASK(3, 0), autocmd_ext_config);
 
 	dev_info(&hci->master.dev, "%d/%d active auto-command entries\n",
@@ -201,9 +201,9 @@ static const struct hci_ext_caps ext_capabilities[] = {
 static int hci_extcap_vendor_NXP(struct i3c_hci *hci, void __iomem *base)
 {
 	hci->vendor_data = (__force void *)base;
-	dev_info(&hci->master.dev, "Build Date Info = %#x\n", readl(base + 1*4));
+	dev_info(&hci->master.dev, "Build Date Info = %#x\n", pete_readl("drivers/i3c/master/mipi-i3c-hci/ext_caps.c:204", base + 1*4));
 	/* reset the FPGA */
-	writel(0xdeadbeef, base + 1*4);
+	pete_writel("drivers/i3c/master/mipi-i3c-hci/ext_caps.c:206", 0xdeadbeef, base + 1*4);
 	return 0;
 }
 
@@ -265,7 +265,7 @@ int i3c_hci_parse_ext_caps(struct i3c_hci *hci)
 		return 0;
 
 	for (; !err && curr_cap < end; curr_cap += cap_length * 4) {
-		cap_header = readl(curr_cap);
+		cap_header = pete_readl("drivers/i3c/master/mipi-i3c-hci/ext_caps.c:268", curr_cap);
 		cap_id = FIELD_GET(CAP_HEADER_ID, cap_header);
 		cap_length = FIELD_GET(CAP_HEADER_LENGTH, cap_header);
 		DBG("id=0x%02x length=%d", cap_id, cap_length);

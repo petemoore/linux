@@ -379,12 +379,12 @@ static int fw_handle_direct_write(struct wil6210_priv *wil, const void *data,
 		if (!wil_fw_addr_check(wil, &dst, block[i].addr, 0, "address"))
 			return -EINVAL;
 
-		x = readl(dst);
+		x = pete_readl("drivers/net/wireless/ath/wil6210/fw_inc.c:382", dst);
 		y = (x & m) | (v & ~m);
 		wil_dbg_fw(wil, "write [0x%08x] <== 0x%08x "
 			   "(old 0x%08x val 0x%08x mask 0x%08x)\n",
 			   le32_to_cpu(block[i].addr), y, x, v, m);
-		writel(y, dst);
+		pete_writel("drivers/net/wireless/ath/wil6210/fw_inc.c:387", y, dst);
 		wmb(); /* finish before processing next record */
 	}
 
@@ -397,18 +397,18 @@ static int gw_write(struct wil6210_priv *wil, void __iomem *gwa_addr,
 {
 	unsigned delay = 0;
 
-	writel(a, gwa_addr);
-	writel(gw_cmd, gwa_cmd);
+	pete_writel("drivers/net/wireless/ath/wil6210/fw_inc.c:400", a, gwa_addr);
+	pete_writel("drivers/net/wireless/ath/wil6210/fw_inc.c:401", gw_cmd, gwa_cmd);
 	wmb(); /* finish before activate gw */
 
-	writel(WIL_FW_GW_CTL_RUN, gwa_ctl); /* activate gw */
+	pete_writel("drivers/net/wireless/ath/wil6210/fw_inc.c:404", WIL_FW_GW_CTL_RUN, gwa_ctl); /* activate gw */
 	do {
 		udelay(1); /* typical time is few usec */
 		if (delay++ > 100) {
 			wil_err_fw(wil, "gw timeout\n");
 			return -EINVAL;
 		}
-	} while (readl(gwa_ctl) & WIL_FW_GW_CTL_BUSY); /* gw done? */
+	} while (pete_readl("drivers/net/wireless/ath/wil6210/fw_inc.c:411", gwa_ctl) & WIL_FW_GW_CTL_BUSY); /* gw done? */
 
 	return 0;
 }
@@ -468,7 +468,7 @@ static int fw_handle_gateway_data(struct wil6210_priv *wil, const void *data,
 		wil_dbg_fw(wil, "  gw write[%3d] [0x%08x] <== 0x%08x\n",
 			   i, a, v);
 
-		writel(v, gwa_val);
+		pete_writel("drivers/net/wireless/ath/wil6210/fw_inc.c:471", v, gwa_val);
 		rc = gw_write(wil, gwa_addr, gwa_cmd, gwa_ctl, gw_cmd, a);
 		if (rc)
 			return rc;
@@ -542,7 +542,7 @@ static int fw_handle_gateway_data4(struct wil6210_priv *wil, const void *data,
 				sizeof(v), false);
 
 		for (k = 0; k < ARRAY_SIZE(block->value); k++)
-			writel(v[k], gwa_val[k]);
+			pete_writel("drivers/net/wireless/ath/wil6210/fw_inc.c:545", v[k], gwa_val[k]);
 		rc = gw_write(wil, gwa_addr, gwa_cmd, gwa_ctl, gw_cmd, a);
 		if (rc)
 			return rc;

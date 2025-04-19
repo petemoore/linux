@@ -2008,12 +2008,12 @@ vxge_hw_vpath_rx_doorbell_init(struct __vxge_hw_vpath_handle *vp);
 
 static inline void __vxge_hw_pio_mem_write32_upper(u32 val, void __iomem *addr)
 {
-	writel(val, addr + 4);
+	pete_writel("drivers/net/ethernet/neterion/vxge/vxge-config.h:2011", val, addr + 4);
 }
 
 static inline void __vxge_hw_pio_mem_write32_lower(u32 val, void __iomem *addr)
 {
-	writel(val, addr);
+	pete_writel("drivers/net/ethernet/neterion/vxge/vxge-config.h:2016", val, addr);
 }
 
 enum vxge_hw_status

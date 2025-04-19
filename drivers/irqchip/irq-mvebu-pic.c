@@ -35,15 +35,15 @@ struct mvebu_pic {
 static void mvebu_pic_reset(struct mvebu_pic *pic)
 {
 	/* ACK and mask all interrupts */
-	writel(0, pic->base + PIC_MASK);
-	writel(PIC_MAX_IRQ_MASK, pic->base + PIC_CAUSE);
+	pete_writel("drivers/irqchip/irq-mvebu-pic.c:38", 0, pic->base + PIC_MASK);
+	pete_writel("drivers/irqchip/irq-mvebu-pic.c:39", PIC_MAX_IRQ_MASK, pic->base + PIC_CAUSE);
 }
 
 static void mvebu_pic_eoi_irq(struct irq_data *d)
 {
 	struct mvebu_pic *pic = irq_data_get_irq_chip_data(d);
 
-	writel(1 << d->hwirq, pic->base + PIC_CAUSE);
+	pete_writel("drivers/irqchip/irq-mvebu-pic.c:46", 1 << d->hwirq, pic->base + PIC_CAUSE);
 }
 
 static void mvebu_pic_mask_irq(struct irq_data *d)
@@ -51,9 +51,9 @@ static void mvebu_pic_mask_irq(struct irq_data *d)
 	struct mvebu_pic *pic = irq_data_get_irq_chip_data(d);
 	u32 reg;
 
-	reg =  readl(pic->base + PIC_MASK);
+	reg =  pete_readl("drivers/irqchip/irq-mvebu-pic.c:54", pic->base + PIC_MASK);
 	reg |= (1 << d->hwirq);
-	writel(reg, pic->base + PIC_MASK);
+	pete_writel("drivers/irqchip/irq-mvebu-pic.c:56", reg, pic->base + PIC_MASK);
 }
 
 static void mvebu_pic_unmask_irq(struct irq_data *d)
@@ -61,9 +61,9 @@ static void mvebu_pic_unmask_irq(struct irq_data *d)
 	struct mvebu_pic *pic = irq_data_get_irq_chip_data(d);
 	u32 reg;
 
-	reg = readl(pic->base + PIC_MASK);
+	reg = pete_readl("drivers/irqchip/irq-mvebu-pic.c:64", pic->base + PIC_MASK);
 	reg &= ~(1 << d->hwirq);
-	writel(reg, pic->base + PIC_MASK);
+	pete_writel("drivers/irqchip/irq-mvebu-pic.c:66", reg, pic->base + PIC_MASK);
 }
 
 static int mvebu_pic_irq_map(struct irq_domain *domain, unsigned int virq,

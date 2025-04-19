@@ -167,9 +167,9 @@ static int flexgen_set_rate(struct clk_hw *hw, unsigned long rate,
 	__clk_hw_set_clk(fdiv_hw, hw);
 
 	if (flexgen->control_mode) {
-		reg = readl(config->reg);
+		reg = pete_readl("drivers/clk/st/clk-flexgen.c:170", config->reg);
 		reg &= ~BIT(config->bit_idx);
-		writel(reg, config->reg);
+		pete_writel("drivers/clk/st/clk-flexgen.c:172", reg, config->reg);
 	}
 
 	div = clk_best_div(parent_rate, rate);

@@ -157,7 +157,7 @@ static int mv_ehci_probe(struct platform_device *pdev)
 
 	ehci_mv->cap_regs =
 		(void __iomem *) ((unsigned long) ehci_mv->base + U2x_CAPREGS_OFFSET);
-	offset = readl(ehci_mv->cap_regs) & CAPLENGTH_MASK;
+	offset = pete_readl("drivers/usb/host/ehci-mv.c:160", ehci_mv->cap_regs) & CAPLENGTH_MASK;
 	ehci_mv->op_regs =
 		(void __iomem *) ((unsigned long) ehci_mv->cap_regs + offset);
 

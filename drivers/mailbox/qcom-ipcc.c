@@ -76,12 +76,12 @@ static irqreturn_t qcom_ipcc_irq_fn(int irq, void *data)
 	int virq;
 
 	for (;;) {
-		hwirq = readl(ipcc->base + IPCC_REG_RECV_ID);
+		hwirq = pete_readl("drivers/mailbox/qcom-ipcc.c:79", ipcc->base + IPCC_REG_RECV_ID);
 		if (hwirq == IPCC_NO_PENDING_IRQ)
 			break;
 
 		virq = irq_find_mapping(ipcc->irq_domain, hwirq);
-		writel(hwirq, ipcc->base + IPCC_REG_RECV_SIGNAL_CLEAR);
+		pete_writel("drivers/mailbox/qcom-ipcc.c:84", hwirq, ipcc->base + IPCC_REG_RECV_SIGNAL_CLEAR);
 		generic_handle_irq(virq);
 	}
 
@@ -93,7 +93,7 @@ static void qcom_ipcc_mask_irq(struct irq_data *irqd)
 	struct qcom_ipcc *ipcc = irq_data_get_irq_chip_data(irqd);
 	irq_hw_number_t hwirq = irqd_to_hwirq(irqd);
 
-	writel(hwirq, ipcc->base + IPCC_REG_RECV_SIGNAL_DISABLE);
+	pete_writel("drivers/mailbox/qcom-ipcc.c:96", hwirq, ipcc->base + IPCC_REG_RECV_SIGNAL_DISABLE);
 }
 
 static void qcom_ipcc_unmask_irq(struct irq_data *irqd)
@@ -101,7 +101,7 @@ static void qcom_ipcc_unmask_irq(struct irq_data *irqd)
 	struct qcom_ipcc *ipcc = irq_data_get_irq_chip_data(irqd);
 	irq_hw_number_t hwirq = irqd_to_hwirq(irqd);
 
-	writel(hwirq, ipcc->base + IPCC_REG_RECV_SIGNAL_ENABLE);
+	pete_writel("drivers/mailbox/qcom-ipcc.c:104", hwirq, ipcc->base + IPCC_REG_RECV_SIGNAL_ENABLE);
 }
 
 static struct irq_chip qcom_ipcc_irq_chip = {
@@ -150,7 +150,7 @@ static int qcom_ipcc_mbox_send_data(struct mbox_chan *chan, void *data)
 	u32 hwirq;
 
 	hwirq = qcom_ipcc_get_hwirq(mchan->client_id, mchan->signal_id);
-	writel(hwirq, ipcc->base + IPCC_REG_SEND_ID);
+	pete_writel("drivers/mailbox/qcom-ipcc.c:153", hwirq, ipcc->base + IPCC_REG_SEND_ID);
 
 	return 0;
 }

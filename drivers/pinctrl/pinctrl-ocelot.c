@@ -26,7 +26,7 @@
 #include "pinmux.h"
 
 #define ocelot_clrsetbits(addr, clear, set) \
-	writel((readl(addr) & ~(clear)) | (set), (addr))
+	pete_writel("drivers/pinctrl/pinctrl-ocelot.c:29", (pete_readl("drivers/pinctrl/pinctrl-ocelot.c:29", addr) & ~(clear)) | (set), (addr))
 
 /* PINCONFIG bits (sparx5 only) */
 enum {
@@ -819,7 +819,7 @@ static int ocelot_hw_get_value(struct ocelot_pinctrl *info,
 	int ret = -EOPNOTSUPP;
 
 	if (info->pincfg) {
-		u32 regcfg = readl(info->pincfg + (pin * sizeof(u32)));
+		u32 regcfg = pete_readl("drivers/pinctrl/pinctrl-ocelot.c:822", info->pincfg + (pin * sizeof(u32)));
 
 		ret = 0;
 		switch (reg) {
